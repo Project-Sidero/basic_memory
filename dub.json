@@ -1,0 +1,26 @@
+{
+    "authors": [
+        "Richard (Rikki) Andrew Cattermole"
+    ],
+    "copyright": "Copyright © 2022, Richard Cattermole",
+    "description": "Basic memory handling for -betterC and beyond.",
+    "license": "Artistic-2.0",
+    "name": "sidero_base",
+    "homepage": "https://github.com/Project-Sidero/basic_memory",
+    
+    "importPaths": ["source"],
+    "sourcePaths": ["source"],
+    "dflags": ["-preview=dip1000", "-preview=dip25"],
+    
+    "configurations": [
+        {
+            "name": "library",
+            "buildOptions": [
+                "betterC"
+            ]
+        },
+        {
+            "name": "unittest"
+        }
+    ]
+}

@@ -1,0 +1,17 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/basic_memory
+basic_memory.so
+basic_memory.dylib
+basic_memory.dll
+basic_memory.a
+basic_memory.lib
+basic_memory-test-*
+*.exe
+*.o
+*.obj
+*.lst
+.idea/
+sidero_base.iml
