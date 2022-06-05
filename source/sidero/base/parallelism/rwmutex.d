@@ -6,7 +6,7 @@ Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
 */
 module sidero.base.parallelism.rwmutex;
-import core.atomic : cas, atomicLoad, pause;
+import core.atomic : cas, atomicLoad, atomicFence;
 
 ///
 struct ReaderWriterLockInline {
@@ -40,7 +40,7 @@ struct ReaderWriterLockInline {
             } else
                 cas(&state, temp, temp | TopBit);
 
-            pause();
+            atomicFence();
 
             for (;;) {
                 if (cas(&state, cast(size_t)0, TopBit + 1))
@@ -64,7 +64,7 @@ struct ReaderWriterLockInline {
             if (temp < TopBit && cas(&state, temp, temp + 1))
                 return ;
 
-            pause();
+            atomicFence();
 
             for (;;) {
                 temp = atomicLoad(state);
@@ -87,7 +87,7 @@ struct ReaderWriterLockInline {
             } else
                 assert(0);
 
-            pause();
+            atomicFence();
 
             for (;;) {
                 temp = atomicLoad(state);
@@ -113,7 +113,7 @@ struct ReaderWriterLockInline {
             } else
                 cas(&state, temp, temp | TopBit);
 
-            pause();
+            atomicFence();
 
             for (;;) {
                 if (cas(&state, cast(size_t)1, TopBit + 1))
@@ -149,7 +149,7 @@ pure:
         } else
             cas(&state, temp, temp | TopBit);
 
-        pause();
+        atomicFence();
 
         for (;;) {
             if (cas(&state, cast(size_t)0, TopBit + 1))
@@ -162,7 +162,7 @@ pure:
             } else
                 cas(&state, temp, temp | TopBit);
 
-            pause();
+            atomicFence();
         }
     }
 
@@ -173,7 +173,7 @@ pure:
         if (temp < TopBit && cas(&state, temp, temp + 1))
             return;
 
-        pause();
+        atomicFence();
 
         for (;;) {
             temp = atomicLoad(state);
@@ -181,7 +181,7 @@ pure:
             if (temp < TopBit && cas(&state, temp, temp + 1))
                 return;
 
-            pause();
+            atomicFence();
         }
 
         assert(0);
@@ -196,7 +196,7 @@ pure:
         } else
             assert(0);
 
-        pause();
+        atomicFence();
 
         for (;;) {
             temp = atomicLoad(state);
@@ -206,7 +206,7 @@ pure:
             } else
                 assert(0);
 
-            pause();
+            atomicFence();
         }
     }
 
@@ -222,7 +222,7 @@ pure:
         } else
             cas(&state, temp, temp | TopBit);
 
-        pause();
+        atomicFence();
 
         for (;;) {
             if (cas(&state, cast(size_t)1, TopBit + 1))
@@ -235,7 +235,7 @@ pure:
             } else
                 cas(&state, temp, temp | TopBit);
 
-            pause();
+            atomicFence();
         }
     }
 
