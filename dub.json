@@ -17,6 +17,7 @@
         {
             "name": "library",
             "targetType": "dynamicLibrary",
+            "versions": ["DynamicSideroBase"],
             "buildOptions": [
                 "betterC"
             ]
