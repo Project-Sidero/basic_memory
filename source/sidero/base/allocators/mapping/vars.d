@@ -3,7 +3,7 @@
 
     License: Boost
  */
-module sidero.base.memory.allocators.mapping.vars;
+module sidero.base.allocators.mapping.vars;
 import std.algorithm.comparison : max;
 @trusted nothrow @nogc:
 

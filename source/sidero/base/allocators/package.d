@@ -21,5 +21,5 @@ License: Artistic v2
 Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
  */
-module sidero.base.memory.allocators;
-public import sidero.base.memory.allocators.api;
+module sidero.base.allocators;
+public import sidero.base.allocators.api;

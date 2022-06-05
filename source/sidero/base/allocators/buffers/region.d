@@ -6,12 +6,12 @@ License: Artistic v2
 Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
  */
-module sidero.base.memory.allocators.buffers.region;
-import sidero.base.memory.allocators.mapping : GoodAlignment;
+module sidero.base.allocators.buffers.region;
+import sidero.base.allocators.mapping : GoodAlignment;
 import std.typecons : Ternary;
 
 private {
-    import sidero.base.memory.allocators.api;
+    import sidero.base.allocators.api;
 
     alias RegionRC = Region!RCAllocator;
 }
@@ -88,7 +88,7 @@ struct Region(PoolAllocator = void, size_t DefaultAlignment = GoodAlignment, siz
     private void[] allocate_(size_t size, TypeInfo ti = null) @system {
         static if (!is(PoolAllocator == void)) {
             if (memory is null) {
-                import sidero.base.memory.allocators.mapping.vars : PAGESIZE;
+                import sidero.base.allocators.mapping.vars : PAGESIZE;
 
                 if (defaultSize == 0)
                     defaultSize = PAGESIZE;
@@ -168,7 +168,7 @@ struct Region(PoolAllocator = void, size_t DefaultAlignment = GoodAlignment, siz
             return memory is null || allocated == memory.length;
     }
 
-package(sidero.base.memory.allocators) {
+package(sidero.base.allocators) {
     bool isOnlyOneAllocationOfSize(size_t size) {
         size_t padding = alignedTo - ((cast(size_t)memory.ptr) % alignedTo);
         if (padding == alignedTo)
@@ -234,7 +234,7 @@ unittest {
 
 ///
 unittest {
-    import sidero.base.memory.allocators.mapping.malloc;
+    import sidero.base.allocators.mapping.malloc;
 
     alias R = Region!(Mallocator);
 

@@ -5,7 +5,7 @@ License: Artistic v2
 Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
  */
-module sidero.base.memory.allocators.api;
+module sidero.base.allocators.api;
 import std.typecons : Ternary;
 public import std.experimental.allocator : make, makeArray, expandArray, shrinkArray, dispose;
 
@@ -23,17 +23,17 @@ private {
     Any memory returned can be assumed to be aligned to GoodAlignment or larger.
  */
 RCAllocator globalAllocator() @trusted nothrow @nogc {
-    globalAllocatorLock.lock;
+    globalAllocatorLock.pureLock;
     scope (exit)
         globalAllocatorLock.unlock;
 
     if (globalAllocator_.isNull) {
         version (all) {
-            import sidero.base.memory.allocators.predefined;
+            import sidero.base.allocators.predefined;
 
             globalAllocator_ = RCAllocator.instanceOf!GeneralPurposeAllocator();
         } else {
-            import sidero.base.memory.allocators.mapping.malloc;
+            import sidero.base.allocators.mapping.malloc;
 
             globalAllocator_ = RCAllocator.instanceOf!Mallocator();
         }
@@ -48,7 +48,7 @@ RCAllocator globalAllocator() @trusted nothrow @nogc {
     Warning: this allocator MUST return memory aligned to GoodAlignment or larger.
  */
 void globalAllocator(RCAllocator allocator) @system nothrow @nogc {
-    globalAllocatorLock.lock;
+    globalAllocatorLock.pureLock;
     scope (exit)
         globalAllocatorLock.unlock;
 
@@ -248,7 +248,7 @@ template makeBufferedArrays(Types...) if (Types.length > 0) {
 
 ///
 unittest {
-    import sidero.base.memory.allocators.predefined;
+    import sidero.base.allocators.predefined;
     GeneralPurposeAllocator allocator;
     auto got = allocator.makeBufferedArrays!(int, float)(2, 4);
 

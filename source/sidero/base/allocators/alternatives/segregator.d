@@ -5,11 +5,11 @@ License: Artistic v2
 Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
  */
-module sidero.base.memory.allocators.alternatives.segregator;
+module sidero.base.allocators.alternatives.segregator;
 import std.typecons : Ternary;
 
 private {
-    import sidero.base.memory.allocators.api;
+    import sidero.base.allocators.api;
 
     alias SegRC = Segregator!(RCAllocator, RCAllocator, 1024);
 }

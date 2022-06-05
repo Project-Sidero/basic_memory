@@ -5,7 +5,7 @@ License: Artistic v2
 Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
  */
-module sidero.base.memory.allocators.locking;
+module sidero.base.allocators.locking;
 import std.typecons : Ternary;
 
 /**
@@ -62,7 +62,7 @@ scope @safe @nogc pure nothrow:
     ///
     bool deallocate(scope void[] array) {
         if (array is null)
-             return false;
+            return false;
 
         mutex.pureLock;
         scope (exit)
@@ -99,6 +99,117 @@ scope @safe @nogc pure nothrow:
             mutex.pureLock;
             scope (exit)
                 mutex.unlock;
+
+            return poolAllocator.empty();
+        }
+    }
+}
+
+/**
+    Hooks allocations and add then remove ranges as allocations/deallocations/reallocations occur.
+ */
+struct GCAllocatorLock(PoolAllocator) {
+    private import sidero.base.allocators.gc;
+
+    ///
+    PoolAllocator poolAllocator;
+
+    ///
+    enum NeedsLocking = false;
+
+scope @safe @nogc pure nothrow:
+
+    ///
+    this(scope return ref GCAllocatorLock other) @trusted {
+        readLockImpl;
+        scope (exit)
+            readUnlockImpl;
+
+        this.poolAllocator = other.poolAllocator;
+        other.poolAllocator = PoolAllocator.init;
+    }
+
+    ///
+    bool isNull() const {
+        return poolAllocator.isNull;
+    }
+
+    ///
+    void[] allocate(size_t size, TypeInfo ti = null) {
+        readLockImpl;
+        scope (exit)
+            readUnlockImpl;
+
+        void[] got = poolAllocator.allocate(size, ti);
+
+        if (got !is null)
+            addRangeImpl(got, ti);
+
+        return got;
+    }
+
+    ///
+    bool reallocate(scope ref void[] array, size_t newSize) {
+        readLockImpl;
+        scope (exit)
+            readUnlockImpl;
+
+        void[] original = array;
+
+        bool got = poolAllocator.reallocate(array, newSize);
+
+        if (got) {
+            removeRangeImpl(original);
+            addRangeImpl(array);
+        }
+
+        return got;
+    }
+
+    ///
+    bool deallocate(scope void[] array) {
+        if (array is null)
+            return false;
+
+        readLockImpl;
+        scope (exit)
+            readUnlockImpl;
+
+        bool got = poolAllocator.deallocate(array);
+        if (got)
+            removeRangeImpl(array);
+
+        return got;
+    }
+
+    static if (__traits(hasMember, PoolAllocator, "owns")) {
+        ///
+        Ternary owns(scope void[] array) {
+            readLockImpl;
+            scope (exit)
+                readUnlockImpl;
+
+            return poolAllocator.owns(array);
+        }
+    }
+
+    static if (__traits(hasMember, PoolAllocator, "deallocateAll")) {
+        ///
+        bool deallocateAll() {
+            readLockImpl;
+            scope (exit)
+                readUnlockImpl;
+
+            return poolAllocator.deallocateAll();
+        }
+    }
+
+    static if (__traits(hasMember, PoolAllocator, "empty")) {
+        ///
+        bool empty() {
+            readLockImpl;
+            scope (exit)
+                readUnlockImpl;
 
             return poolAllocator.empty();
         }

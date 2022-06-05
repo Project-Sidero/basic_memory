@@ -5,7 +5,7 @@ License: Artistic v2
 Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
  */
-module sidero.base.memory.allocators.mapping.malloc;
+module sidero.base.allocators.mapping.malloc;
 
 /**
     LibC malloc/free/realloc based memory mapping allocator.

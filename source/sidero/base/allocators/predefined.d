@@ -10,17 +10,17 @@ License: Artistic v2
 Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
 */
-module sidero.base.memory.allocators.predefined;
-import sidero.base.memory.allocators.api;
-import sidero.base.memory.allocators.buffers.region;
-import sidero.base.memory.allocators.buffers.freelist;
-import sidero.base.memory.allocators.alternatives.allocatorlist;
+module sidero.base.allocators.predefined;
+import sidero.base.allocators.api;
+import sidero.base.allocators.buffers.region;
+import sidero.base.allocators.buffers.freelist;
+import sidero.base.allocators.alternatives.allocatorlist;
 
 private {
     alias HouseKeepingAllocatorTest = HouseKeepingAllocator!RCAllocator;
 }
 
-public import sidero.base.memory.allocators.mapping : DefaultMapper, GoodAlignment;
+public import sidero.base.allocators.mapping : DefaultMapper, GoodAlignment;
 
 /// An allocator specializing in fixed size allocations that can be deallocated all at once.
 alias HouseKeepingAllocator(MappingAllocator = DefaultMapper, size_t AlignedTo = 0) = HouseKeepingFreeList!(
@@ -48,22 +48,23 @@ template TaggedPointerHouseKeepingAllocator(MappingAllocator = DefaultMapper, in
 
 /// Aligns all memory returned to GoodAlignment.
 struct GeneralPurposeAllocator {
-    import sidero.base.memory.allocators.buffers.defs : FitsStrategy;
-    import sidero.base.memory.allocators.buffers.freetree : FreeTree;
-    import sidero.base.memory.allocators.buffers.buddylist : BuddyList;
-    import sidero.base.memory.allocators.buffers.region : Region;
-    import sidero.base.memory.allocators.mapping.malloc;
-    import sidero.base.memory.allocators.alternatives.bucketizer;
-    import sidero.base.memory.allocators.alternatives.segregator;
-    import sidero.base.memory.allocators.locking;
+    import sidero.base.allocators.buffers.defs : FitsStrategy;
+    import sidero.base.allocators.buffers.freetree : FreeTree;
+    import sidero.base.allocators.buffers.buddylist : BuddyList;
+    import sidero.base.allocators.buffers.region : Region;
+    import sidero.base.allocators.mapping.malloc;
+    import sidero.base.allocators.alternatives.bucketizer;
+    import sidero.base.allocators.alternatives.segregator;
+    import sidero.base.allocators.locking : GCAllocatorLock;
 
     private {
-        alias ALRegion(size_t DefaultSize) = AllocatorList!(Region!(Mallocator, GoodAlignment, DefaultSize), () => Region!(Mallocator, GoodAlignment, DefaultSize)());
+        alias ALRegion(size_t DefaultSize) = AllocatorList!(Region!(Mallocator, GoodAlignment, DefaultSize),
+                () => Region!(Mallocator, GoodAlignment, DefaultSize)());
     }
 
     // this will automatically bump up to the next power 2 size, and will always be a good size allocated based upon the PAGESIZE.
     // it'll hold up to 4gb of blocks quite happily. If you need more... yeah you're gonna have a problem anyway.
-    alias GeneralPurposeAllocatorImpl = AllocatorLocking!(BuddyList!(ALRegion!(0), 6, 22));
+    alias GeneralPurposeAllocatorImpl = GCAllocatorLock!(BuddyList!(ALRegion!(0), 6, 22));
     GeneralPurposeAllocatorImpl impl;
 
     alias impl this;

@@ -5,14 +5,14 @@ License: Artistic v2
 Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
  */
-module sidero.base.memory.allocators.buffers.freetree;
-import sidero.base.memory.allocators.mapping : GoodAlignment;
-public import sidero.base.memory.allocators.buffers.defs : FitsStrategy;
-public import sidero.base.memory.allocators.predefined : HouseKeepingAllocator;
+module sidero.base.allocators.buffers.freetree;
+import sidero.base.allocators.mapping : GoodAlignment;
+public import sidero.base.allocators.buffers.defs : FitsStrategy;
+public import sidero.base.allocators.predefined : HouseKeepingAllocator;
 import std.typecons : Ternary;
 
 private {
-    import sidero.base.memory.allocators.api;
+    import sidero.base.allocators.api;
 
     // guarantee tha each strategy has been initialized
     alias FreeTreeFirstFit = FreeTree!(RCAllocator, FitsStrategy.FirstFit);
@@ -134,7 +134,7 @@ struct FreeTree(PoolAllocator, FitsStrategy Strategy, size_t DefaultAlignment = 
     } else static if (Strategy == FitsStrategy.NextFit) {
         ///
         void[] allocate(size_t size, TypeInfo ti = null) {
-            void[] perform(Node** parent) {
+            void[] perform(scope Node** parent) {
                 Node** currentParent = parent, left = &(*currentParent).left;
 
                 while (fitsAlignment(left, size, alignedTo)) {
@@ -495,7 +495,7 @@ private:
         toDemote.right = right;
     }
 
-    struct Node {
+    static struct Node {
         Node* left, right;
         size_t length;
 
@@ -570,8 +570,8 @@ private:
 
 ///
 unittest {
-    import sidero.base.memory.allocators.mapping.malloc;
-    import sidero.base.memory.allocators.buffers.region;
+    import sidero.base.allocators.mapping.malloc;
+    import sidero.base.allocators.buffers.region;
 
     void perform(FT)() {
         FT ft;
