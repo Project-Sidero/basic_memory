@@ -5,14 +5,14 @@ License: Artistic v2
 Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
  */
-module sidero.base.memory.allocators.buffers.freelist;
-import sidero.base.memory.allocators.mapping : GoodAlignment;
-public import sidero.base.memory.allocators.buffers.defs : FitsStrategy;
-public import sidero.base.memory.allocators.predefined : HouseKeepingAllocator;
+module sidero.base.allocators.buffers.freelist;
+import sidero.base.allocators.mapping : GoodAlignment;
+public import sidero.base.allocators.buffers.defs : FitsStrategy;
+public import sidero.base.allocators.predefined : HouseKeepingAllocator;
 import std.typecons : Ternary;
 
 private {
-    import sidero.base.memory.allocators.api;
+    import sidero.base.allocators.api;
 
     // guarantee tha each strategy has been initialized
     alias HCFreeList = HouseKeepingFreeList!(RCAllocator);
@@ -161,8 +161,8 @@ private:
 
 ///
 unittest {
-    import sidero.base.memory.allocators.mapping.malloc;
-    import sidero.base.memory.allocators.buffers.region;
+    import sidero.base.allocators.mapping.malloc;
+    import sidero.base.allocators.buffers.region;
 
     alias HK = HouseKeepingFreeList!(Region!Mallocator);
 
@@ -532,8 +532,8 @@ private:
 
 ///
 unittest {
-    import sidero.base.memory.allocators.mapping.malloc;
-    import sidero.base.memory.allocators.buffers.region;
+    import sidero.base.allocators.mapping.malloc;
+    import sidero.base.allocators.buffers.region;
 
     void perform(FL)() {
         FL fl;

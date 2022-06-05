@@ -7,7 +7,7 @@ Copyright: 2022 Richard Andrew Cattermole
 */
 module sidero.base.parallelism.mutualexclusion;
 
-version(BetterC) {
+version(D_BetterC) {
 } else {
     import core.thread : Thread;
 }
@@ -20,7 +20,7 @@ struct TestTestSetLockInline {
 
 @safe @nogc nothrow:
 
-    version(BetterC) {
+    version(D_BetterC) {
     } else {
         ///
         void lock() @trusted {

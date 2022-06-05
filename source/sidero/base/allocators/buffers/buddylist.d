@@ -5,11 +5,11 @@ License: Artistic v2
 Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
  */
-module sidero.base.memory.allocators.buffers.buddylist;
+module sidero.base.allocators.buffers.buddylist;
 import std.typecons : Ternary;
 
 private {
-    import sidero.base.memory.allocators.api;
+    import sidero.base.allocators.api;
 
     alias BL = BuddyList!(RCAllocator);
 }
@@ -52,7 +52,7 @@ struct BuddyList(PoolAllocator, size_t minExponent = 3, size_t maxExponent = 20)
     }
 
     private {
-        import sidero.base.memory.allocators.buffers.freetree : AllocatedTree;
+        import sidero.base.allocators.buffers.freetree : AllocatedTree;
 
         enum NumberOfBlocks = maxExponent - minExponent;
 
@@ -87,7 +87,7 @@ scope @safe @nogc pure nothrow:
 
     ///
     void[] allocate(size_t size, TypeInfo ti = null) {
-        import sidero.base.memory.allocators.mapping.vars : PAGESIZE;
+        import sidero.base.allocators.mapping.vars : PAGESIZE;
 
         void[] splitUntilSize(Block* current, size_t available, size_t blockOffset) {
             void* ret = cast(void*)current;
@@ -259,8 +259,8 @@ scope @safe @nogc pure nothrow:
 
 ///
 unittest {
-    import sidero.base.memory.allocators.mapping.malloc;
-    import sidero.base.memory.allocators.buffers.region;
+    import sidero.base.allocators.mapping.malloc;
+    import sidero.base.allocators.buffers.region;
 
     alias BL = BuddyList!(Region!Mallocator);
 

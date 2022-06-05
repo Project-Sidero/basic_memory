@@ -5,21 +5,21 @@ License: Artistic v2
 Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
  */
-module sidero.base.memory.allocators.mapping;
+module sidero.base.allocators.mapping;
 ///
-public import sidero.base.memory.allocators.mapping.vars;
+public import sidero.base.allocators.mapping.vars;
 
 ///
-public import sidero.base.memory.allocators.mapping.malloc;
+public import sidero.base.allocators.mapping.malloc;
 
 version(Windows) {
     ///
-    public import sidero.base.memory.allocators.mapping.virtualalloc;
+    public import sidero.base.allocators.mapping.virtualalloc;
     ///
     alias DefaultMapper = VirtualAllocMapper;
 } else version(Posix) {
     ///
-    public import sidero.base.memory.allocators.mapping.mmap;
+    public import sidero.base.allocators.mapping.mmap;
     ///
     alias DefaultMapper = MMap;
 } else {

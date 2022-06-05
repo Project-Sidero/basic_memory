@@ -5,11 +5,11 @@ License: Artistic v2
 Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
  */
-module sidero.base.memory.allocators.alternatives.allocatorlist;
+module sidero.base.allocators.alternatives.allocatorlist;
 import std.typecons : Ternary;
 
 private {
-    import sidero.base.memory.allocators.api;
+    import sidero.base.allocators.api;
 
     // guarantee tha each strategy has been initialized
     alias ALRC = AllocatorList!(RCAllocator, (ref poolAllocator) => poolAllocator);
@@ -227,8 +227,8 @@ private:
 
 ///
 unittest {
-    import sidero.base.memory.allocators.mapping.malloc;
-    import sidero.base.memory.allocators.buffers.region;
+    import sidero.base.allocators.mapping.malloc;
+    import sidero.base.allocators.buffers.region;
 
     alias AL = AllocatorList!(Region!Mallocator, () => Region!Mallocator());
 

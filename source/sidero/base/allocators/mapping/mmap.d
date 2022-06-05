@@ -5,7 +5,7 @@ License: Artistic v2
 Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
  */
-module sidero.base.memory.allocators.mapping.mmap;
+module sidero.base.allocators.mapping.mmap;
 import core.sys.posix.sys.mman;
 
 version (Posix) {

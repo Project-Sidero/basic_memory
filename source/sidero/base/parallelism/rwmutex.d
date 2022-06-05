@@ -11,7 +11,7 @@ import core.atomic : cas, atomicLoad, pause;
 ///
 struct ReaderWriterLockInline {
     private {
-        version(BetterC) {
+        version(D_BetterC) {
         } else {
             import core.thread : Thread;
         }
@@ -22,7 +22,7 @@ struct ReaderWriterLockInline {
 
 @safe nothrow @nogc:
 
-    version(BetterC) {
+    version(D_BetterC) {
     } else {
         ///
         void writeLock() @trusted {
