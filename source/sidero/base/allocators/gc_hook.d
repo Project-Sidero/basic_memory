@@ -1,3 +1,4 @@
+// License: Boost
 module sidero.base.allocators.gc_hook;
 import sidero.base.allocators.gc;
 
