@@ -24,11 +24,11 @@ struct TestTestSetLockInline {
     } else {
         ///
         void lock() @trusted {
-            import core.atomic : cas, pause, atomicLoad;
+            import core.atomic : cas, atomicFence, atomicLoad;
 
             for (;;) {
                 if (atomicLoad(state)) {
-                    pause();
+                    atomicFence();
 
                     while (atomicLoad(state)) {
                         Thread.yield;
@@ -45,11 +45,11 @@ pure:
 
     /// A much more limited lock method, that is pure.
     void pureLock() {
-        import core.atomic : cas, pause, atomicLoad;
+        import core.atomic : cas, atomicFence, atomicLoad;
 
         for (;;) {
             if (atomicLoad(state))
-                pause();
+                atomicFence();
 
             if (cas(&state, false, true))
                 return;
