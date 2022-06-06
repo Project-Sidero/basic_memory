@@ -11,7 +11,7 @@
     "importPaths": ["source"],
     "sourcePaths": ["source"],
     "dflags": ["-preview=dip1000", "-preview=dip25"],
-    "injectSourceFiles": ["source/sidero/base/gc_hook.d"],
+    "injectSourceFiles": ["source/sidero/base/allocators/gc_hook.d"],
     
     "configurations": [
         {
