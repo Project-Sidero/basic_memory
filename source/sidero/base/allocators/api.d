@@ -111,13 +111,13 @@ struct RCAllocator {
         return ret;
     }
 
+scope:
+
     ///
-    ~this() @safe @nogc pure nothrow {
+    ~this() {
         if (refSub_ !is null)
             refSub_();
     }
-
-scope:
 
     ///
     this(ref RCAllocator other) {
