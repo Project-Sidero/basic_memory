@@ -11,6 +11,7 @@
     "importPaths": ["source"],
     "sourcePaths": ["source"],
     "dflags": ["-preview=dip1000", "-preview=dip25"],
+    "dflags-ldc": ["--fvisibility=public"],
     "injectSourceFiles": ["source/sidero/base/allocators/gc_hook.d"],
     
     "configurations": [
@@ -18,6 +19,13 @@
             "name": "library",
             "targetType": "dynamicLibrary",
             "versions": ["DynamicSideroBase"],
+            "buildOptions": [
+                "betterC"
+            ]
+        },
+        {
+            "name": "static",
+            "targetType": "staticLibrary",
             "buildOptions": [
                 "betterC"
             ]
