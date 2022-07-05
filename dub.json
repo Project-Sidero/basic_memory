@@ -8,12 +8,27 @@
     "name": "sidero_base",
     "homepage": "https://github.com/Project-Sidero/basic_memory",
     
-    "importPaths": ["source"],
-    "sourcePaths": ["source"],
+    "importPaths": ["source", "database/generated"],
+    "sourcePaths": ["source", "database/generated"],
     "dflags": ["-preview=dip1000", "-preview=dip25"],
     "dflags-ldc": ["--fvisibility=public"],
     "injectSourceFiles": ["source/sidero/base/allocators/gc_hook.d"],
-    
+
+    "subPackages": [
+        {
+            "name": "generators",
+            "sourcePaths": ["database/generators", "database/utilities"],
+            "targetType": "executable",
+            "workingDirectory": "database"
+        },
+        {
+            "name": "verify_generated",
+            "sourcePaths": ["database/generated", "database/verify_generated", "source"],
+            "targetType": "executable",
+            "workingDirectory": "database"
+        }
+    ],
+
     "configurations": [
         {
             "name": "library",
