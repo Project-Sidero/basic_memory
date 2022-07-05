@@ -1,4 +1,5 @@
 module sidero.base.moduleinfostubs;
+version(D_BetterC):
 
 static foreach (Stub; Stubs) {
     mixin(() {
