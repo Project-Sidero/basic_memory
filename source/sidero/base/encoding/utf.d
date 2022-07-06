@@ -26,9 +26,14 @@ struct ForeachOverUTF(Type) if (isSomeString!Type) {
     @safe nothrow @nogc:
 
     ///
+    void delegate(size_t amountRead, size_t lastIteratedAmount) peekAtReadAmountDelegate;
+
+    ///
     int opApply(scope ForeachOverUTF32HandleDelegate del) scope {
         Type temp = value;
         int result;
+
+        size_t lastIteratedAmount, amountRead;
 
         while (temp.length > 0 && result == 0) {
             size_t consumed;
@@ -41,9 +46,15 @@ struct ForeachOverUTF(Type) if (isSomeString!Type) {
                 consumed = decode(temp, got);
             }
 
+            amountRead += consumed;
+            lastIteratedAmount = consumed;
+
             result = del(got);
             temp = temp[consumed .. $];
         }
+
+        if (peekAtReadAmountDelegate !is null)
+            peekAtReadAmountDelegate(amountRead, lastIteratedAmount);
 
         return result;
     }

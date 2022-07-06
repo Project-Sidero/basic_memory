@@ -120,7 +120,7 @@ scope:
     }
 
     ///
-    this(ref RCAllocator other) {
+    this(return scope ref RCAllocator other) @trusted {
         this.tupleof = other.tupleof;
 
         if (refAdd_ !is null)

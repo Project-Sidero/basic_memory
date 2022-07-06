@@ -73,7 +73,7 @@ dstring normalize(scope ForeachOverUTF32Delegate input, RCAllocator allocator, b
 
 package(sidero.base.text.unicode):
 
-size_t compose_(scope ref dchar[] array, RCAllocator allocator) @trusted {
+size_t compose_(scope ref dchar[] array, scope RCAllocator allocator) @trusted {
     size_t lastStarterOffset, soFarInInput;
 
     dchar[] replacement, replacementBuffer;
@@ -225,7 +225,7 @@ struct Rotate {
 @safe nothrow @nogc:
     @disable this(this);
 
-    this(RCAllocator allocator) {
+    this(scope RCAllocator allocator) return @trusted {
         this.allocator = allocator;
     }
 

@@ -1,5 +1,6 @@
 module sidero.base.text.unicode.readonly;
 import sidero.base.text.unicode.defs;
+import sidero.base.text.unicode.characters.database;
 import sidero.base.encoding.utf;
 import sidero.base.allocators;
 import sidero.base.errors;
@@ -542,12 +543,322 @@ nothrow @nogc:
 
     @disable auto opCast(T)();
 
-    version (none) {
-        // TODO: string comparison
+    const {
+        ///
+        alias equals = opEquals;
 
-        // NFD(toCasefold(NFD(X))) = NFD(toCasefold(NFD(Y)))
-        // toCasefold needs Language to be passed in
-        // needs a way to refill, not just take buffer
+        ///
+        int opEquals(scope string other) scope {
+            return opCmpImpl(other) == 0;
+        }
+
+        ///
+        int opEquals(scope wstring other) scope {
+            return opCmpImpl(other) == 0;
+        }
+
+        ///
+        int opEquals(scope dstring other) scope {
+            return opCmpImpl(other) == 0;
+        }
+
+        ///
+        bool opEquals(Char2)(scope String_UTF!Char2 other) scope {
+            return opCmp(other) == 0;
+        }
+
+        ///
+        unittest {
+            String_UTF first = String_UTF(cast(LiteralType)"first");
+            String_UTF notFirst = String_UTF(cast(LiteralType)"first");
+            String_UTF third = String_UTF(cast(LiteralType)"third");
+
+            assert(first == notFirst);
+            assert(first != third);
+        }
+    }
+
+    const {
+        ///
+        alias compare = opCmp;
+
+        ///
+        int opCmp(scope string other) scope {
+            return opCmpImpl(other);
+        }
+
+        ///
+        unittest {
+            assert(String_UTF(cast(LiteralType)"a").opCmp("z") < 0);
+            assert(String_UTF(cast(LiteralType)"z").opCmp("a") > 0);
+        }
+
+        ///
+        int opCmp(scope wstring other) scope {
+            return opCmpImpl(other);
+        }
+
+        ///
+        unittest {
+            assert(String_UTF(cast(LiteralType)"a").opCmp("z"w) < 0);
+            assert(String_UTF(cast(LiteralType)"z").opCmp("a"w) > 0);
+        }
+
+        ///
+        int opCmp(scope dstring other) scope {
+            return opCmpImpl(other);
+        }
+
+        ///
+        unittest {
+            assert(String_UTF(cast(LiteralType)"a").opCmp("z"d) < 0);
+            assert(String_UTF(cast(LiteralType)"z").opCmp("a"d) > 0);
+        }
+
+        private int opCmpImpl(Other)(scope Other other) scope {
+            int matches(Type)(Type us) {
+                if (us.length < other.length)
+                    return -1;
+                else if (us.length > other.length)
+                    return 1;
+
+                foreach (i; 0 .. us.length) {
+                    if (us[i] < other[i])
+                        return -1;
+                    else if (us[i] > other[i])
+                        return 1;
+                }
+
+                return 0;
+            }
+
+            int needDecode(Type)(Type us) {
+                while (us.length > 0 && other.length > 0) {
+                    dchar usC, otherC;
+
+                    static if (typeof(us[0]).sizeof == 4) {
+                        usC = us[0];
+                        us = us[1 .. $];
+                    } else
+                        us = us[decode(us, usC) .. $];
+
+                    static if (typeof(other[0]).sizeof == 4) {
+                        otherC = other[0];
+                        other = other[1 .. $];
+                    } else
+                        other = other[decode(other, otherC) .. $];
+
+                    if (usC < otherC)
+                        return -1;
+                    else if (usC > otherC)
+                        return 1;
+                }
+
+                if (us.length == 0)
+                    return other.length == 0 ? 0 : -1;
+                else
+                    return 1;
+            }
+
+            return literalEncoding.handle(() {
+                auto actual = cast(string)this.literal;
+
+                static if (typeof(other[0]).sizeof == char.sizeof) {
+                    return matches(actual);
+                } else
+                    return needDecode(actual);
+            }, () {
+                auto actual = cast(wstring)this.literal;
+
+                static if (typeof(other[0]).sizeof == wchar.sizeof) {
+                    return matches(actual);
+                } else
+                    return needDecode(actual);
+            }, () {
+                auto actual = cast(dstring)this.literal;
+
+                static if (typeof(other[0]).sizeof == dchar.sizeof) {
+                    return matches(actual);
+                } else
+                    return needDecode(actual);
+            });
+        }
+
+        ///
+        @trusted unittest {
+            assert(String_UTF("a") < cast(LiteralType)['z']);
+            assert(String_UTF("z") > cast(LiteralType)['a']);
+        }
+
+        ///
+        int opCmp(Char2)(scope String_UTF!Char2 other) scope {
+            return other.literalEncoding.handle(() { auto actual = cast(string)other.literal; return opCmp(actual); }, () {
+                auto actual = cast(wstring)other.literal;
+                return opCmp(actual);
+            }, () { auto actual = cast(dstring)other.literal; return opCmp(actual); });
+        }
+
+        ///
+        unittest {
+            assert(String_UTF(cast(LiteralType)"a") < String_UTF(cast(LiteralType)"z"));
+            assert(String_UTF(cast(LiteralType)"z") > String_UTF(cast(LiteralType)"a"));
+        }
+    }
+
+    const {
+        ///
+        int ignoreCaseEquals(scope string other, scope RCAllocator allocator = RCAllocator.init,
+                UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return ignoreCaseCompareImpl(other, allocator, language.isTurkic) == 0;
+        }
+
+        ///
+        int ignoreCaseEquals(scope wstring other, scope RCAllocator allocator = RCAllocator.init,
+                UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return ignoreCaseCompareImpl(other, allocator, language.isTurkic) == 0;
+        }
+
+        ///
+        int ignoreCaseEquals(scope dstring other, scope RCAllocator allocator = RCAllocator.init,
+                UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return ignoreCaseCompareImpl(other, allocator, language.isTurkic) == 0;
+        }
+
+        ///
+        bool ignoreCaseEquals(Char2)(scope String_UTF!Char2 other, scope RCAllocator allocator = RCAllocator.init,
+                UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return other.literalEncoding.handle(() {
+                auto actual = cast(string)other.literal;
+                return ignoreCaseCompareImpl(actual, allocator, language.isTurkic);
+            }, () {
+                auto actual = cast(wstring)other.literal;
+                return ignoreCaseCompareImpl(actual, allocator, language.isTurkic);
+            }, () {
+                auto actual = cast(dstring)other.literal;
+                return ignoreCaseCompareImpl(actual, allocator, language.isTurkic);
+            }) == 0;
+        }
+
+        ///
+        unittest {
+            String_UTF first = String_UTF(cast(LiteralType)"first");
+            String_UTF notFirst = String_UTF(cast(LiteralType)"fIrst");
+            String_UTF third = String_UTF(cast(LiteralType)"third");
+
+            assert(first.ignoreCaseEquals(notFirst));
+            assert(!first.ignoreCaseEquals(third));
+        }
+    }
+
+    const {
+        ///
+        int ignoreCaseCompare(scope string other, scope RCAllocator allocator = RCAllocator.init,
+                UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return ignoreCaseCompareImpl(other, allocator, language.isTurkic);
+        }
+
+        ///
+        unittest {
+            assert(String_UTF(cast(LiteralType)"A").ignoreCaseCompare("z") < 0);
+            assert(String_UTF(cast(LiteralType)"Z").ignoreCaseCompare("a") > 0);
+        }
+
+        ///
+        int ignoreCaseCompare(scope wstring other, scope RCAllocator allocator = RCAllocator.init,
+                UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return ignoreCaseCompareImpl(other, allocator, language.isTurkic);
+        }
+
+        ///
+        unittest {
+            assert(String_UTF(cast(LiteralType)"A").ignoreCaseCompare("z"w) < 0);
+            assert(String_UTF(cast(LiteralType)"Z").ignoreCaseCompare("a"w) > 0);
+        }
+
+        ///
+        int ignoreCaseCompare(scope dstring other, scope RCAllocator allocator = RCAllocator.init,
+                UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return ignoreCaseCompareImpl(other, allocator, language.isTurkic);
+        }
+
+        ///
+        unittest {
+            assert(String_UTF(cast(LiteralType)"A").ignoreCaseCompare("z"d) < 0);
+            assert(String_UTF(cast(LiteralType)"Z").ignoreCaseCompare("a"d) > 0);
+        }
+
+        private int ignoreCaseCompareImpl(Other)(scope Other other, scope RCAllocator allocator = RCAllocator.init, bool turkic = false) scope @trusted {
+            import sidero.base.text.unicode.comparison;
+
+            allocator = pickAllocator(allocator);
+
+            ForeachOverUTF32Delegate usDel, otherDel;
+
+            static struct Handlers {
+                union {
+                    ForeachOverUTF!string us8;
+                    ForeachOverUTF!wstring us16;
+                    ForeachOverUTF!dstring us32;
+                }
+
+                union {
+                    ForeachOverUTF!string other8;
+                    ForeachOverUTF!wstring other16;
+                    ForeachOverUTF!dstring other32;
+                }
+            }
+
+            Handlers handlers;
+
+            literalEncoding.handle(() {
+                auto actual = cast(string)this.literal;
+                handlers.us8 = foreachOverUTF(actual);
+                usDel = &handlers.us8.opApply;
+            }, () {
+                auto actual = cast(wstring)this.literal;
+                handlers.us16 = foreachOverUTF(actual);
+                usDel = &handlers.us16.opApply;
+            }, () {
+                auto actual = cast(dstring)this.literal;
+                handlers.us32 = foreachOverUTF(actual);
+                usDel = &handlers.us32.opApply;
+            });
+
+            static if (typeof(other[0]).sizeof == char.sizeof) {
+                handlers.other8 = foreachOverUTF(other);
+                otherDel = &handlers.other8.opApply;
+            } else static if (typeof(other[0]).sizeof == wchar.sizeof) {
+                handlers.other16 = foreachOverUTF(other);
+                otherDel = &handlers.other16.opApply;
+            } else static if (typeof(other[0]).sizeof == dchar.sizeof) {
+                handlers.other32 = foreachOverUTF(other);
+                otherDel = &handlers.other32.opApply;
+            }
+
+            return icmpUTF32_NFD(usDel, otherDel, allocator, turkic);
+        }
+
+        ///
+        int ignoreCaseCompare(Char2)(scope String_UTF!Char2 other, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+
+            return other.literalEncoding.handle(() {
+                auto actual = cast(string)other.literal;
+                return ignoreCaseCompareImpl(actual, allocator, language.isTurkic);
+            }, () {
+                auto actual = cast(wstring)other.literal;
+                return ignoreCaseCompareImpl(actual, allocator, language.isTurkic);
+            }, () {
+                auto actual = cast(dstring)other.literal;
+                return ignoreCaseCompareImpl(actual, allocator, language.isTurkic);
+            });
+        }
+
+        ///
+        unittest {
+            assert(String_UTF(cast(LiteralType)"a").ignoreCaseCompare(String_UTF(cast(LiteralType)"Z")) < 0);
+            assert(String_UTF(cast(LiteralType)"Z").ignoreCaseCompare(String_UTF(cast(LiteralType)"a")) > 0);
+        }
     }
 
     version (none) {
@@ -558,9 +869,140 @@ nothrow @nogc:
         // TODO: startsWith/endsWith/indexOf/lastIndexOf/count/contains
     }
 
-    version (none) {
-        // TODO: strip
-        // needs isWhitespace (easy)
+    ///
+    String_UTF strip() scope return {
+        stripLeft();
+        stripRight();
+        return this;
+    }
+
+    ///
+    unittest {
+        String_UTF value = String_UTF(cast(LiteralType)"  \t abc\t\r\n \0");
+        value.strip;
+        assert(value == cast(LiteralType)"abc");
+
+        assert(String_UTF(cast(LiteralType)"  \t abc\t\r\n \0").strip == cast(LiteralType)"abc");
+    }
+
+    String_UTF stripLeft() scope return {
+        literalEncoding.handle(() @trusted {
+            auto actual = cast(string)this.literal;
+            size_t amount;
+
+            while (amount < actual.length) {
+                dchar c;
+                size_t got = decode(actual[amount .. $], c);
+
+                if (!isWhiteSpace(c))
+                    break;
+                amount += got;
+            }
+
+            this.literal = actual[amount .. $];
+        }, () @trusted {
+            auto actual = cast(wstring)this.literal;
+            size_t amount;
+
+            while (amount < actual.length) {
+                dchar c;
+                size_t got = decode(actual[amount .. $], c);
+
+                if (!isWhiteSpace(c))
+                    break;
+                amount += got;
+            }
+
+            this.literal = actual[amount .. $];
+        }, () @trusted {
+            auto actual = cast(dstring)this.literal;
+            size_t amount;
+
+            foreach (c; actual) {
+                if (!c.isWhiteSpace)
+                    break;
+
+                amount++;
+            }
+
+            this.literal = actual[amount .. $];
+        });
+
+        return this;
+    }
+
+    ///
+    unittest {
+        String_UTF value = String_UTF(cast(LiteralType)"  \t abc\t\r\n \0");
+        value.stripLeft;
+        assert(value == cast(LiteralType)"abc\t\r\n \0");
+
+        assert(String_UTF(cast(LiteralType)"  \t abc\t\r\n \0").stripLeft == cast(LiteralType)"abc\t\r\n \0");
+    }
+
+    String_UTF stripRight() scope return {
+        literalEncoding.handle(() @trusted {
+            auto actual = cast(string)this.literal[0 .. this.length];
+            size_t amount, soFar;
+
+            while (soFar < actual.length) {
+                dchar c;
+                size_t got = decode(actual[soFar .. $], c);
+
+                if (isWhiteSpace(c))
+                    amount += got;
+                else
+                    amount = 0;
+
+                soFar += got;
+            }
+
+            if (amount > 0)
+                this.literal = actual[0 .. $ - amount];
+        }, () @trusted {
+            auto actual = (cast(wstring)this.literal)[0 .. this.length];
+            size_t amount, soFar;
+
+            while (soFar < actual.length) {
+                dchar c;
+                size_t got = decode(actual[soFar .. $], c);
+
+                if (isWhiteSpace(c))
+                    amount += got;
+                else
+                    amount = 0;
+
+                soFar += got;
+            }
+
+            if (amount > 0)
+                this.literal = actual[0 .. $ - amount];
+        }, () @trusted {
+            auto actual = (cast(dstring)this.literal)[0 .. this.length];
+            size_t amount;
+
+            foreach_reverse (c; actual) {
+                if (!c.isWhiteSpace) {
+                    break;
+                }
+
+                amount++;
+            }
+
+            if (amount > 0)
+                this.literal = actual[0 .. $ - amount];
+        });
+
+        return this;
+    }
+
+    ///
+    unittest {
+        String_UTF value = String_UTF(cast(LiteralType)"  \t abc\t\r\n \0");
+        value.stripRight;
+        assert(value == cast(LiteralType)"  \t abc");
+
+        assert(String_UTF(cast(LiteralType)"  \t abc\t\r\n \0").stripRight == cast(LiteralType)"  \t abc");
     }
 
 private:
@@ -625,5 +1067,13 @@ private:
 
             this.iterator.literal = actual;
         });
+    }
+
+    RCAllocator pickAllocator(RCAllocator given) const @trusted {
+        if (!given.isNull)
+            return given;
+        if (this.lifeTime !is null)
+            return cast()this.lifeTime.allocator;
+        return globalAllocator();
     }
 }
