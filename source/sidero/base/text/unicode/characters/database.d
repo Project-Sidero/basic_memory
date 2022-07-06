@@ -1,7 +1,26 @@
 module sidero.base.text.unicode.characters.database;
 import unidb = sidero.base.text.unicode.database;
 
-@safe nothrow @nogc pure
+@safe nothrow @nogc pure:
+
+/**
+    Enum members: Unknown, Lithuanian, Turkish, Azeri.
+
+    Used in some Unicode algorithms (such as casing).
+*/
+alias UnicodeLanguage = unidb.Language;
+
+///
+bool isTurkic(UnicodeLanguage input) {
+    final switch(input) {
+        case UnicodeLanguage.Unknown:
+        case UnicodeLanguage.Lithuanian:
+            return false;
+        case UnicodeLanguage.Turkish:
+        case UnicodeLanguage.Azeri:
+            return true;
+    }
+}
 
 ///
 bool isLower(dchar input) {

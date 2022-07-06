@@ -10,7 +10,7 @@ import sidero.base.allocators.api;
 @safe nothrow @nogc:
 
 ///
-int icmpUTF32_NFD(scope ForeachOverUTF32Delegate input1, scope ForeachOverUTF32Delegate input2, RCAllocator allocator = globalAllocator(), bool turkic = false) {
+int icmpUTF32_NFD(scope ForeachOverUTF32Delegate input1, scope ForeachOverUTF32Delegate input2, scope RCAllocator allocator = globalAllocator(), bool turkic = false) {
     return icmpUTF32_(input1, input2, allocator, turkic, false, false);
 }
 
@@ -27,40 +27,40 @@ unittest {
 }
 
 ///
-int icmpUTF32_NFD(scope dstring input1, scope dstring input2, RCAllocator allocator = globalAllocator(), bool turkic = false) @trusted {
+int icmpUTF32_NFD(scope dstring input1, scope dstring input2, scope RCAllocator allocator = globalAllocator(), bool turkic = false) @trusted {
     scope arg1 = foreachOverUTF(input1), arg2 = foreachOverUTF(input2);
     return icmpUTF32_(&arg1.opApply, &arg2.opApply, allocator, turkic, false, false);
 }
 
 ///
-int icmpUTF32_NFC(scope ForeachOverUTF32Delegate input1, scope ForeachOverUTF32Delegate input2, RCAllocator allocator = globalAllocator(), bool turkic = false) {
+int icmpUTF32_NFC(scope ForeachOverUTF32Delegate input1, scope ForeachOverUTF32Delegate input2, scope RCAllocator allocator = globalAllocator(), bool turkic = false) {
     return icmpUTF32_(input1, input2, allocator, turkic, false, true);
 }
 
 ///
-int icmpUTF32_NFC(scope dstring input1, scope dstring input2, RCAllocator allocator = globalAllocator(), bool turkic = false) @trusted {
+int icmpUTF32_NFC(scope dstring input1, scope dstring input2, scope RCAllocator allocator = globalAllocator(), bool turkic = false) @trusted {
     scope arg1 = foreachOverUTF(input1), arg2 = foreachOverUTF(input2);
     return icmpUTF32_(&arg1.opApply, &arg2.opApply, allocator, turkic, false, true);
 }
 
 ///
-int icmpUTF32_NFKD(scope ForeachOverUTF32Delegate input1, scope ForeachOverUTF32Delegate input2, RCAllocator allocator = globalAllocator(), bool turkic = false) {
+int icmpUTF32_NFKD(scope ForeachOverUTF32Delegate input1, scope ForeachOverUTF32Delegate input2, scope RCAllocator allocator = globalAllocator(), bool turkic = false) {
     return icmpUTF32_(input1, input2, allocator, turkic, true, false);
 }
 
 ///
-int icmpUTF32_NFKD(scope dstring input1, scope dstring input2, RCAllocator allocator = globalAllocator(), bool turkic = false) @trusted {
+int icmpUTF32_NFKD(scope dstring input1, scope dstring input2, scope RCAllocator allocator = globalAllocator(), bool turkic = false) @trusted {
     scope arg1 = foreachOverUTF(input1), arg2 = foreachOverUTF(input2);
     return icmpUTF32_(&arg1.opApply, &arg2.opApply, allocator, turkic, true, false);
 }
 
 ///
-int icmpUTF32_NFKC(scope ForeachOverUTF32Delegate input1, scope ForeachOverUTF32Delegate input2, RCAllocator allocator = globalAllocator(), bool turkic = false) {
+int icmpUTF32_NFKC(scope ForeachOverUTF32Delegate input1, scope ForeachOverUTF32Delegate input2, scope RCAllocator allocator = globalAllocator(), bool turkic = false) {
     return icmpUTF32_(input1, input2, allocator, turkic, true, true);
 }
 
 ///
-int icmpUTF32_NFKC(scope dstring input1, scope dstring input2, RCAllocator allocator = globalAllocator(), bool turkic = false) @trusted {
+int icmpUTF32_NFKC(scope dstring input1, scope dstring input2, scope RCAllocator allocator = globalAllocator(), bool turkic = false) @trusted {
     scope arg1 = foreachOverUTF(input1), arg2 = foreachOverUTF(input2);
     return icmpUTF32_(&arg1.opApply, &arg2.opApply, allocator, turkic, true, true);
 }
@@ -142,7 +142,7 @@ struct CaseAwareComparison {
         rotate(against);
     }
 
-    ///
+    /// If you want to know how much of input was consumed to do the match make your input delegate support getting it (ForeachOverUTF does).
     int compare(scope ForeachOverUTF32Delegate input) {
         // to make this as cheap as possible, we MUST NOT CALL caseFoldLength.
         // yes we have to call to get the CCC a lot (potentially)
@@ -201,7 +201,7 @@ struct CaseAwareComparison {
 
 package(sidero.base.text.unicode):
 
-int icmpUTF32_(scope ForeachOverUTF32Delegate input1, scope ForeachOverUTF32Delegate input2, RCAllocator allocator,
+int icmpUTF32_(scope ForeachOverUTF32Delegate input1, scope ForeachOverUTF32Delegate input2, scope RCAllocator allocator,
         bool turkic = false, bool compatibility = false, bool composition = false) {
     const input1Dlength = caseFoldLength(input1, turkic, compatibility, true), input2Dlength = caseFoldLength(input2,
             turkic, compatibility, true);
