@@ -12,6 +12,10 @@ alias String_UTF16 = String_UTF!wchar;
 ///
 alias String_UTF32 = String_UTF!dchar;
 
+// missing toHash
+// missing opApply
+// todo: rewrite stripRight to use fromEnd variants of UTF decode/encode stuff
+
 ///
 struct String_UTF(Char_) {
     package(sidero.base.text.unicode) {
@@ -214,14 +218,17 @@ nothrow @nogc:
     @disable this(this) scope;
 
     @trusted scope {
+        ///
         this(scope return string literal, scope return RCAllocator allocator = RCAllocator.init, scope return string toDeallocate = null) {
             initForLiteral(literal, allocator, toDeallocate);
         }
 
+        ///
         this(scope return wstring literal, scope return RCAllocator allocator = RCAllocator.init, scope return wstring toDeallocate = null) {
             initForLiteral(literal, allocator, toDeallocate);
         }
 
+        ///
         this(scope return dstring literal, scope return RCAllocator allocator = RCAllocator.init, scope return dstring toDeallocate = null) {
             initForLiteral(literal, allocator, toDeallocate);
         }
@@ -249,6 +256,7 @@ nothrow @nogc:
             }
         }
 
+        ///
         ~this() {
             if (haveIterator)
                 this.iterator.rc(false);
@@ -840,7 +848,7 @@ nothrow @nogc:
 
         ///
         int ignoreCaseCompare(Char2)(scope String_UTF!Char2 other, scope RCAllocator allocator = RCAllocator.init,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+                UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
 
             return other.literalEncoding.handle(() {
                 auto actual = cast(string)other.literal;
@@ -861,8 +869,386 @@ nothrow @nogc:
         }
     }
 
-    version (none) {
-        // TODO: ranges
+    ///
+    bool empty() scope nothrow @nogc {
+        return (haveIterator && this.iterator.literal.length == 0 && this.iterator.forwardItems.length == 0
+                && this.iterator.backwardItems.length == 0) || this.length == 0;
+    }
+
+    ///
+    unittest {
+        String_UTF thing;
+        assert(thing.empty);
+        thing = cast(LiteralType)"bar";
+        assert(!thing.empty);
+    }
+
+    ///
+    Char front() scope @trusted {
+        assert(!isNull);
+        setupIterator;
+
+        const canRefill = this.iterator.literal.length > 0;
+        const needRefill = this.iterator.forwardItems.length == 0;
+        const needToUseOtherBuffer = !canRefill && needRefill && this.iterator.backwardItems.length > 0;
+
+        if (needToUseOtherBuffer) {
+            // take first in backwards buffer
+            assert(this.iterator.backwardItems.length > 0);
+            return (cast(Char[])this.iterator.backwardItems)[0];
+        } else if (needRefill) {
+            popFront;
+        }
+
+        // take first in forwards buffer
+        assert(this.iterator.forwardItems.length > 0);
+        return (cast(Char[])this.iterator.forwardItems)[0];
+    }
+
+    ///
+    unittest {
+        static Text8 = "ok it's a live";
+        static Text16 = "I'm up to the"w;
+        static Text32 = "walls can't talk"d;
+
+        String_UTF text = String_UTF(Text8);
+        foreach (i, c; Text8) {
+            auto got = text.front;
+
+            assert(!text.empty);
+            assert(got == c);
+            text.popFront;
+        }
+        assert(text.empty);
+
+        text = String_UTF(Text16);
+        foreach (i, c; Text16) {
+            auto got = text.front;
+
+            assert(!text.empty);
+            assert(got == c);
+            text.popFront;
+        }
+        assert(text.empty);
+
+        text = String_UTF(Text32);
+        foreach (i, c; Text32) {
+            auto got = text.front;
+
+            assert(!text.empty);
+            assert(got == c);
+            text.popFront;
+        }
+        assert(text.empty);
+    }
+
+    ///
+    Char back() scope @trusted {
+        assert(!isNull);
+        setupIterator;
+
+        const canRefill = this.iterator.literal.length > 0;
+        const needRefill = this.iterator.backwardItems.length == 0;
+        const needToUseOtherBuffer = !canRefill && this.iterator.forwardItems.length > 0 && needRefill;
+
+        if (needToUseOtherBuffer) {
+            // take first in backwards buffer
+            assert(this.iterator.forwardItems.length > 0);
+            return (cast(Char[])this.iterator.forwardItems)[$ - 1];
+        } else if (needRefill) {
+            popBack;
+        }
+
+        // take first in forwards buffer
+        assert(this.iterator.backwardItems.length > 0);
+        return (cast(Char[])this.iterator.backwardItems)[$ - 1];
+    }
+
+    ///
+    unittest {
+        static Text8 = "ok it's a live";
+        static Text16 = "I'm up to the"w;
+        static Text32 = "walls can't talk"d;
+
+        String_UTF text = String_UTF(Text8);
+        foreach_reverse (i, c; Text8) {
+            auto got = text.back;
+
+            assert(!text.empty);
+            assert(got == c);
+            text.popBack;
+        }
+        assert(text.empty);
+
+        text = String_UTF(Text16);
+        foreach_reverse (i, c; Text16) {
+            auto got = text.back;
+
+            assert(!text.empty);
+            assert(got == c);
+            text.popBack;
+        }
+        assert(text.empty);
+
+        text = String_UTF(Text32);
+        foreach_reverse (i, c; Text32) {
+            auto got = text.back;
+
+            assert(!text.empty);
+            assert(got == c);
+            text.popBack;
+        }
+        assert(text.empty);
+    }
+
+    /// See_Also: front
+    void popFront() scope @trusted {
+        assert(!empty);
+
+        setupIterator;
+
+        const canRefill = this.iterator.literal.length > 0;
+        const needRefill = this.iterator.forwardItems.length == 0;
+        const needToUseOtherBuffer = !canRefill && this.iterator.forwardItems.length == 0 && this.iterator.backwardItems.length > 0;
+
+        if (needToUseOtherBuffer) {
+            this.iterator.backwardItems = (cast(Char[])this.iterator.backwardItems)[1 .. $];
+        } else if (needRefill) {
+            assert(canRefill);
+
+            Char[4 / Char.sizeof] charBuffer;
+            size_t amountFilled;
+
+            literalEncoding.handle(() {
+                auto actual = cast(string)this.iterator.literal;
+
+                static if (is(Char == char)) {
+                    // copy straight
+                    size_t canDo = charBuffer.length;
+                    if (canDo > actual.length)
+                        canDo = actual.length;
+
+                    charBuffer[0 .. canDo] = actual[0 .. canDo];
+
+                    actual = actual[canDo .. $];
+                    amountFilled = canDo;
+                } else static if (is(Char == wchar)) {
+                    // need to reencode
+                    const consumedGiven = reEncode(actual, charBuffer);
+
+                    actual = actual[consumedGiven[0] .. $];
+                    amountFilled = consumedGiven[1];
+                } else static if (is(Char == dchar)) {
+                    // decode
+                    const consumed = decode(actual, charBuffer[0]);
+
+                    actual = actual[consumed .. $];
+                    amountFilled = 1;
+                }
+
+                this.iterator.literal = actual;
+            }, () {
+                auto actual = cast(wstring)this.iterator.literal;
+
+                static if (is(Char == char)) {
+                    // need to reencode
+                    const consumedGiven = reEncode(actual, charBuffer);
+
+                    actual = actual[consumedGiven[0] .. $];
+                    amountFilled = consumedGiven[1];
+                } else static if (is(Char == wchar)) {
+                    // copy straight
+                    size_t canDo = charBuffer.length;
+                    if (canDo > actual.length)
+                        canDo = actual.length;
+
+                    charBuffer[0 .. canDo] = actual[0 .. canDo];
+
+                    actual = actual[canDo .. $];
+                    amountFilled = canDo;
+                } else static if (is(Char == dchar)) {
+                    // decode
+                    const consumed = decode(actual, charBuffer[0]);
+
+                    actual = actual[consumed .. $];
+                    amountFilled = 1;
+                }
+
+                this.iterator.literal = actual;
+            }, () {
+                auto actual = cast(dstring)this.iterator.literal;
+
+                static if (is(Char == char)) {
+                    // encode
+                    amountFilled = encodeUTF8(actual[0], charBuffer);
+                    actual = actual[1 .. $];
+                } else static if (is(Char == wchar)) {
+                    // encode
+                    amountFilled = encodeUTF16(actual[0], charBuffer);
+                    actual = actual[1 .. $];
+                } else static if (is(Char == dchar)) {
+                    // copy straight
+                    size_t canDo = charBuffer.length;
+                    if (canDo > actual.length)
+                        canDo = actual.length;
+
+                    charBuffer[0 .. canDo] = actual[0 .. canDo];
+
+                    actual = actual[canDo .. $];
+                    amountFilled = canDo;
+                }
+
+                this.iterator.literal = actual;
+            });
+
+            this.iterator.forwardBuffer = charBuffer;
+            this.iterator.forwardItems = (cast(Char[])this.iterator.forwardBuffer)[0 .. amountFilled];
+        } else {
+            this.iterator.forwardItems = (cast(Char[])this.iterator.forwardItems)[1 .. $];
+        }
+    }
+
+    /// See_Also: back
+    void popBack() scope @trusted {
+        assert(!empty);
+
+        setupIterator;
+
+        const canRefill = this.iterator.literal.length > 0;
+        const needRefill = this.iterator.backwardItems.length == 0;
+        const needToUseOtherBuffer = !canRefill && this.iterator.forwardItems.length > 0 && needRefill;
+
+        if (needToUseOtherBuffer) {
+            this.iterator.forwardItems = (cast(Char[])this.iterator.forwardItems)[0 .. $ - 1];
+        } else if (needRefill) {
+            assert(canRefill);
+
+            Char[4 / Char.sizeof] charBuffer;
+            size_t amountFilled;
+
+            literalEncoding.handle(() {
+                auto actual = cast(string)this.iterator.literal;
+
+                static if (is(Char == char)) {
+                    // copy straight
+                    size_t canDo = charBuffer.length;
+                    if (canDo > actual.length)
+                        canDo = actual.length;
+
+                    charBuffer[0 .. canDo] = actual[$ - canDo .. $];
+
+                    actual = actual[0 .. $ - canDo];
+                    amountFilled = canDo;
+                } else static if (is(Char == wchar)) {
+                    // need to reencode
+                    const consumedGiven = reEncodeFromEnd(actual, charBuffer);
+
+                    actual = actual[0 .. $ - consumedGiven[0]];
+                    amountFilled = consumedGiven[1];
+                } else static if (is(Char == dchar)) {
+                    // decode
+                    const consumed = decodeFromEnd(actual, charBuffer[0]);
+
+                    actual = actual[0 .. $ - consumed];
+                    amountFilled = 1;
+                }
+
+                this.iterator.literal = actual;
+            }, () {
+                auto actual = cast(wstring)this.iterator.literal;
+
+                static if (is(Char == char)) {
+                    // need to reencode
+                    const consumedGiven = reEncodeFromEnd(actual, charBuffer);
+
+                    actual = actual[0 .. $ - consumedGiven[0]];
+                    amountFilled = consumedGiven[1];
+                } else static if (is(Char == wchar)) {
+                    // copy straight
+                    size_t canDo = charBuffer.length;
+                    if (canDo > actual.length)
+                        canDo = actual.length;
+
+                    charBuffer[0 .. canDo] = actual[$ - canDo .. $];
+
+                    actual = actual[0 .. $ - canDo];
+                    amountFilled = canDo;
+                } else static if (is(Char == dchar)) {
+                    // decode
+                    const consumed = decodeFromEnd(actual, charBuffer[0]);
+
+                    actual = actual[0 .. $ - consumed];
+                    amountFilled = 1;
+                }
+
+                this.iterator.literal = actual;
+            }, () {
+                auto actual = cast(dstring)this.iterator.literal;
+
+                static if (is(Char == char)) {
+                    // encode
+                    amountFilled = encodeUTF8(actual[$ - 1], charBuffer);
+                    actual = actual[0 .. $ - 1];
+                } else static if (is(Char == wchar)) {
+                    // encode
+                    amountFilled = encodeUTF16(actual[$ - 1], charBuffer);
+                    actual = actual[0 .. $ - 1];
+                } else static if (is(Char == dchar)) {
+                    // copy straight
+                    size_t canDo = charBuffer.length;
+                    if (canDo > actual.length)
+                        canDo = actual.length;
+
+                    charBuffer[0 .. canDo] = actual[$ - canDo .. $];
+
+                    actual = actual[0 .. $ - canDo];
+                    amountFilled = canDo;
+                }
+
+                this.iterator.literal = actual;
+            });
+
+            this.iterator.backwardBuffer = charBuffer;
+            this.iterator.backwardItems = (cast(Char[])this.iterator.backwardBuffer)[0 .. amountFilled];
+        } else {
+            this.iterator.backwardItems = (cast(Char[])this.iterator.backwardItems)[0 .. $ - 1];
+        }
+    }
+
+    String_UTF8 byUTF8() scope return @trusted {
+        String_UTF8 ret;
+        ret.lifeTime = cast(String_UTF8.LifeTime*)this.lifeTime;
+        ret.literal = this.literal;
+        ret.literalEncoding = this.literalEncoding;
+
+        if (this.lifeTime !is null)
+            atomicOp!"+="(this.lifeTime.refCount, 1);
+
+        return ret;
+    }
+
+    String_UTF16 byUTF16() scope return @trusted {
+        String_UTF16 ret;
+        ret.lifeTime = cast(String_UTF16.LifeTime*)this.lifeTime;
+        ret.literal = this.literal;
+        ret.literalEncoding = this.literalEncoding;
+
+        if (this.lifeTime !is null)
+            atomicOp!"+="(this.lifeTime.refCount, 1);
+
+        return ret;
+    }
+
+    String_UTF32 byUTF32() scope return @trusted {
+        String_UTF32 ret;
+        ret.lifeTime = cast(String_UTF32.LifeTime*)this.lifeTime;
+        ret.literal = this.literal;
+        ret.literalEncoding = this.literalEncoding;
+
+        if (this.lifeTime !is null)
+            atomicOp!"+="(this.lifeTime.refCount, 1);
+
+        return ret;
     }
 
     version (none) {
@@ -1016,6 +1402,9 @@ private:
         shared(int) refCount;
         RCAllocator allocator;
         immutable(void)[] literal;
+
+        void[4] forwardBuffer, backwardBuffer;
+        void[] forwardItems, backwardItems;
 
     scope @nogc nothrow:
 
