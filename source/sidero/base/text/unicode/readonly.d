@@ -521,6 +521,11 @@ nothrow @nogc:
         assert(!someMoreStack.isPtrNullTerminated());
     }
 
+    /// Returns: if the underlying encoding is different from the typed encoding.
+    bool isEncodingChanged() const scope {
+        return this.literalEncoding.codepointSize != Char.sizeof;
+    }
+
     ///
     alias opDollar = length;
 
@@ -529,7 +534,7 @@ nothrow @nogc:
 
         Removes null terminator at the end if it has one.
      */
-    size_t length() const scope nothrow @nogc {
+    size_t length() const scope {
         return literalEncoding.handle(() {
             auto actual = cast(string)this.literal;
 
