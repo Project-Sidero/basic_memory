@@ -23,7 +23,7 @@ struct ForeachOverUTF(Type) if (isSomeString!Type) {
 
     @disable this(this);
 
-    @safe nothrow @nogc:
+@safe nothrow @nogc:
 
     ///
     void delegate(size_t amountRead, size_t lastIteratedAmount) peekAtReadAmountDelegate;
@@ -532,12 +532,36 @@ size_t[2] reEncode(scope const(char)[] input, out wchar[2] output) {
 }
 
 ///
+size_t[2] reEncodeFromEnd(scope const(char)[] input, out wchar[2] output) {
+    if (input.length == 0)
+        return [0, 0];
+
+    dchar temp;
+    size_t consumed = decodeFromEnd(input, temp);
+    size_t given = encodeUTF16(temp, output);
+
+    return [consumed, given];
+}
+
+///
 size_t[2] reEncode(scope const(wchar)[] input, out char[4] output) {
     if (input.length == 0)
         return [0, 0];
 
     dchar temp;
     size_t consumed = decode(input, temp);
+    size_t given = encodeUTF8(temp, output);
+
+    return [consumed, given];
+}
+
+///
+size_t[2] reEncodeFromEnd(scope const(wchar)[] input, out char[4] output) {
+    if (input.length == 0)
+        return [0, 0];
+
+    dchar temp;
+    size_t consumed = decodeFromEnd(input, temp);
     size_t given = encodeUTF8(temp, output);
 
     return [consumed, given];
@@ -635,6 +659,41 @@ size_t decode(scope const(char)[] input, out dchar result) {
 }
 
 ///
+size_t decodeFromEnd(scope const(char)[] input, out dchar result) {
+    size_t consumed;
+    result = replacementCharacter;
+
+    if (input.length >= 1 && input[$ - 1] < 0x80) {
+        result = input[$ - 1];
+        consumed = 1;
+    } else if (input.length >= 2 && (input[$ - 2] & 0xE0) == 0xC0) {
+        result = (cast(dchar)input[$ - 2] & 0x1F) << 6;
+        result |= input[$ - 1] & 0x3F;
+        consumed = 2;
+    } else if (input.length >= 3 && (input[$ - 3] & 0xF0) == 0xE0) {
+        result = (cast(dchar)input[$ - 3] & 0x0F) << 12;
+        result |= (cast(dchar)input[$ - 2] & 0x3F) << 6;
+        result |= input[$ - 1] & 0x3F;
+        consumed = 3;
+    } else if (input.length >= 4 && (input[$ - 4] & 0xF8) == 0xF0 && input[$ - 4] <= 0xF4) {
+        result = (cast(dchar)input[$ - 4] & 0x07) << 18;
+        result |= (cast(dchar)input[$ - 3] & 0x3F) << 12;
+        result |= (cast(dchar)input[$ - 2] & 0x3F) << 6;
+        result |= input[$ - 1] & 0x3F;
+        consumed = 4;
+    } else {
+        // unrecognizable
+        consumed = cast(size_t)(input.length > 0);
+    }
+
+    // surrogate half, reserved for UTF-16.
+    if (result >= 0xD800 && result <= 0xDFFF)
+        result = replacementCharacter;
+
+    return consumed;
+}
+
+///
 size_t decode(scope const(wchar)[] input, out dchar result) {
     size_t consumed;
     result = replacementCharacter;
@@ -645,6 +704,27 @@ size_t decode(scope const(wchar)[] input, out dchar result) {
     } else if (input.length >= 2 && input[0] >= 0xD800 && input[0] <= 0xDBFF && input[1] >= 0xDC00 && input[1] <= 0xDFFF) {
         result = (input[0] & 0x03FF) << 10;
         result |= input[1] & 0x03FF;
+        result += 0x10000;
+        consumed = 2;
+    } else {
+        // unrecognizable
+        consumed = cast(size_t)(input.length > 0);
+    }
+
+    return consumed;
+}
+
+///
+size_t decodeFromEnd(scope const(wchar)[] input, out dchar result) {
+    size_t consumed;
+    result = replacementCharacter;
+
+    if (input.length >= 1 && input[$ - 1] < 0xD800 || input[$ - 1] >= 0xE000) {
+        result = input[$ - 1];
+        consumed = 1;
+    } else if (input.length >= 2 && input[$ - 2] >= 0xD800 && input[$ - 2] <= 0xDBFF && input[$ - 1] >= 0xDC00 && input[$ - 1] <= 0xDFFF) {
+        result = (input[$ - 2] & 0x03FF) << 10;
+        result |= input[$ - 1] & 0x03FF;
         result += 0x10000;
         consumed = 2;
     } else {
@@ -671,10 +751,35 @@ size_t decodeLength(scope const(char)[] input) {
 }
 
 ///
+size_t decodeLengthFromEnd(scope const(char)[] input) {
+    size_t consumed = cast(size_t)(input.length > 0);
+
+    if (input.length >= 2 && (input[$ - 2] & 0xE0) == 0xC0) {
+        consumed = 2;
+    } else if (input.length >= 3 && (input[$ - 3] & 0xF0) == 0xE0) {
+        consumed = 3;
+    } else if (input.length >= 4 && (input[$ - 4] & 0xF8) == 0xF0 && input[$ - 4] <= 0xF4) {
+        consumed = 4;
+    }
+
+    return consumed;
+}
+
+///
 size_t decodeLength(scope const(wchar)[] input) {
     size_t consumed = cast(size_t)(input.length > 0);
 
     if (input.length >= 2 && input[0] >= 0xD800 && input[0] <= 0xDBFF && input[1] >= 0xDC00 && input[1] <= 0xDFFF)
+        consumed = 2;
+
+    return consumed;
+}
+
+///
+size_t decodeLengthFromEnd(scope const(wchar)[] input) {
+    size_t consumed = cast(size_t)(input.length > 0);
+
+    if (input.length >= 2 && input[$ - 2] >= 0xD800 && input[$ - 2] <= 0xDBFF && input[$ - 1] >= 0xDC00 && input[$ - 1] <= 0xDFFF)
         consumed = 2;
 
     return consumed;
