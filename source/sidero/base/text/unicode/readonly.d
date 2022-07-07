@@ -12,9 +12,6 @@ alias String_UTF16 = String_UTF!wchar;
 ///
 alias String_UTF32 = String_UTF!dchar;
 
-// missing toHash
-// missing opApply
-
 ///
 struct String_UTF(Char_) {
     package(sidero.base.text.unicode) {
@@ -28,6 +25,135 @@ struct String_UTF(Char_) {
 
         LifeTime* lifeTime;
         Iterator* iterator;
+
+        int opApplyImpl(Del)(scope Del del) @trusted scope {
+            bool deallocateAllocator;
+
+            if (isNull)
+                return 0;
+
+            Iterator* oldIterator = this.iterator;
+
+            this.iterator = null;
+            setupIterator;
+
+            if (oldIterator !is null)
+                this.iterator.literal = oldIterator.literal;
+
+            scope (exit) {
+                this.iterator.rc(false);
+                this.iterator = oldIterator;
+            }
+
+            size_t offset;
+            int result;
+
+            while (!empty) {
+                Char temp = front();
+
+                static if (__traits(compiles, del(offset, temp)))
+                    result = del(offset, temp);
+                else static if (__traits(compiles, del(temp)))
+                    result = del(temp);
+                else
+                    static assert(0);
+
+                if (result)
+                    return result;
+
+                offset++;
+                popFront();
+            }
+
+            return result;
+        }
+
+        int opApplyReverseImpl(Del)(scope Del del) @trusted scope {
+            if (isNull)
+                return 0;
+
+            Iterator* oldIterator = this.iterator;
+
+            this.iterator = null;
+            setupIterator;
+
+            if (oldIterator !is null)
+                this.iterator.literal = oldIterator.literal;
+
+            scope (exit) {
+                this.iterator.rc(false);
+                this.iterator = oldIterator;
+            }
+
+            Char temp;
+            size_t offset;
+            enum NeedOffset = __traits(compiles, del(offset, temp));
+
+            static if (NeedOffset) {
+                offset = literalEncoding.handle(() {
+                    auto actual = cast(string)this.literal;
+
+                    static if (is(Char == char)) {
+                        // char to char
+                        return actual.length;
+                    } else static if (is(Char == wchar)) {
+                        // char storage into wchar's
+                        return reEncodeLength(actual);
+                    } else static if (is(Char == dchar)) {
+                        // char storage into dchar's
+                        return decodeLength(actual);
+                    }
+                }, () {
+                    auto actual = cast(wstring)this.literal;
+
+                    static if (is(Char == char)) {
+                        // wchar storage to char
+                        return reEncodeLength(actual);
+                    } else static if (is(Char == wchar)) {
+                        // wchar to wchar
+                        return reEncodeLength(actual);
+                    } else static if (is(Char == dchar)) {
+                        // wchar storage into dchar's
+                        return decodeLength(actual);
+                    }
+                }, () {
+                    auto actual = cast(dstring)this.literal;
+
+                    static if (is(Char == char)) {
+                        //dchar storage into char
+                        return encodeLengthUTF8(actual);
+                    } else static if (is(Char == wchar)) {
+                        // dchar into wchar
+                        return encodeLengthUTF16(actual);
+                    } else static if (is(Char == dchar)) {
+                        // dchar to dchar
+                        return actual.length;
+                    }
+                }) - 1;
+            }
+
+            int result;
+
+            while (!empty) {
+                temp = back();
+
+                static if (NeedOffset)
+                    result = del(offset, temp);
+                else static if (__traits(compiles, del(temp)))
+                    result = del(temp);
+                else
+                    static assert(0);
+
+                if (result)
+                    return result;
+
+                static if (NeedOffset)
+                    offset--;
+                popBack();
+            }
+
+            return result;
+        }
     }
 
     ///
@@ -35,7 +161,43 @@ struct String_UTF(Char_) {
     ///
     alias LiteralType = immutable(Char)[];
 
-    // TODO: opApply
+    ///
+    mixin OpApplyCombos!("Char", "size_t", ["@safe", "nothrow", "@nogc"]);
+
+    ///
+    unittest {
+        static Text = cast(LiteralType)"Hello there!";
+        String_UTF text = String_UTF(Text);
+
+        size_t lastIndex;
+
+        foreach (i, c; text) {
+            assert(i == 0 || lastIndex == i);
+            assert(Text[i] == c);
+            lastIndex++;
+        }
+
+        assert(lastIndex == Text.length);
+    }
+
+    ///
+    mixin OpApplyCombos!("Char", "size_t", ["@safe", "nothrow", "@nogc"], "opApplyReverse");
+
+    ///
+    unittest {
+        static Text = cast(LiteralType)"Hello there!";
+        String_UTF text = String_UTF(Text);
+
+        size_t lastIndex = Text.length;
+
+        foreach_reverse (i, c; text) {
+            assert(i == 0 || lastIndex - 1 == i);
+            assert(Text[i] == c);
+            lastIndex--;
+        }
+
+        assert(lastIndex == 0);
+    }
 
 nothrow @nogc:
 
@@ -1332,7 +1494,7 @@ nothrow @nogc:
 
             while (soFar < actual.length) {
                 dchar c;
-                size_t got = decodeFromEnd(actual[0 .. $-soFar], c);
+                size_t got = decodeFromEnd(actual[0 .. $ - soFar], c);
 
                 if (isWhiteSpace(c))
                     amount += got;
@@ -1350,7 +1512,7 @@ nothrow @nogc:
 
             while (soFar < actual.length) {
                 dchar c;
-                size_t got = decodeFromEnd(actual[0 .. $-soFar], c);
+                size_t got = decodeFromEnd(actual[0 .. $ - soFar], c);
 
                 if (isWhiteSpace(c))
                     amount += got;
@@ -1388,6 +1550,13 @@ nothrow @nogc:
         assert(value == cast(LiteralType)"  \t abc");
 
         assert(String_UTF(cast(LiteralType)"  \t abc\t\r\n \0").stripRight == cast(LiteralType)"  \t abc");
+    }
+
+    ///
+    ulong toHash() const scope @trusted {
+        import sidero.base.hash.fnv : fnv_64_1a;
+
+        return fnv_64_1a(cast(ubyte[])this.literal);
     }
 
 private:
