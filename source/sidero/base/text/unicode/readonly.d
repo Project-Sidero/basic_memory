@@ -742,7 +742,17 @@ nothrow @nogc:
         }
 
         ///
-        bool opEquals(Char2)(scope String_UTF!Char2 other) scope {
+        bool opEquals(scope String_UTF8 other) scope {
+            return opCmp(other) == 0;
+        }
+
+        ///
+        bool opEquals(scope String_UTF16 other) scope {
+            return opCmp(other) == 0;
+        }
+
+        ///
+        bool opEquals(scope String_UTF32 other) scope {
             return opCmp(other) == 0;
         }
 
@@ -1018,8 +1028,26 @@ nothrow @nogc:
         }
 
         ///
-        int ignoreCaseCompare(Char2)(scope String_UTF!Char2 other, scope RCAllocator allocator = RCAllocator.init,
+        int ignoreCaseCompare(scope String_UTF8 other, scope RCAllocator allocator = RCAllocator.init,
                 UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return ignoreCaseCompareImpl(other, allocator, language);
+        }
+
+        ///
+        int ignoreCaseCompare(scope String_UTF16 other, scope RCAllocator allocator = RCAllocator.init,
+                UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return ignoreCaseCompareImpl(other, allocator, language);
+        }
+
+        ///
+        int ignoreCaseCompare(scope String_UTF32 other, scope RCAllocator allocator = RCAllocator.init,
+                UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return ignoreCaseCompareImpl(other, allocator, language);
+        }
+
+        ///
+        private int ignoreCaseCompareImpl(Char2)(scope String_UTF!Char2 other,
+                scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
 
             return other.literalEncoding.handle(() {
                 auto actual = cast(string)other.literal;
@@ -1386,6 +1414,7 @@ nothrow @nogc:
         }
     }
 
+    ///
     String_UTF8 byUTF8() scope return @trusted {
         String_UTF8 ret;
         ret.lifeTime = cast(String_UTF8.LifeTime*)this.lifeTime;
@@ -1398,6 +1427,23 @@ nothrow @nogc:
         return ret;
     }
 
+    ///
+    unittest {
+        static Text8 = "ok it's a live";
+        static Text16 = "I'm up to the"w;
+        static Text32 = "walls can't talk"d;
+
+        String_UTF text = String_UTF(Text8);
+        assert(text.length == text.byUTF8().length);
+
+        text = String_UTF(Text16);
+        assert(text.length == text.byUTF8().length);
+
+        text = String_UTF(Text32);
+        assert(text.length == text.byUTF8().length);
+    }
+
+    ///
     String_UTF16 byUTF16() scope return @trusted {
         String_UTF16 ret;
         ret.lifeTime = cast(String_UTF16.LifeTime*)this.lifeTime;
@@ -1410,6 +1456,23 @@ nothrow @nogc:
         return ret;
     }
 
+    ///
+    unittest {
+        static Text8 = "ok it's a live";
+        static Text16 = "I'm up to the"w;
+        static Text32 = "walls can't talk"d;
+
+        String_UTF text = String_UTF(Text8);
+        assert(text.length == text.byUTF16().length);
+
+        text = String_UTF(Text16);
+        assert(text.length == text.byUTF16().length);
+
+        text = String_UTF(Text32);
+        assert(text.length == text.byUTF16().length);
+    }
+
+    ///
     String_UTF32 byUTF32() scope return @trusted {
         String_UTF32 ret;
         ret.lifeTime = cast(String_UTF32.LifeTime*)this.lifeTime;
@@ -1420,6 +1483,22 @@ nothrow @nogc:
             atomicOp!"+="(this.lifeTime.refCount, 1);
 
         return ret;
+    }
+
+    ///
+    unittest {
+        static Text8 = "ok it's a live";
+        static Text16 = "I'm up to the"w;
+        static Text32 = "walls can't talk"d;
+
+        String_UTF text = String_UTF(Text8);
+        assert(text.length == text.byUTF32().length);
+
+        text = String_UTF(Text16);
+        assert(text.length == text.byUTF32().length);
+
+        text = String_UTF(Text32);
+        assert(text.length == text.byUTF32().length);
     }
 
     version (none) {
@@ -1567,6 +1646,22 @@ nothrow @nogc:
         import sidero.base.hash.fnv : fnv_64_1a;
 
         return fnv_64_1a(cast(ubyte[])this.literal);
+    }
+
+    ///
+    unittest {
+        static Text8 = "ok it's a live";
+        static Text16 = "I'm up to the"w;
+        static Text32 = "walls can't talk"d;
+
+        String_UTF text = String_UTF(Text8);
+        assert(text.toHash() == 1586511100919779533);
+
+        text = String_UTF(Text16);
+        assert(text.toHash() == 10386160303096007217);
+
+        text = String_UTF(Text32);
+        assert(text.toHash() == 3495845543429281309);
     }
 
 private:
