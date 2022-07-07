@@ -14,7 +14,6 @@ alias String_UTF32 = String_UTF!dchar;
 
 // missing toHash
 // missing opApply
-// todo: rewrite stripRight to use fromEnd variants of UTF decode/encode stuff
 
 ///
 struct String_UTF(Char_) {
@@ -1333,12 +1332,12 @@ nothrow @nogc:
 
             while (soFar < actual.length) {
                 dchar c;
-                size_t got = decode(actual[soFar .. $], c);
+                size_t got = decodeFromEnd(actual[0 .. $-soFar], c);
 
                 if (isWhiteSpace(c))
                     amount += got;
                 else
-                    amount = 0;
+                    break;
 
                 soFar += got;
             }
@@ -1351,12 +1350,12 @@ nothrow @nogc:
 
             while (soFar < actual.length) {
                 dchar c;
-                size_t got = decode(actual[soFar .. $], c);
+                size_t got = decodeFromEnd(actual[0 .. $-soFar], c);
 
                 if (isWhiteSpace(c))
                     amount += got;
                 else
-                    amount = 0;
+                    break;
 
                 soFar += got;
             }
