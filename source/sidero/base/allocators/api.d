@@ -114,7 +114,7 @@ struct RCAllocator {
 scope:
 
     ///
-    ~this() {
+     ~this() {
         if (refSub_ !is null)
             refSub_();
     }
@@ -161,6 +161,11 @@ scope:
 
     @disable void opAssign(scope ref RCAllocator other) const;
     @disable void opAssign(scope RCAllocator other) const;
+
+    ///
+    bool opCast(T : bool)() scope const {
+        return !isNull;
+    }
 
     @disable auto opCast(T)();
 
@@ -249,6 +254,7 @@ template makeBufferedArrays(Types...) if (Types.length > 0) {
 ///
 unittest {
     import sidero.base.allocators.predefined;
+
     GeneralPurposeAllocator allocator;
     auto got = allocator.makeBufferedArrays!(int, float)(2, 4);
 

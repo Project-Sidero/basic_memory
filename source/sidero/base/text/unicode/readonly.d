@@ -710,6 +710,11 @@ nothrow @nogc:
         }
     }
 
+    ///
+    bool opCast(T : bool)() scope const {
+        return !isNull;
+    }
+
     @disable auto opCast(T)();
 
     const {
