@@ -14,6 +14,7 @@ size_t caseFoldLength(scope dstring input, bool turkic = false, bool compatibili
 
 /// Gets length of Case_Folding with support for turkic rules, hangul and compatibility
 size_t caseFoldLength(scope ForeachOverUTF32Delegate input, bool turkic = false, bool compatibility = false, bool decompose = false) @trusted {
+    dchar[3] hangulMap;
     size_t ret;
 
     /*
@@ -23,10 +24,23 @@ mappings that would conflict. Any character that does not have a mapping in thes
 considered to map to itself
     */
 
-    dchar[3] hangulMap;
+    bool handleDecompose(dchar c) {
+        auto decmap = sidero_utf_lut_getDecompositionMap(c);
+        dstring got2;
+        size_t len;
+
+        if (compatibility && decmap.fullyDecomposedCompatibility.length > 0)
+            got2 = decmap.fullyDecomposedCompatibility;
+        else if (decmap.fullyDecomposed.length > 0 && (compatibility || decmap.tag == CompatibilityFormattingTag.None))
+            got2 = decmap.fullyDecomposed;
+        else if ((len = decomposeHangulSyllable(c, hangulMap)) > 0)
+            got2 = cast(dstring)hangulMap[0 .. len];
+
+        ret += got2.length;
+        return got2.length > 0;
+    }
 
     foreach (dchar c; input) {
-        size_t len;
         dstring got;
 
         if (turkic)
@@ -34,33 +48,24 @@ considered to map to itself
         if (got.length == 0)
             got = sidero_utf_lut_getCaseFolding(c);
 
-        // we support decomposing here to prevent extra memory allocations or work elsewhere when normalizing.
-        if (got.length == 0 && decompose) {
-            foreach (dchar c2; got) {
-                auto decmap = sidero_utf_lut_getDecompositionMap(c);
-                dstring got2;
-                size_t len2;
-
-                if (compatibility && decmap.fullyDecomposedCompatibility.length > 0)
-                    got2 = decmap.fullyDecomposedCompatibility;
-                else if (decmap.fullyDecomposed.length > 0 && (compatibility || decmap.tag == CompatibilityFormattingTag.None))
-                    got2 = decmap.fullyDecomposed;
-                else if ((len2 = decomposeHangulSyllable(c2, hangulMap)) > 0)
-                    got2 = cast(dstring)hangulMap[0 .. len2];
-
-                if (got2.length > 0)
-                    len += got2.length;
-                else
-                    len++;
-            }
-        } else {
-            len += got.length;
-        }
-
-        if (len == 0)
-            len = 1;
-
-        ret += len;
+        if (got.length > 0) {
+            // we support decomposing here to prevent extra memory allocations or work elsewhere when normalizing.
+            if (decompose) {
+                foreach (dchar c2; got) {
+                    if (handleDecompose(c2))
+                        return ret;
+                    else
+                        ret++;
+                }
+            } else
+                ret++;
+        } else if (decompose) {
+            if (handleDecompose(c))
+                return ret;
+            else
+                ret++;
+        } else
+            ret++;
     }
 
     return ret;
@@ -76,6 +81,24 @@ bool isCasefolded(scope dstring input, bool turkic = false, bool compatibility =
 bool isCasefolded(scope ForeachOverUTF32Delegate input, bool turkic = false, bool compatibility = false, bool decompose = false) @trusted {
     dchar[3] hangulMap;
 
+    bool handleDecompose(dchar c) {
+        auto decmap = sidero_utf_lut_getDecompositionMap(c);
+        dstring got2;
+        size_t len;
+
+        if (compatibility && decmap.fullyDecomposedCompatibility.length > 0)
+            got2 = decmap.fullyDecomposedCompatibility;
+        else if (decmap.fullyDecomposed.length > 0 && (compatibility || decmap.tag == CompatibilityFormattingTag.None))
+            got2 = decmap.fullyDecomposed;
+        else if ((len = decomposeHangulSyllable(c, hangulMap)) > 0)
+            got2 = cast(dstring)hangulMap[0 .. len];
+
+        if (got2.length > 0)
+            return true;
+
+        return false;
+    }
+
     foreach (dchar c; input) {
         dstring got;
 
@@ -84,23 +107,17 @@ bool isCasefolded(scope ForeachOverUTF32Delegate input, bool turkic = false, boo
         if (got.length == 0)
             got = sidero_utf_lut_getCaseFolding(c);
 
-        // we support decomposing here to prevent extra memory allocations or work elsewhere when normalizing.
-        if (got.length == 0 && decompose) {
-            foreach (dchar c2; got) {
-                auto decmap = sidero_utf_lut_getDecompositionMap(c);
-                dstring got2;
-                size_t len2;
-
-                if (compatibility && decmap.fullyDecomposedCompatibility.length > 0)
-                    got2 = decmap.fullyDecomposedCompatibility;
-                else if (decmap.fullyDecomposed.length > 0 && (compatibility || decmap.tag == CompatibilityFormattingTag.None))
-                    got2 = decmap.fullyDecomposed;
-                else if ((len2 = decomposeHangulSyllable(c2, hangulMap)) > 0)
-                    got2 = cast(dstring)hangulMap[0 .. len2];
-
-                if (got2.length > 0)
-                    return false;
+        if (got.length > 0) {
+            // we support decomposing here to prevent extra memory allocations or work elsewhere when normalizing.
+            if (decompose) {
+                foreach (dchar c2; got) {
+                    if (handleDecompose(c2))
+                        return false;
+                }
             }
+        } else if (decompose) {
+            if (handleDecompose(c))
+                return false;
         }
     }
 
@@ -141,6 +158,24 @@ mappings that would conflict. Any character that does not have a mapping in thes
 considered to map to itself
     */
 
+    bool handleDecompose(dchar c) {
+        auto decmap = sidero_utf_lut_getDecompositionMap(c);
+        dstring got2;
+        size_t len;
+
+        if (compatibility && decmap.fullyDecomposedCompatibility.length > 0)
+            got2 = decmap.fullyDecomposedCompatibility;
+        else if (decmap.fullyDecomposed.length > 0 && (compatibility || decmap.tag == CompatibilityFormattingTag.None))
+            got2 = decmap.fullyDecomposed;
+        else if ((len = decomposeHangulSyllable(c, hangulMap)) > 0)
+            got2 = cast(dstring)hangulMap[0 .. len];
+
+        if ((got2.length == 0 && handle(c)) || (got2.length > 0 && handle(got2)))
+            return true;
+
+        return false;
+    }
+
     foreach (dchar c; input) {
         dstring got;
 
@@ -153,21 +188,13 @@ considered to map to itself
             // we support decomposing here to prevent extra memory allocations or work elsewhere when normalizing.
             if (decompose) {
                 foreach (dchar c2; got) {
-                    auto decmap = sidero_utf_lut_getDecompositionMap(c);
-                    dstring got2;
-                    size_t len;
-
-                    if (compatibility && decmap.fullyDecomposedCompatibility.length > 0)
-                        got2 = decmap.fullyDecomposedCompatibility;
-                    else if (decmap.fullyDecomposed.length > 0 && (compatibility || decmap.tag == CompatibilityFormattingTag.None))
-                        got2 = decmap.fullyDecomposed;
-                    else if ((len = decomposeHangulSyllable(c2, hangulMap)) > 0)
-                        got2 = cast(dstring)hangulMap[0 .. len];
-
-                    if ((got2.length == 0 && handle(c2)) || (got2.length > 0 && handle(got2)))
+                    if (handleDecompose(c2))
                         return;
                 }
             } else if (handle(got))
+                return;
+        } else if (decompose) {
+            if (handleDecompose(c))
                 return;
         } else if (handle(c))
             return;

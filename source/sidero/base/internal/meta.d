@@ -38,6 +38,8 @@ mixin template OpApplyCombos(string ValueType, string KeyType = "size_t", string
 
                 if (withKeyOffset >= 0 && active[withKeyOffset])
                     ret ~= KeyType ~ ", ";
+
+                ret ~= "ref ";
                 ret ~= ValueType ~ ")";
 
                 foreach (i, attribute; attributes) {

@@ -358,6 +358,9 @@ export immutable(DecompositionMapping) sidero_utf_lut_getDecompositionMap(dchar 
 }
 extern(C) immutable(void*) sidero_utf_lut_getDecompositionMap2(dchar input) @trusted nothrow @nogc pure;
 
+/// Get length of fully decomposed for character.
+extern(C) immutable(size_t) sidero_utf_lut_lengthOfFullyDecomposed(dchar input) @trusted nothrow @nogc pure;
+
 /// Get composition for character pair.
 /// Returns: dchar.init if not set.
 export dchar sidero_utf_lut_getCompositionCanonical(dchar L, dchar C) @trusted nothrow @nogc pure {

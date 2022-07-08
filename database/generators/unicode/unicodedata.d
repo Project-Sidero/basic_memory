@@ -216,6 +216,37 @@ void unicodeData() {
     }
 
     {
+        SequentialRanges!(size_t, SequentialRangeSplitGroup, 2) sr;
+
+        foreach (character, entry; state.decompositonMappings)
+            sr.add(character, entry.fullyDecomposed.length);
+
+        sr.splitForSame;
+        sr.calculateTrueSpread;
+        sr.joinWhenClose();
+        sr.joinWithDiff(null, 64);
+        sr.calculateTrueSpread;
+        sr.layerByRangeMax(0, ushort.max / 4);
+        sr.layerJoinIfEndIsStart(0, 16);
+        sr.layerByRangeMax(1, ushort.max / 2);
+        sr.layerJoinIfEndIsStart(1, 64);
+
+        LookupTableGenerator!(size_t, SequentialRangeSplitGroup, 2) lut;
+        lut.sr = sr;
+        lut.lutType = "size_t";
+        lut.name = "sidero_utf_lut_lengthOfFullyDecomposed";
+        lut.defaultReturn = "1";
+
+        auto gotDcode = lut.build();
+
+        api ~= "\n";
+        api ~= "/// Get length of fully decomposed for character.\n";
+        api ~= gotDcode[0];
+
+        internal ~= gotDcode[1];
+    }
+
+    {
         SequentialRanges!(dchar, SequentialRangeSplitGroup, 2, ulong) sr;
 
         CompositionCanonical: foreach (character, entry; state.decompositonMappings) {

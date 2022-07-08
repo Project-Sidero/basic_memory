@@ -10,6 +10,66 @@ import std.traits : isSomeString;
 alias ForeachOverUTF32HandleDelegate = int delegate(ref dchar) @safe nothrow @nogc;
 ///
 alias ForeachOverUTF32Delegate = int delegate(scope ForeachOverUTF32HandleDelegate) @safe nothrow @nogc;
+///
+alias ForeachOverUTF32PeekDelegate = void delegate(size_t amountRead, size_t lastIteratedAmount) @safe nothrow @nogc;
+
+@safe nothrow @nogc {
+    ///
+    ForeachOverAnyUTF foreachOverAnyUTF(scope return string arg, size_t limitCharacters = size_t.max, scope return ForeachOverUTF32PeekDelegate peekDel = null) {
+        return ForeachOverAnyUTF(arg, limitCharacters, peekDel);
+    }
+
+    ///
+    ForeachOverAnyUTF foreachOverAnyUTF(scope return wstring arg, size_t limitCharacters = size_t.max, scope return ForeachOverUTF32PeekDelegate peekDel = null) {
+        return ForeachOverAnyUTF(arg, limitCharacters, peekDel);
+    }
+
+    ///
+    ForeachOverAnyUTF foreachOverAnyUTF(scope return dstring arg, size_t limitCharacters = size_t.max, scope return ForeachOverUTF32PeekDelegate peekDel = null) {
+        return ForeachOverAnyUTF(arg, limitCharacters, peekDel);
+    }
+}
+
+///
+struct ForeachOverAnyUTF {
+    private union {
+        ForeachOverUTF!string utf8;
+        ForeachOverUTF!wstring utf16;
+        ForeachOverUTF!dstring utf32;
+    }
+
+    ForeachOverUTF32Delegate handler;
+
+    @disable this(this);
+
+@safe nothrow @nogc scope:
+
+    this(scope return string input, size_t limitCharacters = size_t.max, scope return ForeachOverUTF32PeekDelegate peekDel = null) @trusted {
+        utf8.value = input;
+        utf8.peekAtReadAmountDelegate = peekDel;
+        utf8.limitCharacters = limitCharacters;
+        handler = &utf8.opApply;
+    }
+
+    this(scope return wstring input, size_t limitCharacters = size_t.max, scope return ForeachOverUTF32PeekDelegate peekDel = null) @trusted {
+        utf16.value = input;
+        utf16.peekAtReadAmountDelegate = peekDel;
+        utf16.limitCharacters = limitCharacters;
+        handler = &utf16.opApply;
+    }
+
+    this(scope return dstring input, size_t limitCharacters = size_t.max, scope return ForeachOverUTF32PeekDelegate peekDel = null) @trusted {
+        utf32.value = input;
+        utf32.peekAtReadAmountDelegate = peekDel;
+        utf32.limitCharacters = limitCharacters;
+        handler = &utf32.opApply;
+    }
+
+    int opApply(scope ForeachOverUTF32HandleDelegate del) {
+        assert(handler !is null);
+        return handler(del);
+    }
+}
 
 ///
 ForeachOverUTF!Type foreachOverUTF(Type)(scope return Type arg) {
@@ -20,22 +80,24 @@ ForeachOverUTF!Type foreachOverUTF(Type)(scope return Type arg) {
 struct ForeachOverUTF(Type) if (isSomeString!Type) {
     ///
     Type value;
+    ///
+    size_t limitCharacters = size_t.max;
 
     @disable this(this);
 
 @safe nothrow @nogc:
 
     ///
-    void delegate(size_t amountRead, size_t lastIteratedAmount) peekAtReadAmountDelegate;
+    ForeachOverUTF32PeekDelegate peekAtReadAmountDelegate;
 
     ///
     int opApply(scope ForeachOverUTF32HandleDelegate del) scope {
         Type temp = value;
         int result;
 
-        size_t lastIteratedAmount, amountRead;
+        size_t lastIteratedAmount, amountRead, numberOfCharacters;
 
-        while (temp.length > 0 && result == 0) {
+        while (temp.length > 0 && result == 0 && numberOfCharacters < limitCharacters) {
             size_t consumed;
             dchar got;
 
@@ -51,6 +113,7 @@ struct ForeachOverUTF(Type) if (isSomeString!Type) {
 
             result = del(got);
             temp = temp[consumed .. $];
+            numberOfCharacters++;
         }
 
         if (peekAtReadAmountDelegate !is null)
@@ -621,6 +684,124 @@ size_t reEncodeLength(scope const(wchar)[] input) {
 
         assert(reEncodeLength(input) == output.length);
     }
+}
+
+/// Returns: number of code points from start that fulfills the number of characters or 0 if it wasn't completed
+size_t codePointsFromStart(scope const(char)[] input, size_t countCharacters) {
+    size_t ret;
+
+    while (countCharacters > 0) {
+        if (input.length == 0)
+            return 0;
+
+        size_t got = decodeLength(input);
+        ret += got;
+
+        input = input[got .. $];
+        countCharacters--;
+    }
+
+    return ret;
+}
+
+///
+unittest {
+    static immutable Text = "it is bold";
+    assert(codePointsFromStart(Text, 4) == 4);
+}
+
+/// Returns: number of code points from end that fulfills the number of characters or 0 if it wasn't completed
+size_t codePointsFromEnd(scope const(char)[] input, size_t countCharacters) {
+    size_t ret;
+
+    while (countCharacters > 0) {
+        if (input.length == 0)
+            return 0;
+
+        size_t got = decodeLengthFromEnd(input);
+        ret += got;
+
+        input = input[got .. $];
+        countCharacters--;
+    }
+
+    return ret;
+}
+
+///
+unittest {
+    static immutable Text = "it is bold";
+    assert(codePointsFromEnd(Text, 4) == 4);
+}
+
+/// Returns: number of code points from start that fulfills the number of characters or 0 if it wasn't completed
+size_t codePointsFromStart(scope const(wchar)[] input, size_t countCharacters) {
+    size_t ret;
+
+    while (countCharacters > 0) {
+        if (input.length == 0)
+            return 0;
+
+        size_t got = decodeLength(input);
+        ret += got;
+
+        input = input[got .. $];
+        countCharacters--;
+    }
+
+    return ret;
+}
+
+///
+unittest {
+    static immutable Text = "it is bold"w;
+    assert(codePointsFromStart(Text, 4) == 4);
+}
+
+/// Returns: number of code points from end that fulfills the number of characters or 0 if it wasn't completed
+size_t codePointsFromEnd(scope const(wchar)[] input, size_t countCharacters) {
+    size_t ret;
+
+    while (countCharacters > 0) {
+        if (input.length == 0)
+            return 0;
+
+        size_t got = decodeLengthFromEnd(input);
+        ret += got;
+
+        input = input[got .. $];
+        countCharacters--;
+    }
+
+    return ret;
+}
+
+///
+unittest {
+    static immutable Text = "it is bold"w;
+    assert(codePointsFromEnd(Text, 4) == 4);
+}
+
+/// Returns: number of code points from start that fulfills the number of characters or 0 if it wasn't completed
+size_t codePointsFromStart(scope const(dchar)[] input, size_t countCharacters) {
+    return input.length >= countCharacters ? countCharacters : 0;
+}
+
+///
+unittest {
+    static immutable Text = "it is bold"d;
+    assert(codePointsFromStart(Text, 4) == 4);
+}
+
+/// Returns: number of code points from end that fulfills the number of characters or 0 if it wasn't completed
+size_t codePointsFromEnd(scope const(dchar)[] input, size_t countCharacters) {
+    return input.length >= countCharacters ? countCharacters : 0;
+}
+
+///
+unittest {
+    static immutable Text = "it is bold"d;
+    assert(codePointsFromEnd(Text, 4) == 4);
 }
 
 ///

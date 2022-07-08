@@ -10,7 +10,8 @@ import sidero.base.allocators.api;
 @safe nothrow @nogc:
 
 ///
-int icmpUTF32_NFD(scope ForeachOverUTF32Delegate input1, scope ForeachOverUTF32Delegate input2, scope RCAllocator allocator = globalAllocator(), bool turkic = false) {
+int icmpUTF32_NFD(scope ForeachOverUTF32Delegate input1, scope ForeachOverUTF32Delegate input2,
+        scope RCAllocator allocator = globalAllocator(), bool turkic = false) {
     return icmpUTF32_(input1, input2, allocator, turkic, false, false);
 }
 
@@ -33,7 +34,8 @@ int icmpUTF32_NFD(scope dstring input1, scope dstring input2, scope RCAllocator 
 }
 
 ///
-int icmpUTF32_NFC(scope ForeachOverUTF32Delegate input1, scope ForeachOverUTF32Delegate input2, scope RCAllocator allocator = globalAllocator(), bool turkic = false) {
+int icmpUTF32_NFC(scope ForeachOverUTF32Delegate input1, scope ForeachOverUTF32Delegate input2,
+        scope RCAllocator allocator = globalAllocator(), bool turkic = false) {
     return icmpUTF32_(input1, input2, allocator, turkic, false, true);
 }
 
@@ -44,7 +46,8 @@ int icmpUTF32_NFC(scope dstring input1, scope dstring input2, scope RCAllocator 
 }
 
 ///
-int icmpUTF32_NFKD(scope ForeachOverUTF32Delegate input1, scope ForeachOverUTF32Delegate input2, scope RCAllocator allocator = globalAllocator(), bool turkic = false) {
+int icmpUTF32_NFKD(scope ForeachOverUTF32Delegate input1, scope ForeachOverUTF32Delegate input2,
+        scope RCAllocator allocator = globalAllocator(), bool turkic = false) {
     return icmpUTF32_(input1, input2, allocator, turkic, true, false);
 }
 
@@ -55,7 +58,8 @@ int icmpUTF32_NFKD(scope dstring input1, scope dstring input2, scope RCAllocator
 }
 
 ///
-int icmpUTF32_NFKC(scope ForeachOverUTF32Delegate input1, scope ForeachOverUTF32Delegate input2, scope RCAllocator allocator = globalAllocator(), bool turkic = false) {
+int icmpUTF32_NFKC(scope ForeachOverUTF32Delegate input1, scope ForeachOverUTF32Delegate input2,
+        scope RCAllocator allocator = globalAllocator(), bool turkic = false) {
     return icmpUTF32_(input1, input2, allocator, turkic, true, true);
 }
 
@@ -78,8 +82,10 @@ struct CaseAwareComparison {
         dchar[] against;
     }
 
+@safe nothrow @nogc:
+
     ///
-    this(RCAllocator allocator, bool isTurkic) return @trusted {
+    this(scope RCAllocator allocator, bool isTurkic) scope @trusted {
         this.allocator = allocator;
         this.isTurkic = isTurkic;
 
@@ -87,7 +93,7 @@ struct CaseAwareComparison {
         againstBuffer = againstInlineBuffer[];
     }
 
-    ~this() {
+    ~this() scope {
         if (againstBuffer.length > againstInlineBuffer.length)
             allocator.dispose(againstBuffer);
     }
@@ -95,7 +101,12 @@ struct CaseAwareComparison {
     @disable this(this);
 
     ///
-    void setAgainst(scope ForeachOverUTF32Delegate input, bool isCaseSensitive = true, size_t lengthHint = 0) {
+    size_t againstLength() scope {
+        return against.length;
+    }
+
+    ///
+    void setAgainst(scope ForeachOverUTF32Delegate input, bool isCaseSensitive = true) scope {
         this.isCaseSensitive = isCaseSensitive;
 
         void allocateAgainst(size_t length) {
@@ -113,18 +124,25 @@ struct CaseAwareComparison {
         }
 
         if (isCaseSensitive) {
-            size_t inputLength = lengthHint;
+            size_t inputLength;
 
-            if (inputLength == 0) {
-                foreach (c; input)
-                    inputLength++;
+            foreach (c; input) {
+                inputLength += sidero_utf_lut_lengthOfFullyDecomposed(c);
             }
 
             allocateAgainst(inputLength);
 
             size_t soFar;
-            foreach (v; input)
-                against[soFar++] = v;
+            foreach (c; input) {
+                auto map = sidero_utf_lut_getDecompositionMap(c);
+
+                if (map.fullyDecomposed.length == 0)
+                    against[soFar++] = c;
+                else {
+                    against[soFar .. soFar + map.fullyDecomposed.length][] = map.fullyDecomposed[];
+                    soFar += map.fullyDecomposed.length;
+                }
+            }
         } else {
             const inputLength = caseFoldLength(input, isTurkic, false, true);
             allocateAgainst(inputLength);
@@ -143,7 +161,7 @@ struct CaseAwareComparison {
     }
 
     /// If you want to know how much of input was consumed to do the match make your input delegate support getting it (ForeachOverUTF does).
-    int compare(scope ForeachOverUTF32Delegate input) {
+    int compare(scope ForeachOverUTF32Delegate input, bool ignoreLonger = false) scope {
         // to make this as cheap as possible, we MUST NOT CALL caseFoldLength.
         // yes we have to call to get the CCC a lot (potentially)
 
@@ -153,6 +171,9 @@ struct CaseAwareComparison {
         rotate.partialReset;
 
         bool handleRotated(dchar value) @nogc {
+            if (processed >= against.length)
+                return true;
+
             if (against[processed] < value) {
                 ret = 1;
                 processed++;
@@ -169,21 +190,44 @@ struct CaseAwareComparison {
 
         if (isCaseSensitive) {
             foreach (c; input) {
-                rotate.partial(&handleRotated, c);
+                auto map = sidero_utf_lut_getDecompositionMap(c);
+                received += map.fullyDecomposed.length > 0 ? map.fullyDecomposed.length : 1;
+
+                if (received > against.length) {
+                    // we are longer
+                    if (!ignoreLonger)
+                        ret = 1;
+                    break;
+                }
+
+                if (map.fullyDecomposed.length == 0)
+                    rotate.partial(&handleRotated, c);
+                else
+                    rotate.partial(&handleRotated, map.fullyDecomposed);
+
                 if (ret != 0)
                     break;
             }
         } else {
             caseFold((scope const(dchar)[] got...) {
+                size_t todo;
+
+                while(received < against.length && todo < got.length) {
+                    received++;
+                    todo++;
+                }
+
                 received += got.length;
+                if (todo > 0)
+                    rotate.partial(&handleRotated, got[0 .. todo]);
 
                 if (received > against.length) {
                     // we are longer
-                    ret = 1;
+                    if (!ignoreLonger)
+                        ret = 1;
                     return true;
                 }
 
-                rotate.partial(&handleRotated, got);
                 return ret != 0;
             }, input, isTurkic, false, true);
         }
@@ -194,7 +238,6 @@ struct CaseAwareComparison {
         // we are shorter
         if (ret == 0 && received < against.length)
             ret = -1;
-
         return ret;
     }
 }
@@ -234,7 +277,7 @@ int icmpUTF32_(scope ForeachOverUTF32Delegate input1, scope ForeachOverUTF32Dele
 
     //
 
-    Rotate rotate = Rotate(allocator);
+    scope rotate = Rotate(allocator);
     rotate(array1);
     rotate(array2);
     assert(array1.length == array2.length);

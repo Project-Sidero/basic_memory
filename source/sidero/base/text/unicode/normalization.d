@@ -225,11 +225,11 @@ struct Rotate {
 @safe nothrow @nogc:
     @disable this(this);
 
-    this(scope RCAllocator allocator) return @trusted {
+    this(scope RCAllocator allocator) scope @trusted {
         this.allocator = allocator;
     }
 
-    ~this() {
+    ~this() scope {
         if (rotateBuffer.length > rotateInlineBuffer.length)
             allocator.dispose(rotateBuffer);
     }
@@ -329,11 +329,11 @@ struct Rotate {
         }
     }
 
-    void partialReset() {
+    void partialReset() scope {
         rotateBufferUsed = 0;
     }
 
-    bool partialFinish(scope RotatePartialHandlerDelegate handler) {
+    bool partialFinish(scope RotatePartialHandlerDelegate handler) scope @trusted {
         import std.algorithm : sort;
 
         auto rb = rotateBuffer[0 .. rotateBufferUsed];
@@ -348,7 +348,7 @@ struct Rotate {
         return false;
     }
 
-    bool partial(scope RotatePartialHandlerDelegate handler, scope const(dchar)[] array...) @trusted {
+    bool partial(scope RotatePartialHandlerDelegate handler, scope const(dchar)[] array...) scope @trusted {
         if (rotateBuffer.length == 0)
             rotateBuffer = rotateInlineBuffer[];
 

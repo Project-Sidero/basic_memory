@@ -1501,8 +1501,135 @@ nothrow @nogc:
         assert(text.length == text.byUTF32().length);
     }
 
+    ///
+    bool startsWith(scope string input, scope RCAllocator allocator = RCAllocator.init) {
+        return startsWithImpl(input, allocator, true);
+    }
+
+    ///
+    unittest {
+        String_UTF text = String_UTF("hello world!");
+        assert(text.startsWith("hello"));
+        assert(!text.startsWith("world!"));
+        assert(!text.startsWith("Hello"));
+    }
+
+    ///
+    bool startsWith(scope wstring input, scope RCAllocator allocator = RCAllocator.init) {
+        return startsWithImpl(input, allocator, true);
+    }
+
+    ///
+    unittest {
+        String_UTF text = String_UTF("hello world!"w);
+        assert(text.startsWith("hello"w));
+        assert(!text.startsWith("world!"w));
+        assert(!text.startsWith("Hello"w));
+    }
+
+    ///
+    bool startsWith(scope dstring input, scope RCAllocator allocator = RCAllocator.init) {
+        return startsWithImpl(input, allocator, true);
+    }
+
+    ///
+    unittest {
+        String_UTF text = String_UTF("hello world!"d);
+        assert(text.startsWith("hello"d));
+        assert(!text.startsWith("world!"d));
+        assert(!text.startsWith("Hello"d));
+    }
+
+    ///
+    bool ignoreCaseStartsWith(scope string input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) {
+        return startsWithImpl(input, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        String_UTF text = String_UTF("Hello World!");
+        assert(text.ignoreCaseStartsWith("hello"));
+        assert(!text.ignoreCaseStartsWith("world!"));
+    }
+
+    ///
+    bool ignoreCaseStartsWith(scope wstring input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) {
+        return startsWithImpl(input, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        String_UTF text = String_UTF("Hello World!"w);
+        assert(text.ignoreCaseStartsWith("hello"w));
+        assert(!text.ignoreCaseStartsWith("world!"w));
+    }
+
+    ///
+    bool ignoreCaseStartsWith(scope dstring input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) {
+        return startsWithImpl(input, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        String_UTF text = String_UTF("Hello World!"d);
+        assert(text.ignoreCaseStartsWith("hello"d));
+        assert(!text.ignoreCaseStartsWith("world!"d));
+    }
+
+    private bool startsWithImpl(String)(scope String input, scope RCAllocator allocator, bool caseSensitive,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) @trusted {
+        import sidero.base.text.unicode.comparison : CaseAwareComparison;
+
+        allocator = pickAllocator(allocator);
+
+        scope ForeachOverAnyUTF inputOpApply = foreachOverAnyUTF(input);
+        scope comparison = CaseAwareComparison(allocator, language.isTurkic);
+        scope tempUs = this.byUTF32();
+
+        // Most likely we are longer than the input string.
+        // Therefore we must set the input as what to compare against (to try and prevent memory allocations).
+        // We also need to tell the comparator to ignore if we are longer.
+
+        comparison.setAgainst(inputOpApply.handler, caseSensitive);
+        return comparison.compare(&tempUs.opApply, true) == 0;
+    }
+
     version (none) {
         // TODO: startsWith/endsWith/indexOf/lastIndexOf/count/contains
+        bool endsWith(scope string input, scope RCAllocator allocator = RCAllocator.init) {
+            return endsWithImpl(input, allocator, false);
+        }
+
+        bool endsWith(scope wstring input, scope RCAllocator allocator = RCAllocator.init) {
+            return endsWithImpl(input, allocator, false);
+        }
+
+        bool endsWith(scope dstring input, scope RCAllocator allocator = RCAllocator.init) {
+            return endsWithImpl(input, allocator, false);
+        }
+
+        bool ignoreCaseEndsWith(scope string input, scope RCAllocator allocator = RCAllocator.init,
+                UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            return endsWithImpl(input, allocator, true, language);
+        }
+
+        bool ignoreCaseEndsWith(scope wstring input, scope RCAllocator allocator = RCAllocator.init,
+                UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            return endsWithImpl(input, allocator, true, language);
+        }
+
+        bool ignoreCaseEndsWith(scope dstring input, scope RCAllocator allocator = RCAllocator.init,
+                UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            return endsWithImpl(input, allocator, true, language);
+        }
+
+        private bool endsWithImpl(String)(scope String input, scope RCAllocator allocator, bool ignoreCase,
+                UnicodeLanguage language = UnicodeLanguage.Unknown) {
+
+        }
     }
 
     ///
@@ -1731,7 +1858,7 @@ private:
         });
     }
 
-    RCAllocator pickAllocator(RCAllocator given) const @trusted {
+    RCAllocator pickAllocator(scope return RCAllocator given) const @trusted {
         if (!given.isNull)
             return given;
         if (this.lifeTime !is null)
