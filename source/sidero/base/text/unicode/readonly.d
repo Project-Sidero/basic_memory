@@ -880,7 +880,39 @@ nothrow @nogc:
         }
 
         ///
-        int opCmp(Char2)(scope String_UTF!Char2 other) scope {
+        int opCmp(scope String_UTF8 other) scope {
+            return opCmpImplStr(other);
+        }
+
+        ///
+        unittest {
+            assert(String_UTF8("a").opCmp(String_UTF8("z")) < 0);
+            assert(String_UTF8("z").opCmp(String_UTF8("a")) > 0);
+        }
+
+        ///
+        int opCmp(scope String_UTF16 other) scope {
+            return opCmpImplStr(other);
+        }
+
+        ///
+        unittest {
+            assert(String_UTF16("a"w).opCmp(String_UTF16("z"w)) < 0);
+            assert(String_UTF16("z"w).opCmp(String_UTF16("a"w)) > 0);
+        }
+
+        ///
+        int opCmp(scope String_UTF32 other) scope {
+            return opCmpImplStr(other);
+        }
+
+        ///
+        unittest {
+            assert(String_UTF32("a"d).opCmp(String_UTF32("z"d)) < 0);
+            assert(String_UTF32("z"d).opCmp(String_UTF32("a"d)) > 0);
+        }
+
+        private int opCmpImplStr(Char2)(scope String_UTF!Char2 other) scope {
             return other.literalEncoding.handle(() { auto actual = cast(string)other.literal; return opCmp(actual); }, () {
                 auto actual = cast(wstring)other.literal;
                 return opCmp(actual);
@@ -914,8 +946,27 @@ nothrow @nogc:
         }
 
         ///
-        bool ignoreCaseEquals(Char2)(scope String_UTF!Char2 other, scope RCAllocator allocator = RCAllocator.init,
+        bool ignoreCaseEquals(scope String_UTF8 other, scope RCAllocator allocator = RCAllocator.init,
                 UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return ignoreCaseEqualsImpl(other, allocator, language);
+        }
+
+        ///
+        bool ignoreCaseEquals(scope String_UTF16 other, scope RCAllocator allocator = RCAllocator.init,
+                UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return ignoreCaseEqualsImpl(other, allocator, language);
+        }
+
+        ///
+        bool ignoreCaseEquals(scope String_UTF32 other, scope RCAllocator allocator = RCAllocator.init,
+                UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return ignoreCaseEqualsImpl(other, allocator, language);
+        }
+
+        ///
+        private bool ignoreCaseEqualsImpl(Char2)(scope String_UTF!Char2 other,
+                scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+
             return other.literalEncoding.handle(() {
                 auto actual = cast(string)other.literal;
                 return ignoreCaseCompareImpl(actual, allocator, language.isTurkic);
@@ -1502,7 +1553,7 @@ nothrow @nogc:
     }
 
     ///
-    bool startsWith(scope string input, scope RCAllocator allocator = RCAllocator.init) {
+    bool startsWith(scope string input, scope RCAllocator allocator = RCAllocator.init) scope {
         return startsWithImpl(input, allocator, true);
     }
 
@@ -1515,7 +1566,7 @@ nothrow @nogc:
     }
 
     ///
-    bool startsWith(scope wstring input, scope RCAllocator allocator = RCAllocator.init) {
+    bool startsWith(scope wstring input, scope RCAllocator allocator = RCAllocator.init) scope {
         return startsWithImpl(input, allocator, true);
     }
 
@@ -1528,7 +1579,7 @@ nothrow @nogc:
     }
 
     ///
-    bool startsWith(scope dstring input, scope RCAllocator allocator = RCAllocator.init) {
+    bool startsWith(scope dstring input, scope RCAllocator allocator = RCAllocator.init) scope {
         return startsWithImpl(input, allocator, true);
     }
 
@@ -1542,7 +1593,7 @@ nothrow @nogc:
 
     ///
     bool ignoreCaseStartsWith(scope string input, scope RCAllocator allocator = RCAllocator.init,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
         return startsWithImpl(input, allocator, false, language);
     }
 
@@ -1555,7 +1606,7 @@ nothrow @nogc:
 
     ///
     bool ignoreCaseStartsWith(scope wstring input, scope RCAllocator allocator = RCAllocator.init,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
         return startsWithImpl(input, allocator, false, language);
     }
 
@@ -1568,7 +1619,7 @@ nothrow @nogc:
 
     ///
     bool ignoreCaseStartsWith(scope dstring input, scope RCAllocator allocator = RCAllocator.init,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
         return startsWithImpl(input, allocator, false, language);
     }
 
@@ -1580,7 +1631,7 @@ nothrow @nogc:
     }
 
     private bool startsWithImpl(String)(scope String input, scope RCAllocator allocator, bool caseSensitive,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) @trusted {
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope @trusted {
         import sidero.base.text.unicode.comparison : CaseAwareComparison;
 
         allocator = pickAllocator(allocator);
@@ -1597,39 +1648,305 @@ nothrow @nogc:
         return comparison.compare(&tempUs.opApply, true) == 0;
     }
 
+    ///
+    bool startsWith(scope String_UTF8 other, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return startsWithImplStr(other, allocator, true, language);
+    }
+
+    ///
+    unittest {
+        String_UTF text = String_UTF("hello world!");
+        assert(text.startsWith("hello"));
+        assert(!text.startsWith("world!"));
+    }
+
+    ///
+    bool startsWith(scope String_UTF16 other, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return startsWithImplStr(other, allocator, true, language);
+    }
+
+    ///
+    unittest {
+        String_UTF text = String_UTF("hello world!"w);
+        assert(text.startsWith("hello"w));
+        assert(!text.startsWith("world!"w));
+    }
+
+    ///
+    bool startsWith(scope String_UTF32 other, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return startsWithImplStr(other, allocator, true, language);
+    }
+
+    ///
+    unittest {
+        String_UTF text = String_UTF("hello world!"d);
+        assert(text.startsWith("hello"d));
+        assert(!text.startsWith("world!"d));
+    }
+
+    ///
+    bool ignoreCaseStartsWith(scope String_UTF8 other, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return startsWithImplStr(other, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        String_UTF text = String_UTF("Hello World!");
+        assert(text.ignoreCaseStartsWith("hello"));
+        assert(!text.ignoreCaseStartsWith("world!"));
+    }
+
+    ///
+    bool ignoreCaseStartsWith(scope String_UTF16 other, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return startsWithImplStr(other, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        String_UTF text = String_UTF("Hello World!"w);
+        assert(text.ignoreCaseStartsWith("hello"w));
+        assert(!text.ignoreCaseStartsWith("world!"w));
+    }
+
+    ///
+    bool ignoreCaseStartsWith(scope String_UTF32 other, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return startsWithImplStr(other, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        String_UTF text = String_UTF("Hello World!"d);
+        assert(text.ignoreCaseStartsWith("hello"d));
+        assert(!text.ignoreCaseStartsWith("world!"d));
+    }
+
+    private bool startsWithImplStr(Char2)(scope String_UTF!Char2 other, scope RCAllocator allocator = RCAllocator.init,
+            bool caseSensitive = true, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+
+        return other.literalEncoding.handle(() {
+            auto actual = cast(string)other.literal;
+            return startsWithImpl(actual, allocator, caseSensitive, language);
+        }, () {
+            auto actual = cast(wstring)other.literal;
+            return startsWithImpl(actual, allocator, caseSensitive, language);
+        }, () {
+            auto actual = cast(dstring)other.literal;
+            return startsWithImpl(actual, allocator, caseSensitive, language);
+        });
+    }
+
+    ///
+    bool endsWith(scope string input, scope RCAllocator allocator = RCAllocator.init) scope {
+        return endsWithImpl(input, allocator, true);
+    }
+
+    ///
+    unittest {
+        String_UTF text = String_UTF("hello world!");
+        assert(text.endsWith("world!"));
+        assert(!text.endsWith("hello"));
+        assert(!text.endsWith("Hello"));
+    }
+
+    ///
+    bool endsWith(scope wstring input, scope RCAllocator allocator = RCAllocator.init) scope {
+        return endsWithImpl(input, allocator, true);
+    }
+
+    ///
+    unittest {
+        String_UTF text = String_UTF("hello world!"w);
+        assert(text.endsWith("world!"w));
+        assert(!text.endsWith("hello"w));
+        assert(!text.endsWith("Hello"w));
+    }
+
+    ///
+    bool endsWith(scope dstring input, scope RCAllocator allocator = RCAllocator.init) scope {
+        return endsWithImpl(input, allocator, true);
+    }
+
+    ///
+    unittest {
+        String_UTF text = String_UTF("hello world!"d);
+        assert(text.endsWith("world!"d));
+        assert(!text.endsWith("hello"d));
+        assert(!text.endsWith("Hello"d));
+    }
+
+    ///
+    bool ignoreCaseEndsWith(scope string input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return endsWithImpl(input, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        String_UTF text = String_UTF("Hello World!");
+        assert(text.ignoreCaseEndsWith("world!"));
+        assert(!text.ignoreCaseEndsWith("hello"));
+    }
+
+    ///
+    bool ignoreCaseEndsWith(scope wstring input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return endsWithImpl(input, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        String_UTF text = String_UTF("Hello World!"w);
+        assert(text.ignoreCaseEndsWith("world!"w));
+        assert(!text.ignoreCaseEndsWith("hello"w));
+    }
+
+    ///
+    bool ignoreCaseEndsWith(scope dstring input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return endsWithImpl(input, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        String_UTF text = String_UTF("Hello World!"d);
+        assert(text.ignoreCaseEndsWith("world!"d));
+        assert(!text.ignoreCaseEndsWith("hello"d));
+    }
+
+    private bool endsWithImpl(String)(scope String input, scope RCAllocator allocator, bool caseSensitive,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope @trusted {
+        import sidero.base.text.unicode.comparison : CaseAwareComparison;
+
+        allocator = pickAllocator(allocator);
+
+        scope ForeachOverAnyUTF inputOpApply = foreachOverAnyUTF(input);
+        scope comparison = CaseAwareComparison(allocator, language.isTurkic);
+
+        // Most likely we are longer than the input string.
+        // Therefore we must set the input as what to compare against (to try and prevent memory allocations).
+        // We also need to tell the comparator to ignore if we are longer.
+
+        comparison.setAgainst(inputOpApply.handler, caseSensitive);
+
+        // it is not enough to compare, we need to set an offset for us to make it match up to the end.
+        const numberOfCharactersNeeded = comparison.againstLength();
+        const toConsumeLength = literalEncoding.handle(() {
+            auto actual = cast(string)this.literal;
+            return codePointsFromEnd(actual, numberOfCharactersNeeded);
+        }, () { auto actual = cast(wstring)this.literal; return codePointsFromEnd(actual, numberOfCharactersNeeded); }, () {
+            auto actual = cast(dstring)this.literal;
+            return codePointsFromEnd(actual, numberOfCharactersNeeded);
+        });
+
+        if (toConsumeLength == 0) {
+            // we are smaller or equal in size
+            return toConsumeLength == input.length;
+        }
+
+        const offsetForUs = this.length - toConsumeLength;
+        scope tempUs = this[offsetForUs .. offsetForUs + toConsumeLength].byUTF32();
+        return comparison.compare(&tempUs.opApply, true) == 0;
+    }
+
+    ///
+    bool endsWith(scope String_UTF8 other, scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage
+            .Unknown) scope {
+        return endsWithImplStr(other, allocator, true, language);
+    }
+
+    ///
+    unittest {
+        String_UTF text = String_UTF("hello world!");
+        assert(text.endsWith("world!"));
+        assert(!text.endsWith("hello"));
+    }
+
+    ///
+    bool endsWith(scope String_UTF16 other, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return endsWithImplStr(other, allocator, true, language);
+    }
+
+    ///
+    unittest {
+        String_UTF text = String_UTF("hello world!"w);
+        assert(text.endsWith("world!"w));
+        assert(!text.endsWith("hello"w));
+    }
+
+    ///
+    bool endsWith(scope String_UTF32 other, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return endsWithImplStr(other, allocator, true, language);
+    }
+
+    ///
+    unittest {
+        String_UTF text = String_UTF("hello world!"d);
+        assert(text.endsWith("world!"d));
+        assert(!text.endsWith("hello"d));
+    }
+
+    ///
+    bool ignoreCaseEndsWith(scope String_UTF8 other, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return endsWithImplStr(other, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        String_UTF text = String_UTF("Hello World!");
+        assert(text.ignoreCaseEndsWith("world!"));
+        assert(!text.ignoreCaseEndsWith("hello"));
+    }
+
+    ///
+    bool ignoreCaseEndsWith(scope String_UTF16 other, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return endsWithImplStr(other, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        String_UTF text = String_UTF("Hello World!"w);
+        assert(text.ignoreCaseEndsWith("world!"w));
+        assert(!text.ignoreCaseEndsWith("hello"w));
+    }
+
+    ///
+    bool ignoreCaseEndsWith(scope String_UTF32 other, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return endsWithImplStr(other, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        String_UTF text = String_UTF("Hello World!"d);
+        assert(text.ignoreCaseEndsWith("world!"d));
+        assert(!text.ignoreCaseEndsWith("hello"d));
+    }
+
+    private bool endsWithImplStr(Char2)(scope String_UTF!Char2 other, scope RCAllocator allocator = RCAllocator.init,
+            bool caseSensitive = true, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+
+        return other.literalEncoding.handle(() {
+            auto actual = cast(string)other.literal;
+            return endsWithImpl(actual, allocator, caseSensitive, language);
+        }, () { auto actual = cast(wstring)other.literal; return endsWithImpl(actual, allocator, caseSensitive, language); }, () {
+            auto actual = cast(dstring)other.literal;
+            return endsWithImpl(actual, allocator, caseSensitive, language);
+        });
+    }
+
     version (none) {
-        // TODO: startsWith/endsWith/indexOf/lastIndexOf/count/contains
-        bool endsWith(scope string input, scope RCAllocator allocator = RCAllocator.init) {
-            return endsWithImpl(input, allocator, false);
-        }
+        // TODO: indexOf/lastIndexOf/count/contains
 
-        bool endsWith(scope wstring input, scope RCAllocator allocator = RCAllocator.init) {
-            return endsWithImpl(input, allocator, false);
-        }
-
-        bool endsWith(scope dstring input, scope RCAllocator allocator = RCAllocator.init) {
-            return endsWithImpl(input, allocator, false);
-        }
-
-        bool ignoreCaseEndsWith(scope string input, scope RCAllocator allocator = RCAllocator.init,
-                UnicodeLanguage language = UnicodeLanguage.Unknown) {
-            return endsWithImpl(input, allocator, true, language);
-        }
-
-        bool ignoreCaseEndsWith(scope wstring input, scope RCAllocator allocator = RCAllocator.init,
-                UnicodeLanguage language = UnicodeLanguage.Unknown) {
-            return endsWithImpl(input, allocator, true, language);
-        }
-
-        bool ignoreCaseEndsWith(scope dstring input, scope RCAllocator allocator = RCAllocator.init,
-                UnicodeLanguage language = UnicodeLanguage.Unknown) {
-            return endsWithImpl(input, allocator, true, language);
-        }
-
-        private bool endsWithImpl(String)(scope String input, scope RCAllocator allocator, bool ignoreCase,
-                UnicodeLanguage language = UnicodeLanguage.Unknown) {
-
-        }
     }
 
     ///
@@ -1648,6 +1965,7 @@ nothrow @nogc:
         assert(String_UTF(cast(LiteralType)"  \t abc\t\r\n \0").strip == cast(LiteralType)"abc");
     }
 
+    ///
     String_UTF stripLeft() scope return {
         literalEncoding.handle(() @trusted {
             auto actual = cast(string)this.literal;
@@ -1703,6 +2021,7 @@ nothrow @nogc:
         assert(String_UTF(cast(LiteralType)"  \t abc\t\r\n \0").stripLeft == cast(LiteralType)"abc\t\r\n \0");
     }
 
+    ///
     String_UTF stripRight() scope return {
         literalEncoding.handle(() @trusted {
             auto actual = cast(string)this.literal[0 .. this.length];
