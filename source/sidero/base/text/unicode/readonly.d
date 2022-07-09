@@ -2148,8 +2148,574 @@ nothrow @nogc:
         });
     }
 
-    version (none) {
-        // TODO: indexOf/lastIndexOf/contains
+    ///
+    bool contains(scope string input, scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return containsImpl(input, allocator, true, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrats its alive").contains("a"));
+        assert(!String_UTF(cast(LiteralType)"congrats its alive").contains("b"));
+    }
+
+    ///
+    bool contains(scope wstring input, scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return containsImpl(input, allocator, true, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrats its alive").contains("a"w));
+        assert(!String_UTF(cast(LiteralType)"congrats its alive").contains("b"w));
+    }
+
+    ///
+    bool contains(scope dstring input, scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return containsImpl(input, allocator, true, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrats its alive").contains("a"d));
+        assert(!String_UTF(cast(LiteralType)"congrats its alive").contains("b"d));
+    }
+
+    ///
+    bool ignoreCaseContains(scope string input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return containsImpl(input, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrAts its alive").ignoreCaseContains("a"));
+        assert(!String_UTF(cast(LiteralType)"congrats its alive").ignoreCaseContains("b"));
+    }
+
+    ///
+    bool ignoreCaseContains(scope wstring input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return containsImpl(input, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrAts its alive").ignoreCaseContains("a"w));
+        assert(!String_UTF(cast(LiteralType)"congrats its alive").ignoreCaseContains("b"w));
+    }
+
+    ///
+    bool ignoreCaseContains(scope dstring input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return containsImpl(input, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrAts its alive").ignoreCaseContains("a"d));
+        assert(!String_UTF(cast(LiteralType)"congrats its alive").ignoreCaseContains("b"d));
+    }
+
+    private bool containsImpl(String)(scope String input, scope RCAllocator allocator, bool caseSensitive, UnicodeLanguage language) scope @trusted {
+        import sidero.base.text.unicode.comparison : CaseAwareComparison;
+
+        allocator = pickAllocator(allocator);
+
+        scope ForeachOverAnyUTF inputOpApply = foreachOverAnyUTF(input);
+        scope comparison = CaseAwareComparison(allocator, language.isTurkic);
+        comparison.setAgainst(inputOpApply.handler, caseSensitive);
+
+        String_UTF us = this;
+        const lengthOfOther = comparison.againstLength();
+
+        while (us.length > 0) {
+            size_t toIncrease = 1;
+            scope tempUs = us.byUTF32();
+
+            if (comparison.compare(&tempUs.opApply, true) == 0) {
+                return true;
+            }
+
+            foreach (i; 0 .. toIncrease) {
+                const size_t characterLength = us.literalEncoding.handle(() {
+                    return decodeLength(cast(string)us.literal);
+                }, () { return decodeLength(cast(wstring)us.literal); }, () {
+                    return decodeLength(cast(dstring)us.literal);
+                });
+
+                us = us[characterLength .. $];
+            }
+        }
+
+        return false;
+    }
+
+    ///
+    bool contains(scope String_UTF8 input, scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage
+            .Unknown) scope {
+        return containsImplStr(input, allocator, true, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrats its alive").contains(String_UTF8("a")));
+        assert(!String_UTF(cast(LiteralType)"congrats its alive").contains(String_UTF8("b")));
+    }
+
+    ///
+    bool contains(scope String_UTF16 input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return containsImplStr(input, allocator, true, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrats its alive").contains(String_UTF16("a")));
+        assert(!String_UTF(cast(LiteralType)"congrats its alive").contains(String_UTF16("b")));
+    }
+
+    ///
+    bool contains(scope String_UTF32 input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return containsImplStr(input, allocator, true, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrats its alive").contains(String_UTF32("a")));
+        assert(!String_UTF(cast(LiteralType)"congrats its alive").contains(String_UTF32("b")));
+    }
+
+    ///
+    bool ignoreCaseContains(scope String_UTF8 input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return containsImplStr(input, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrAts its alive").ignoreCaseContains(String_UTF8("a")));
+        assert(!String_UTF(cast(LiteralType)"congrats its alive").ignoreCaseContains(String_UTF8("b")));
+    }
+
+    ///
+    bool ignoreCaseContains(scope String_UTF16 input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return containsImplStr(input, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrAts its alive").ignoreCaseContains(String_UTF16("a")));
+        assert(!String_UTF(cast(LiteralType)"congrats its alive").ignoreCaseContains(String_UTF16("b")));
+    }
+
+    ///
+    bool ignoreCaseContains(scope String_UTF32 input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return containsImplStr(input, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrAts its alive").ignoreCaseContains(String_UTF32("a")));
+        assert(!String_UTF(cast(LiteralType)"congrats its alive").ignoreCaseContains(String_UTF32("b")));
+    }
+
+    private bool containsImplStr(String)(scope String other, scope RCAllocator allocator, bool caseSensitive, UnicodeLanguage language) scope {
+        return other.literalEncoding.handle(() {
+            auto actual = cast(string)other.literal;
+            return containsImpl(actual, allocator, caseSensitive, language);
+        }, () { auto actual = cast(wstring)other.literal; return containsImpl(actual, allocator, caseSensitive, language); }, () {
+            auto actual = cast(dstring)other.literal;
+            return containsImpl(actual, allocator, caseSensitive, language);
+        });
+    }
+
+    ///
+    ptrdiff_t indexOf(scope string input, scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage
+            .Unknown) scope {
+        return indexOfImpl(input, allocator, true, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrats its alive").indexOf("a") == 5);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").indexOf("b") == -1);
+    }
+
+    ///
+    ptrdiff_t indexOf(scope wstring input, scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage
+            .Unknown) scope {
+        return indexOfImpl(input, allocator, true, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrats its alive").indexOf("a"w) == 5);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").indexOf("b"w) == -1);
+    }
+
+    ///
+    ptrdiff_t indexOf(scope dstring input, scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage
+            .Unknown) scope {
+        return indexOfImpl(input, allocator, true, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrats its alive").indexOf("a"d) == 5);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").indexOf("b"d) == -1);
+    }
+
+    ///
+    ptrdiff_t ignoreCaseIndexOf(scope string input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return indexOfImpl(input, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrAts its alive").ignoreCaseIndexOf("a") == 5);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").ignoreCaseIndexOf("b") == -1);
+    }
+
+    ///
+    ptrdiff_t ignoreCaseIndexOf(scope wstring input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return indexOfImpl(input, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrAts its alive").ignoreCaseIndexOf("a"w) == 5);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").ignoreCaseIndexOf("b"w) == -1);
+    }
+
+    ///
+    ptrdiff_t ignoreCaseIndexOf(scope dstring input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return indexOfImpl(input, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrAts its alive").ignoreCaseIndexOf("a"d) == 5);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").ignoreCaseIndexOf("b"d) == -1);
+    }
+
+    private ptrdiff_t indexOfImpl(String)(scope String input, scope RCAllocator allocator, bool caseSensitive, UnicodeLanguage language) scope @trusted {
+        import sidero.base.text.unicode.comparison : CaseAwareComparison;
+
+        allocator = pickAllocator(allocator);
+
+        scope ForeachOverAnyUTF inputOpApply = foreachOverAnyUTF(input);
+        scope comparison = CaseAwareComparison(allocator, language.isTurkic);
+        comparison.setAgainst(inputOpApply.handler, caseSensitive);
+
+        ptrdiff_t ret;
+        String_UTF us = this;
+        const lengthOfOther = comparison.againstLength();
+
+        while (us.length > 0) {
+            size_t toIncrease = 1;
+            scope tempUs = us.byUTF32();
+
+            if (comparison.compare(&tempUs.opApply, true) == 0) {
+                return ret;
+            }
+
+            foreach (i; 0 .. toIncrease) {
+                const size_t characterLength = us.literalEncoding.handle(() {
+                    return decodeLength(cast(string)us.literal);
+                }, () { return decodeLength(cast(wstring)us.literal); }, () {
+                    return decodeLength(cast(dstring)us.literal);
+                });
+
+                us = us[characterLength .. $];
+                ret += characterLength;
+            }
+        }
+
+        return -1;
+    }
+
+    ///
+    ptrdiff_t indexOf(scope String_UTF8 input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return indexOfImplStr(input, allocator, true, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrats its alive").indexOf(String_UTF8("a")) == 5);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").indexOf(String_UTF8("b")) == -1);
+    }
+
+    ///
+    ptrdiff_t indexOf(scope String_UTF16 input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return indexOfImplStr(input, allocator, true, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrats its alive").indexOf(String_UTF16("a")) == 5);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").indexOf(String_UTF16("b")) == -1);
+    }
+
+    ///
+    ptrdiff_t indexOf(scope String_UTF32 input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return indexOfImplStr(input, allocator, true, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrats its alive").indexOf(String_UTF32("a")) == 5);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").indexOf(String_UTF32("b")) == -1);
+    }
+
+    ///
+    ptrdiff_t ignoreCaseIndexOf(scope String_UTF8 input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return indexOfImplStr(input, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrAts its alive").ignoreCaseIndexOf(String_UTF8("a")) == 5);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").ignoreCaseIndexOf(String_UTF8("b")) == -1);
+    }
+
+    ///
+    ptrdiff_t ignoreCaseIndexOf(scope String_UTF16 input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return indexOfImplStr(input, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrAts its alive").ignoreCaseIndexOf(String_UTF16("a")) == 5);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").ignoreCaseIndexOf(String_UTF16("b")) == -1);
+    }
+
+    ///
+    ptrdiff_t ignoreCaseIndexOf(scope String_UTF32 input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return indexOfImplStr(input, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrAts its alive").ignoreCaseIndexOf(String_UTF32("a")) == 5);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").ignoreCaseIndexOf(String_UTF32("b")) == -1);
+    }
+
+    private ptrdiff_t indexOfImplStr(String)(scope String other, scope RCAllocator allocator, bool caseSensitive, UnicodeLanguage language) scope {
+        return other.literalEncoding.handle(() {
+            auto actual = cast(string)other.literal;
+            return indexOfImpl(actual, allocator, caseSensitive, language);
+        }, () { auto actual = cast(wstring)other.literal; return indexOfImpl(actual, allocator, caseSensitive, language); }, () {
+            auto actual = cast(dstring)other.literal;
+            return indexOfImpl(actual, allocator, caseSensitive, language);
+        });
+    }
+
+    ///
+    ptrdiff_t lastIndexOf(scope string input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return lastIndexOfImpl(input, allocator, true, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrats its alive").lastIndexOf("a") == 13);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").lastIndexOf("b") == -1);
+    }
+
+    ///
+    ptrdiff_t lastIndexOf(scope wstring input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return lastIndexOfImpl(input, allocator, true, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrats its alive").lastIndexOf("a"w) == 13);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").lastIndexOf("b"w) == -1);
+    }
+
+    ///
+    ptrdiff_t lastIndexOf(scope dstring input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return lastIndexOfImpl(input, allocator, true, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrats its alive").lastIndexOf("a"d) == 13);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").lastIndexOf("b"d) == -1);
+    }
+
+    ///
+    ptrdiff_t ignoreCaseLastIndexOf(scope string input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return lastIndexOfImpl(input, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrAts its alive").ignoreCaseLastIndexOf("a") == 13);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").ignoreCaseLastIndexOf("b") == -1);
+    }
+
+    ///
+    ptrdiff_t ignoreCaseLastIndexOf(scope wstring input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return lastIndexOfImpl(input, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrAts its alive").ignoreCaseLastIndexOf("a"w) == 13);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").ignoreCaseLastIndexOf("b"w) == -1);
+    }
+
+    ///
+    ptrdiff_t ignoreCaseLastIndexOf(scope dstring input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return lastIndexOfImpl(input, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrAts its alive").ignoreCaseLastIndexOf("a"d) == 13);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").ignoreCaseLastIndexOf("b"d) == -1);
+    }
+
+    private ptrdiff_t lastIndexOfImpl(String)(scope String input, scope RCAllocator allocator, bool caseSensitive, UnicodeLanguage language) scope @trusted {
+        import sidero.base.text.unicode.comparison : CaseAwareComparison;
+
+        allocator = pickAllocator(allocator);
+
+        scope ForeachOverAnyUTF inputOpApply = foreachOverAnyUTF(input);
+        scope comparison = CaseAwareComparison(allocator, language.isTurkic);
+        comparison.setAgainst(inputOpApply.handler, caseSensitive);
+
+        ptrdiff_t ret = -1, soFar;
+        String_UTF us = this;
+        const lengthOfOther = comparison.againstLength();
+
+        while (us.length > 0) {
+            size_t toIncrease = 1;
+            scope tempUs = us.byUTF32();
+
+            if (comparison.compare(&tempUs.opApply, true) == 0) {
+                ret = soFar;
+                toIncrease = lengthOfOther;
+            }
+
+            foreach (i; 0 .. toIncrease) {
+                const size_t characterLength = us.literalEncoding.handle(() {
+                    return decodeLength(cast(string)us.literal);
+                }, () { return decodeLength(cast(wstring)us.literal); }, () {
+                    return decodeLength(cast(dstring)us.literal);
+                });
+
+                us = us[characterLength .. $];
+                soFar += characterLength;
+            }
+        }
+
+        return ret;
+    }
+
+    ///
+    ptrdiff_t lastIndexOf(scope String_UTF8 input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return lastIndexOfImplStr(input, allocator, true, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrats its alive").lastIndexOf(String_UTF8("a")) == 13);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").lastIndexOf(String_UTF8("b")) == -1);
+    }
+
+    ///
+    ptrdiff_t lastIndexOf(scope String_UTF16 input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return lastIndexOfImplStr(input, allocator, true, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrats its alive").lastIndexOf(String_UTF16("a")) == 13);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").lastIndexOf(String_UTF16("b")) == -1);
+    }
+
+    ///
+    ptrdiff_t lastIndexOf(scope String_UTF32 input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return lastIndexOfImplStr(input, allocator, true, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrats its alive").lastIndexOf(String_UTF32("a")) == 13);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").lastIndexOf(String_UTF32("b")) == -1);
+    }
+
+    ///
+    ptrdiff_t ignoreCaseLastIndexOf(scope String_UTF8 input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return lastIndexOfImplStr(input, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrAts its alive").ignoreCaseLastIndexOf(String_UTF8("a")) == 13);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").ignoreCaseLastIndexOf(String_UTF8("b")) == -1);
+    }
+
+    ///
+    ptrdiff_t ignoreCaseLastIndexOf(scope String_UTF16 input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return lastIndexOfImplStr(input, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrAts its alive").ignoreCaseLastIndexOf(String_UTF16("a")) == 13);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").ignoreCaseLastIndexOf(String_UTF16("b")) == -1);
+    }
+
+    ///
+    ptrdiff_t ignoreCaseLastIndexOf(scope String_UTF32 input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return lastIndexOfImplStr(input, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrAts its alive").ignoreCaseLastIndexOf(String_UTF32("a")) == 13);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").ignoreCaseLastIndexOf(String_UTF32("b")) == -1);
+    }
+
+    private ptrdiff_t lastIndexOfImplStr(String)(scope String other, scope RCAllocator allocator, bool caseSensitive,
+            UnicodeLanguage language) scope {
+        return other.literalEncoding.handle(() {
+            auto actual = cast(string)other.literal;
+            return lastIndexOfImpl(actual, allocator, caseSensitive, language);
+        }, () {
+            auto actual = cast(wstring)other.literal;
+            return lastIndexOfImpl(actual, allocator, caseSensitive, language);
+        }, () {
+            auto actual = cast(dstring)other.literal;
+            return lastIndexOfImpl(actual, allocator, caseSensitive, language);
+        });
     }
 
     ///
