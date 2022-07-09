@@ -396,7 +396,7 @@ nothrow @nogc:
 
         private void initForLiteral(T, U)(scope return T literal, scope return RCAllocator allocator, scope return U toDeallocate) {
             if (literal.length > 0 || (toDeallocate.length > 0 && !allocator.isNull)) {
-                version(D_BetterC) {
+                version (D_BetterC) {
                 } else {
                     if (__ctfe && literal[$ - 1] != '\0') {
                         static T justDoIt(T input) {
@@ -530,9 +530,7 @@ nothrow @nogc:
     }
 
     ///
-    alias opDollar = length;
-
-    /**
+    alias opDollar = length; /**
         The length of the string in its native encoding.
 
         Removes null terminator at the end if it has one.
@@ -634,7 +632,7 @@ nothrow @nogc:
         zliteral[$ - 1] = '\0';
 
         void copy(Source)(scope Source source) {
-            foreach(i, Char c; source)
+            foreach (i, Char c; source)
                 zliteral[i] = c;
         }
 
@@ -1270,7 +1268,7 @@ nothrow @nogc:
         const needToUseOtherBuffer = !canRefill && this.iterator.forwardItems.length == 0 && this.iterator.backwardItems.length > 0;
 
         void copy(Destination, Source)(scope Destination destination, scope Source source) {
-            foreach(i, c; source)
+            foreach (i, c; source)
                 destination[i] = c;
         }
 
@@ -1382,7 +1380,7 @@ nothrow @nogc:
         const needToUseOtherBuffer = !canRefill && this.iterator.forwardItems.length > 0 && needRefill;
 
         void copy(Destination, Source)(scope Destination destination, scope Source source) {
-            foreach(i, c; source)
+            foreach (i, c; source)
                 destination[i] = c;
         }
 
@@ -1403,7 +1401,7 @@ nothrow @nogc:
                     if (canDo > actual.length)
                         canDo = actual.length;
 
-                    copy(charBuffer[0 .. canDo], actual[$-canDo .. $]);
+                    copy(charBuffer[0 .. canDo], actual[$ - canDo .. $]);
 
                     actual = actual[0 .. $ - canDo];
                     amountFilled = canDo;
@@ -1437,7 +1435,7 @@ nothrow @nogc:
                     if (canDo > actual.length)
                         canDo = actual.length;
 
-                    copy(charBuffer[0 .. canDo], actual[$-canDo .. $]);
+                    copy(charBuffer[0 .. canDo], actual[$ - canDo .. $]);
 
                     actual = actual[0 .. $ - canDo];
                     amountFilled = canDo;
@@ -1467,7 +1465,7 @@ nothrow @nogc:
                     if (canDo > actual.length)
                         canDo = actual.length;
 
-                    copy(charBuffer[0 .. canDo], actual[$-canDo .. $]);
+                    copy(charBuffer[0 .. canDo], actual[$ - canDo .. $]);
 
                     actual = actual[0 .. $ - canDo];
                     amountFilled = canDo;
@@ -1962,9 +1960,196 @@ nothrow @nogc:
         });
     }
 
-    version (none) {
-        // TODO: indexOf/lastIndexOf/count/contains
+    ///
+    size_t count(scope string input, scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return countImpl(input, allocator, true, language);
+    }
 
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrats its alive").count("a") == 2);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").count("b") == 0);
+    }
+
+    ///
+    size_t count(scope wstring input, scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return countImpl(input, allocator, true, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrats its alive").count("a"w) == 2);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").count("b"w) == 0);
+    }
+
+    ///
+    size_t count(scope dstring input, scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return countImpl(input, allocator, true, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrats its alive").count("a"d) == 2);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").count("b"d) == 0);
+    }
+
+    ///
+    size_t ignoreCaseCount(scope string input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return countImpl(input, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrAts its alive").ignoreCaseCount("a") == 2);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").ignoreCaseCount("b") == 0);
+    }
+
+    ///
+    size_t ignoreCaseCount(scope wstring input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return countImpl(input, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrAts its alive").ignoreCaseCount("a"w) == 2);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").ignoreCaseCount("b"w) == 0);
+    }
+
+    ///
+    size_t ignoreCaseCount(scope dstring input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return countImpl(input, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrAts its alive").ignoreCaseCount("a"d) == 2);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").ignoreCaseCount("b"d) == 0);
+    }
+
+    private size_t countImpl(String)(scope String input, scope RCAllocator allocator, bool caseSensitive, UnicodeLanguage language) scope @trusted {
+        import sidero.base.text.unicode.comparison : CaseAwareComparison;
+
+        allocator = pickAllocator(allocator);
+
+        scope ForeachOverAnyUTF inputOpApply = foreachOverAnyUTF(input);
+        scope comparison = CaseAwareComparison(allocator, language.isTurkic);
+        comparison.setAgainst(inputOpApply.handler, caseSensitive);
+
+        String_UTF us = this;
+        size_t total;
+        const lengthOfOther = comparison.againstLength();
+
+        while (us.length > 0) {
+            size_t toIncrease = 1;
+            scope tempUs = us.byUTF32();
+
+            if (comparison.compare(&tempUs.opApply, true) == 0) {
+                // GOTCHA
+                toIncrease = lengthOfOther;
+                total++;
+            }
+
+            foreach (i; 0 .. toIncrease) {
+                const size_t characterLength = us.literalEncoding.handle(() {
+                    return decodeLength(cast(string)us.literal);
+                }, () { return decodeLength(cast(wstring)us.literal); }, () {
+                    return decodeLength(cast(dstring)us.literal);
+                });
+
+                us = us[characterLength .. $];
+            }
+        }
+
+        return total;
+    }
+
+    ///
+    size_t count(scope String_UTF8 input, scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage
+            .Unknown) scope {
+        return countImplStr(input, allocator, true, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrats its alive").count(String_UTF8("a")) == 2);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").count(String_UTF8("b")) == 0);
+    }
+
+    ///
+    size_t count(scope String_UTF16 input, scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage
+            .Unknown) scope {
+        return countImplStr(input, allocator, true, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrats its alive").count(String_UTF16("a")) == 2);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").count(String_UTF16("b")) == 0);
+    }
+
+    ///
+    size_t count(scope String_UTF32 input, scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage
+            .Unknown) scope {
+        return countImplStr(input, allocator, true, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrats its alive").count(String_UTF32("a")) == 2);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").count(String_UTF32("b")) == 0);
+    }
+
+    ///
+    size_t ignoreCaseCount(scope String_UTF8 input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return countImplStr(input, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrAts its alive").ignoreCaseCount(String_UTF8("a")) == 2);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").ignoreCaseCount(String_UTF8("b")) == 0);
+    }
+
+    ///
+    size_t ignoreCaseCount(scope String_UTF16 input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return countImplStr(input, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrAts its alive").ignoreCaseCount(String_UTF16("a")) == 2);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").ignoreCaseCount(String_UTF16("b")) == 0);
+    }
+
+    ///
+    size_t ignoreCaseCount(scope String_UTF32 input, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return countImplStr(input, allocator, false, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"congrAts its alive").ignoreCaseCount(String_UTF32("a")) == 2);
+        assert(String_UTF(cast(LiteralType)"congrats its alive").ignoreCaseCount(String_UTF32("b")) == 0);
+    }
+
+    private size_t countImplStr(String)(scope String other, scope RCAllocator allocator, bool caseSensitive, UnicodeLanguage language) scope {
+        return other.literalEncoding.handle(() {
+            auto actual = cast(string)other.literal;
+            return countImpl(actual, allocator, caseSensitive, language);
+        }, () { auto actual = cast(wstring)other.literal; return countImpl(actual, allocator, caseSensitive, language); }, () {
+            auto actual = cast(dstring)other.literal;
+            return countImpl(actual, allocator, caseSensitive, language);
+        });
+    }
+
+    version (none) {
+        // TODO: indexOf/lastIndexOf/contains
     }
 
     ///

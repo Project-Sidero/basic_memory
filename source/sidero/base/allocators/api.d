@@ -267,6 +267,7 @@ unittest {
 
 /// A subset of the std.experimental.allocator one, as that one can use exceptions.
 auto make(T, Allocator, Args...)(scope auto ref Allocator alloc, scope return auto ref Args args) @trusted {
+    import core.lifetime : emplace;
     size_t sizeToAllocate = T.sizeof;
 
     static if (is(T == class)) {
@@ -283,9 +284,13 @@ auto make(T, Allocator, Args...)(scope auto ref Allocator alloc, scope return au
 
     if (array is null)
         return typeof(ret).init;
+    assert(ret !is null);
 
-    foreach (i, ubyte v; cast(ubyte[])__traits(initSymbol, T))
-        *cast(ubyte*)&array[i] = v;
+    static if (is(T == class)) {
+        emplace(&ret);
+    } else {
+        emplace(ret);
+    }
 
     static if (__traits(compiles, { ret.__ctor(args); })) {
         version (D_BetterC) {
@@ -298,8 +303,14 @@ auto make(T, Allocator, Args...)(scope auto ref Allocator alloc, scope return au
             }
         }
     } else {
-        static foreach (i; 0 .. args.length) {
-            ret.tupleof[i] = args[i];
+        static if (is(T == class)) {
+            static foreach (i; 0 .. Args.length) {
+                ret.tupleof[i] = args[i];
+            }
+        } else {
+            static foreach (i; 0 .. Args.length) {
+                (*ret).tupleof[i] = args[i];
+            }
         }
     }
 
@@ -316,10 +327,18 @@ T[] makeArray(T, Allocator)(auto ref Allocator alloc, size_t length) @trusted {
     if (length > MaximumInArray)
         return null;
 
-    version(D_BetterC) {
-        void[] array = alloc.allocate(length, null);
+    size_t sizeToAllocate = T.sizeof;
+
+    static if (is(T == class)) {
+        sizeToAllocate = __traits(classInstanceSize, T);
+    }
+
+    sizeToAllocate *= length;
+
+    version (D_BetterC) {
+        void[] array = alloc.allocate(sizeToAllocate, null);
     } else {
-        void[] array = alloc.allocate(length, typeid(T[]));
+        void[] array = alloc.allocate(sizeToAllocate, typeid(T[]));
     }
 
     if (array is null)
@@ -328,14 +347,12 @@ T[] makeArray(T, Allocator)(auto ref Allocator alloc, size_t length) @trusted {
     T[] ret = cast(T[])array;
 
     static if (is(T == struct) || is(T == class) || is(T == union)) {
-        size_t soFar;
         foreach (i; 0 .. length) {
-            foreach (v; cast(ubyte[])__traits(initSymbol, T)) {
-                *cast(ubyte*)&ret[soFar++] = v;
-            }
+            import core.lifetime : emplace;
+            emplace(&ret[i]);
         }
     } else {
-        foreach(ref v; ret)
+        foreach (ref v; ret)
             v = T.init;
     }
 
