@@ -967,6 +967,11 @@ size_t decodeLengthFromEnd(scope const(wchar)[] input) {
 }
 
 ///
+size_t decodeLength(scope const(dchar)[] input) {
+    return input.length > 0 ? 1 : 0;
+}
+
+///
 size_t encodeUTF8(dchar input, out char[4] output) {
     if (input <= 0x7F) {
         output[0] = cast(char)input;
