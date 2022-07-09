@@ -138,8 +138,12 @@ dstring toCasefold(scope ForeachOverUTF32Delegate input, RCAllocator allocator, 
     dchar[] ret = allocator.makeArray!dchar(length);
 
     size_t soFar;
-    caseFold((scope const(dchar)[] got...) { ret[soFar .. soFar + got.length] = got[]; soFar += got.length; return false; },
-            input, turkic, compatibility, decompose);
+    caseFold((scope const(dchar)[] got...) {
+        foreach (i, v; got)
+            ret[soFar + i] = v;
+        soFar += got.length;
+        return false;
+    }, input, turkic, compatibility, decompose);
 
     return cast(dstring)ret;
 }
