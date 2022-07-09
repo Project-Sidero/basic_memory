@@ -396,12 +396,15 @@ nothrow @nogc:
 
         private void initForLiteral(T, U)(scope return T literal, scope return RCAllocator allocator, scope return U toDeallocate) {
             if (literal.length > 0 || (toDeallocate.length > 0 && !allocator.isNull)) {
-                if (__ctfe && literal[$ - 1] != '\0') {
-                    static T justDoIt(T input) {
-                        return input ~ '\0';
-                    }
+                version(D_BetterC) {
+                } else {
+                    if (__ctfe && literal[$ - 1] != '\0') {
+                        static T justDoIt(T input) {
+                            return input ~ '\0';
+                        }
 
-                    literal = (cast(T function(T)@safe nothrow @nogc)&justDoIt)(literal);
+                        literal = (cast(T function(T)@safe nothrow @nogc)&justDoIt)(literal);
+                    }
                 }
 
                 this.literal = literal;
@@ -630,12 +633,17 @@ nothrow @nogc:
         Char[] zliteral = allocator.makeArray!Char(needsLength);
         zliteral[$ - 1] = '\0';
 
+        void copy(Source)(scope Source source) {
+            foreach(i, Char c; source)
+                zliteral[i] = c;
+        }
+
         size_t soFar;
         literalEncoding.handle(() {
             auto actual = cast(string)this.literal[0 .. this.length];
 
             static if (is(Char == char))
-                zliteral[0 .. $ - 1] = actual[];
+                copy(actual);
             else static if (is(Char == wchar))
                 reEncode(actual, (wchar got) { zliteral[soFar++] = got; });
             else
@@ -646,7 +654,7 @@ nothrow @nogc:
             static if (is(Char == char))
                 reEncode(actual, (char got) { zliteral[soFar++] = got; });
             else static if (is(Char == wchar))
-                zliteral[0 .. $ - 1] = actual[];
+                copy(actual);
             else
                 decode(actual, (dchar got) { zliteral[soFar++] = got; });
         }, () {
@@ -657,7 +665,7 @@ nothrow @nogc:
             else static if (is(Char == wchar))
                 encodeUTF16(actual, (wchar got) { zliteral[soFar++] = got; });
             else
-                zliteral[0 .. $ - 1] = actual[];
+                copy(actual);
         });
 
         return String_UTF(cast(LiteralType)zliteral, allocator, cast(LiteralType)zliteral);
@@ -1261,6 +1269,11 @@ nothrow @nogc:
         const needRefill = this.iterator.forwardItems.length == 0;
         const needToUseOtherBuffer = !canRefill && this.iterator.forwardItems.length == 0 && this.iterator.backwardItems.length > 0;
 
+        void copy(Destination, Source)(scope Destination destination, scope Source source) {
+            foreach(i, c; source)
+                destination[i] = c;
+        }
+
         if (needToUseOtherBuffer) {
             this.iterator.backwardItems = (cast(Char[])this.iterator.backwardItems)[1 .. $];
         } else if (needRefill) {
@@ -1278,7 +1291,7 @@ nothrow @nogc:
                     if (canDo > actual.length)
                         canDo = actual.length;
 
-                    charBuffer[0 .. canDo] = actual[0 .. canDo];
+                    copy(charBuffer[0 .. canDo], actual[0 .. canDo]);
 
                     actual = actual[canDo .. $];
                     amountFilled = canDo;
@@ -1312,7 +1325,7 @@ nothrow @nogc:
                     if (canDo > actual.length)
                         canDo = actual.length;
 
-                    charBuffer[0 .. canDo] = actual[0 .. canDo];
+                    copy(charBuffer[0 .. canDo], actual[0 .. canDo]);
 
                     actual = actual[canDo .. $];
                     amountFilled = canDo;
@@ -1342,7 +1355,7 @@ nothrow @nogc:
                     if (canDo > actual.length)
                         canDo = actual.length;
 
-                    charBuffer[0 .. canDo] = actual[0 .. canDo];
+                    copy(charBuffer[0 .. canDo], actual[0 .. canDo]);
 
                     actual = actual[canDo .. $];
                     amountFilled = canDo;
@@ -1368,6 +1381,11 @@ nothrow @nogc:
         const needRefill = this.iterator.backwardItems.length == 0;
         const needToUseOtherBuffer = !canRefill && this.iterator.forwardItems.length > 0 && needRefill;
 
+        void copy(Destination, Source)(scope Destination destination, scope Source source) {
+            foreach(i, c; source)
+                destination[i] = c;
+        }
+
         if (needToUseOtherBuffer) {
             this.iterator.forwardItems = (cast(Char[])this.iterator.forwardItems)[0 .. $ - 1];
         } else if (needRefill) {
@@ -1385,7 +1403,7 @@ nothrow @nogc:
                     if (canDo > actual.length)
                         canDo = actual.length;
 
-                    charBuffer[0 .. canDo] = actual[$ - canDo .. $];
+                    copy(charBuffer[0 .. canDo], actual[$-canDo .. $]);
 
                     actual = actual[0 .. $ - canDo];
                     amountFilled = canDo;
@@ -1419,7 +1437,7 @@ nothrow @nogc:
                     if (canDo > actual.length)
                         canDo = actual.length;
 
-                    charBuffer[0 .. canDo] = actual[$ - canDo .. $];
+                    copy(charBuffer[0 .. canDo], actual[$-canDo .. $]);
 
                     actual = actual[0 .. $ - canDo];
                     amountFilled = canDo;
@@ -1449,7 +1467,7 @@ nothrow @nogc:
                     if (canDo > actual.length)
                         canDo = actual.length;
 
-                    charBuffer[0 .. canDo] = actual[$ - canDo .. $];
+                    copy(charBuffer[0 .. canDo], actual[$-canDo .. $]);
 
                     actual = actual[0 .. $ - canDo];
                     amountFilled = canDo;

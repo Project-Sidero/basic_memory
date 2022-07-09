@@ -83,7 +83,8 @@ size_t compose_(scope ref dchar[] array, scope RCAllocator allocator) @trusted {
             dchar[] old = replacementBuffer;
 
             replacementBuffer = allocator.makeArray!dchar(replacementBuffer.length + 64 + amount);
-            replacementBuffer[0 .. old.length][] = old[];
+            foreach (i, v; old)
+                replacementBuffer[i] = v;
 
             if (old.length > 0)
                 allocator.dispose(old);
@@ -270,7 +271,8 @@ struct Rotate {
                 ToRotate[] temp = allocator.makeArray!ToRotate(rotateBuffer.length + 64);
                 assert(temp !is null);
 
-                temp[0 .. rotateBuffer.length][] = rotateBuffer[];
+                foreach (i, v; rotateBuffer)
+                    temp[i] = v;
 
                 if (rotateBuffer.length > rotateInlineBuffer.length)
                     allocator.dispose(rotateBuffer);
@@ -285,7 +287,6 @@ struct Rotate {
     }
 
     void opCall(scope dchar[] array) @trusted scope {
-        import std.range : zip, iota;
         import std.algorithm : sort;
 
         if (rotateBuffer.length == 0)
@@ -322,10 +323,15 @@ struct Rotate {
 
             auto rb = rotateBuffer[0 .. rotateBufferUsed];
 
-            foreach (i, ref v; rb)
-                v.index = i;
+            foreach (i, ref rbv; rb) {
+                rbv.character = todo[i];
+                rbv.index = i;
+            }
 
-            zip(todo, rb).sort!((a, b) => a[1] < b[1]);
+            rb.sort;
+
+            foreach (i, ref rbv; rb)
+                todo[i] = rbv.character;
         }
     }
 

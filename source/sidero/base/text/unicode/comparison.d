@@ -112,7 +112,8 @@ struct CaseAwareComparison {
         void allocateAgainst(size_t length) {
             if (againstBuffer.length < length) {
                 dchar[] temp = allocator.makeArray!dchar(length);
-                temp[0 .. againstBuffer.length][] = againstBuffer[];
+                foreach (i, v; againstBuffer)
+                    temp[i] = v;
 
                 if (againstBuffer.length > againstInlineBuffer.length)
                     allocator.dispose(againstBuffer);
@@ -139,7 +140,8 @@ struct CaseAwareComparison {
                 if (map.fullyDecomposed.length == 0)
                     against[soFar++] = c;
                 else {
-                    against[soFar .. soFar + map.fullyDecomposed.length][] = map.fullyDecomposed[];
+                    foreach (i, v; map.fullyDecomposed)
+                        against[soFar + i] = v;
                     soFar += map.fullyDecomposed.length;
                 }
             }
@@ -150,7 +152,8 @@ struct CaseAwareComparison {
             {
                 size_t soFar;
                 caseFold((scope const(dchar)[] got...) {
-                    against[soFar .. soFar + got.length] = got[];
+                    foreach (i, v; got)
+                        against[soFar + i] = v;
                     soFar += got.length;
                     return false;
                 }, input, isTurkic, false, true);
@@ -212,7 +215,7 @@ struct CaseAwareComparison {
             caseFold((scope const(dchar)[] got...) {
                 size_t todo;
 
-                while(received < against.length && todo < got.length) {
+                while (received < against.length && todo < got.length) {
                     received++;
                     todo++;
                 }
@@ -262,14 +265,16 @@ int icmpUTF32_(scope ForeachOverUTF32Delegate input1, scope ForeachOverUTF32Dele
     {
         size_t soFarCaseFolded;
         caseFold((scope const(dchar)[] got...) {
-            array1[soFarCaseFolded .. soFarCaseFolded + got.length] = got[];
+            foreach (i, v; got)
+                array1[soFarCaseFolded + i] = v;
             soFarCaseFolded += got.length;
             return false;
         }, input1, turkic, compatibility, true);
 
         soFarCaseFolded = 0;
         caseFold((scope const(dchar)[] got...) {
-            array2[soFarCaseFolded .. soFarCaseFolded + got.length] = got[];
+            foreach (i, v; got)
+                array2[soFarCaseFolded + i] = v;
             soFarCaseFolded += got.length;
             return false;
         }, input2, turkic, compatibility, true);

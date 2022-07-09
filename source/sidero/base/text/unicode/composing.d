@@ -100,7 +100,8 @@ void decompose(scope dchar[] array, scope ForeachOverUTF32Delegate input, bool c
             got = cast(dstring)hangulMap[0 .. len];
 
         if (got.length > 0) {
-            array[soFar .. soFar + got.length][] = got[];
+            foreach(i, v; got)
+                array[soFar + i] = v;
             soFar += got.length;
         } else {
             array[soFar] = c;
