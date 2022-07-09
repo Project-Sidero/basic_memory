@@ -7,7 +7,7 @@ Copyright: 2022 Richard Andrew Cattermole
  */
 module sidero.base.allocators.api;
 import std.typecons : Ternary;
-public import std.experimental.allocator : make, makeArray, expandArray, shrinkArray, dispose;
+public import std.experimental.allocator : dispose;
 
 ///
 private {
@@ -263,6 +263,134 @@ unittest {
 
     assert(got[0].length == 2);
     assert(got[1].length == 4);
+}
+
+/// A subset of the std.experimental.allocator one, as that one can use exceptions.
+auto make(T, Allocator, Args...)(scope auto ref Allocator alloc, scope return auto ref Args args) @trusted {
+    size_t sizeToAllocate = T.sizeof;
+
+    static if (is(T == class)) {
+        sizeToAllocate = __traits(classInstanceSize, T);
+    }
+
+    void[] array = alloc.allocate(sizeToAllocate);
+
+    static if (is(T == class)) {
+        auto ret = cast(T)array.ptr;
+    } else {
+        auto ret = cast(T*)array.ptr;
+    }
+
+    if (array is null)
+        return typeof(ret).init;
+
+    foreach (i, ubyte v; cast(ubyte[])__traits(initSymbol, T))
+        *cast(ubyte*)&array[i] = v;
+
+    static if (__traits(compiles, { ret.__ctor(args); })) {
+        version (D_BetterC) {
+            ret.__ctor(args);
+        } else {
+            try {
+                ret.__ctor(args);
+            } catch (Exception) {
+                alloc.deallocate(array);
+            }
+        }
+    } else {
+        static foreach (i; 0 .. args.length) {
+            ret.tupleof[i] = args[i];
+        }
+    }
+
+    return ret;
+}
+
+/// Similar to std.experimental.allocator one
+T[] makeArray(T, Allocator)(auto ref Allocator alloc, size_t length) @trusted {
+    if (length == 0)
+        return null;
+
+    enum MaximumInArray = size_t.max / T.sizeof;
+
+    if (length > MaximumInArray)
+        return null;
+
+    version(D_BetterC) {
+        void[] array = alloc.allocate(length, null);
+    } else {
+        void[] array = alloc.allocate(length, typeid(T[]));
+    }
+
+    if (array is null)
+        return null;
+
+    T[] ret = cast(T[])array;
+
+    static if (is(T == struct) || is(T == class) || is(T == union)) {
+        size_t soFar;
+        foreach (i; 0 .. length) {
+            foreach (v; cast(ubyte[])__traits(initSymbol, T)) {
+                *cast(ubyte*)&ret[soFar++] = v;
+            }
+        }
+    } else {
+        foreach(ref v; ret)
+            v = T.init;
+    }
+
+    return ret;
+}
+
+/// Mostly a copy of the one in std.experimental.allocator.
+bool expandArray(T, Allocator)(scope auto ref Allocator alloc, scope ref T[] array, size_t delta) @trusted {
+    if (delta == 0)
+        return true;
+    if (array is null)
+        return false;
+
+    size_t originalLength = array.length;
+    void[] temp = cast(void[])array;
+
+    if (!alloc.reallocate(temp, temp.length + (T.sizeof * delta))) {
+        return false;
+    }
+
+    array[originalLength .. $] = T.init;
+    array = temp;
+    return true;
+}
+
+/// A subset of the std.experimental.allocator one, as that one can use exceptions.
+bool shrinkArray(T, Allocator)(scope auto ref Allocator alloc, scope ref T[] array, size_t delta) @trusted {
+    if (delta > array.length)
+        return false;
+
+    version (D_BetterC) {
+        foreach (ref item; array[$ - delta .. $]) {
+            static if (__traits(hasMember, T, "__dtor"))
+                item.__dtor;
+            item = T.init;
+        }
+    } else {
+        foreach (ref item; array[$ - delta .. $]) {
+            try {
+                item.destroy;
+            } catch (Exception) {
+            }
+        }
+    }
+
+    if (delta == array.length) {
+        alloc.deallocate(array);
+        array = null;
+        return true;
+    }
+
+    auto temp = cast(void[])array;
+    bool result = alloc.reallocate(temp, temp.length - (delta * T.sizeof));
+    array = cast(T[])temp;
+    return result;
 }
 
 private:
