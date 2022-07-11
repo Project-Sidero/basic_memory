@@ -204,6 +204,42 @@ struct SpecialCasing {
     SpecialCasingCondition condition;
 }
 
+/// Is character case ignorable
+bool isUnicodeCaseIgnorable(dchar input) @safe nothrow @nogc pure {
+    switch(sidero_utf_lut_getGeneralCategory(input)) {
+        case GeneralCategory.Mn:
+        case GeneralCategory.Me:
+        case GeneralCategory.Cf:
+        case GeneralCategory.Lm:
+        case GeneralCategory.Sk:
+            return true;
+
+        default:
+            switch(sidero_utf_lut_getWordBreakProperty(input)) {
+                case WordBreakProperty.MidLetter:
+                case WordBreakProperty.MidNumLet:
+                case WordBreakProperty.Single_Quote:
+                    return true;
+
+                default:
+                    return false;
+            }
+    }
+}
+
+// Is character cased
+bool isUnicodeCased(dchar input) @safe nothrow @nogc pure {
+    switch(sidero_utf_lut_getGeneralCategory(input)) {
+        case GeneralCategory.Lt:
+        case GeneralCategory.Ll:
+        case GeneralCategory.Lu:
+            return true;
+
+        default:
+            return sidero_utf_lut_isMemberOfOther_Lowercase(input) || sidero_utf_lut_isMemberOfOther_Uppercase(input);
+    }
+}
+
 
 /// Lookup Casefolding for character.
 /// Returns: null if unchanged.

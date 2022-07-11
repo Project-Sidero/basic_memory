@@ -90,3 +90,13 @@ bool isGraphical(dchar input) {
 bool isWhiteSpace(dchar input) {
     return unidb.isUnicodeWhiteSpace(input);
 }
+
+///
+bool isCaseIgnorable(dchar input) {
+    return unidb.isUnicodeCaseIgnorable(input);
+}
+
+///
+bool isCased(dchar input) {
+    return unidb.isUnicodeCased(input);
+}
