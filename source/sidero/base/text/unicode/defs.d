@@ -17,13 +17,27 @@ struct UnicodeEncoding {
     ///
     enum For(T : string) = UTF8;
     ///
+    enum For(T : char[]) = UTF8;
+    ///
+    enum For(T : const(char)[]) = UTF8;
+
+    ///
     enum For(T : wchar) = UTF16;
     ///
     enum For(T : wstring) = UTF16;
     ///
+    enum For(T : wchar[]) = UTF16;
+    ///
+    enum For(T : const(wchar)[]) = UTF16;
+
+    ///
     enum For(T : dchar) = UTF32;
     ///
     enum For(T : dstring) = UTF32;
+    ///
+    enum For(T : dchar[]) = UTF32;
+    ///
+    enum For(T : const(dchar)[]) = UTF32;
 
 scope const:
 

@@ -15,59 +15,71 @@ alias ForeachOverUTF32PeekDelegate = void delegate(size_t amountRead, size_t las
 
 @safe nothrow @nogc {
     ///
-    ForeachOverAnyUTF foreachOverAnyUTF(scope return string arg, size_t limitCharacters = size_t.max, scope return ForeachOverUTF32PeekDelegate peekDel = null) {
+    ForeachOverAnyUTF foreachOverAnyUTF(scope return const(char)[] arg, size_t limitCharacters = size_t.max, scope return ForeachOverUTF32PeekDelegate peekDel = null) {
         return ForeachOverAnyUTF(arg, limitCharacters, peekDel);
     }
 
     ///
-    ForeachOverAnyUTF foreachOverAnyUTF(scope return wstring arg, size_t limitCharacters = size_t.max, scope return ForeachOverUTF32PeekDelegate peekDel = null) {
+    ForeachOverAnyUTF foreachOverAnyUTF(scope return const(wchar)[] arg, size_t limitCharacters = size_t.max, scope return ForeachOverUTF32PeekDelegate peekDel = null) {
         return ForeachOverAnyUTF(arg, limitCharacters, peekDel);
     }
 
     ///
-    ForeachOverAnyUTF foreachOverAnyUTF(scope return dstring arg, size_t limitCharacters = size_t.max, scope return ForeachOverUTF32PeekDelegate peekDel = null) {
+    ForeachOverAnyUTF foreachOverAnyUTF(scope return const(dchar)[] arg, size_t limitCharacters = size_t.max, scope return ForeachOverUTF32PeekDelegate peekDel = null) {
         return ForeachOverAnyUTF(arg, limitCharacters, peekDel);
     }
 }
 
 ///
 struct ForeachOverAnyUTF {
-    private union {
-        ForeachOverUTF!string utf8;
-        ForeachOverUTF!wstring utf16;
-        ForeachOverUTF!dstring utf32;
-    }
+    private {
+        union {
+            ForeachOverUTF!(const(char)[]) utf8;
+            ForeachOverUTF!(const(wchar)[]) utf16;
+            ForeachOverUTF!(const(dchar)[]) utf32;
+        }
 
-    ForeachOverUTF32Delegate handler;
+        int size;
+    }
 
     @disable this(this);
 
 @safe nothrow @nogc scope:
 
-    this(scope return string input, size_t limitCharacters = size_t.max, scope return ForeachOverUTF32PeekDelegate peekDel = null) @trusted {
+    ///
+    this(scope return const(char)[] input, size_t limitCharacters = size_t.max, scope return ForeachOverUTF32PeekDelegate peekDel = null) @trusted {
         utf8.value = input;
         utf8.peekAtReadAmountDelegate = peekDel;
         utf8.limitCharacters = limitCharacters;
-        handler = &utf8.opApply;
+        size = 8;
     }
 
-    this(scope return wstring input, size_t limitCharacters = size_t.max, scope return ForeachOverUTF32PeekDelegate peekDel = null) @trusted {
+    ///
+    this(scope return const(wchar)[] input, size_t limitCharacters = size_t.max, scope return ForeachOverUTF32PeekDelegate peekDel = null) @trusted {
         utf16.value = input;
         utf16.peekAtReadAmountDelegate = peekDel;
         utf16.limitCharacters = limitCharacters;
-        handler = &utf16.opApply;
+        size = 16;
     }
 
-    this(scope return dstring input, size_t limitCharacters = size_t.max, scope return ForeachOverUTF32PeekDelegate peekDel = null) @trusted {
+    ///
+    this(scope return const(dchar)[] input, size_t limitCharacters = size_t.max, scope return ForeachOverUTF32PeekDelegate peekDel = null) @trusted {
         utf32.value = input;
         utf32.peekAtReadAmountDelegate = peekDel;
         utf32.limitCharacters = limitCharacters;
-        handler = &utf32.opApply;
+        size = 32;
     }
 
-    int opApply(scope ForeachOverUTF32HandleDelegate del) {
-        assert(handler !is null);
-        return handler(del);
+    ///
+    int opApply(scope ForeachOverUTF32HandleDelegate del) @trusted {
+        if (size == 8)
+            return utf8.opApply(del);
+        else if (size == 16)
+            return utf16.opApply(del);
+        else if (size == 32)
+            return utf32.opApply(del);
+        else
+            assert(0);
     }
 }
 
