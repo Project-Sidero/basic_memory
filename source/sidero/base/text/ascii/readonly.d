@@ -264,14 +264,7 @@ nothrow @nogc:
         this(scope return LiteralType literal, scope return RCAllocator allocator = RCAllocator.init,
                 scope return LiteralType toDeallocate = null) scope {
             if (literal.length > 0 || (toDeallocate.length > 0 && !allocator.isNull)) {
-                if (__ctfe && literal[$ - 1] != '\0') {
-                    static LiteralType justDoIt(LiteralType input) {
-                        return input ~ '\0';
-                    }
-
-                    this.literal = (cast(LiteralType function(LiteralType)@safe nothrow @nogc)&justDoIt)(literal);
-                } else
-                    this.literal = literal;
+                this.literal = literal;
 
                 if (!allocator.isNull) {
                     if (toDeallocate is null)
@@ -355,7 +348,7 @@ nothrow @nogc:
 
     ///
     unittest {
-        static String_ASCII global = String_ASCII("oh yeah");
+        static String_ASCII global = String_ASCII("oh yeah\0");
         assert(global.isPtrNullTerminated());
 
         String_ASCII stack = String_ASCII("hmm...");
@@ -379,7 +372,7 @@ nothrow @nogc:
 
     ///
     unittest {
-        static String_ASCII global = String_ASCII("oh yeah");
+        static String_ASCII global = String_ASCII("oh yeah\0");
         assert(global.length == 7);
         assert(global.literal.length == 8);
 
