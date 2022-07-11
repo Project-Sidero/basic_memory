@@ -15,7 +15,7 @@ alias String_UTF32 = String_UTF!dchar;
 ///
 struct String_UTF(Char_) {
     package(sidero.base.text.unicode) {
-        immutable(void)[] literal;
+        const(void)[] literal;
         UnicodeEncoding literalEncoding;
     }
 
@@ -91,7 +91,7 @@ struct String_UTF(Char_) {
 
             static if (NeedOffset) {
                 offset = literalEncoding.handle(() {
-                    auto actual = cast(string)this.literal;
+                    auto actual = cast(const(char)[])this.literal;
 
                     static if (is(Char == char)) {
                         // char to char
@@ -104,7 +104,7 @@ struct String_UTF(Char_) {
                         return decodeLength(actual);
                     }
                 }, () {
-                    auto actual = cast(wstring)this.literal;
+                    auto actual = cast(const(wchar)[])this.literal;
 
                     static if (is(Char == char)) {
                         // wchar storage to char
@@ -117,7 +117,7 @@ struct String_UTF(Char_) {
                         return decodeLength(actual);
                     }
                 }, () {
-                    auto actual = cast(dstring)this.literal;
+                    auto actual = cast(const(dchar)[])this.literal;
 
                     static if (is(Char == char)) {
                         //dchar storage into char
@@ -202,7 +202,7 @@ struct String_UTF(Char_) {
 nothrow @nogc:
 
     /**
-        Makes no guarantees that the string is actually null terminated. Unsafe!!!
+        Makes no guarantees that the const(char)[] is actually null terminated. Unsafe!!!
 
         Will only return a pointer if the underlying memory is encoded approprietely.
      */
@@ -259,15 +259,15 @@ nothrow @nogc:
             atomicOp!"+="(ret.lifeTime.refCount, 1);
 
         literalEncoding.handle(() {
-            auto actual = cast(string)this.literal;
+            auto actual = cast(const(char)[])this.literal;
             assert(end <= actual.length, "End of slice must be before or equal to length.");
             ret.literal = actual[start .. end];
         }, () {
-            auto actual = cast(wstring)this.literal;
+            auto actual = cast(const(wchar)[])this.literal;
             assert(end <= actual.length, "End of slice must be before or equal to length.");
             ret.literal = actual[start .. end];
         }, () {
-            auto actual = cast(dstring)this.literal;
+            auto actual = cast(const(dchar)[])this.literal;
             assert(end <= actual.length, "End of slice must be before or equal to length.");
             ret.literal = actual[start .. end];
         });
@@ -321,7 +321,7 @@ nothrow @nogc:
 
     ///
     void opAssign(scope const(char)[] literal) scope @trusted {
-        this = String_UTF(cast(string)literal);
+        this = String_UTF(cast(const(char)[])literal);
     }
 
     ///
@@ -332,7 +332,7 @@ nothrow @nogc:
 
     ///
     void opAssign(scope const(wchar)[] literal) scope @trusted {
-        this = String_UTF(cast(wstring)literal);
+        this = String_UTF(cast(const(wchar)[])literal);
     }
 
     ///
@@ -343,7 +343,7 @@ nothrow @nogc:
 
     ///
     void opAssign(scope const(dchar)[] literal) scope @trusted {
-        this = String_UTF(cast(dstring)literal);
+        this = String_UTF(cast(const(dchar)[])literal);
     }
 
     ///
@@ -380,17 +380,17 @@ nothrow @nogc:
 
     @trusted scope {
         ///
-        this(scope return string literal, scope return RCAllocator allocator = RCAllocator.init, scope return string toDeallocate = null) {
+        this(scope return const(char)[] literal, scope return RCAllocator allocator = RCAllocator.init, scope return const(char)[] toDeallocate = null) {
             initForLiteral(literal, allocator, toDeallocate);
         }
 
         ///
-        this(scope return wstring literal, scope return RCAllocator allocator = RCAllocator.init, scope return wstring toDeallocate = null) {
+        this(scope return const(wchar)[] literal, scope return RCAllocator allocator = RCAllocator.init, scope return const(wchar)[] toDeallocate = null) {
             initForLiteral(literal, allocator, toDeallocate);
         }
 
         ///
-        this(scope return dstring literal, scope return RCAllocator allocator = RCAllocator.init, scope return dstring toDeallocate = null) {
+        this(scope return const(dchar)[] literal, scope return RCAllocator allocator = RCAllocator.init, scope return const(dchar)[] toDeallocate = null) {
             initForLiteral(literal, allocator, toDeallocate);
         }
 
@@ -469,43 +469,43 @@ nothrow @nogc:
     }
 
     /**
-    Returns: if ``ptr`` will return a null terminated string or not
+    Returns: if ``ptr`` will return a null terminated const(char)[] or not
     */
     bool isPtrNullTerminated() scope @trusted {
         if (isNull)
             return false;
 
         return literalEncoding.handle(() {
-            auto actual = cast(string)this.literal;
+            auto actual = cast(const(char)[])this.literal;
 
             if (actual[$ - 1] == '\0')
                 return true;
             else if (this.lifeTime is null)
                 return actual[$ - 1] == '\0';
 
-            auto actualOriginal = cast(string)this.lifeTime.original;
+            auto actualOriginal = cast(const(char)[])this.lifeTime.original;
 
             return actualOriginal[$ - 1] == '\0' && ((actualOriginal.ptr + actualOriginal.length) - (actual.length + 1)) is actual.ptr;
         }, () {
-            auto actual = cast(wstring)this.literal;
+            auto actual = cast(const(wchar)[])this.literal;
 
             if (actual[$ - 1] == '\0')
                 return true;
             else if (this.lifeTime is null)
                 return actual[$ - 1] == '\0';
 
-            auto actualOriginal = cast(wstring)this.lifeTime.original;
+            auto actualOriginal = cast(const(wchar)[])this.lifeTime.original;
 
             return actualOriginal[$ - 1] == '\0' && ((actualOriginal.ptr + actualOriginal.length) - (actual.length + 1)) is actual.ptr;
         }, () {
-            auto actual = cast(dstring)this.literal;
+            auto actual = cast(const(dchar)[])this.literal;
 
             if (actual[$ - 1] == '\0')
                 return true;
             else if (this.lifeTime is null)
                 return actual[$ - 1] == '\0';
 
-            auto actualOriginal = cast(dstring)this.lifeTime.original;
+            auto actualOriginal = cast(const(dchar)[])this.lifeTime.original;
 
             return actualOriginal[$ - 1] == '\0' && ((actualOriginal.ptr + actualOriginal.length) - (actual.length + 1)) is actual.ptr;
         });
@@ -519,7 +519,7 @@ nothrow @nogc:
         String_UTF stack = String_UTF("hmm...");
         assert(!stack.isPtrNullTerminated());
 
-        string someText = "oh noes";
+        const(char)[] someText = "oh noes";
         String_UTF someMoreStack = String_UTF(someText);
         assert(!someMoreStack.isPtrNullTerminated());
     }
@@ -531,27 +531,27 @@ nothrow @nogc:
 
     ///
     alias opDollar = length; /**
-        The length of the string in its native encoding.
+        The length of the const(char)[] in its native encoding.
 
         Removes null terminator at the end if it has one.
      */
     size_t length() const scope {
         return literalEncoding.handle(() {
-            auto actual = cast(string)this.literal;
+            auto actual = cast(const(char)[])this.literal;
 
             size_t ret = actual.length;
             if (ret > 0 && actual[$ - 1] == '\0')
                 ret--;
             return ret;
         }, () {
-            auto actual = cast(wstring)this.literal;
+            auto actual = cast(const(wchar)[])this.literal;
 
             size_t ret = actual.length;
             if (ret > 0 && actual[$ - 1] == '\0')
                 ret--;
             return ret;
         }, () {
-            auto actual = cast(dstring)this.literal;
+            auto actual = cast(const(dchar)[])this.literal;
 
             size_t ret = actual.length;
             if (ret > 0 && actual[$ - 1] == '\0')
@@ -597,7 +597,7 @@ nothrow @nogc:
         }
 
         size_t needsLength = literalEncoding.handle(() {
-            auto actual = cast(string)this.literal[0 .. this.length];
+            auto actual = cast(const(char)[])this.literal[0 .. this.length];
 
             static if (is(Char == char))
                 return actual.length;
@@ -606,7 +606,7 @@ nothrow @nogc:
             else
                 return decodeLength(actual);
         }, () {
-            auto actual = (cast(wstring)this.literal)[0 .. this.length];
+            auto actual = (cast(const(wchar)[])this.literal)[0 .. this.length];
 
             static if (is(Char == char))
                 return reEncodeLength(actual);
@@ -615,7 +615,7 @@ nothrow @nogc:
             else
                 return decodeLength(actual);
         }, () {
-            auto actual = (cast(dstring)this.literal)[0 .. this.length];
+            auto actual = (cast(const(dchar)[])this.literal)[0 .. this.length];
 
             static if (is(Char == char))
                 return encodeLengthUTF8(actual);
@@ -638,7 +638,7 @@ nothrow @nogc:
 
         size_t soFar;
         literalEncoding.handle(() {
-            auto actual = cast(string)this.literal[0 .. this.length];
+            auto actual = cast(const(char)[])this.literal[0 .. this.length];
 
             static if (is(Char == char))
                 copy(actual);
@@ -647,7 +647,7 @@ nothrow @nogc:
             else
                 decode(actual, (dchar got) { zliteral[soFar++] = got; });
         }, () {
-            auto actual = (cast(wstring)this.literal)[0 .. this.length];
+            auto actual = (cast(const(wchar)[])this.literal)[0 .. this.length];
 
             static if (is(Char == char))
                 reEncode(actual, (char got) { zliteral[soFar++] = got; });
@@ -656,7 +656,7 @@ nothrow @nogc:
             else
                 decode(actual, (dchar got) { zliteral[soFar++] = got; });
         }, () {
-            auto actual = (cast(dstring)this.literal)[0 .. this.length];
+            auto actual = (cast(const(dchar)[])this.literal)[0 .. this.length];
 
             static if (is(Char == char))
                 encodeUTF8(actual, (char got) { zliteral[soFar++] = got; });
@@ -686,21 +686,21 @@ nothrow @nogc:
             return Result!Char(RangeException);
 
         return literalEncoding.handle(() {
-            auto actual = cast(string)this.literal;
+            auto actual = cast(const(char)[])this.literal;
 
             static if (is(Char == char))
                 return Result!Char(actual[index]);
             else
                 return Result!Char(WrongUnicodeEncodingException);
         }, () {
-            auto actual = cast(wstring)this.literal;
+            auto actual = cast(const(wchar)[])this.literal;
 
             static if (is(Char == wchar))
                 return Result!Char(actual[index]);
             else
                 return Result!Char(WrongUnicodeEncodingException);
         }, () {
-            auto actual = cast(dstring)this.literal;
+            auto actual = cast(const(dchar)[])this.literal;
 
             static if (is(Char == dchar))
                 return Result!Char(actual[index]);
@@ -733,17 +733,17 @@ nothrow @nogc:
         alias equals = opEquals;
 
         ///
-        int opEquals(scope string other) scope {
+        int opEquals(scope const(char)[] other) scope {
             return opCmpImpl(other) == 0;
         }
 
         ///
-        int opEquals(scope wstring other) scope {
+        int opEquals(scope const(wchar)[] other) scope {
             return opCmpImpl(other) == 0;
         }
 
         ///
-        int opEquals(scope dstring other) scope {
+        int opEquals(scope const(dchar)[] other) scope {
             return opCmpImpl(other) == 0;
         }
 
@@ -778,7 +778,7 @@ nothrow @nogc:
         alias compare = opCmp;
 
         ///
-        int opCmp(scope string other) scope {
+        int opCmp(scope const(char)[] other) scope {
             return opCmpImpl(other);
         }
 
@@ -789,7 +789,7 @@ nothrow @nogc:
         }
 
         ///
-        int opCmp(scope wstring other) scope {
+        int opCmp(scope const(wchar)[] other) scope {
             return opCmpImpl(other);
         }
 
@@ -800,7 +800,7 @@ nothrow @nogc:
         }
 
         ///
-        int opCmp(scope dstring other) scope {
+        int opCmp(scope const(dchar)[] other) scope {
             return opCmpImpl(other);
         }
 
@@ -856,21 +856,21 @@ nothrow @nogc:
             }
 
             return literalEncoding.handle(() {
-                auto actual = cast(string)this.literal;
+                auto actual = cast(const(char)[])this.literal;
 
                 static if (typeof(other[0]).sizeof == char.sizeof) {
                     return matches(actual);
                 } else
                     return needDecode(actual);
             }, () {
-                auto actual = cast(wstring)this.literal;
+                auto actual = cast(const(wchar)[])this.literal;
 
                 static if (typeof(other[0]).sizeof == wchar.sizeof) {
                     return matches(actual);
                 } else
                     return needDecode(actual);
             }, () {
-                auto actual = cast(dstring)this.literal;
+                auto actual = cast(const(dchar)[])this.literal;
 
                 static if (typeof(other[0]).sizeof == dchar.sizeof) {
                     return matches(actual);
@@ -919,10 +919,10 @@ nothrow @nogc:
         }
 
         private int opCmpImplStr(Char2)(scope String_UTF!Char2 other) scope {
-            return other.literalEncoding.handle(() { auto actual = cast(string)other.literal; return opCmp(actual); }, () {
-                auto actual = cast(wstring)other.literal;
+            return other.literalEncoding.handle(() { auto actual = cast(const(char)[])other.literal; return opCmp(actual); }, () {
+                auto actual = cast(const(wchar)[])other.literal;
                 return opCmp(actual);
-            }, () { auto actual = cast(dstring)other.literal; return opCmp(actual); });
+            }, () { auto actual = cast(const(dchar)[])other.literal; return opCmp(actual); });
         }
 
         ///
@@ -934,19 +934,19 @@ nothrow @nogc:
 
     const {
         ///
-        int ignoreCaseEquals(scope string other, scope RCAllocator allocator = RCAllocator.init,
+        int ignoreCaseEquals(scope const(char)[] other, scope RCAllocator allocator = RCAllocator.init,
                 UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
             return ignoreCaseCompareImpl(other, allocator, language.isTurkic) == 0;
         }
 
         ///
-        int ignoreCaseEquals(scope wstring other, scope RCAllocator allocator = RCAllocator.init,
+        int ignoreCaseEquals(scope const(wchar)[] other, scope RCAllocator allocator = RCAllocator.init,
                 UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
             return ignoreCaseCompareImpl(other, allocator, language.isTurkic) == 0;
         }
 
         ///
-        int ignoreCaseEquals(scope dstring other, scope RCAllocator allocator = RCAllocator.init,
+        int ignoreCaseEquals(scope const(dchar)[] other, scope RCAllocator allocator = RCAllocator.init,
                 UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
             return ignoreCaseCompareImpl(other, allocator, language.isTurkic) == 0;
         }
@@ -974,13 +974,13 @@ nothrow @nogc:
                 scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
 
             return other.literalEncoding.handle(() {
-                auto actual = cast(string)other.literal;
+                auto actual = cast(const(char)[])other.literal;
                 return ignoreCaseCompareImpl(actual, allocator, language.isTurkic);
             }, () {
-                auto actual = cast(wstring)other.literal;
+                auto actual = cast(const(wchar)[])other.literal;
                 return ignoreCaseCompareImpl(actual, allocator, language.isTurkic);
             }, () {
-                auto actual = cast(dstring)other.literal;
+                auto actual = cast(const(dchar)[])other.literal;
                 return ignoreCaseCompareImpl(actual, allocator, language.isTurkic);
             }) == 0;
         }
@@ -998,7 +998,7 @@ nothrow @nogc:
 
     const {
         ///
-        int ignoreCaseCompare(scope string other, scope RCAllocator allocator = RCAllocator.init,
+        int ignoreCaseCompare(scope const(char)[] other, scope RCAllocator allocator = RCAllocator.init,
                 UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
             return ignoreCaseCompareImpl(other, allocator, language.isTurkic);
         }
@@ -1010,7 +1010,7 @@ nothrow @nogc:
         }
 
         ///
-        int ignoreCaseCompare(scope wstring other, scope RCAllocator allocator = RCAllocator.init,
+        int ignoreCaseCompare(scope const(wchar)[] other, scope RCAllocator allocator = RCAllocator.init,
                 UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
             return ignoreCaseCompareImpl(other, allocator, language.isTurkic);
         }
@@ -1022,7 +1022,7 @@ nothrow @nogc:
         }
 
         ///
-        int ignoreCaseCompare(scope dstring other, scope RCAllocator allocator = RCAllocator.init,
+        int ignoreCaseCompare(scope const(dchar)[] other, scope RCAllocator allocator = RCAllocator.init,
                 UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
             return ignoreCaseCompareImpl(other, allocator, language.isTurkic);
         }
@@ -1037,51 +1037,20 @@ nothrow @nogc:
             import sidero.base.text.unicode.comparison;
 
             allocator = pickAllocator(allocator);
+            scope ForeachOverAnyUTF usH, otherH = foreachOverAnyUTF(other);
 
-            ForeachOverUTF32Delegate usDel, otherDel;
-
-            static struct Handlers {
-                union {
-                    ForeachOverUTF!string us8;
-                    ForeachOverUTF!wstring us16;
-                    ForeachOverUTF!dstring us32;
-                }
-
-                union {
-                    ForeachOverUTF!string other8;
-                    ForeachOverUTF!wstring other16;
-                    ForeachOverUTF!dstring other32;
-                }
-            }
-
-            Handlers handlers;
-
-            literalEncoding.handle(() {
-                auto actual = cast(string)this.literal;
-                handlers.us8 = foreachOverUTF(actual);
-                usDel = &handlers.us8.opApply;
+            literalEncoding.handle(() @trusted {
+                auto actual = cast(const(char)[])this.literal;
+                usH = foreachOverAnyUTF(actual);
             }, () {
-                auto actual = cast(wstring)this.literal;
-                handlers.us16 = foreachOverUTF(actual);
-                usDel = &handlers.us16.opApply;
+                auto actual = cast(const(wchar)[])this.literal;
+                usH = foreachOverAnyUTF(actual);
             }, () {
-                auto actual = cast(dstring)this.literal;
-                handlers.us32 = foreachOverUTF(actual);
-                usDel = &handlers.us32.opApply;
+                auto actual = cast(const(dchar)[])this.literal;
+                usH = foreachOverAnyUTF(actual);
             });
 
-            static if (typeof(other[0]).sizeof == char.sizeof) {
-                handlers.other8 = foreachOverUTF(other);
-                otherDel = &handlers.other8.opApply;
-            } else static if (typeof(other[0]).sizeof == wchar.sizeof) {
-                handlers.other16 = foreachOverUTF(other);
-                otherDel = &handlers.other16.opApply;
-            } else static if (typeof(other[0]).sizeof == dchar.sizeof) {
-                handlers.other32 = foreachOverUTF(other);
-                otherDel = &handlers.other32.opApply;
-            }
-
-            return icmpUTF32_NFD(usDel, otherDel, allocator, turkic);
+            return icmpUTF32_NFD(&usH.opApply, &otherH.opApply, allocator, turkic);
         }
 
         ///
@@ -1107,13 +1076,13 @@ nothrow @nogc:
                 scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
 
             return other.literalEncoding.handle(() {
-                auto actual = cast(string)other.literal;
+                auto actual = cast(const(char)[])other.literal;
                 return ignoreCaseCompareImpl(actual, allocator, language.isTurkic);
             }, () {
-                auto actual = cast(wstring)other.literal;
+                auto actual = cast(const(wchar)[])other.literal;
                 return ignoreCaseCompareImpl(actual, allocator, language.isTurkic);
             }, () {
-                auto actual = cast(dstring)other.literal;
+                auto actual = cast(const(dchar)[])other.literal;
                 return ignoreCaseCompareImpl(actual, allocator, language.isTurkic);
             });
         }
@@ -1281,7 +1250,7 @@ nothrow @nogc:
             size_t amountFilled;
 
             literalEncoding.handle(() {
-                auto actual = cast(string)this.iterator.literal;
+                auto actual = cast(const(char)[])this.iterator.literal;
 
                 static if (is(Char == char)) {
                     // copy straight
@@ -1309,7 +1278,7 @@ nothrow @nogc:
 
                 this.iterator.literal = actual;
             }, () {
-                auto actual = cast(wstring)this.iterator.literal;
+                auto actual = cast(const(wchar)[])this.iterator.literal;
 
                 static if (is(Char == char)) {
                     // need to reencode
@@ -1337,7 +1306,7 @@ nothrow @nogc:
 
                 this.iterator.literal = actual;
             }, () {
-                auto actual = cast(dstring)this.iterator.literal;
+                auto actual = cast(const(dchar)[])this.iterator.literal;
 
                 static if (is(Char == char)) {
                     // encode
@@ -1393,7 +1362,7 @@ nothrow @nogc:
             size_t amountFilled;
 
             literalEncoding.handle(() {
-                auto actual = cast(string)this.iterator.literal;
+                auto actual = cast(const(char)[])this.iterator.literal;
 
                 static if (is(Char == char)) {
                     // copy straight
@@ -1421,7 +1390,7 @@ nothrow @nogc:
 
                 this.iterator.literal = actual;
             }, () {
-                auto actual = cast(wstring)this.iterator.literal;
+                auto actual = cast(const(wchar)[])this.iterator.literal;
 
                 static if (is(Char == char)) {
                     // need to reencode
@@ -1449,7 +1418,7 @@ nothrow @nogc:
 
                 this.iterator.literal = actual;
             }, () {
-                auto actual = cast(dstring)this.iterator.literal;
+                auto actual = cast(const(dchar)[])this.iterator.literal;
 
                 static if (is(Char == char)) {
                     // encode
@@ -1569,7 +1538,7 @@ nothrow @nogc:
     }
 
     ///
-    bool startsWith(scope string input, scope RCAllocator allocator = RCAllocator.init) scope {
+    bool startsWith(scope const(char)[] input, scope RCAllocator allocator = RCAllocator.init) scope {
         return startsWithImpl(input, allocator, true);
     }
 
@@ -1582,7 +1551,7 @@ nothrow @nogc:
     }
 
     ///
-    bool startsWith(scope wstring input, scope RCAllocator allocator = RCAllocator.init) scope {
+    bool startsWith(scope const(wchar)[] input, scope RCAllocator allocator = RCAllocator.init) scope {
         return startsWithImpl(input, allocator, true);
     }
 
@@ -1595,7 +1564,7 @@ nothrow @nogc:
     }
 
     ///
-    bool startsWith(scope dstring input, scope RCAllocator allocator = RCAllocator.init) scope {
+    bool startsWith(scope const(dchar)[] input, scope RCAllocator allocator = RCAllocator.init) scope {
         return startsWithImpl(input, allocator, true);
     }
 
@@ -1608,7 +1577,7 @@ nothrow @nogc:
     }
 
     ///
-    bool ignoreCaseStartsWith(scope string input, scope RCAllocator allocator = RCAllocator.init,
+    bool ignoreCaseStartsWith(scope const(char)[] input, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
         return startsWithImpl(input, allocator, false, language);
     }
@@ -1621,7 +1590,7 @@ nothrow @nogc:
     }
 
     ///
-    bool ignoreCaseStartsWith(scope wstring input, scope RCAllocator allocator = RCAllocator.init,
+    bool ignoreCaseStartsWith(scope const(wchar)[] input, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
         return startsWithImpl(input, allocator, false, language);
     }
@@ -1634,7 +1603,7 @@ nothrow @nogc:
     }
 
     ///
-    bool ignoreCaseStartsWith(scope dstring input, scope RCAllocator allocator = RCAllocator.init,
+    bool ignoreCaseStartsWith(scope const(dchar)[] input, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
         return startsWithImpl(input, allocator, false, language);
     }
@@ -1656,11 +1625,11 @@ nothrow @nogc:
         scope comparison = CaseAwareComparison(allocator, language.isTurkic);
         scope tempUs = this.byUTF32();
 
-        // Most likely we are longer than the input string.
+        // Most likely we are longer than the input const(char)[].
         // Therefore we must set the input as what to compare against (to try and prevent memory allocations).
         // We also need to tell the comparator to ignore if we are longer.
 
-        comparison.setAgainst(inputOpApply.handler, caseSensitive);
+        comparison.setAgainst(&inputOpApply.opApply, caseSensitive);
         return comparison.compare(&tempUs.opApply, true) == 0;
     }
 
@@ -1746,19 +1715,19 @@ nothrow @nogc:
             bool caseSensitive = true, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
 
         return other.literalEncoding.handle(() {
-            auto actual = cast(string)other.literal;
+            auto actual = cast(const(char)[])other.literal;
             return startsWithImpl(actual, allocator, caseSensitive, language);
         }, () {
-            auto actual = cast(wstring)other.literal;
+            auto actual = cast(const(wchar)[])other.literal;
             return startsWithImpl(actual, allocator, caseSensitive, language);
         }, () {
-            auto actual = cast(dstring)other.literal;
+            auto actual = cast(const(dchar)[])other.literal;
             return startsWithImpl(actual, allocator, caseSensitive, language);
         });
     }
 
     ///
-    bool endsWith(scope string input, scope RCAllocator allocator = RCAllocator.init) scope {
+    bool endsWith(scope const(char)[] input, scope RCAllocator allocator = RCAllocator.init) scope {
         return endsWithImpl(input, allocator, true);
     }
 
@@ -1771,7 +1740,7 @@ nothrow @nogc:
     }
 
     ///
-    bool endsWith(scope wstring input, scope RCAllocator allocator = RCAllocator.init) scope {
+    bool endsWith(scope const(wchar)[] input, scope RCAllocator allocator = RCAllocator.init) scope {
         return endsWithImpl(input, allocator, true);
     }
 
@@ -1784,7 +1753,7 @@ nothrow @nogc:
     }
 
     ///
-    bool endsWith(scope dstring input, scope RCAllocator allocator = RCAllocator.init) scope {
+    bool endsWith(scope const(dchar)[] input, scope RCAllocator allocator = RCAllocator.init) scope {
         return endsWithImpl(input, allocator, true);
     }
 
@@ -1797,7 +1766,7 @@ nothrow @nogc:
     }
 
     ///
-    bool ignoreCaseEndsWith(scope string input, scope RCAllocator allocator = RCAllocator.init,
+    bool ignoreCaseEndsWith(scope const(char)[] input, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
         return endsWithImpl(input, allocator, false, language);
     }
@@ -1810,7 +1779,7 @@ nothrow @nogc:
     }
 
     ///
-    bool ignoreCaseEndsWith(scope wstring input, scope RCAllocator allocator = RCAllocator.init,
+    bool ignoreCaseEndsWith(scope const(wchar)[] input, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
         return endsWithImpl(input, allocator, false, language);
     }
@@ -1823,7 +1792,7 @@ nothrow @nogc:
     }
 
     ///
-    bool ignoreCaseEndsWith(scope dstring input, scope RCAllocator allocator = RCAllocator.init,
+    bool ignoreCaseEndsWith(scope const(dchar)[] input, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
         return endsWithImpl(input, allocator, false, language);
     }
@@ -1844,19 +1813,19 @@ nothrow @nogc:
         scope ForeachOverAnyUTF inputOpApply = foreachOverAnyUTF(input);
         scope comparison = CaseAwareComparison(allocator, language.isTurkic);
 
-        // Most likely we are longer than the input string.
+        // Most likely we are longer than the input const(char)[].
         // Therefore we must set the input as what to compare against (to try and prevent memory allocations).
         // We also need to tell the comparator to ignore if we are longer.
 
-        comparison.setAgainst(inputOpApply.handler, caseSensitive);
+        comparison.setAgainst(&inputOpApply.opApply, caseSensitive);
 
         // it is not enough to compare, we need to set an offset for us to make it match up to the end.
         const numberOfCharactersNeeded = comparison.againstLength();
         const toConsumeLength = literalEncoding.handle(() {
-            auto actual = cast(string)this.literal;
+            auto actual = cast(const(char)[])this.literal;
             return codePointsFromEnd(actual, numberOfCharactersNeeded);
-        }, () { auto actual = cast(wstring)this.literal; return codePointsFromEnd(actual, numberOfCharactersNeeded); }, () {
-            auto actual = cast(dstring)this.literal;
+        }, () { auto actual = cast(const(wchar)[])this.literal; return codePointsFromEnd(actual, numberOfCharactersNeeded); }, () {
+            auto actual = cast(const(dchar)[])this.literal;
             return codePointsFromEnd(actual, numberOfCharactersNeeded);
         });
 
@@ -1952,16 +1921,16 @@ nothrow @nogc:
             bool caseSensitive = true, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
 
         return other.literalEncoding.handle(() {
-            auto actual = cast(string)other.literal;
+            auto actual = cast(const(char)[])other.literal;
             return endsWithImpl(actual, allocator, caseSensitive, language);
-        }, () { auto actual = cast(wstring)other.literal; return endsWithImpl(actual, allocator, caseSensitive, language); }, () {
-            auto actual = cast(dstring)other.literal;
+        }, () { auto actual = cast(const(wchar)[])other.literal; return endsWithImpl(actual, allocator, caseSensitive, language); }, () {
+            auto actual = cast(const(dchar)[])other.literal;
             return endsWithImpl(actual, allocator, caseSensitive, language);
         });
     }
 
     ///
-    size_t count(scope string input, scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+    size_t count(scope const(char)[] input, scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
         return countImpl(input, allocator, true, language);
     }
 
@@ -1972,7 +1941,7 @@ nothrow @nogc:
     }
 
     ///
-    size_t count(scope wstring input, scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+    size_t count(scope const(wchar)[] input, scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
         return countImpl(input, allocator, true, language);
     }
 
@@ -1983,7 +1952,7 @@ nothrow @nogc:
     }
 
     ///
-    size_t count(scope dstring input, scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+    size_t count(scope const(dchar)[] input, scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
         return countImpl(input, allocator, true, language);
     }
 
@@ -1994,7 +1963,7 @@ nothrow @nogc:
     }
 
     ///
-    size_t ignoreCaseCount(scope string input, scope RCAllocator allocator = RCAllocator.init,
+    size_t ignoreCaseCount(scope const(char)[] input, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
         return countImpl(input, allocator, false, language);
     }
@@ -2006,7 +1975,7 @@ nothrow @nogc:
     }
 
     ///
-    size_t ignoreCaseCount(scope wstring input, scope RCAllocator allocator = RCAllocator.init,
+    size_t ignoreCaseCount(scope const(wchar)[] input, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
         return countImpl(input, allocator, false, language);
     }
@@ -2018,7 +1987,7 @@ nothrow @nogc:
     }
 
     ///
-    size_t ignoreCaseCount(scope dstring input, scope RCAllocator allocator = RCAllocator.init,
+    size_t ignoreCaseCount(scope const(dchar)[] input, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
         return countImpl(input, allocator, false, language);
     }
@@ -2036,7 +2005,7 @@ nothrow @nogc:
 
         scope ForeachOverAnyUTF inputOpApply = foreachOverAnyUTF(input);
         scope comparison = CaseAwareComparison(allocator, language.isTurkic);
-        comparison.setAgainst(inputOpApply.handler, caseSensitive);
+        comparison.setAgainst(&inputOpApply.opApply, caseSensitive);
 
         String_UTF us = this;
         size_t total;
@@ -2054,9 +2023,9 @@ nothrow @nogc:
 
             foreach (i; 0 .. toIncrease) {
                 const size_t characterLength = us.literalEncoding.handle(() {
-                    return decodeLength(cast(string)us.literal);
-                }, () { return decodeLength(cast(wstring)us.literal); }, () {
-                    return decodeLength(cast(dstring)us.literal);
+                    return decodeLength(cast(const(char)[])us.literal);
+                }, () { return decodeLength(cast(const(wchar)[])us.literal); }, () {
+                    return decodeLength(cast(const(dchar)[])us.literal);
                 });
 
                 us = us[characterLength .. $];
@@ -2140,16 +2109,16 @@ nothrow @nogc:
 
     private size_t countImplStr(String)(scope String other, scope RCAllocator allocator, bool caseSensitive, UnicodeLanguage language) scope {
         return other.literalEncoding.handle(() {
-            auto actual = cast(string)other.literal;
+            auto actual = cast(const(char)[])other.literal;
             return countImpl(actual, allocator, caseSensitive, language);
-        }, () { auto actual = cast(wstring)other.literal; return countImpl(actual, allocator, caseSensitive, language); }, () {
-            auto actual = cast(dstring)other.literal;
+        }, () { auto actual = cast(const(wchar)[])other.literal; return countImpl(actual, allocator, caseSensitive, language); }, () {
+            auto actual = cast(const(dchar)[])other.literal;
             return countImpl(actual, allocator, caseSensitive, language);
         });
     }
 
     ///
-    bool contains(scope string input, scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+    bool contains(scope const(char)[] input, scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
         return containsImpl(input, allocator, true, language);
     }
 
@@ -2160,7 +2129,7 @@ nothrow @nogc:
     }
 
     ///
-    bool contains(scope wstring input, scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+    bool contains(scope const(wchar)[] input, scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
         return containsImpl(input, allocator, true, language);
     }
 
@@ -2171,7 +2140,7 @@ nothrow @nogc:
     }
 
     ///
-    bool contains(scope dstring input, scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+    bool contains(scope const(dchar)[] input, scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
         return containsImpl(input, allocator, true, language);
     }
 
@@ -2182,7 +2151,7 @@ nothrow @nogc:
     }
 
     ///
-    bool ignoreCaseContains(scope string input, scope RCAllocator allocator = RCAllocator.init,
+    bool ignoreCaseContains(scope const(char)[] input, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
         return containsImpl(input, allocator, false, language);
     }
@@ -2194,7 +2163,7 @@ nothrow @nogc:
     }
 
     ///
-    bool ignoreCaseContains(scope wstring input, scope RCAllocator allocator = RCAllocator.init,
+    bool ignoreCaseContains(scope const(wchar)[] input, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
         return containsImpl(input, allocator, false, language);
     }
@@ -2206,7 +2175,7 @@ nothrow @nogc:
     }
 
     ///
-    bool ignoreCaseContains(scope dstring input, scope RCAllocator allocator = RCAllocator.init,
+    bool ignoreCaseContains(scope const(dchar)[] input, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
         return containsImpl(input, allocator, false, language);
     }
@@ -2224,7 +2193,7 @@ nothrow @nogc:
 
         scope ForeachOverAnyUTF inputOpApply = foreachOverAnyUTF(input);
         scope comparison = CaseAwareComparison(allocator, language.isTurkic);
-        comparison.setAgainst(inputOpApply.handler, caseSensitive);
+        comparison.setAgainst(&inputOpApply.opApply, caseSensitive);
 
         String_UTF us = this;
         const lengthOfOther = comparison.againstLength();
@@ -2239,9 +2208,9 @@ nothrow @nogc:
 
             foreach (i; 0 .. toIncrease) {
                 const size_t characterLength = us.literalEncoding.handle(() {
-                    return decodeLength(cast(string)us.literal);
-                }, () { return decodeLength(cast(wstring)us.literal); }, () {
-                    return decodeLength(cast(dstring)us.literal);
+                    return decodeLength(cast(const(char)[])us.literal);
+                }, () { return decodeLength(cast(const(wchar)[])us.literal); }, () {
+                    return decodeLength(cast(const(dchar)[])us.literal);
                 });
 
                 us = us[characterLength .. $];
@@ -2325,16 +2294,16 @@ nothrow @nogc:
 
     private bool containsImplStr(String)(scope String other, scope RCAllocator allocator, bool caseSensitive, UnicodeLanguage language) scope {
         return other.literalEncoding.handle(() {
-            auto actual = cast(string)other.literal;
+            auto actual = cast(const(char)[])other.literal;
             return containsImpl(actual, allocator, caseSensitive, language);
-        }, () { auto actual = cast(wstring)other.literal; return containsImpl(actual, allocator, caseSensitive, language); }, () {
-            auto actual = cast(dstring)other.literal;
+        }, () { auto actual = cast(const(wchar)[])other.literal; return containsImpl(actual, allocator, caseSensitive, language); }, () {
+            auto actual = cast(const(dchar)[])other.literal;
             return containsImpl(actual, allocator, caseSensitive, language);
         });
     }
 
     ///
-    ptrdiff_t indexOf(scope string input, scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage
+    ptrdiff_t indexOf(scope const(char)[] input, scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage
             .Unknown) scope {
         return indexOfImpl(input, allocator, true, language);
     }
@@ -2346,7 +2315,7 @@ nothrow @nogc:
     }
 
     ///
-    ptrdiff_t indexOf(scope wstring input, scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage
+    ptrdiff_t indexOf(scope const(wchar)[] input, scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage
             .Unknown) scope {
         return indexOfImpl(input, allocator, true, language);
     }
@@ -2358,7 +2327,7 @@ nothrow @nogc:
     }
 
     ///
-    ptrdiff_t indexOf(scope dstring input, scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage
+    ptrdiff_t indexOf(scope const(dchar)[] input, scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage
             .Unknown) scope {
         return indexOfImpl(input, allocator, true, language);
     }
@@ -2370,7 +2339,7 @@ nothrow @nogc:
     }
 
     ///
-    ptrdiff_t ignoreCaseIndexOf(scope string input, scope RCAllocator allocator = RCAllocator.init,
+    ptrdiff_t ignoreCaseIndexOf(scope const(char)[] input, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
         return indexOfImpl(input, allocator, false, language);
     }
@@ -2382,7 +2351,7 @@ nothrow @nogc:
     }
 
     ///
-    ptrdiff_t ignoreCaseIndexOf(scope wstring input, scope RCAllocator allocator = RCAllocator.init,
+    ptrdiff_t ignoreCaseIndexOf(scope const(wchar)[] input, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
         return indexOfImpl(input, allocator, false, language);
     }
@@ -2394,7 +2363,7 @@ nothrow @nogc:
     }
 
     ///
-    ptrdiff_t ignoreCaseIndexOf(scope dstring input, scope RCAllocator allocator = RCAllocator.init,
+    ptrdiff_t ignoreCaseIndexOf(scope const(dchar)[] input, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
         return indexOfImpl(input, allocator, false, language);
     }
@@ -2412,7 +2381,7 @@ nothrow @nogc:
 
         scope ForeachOverAnyUTF inputOpApply = foreachOverAnyUTF(input);
         scope comparison = CaseAwareComparison(allocator, language.isTurkic);
-        comparison.setAgainst(inputOpApply.handler, caseSensitive);
+        comparison.setAgainst(&inputOpApply.opApply, caseSensitive);
 
         ptrdiff_t ret;
         String_UTF us = this;
@@ -2428,9 +2397,9 @@ nothrow @nogc:
 
             foreach (i; 0 .. toIncrease) {
                 const size_t characterLength = us.literalEncoding.handle(() {
-                    return decodeLength(cast(string)us.literal);
-                }, () { return decodeLength(cast(wstring)us.literal); }, () {
-                    return decodeLength(cast(dstring)us.literal);
+                    return decodeLength(cast(const(char)[])us.literal);
+                }, () { return decodeLength(cast(const(wchar)[])us.literal); }, () {
+                    return decodeLength(cast(const(dchar)[])us.literal);
                 });
 
                 us = us[characterLength .. $];
@@ -2515,16 +2484,16 @@ nothrow @nogc:
 
     private ptrdiff_t indexOfImplStr(String)(scope String other, scope RCAllocator allocator, bool caseSensitive, UnicodeLanguage language) scope {
         return other.literalEncoding.handle(() {
-            auto actual = cast(string)other.literal;
+            auto actual = cast(const(char)[])other.literal;
             return indexOfImpl(actual, allocator, caseSensitive, language);
-        }, () { auto actual = cast(wstring)other.literal; return indexOfImpl(actual, allocator, caseSensitive, language); }, () {
-            auto actual = cast(dstring)other.literal;
+        }, () { auto actual = cast(const(wchar)[])other.literal; return indexOfImpl(actual, allocator, caseSensitive, language); }, () {
+            auto actual = cast(const(dchar)[])other.literal;
             return indexOfImpl(actual, allocator, caseSensitive, language);
         });
     }
 
     ///
-    ptrdiff_t lastIndexOf(scope string input, scope RCAllocator allocator = RCAllocator.init,
+    ptrdiff_t lastIndexOf(scope const(char)[] input, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
         return lastIndexOfImpl(input, allocator, true, language);
     }
@@ -2536,7 +2505,7 @@ nothrow @nogc:
     }
 
     ///
-    ptrdiff_t lastIndexOf(scope wstring input, scope RCAllocator allocator = RCAllocator.init,
+    ptrdiff_t lastIndexOf(scope const(wchar)[] input, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
         return lastIndexOfImpl(input, allocator, true, language);
     }
@@ -2548,7 +2517,7 @@ nothrow @nogc:
     }
 
     ///
-    ptrdiff_t lastIndexOf(scope dstring input, scope RCAllocator allocator = RCAllocator.init,
+    ptrdiff_t lastIndexOf(scope const(dchar)[] input, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
         return lastIndexOfImpl(input, allocator, true, language);
     }
@@ -2560,7 +2529,7 @@ nothrow @nogc:
     }
 
     ///
-    ptrdiff_t ignoreCaseLastIndexOf(scope string input, scope RCAllocator allocator = RCAllocator.init,
+    ptrdiff_t ignoreCaseLastIndexOf(scope const(char)[] input, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
         return lastIndexOfImpl(input, allocator, false, language);
     }
@@ -2572,7 +2541,7 @@ nothrow @nogc:
     }
 
     ///
-    ptrdiff_t ignoreCaseLastIndexOf(scope wstring input, scope RCAllocator allocator = RCAllocator.init,
+    ptrdiff_t ignoreCaseLastIndexOf(scope const(wchar)[] input, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
         return lastIndexOfImpl(input, allocator, false, language);
     }
@@ -2584,7 +2553,7 @@ nothrow @nogc:
     }
 
     ///
-    ptrdiff_t ignoreCaseLastIndexOf(scope dstring input, scope RCAllocator allocator = RCAllocator.init,
+    ptrdiff_t ignoreCaseLastIndexOf(scope const(dchar)[] input, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
         return lastIndexOfImpl(input, allocator, false, language);
     }
@@ -2602,7 +2571,7 @@ nothrow @nogc:
 
         scope ForeachOverAnyUTF inputOpApply = foreachOverAnyUTF(input);
         scope comparison = CaseAwareComparison(allocator, language.isTurkic);
-        comparison.setAgainst(inputOpApply.handler, caseSensitive);
+        comparison.setAgainst(&inputOpApply.opApply, caseSensitive);
 
         ptrdiff_t ret = -1, soFar;
         String_UTF us = this;
@@ -2619,9 +2588,9 @@ nothrow @nogc:
 
             foreach (i; 0 .. toIncrease) {
                 const size_t characterLength = us.literalEncoding.handle(() {
-                    return decodeLength(cast(string)us.literal);
-                }, () { return decodeLength(cast(wstring)us.literal); }, () {
-                    return decodeLength(cast(dstring)us.literal);
+                    return decodeLength(cast(const(char)[])us.literal);
+                }, () { return decodeLength(cast(const(wchar)[])us.literal); }, () {
+                    return decodeLength(cast(const(dchar)[])us.literal);
                 });
 
                 us = us[characterLength .. $];
@@ -2707,13 +2676,13 @@ nothrow @nogc:
     private ptrdiff_t lastIndexOfImplStr(String)(scope String other, scope RCAllocator allocator, bool caseSensitive,
             UnicodeLanguage language) scope {
         return other.literalEncoding.handle(() {
-            auto actual = cast(string)other.literal;
+            auto actual = cast(const(char)[])other.literal;
             return lastIndexOfImpl(actual, allocator, caseSensitive, language);
         }, () {
-            auto actual = cast(wstring)other.literal;
+            auto actual = cast(const(wchar)[])other.literal;
             return lastIndexOfImpl(actual, allocator, caseSensitive, language);
         }, () {
-            auto actual = cast(dstring)other.literal;
+            auto actual = cast(const(dchar)[])other.literal;
             return lastIndexOfImpl(actual, allocator, caseSensitive, language);
         });
     }
@@ -2737,7 +2706,7 @@ nothrow @nogc:
     ///
     String_UTF stripLeft() scope return {
         literalEncoding.handle(() @trusted {
-            auto actual = cast(string)this.literal;
+            auto actual = cast(const(char)[])this.literal;
             size_t amount;
 
             while (amount < actual.length) {
@@ -2751,7 +2720,7 @@ nothrow @nogc:
 
             this.literal = actual[amount .. $];
         }, () @trusted {
-            auto actual = cast(wstring)this.literal;
+            auto actual = cast(const(wchar)[])this.literal;
             size_t amount;
 
             while (amount < actual.length) {
@@ -2765,7 +2734,7 @@ nothrow @nogc:
 
             this.literal = actual[amount .. $];
         }, () @trusted {
-            auto actual = cast(dstring)this.literal;
+            auto actual = cast(const(dchar)[])this.literal;
             size_t amount;
 
             foreach (c; actual) {
@@ -2793,7 +2762,7 @@ nothrow @nogc:
     ///
     String_UTF stripRight() scope return {
         literalEncoding.handle(() @trusted {
-            auto actual = cast(string)this.literal[0 .. this.length];
+            auto actual = cast(const(char)[])this.literal[0 .. this.length];
             size_t amount, soFar;
 
             while (soFar < actual.length) {
@@ -2811,7 +2780,7 @@ nothrow @nogc:
             if (amount > 0)
                 this.literal = actual[0 .. $ - amount];
         }, () @trusted {
-            auto actual = (cast(wstring)this.literal)[0 .. this.length];
+            auto actual = (cast(const(wchar)[])this.literal)[0 .. this.length];
             size_t amount, soFar;
 
             while (soFar < actual.length) {
@@ -2829,7 +2798,7 @@ nothrow @nogc:
             if (amount > 0)
                 this.literal = actual[0 .. $ - amount];
         }, () @trusted {
-            auto actual = (cast(dstring)this.literal)[0 .. this.length];
+            auto actual = (cast(const(dchar)[])this.literal)[0 .. this.length];
             size_t amount;
 
             foreach_reverse (c; actual) {
@@ -2883,13 +2852,13 @@ private:
     static struct LifeTime {
         shared(int) refCount;
         RCAllocator allocator;
-        immutable(void)[] original;
+        const(void)[] original;
     }
 
     static struct Iterator {
         shared(int) refCount;
         RCAllocator allocator;
-        immutable(void)[] literal;
+        const(void)[] literal;
 
         void[4] forwardBuffer, backwardBuffer;
         void[] forwardItems, backwardItems;
@@ -2923,21 +2892,21 @@ private:
         assert(this.iterator !is null);
 
         literalEncoding.handle(() {
-            auto actual = cast(string)this.literal;
+            auto actual = cast(const(char)[])this.literal;
 
             if (actual.length > 0 && actual[$ - 1] == '\0')
                 actual = actual[0 .. $ - 1];
 
             this.iterator.literal = actual;
         }, () {
-            auto actual = cast(wstring)this.literal;
+            auto actual = cast(const(wchar)[])this.literal;
 
             if (actual.length > 0 && actual[$ - 1] == '\0')
                 actual = actual[0 .. $ - 1];
 
             this.iterator.literal = actual;
         }, () {
-            auto actual = cast(dstring)this.literal;
+            auto actual = cast(const(dchar)[])this.literal;
 
             if (actual.length > 0 && actual[$ - 1] == '\0')
                 actual = actual[0 .. $ - 1];
