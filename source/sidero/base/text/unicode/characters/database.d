@@ -1,4 +1,5 @@
 module sidero.base.text.unicode.characters.database;
+import sidero.base.bitmanip : BitFlags;
 import unidb = sidero.base.text.unicode.database;
 
 @safe nothrow @nogc pure:
@@ -9,6 +10,8 @@ import unidb = sidero.base.text.unicode.database;
     Used in some Unicode algorithms (such as casing).
 */
 alias UnicodeLanguage = unidb.Language;
+///
+alias UnicodeLanguageFlags = BitFlags.For!UnicodeLanguage;
 
 ///
 bool isTurkic(UnicodeLanguage input) {
