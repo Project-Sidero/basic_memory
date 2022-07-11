@@ -6,6 +6,7 @@ isCased
 isCaseIgnorable
 sidero_utf_lut_isMemberOfSoft_Dotted
 sidero_utf_lut_getCCC
+sidero_utf_lut_getSpecialCasing(language)
 
 Final_Sigma: [+] [-]
 (isCased isCaseIgnorable*) C !(isCaseIgnorable* isCased)
