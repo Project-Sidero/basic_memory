@@ -359,6 +359,22 @@ T[] makeArray(T, Allocator)(auto ref Allocator alloc, size_t length) @trusted {
     return ret;
 }
 
+/// Ditto
+T[] makeArray(T, Allocator)(auto ref Allocator alloc, const(T)[] initValues) @trusted {
+    T[] ret = alloc.makeArray!T(initValues.length);
+
+    if (ret is null)
+        return null;
+    else if (ret.length != initValues.length) {
+        alloc.deallocate(cast(void[])ret);
+        return null;
+    } else {
+        foreach(i, ref v; initValues)
+            ret[i] = v;
+        return ret;
+    }
+}
+
 /// Mostly a copy of the one in std.experimental.allocator.
 bool expandArray(T, Allocator)(scope auto ref Allocator alloc, scope ref T[] array, size_t delta) @trusted {
     if (delta == 0)
