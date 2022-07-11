@@ -79,7 +79,6 @@ struct BitFlags {
         assert(flags.flags == 2);
     }
 
-
     ///
     void opOpAssign(string op : "|", Enum)(Enum value)
             if (is(Enum == enum) && __traits(allMembers, Enum).length <= typeof(this.flags).sizeof * 8) {
@@ -314,6 +313,132 @@ struct BitFlags {
     ///
     ulong toHash() const {
         return flags;
+    }
+
+   ///
+    struct For(Enum) {
+        static assert(__traits(allMembers, Enum).length <= typeof(this.bitFlags.flags).sizeof * 8);
+
+        ///
+        BitFlags bitFlags;
+
+        @safe nothrow @nogc pure:
+
+        ///
+        this(Input)(Input input) {
+            import std.traits : isNumeric;
+
+            static if (is(Input == Enum)) {
+                this.bitFlags.flags = flagForEnum(input);
+            } else static if (isNumeric!Input) {
+                this.bitFlags.flags = input;
+            } else static if (is(Input == BitFlags)) {
+                this.bitFlags = input;
+            } else
+                static assert(0);
+        }
+
+        ///
+        void opOpAssign(string op : "&")(Enum value) {
+            bitFlags &= value;
+        }
+
+        ///
+        void opOpAssign(string op : "|")(Enum value) {
+            bitFlags |= value;
+        }
+
+        ///
+        void opOpAssign(string op : "^")(Enum value) {
+            bitFlags ^= value;
+        }
+
+        ///
+        void opOpAssign(string op : "&")(BitFlags value)
+        {
+            bitFlags &= value;
+        }
+
+        ///
+        void opOpAssign(string op : "|")(BitFlags value)
+        {
+            bitFlags |= value;
+        }
+
+        ///
+        void opOpAssign(string op : "^")(BitFlags value)
+        {
+            bitFlags ^= value;
+        }
+
+        ///
+        For opBinary(string op : "&")(Enum value) {
+            return For(bitFlags & value);
+        }
+
+        ///
+        For opBinary(string op : "|")(Enum value) {
+            return For(bitFlags | value);
+        }
+
+        ///
+        For opBinary(string op : "^")(Enum value) {
+            return For(bitFlags ^ value);
+        }
+
+        ///
+        For opBinary(string op : "&")(BitFlags value) {
+            return For(bitFlags & value);
+        }
+
+        ///
+        For opBinary(string op : "|")(BitFlags value) {
+            return For(bitFlags | value);
+        }
+
+        ///
+        For opBinary(string op : "^")(BitFlags value) {
+            return For(bitFlags ^ value);
+        }
+
+        ///
+        bool opBinaryRight(string op : "in")(Enum value) {
+            return value in bitFlags;
+        }
+
+        ///
+        int opCmp(const BitFlags other) const {
+            return bitFlags.opCmp(other);
+        }
+
+        ///
+        int opCmp(const For other) const {
+            return bitFlags.opCmp(other.bitFlags);
+        }
+
+        ///
+        ulong toHash() const {
+            return bitFlags.toHash();
+        }
+    }
+
+    ///
+    unittest {
+        enum Something {
+            Donkey,
+            Horse,
+            Anything,
+        }
+
+        alias SomethingFlags = BitFlags.For!Something;
+
+        void accepter(SomethingFlags bitFlags) {
+            assert(Something.Anything in bitFlags);
+            assert(Something.Donkey !in bitFlags);
+        }
+
+        accepter(SomethingFlags(Something.Anything));
+        accepter(SomethingFlags(Something.Anything) | Something.Horse);
     }
 
 private:
