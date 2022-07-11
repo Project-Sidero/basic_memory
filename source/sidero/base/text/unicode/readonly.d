@@ -681,6 +681,17 @@ nothrow @nogc:
     }
 
     ///
+    String_UTF normalize(RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.Unknown,
+            bool compatibility = false, bool compose = false) scope @trusted {
+        allocator = pickAllocator(allocator);
+        scope us32 = this.byUTF32();
+
+        import n = sidero.base.text.unicode.normalization;
+        const(dchar)[] got = n.normalize(&us32.opApply, allocator, language.isTurkic, compatibility, compose);
+        return String_UTF(got, allocator, got);
+    }
+
+    ///
     Result!Char opIndex(size_t index) const scope {
         if (this.length < index)
             return Result!Char(RangeException);
