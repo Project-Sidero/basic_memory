@@ -361,6 +361,8 @@ private:
             import std.stdio : writeln, stdout;
 
             Datem* datem = datems;
+            if (datem is null)
+                return;
 
             KeyType lastEnd = datem.range.end;
             datem = datem.next;

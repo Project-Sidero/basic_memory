@@ -1,62 +1,10 @@
-module generators.main;
+/**
+ Unicode database access routines
+ License: Artistic-v2
+*/
+module sidero.base.text.unicode.database;
+// Generated do not modify
 
-void main() {
-    import std.array : appender;
-    import std.file : remove, exists, mkdirRecurse, write;
-
-    try {
-        if (exists("generated"))
-            remove("generated");
-    } catch (Exception e) {
-    }
-
-    mkdirRecurse("generated/sidero/base/internal/unicode");
-    mkdirRecurse("generated/sidero/base/text/unicode");
-
-    createAPIfile;
-
-    {
-        import generators.unicode.casefolding;
-        import generators.unicode.compositionexclusions;
-        import generators.unicode.hangulsyllabletype;
-        import generators.unicode.derivednormalizationprops;
-        import generators.unicode.unicodedata;
-        import generators.unicode.proplist;
-        import generators.unicode.wordbreakproperty;
-        import generators.unicode.specialcasing;
-        import generators.unicode.linebreak;
-        import generators.unicode.emoji_data;
-        import generators.unicode.scripts;
-
-        caseFolding;
-        // must be before unicodeData
-        compositionExclusions;
-        hangulSyllableType;
-        derivedNormalizationProps;
-        // must be after compositionExclusions
-        unicodeData;
-        propList;
-        wordBreakProperty;
-        specialCasing;
-        lineBreak;
-        emojiData;
-        handleScripts;
-    }
-}
-
-void createAPIfile() {
-    import std.array : appender;
-    import std.file : write;
-
-    auto api = appender!string();
-    api ~= "/**\n";
-    api ~= " Unicode database access routines\n";
-    api ~= " License: Artistic-v2\n";
-    api ~= "*/\n";
-    api ~= "module sidero.base.text.unicode.database;\n";
-    api ~= "// Generated do not modify\n";
-
-    api ~= `
 /// Add 1 to end to foreach
 struct ValueRange {
     ///
@@ -506,18 +454,3 @@ bool isUnicodeCased(dchar input) @safe nothrow @nogc pure {
     }
 }
 
-// Is character Grapheme extend
-bool isUnicodeGraphemeExtend(dchar input) @safe nothrow @nogc pure {
-    switch(sidero_utf_lut_getGeneralCategory(input)) {
-        case GeneralCategory.Me:
-        case GeneralCategory.Mn:
-            return true;
-        default:
-            return sidero_utf_lut_isMemberOfOther_Grapheme_Extend(input);
-    }
-}
-
-`;
-
-    write("generated/sidero/base/text/unicode/database.d", api.data);
-}
