@@ -64,7 +64,7 @@ dchar toSimplifiedTitle(dchar input) {
     return input;
 }
 
-///
+/// Lowercase + Uppercase + Lt + Lm + Lo + Nl + Other_Alphabetic
 bool isAlpha(dchar input) {
     return unidb.isUnicodeAlpha(input);
 }

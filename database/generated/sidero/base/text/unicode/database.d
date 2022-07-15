@@ -204,6 +204,220 @@ struct SpecialCasing {
     SpecialCasingCondition condition;
 }
 
+///
+enum LineBreakClass : ubyte {
+    XX, ///
+    BK, ///
+    CR, ///
+    LF, ///
+    CM, ///
+    NL, ///
+    SG, ///
+    WJ, ///
+    ZW, ///
+    GL, ///
+    SP, ///
+    ZWJ, ///
+    B2, ///
+    BA, ///
+    BB, ///
+    HY, ///
+    CB, ///
+    CL, ///
+    CP, ///
+    EX, ///
+    IN, ///
+    NS, ///
+    OP, ///
+    QU, ///
+    IS, ///
+    NU, ///
+    PO, ///
+    PR, ///
+    SY, ///
+    AI, ///
+    AL, ///
+    CJ, ///
+    EB, ///
+    EM, ///
+    H2, ///
+    H3, ///
+    HL, ///
+    ID, ///
+    JL, ///
+    JV, ///
+    JT, ///
+    RI, ///
+    SA, ///
+    Unknown = XX, ///
+}
+
+///
+enum Script : ubyte {
+    Unknown, ///
+    Old_Hungarian, ///
+    Coptic, ///
+    Ol_Chiki, ///
+    Cyrillic, ///
+    Thaana, ///
+    Inscriptional_Parthian, ///
+    Nabataean, ///
+    Ogham, ///
+    Meroitic_Hieroglyphs, ///
+    Makasar, ///
+    Siddham, ///
+    Old_Persian, ///
+    Imperial_Aramaic, ///
+    Myanmar, ///
+    Deseret, ///
+    Kaithi, ///
+    Medefaidrin, ///
+    Kayah_Li, ///
+    Hiragana, ///
+    Ahom, ///
+    Devanagari, ///
+    Tibetan, ///
+    Nko, ///
+    Brahmi, ///
+    Osage, ///
+    Nushu, ///
+    Cuneiform, ///
+    Takri, ///
+    Toto, ///
+    Latin, ///
+    Hanunoo, ///
+    Limbu, ///
+    Saurashtra, ///
+    Lisu, ///
+    Egyptian_Hieroglyphs, ///
+    Elbasan, ///
+    Palmyrene, ///
+    Tagbanwa, ///
+    Old_Italic, ///
+    Caucasian_Albanian, ///
+    Malayalam, ///
+    Inherited, ///
+    Sora_Sompeng, ///
+    Linear_B, ///
+    Nyiakeng_Puachue_Hmong, ///
+    Meroitic_Cursive, ///
+    Thai, ///
+    Mende_Kikakui, ///
+    Old_Sogdian, ///
+    Old_Turkic, ///
+    Samaritan, ///
+    Old_South_Arabian, ///
+    Hanifi_Rohingya, ///
+    Balinese, ///
+    Mandaic, ///
+    SignWriting, ///
+    Tifinagh, ///
+    Tai_Viet, ///
+    Syriac, ///
+    Soyombo, ///
+    Elymaic, ///
+    Hatran, ///
+    Chorasmian, ///
+    Glagolitic, ///
+    Osmanya, ///
+    Linear_A, ///
+    Mro, ///
+    Chakma, ///
+    Modi, ///
+    Bassa_Vah, ///
+    Han, ///
+    Multani, ///
+    Bopomofo, ///
+    Adlam, ///
+    Khitan_Small_Script, ///
+    Lao, ///
+    Psalter_Pahlavi, ///
+    Anatolian_Hieroglyphs, ///
+    Canadian_Aboriginal, ///
+    Common, ///
+    Gothic, ///
+    Yi, ///
+    Sinhala, ///
+    Rejang, ///
+    Lepcha, ///
+    Tai_Tham, ///
+    Dives_Akuru, ///
+    Meetei_Mayek, ///
+    Tirhuta, ///
+    Marchen, ///
+    Wancho, ///
+    Phoenician, ///
+    Gurmukhi, ///
+    Khudawadi, ///
+    Khojki, ///
+    Newa, ///
+    Dogra, ///
+    Oriya, ///
+    Tagalog, ///
+    Sundanese, ///
+    Old_Permic, ///
+    Shavian, ///
+    Lycian, ///
+    Miao, ///
+    Tangut, ///
+    Bengali, ///
+    Inscriptional_Pahlavi, ///
+    Vithkuqi, ///
+    Armenian, ///
+    New_Tai_Lue, ///
+    Sogdian, ///
+    Buhid, ///
+    Manichaean, ///
+    Greek, ///
+    Braille, ///
+    Avestan, ///
+    Arabic, ///
+    Javanese, ///
+    Lydian, ///
+    Pau_Cin_Hau, ///
+    Cypro_Minoan, ///
+    Buginese, ///
+    Batak, ///
+    Nandinagari, ///
+    Cham, ///
+    Gunjala_Gondi, ///
+    Cypriot, ///
+    Ugaritic, ///
+    Georgian, ///
+    Sharada, ///
+    Tamil, ///
+    Cherokee, ///
+    Pahawh_Hmong, ///
+    Syloti_Nagri, ///
+    Kharoshthi, ///
+    Zanabazar_Square, ///
+    Katakana, ///
+    Telugu, ///
+    Ethiopic, ///
+    Vai, ///
+    Bamum, ///
+    Hangul, ///
+    Mongolian, ///
+    Old_Uyghur, ///
+    Mahajani, ///
+    Khmer, ///
+    Grantha, ///
+    Kannada, ///
+    Yezidi, ///
+    Old_North_Arabian, ///
+    Tai_Le, ///
+    Hebrew, ///
+    Gujarati, ///
+    Tangsa, ///
+    Carian, ///
+    Bhaiksuki, ///
+    Masaram_Gondi, ///
+    Runic, ///
+    Duployan, ///
+    Warang_Citi, ///
+    Phags_Pa, ///
+}
+
 /// Is character case ignorable
 bool isUnicodeCaseIgnorable(dchar input) @safe nothrow @nogc pure {
     switch(sidero_utf_lut_getGeneralCategory(input)) {
@@ -237,6 +451,17 @@ bool isUnicodeCased(dchar input) @safe nothrow @nogc pure {
 
         default:
             return sidero_utf_lut_isMemberOfOther_Lowercase(input) || sidero_utf_lut_isMemberOfOther_Uppercase(input);
+    }
+}
+
+// Is character Grapheme extend
+bool isUnicodeGraphemeExtend(dchar input) @safe nothrow @nogc pure {
+    switch(sidero_utf_lut_getGeneralCategory(input)) {
+        case GeneralCategory.Me:
+        case GeneralCategory.Mn:
+            return true;
+        default:
+            return sidero_utf_lut_isMemberOfOther_Grapheme_Extend(input);
     }
 }
 
@@ -826,3 +1051,521 @@ export immutable(SpecialCasing) sidero_utf_lut_getSpecialCasingTurkic(dchar inpu
     if (got is null) return typeof(return).init;
     return *cast(immutable(SpecialCasing*)) got;
 }
+
+/// Get the Line break class
+extern(C) immutable(LineBreakClass) sidero_utf_lut_getLineBreakClass(dchar input) @trusted nothrow @nogc pure;
+
+
+/// Is member of Emoji class?
+extern(C) immutable(bool) sidero_utf_lut_isMemberOfEmoji(dchar input) @trusted nothrow @nogc pure;
+
+
+/// Is member of Emoji_Presentation class?
+extern(C) immutable(bool) sidero_utf_lut_isMemberOfEmoji_Presentation(dchar input) @trusted nothrow @nogc pure;
+
+
+/// Is member of Emoji_Modifier class?
+extern(C) immutable(bool) sidero_utf_lut_isMemberOfEmoji_Modifier(dchar input) @trusted nothrow @nogc pure;
+
+
+/// Is member of Emoji_Modifier_Base class?
+extern(C) immutable(bool) sidero_utf_lut_isMemberOfEmoji_Modifier_Base(dchar input) @trusted nothrow @nogc pure;
+
+
+/// Is member of Emoji_Component class?
+extern(C) immutable(bool) sidero_utf_lut_isMemberOfEmoji_Component(dchar input) @trusted nothrow @nogc pure;
+
+
+/// Is member of Extended_Pictographic class?
+extern(C) immutable(bool) sidero_utf_lut_isMemberOfExtended_Pictographic(dchar input) @trusted nothrow @nogc pure;
+
+
+/// Get the Script for a character
+extern(C) immutable(Script) sidero_utf_lut_getScript(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Unknown
+extern(C) immutable(bool) sidero_utf_lut_isScriptUnknown(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Old_Hungarian
+extern(C) immutable(bool) sidero_utf_lut_isScriptOld_Hungarian(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Coptic
+extern(C) immutable(bool) sidero_utf_lut_isScriptCoptic(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Ol_Chiki
+extern(C) immutable(bool) sidero_utf_lut_isScriptOl_Chiki(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Cyrillic
+extern(C) immutable(bool) sidero_utf_lut_isScriptCyrillic(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Thaana
+extern(C) immutable(bool) sidero_utf_lut_isScriptThaana(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Inscriptional_Parthian
+extern(C) immutable(bool) sidero_utf_lut_isScriptInscriptional_Parthian(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Nabataean
+extern(C) immutable(bool) sidero_utf_lut_isScriptNabataean(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Ogham
+extern(C) immutable(bool) sidero_utf_lut_isScriptOgham(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Meroitic_Hieroglyphs
+extern(C) immutable(bool) sidero_utf_lut_isScriptMeroitic_Hieroglyphs(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Makasar
+extern(C) immutable(bool) sidero_utf_lut_isScriptMakasar(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Siddham
+extern(C) immutable(bool) sidero_utf_lut_isScriptSiddham(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Old_Persian
+extern(C) immutable(bool) sidero_utf_lut_isScriptOld_Persian(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Imperial_Aramaic
+extern(C) immutable(bool) sidero_utf_lut_isScriptImperial_Aramaic(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Myanmar
+extern(C) immutable(bool) sidero_utf_lut_isScriptMyanmar(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Deseret
+extern(C) immutable(bool) sidero_utf_lut_isScriptDeseret(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Kaithi
+extern(C) immutable(bool) sidero_utf_lut_isScriptKaithi(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Medefaidrin
+extern(C) immutable(bool) sidero_utf_lut_isScriptMedefaidrin(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Kayah_Li
+extern(C) immutable(bool) sidero_utf_lut_isScriptKayah_Li(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Hiragana
+extern(C) immutable(bool) sidero_utf_lut_isScriptHiragana(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Ahom
+extern(C) immutable(bool) sidero_utf_lut_isScriptAhom(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Devanagari
+extern(C) immutable(bool) sidero_utf_lut_isScriptDevanagari(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Tibetan
+extern(C) immutable(bool) sidero_utf_lut_isScriptTibetan(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Nko
+extern(C) immutable(bool) sidero_utf_lut_isScriptNko(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Brahmi
+extern(C) immutable(bool) sidero_utf_lut_isScriptBrahmi(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Osage
+extern(C) immutable(bool) sidero_utf_lut_isScriptOsage(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Nushu
+extern(C) immutable(bool) sidero_utf_lut_isScriptNushu(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Cuneiform
+extern(C) immutable(bool) sidero_utf_lut_isScriptCuneiform(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Takri
+extern(C) immutable(bool) sidero_utf_lut_isScriptTakri(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Toto
+extern(C) immutable(bool) sidero_utf_lut_isScriptToto(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Latin
+extern(C) immutable(bool) sidero_utf_lut_isScriptLatin(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Hanunoo
+extern(C) immutable(bool) sidero_utf_lut_isScriptHanunoo(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Limbu
+extern(C) immutable(bool) sidero_utf_lut_isScriptLimbu(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Saurashtra
+extern(C) immutable(bool) sidero_utf_lut_isScriptSaurashtra(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Lisu
+extern(C) immutable(bool) sidero_utf_lut_isScriptLisu(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Egyptian_Hieroglyphs
+extern(C) immutable(bool) sidero_utf_lut_isScriptEgyptian_Hieroglyphs(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Elbasan
+extern(C) immutable(bool) sidero_utf_lut_isScriptElbasan(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Palmyrene
+extern(C) immutable(bool) sidero_utf_lut_isScriptPalmyrene(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Tagbanwa
+extern(C) immutable(bool) sidero_utf_lut_isScriptTagbanwa(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Old_Italic
+extern(C) immutable(bool) sidero_utf_lut_isScriptOld_Italic(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Caucasian_Albanian
+extern(C) immutable(bool) sidero_utf_lut_isScriptCaucasian_Albanian(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Malayalam
+extern(C) immutable(bool) sidero_utf_lut_isScriptMalayalam(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Inherited
+extern(C) immutable(bool) sidero_utf_lut_isScriptInherited(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Sora_Sompeng
+extern(C) immutable(bool) sidero_utf_lut_isScriptSora_Sompeng(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Linear_B
+extern(C) immutable(bool) sidero_utf_lut_isScriptLinear_B(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Nyiakeng_Puachue_Hmong
+extern(C) immutable(bool) sidero_utf_lut_isScriptNyiakeng_Puachue_Hmong(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Meroitic_Cursive
+extern(C) immutable(bool) sidero_utf_lut_isScriptMeroitic_Cursive(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Thai
+extern(C) immutable(bool) sidero_utf_lut_isScriptThai(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Mende_Kikakui
+extern(C) immutable(bool) sidero_utf_lut_isScriptMende_Kikakui(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Old_Sogdian
+extern(C) immutable(bool) sidero_utf_lut_isScriptOld_Sogdian(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Old_Turkic
+extern(C) immutable(bool) sidero_utf_lut_isScriptOld_Turkic(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Samaritan
+extern(C) immutable(bool) sidero_utf_lut_isScriptSamaritan(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Old_South_Arabian
+extern(C) immutable(bool) sidero_utf_lut_isScriptOld_South_Arabian(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Hanifi_Rohingya
+extern(C) immutable(bool) sidero_utf_lut_isScriptHanifi_Rohingya(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Balinese
+extern(C) immutable(bool) sidero_utf_lut_isScriptBalinese(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Mandaic
+extern(C) immutable(bool) sidero_utf_lut_isScriptMandaic(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script SignWriting
+extern(C) immutable(bool) sidero_utf_lut_isScriptSignWriting(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Tifinagh
+extern(C) immutable(bool) sidero_utf_lut_isScriptTifinagh(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Tai_Viet
+extern(C) immutable(bool) sidero_utf_lut_isScriptTai_Viet(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Syriac
+extern(C) immutable(bool) sidero_utf_lut_isScriptSyriac(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Soyombo
+extern(C) immutable(bool) sidero_utf_lut_isScriptSoyombo(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Elymaic
+extern(C) immutable(bool) sidero_utf_lut_isScriptElymaic(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Hatran
+extern(C) immutable(bool) sidero_utf_lut_isScriptHatran(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Chorasmian
+extern(C) immutable(bool) sidero_utf_lut_isScriptChorasmian(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Glagolitic
+extern(C) immutable(bool) sidero_utf_lut_isScriptGlagolitic(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Osmanya
+extern(C) immutable(bool) sidero_utf_lut_isScriptOsmanya(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Linear_A
+extern(C) immutable(bool) sidero_utf_lut_isScriptLinear_A(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Mro
+extern(C) immutable(bool) sidero_utf_lut_isScriptMro(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Chakma
+extern(C) immutable(bool) sidero_utf_lut_isScriptChakma(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Modi
+extern(C) immutable(bool) sidero_utf_lut_isScriptModi(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Bassa_Vah
+extern(C) immutable(bool) sidero_utf_lut_isScriptBassa_Vah(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Han
+extern(C) immutable(bool) sidero_utf_lut_isScriptHan(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Multani
+extern(C) immutable(bool) sidero_utf_lut_isScriptMultani(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Bopomofo
+extern(C) immutable(bool) sidero_utf_lut_isScriptBopomofo(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Adlam
+extern(C) immutable(bool) sidero_utf_lut_isScriptAdlam(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Khitan_Small_Script
+extern(C) immutable(bool) sidero_utf_lut_isScriptKhitan_Small_Script(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Lao
+extern(C) immutable(bool) sidero_utf_lut_isScriptLao(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Psalter_Pahlavi
+extern(C) immutable(bool) sidero_utf_lut_isScriptPsalter_Pahlavi(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Anatolian_Hieroglyphs
+extern(C) immutable(bool) sidero_utf_lut_isScriptAnatolian_Hieroglyphs(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Canadian_Aboriginal
+extern(C) immutable(bool) sidero_utf_lut_isScriptCanadian_Aboriginal(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Common
+extern(C) immutable(bool) sidero_utf_lut_isScriptCommon(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Gothic
+extern(C) immutable(bool) sidero_utf_lut_isScriptGothic(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Yi
+extern(C) immutable(bool) sidero_utf_lut_isScriptYi(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Sinhala
+extern(C) immutable(bool) sidero_utf_lut_isScriptSinhala(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Rejang
+extern(C) immutable(bool) sidero_utf_lut_isScriptRejang(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Lepcha
+extern(C) immutable(bool) sidero_utf_lut_isScriptLepcha(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Tai_Tham
+extern(C) immutable(bool) sidero_utf_lut_isScriptTai_Tham(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Dives_Akuru
+extern(C) immutable(bool) sidero_utf_lut_isScriptDives_Akuru(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Meetei_Mayek
+extern(C) immutable(bool) sidero_utf_lut_isScriptMeetei_Mayek(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Tirhuta
+extern(C) immutable(bool) sidero_utf_lut_isScriptTirhuta(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Marchen
+extern(C) immutable(bool) sidero_utf_lut_isScriptMarchen(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Wancho
+extern(C) immutable(bool) sidero_utf_lut_isScriptWancho(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Phoenician
+extern(C) immutable(bool) sidero_utf_lut_isScriptPhoenician(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Gurmukhi
+extern(C) immutable(bool) sidero_utf_lut_isScriptGurmukhi(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Khudawadi
+extern(C) immutable(bool) sidero_utf_lut_isScriptKhudawadi(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Khojki
+extern(C) immutable(bool) sidero_utf_lut_isScriptKhojki(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Newa
+extern(C) immutable(bool) sidero_utf_lut_isScriptNewa(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Dogra
+extern(C) immutable(bool) sidero_utf_lut_isScriptDogra(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Oriya
+extern(C) immutable(bool) sidero_utf_lut_isScriptOriya(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Tagalog
+extern(C) immutable(bool) sidero_utf_lut_isScriptTagalog(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Sundanese
+extern(C) immutable(bool) sidero_utf_lut_isScriptSundanese(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Old_Permic
+extern(C) immutable(bool) sidero_utf_lut_isScriptOld_Permic(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Shavian
+extern(C) immutable(bool) sidero_utf_lut_isScriptShavian(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Lycian
+extern(C) immutable(bool) sidero_utf_lut_isScriptLycian(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Miao
+extern(C) immutable(bool) sidero_utf_lut_isScriptMiao(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Tangut
+extern(C) immutable(bool) sidero_utf_lut_isScriptTangut(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Bengali
+extern(C) immutable(bool) sidero_utf_lut_isScriptBengali(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Inscriptional_Pahlavi
+extern(C) immutable(bool) sidero_utf_lut_isScriptInscriptional_Pahlavi(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Vithkuqi
+extern(C) immutable(bool) sidero_utf_lut_isScriptVithkuqi(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Armenian
+extern(C) immutable(bool) sidero_utf_lut_isScriptArmenian(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script New_Tai_Lue
+extern(C) immutable(bool) sidero_utf_lut_isScriptNew_Tai_Lue(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Sogdian
+extern(C) immutable(bool) sidero_utf_lut_isScriptSogdian(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Buhid
+extern(C) immutable(bool) sidero_utf_lut_isScriptBuhid(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Manichaean
+extern(C) immutable(bool) sidero_utf_lut_isScriptManichaean(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Greek
+extern(C) immutable(bool) sidero_utf_lut_isScriptGreek(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Braille
+extern(C) immutable(bool) sidero_utf_lut_isScriptBraille(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Avestan
+extern(C) immutable(bool) sidero_utf_lut_isScriptAvestan(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Arabic
+extern(C) immutable(bool) sidero_utf_lut_isScriptArabic(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Javanese
+extern(C) immutable(bool) sidero_utf_lut_isScriptJavanese(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Lydian
+extern(C) immutable(bool) sidero_utf_lut_isScriptLydian(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Pau_Cin_Hau
+extern(C) immutable(bool) sidero_utf_lut_isScriptPau_Cin_Hau(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Cypro_Minoan
+extern(C) immutable(bool) sidero_utf_lut_isScriptCypro_Minoan(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Buginese
+extern(C) immutable(bool) sidero_utf_lut_isScriptBuginese(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Batak
+extern(C) immutable(bool) sidero_utf_lut_isScriptBatak(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Nandinagari
+extern(C) immutable(bool) sidero_utf_lut_isScriptNandinagari(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Cham
+extern(C) immutable(bool) sidero_utf_lut_isScriptCham(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Gunjala_Gondi
+extern(C) immutable(bool) sidero_utf_lut_isScriptGunjala_Gondi(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Cypriot
+extern(C) immutable(bool) sidero_utf_lut_isScriptCypriot(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Ugaritic
+extern(C) immutable(bool) sidero_utf_lut_isScriptUgaritic(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Georgian
+extern(C) immutable(bool) sidero_utf_lut_isScriptGeorgian(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Sharada
+extern(C) immutable(bool) sidero_utf_lut_isScriptSharada(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Tamil
+extern(C) immutable(bool) sidero_utf_lut_isScriptTamil(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Cherokee
+extern(C) immutable(bool) sidero_utf_lut_isScriptCherokee(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Pahawh_Hmong
+extern(C) immutable(bool) sidero_utf_lut_isScriptPahawh_Hmong(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Syloti_Nagri
+extern(C) immutable(bool) sidero_utf_lut_isScriptSyloti_Nagri(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Kharoshthi
+extern(C) immutable(bool) sidero_utf_lut_isScriptKharoshthi(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Zanabazar_Square
+extern(C) immutable(bool) sidero_utf_lut_isScriptZanabazar_Square(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Katakana
+extern(C) immutable(bool) sidero_utf_lut_isScriptKatakana(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Telugu
+extern(C) immutable(bool) sidero_utf_lut_isScriptTelugu(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Ethiopic
+extern(C) immutable(bool) sidero_utf_lut_isScriptEthiopic(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Vai
+extern(C) immutable(bool) sidero_utf_lut_isScriptVai(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Bamum
+extern(C) immutable(bool) sidero_utf_lut_isScriptBamum(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Hangul
+extern(C) immutable(bool) sidero_utf_lut_isScriptHangul(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Mongolian
+extern(C) immutable(bool) sidero_utf_lut_isScriptMongolian(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Old_Uyghur
+extern(C) immutable(bool) sidero_utf_lut_isScriptOld_Uyghur(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Mahajani
+extern(C) immutable(bool) sidero_utf_lut_isScriptMahajani(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Khmer
+extern(C) immutable(bool) sidero_utf_lut_isScriptKhmer(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Grantha
+extern(C) immutable(bool) sidero_utf_lut_isScriptGrantha(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Kannada
+extern(C) immutable(bool) sidero_utf_lut_isScriptKannada(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Yezidi
+extern(C) immutable(bool) sidero_utf_lut_isScriptYezidi(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Old_North_Arabian
+extern(C) immutable(bool) sidero_utf_lut_isScriptOld_North_Arabian(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Tai_Le
+extern(C) immutable(bool) sidero_utf_lut_isScriptTai_Le(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Hebrew
+extern(C) immutable(bool) sidero_utf_lut_isScriptHebrew(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Gujarati
+extern(C) immutable(bool) sidero_utf_lut_isScriptGujarati(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Tangsa
+extern(C) immutable(bool) sidero_utf_lut_isScriptTangsa(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Carian
+extern(C) immutable(bool) sidero_utf_lut_isScriptCarian(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Bhaiksuki
+extern(C) immutable(bool) sidero_utf_lut_isScriptBhaiksuki(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Masaram_Gondi
+extern(C) immutable(bool) sidero_utf_lut_isScriptMasaram_Gondi(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Runic
+extern(C) immutable(bool) sidero_utf_lut_isScriptRunic(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Duployan
+extern(C) immutable(bool) sidero_utf_lut_isScriptDuployan(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Warang_Citi
+extern(C) immutable(bool) sidero_utf_lut_isScriptWarang_Citi(dchar input) @trusted nothrow @nogc pure;
+
+/// Is the character a member of the script Phags_Pa
+extern(C) immutable(bool) sidero_utf_lut_isScriptPhags_Pa(dchar input) @trusted nothrow @nogc pure;
+
