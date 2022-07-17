@@ -67,5 +67,10 @@ struct WordBreaker(Char, alias Function) {
         bool opEquals(Char value) const @safe nothrow @nogc pure {
             return this.value == value;
         }
+
+        ///
+        bool opEquals(const Entry other) const @safe nothrow @nogc pure {
+            return this.tupleof == other.tupleof;
+        }
     }
 }
