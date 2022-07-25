@@ -416,8 +416,11 @@ nothrow @nogc:
             zliteral = allocator.makeArray!ubyte(cast(ubyte[])(this.literal.ptr[0 .. this.literal.length + 1]));
         else {
             zliteral = allocator.makeArray!ubyte(this.literal.length + 1);
-            zliteral[0 .. $ - 1] = this.literal[];
             zliteral[$ - 1] = 0;
+
+            foreach(i, v; this.literal){
+                zliteral[i] = v;
+            }
         }
 
         return String_ASCII(cast(LiteralType)zliteral, allocator, cast(LiteralType)zliteral);
