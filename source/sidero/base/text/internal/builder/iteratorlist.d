@@ -545,7 +545,7 @@ struct IteratorListImpl(Char) {
 
     private:
         bool emptyInternal() {
-            return forwards.offsetFromHead >= backwards.offsetFromHead;
+            return forwards.isEmpty(minimumOffsetFromHead, backwards.offsetFromHead);
         }
 
         Char frontInternal() {
@@ -630,6 +630,10 @@ struct IteratorListImpl(Char) {
             assert(block !is null);
             assert(block.length > offsetIntoBlock);
             return block.get()[offsetIntoBlock];
+        }
+
+        bool isEmpty(size_t start, size_t end) {
+            return offsetFromHead < start || offsetFromHead >= end;
         }
 
         void setup(scope BlockListImpl!Char* blockList, size_t offsetFromHead) {
@@ -755,6 +759,80 @@ struct IteratorListImpl(Char) {
                 }
             }
         }
+    }
+
+    unittest {
+        IteratorListTest!Char ilt = IteratorListTest!Char(globalAllocator());
+        alias FET = int delegate(size_t, ref Char) @safe nothrow @nogc;
+
+        enum Text1 = "take me to";
+        enum Text2 = "do or die";
+
+        Cursor.Block* a = ilt.blockList.insert(&ilt.blockList.head);
+        Cursor.Block* b = ilt.blockList.insert(a);
+
+        a.length = Text1.length;
+        foreach (i, v; Text1)
+            a.get()[i] = v;
+
+        b.length = Text2.length;
+        foreach (i, v; Text2)
+            b.get()[i] = v;
+
+        ilt.blockList.numberOfItems = Text1.length + Text2.length;
+
+        static struct CustomIterator {
+            Cursor cursor;
+            size_t max;
+
+            int opApply(Del)(scope Del del) {
+                int result;
+
+                while(!cursor.isEmpty(0, max)) {
+                    Char c = cursor.get();
+
+                    result = del(c);
+                    if (result)
+                        return result;
+
+                    cursor.advanceForward(1, max, true);
+                }
+
+                return result;
+            }
+        }
+
+        CustomIterator ci;
+        ci.max = ilt.blockList.numberOfItems;
+
+        () @trusted { ci.cursor.setup(&ilt.blockList, 0); }();
+
+        bool matches(CustomIterator iterator) {
+            size_t count;
+
+            foreach (Char c; iterator) {
+                if (count == 0 && !(c == 't' || c == 'd'))
+                    return false;
+                else if (count == 1 && c != 'o')
+                    return false;
+                else if (count > 1)
+                    break;
+
+                count++;
+            }
+
+            return true;
+        }
+
+        size_t matched;
+
+        foreach (Char c; ci) {
+            if (matches(ci)) {
+                matched++;
+            }
+        }
+
+        assert(matched == 2);
     }
 }
 
