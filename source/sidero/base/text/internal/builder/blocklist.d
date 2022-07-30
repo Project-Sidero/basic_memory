@@ -106,23 +106,23 @@ struct BlockListImpl(Char) {
     Block* blockForOffset(ref size_t offset, out size_t offsetIntoBlock) pure @trusted {
         size_t retActualOffsetFromHead;
         Block* ret = &head;
+        size_t canDo = ret.length;
 
         // until currentBlock's next node is tailBlock
         do {
-            const canDo = ret.length - offsetIntoBlock;
+            if (canDo <= offset) {
+                retActualOffsetFromHead += canDo;
+                offset -= canDo;
+                offsetIntoBlock = canDo;
 
-            if (canDo == 0) {
                 ret = ret.next;
                 offsetIntoBlock = 0;
-                continue;
+                canDo = ret.length;
             } else if (canDo > offset) {
                 offsetIntoBlock = offset;
                 break;
-            }
-
-            retActualOffsetFromHead += canDo;
-            offset -= canDo;
-            offsetIntoBlock = canDo;
+            } else
+                assert(0);
         }
         while (ret.next !is null && offset > 0);
 
@@ -305,7 +305,7 @@ struct BlockListImpl(Char) {
             bl.clear;
         }
 
-        void moveLeft(size_t oldOffset, size_t newOffset) pure{
+        void moveLeft(size_t oldOffset, size_t newOffset) pure {
             if (oldOffset == this.length) {
                 this.length = newOffset;
                 return;
@@ -340,7 +340,7 @@ struct BlockListImpl(Char) {
             bl.clear;
         }
 
-        void moveRight(size_t oldOffset, size_t newOffset)pure {
+        void moveRight(size_t oldOffset, size_t newOffset) pure {
             assert(oldOffset < newOffset);
 
             size_t diff = newOffset - oldOffset;
