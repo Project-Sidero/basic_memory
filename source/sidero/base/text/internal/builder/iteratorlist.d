@@ -33,6 +33,7 @@ struct IteratorListImpl(Char) {
 
         ret.forwards.setup(blockList, minimumOffsetFromHead);
         ret.backwards.setup(blockList, maximumOffsetFromHead);
+        ret.empty;
         return ret;
     }
 
@@ -260,6 +261,288 @@ struct IteratorListImpl(Char) {
             popBackInternal();
         }
 
+        //
+
+        int foreachBlocks(scope int delegate(scope Char[] data) @safe nothrow @nogc del) {
+            Cursor.Block* current = forwards.block;
+            size_t offsetIntoB = forwards.offsetIntoBlock, canDo = size_t.max;
+
+            if (this.maximumOffsetFromHead != size_t.max)
+                canDo = backwards.offsetFromHead - forwards.offsetFromHead;
+
+            int result;
+
+            while (current.next !is null && canDo > 0) {
+                size_t willDo = canDo;
+                auto slice = current.get()[offsetIntoB .. current.length];
+
+                if (willDo > slice.length)
+                    willDo = slice.length;
+                if (slice.length > willDo)
+                    slice = slice[0 .. willDo];
+
+                result = del(slice);
+                if (slice.length > 0 && result)
+                    break;
+
+                offsetIntoB = 0;
+                canDo -= willDo;
+                current = current.next;
+            }
+
+            return result;
+        }
+
+        unittest {
+            IteratorListTest!Char ilt = IteratorListTest!Char(globalAllocator());
+
+            alias FET = int delegate(size_t, ref Char) @safe nothrow @nogc;
+
+            enum Text1 = "Dolls kill";
+            enum Text2 = "don't provoke us";
+
+            Cursor.Block* a = ilt.blockList.insert(&ilt.blockList.head);
+            Cursor.Block* b = ilt.blockList.insert(a);
+
+            a.length = Text1.length;
+            foreach (i, v; Text1)
+                a.get()[i] = v;
+
+            b.length = Text2.length;
+            foreach (i, v; Text2)
+                b.get()[i] = v;
+
+            ilt.blockList.numberOfItems = Text1.length + Text2.length;
+
+            {
+                size_t seen;
+                Iterator* iterator = ilt.iteratorList.newIterator(&ilt.blockList);
+
+                foreach (data; &iterator.foreachBlocks) {
+                    seen += data.length;
+                }
+
+                assert(seen == Text1.length + Text2.length);
+                ilt.iteratorList.rcIteratorInternal(false, iterator);
+            }
+
+            {
+                size_t seen;
+                Iterator* iterator = ilt.iteratorList.newIterator(&ilt.blockList);
+                iterator.popFront;
+                iterator.popBack;
+
+                foreach (data; &iterator.foreachBlocks) {
+                    seen += data.length;
+                }
+
+                assert(seen == Text1.length + Text2.length - 2);
+                ilt.iteratorList.rcIteratorInternal(false, iterator);
+            }
+        }
+
+        int foreachReverseBlocks(scope int delegate(Char[] data) @safe nothrow @nogc del) {
+            Cursor.Block* current = backwards.block;
+            size_t offsetIntoB = backwards.offsetIntoBlock, canDo = size_t.max;
+
+            if (this.maximumOffsetFromHead != size_t.max)
+                canDo = backwards.offsetFromHead - forwards.offsetFromHead;
+
+            int result;
+
+            while (current.previous !is null && canDo > 0) {
+                size_t willDo = canDo;
+                auto slice = current.get()[0 .. offsetIntoB];
+
+                if (willDo > slice.length)
+                    willDo = slice.length;
+                if (slice.length > canDo)
+                    slice = slice[$ - willDo .. $];
+
+                result = del(slice);
+                if (slice.length > 0 && result)
+                    break;
+
+                canDo -= willDo;
+                current = current.previous;
+                offsetIntoB = current.length;
+            }
+
+            return result;
+        }
+
+        unittest {
+            IteratorListTest!Char ilt = IteratorListTest!Char(globalAllocator());
+
+            alias FET = int delegate(size_t, ref Char) @safe nothrow @nogc;
+
+            enum Text1 = "Dolls kill";
+            enum Text2 = "don't provoke us";
+
+            Cursor.Block* a = ilt.blockList.insert(&ilt.blockList.head);
+            Cursor.Block* b = ilt.blockList.insert(a);
+
+            a.length = Text1.length;
+            foreach (i, v; Text1)
+                a.get()[i] = v;
+
+            b.length = Text2.length;
+            foreach (i, v; Text2)
+                b.get()[i] = v;
+
+            ilt.blockList.numberOfItems = Text1.length + Text2.length;
+
+            {
+                size_t seen;
+                Iterator* iterator = ilt.iteratorList.newIterator(&ilt.blockList);
+
+                foreach (data; &iterator.foreachReverseBlocks) {
+                    seen += data.length;
+                }
+
+                assert(seen == Text1.length + Text2.length);
+                ilt.iteratorList.rcIteratorInternal(false, iterator);
+            }
+
+            {
+                size_t seen;
+                Iterator* iterator = ilt.iteratorList.newIterator(&ilt.blockList);
+                iterator.popFront;
+                iterator.popBack;
+
+                foreach (data; &iterator.foreachReverseBlocks) {
+                    seen += data.length;
+                }
+
+                assert(seen == Text1.length + Text2.length - 2);
+                ilt.iteratorList.rcIteratorInternal(false, iterator);
+            }
+        }
+
+        // event hooks
+
+        void moveRange(Cursor.Block* ifThisBlock, size_t ifStartOffsetInBlock, Cursor.Block* movedIntoBlock,
+                size_t movedIntoOffset, size_t amount) {
+            forwards.moveRange(ifThisBlock, ifStartOffsetInBlock, movedIntoBlock, movedIntoOffset, amount);
+            backwards.moveRange(ifThisBlock, ifStartOffsetInBlock, movedIntoBlock, movedIntoOffset, amount);
+        }
+
+        unittest {
+            IteratorListTest!Char ilt = IteratorListTest!Char(globalAllocator());
+
+            alias FET = int delegate(size_t, ref Char) @safe nothrow @nogc;
+
+            enum Text1 = "bang bang";
+            enum Text2 = "wait a minute";
+
+            Cursor.Block* a = ilt.blockList.insert(&ilt.blockList.head);
+            Cursor.Block* c = ilt.blockList.insert(a);
+
+            a.length = Text1.length;
+            foreach (i, v; Text1)
+                a.get()[i] = v;
+
+            c.length = Text2.length;
+            foreach (i, v; Text2)
+                c.get()[i] = v;
+
+            ilt.blockList.numberOfItems = Text1.length + Text2.length;
+            Iterator* iterator1 = ilt.iteratorList.newIterator(&ilt.blockList),
+                iterator2 = ilt.iteratorList.newIterator(&ilt.blockList),
+                iterator3 = ilt.iteratorList.newIterator(&ilt.blockList), iterator4 = ilt.iteratorList.newIterator(&ilt.blockList);
+
+            {
+                // we want all iterators to point to data entries
+                iterator1.back;
+                iterator2.back;
+                iterator3.back;
+                iterator4.back;
+
+                // move iterators around so that we can test that positions are correct regardless of initial configuration
+                iterator2.popFront;
+                iterator3.popBack;
+                iterator4.popFront;
+                iterator4.popBack;
+
+                // verify
+
+                assert(iterator1.forwards.offsetIntoBlock == 0);
+                assert(iterator2.forwards.offsetIntoBlock == 1);
+                assert(iterator3.forwards.offsetIntoBlock == 0);
+                assert(iterator4.forwards.offsetIntoBlock == 1);
+                assert(iterator1.forwards.block is a);
+                assert(iterator2.forwards.block is a);
+                assert(iterator3.forwards.block is a);
+                assert(iterator4.forwards.block is a);
+
+                assert(iterator1.backwards.offsetIntoBlock == Text2.length - 1);
+                assert(iterator2.backwards.offsetIntoBlock == Text2.length - 1);
+                assert(iterator3.backwards.offsetIntoBlock == Text2.length - 2);
+                assert(iterator4.backwards.offsetIntoBlock == Text2.length - 2);
+                assert(iterator1.backwards.block is c);
+                assert(iterator2.backwards.block is c);
+                assert(iterator3.backwards.block is c);
+                assert(iterator4.backwards.block is c);
+            }
+
+            {
+
+                Cursor.Block* b = ilt.blockList.insert(a);
+
+                {
+                    size_t oldOffset = 1, newOffset = 0, amountToMove = Text1.length - 1, amountIn = amountToMove;
+                    Cursor.Block* from = a, into = b;
+
+                    from.moveFromInto(oldOffset, amountToMove, into, newOffset);
+                    assert(from.length == 1);
+                    assert(into.length == amountIn);
+
+                    iterator1.moveRange(from, oldOffset, into, newOffset, amountToMove);
+                    iterator2.moveRange(from, oldOffset, into, newOffset, amountToMove);
+                    iterator3.moveRange(from, oldOffset, into, newOffset, amountToMove);
+                    iterator4.moveRange(from, oldOffset, into, newOffset, amountToMove);
+                }
+
+                {
+                    size_t oldOffset = 0, newOffset = Text1.length - 1, amountToMove = Text2.length - 1,
+                        amountIn = Text1.length + Text2.length - 2;
+                    Cursor.Block* from = c, into = b;
+
+                    from.moveFromInto(oldOffset, amountToMove, into, newOffset);
+                    assert(from.length == 1);
+                    assert(into.length == amountIn);
+
+                    iterator1.moveRange(from, oldOffset, into, newOffset, amountToMove);
+                    iterator2.moveRange(from, oldOffset, into, newOffset, amountToMove);
+                    iterator3.moveRange(from, oldOffset, into, newOffset, amountToMove);
+                    iterator4.moveRange(from, oldOffset, into, newOffset, amountToMove);
+                }
+
+                assert(iterator1.forwards.offsetIntoBlock == 0);
+                assert(iterator2.forwards.offsetIntoBlock == 0);
+                assert(iterator3.forwards.offsetIntoBlock == 0);
+                assert(iterator4.forwards.offsetIntoBlock == 0);
+                assert(iterator1.forwards.block is a);
+                assert(iterator2.forwards.block is b);
+                assert(iterator3.forwards.block is a);
+                assert(iterator4.forwards.block is b);
+
+                assert(iterator1.backwards.offsetIntoBlock == 0);
+                assert(iterator2.backwards.offsetIntoBlock == 0);
+                assert(iterator3.backwards.offsetIntoBlock == Text1.length + Text2.length - 3);
+                assert(iterator4.backwards.offsetIntoBlock == Text1.length + Text2.length - 3);
+                assert(iterator1.backwards.block is c);
+                assert(iterator2.backwards.block is c);
+                assert(iterator3.backwards.block is b);
+                assert(iterator4.backwards.block is b);
+            }
+
+            ilt.iteratorList.rcIteratorInternal(false, iterator1);
+            ilt.iteratorList.rcIteratorInternal(false, iterator2);
+            ilt.iteratorList.rcIteratorInternal(false, iterator3);
+            ilt.iteratorList.rcIteratorInternal(false, iterator4);
+        }
+
     private:
         bool emptyInternal() {
             return forwards.offsetFromHead >= backwards.offsetFromHead;
@@ -457,6 +740,19 @@ struct IteratorListImpl(Char) {
                 assert(offsetFromHead > 0);
                 offsetFromHead -= canDo;
                 amount -= canDo;
+            }
+        }
+
+        // event hooks
+
+        void moveRange(Block* ifThisBlock, size_t ifStartOffsetInBlock, Block* movedIntoBlock, size_t movedIntoOffset, size_t amount) {
+            if (this.block is ifThisBlock) {
+                if (this.offsetIntoBlock >= ifStartOffsetInBlock && this.offsetIntoBlock < ifStartOffsetInBlock + amount) {
+                    this.block = movedIntoBlock;
+                    this.offsetIntoBlock = (this.offsetIntoBlock - ifStartOffsetInBlock) + movedIntoOffset;
+                } else if (this.offsetIntoBlock >= ifStartOffsetInBlock + amount) {
+                    this.offsetIntoBlock -= amount;
+                }
             }
         }
     }
