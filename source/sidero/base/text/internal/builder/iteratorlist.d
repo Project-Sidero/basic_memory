@@ -77,8 +77,38 @@ struct IteratorListImpl(Char) {
 
         Iterator* a = ilt.iteratorList.newIterator(&ilt.blockList);
         Iterator* b = ilt.iteratorList.newIterator(&ilt.blockList);
+
+        int seenA, seenB;
+
+        foreach (iterator; ilt.iteratorList) {
+            if (iterator is a)
+                seenA++;
+            else if (iterator is b)
+                seenB++;
+            else
+                assert(0);
+        }
+
+        assert(seenA == 1);
+        assert(seenB == 1);
+
         ilt.iteratorList.rcIteratorInternal(false, a);
         ilt.iteratorList.rcIteratorInternal(false, b);
+    }
+
+    int opApply(scope int delegate(scope Iterator*) @safe nothrow @nogc pure del) {
+        Iterator* current = head;
+        int result;
+
+        while (current !is null) {
+            result = del(current);
+            if (result)
+                return result;
+
+            current = current.next;
+        }
+
+        return result;
     }
 
     struct Iterator {

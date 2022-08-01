@@ -15,7 +15,7 @@ struct BlockListImpl(Char) {
     RCAllocator allocator;
     TestTestSetLockInline mutex;
     Block head, tail;
-    size_t numberOfItems;
+    size_t numberOfItems, numberOfBlocks;
     int refCount = 1;
 
 @safe nothrow @nogc:
@@ -41,6 +41,7 @@ struct BlockListImpl(Char) {
         previous.next = ret;
         ret.previous = previous;
 
+        this.numberOfBlocks++;
         return ret;
     }
 
@@ -63,6 +64,7 @@ struct BlockListImpl(Char) {
         block.previous.next = block.next;
 
         allocator.deallocate((cast(void*)block)[0 .. ByteLength + Block.sizeof]);
+        this.numberOfBlocks--;
     }
 
     unittest {
@@ -188,6 +190,115 @@ struct BlockListImpl(Char) {
         assert(adjustedOffset == 15);
         assert(offsetIntoBlock == 0);
 
+        bl.clear;
+    }
+
+    int opApply(scope int delegate(Char[] data) @safe nothrow @nogc del) {
+        return this.opApply((blockOffset, data) { return del(data); });
+    }
+
+    int opApply(scope int delegate(size_t blockOffset, Char[] data) @safe nothrow @nogc del) {
+        assert(head.length == 0);
+        assert(tail.length == 0);
+
+        Block* current = head.next;
+        size_t id;
+        int result;
+
+        while (current.next !is null) {
+            result = del(id, current.get()[0 .. current.length]);
+
+            if (result)
+                return result;
+
+            current = current.next;
+            id++;
+        }
+
+        return result;
+    }
+
+    unittest {
+        BlockListImpl bl = BlockListImpl(globalAllocator());
+
+        Block* a = bl.insert(&bl.head);
+        assert(a !is null);
+        Block* b = bl.insert(a);
+        assert(b !is null);
+
+        a.length = 10;
+        b.length = 5;
+
+        int seenA, seenB;
+
+        ptrdiff_t lastOffset = -1;
+        foreach(offset, data; bl) {
+            assert(offset == lastOffset + 1);
+
+            if (data is a.get())
+                seenA++;
+            else if (data is b.get())
+                seenB++;
+            else assert(0);
+
+            lastOffset++;
+        }
+
+        assert(seenA == 1);
+        assert(seenB == 1);
+        bl.clear;
+    }
+
+    int opApplyReverse(scope int delegate(size_t blockOffset, Char[] data) @safe nothrow @nogc del) {
+        assert(head.length == 0);
+        assert(tail.length == 0);
+
+        Block* current = tail.previous;
+        ptrdiff_t id = this.numberOfBlocks - 1;
+        int result;
+
+        while (current.previous !is null) {
+            assert(id >= 0);
+            result = del(id, current.get()[0 .. current.length]);
+
+            if (result)
+                return result;
+
+            current = current.previous;
+            id--;
+        }
+
+        return result;
+    }
+
+    unittest {
+        BlockListImpl bl = BlockListImpl(globalAllocator());
+
+        Block* a = bl.insert(&bl.head);
+        assert(a !is null);
+        Block* b = bl.insert(a);
+        assert(b !is null);
+
+        a.length = 10;
+        b.length = 5;
+
+        int seenA, seenB;
+
+        ptrdiff_t lastOffset = 2;
+        foreach_reverse(offset, data; bl) {
+            assert(offset == lastOffset - 1);
+
+            if (data is a.get())
+                seenA++;
+            else if (data is b.get())
+                seenB++;
+            else assert(0);
+
+            lastOffset--;
+        }
+
+        assert(seenA == 1);
+        assert(seenB == 1);
         bl.clear;
     }
 
