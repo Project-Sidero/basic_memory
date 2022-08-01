@@ -94,8 +94,8 @@ struct Region(PoolAllocator = void, size_t DefaultAlignment = GoodAlignment, siz
                     defaultSize = PAGESIZE;
 
                 size_t toAllocateSize = defaultSize;
-                if (toAllocateSize < size + 16)
-                    toAllocateSize = size + 16;
+                if (toAllocateSize < size + alignedTo)
+                    toAllocateSize = size + alignedTo;
 
                 memory = poolAllocator.allocate(toAllocateSize, null);
             }
