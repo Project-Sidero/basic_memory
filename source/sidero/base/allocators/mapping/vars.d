@@ -7,9 +7,8 @@ module sidero.base.allocators.mapping.vars;
 import std.algorithm.comparison : max;
 @trusted nothrow @nogc:
 
-///
-enum GoodAlignment = max(real.alignof, double.alignof);
-// in practice this will provide a good value regardless of target
+/// Size of the L1 cpu cache line
+enum GoodAlignment = 64;
 
 ///
 @property size_t PAGESIZE() pure {
