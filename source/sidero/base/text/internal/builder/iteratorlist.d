@@ -638,7 +638,119 @@ struct IteratorListImpl(Char) {
                 assert(iterator1.backwards.block is a);
                 assert(iterator2.backwards.block is a);
                 assert(iterator3.backwards.block is a);
+            }
 
+            ilt.iteratorList.rcIteratorInternal(false, iterator1);
+            ilt.iteratorList.rcIteratorInternal(false, iterator2);
+            ilt.iteratorList.rcIteratorInternal(false, iterator3);
+        }
+
+        void onRemoveDecreaseFromHead(size_t ifFromOffsetFromHead, size_t amount) {
+            if (this.maximumOffsetFromHead <= ifFromOffsetFromHead)
+                return;
+
+            if (this.minimumOffsetFromHead > ifFromOffsetFromHead) {
+                size_t amountToGoBackwards = this.minimumOffsetFromHead - ifFromOffsetFromHead;
+
+                if (amountToGoBackwards > amount)
+                    amountToGoBackwards = amount;
+
+                this.minimumOffsetFromHead -= amountToGoBackwards;
+            }
+
+            forwards.onRemoveDecreaseFromHead(ifFromOffsetFromHead, amount, this.maximumOffsetFromHead);
+            backwards.onRemoveDecreaseFromHead(ifFromOffsetFromHead, amount, this.maximumOffsetFromHead);
+
+            {
+                size_t amountToGoBackwards = this.maximumOffsetFromHead - ifFromOffsetFromHead;
+
+                if (amountToGoBackwards > amount)
+                    amountToGoBackwards = amount;
+
+                this.maximumOffsetFromHead -= amountToGoBackwards;
+            }
+        }
+
+        unittest {
+            IteratorListTest!Char ilt = IteratorListTest!Char(globalAllocator());
+
+            alias FET = int delegate(size_t, ref Char) @safe nothrow @nogc;
+
+            enum Text1 = "what the cat";
+            enum Text2 = " the";
+            enum Text3 = "what cat";
+            enum OffsetStart = 4;
+            enum OffsetEnd = 3;
+
+            Cursor.Block* a = ilt.blockList.insert(&ilt.blockList.head);
+
+            a.length = Text1.length;
+            foreach (i, v; Text1)
+                a.get()[i] = v;
+
+            ilt.blockList.numberOfItems = Text1.length;
+            Iterator* iterator1 = ilt.iteratorList.newIterator(&ilt.blockList),
+                iterator2 = ilt.iteratorList.newIterator(&ilt.blockList), iterator3 = ilt.iteratorList.newIterator(&ilt.blockList);
+
+            {
+                // we want all iterators to point to data entries
+                iterator1.back;
+                iterator2.back;
+                iterator3.back;
+
+                // move iterators around so that we can test that positions are correct regardless of initial configuration
+                foreach (i; 0 .. OffsetStart) {
+                    iterator2.popFront;
+                    iterator3.popFront;
+                }
+
+                foreach (i; 0 .. OffsetEnd) {
+                    iterator2.popBack;
+                    iterator3.popBack;
+                }
+
+                iterator2.popBack;
+                iterator3.popFront;
+
+                // verify
+
+                assert(iterator1.forwards.offsetIntoBlock == 0);
+                assert(iterator2.forwards.offsetIntoBlock == OffsetStart);
+                assert(iterator3.forwards.offsetIntoBlock == OffsetStart + 1);
+                assert(iterator1.forwards.block is a);
+                assert(iterator2.forwards.block is a);
+                assert(iterator3.forwards.block is a);
+
+                assert(iterator1.backwards.offsetIntoBlock == Text1.length - 1);
+                assert(iterator2.backwards.offsetIntoBlock == Text1.length - (OffsetEnd + 2));
+                assert(iterator3.backwards.offsetIntoBlock == Text1.length - (OffsetEnd + 1));
+                assert(iterator1.backwards.block is a);
+                assert(iterator2.backwards.block is a);
+                assert(iterator3.backwards.block is a);
+            }
+
+            {
+                ilt.blockList.numberOfItems -= Text2.length;
+                a.moveLeft(OffsetStart + Text2.length, OffsetStart);
+                assert(a.get() == Text3);
+
+                iterator1.onRemoveDecreaseFromHead(OffsetStart, Text2.length);
+                iterator2.onRemoveDecreaseFromHead(OffsetStart, Text2.length);
+                iterator3.onRemoveDecreaseFromHead(OffsetStart, Text2.length);
+
+                assert(iterator1.forwards.offsetIntoBlock == 0);
+                assert(iterator2.forwards.offsetIntoBlock == OffsetStart);
+                assert(iterator3.forwards.offsetIntoBlock == OffsetStart);
+                assert(iterator1.forwards.block is a);
+                assert(iterator2.forwards.block is a);
+                assert(iterator3.forwards.block is a);
+
+                assert(iterator1.backwards.offsetIntoBlock == Text3.length - 1);
+                assert(iterator2.backwards.offsetIntoBlock == OffsetStart);
+                assert(iterator3.backwards.offsetIntoBlock == OffsetStart);
+                assert(iterator1.backwards.block is a);
+                assert(iterator2.backwards.block is a);
+                assert(iterator3.backwards.block is a);
             }
 
             ilt.iteratorList.rcIteratorInternal(false, iterator1);
@@ -866,6 +978,12 @@ struct IteratorListImpl(Char) {
         void onInsertIncreaseFromHead(size_t ifFromOffsetFromHead, size_t amount, size_t maximumOffsetFromHead) {
             if (this.offsetFromHead >= ifFromOffsetFromHead) {
                 advanceForward(amount, maximumOffsetFromHead, offsetFromHead + amount < maximumOffsetFromHead);
+            }
+        }
+
+        void onRemoveDecreaseFromHead(size_t ifFromOffsetFromHead, size_t amount, size_t maximumOffsetFromHead) {
+            if (this.offsetFromHead > ifFromOffsetFromHead) {
+                advanceBackwards(amount, ifFromOffsetFromHead, maximumOffsetFromHead, offsetFromHead + amount < maximumOffsetFromHead);
             }
         }
     }
