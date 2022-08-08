@@ -55,6 +55,8 @@ struct IteratorListImpl(Char) {
     }
 
     void rcIteratorInternal(bool addRef, scope Iterator* iterator) @trusted {
+        assert(iterator !is null);
+
         if (addRef)
             iterator.refCount++;
         else if (iterator.refCount == 1) {
@@ -990,6 +992,22 @@ struct IteratorListImpl(Char) {
                 offsetFromHead -= canDo;
                 amount -= canDo;
             }
+
+            if (!limitToData && offsetIntoBlock == 0 && amount > 0 && this.block.previous !is null) {
+                this.block = this.block.previous;
+                offsetIntoBlock = this.block.length;
+                amount--;
+            }
+        }
+
+        unittest {
+            IteratorListTest!Char ilt = IteratorListTest!Char(globalAllocator());
+
+            Cursor cursor;
+            cursor.block = &ilt.blockList.tail;
+
+            cursor.advanceBackwards(1, 0, 0, false);
+            assert(cursor.block.next !is null);
         }
 
         // event hooks
