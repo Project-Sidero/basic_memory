@@ -33,7 +33,9 @@ struct IteratorListImpl(Char) {
 
         ret.forwards.setup(blockList, minimumOffsetFromHead);
         ret.backwards.setup(blockList, maximumOffsetFromHead);
-        ret.empty;
+
+        assert(ret.forwards.block !is null);
+        assert(ret.backwards.block !is null);
         return ret;
     }
 
@@ -129,7 +131,7 @@ struct IteratorListImpl(Char) {
             assert(backwards.offsetFromHead <= maximumOffsetFromHead);
 
             assert(forwards.block !is null);
-            assert(backwards.block.previous !is null);
+            assert(backwards.block !is null);
         }
 
         int opApply(Del)(scope Del del) @trusted {
@@ -158,7 +160,6 @@ struct IteratorListImpl(Char) {
 
         unittest {
             IteratorListTest!Char ilt = IteratorListTest!Char(globalAllocator());
-            Iterator* iterator = ilt.iteratorList.newIterator(&ilt.blockList);
 
             alias FET = int delegate(size_t, ref Char) @safe nothrow @nogc;
 
@@ -176,7 +177,9 @@ struct IteratorListImpl(Char) {
             foreach (i, v; Text2)
                 b.get()[i] = v;
 
-            size_t lastOffset;
+            ilt.blockList.numberOfItems = Text1.length + Text2.length;
+            Iterator* iterator = ilt.iteratorList.newIterator(&ilt.blockList);
+            ptrdiff_t lastOffset = -1;
 
             foreach (i, v; &iterator.opApply!FET) {
                 if (i >= Text1.length)
@@ -216,7 +219,6 @@ struct IteratorListImpl(Char) {
 
         unittest {
             IteratorListTest!Char ilt = IteratorListTest!Char(globalAllocator());
-            Iterator* iterator = ilt.iteratorList.newIterator(&ilt.blockList);
 
             alias FET = int delegate(size_t, ref Char) @safe nothrow @nogc;
 
@@ -234,6 +236,8 @@ struct IteratorListImpl(Char) {
             foreach (i, v; Text2)
                 b.get()[i] = v;
 
+            Iterator* iterator = ilt.iteratorList.newIterator(&ilt.blockList);
+            ilt.blockList.numberOfItems = Text1.length + Text2.length;
             size_t lastOffset = Text1.length + Text2.length - 1, numberOfZero;
 
             foreach (i, v; &iterator.opApplyReverse!FET) {
@@ -297,10 +301,7 @@ struct IteratorListImpl(Char) {
 
         int foreachBlocks(scope int delegate(scope Char[] data) @safe nothrow @nogc del) {
             Cursor.Block* current = forwards.block;
-            size_t offsetIntoB = forwards.offsetIntoBlock, canDo = size_t.max;
-
-            if (this.maximumOffsetFromHead != size_t.max)
-                canDo = backwards.offsetFromHead - forwards.offsetFromHead;
+            size_t offsetIntoB = forwards.offsetIntoBlock, canDo = backwards.offsetFromHead - forwards.offsetFromHead;
 
             int result;
 
@@ -453,8 +454,8 @@ struct IteratorListImpl(Char) {
 
         // event hooks
 
-        void moveRange(Cursor.Block* ifThisBlock, size_t ifStartOffsetInBlock, Cursor.Block* movedIntoBlock,
-                size_t movedIntoOffset, size_t amount) {
+        void moveRange(scope Cursor.Block* ifThisBlock, size_t ifStartOffsetInBlock, scope Cursor.Block* movedIntoBlock,
+                size_t movedIntoOffset, size_t amount) @trusted {
             forwards.moveRange(ifThisBlock, ifStartOffsetInBlock, movedIntoBlock, movedIntoOffset, amount);
             backwards.moveRange(ifThisBlock, ifStartOffsetInBlock, movedIntoBlock, movedIntoOffset, amount);
         }
@@ -485,10 +486,10 @@ struct IteratorListImpl(Char) {
 
             {
                 // we want all iterators to point to data entries
-                iterator1.back;
-                iterator2.back;
-                iterator3.back;
-                iterator4.back;
+                iterator1.popBackInternal;
+                iterator2.popBackInternal;
+                iterator3.popBackInternal;
+                iterator4.popBackInternal;
 
                 // move iterators around so that we can test that positions are correct regardless of initial configuration
                 iterator2.popFront;
@@ -518,7 +519,6 @@ struct IteratorListImpl(Char) {
             }
 
             {
-
                 Cursor.Block* b = ilt.blockList.insert(a);
 
                 {
@@ -529,10 +529,23 @@ struct IteratorListImpl(Char) {
                     assert(from.length == 1);
                     assert(into.length == amountIn);
 
+                    size_t amountOfData;
+                    foreach (Char[] data; ilt.blockList) {
+                        amountOfData += data.length;
+                    }
+                    assert(amountOfData == Text1.length + Text2.length);
+
                     iterator1.moveRange(from, oldOffset, into, newOffset, amountToMove);
                     iterator2.moveRange(from, oldOffset, into, newOffset, amountToMove);
                     iterator3.moveRange(from, oldOffset, into, newOffset, amountToMove);
                     iterator4.moveRange(from, oldOffset, into, newOffset, amountToMove);
+
+                    assert(iterator2.forwards.offsetFromHead > 0);
+                    assert(iterator4.forwards.offsetFromHead > 0);
+                    assert(iterator1.backwards.offsetFromHead > 0);
+                    assert(iterator2.backwards.offsetFromHead > 0);
+                    assert(iterator3.backwards.offsetFromHead > 0);
+                    assert(iterator4.backwards.offsetFromHead > 0);
                 }
 
                 {
@@ -544,10 +557,23 @@ struct IteratorListImpl(Char) {
                     assert(from.length == 1);
                     assert(into.length == amountIn);
 
+                    size_t amountOfData;
+                    foreach (Char[] data; ilt.blockList) {
+                        amountOfData += data.length;
+                    }
+                    assert(amountOfData == Text1.length + Text2.length);
+
                     iterator1.moveRange(from, oldOffset, into, newOffset, amountToMove);
                     iterator2.moveRange(from, oldOffset, into, newOffset, amountToMove);
                     iterator3.moveRange(from, oldOffset, into, newOffset, amountToMove);
                     iterator4.moveRange(from, oldOffset, into, newOffset, amountToMove);
+
+                    assert(iterator2.forwards.offsetFromHead > 0);
+                    assert(iterator4.forwards.offsetFromHead > 0);
+                    assert(iterator1.backwards.offsetFromHead > 0);
+                    assert(iterator2.backwards.offsetFromHead > 0);
+                    assert(iterator3.backwards.offsetFromHead > 0);
+                    assert(iterator4.backwards.offsetFromHead > 0);
                 }
 
                 assert(iterator1.forwards.offsetIntoBlock == 0);
@@ -610,9 +636,9 @@ struct IteratorListImpl(Char) {
 
             {
                 // we want all iterators to point to data entries
-                iterator1.back;
-                iterator2.back;
-                iterator3.back;
+                iterator1.popBackInternal;
+                iterator2.popBackInternal;
+                iterator3.popBackInternal;
 
                 // move iterators around so that we can test that positions are correct regardless of initial configuration
                 foreach (i; 0 .. OffsetStart) {
@@ -678,7 +704,7 @@ struct IteratorListImpl(Char) {
         }
 
         void onRemoveDecreaseFromHead(size_t ifFromOffsetFromHead, size_t amount) {
-            if (this.maximumOffsetFromHead <= ifFromOffsetFromHead)
+            if (this.maximumOffsetFromHead < ifFromOffsetFromHead)
                 return;
 
             if (this.minimumOffsetFromHead > ifFromOffsetFromHead) {
@@ -690,8 +716,7 @@ struct IteratorListImpl(Char) {
                 this.minimumOffsetFromHead -= amountToGoBackwards;
             }
 
-            forwards.onRemoveDecreaseFromHead(ifFromOffsetFromHead, amount, this.maximumOffsetFromHead);
-            backwards.onRemoveDecreaseFromHead(ifFromOffsetFromHead, amount, this.maximumOffsetFromHead);
+            size_t newMaximumOffsetFromHead = this.maximumOffsetFromHead;
 
             {
                 size_t amountToGoBackwards = this.maximumOffsetFromHead - ifFromOffsetFromHead;
@@ -699,8 +724,13 @@ struct IteratorListImpl(Char) {
                 if (amountToGoBackwards > amount)
                     amountToGoBackwards = amount;
 
-                this.maximumOffsetFromHead -= amountToGoBackwards;
+                newMaximumOffsetFromHead -= amountToGoBackwards;
             }
+
+            forwards.onRemoveDecreaseFromHead(ifFromOffsetFromHead, amount, this.maximumOffsetFromHead);
+            backwards.onRemoveDecreaseFromHead(ifFromOffsetFromHead, amount, this.maximumOffsetFromHead);
+
+            this.maximumOffsetFromHead = newMaximumOffsetFromHead;
         }
 
         unittest {
@@ -726,9 +756,9 @@ struct IteratorListImpl(Char) {
 
             {
                 // we want all iterators to point to data entries
-                iterator1.back;
-                iterator2.back;
-                iterator3.back;
+                iterator1.popBackInternal;
+                iterator2.popBackInternal;
+                iterator3.popBackInternal;
 
                 // move iterators around so that we can test that positions are correct regardless of initial configuration
                 foreach (i; 0 .. OffsetStart) {
@@ -944,9 +974,6 @@ struct IteratorListImpl(Char) {
         void advanceBackwards(size_t amount, size_t minimumOffsetFromHead, size_t maximumOffsetFromHead, bool limitToData) {
             assert(block !is null);
 
-            if (amount == 0 && limitToData && (offsetFromHead == maximumOffsetFromHead || offsetIntoBlock == block.length))
-                amount = 1;
-
             // until currentBlock's previous node is headBlock
             while (block.previous !is null && amount > 0 && offsetFromHead > minimumOffsetFromHead) {
                 size_t canDo = offsetIntoBlock;
@@ -972,7 +999,6 @@ struct IteratorListImpl(Char) {
                                 offsetFromHead--;
                         }
                     } else {
-                        amount--;
                         offsetIntoBlock = block.length;
                     }
 
@@ -993,11 +1019,12 @@ struct IteratorListImpl(Char) {
                 amount -= canDo;
             }
 
-            if (!limitToData && offsetIntoBlock == 0 && amount > 0 && this.block.previous !is null) {
+            if (!limitToData && offsetIntoBlock == 0 && this.block.previous !is null) {
                 this.block = this.block.previous;
                 offsetIntoBlock = this.block.length;
-                amount--;
             }
+
+            assert(amount == 0 || this.offsetFromHead == minimumOffsetFromHead, "WHAT?");
         }
 
         unittest {
@@ -1012,14 +1039,23 @@ struct IteratorListImpl(Char) {
 
         // event hooks
 
-        void moveRange(Block* ifThisBlock, size_t ifStartOffsetInBlock, Block* movedIntoBlock, size_t movedIntoOffset, size_t amount) {
+        void moveRange(scope Block* ifThisBlock, size_t ifStartOffsetInBlock, scope Block* movedIntoBlock,
+                size_t movedIntoOffset, size_t amount) @trusted {
+
             if (this.block is ifThisBlock) {
                 if (this.offsetIntoBlock >= ifStartOffsetInBlock && this.offsetIntoBlock < ifStartOffsetInBlock + amount) {
                     this.block = movedIntoBlock;
                     this.offsetIntoBlock = (this.offsetIntoBlock - ifStartOffsetInBlock) + movedIntoOffset;
                 } else if (this.offsetIntoBlock >= ifStartOffsetInBlock + amount) {
-                    this.offsetIntoBlock -= amount;
-                }
+                    if (movedIntoBlock is ifThisBlock) {
+                        if (ifStartOffsetInBlock > movedIntoOffset)
+                            this.offsetIntoBlock -= ifStartOffsetInBlock - movedIntoOffset;
+                        else
+                            this.offsetIntoBlock -= movedIntoOffset - ifStartOffsetInBlock;
+                    } else
+                        this.offsetIntoBlock -= amount;
+                } else
+                    assert(this.offsetIntoBlock < ifStartOffsetInBlock);
             }
         }
 
@@ -1031,8 +1067,43 @@ struct IteratorListImpl(Char) {
 
         void onRemoveDecreaseFromHead(size_t ifFromOffsetFromHead, size_t amount, size_t maximumOffsetFromHead) {
             if (this.offsetFromHead > ifFromOffsetFromHead) {
+                size_t canDo = this.offsetFromHead - ifFromOffsetFromHead;
+                if (canDo < amount)
+                    amount = canDo;
                 advanceBackwards(amount, ifFromOffsetFromHead, maximumOffsetFromHead, offsetFromHead + amount < maximumOffsetFromHead);
             }
+
+            if (this.offsetFromHead == ifFromOffsetFromHead && this.offsetIntoBlock == 0)
+                advanceBackwards(0, ifFromOffsetFromHead, maximumOffsetFromHead, false);
+
+            assert(this.offsetFromHead <= maximumOffsetFromHead);
+            if (this.offsetFromHead == ifFromOffsetFromHead && this.offsetIntoBlock == 0)
+                assert(this.offsetIntoBlock > 0 || this.block.previous is null);
+        }
+
+        unittest {
+            IteratorListTest!Char ilt = IteratorListTest!Char(globalAllocator());
+
+            Cursor.Block* a = ilt.blockList.insert(&ilt.blockList.head), b = ilt.blockList.insert(a);
+            a.length = 10;
+            b.length = 10;
+            ilt.blockList.numberOfItems = 20;
+
+            Cursor cursor;
+            cursor.setup(&ilt.blockList, 20);
+            assert(cursor.offsetFromHead == 20);
+            assert(cursor.offsetIntoBlock == 0);
+            assert(cursor.block is &ilt.blockList.tail);
+
+            cursor.advanceBackwards(0, 0, 20, false);
+            assert(cursor.offsetFromHead == 20);
+            assert(cursor.offsetIntoBlock == 10);
+            assert(cursor.block is b);
+
+            cursor.onRemoveDecreaseFromHead(10, 10, 20);
+            assert(cursor.block is a);
+            assert(cursor.offsetFromHead == 10);
+            assert(cursor.offsetIntoBlock == 10);
         }
     }
 

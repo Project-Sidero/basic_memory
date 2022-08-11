@@ -137,6 +137,10 @@ struct BlockListImpl(Char) {
 
         assert(ret !is null);
         assert(ret.length >= offsetIntoBlock);
+
+        if (offset > 0)
+            assert(ret !is &head);
+
         return ret;
     }
 
@@ -193,6 +197,50 @@ struct BlockListImpl(Char) {
         bl.clear;
     }
 
+    int opApply(scope int delegate(Block* block) @safe nothrow @nogc del) @safe nothrow @nogc {
+        Block* current = head.next;
+        int result;
+
+        while (current.next !is null) {
+            Block* next = current.next;
+            result = del(current);
+
+            if (result)
+                return result;
+
+            current = next;
+        }
+
+        return result;
+    }
+
+    unittest {
+        BlockListImpl bl = BlockListImpl(globalAllocator());
+
+        Block* a = bl.insert(&bl.head);
+        assert(a !is null);
+        Block* b = bl.insert(a);
+        assert(b !is null);
+
+        a.length = 10;
+        b.length = 5;
+
+        int seenA, seenB;
+
+        foreach (Block* block; bl) {
+            if (block is a)
+                seenA++;
+            else if (block is b)
+                seenB++;
+            else
+                assert(0);
+        }
+
+        assert(seenA == 1);
+        assert(seenB == 1);
+        bl.clear;
+    }
+
     int opApply(scope int delegate(Char[] data) @safe nothrow @nogc del) {
         return this.opApply((blockOffset, data) { return del(data); });
     }
@@ -232,14 +280,15 @@ struct BlockListImpl(Char) {
         int seenA, seenB;
 
         ptrdiff_t lastOffset = -1;
-        foreach(offset, data; bl) {
+        foreach (offset, data; bl) {
             assert(offset == lastOffset + 1);
 
             if (data is a.get())
                 seenA++;
             else if (data is b.get())
                 seenB++;
-            else assert(0);
+            else
+                assert(0);
 
             lastOffset++;
         }
@@ -285,14 +334,15 @@ struct BlockListImpl(Char) {
         int seenA, seenB;
 
         ptrdiff_t lastOffset = 2;
-        foreach_reverse(offset, data; bl) {
+        foreach_reverse (offset, data; bl) {
             assert(offset == lastOffset - 1);
 
             if (data is a.get())
                 seenA++;
             else if (data is b.get())
                 seenB++;
-            else assert(0);
+            else
+                assert(0);
 
             lastOffset--;
         }
@@ -362,7 +412,7 @@ struct BlockListImpl(Char) {
             bl.clear;
         }
 
-        void moveFromInto(size_t oldOffset, size_t amount, Block* into, size_t newOffset) pure {
+        void moveFromInto(size_t oldOffset, size_t amount, scope Block* into, size_t newOffset) pure {
             assert(into !is null);
             assert(into !is &this);
             assert(this.length >= oldOffset + amount);
