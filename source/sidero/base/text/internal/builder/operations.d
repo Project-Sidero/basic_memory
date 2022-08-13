@@ -61,6 +61,86 @@ mixin template StringBuilderOperations() {
         return iteratorList.newIterator(&blockList, minimumOffsetFromHead, maximumOffsetFromHead);
     }
 
+    size_t clobberInsertOperation(scope Iterator* iterator, scope ref Cursor cursor, scope Char[] literal...) {
+        size_t maximumOffsetFromHead = blockList.numberOfItems;
+
+        if (iterator !is null)
+            maximumOffsetFromHead = iterator.maximumOffsetFromHead;
+
+        return clobberInsertOperation(cursor, maximumOffsetFromHead, literal);
+    }
+
+    size_t clobberInsertOperation(scope ref Cursor cursor, size_t maximumOffsetFromHead, scope Char[] literal...) {
+        size_t canDo = maximumOffsetFromHead - cursor.offsetFromHead, done;
+        if (literal.length < canDo)
+            canDo = literal.length;
+
+        while (canDo > 0) {
+            size_t toDo = cursor.block.length - cursor.offsetIntoBlock;
+            if (toDo > canDo)
+                toDo = canDo;
+
+            foreach (i, ref c; cursor.block.get()[cursor.offsetIntoBlock .. cursor.offsetIntoBlock + toDo])
+                c = literal[i];
+
+            canDo -= toDo;
+            done += toDo;
+
+            literal = literal[toDo .. $];
+            cursor.advanceForward(toDo, maximumOffsetFromHead, true);
+            assert(canDo == 0 || cursor.offsetIntoBlock == 0);
+        }
+
+        if (literal.length > 0) {
+            LiteralAsTarget literalAsTarget;
+            literalAsTarget.literal = literal;
+            scope lAT = literalAsTarget.get;
+
+            done += this.insertOperation(cursor, maximumOffsetFromHead, lAT);
+        }
+
+        return done;
+    }
+
+    @trusted unittest {
+        enum StartText = cast(Char[])"Hello, world!Hello, world!Hello, world!Hello, world!";
+        enum ReplaceFor = cast(Char[])"stop it";
+        enum Result = cast(Char[])"Hello, world!Hello, world!Hello, stop itHello, world!";
+        enum Offset = 33;
+        enum Max = 39;
+
+        OpTest!Char opTest = OpTest!Char(globalAllocator());
+
+        {
+            Cursor insertCursor;
+            opTest.LiteralAsTarget lAT;
+            lAT.literal = StartText;
+            scope target = lAT.get();
+
+            insertCursor.setup(&opTest.blockList, 0);
+            opTest.insertOperation(null, insertCursor, target);
+        }
+
+        {
+            Cursor cursor;
+            cursor.setup(&opTest.blockList, Offset);
+
+            opTest.clobberInsertOperation(cursor, Max, ReplaceFor);
+        }
+
+        {
+            scope LiteralMatcher literalMatcher;
+            literalMatcher.literal = cast(Char[])Result;
+
+            Cursor literalCursor;
+            literalCursor.setup(&opTest.blockList, 0);
+
+            bool matched = literalMatcher.matches(literalCursor, opTest.blockList.numberOfItems);
+            assert(matched);
+            assert(opTest.blockList.numberOfItems == Result.length);
+        }
+    }
+
     // keeps position the same position
     void removeOperation(scope Iterator* iterator, scope ref Cursor cursor, size_t amount) {
         size_t minimumOffsetFromHead = 0, maximumOffsetFromHead = blockList.numberOfItems;
@@ -81,7 +161,6 @@ mixin template StringBuilderOperations() {
 
         size_t amountRemoved = amount;
 
-        //debugPosition(cursor);
         foreach (iterator; iteratorList) {
             iterator.onRemoveDecreaseFromHead(cursor.offsetFromHead, amount);
         }
@@ -105,8 +184,6 @@ mixin template StringBuilderOperations() {
             size_t canDo = block.length - offsetIntoBlock;
             if (canDo > amount)
                 canDo = amount;
-
-            //debugPosition(block, offsetIntoBlock);
 
             if (canDo + offsetIntoBlock == block.length) {
                 // might have a prefix, no suffix, so this is either the first node or a middle node
@@ -330,16 +407,19 @@ mixin template StringBuilderOperations() {
         }
     }
 
-    // advances to end of inserted content
     size_t insertOperation(scope Iterator* iterator, scope ref Cursor cursor, scope ref OtherStateAsTarget!Char toInsert) {
-        const amountInserted = toInsert.length();
-        size_t amountToInsert = amountInserted, startOffsetFromHead = cursor.offsetFromHead, minimumOffsetFromHead = 0,
-            maximumOffsetFromHead = blockList.numberOfItems;
+        size_t maximumOffsetFromHead = blockList.numberOfItems;
 
-        if (iterator !is null) {
-            minimumOffsetFromHead = iterator.minimumOffsetFromHead;
+        if (iterator !is null)
             maximumOffsetFromHead = iterator.maximumOffsetFromHead;
-        }
+
+        return insertOperation(cursor, maximumOffsetFromHead, toInsert);
+    }
+
+    // advances to end of inserted content
+    size_t insertOperation(scope ref Cursor cursor, size_t maximumOffsetFromHead, scope ref OtherStateAsTarget!Char toInsert) {
+        const amountInserted = toInsert.length();
+        size_t amountToInsert = amountInserted, startOffsetFromHead = cursor.offsetFromHead;
 
         {
             // sanitize cursor locations (head/tail) to ensure we have a place to actually store stuff
