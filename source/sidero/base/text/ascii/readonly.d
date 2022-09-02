@@ -31,23 +31,15 @@ struct String_ASCII {
                 this.iterator = oldIterator;
             }
 
-            size_t offset;
             int result;
 
             while (!empty) {
                 Char temp = front();
 
-                static if (__traits(compiles, del(offset, temp)))
-                    result = del(offset, temp);
-                else static if (__traits(compiles, del(temp)))
-                    result = del(temp);
-                else
-                    static assert(0);
-
+                result = del(temp);
                 if (result)
                     return result;
 
-                offset++;
                 popFront();
             }
 
@@ -71,23 +63,15 @@ struct String_ASCII {
                 this.iterator = oldIterator;
             }
 
-            size_t offset = this.iterator.literal.length - 1;
             int result;
 
             while (!empty) {
                 Char temp = back();
 
-                static if (__traits(compiles, del(offset, temp)))
-                    result = del(offset, temp);
-                else static if (__traits(compiles, del(temp)))
-                    result = del(temp);
-                else
-                    static assert(0);
-
+                result = del(temp);
                 if (result)
                     return result;
 
-                offset--;
                 popBack();
             }
 
@@ -101,7 +85,7 @@ struct String_ASCII {
     alias LiteralType = const(ubyte)[];
 
     ///
-    mixin OpApplyCombos!("Char", "size_t", ["@safe", "nothrow", "@nogc"]);
+    mixin OpApplyCombos!("Char", null, ["@safe", "nothrow", "@nogc"]);
 
     ///
     unittest {
@@ -110,9 +94,8 @@ struct String_ASCII {
 
         size_t lastIndex;
 
-        foreach (i, c; text) {
-            assert(i == 0 || lastIndex == i);
-            assert(Text[i] == c);
+        foreach (c; text) {
+            assert(Text[lastIndex] == c);
             lastIndex++;
         }
 
@@ -120,7 +103,7 @@ struct String_ASCII {
     }
 
     ///
-    mixin OpApplyCombos!("Char", "size_t", ["@safe", "nothrow", "@nogc"], "opApplyReverse");
+    mixin OpApplyCombos!("Char", null, ["@safe", "nothrow", "@nogc"], "opApplyReverse");
 
     ///
     unittest {
@@ -129,10 +112,10 @@ struct String_ASCII {
 
         size_t lastIndex = Text.length;
 
-        foreach_reverse (i, c; text) {
-            assert(i == 0 || lastIndex - 1 == i);
-            assert(Text[i] == c);
+        foreach_reverse (c; text) {
+            assert(lastIndex > 0);
             lastIndex--;
+            assert(Text[lastIndex] == c);
         }
 
         assert(lastIndex == 0);
@@ -439,18 +422,8 @@ nothrow @nogc:
     //
 
     ///
-    Char opIndex(size_t index) const scope {
-        assert(this.length > index);
-        return this.literal[index];
-    }
-
-    ///
-    unittest {
-        static SomeText = "lotsa text goes here ya?";
-        String_ASCII lotsaText = String_ASCII(SomeText);
-
-        foreach (i, c; SomeText)
-            assert(lotsaText[i] == c);
+    String_ASCII opIndex(size_t index) scope {
+        return this[index .. index + 1];
     }
 
     @disable auto opCast(T)();
@@ -2558,25 +2531,30 @@ unittest {
     size_t seen;
 
     foreach (c; str) {
-        assert(str[seen] == c);
+        bool matched;
+        foreach(c2; str[seen]) {
+            matched = c2 == c;
+            break;
+        }
+
+        assert(matched);
         assert(SomeText[seen++] == cast(char)c);
     }
 
     assert(seen == SomeText.length);
     seen = 0;
 
-    foreach (i, c; str) {
-        assert(SomeText[i] == cast(char)c);
-        assert(i == seen++);
+    foreach (c; str) {
+        assert(SomeText[seen++] == cast(char)c);
     }
 
     assert(seen == SomeText.length);
     seen = 0;
 
-    foreach_reverse (size_t i, ubyte c; str) {
-        assert(SomeText[i] == cast(char)c);
+    foreach_reverse (ubyte c; str) {
+        assert(seen < SomeText.length);
+        assert(SomeText[$-(seen + 1)] == cast(char)c);
         seen++;
-        assert(i == str.length - seen);
     }
 
     assert(seen == SomeText.length);
