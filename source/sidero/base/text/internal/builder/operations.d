@@ -8,10 +8,11 @@ mixin template StringBuilderOperations() {
 
     BlockList blockList;
 
-    IteratorListImpl!Char iteratorList;
+    IteratorListImpl!(Char, CustomIteratorContents) iteratorList;
     alias Iterator = iteratorList.Iterator;
     alias Cursor = iteratorList.Cursor;
     alias Block = BlockList.Block;
+    alias OpTest = sidero.base.text.internal.builder.operations.OpTest;
 
 @safe nothrow @nogc:
 
@@ -22,10 +23,10 @@ mixin template StringBuilderOperations() {
     }
 
     void rcIterator(bool addRef, scope Iterator* iterator) {
-        assert(iterator !is null);
         blockList.mutex.pureLock;
 
-        iteratorList.rcIteratorInternal(addRef, iterator);
+        if (iterator !is null)
+            iteratorList.rcIteratorInternal(addRef, iterator);
         if (this.rcInternal(addRef))
             blockList.mutex.unlock;
     }
@@ -48,7 +49,9 @@ mixin template StringBuilderOperations() {
         return true;
     }
 
-    Iterator* newIterator(scope Iterator* iterator = null, size_t minimumOffsetFromHead = 0, size_t maximumOffsetFromHead = size_t.max) {
+    Iterator* newIterator(scope Iterator* iterator = null, size_t minimumOffsetFromHead = 0, size_t maximumOffsetFromHead = size_t.max) @trusted {
+        blockList.mutex.pureLock;
+
         if (iterator !is null) {
             minimumOffsetFromHead += iterator.minimumOffsetFromHead;
 
@@ -58,7 +61,54 @@ mixin template StringBuilderOperations() {
                 maximumOffsetFromHead += iterator.minimumOffsetFromHead;
         }
 
-        return iteratorList.newIterator(&blockList, minimumOffsetFromHead, maximumOffsetFromHead);
+        this.rcInternal(true);
+        Iterator* ret = iteratorList.newIterator(&blockList, minimumOffsetFromHead, maximumOffsetFromHead);
+
+        blockList.mutex.unlock;
+        return ret;
+    }
+
+    size_t externalLength(scope Iterator* iterator = null) {
+        blockList.mutex.pureLock;
+
+        size_t ret;
+
+        if (iterator is null)
+            ret = blockList.numberOfItems;
+         else
+            ret = iterator.backwards.offsetFromHead - iterator.forwards.offsetFromHead;
+
+        blockList.mutex.unlock;
+        return ret;
+    }
+
+    void externalInsert(scope Iterator* iterator, size_t offset, scope ref OtherStateAsTarget!Char other) @trusted {
+        blockList.mutex.pureLock;
+        if (other.obj !is &this)
+            other.mutex(true);
+
+        size_t maximumOffsetFromHead;
+        Cursor cursor = cursorFor(iterator, maximumOffsetFromHead, offset);
+        insertOperation(cursor, maximumOffsetFromHead, other);
+
+        blockList.mutex.unlock;
+        if (other.obj !is &this)
+            other.mutex(false);
+    }
+
+    // exposed /\/\/\/\/\
+    // internal \/\/\/\/
+
+    Cursor cursorFor(Iterator* iterator, out size_t maximumOffsetFromHead, size_t offset = 0) {
+        if (iterator !is null) {
+            offset += iterator.forwards.offsetFromHead;
+            maximumOffsetFromHead = iterator.backwards.offsetFromHead;
+        } else maximumOffsetFromHead = blockList.numberOfItems;
+
+        Cursor ret;
+        ret.setup(&blockList, offset);
+
+        return ret;
     }
 
     size_t clobberInsertOperation(scope Iterator* iterator, scope ref Cursor cursor, scope Char[] literal...) {
@@ -80,7 +130,11 @@ mixin template StringBuilderOperations() {
             if (toDo > canDo)
                 toDo = canDo;
 
-            foreach (i, ref c; cursor.block.get()[cursor.offsetIntoBlock .. cursor.offsetIntoBlock + toDo])
+            scope blockData = cursor.block.get()[cursor.offsetIntoBlock .. cursor.offsetIntoBlock + toDo];
+            onRemove(blockData);
+            onInsert(literal[0 .. toDo]);
+
+            foreach (i, ref c; blockData)
                 c = literal[i];
 
             canDo -= toDo;
@@ -112,7 +166,7 @@ mixin template StringBuilderOperations() {
         OpTest!Char opTest = OpTest!Char(globalAllocator());
 
         {
-            Cursor insertCursor;
+            opTest.Cursor insertCursor;
             opTest.LiteralAsTarget lAT;
             lAT.literal = StartText;
             scope target = lAT.get();
@@ -122,17 +176,17 @@ mixin template StringBuilderOperations() {
         }
 
         {
-            Cursor cursor;
+            opTest.Cursor cursor;
             cursor.setup(&opTest.blockList, Offset);
 
             opTest.clobberInsertOperation(cursor, Max, ReplaceFor);
         }
 
         {
-            scope LiteralMatcher literalMatcher;
+            scope opTest.LiteralMatcher literalMatcher;
             literalMatcher.literal = cast(Char[])Result;
 
-            Cursor literalCursor;
+            opTest.Cursor literalCursor;
             literalCursor.setup(&opTest.blockList, 0);
 
             bool matched = literalMatcher.matches(literalCursor, opTest.blockList.numberOfItems);
@@ -184,6 +238,7 @@ mixin template StringBuilderOperations() {
             size_t canDo = block.length - offsetIntoBlock;
             if (canDo > amount)
                 canDo = amount;
+            onRemove(block.get()[offsetIntoBlock .. offsetIntoBlock + canDo]);
 
             if (canDo + offsetIntoBlock == block.length) {
                 // might have a prefix, no suffix, so this is either the first node or a middle node
@@ -327,20 +382,20 @@ mixin template StringBuilderOperations() {
             opTest.blockList.numberOfItems = BlockList.Count * 3;
         }
 
-        Iterator* iterator1, iterator2, iterator3, iterator4, iterator5, iterator6;
+        opTest.Iterator* iterator1, iterator2, iterator3, iterator4, iterator5, iterator6;
         iterator6 = opTest.newIterator(null, opTest.blockList.numberOfItems, opTest.blockList.numberOfItems);
 
-        void test(size_t offsetFromHead, scope Char[] expected, return ref Iterator* iterator) @trusted {
+        void test(size_t offsetFromHead, scope Char[] expected, return ref opTest.Iterator* iterator) @trusted {
             iterator = opTest.newIterator(null, offsetFromHead, offsetFromHead + expected.length);
 
-            Cursor cursor = iterator.forwards;
+            opTest.Cursor cursor = iterator.forwards;
             opTest.removeOperation(null, cursor, opTest.blockList.numberOfItems - expected.length);
 
             {
-                scope LiteralMatcher literalMatcher;
+                scope opTest.LiteralMatcher literalMatcher;
                 literalMatcher.literal = expected;
 
-                Cursor literalCursor;
+                opTest.Cursor literalCursor;
                 literalCursor.setup(&opTest.blockList, 0);
 
                 bool matched = literalMatcher.matches(literalCursor, opTest.blockList.numberOfItems);
@@ -457,7 +512,9 @@ mixin template StringBuilderOperations() {
             assert(cursor.block.next !is null);
         }
 
-        foreach (cA; toInsert.foreachBlocks) {
+        foreach (scope cA; toInsert.foreachContiguous) {
+            onInsert(cA);
+
             while (cA.length > 0) {
                 if (cursor.block.length == BlockList.Count) {
                     // we are maxed out, oh noes
@@ -569,16 +626,16 @@ mixin template StringBuilderOperations() {
         }
 
         OpTest!Char opTest = OpTest!Char(globalAllocator());
-        Iterator* iterator1, iterator2, iterator3, iterator4;
+        opTest.Iterator* iterator1, iterator2, iterator3, iterator4;
 
-        void test(size_t offsetFromHead, scope Char[] input, scope Char[] expected, scope out Iterator* iterator) @trusted {
+        void test(size_t offsetFromHead, scope Char[] input, scope Char[] expected, scope out opTest.Iterator* iterator) @trusted {
             assert(offsetFromHead <= opTest.blockList.numberOfItems);
             iterator = opTest.newIterator(null, offsetFromHead, opTest.blockList.numberOfItems);
 
-            Cursor cursor = iterator.forwards;
+            opTest.Cursor cursor = iterator.forwards;
 
             {
-                scope LiteralAsTarget literalAsTarget;
+                scope opTest.LiteralAsTarget literalAsTarget;
                 literalAsTarget.literal = input;
                 scope osat = literalAsTarget.get;
 
@@ -587,10 +644,10 @@ mixin template StringBuilderOperations() {
             }
 
             {
-                scope LiteralMatcher literalMatcher;
+                scope opTest.LiteralMatcher literalMatcher;
                 literalMatcher.literal = expected;
 
-                Cursor literalCursor;
+                opTest.Cursor literalCursor;
                 literalCursor.setup(&opTest.blockList, 0);
 
                 bool matched = literalMatcher.matches(literalCursor, opTest.blockList.numberOfItems);
@@ -656,7 +713,7 @@ mixin template StringBuilderOperations() {
         OpTest!Char opTest = OpTest!Char(globalAllocator());
 
         {
-            Cursor insertCursor;
+            opTest.Cursor insertCursor;
             opTest.LiteralAsTarget lAT;
             lAT.literal = StartText;
             scope target = lAT.get();
@@ -666,12 +723,12 @@ mixin template StringBuilderOperations() {
         }
 
         {
-            Cursor replaceCursor;
+            opTest.Cursor replaceCursor;
             replaceCursor.setup(&opTest.blockList, 0);
 
-            size_t matched = opTest.replaceOperation(null, replaceCursor, (scope Cursor cursor, size_t maximumOffsetFromHead) {
+            size_t matched = opTest.replaceOperation(null, replaceCursor, (scope opTest.Cursor cursor, size_t maximumOffsetFromHead) {
                 return cast(size_t)(cursor.get() == 'l' ? 1 : 0);
-            }, (scope Iterator* iterator, scope ref Cursor cursor) @trusted {
+            }, (scope opTest.Iterator* iterator, scope ref opTest.Cursor cursor) @trusted {
                 opTest.LiteralAsTarget lAT;
                 lAT.literal = cast(Char[])"z";
                 scope target = lAT.get();
@@ -683,10 +740,10 @@ mixin template StringBuilderOperations() {
         }
 
         {
-            scope LiteralMatcher literalMatcher;
+            scope opTest.LiteralMatcher literalMatcher;
             literalMatcher.literal = cast(Char[])Result;
 
-            Cursor literalCursor;
+            opTest.Cursor literalCursor;
             literalCursor.setup(&opTest.blockList, 0);
 
             bool matched = literalMatcher.matches(literalCursor, opTest.blockList.numberOfItems);
@@ -696,7 +753,18 @@ mixin template StringBuilderOperations() {
     }
 }
 
-private:
+struct OtherStateAsTarget(TargetChar) {
+    void* obj;
+
+    void delegate(bool lockNotUnlock) @safe @nogc nothrow mutex;
+    int delegate(scope int delegate(scope ref /* ignore this */ TargetChar[] data) @safe @nogc nothrow del) @safe @nogc nothrow foreachContiguous;
+    int delegate(scope int delegate(ref /* ignore this */ TargetChar) @safe @nogc nothrow del) @safe @nogc nothrow foreachValue;
+    size_t delegate() @safe nothrow @nogc length;
+
+    bool isNull() @safe nothrow @nogc {
+        return obj is null;
+    }
+}
 
 alias OpTb = OpTest!ubyte;
 alias OpTc = OpTest!char;
@@ -704,6 +772,7 @@ alias OpTw = OpTest!wchar;
 alias OpTd = OpTest!dchar;
 
 struct OpTest(Char) {
+    alias CustomIteratorContents = void;
     mixin StringBuilderOperations;
 
 @safe nothrow @nogc:
@@ -772,10 +841,10 @@ struct OpTest(Char) {
                 writeln("====================");
 
                 while (block !is null) {
-                    if (block is iterator.forwards.block)
+                    if (iterator !is null && block is iterator.forwards.block)
                         write(iterator.forwards.offsetIntoBlock, ">");
                     writef!"%s:%X@(%s)"(offsetFromHead, block, *block);
-                    if (block is iterator.backwards.block)
+                    if (iterator !is null && block is iterator.backwards.block)
                         writef!":%s<"(iterator.backwards.offsetIntoBlock);
                     write("    [[[", cast(char[])block.get(), "]]]\n");
 
@@ -797,6 +866,12 @@ struct OpTest(Char) {
             } catch (Exception) {
             }
         }
+    }
+
+    void onInsert(scope const Char[]) scope {
+    }
+
+    void onRemove(scope const Char[]) scope {
     }
 
     static struct LiteralMatcher {
@@ -856,13 +931,13 @@ struct OpTest(Char) {
         void mutex(bool) {
         }
 
-        int foreachBlocks(scope int delegate(ref Char[] data) @safe @nogc nothrow del) @trusted @nogc nothrow {
+        int foreachContiguous(scope int delegate(scope ref /* ignore this */ Char[] data) @safe @nogc nothrow del) @trusted @nogc nothrow {
             // don't mutate during testing
             Char[] temp = cast(Char[])literal;
             return del(temp);
         }
 
-        int foreachValue(scope int delegate(ref Char) @safe @nogc nothrow del) @safe @nogc nothrow {
+        int foreachValue(scope int delegate(ref /* ignore this */ Char) @safe @nogc nothrow del) @safe @nogc nothrow {
             int result;
 
             foreach (Char c; literal) {
@@ -880,20 +955,7 @@ struct OpTest(Char) {
         }
 
         OtherStateAsTarget!Char get() scope return @trusted {
-            return OtherStateAsTarget!Char(cast(void*)literal.ptr, &mutex, &foreachBlocks, &foreachValue, &length);
+            return OtherStateAsTarget!Char(cast(void*)literal.ptr, &mutex, &foreachContiguous, &foreachValue, &length);
         }
-    }
-}
-
-struct OtherStateAsTarget(TargetChar) {
-    void* obj;
-
-    void delegate(bool lockNotUnlock) @safe @nogc nothrow mutex;
-    int delegate(scope int delegate(ref TargetChar[] data) @safe @nogc nothrow del) @safe @nogc nothrow foreachBlocks;
-    int delegate(scope int delegate(ref TargetChar) @safe @nogc nothrow del) @safe @nogc nothrow foreachValue;
-    size_t delegate() @safe nothrow @nogc length;
-
-    bool isNull() @safe nothrow @nogc {
-        return obj is null;
     }
 }
