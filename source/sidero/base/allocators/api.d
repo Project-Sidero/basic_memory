@@ -274,7 +274,11 @@ auto make(T, Allocator, Args...)(scope auto ref Allocator alloc, scope return au
         sizeToAllocate = __traits(classInstanceSize, T);
     }
 
-    void[] array = alloc.allocate(sizeToAllocate);
+    version(D_BetterC) {
+        void[] array = alloc.allocate(sizeToAllocate);
+    } else {
+        void[] array = alloc.allocate(sizeToAllocate, typeid(T));
+    }
 
     static if (is(T == class)) {
         auto ret = cast(T)array.ptr;
@@ -336,7 +340,7 @@ T[] makeArray(T, Allocator)(auto ref Allocator alloc, size_t length) @trusted {
     sizeToAllocate *= length;
 
     version (D_BetterC) {
-        void[] array = alloc.allocate(sizeToAllocate, null);
+        void[] array = alloc.allocate(sizeToAllocate);
     } else {
         void[] array = alloc.allocate(sizeToAllocate, typeid(T[]));
     }
