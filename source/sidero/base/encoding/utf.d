@@ -4,28 +4,31 @@ UTF-16 encoding: https://datatracker.ietf.org/doc/html/rfc2781
  */
 module sidero.base.encoding.utf;
 import sidero.base.text.unicode.characters.defs;
-import std.traits : isSomeString;
+import std.traits : isSomeString, isSomeFunction;
 
 ///
-alias ForeachOverUTF32HandleDelegate = int delegate(ref dchar) @safe nothrow @nogc;
+alias ForeachOverUTF32handle = int delegate(ref dchar) @safe nothrow @nogc;
 ///
-alias ForeachOverUTF32Delegate = int delegate(scope ForeachOverUTF32HandleDelegate) @safe nothrow @nogc;
+alias ForeachOverUTF32Delegate = int delegate(scope ForeachOverUTF32handle) @safe nothrow @nogc;
 ///
 alias ForeachOverUTF32PeekDelegate = void delegate(size_t amountRead, size_t lastIteratedAmount) @safe nothrow @nogc;
 
 @safe nothrow @nogc {
     ///
-    ForeachOverAnyUTF foreachOverAnyUTF(scope return const(char)[] arg, size_t limitCharacters = size_t.max, scope return ForeachOverUTF32PeekDelegate peekDel = null) {
+    ForeachOverAnyUTF foreachOverAnyUTF(scope return const(char)[] arg, size_t limitCharacters = size_t.max,
+            scope return ForeachOverUTF32PeekDelegate peekDel = null) {
         return ForeachOverAnyUTF(arg, limitCharacters, peekDel);
     }
 
     ///
-    ForeachOverAnyUTF foreachOverAnyUTF(scope return const(wchar)[] arg, size_t limitCharacters = size_t.max, scope return ForeachOverUTF32PeekDelegate peekDel = null) {
+    ForeachOverAnyUTF foreachOverAnyUTF(scope return const(wchar)[] arg, size_t limitCharacters = size_t.max,
+            scope return ForeachOverUTF32PeekDelegate peekDel = null) {
         return ForeachOverAnyUTF(arg, limitCharacters, peekDel);
     }
 
     ///
-    ForeachOverAnyUTF foreachOverAnyUTF(scope return const(dchar)[] arg, size_t limitCharacters = size_t.max, scope return ForeachOverUTF32PeekDelegate peekDel = null) {
+    ForeachOverAnyUTF foreachOverAnyUTF(scope return const(dchar)[] arg, size_t limitCharacters = size_t.max,
+            scope return ForeachOverUTF32PeekDelegate peekDel = null) {
         return ForeachOverAnyUTF(arg, limitCharacters, peekDel);
     }
 }
@@ -71,7 +74,7 @@ struct ForeachOverAnyUTF {
     }
 
     ///
-    int opApply(scope ForeachOverUTF32HandleDelegate del) @trusted {
+    int opApply(scope ForeachOverUTF32handle del) @trusted {
         if (size == 8)
             return utf8.opApply(del);
         else if (size == 16)
@@ -103,7 +106,7 @@ struct ForeachOverUTF(Type) if (isSomeString!Type) {
     ForeachOverUTF32PeekDelegate peekAtReadAmountDelegate;
 
     ///
-    int opApply(scope ForeachOverUTF32HandleDelegate del) scope {
+    int opApply(scope ForeachOverUTF32handle del) scope {
         Type temp = value;
         int result;
 
@@ -136,8 +139,9 @@ struct ForeachOverUTF(Type) if (isSomeString!Type) {
 }
 
 /// Supports UTF-8 and UTF-16
-void decode(T, U)(scope U refillDelegate, scope T handleDelegate) if (is(T == delegate) && is(U == delegate)) {
-    auto input = refillDelegate();
+void decode(T, U)(scope U refill, scope T handle) if (isSomeFunction!T && isSomeFunction!U) {
+    import std.traits : ReturnType;
+    auto input = refill();
     dchar temp;
 
     enum isUTF8 = is(typeof(cast()input[0]) == char);
@@ -152,7 +156,7 @@ void decode(T, U)(scope U refillDelegate, scope T handleDelegate) if (is(T == de
             buffer[0 .. input.length] = input[];
             size_t inBuffer = input.length;
 
-            input = refillDelegate();
+            input = refill();
 
             size_t toCopy = 8 - inBuffer;
             if (toCopy > input.length)
@@ -163,8 +167,14 @@ void decode(T, U)(scope U refillDelegate, scope T handleDelegate) if (is(T == de
 
             while (inBuffer > 0) {
                 size_t consumed = decode(tempInput, temp);
-                if (consumed > 0)
-                    handleDelegate(temp);
+
+                static if (is(ReturnType!handle == bool)) {
+                    if (consumed > 0 && handle(temp))
+                        return;
+                } else {
+                    if (consumed > 0)
+                        handle(temp);
+                }
 
                 if (consumed >= inBuffer) {
                     consumed -= inBuffer;
@@ -178,13 +188,20 @@ void decode(T, U)(scope U refillDelegate, scope T handleDelegate) if (is(T == de
             }
         } else {
             size_t consumed = decode(input, temp);
-            if (consumed > 0)
-                handleDelegate(temp);
+
+            static if (is(ReturnType!handle == bool)) {
+                if (consumed > 0 && handle(temp))
+                    return;
+            } else {
+                if (consumed > 0)
+                    handle(temp);
+            }
+
             input = input[consumed .. $];
         }
 
         if (input.length == 0)
-            input = refillDelegate();
+            input = refill();
     }
 }
 
@@ -220,13 +237,22 @@ unittest {
 }
 
 ///
-void decode(T)(const(char)[] input, scope T handleDelegate) if (is(T == delegate)) {
+void decode(T)(const(char)[] input, scope T handle) if (isSomeFunction!T) {
+    import std.traits : ReturnType;
     dchar temp;
 
     while (input.length > 0) {
         size_t consumed = decode(input, temp);
-        if (consumed > 0)
-            handleDelegate(temp);
+
+        static if (is(ReturnType!handle == bool)) {
+            if (consumed > 0 && handle(temp))
+                return;
+        } else {
+            static assert(is(ReturnType!handle == void), "I don't know how to handle a non-void or bool return type");
+            if (consumed > 0)
+                handle(temp);
+        }
+
         input = input[consumed .. $];
     }
 }
@@ -246,13 +272,22 @@ unittest {
 }
 
 ///
-void decode(T)(const(wchar)[] input, scope T handleDelegate) if (is(T == delegate)) {
+void decode(T)(const(wchar)[] input, scope T handle) if (isSomeFunction!T) {
+    import std.traits : ReturnType;
     dchar temp;
 
     while (input.length > 0) {
         size_t consumed = decode(input, temp);
-        if (consumed > 0)
-            handleDelegate(temp);
+
+        static if (is(ReturnType!handle == bool)) {
+            if (consumed > 0 && handle(temp))
+                return;
+        } else {
+            static assert(is(ReturnType!handle == void), "I don't know how to handle a non-void or bool return type");
+            if (consumed > 0)
+                handle(temp);
+        }
+
         input = input[consumed .. $];
     }
 }
@@ -272,20 +307,20 @@ unittest {
 }
 
 ///
-void encodeUTF8(T)(const(dchar)[] input, scope T handleDelegate) if (is(T == delegate)) {
+void encodeUTF8(T)(const(dchar)[] input, scope T handle) if (isSomeFunction!T) {
     char[4] temp;
 
     while (input.length > 0) {
         size_t given = encodeUTF8(input[0], temp);
 
         if (given > 0)
-            handleDelegate(temp[0]);
+            handle(temp[0]);
         if (given > 1)
-            handleDelegate(temp[1]);
+            handle(temp[1]);
         if (given > 2)
-            handleDelegate(temp[2]);
+            handle(temp[2]);
         if (given > 3)
-            handleDelegate(temp[3]);
+            handle(temp[3]);
         input = input[1 .. $];
     }
 }
@@ -305,16 +340,16 @@ unittest {
 }
 
 ///
-void encodeUTF16(T)(const(dchar)[] input, scope T handleDelegate) if (is(T == delegate)) {
+void encodeUTF16(T)(const(dchar)[] input, scope T handle) if (isSomeFunction!T) {
     wchar[2] temp;
 
     while (input.length > 0) {
         size_t given = encodeUTF16(input[0], temp);
 
         if (given > 0)
-            handleDelegate(temp[0]);
+            handle(temp[0]);
         if (given > 1)
-            handleDelegate(temp[1]);
+            handle(temp[1]);
 
         input = input[1 .. $];
     }
@@ -335,9 +370,9 @@ unittest {
 }
 
 /// Supports UTF-8 and UTF-16
-size_t decodeLength(T)(scope T refillDelegate) if (is(T == delegate)) {
+size_t decodeLength(T)(scope T refill) if (isSomeFunction!T) {
     size_t result;
-    auto input = refillDelegate();
+    auto input = refill();
 
     enum isUTF8 = is(typeof(cast()input[0]) == char);
     enum isUTF16 = is(typeof(cast()input[0]) == wchar);
@@ -349,7 +384,7 @@ size_t decodeLength(T)(scope T refillDelegate) if (is(T == delegate)) {
             buffer[0 .. input.length] = input[];
             size_t inBuffer = input.length;
 
-            input = refillDelegate();
+            input = refill();
 
             size_t toCopy = 8 - inBuffer;
             if (toCopy > input.length)
@@ -379,7 +414,7 @@ size_t decodeLength(T)(scope T refillDelegate) if (is(T == delegate)) {
         }
 
         if (input.length == 0)
-            input = refillDelegate();
+            input = refill();
     }
 
     return result;
@@ -405,9 +440,9 @@ unittest {
 }
 
 ///
-size_t encodeLengthUTF8(T)(scope T refillDelegate) if (is(T == delegate)) {
+size_t encodeLengthUTF8(T)(scope T refill) if (isSomeFunction!T) {
     size_t result;
-    auto input = refillDelegate();
+    auto input = refill();
 
     enum isUTF32 = is(typeof(cast()input[0]) == dchar);
     static assert(isUTF32, __FUNCTION__ ~ " only supports dchar arrays");
@@ -417,7 +452,7 @@ size_t encodeLengthUTF8(T)(scope T refillDelegate) if (is(T == delegate)) {
             result += encodeLengthUTF8(c);
         }
 
-        input = refillDelegate();
+        input = refill();
     }
 
     return result;
@@ -437,9 +472,9 @@ unittest {
 }
 
 ///
-size_t encodeLengthUTF16(T)(scope T refillDelegate) if (is(T == delegate)) {
+size_t encodeLengthUTF16(T)(scope T refill) if (isSomeFunction!T) {
     size_t result;
-    auto input = refillDelegate();
+    auto input = refill();
 
     enum isUTF32 = is(typeof(cast()input[0]) == dchar);
     static assert(isUTF32, __FUNCTION__ ~ " only supports dchar arrays");
@@ -449,7 +484,7 @@ size_t encodeLengthUTF16(T)(scope T refillDelegate) if (is(T == delegate)) {
             result += encodeLengthUTF16(c);
         }
 
-        input = refillDelegate();
+        input = refill();
     }
 
     return result;
@@ -469,8 +504,8 @@ unittest {
 }
 
 /// Supports UTF-8 and UTF-16
-void reEncode(T, U)(scope U refillDelegate, scope T handleDelegate) if (is(T == delegate) && is(U == delegate)) {
-    auto input = refillDelegate();
+void reEncode(T, U)(scope U refill, scope T handle) if (isSomeFunction!T && isSomeFunction!U) {
+    auto input = refill();
     dchar temp;
 
     enum isUTF8 = is(typeof(cast()input[0]) == char);
@@ -485,7 +520,7 @@ void reEncode(T, U)(scope U refillDelegate, scope T handleDelegate) if (is(T == 
             buffer[0 .. input.length] = input[];
             size_t inBuffer = input.length;
 
-            input = refillDelegate();
+            input = refill();
 
             size_t toCopy = 8 - inBuffer;
             if (toCopy > input.length)
@@ -499,20 +534,20 @@ void reEncode(T, U)(scope U refillDelegate, scope T handleDelegate) if (is(T == 
                     size_t[2] consumedGot = reEncode(input, temp);
 
                     if (consumedGot[1] > 0)
-                        handleDelegate(temp[0]);
+                        handle(temp[0]);
                     if (consumedGot[1] > 1)
-                        handleDelegate(temp[1]);
+                        handle(temp[1]);
                 } else static if (isUTF16) {
                     size_t[2] consumedGot = reEncode(input, temp);
 
                     if (consumedGot[1] > 0)
-                        handleDelegate(temp[0]);
+                        handle(temp[0]);
                     if (consumedGot[1] > 1)
-                        handleDelegate(temp[1]);
+                        handle(temp[1]);
                     if (consumedGot[1] > 2)
-                        handleDelegate(temp[2]);
+                        handle(temp[2]);
                     if (consumedGot[1] > 3)
-                        handleDelegate(temp[3]);
+                        handle(temp[3]);
                 }
 
                 if (consumedGot[0] >= inBuffer) {
@@ -530,65 +565,461 @@ void reEncode(T, U)(scope U refillDelegate, scope T handleDelegate) if (is(T == 
                 size_t[2] consumedGot = reEncode(input, temp);
 
                 if (consumedGot[1] > 0)
-                    handleDelegate(temp[0]);
+                    handle(temp[0]);
                 if (consumedGot[1] > 1)
-                    handleDelegate(temp[1]);
+                    handle(temp[1]);
 
                 input = input[consumedGot[0] .. $];
             } else static if (isUTF16) {
                 size_t[2] consumedGot = reEncode(input, temp);
 
                 if (consumedGot[1] > 0)
-                    handleDelegate(temp[0]);
+                    handle(temp[0]);
                 if (consumedGot[1] > 1)
-                    handleDelegate(temp[1]);
+                    handle(temp[1]);
                 if (consumedGot[1] > 2)
-                    handleDelegate(temp[2]);
+                    handle(temp[2]);
                 if (consumedGot[1] > 3)
-                    handleDelegate(temp[3]);
+                    handle(temp[3]);
 
                 input = input[consumedGot[0] .. $];
             }
         }
 
         if (input.length == 0)
-            input = refillDelegate();
+            input = refill();
     }
 }
 
 ///
-void reEncode(T)(scope const(char)[] input, scope T handleDelegate) if (is(T == delegate)) {
+void reEncode(T)(scope const(char)[] input, scope T handle) if (isSomeFunction!T) {
     wchar[2] temp;
 
     while (input.length > 0) {
         size_t[2] consumedGot = reEncode(input, temp);
 
         if (consumedGot[1] > 0)
-            handleDelegate(temp[0]);
+            handle(temp[0]);
         if (consumedGot[1] > 1)
-            handleDelegate(temp[1]);
+            handle(temp[1]);
 
         input = input[consumedGot[0] .. $];
     }
 }
 
 ///
-void reEncode(T)(scope const(wchar)[] input, scope T handleDelegate) if (is(T == delegate)) {
+void reEncode(T)(scope const(wchar)[] input, scope T handle) if (isSomeFunction!T) {
     char[4] temp;
 
     while (input.length > 0) {
         size_t[2] consumedGot = reEncode(input, temp);
 
         if (consumedGot[1] > 0)
-            handleDelegate(temp[0]);
+            handle(temp[0]);
         if (consumedGot[1] > 1)
-            handleDelegate(temp[1]);
+            handle(temp[1]);
         if (consumedGot[1] > 2)
-            handleDelegate(temp[2]);
+            handle(temp[2]);
         if (consumedGot[1] > 3)
-            handleDelegate(temp[3]);
+            handle(temp[3]);
 
         input = input[consumedGot[0] .. $];
+    }
+}
+
+///
+dchar decode(Char)(scope bool delegate() @safe nothrow @nogc empty, scope Char delegate() @safe nothrow @nogc front,
+    scope void delegate() @safe nothrow @nogc popFront, out size_t consumed) {
+    assert(empty !is null);
+    assert(front !is null);
+    assert(popFront !is null);
+
+    consumed = 1;
+    dchar result = replacementCharacter;
+
+    Char[4 / Char.sizeof] temp;
+    size_t soFar, expecting;
+
+    while (!empty()) {
+        Char got = front();
+
+        static if (is(Char == char)) {
+            if (soFar == 0) {
+                if (got < 0x80) {
+                    // ok only need one
+                    result = cast(dchar)got;
+
+                    consumed = 1;
+                    popFront();
+                    break;
+                } else if ((got & 0xE0) == 0xC0) {
+                    temp[soFar++] = got;
+                    expecting = 2;
+
+                    popFront();
+                    continue;
+                } else if ((got & 0xF0) == 0xE0) {
+                    temp[soFar++] = got;
+                    expecting = 3;
+
+                    popFront();
+                    continue;
+                } else if ((got & 0xF8) == 0xF0 && got <= 0xF4) {
+                    temp[soFar++] = got;
+                    expecting = 4;
+
+                    popFront();
+                    continue;
+                } else {
+                    // unknown state
+
+                    popFront();
+                    break;
+                }
+            } else if (soFar == 1) {
+                if (expecting == 2) {
+                    result = (cast(dchar)temp[0] & 0x1F) << 6;
+                    result |= got & 0x3F;
+
+                    consumed = 2;
+                    popFront();
+                    break;
+                } else {
+                    temp[soFar++] = got;
+
+                    popFront();
+                    continue;
+                }
+            } else if (soFar == 2) {
+                if (expecting == 3) {
+                    result = (cast(dchar)temp[0] & 0x0F) << 12;
+                    result |= (cast(dchar)temp[1] & 0x3F) << 6;
+                    result |= got & 0x3F;
+
+                    consumed = 3;
+                    popFront();
+                    break;
+                } else {
+                    temp[soFar++] = got;
+
+                    popFront();
+                    continue;
+                }
+            } else {
+                result = (cast(dchar)temp[0] & 0x07) << 18;
+                result |= (cast(dchar)temp[1] & 0x3F) << 12;
+                result |= (cast(dchar)temp[2] & 0x3F) << 6;
+                result |= got & 0x3F;
+
+                consumed = 4;
+                popFront();
+                break;
+            }
+        } else static if (is(Char == wchar)) {
+            if (soFar == 0) {
+                if (got < 0xD800 || got >= 0xE000) {
+                    result = got;
+
+                    consumed = 1;
+                    popFront();
+                    break;
+                } else {
+                    temp[soFar++] = got;
+
+                    popFront();
+                    continue;
+                }
+            } else if (soFar == 1) {
+                if (temp[0] >= 0xD800 && temp[0] <= 0xDBFF && got >= 0xDC00 && got <= 0xDFFF) {
+                    result = (temp[0] & 0x03FF) << 10;
+                    result |= got & 0x03FF;
+                    result += 0x10000;
+
+                    consumed = 2;
+                    popFront();
+                    break;
+                } else {
+                    // unknown state
+                    break;
+                }
+            }
+        } else static if (is(Char == dchar)) {
+            result = got;
+
+            consumed = 1;
+            popFront();
+            break;
+        }
+    }
+
+    return result;
+}
+
+///
+unittest {
+    string[] inputs8 = ["\x41\xE2\x89\xA2\xCE\x91\x2E", "\xED\x95\x9C\xEA\xB5\xAD\xEC\x96\xB4", "\xF0\xA3\x8E\xB4"];
+    wstring[] inputs16 = ["\x41\u2262\u0391\x2E"w, "\uD55C\uAD6D\uC5B4"w, cast(wstring)cast(ubyte[])"\x4C\xD8\xB4\xDF"];
+    dstring[] outputs = ["\u0041\u2262\u0391\u002E"d, "\uD55C\uAD6D\uC5B4"d, "\U000233B4"d];
+
+    {
+        foreach (entry; 0 .. inputs8.length) {
+            string input = inputs8[entry];
+            dstring output = outputs[entry];
+
+            char front(){
+                return input[0];
+            }
+
+            bool empty() {
+                return input.length == 0;
+            }
+
+            void popFront() {
+                input = input[1 .. $];
+            }
+
+            while(!empty()) {
+                size_t consumed;
+                dchar got = decode(&empty, &front, &popFront, consumed);
+
+                assert(output[0] == got);
+                output = output[1 .. $];
+            }
+
+            assert(output.length == 0);
+        }
+    }
+
+    {
+        foreach (entry; 0 .. inputs16.length) {
+            wstring input = inputs16[entry];
+            dstring output = outputs[entry];
+
+            wchar front(){
+                return input[0];
+            }
+
+            bool empty() {
+                return input.length == 0;
+            }
+
+            void popFront() {
+                input = input[1 .. $];
+            }
+
+            while(!empty()) {
+                size_t consumed;
+                dchar got = decode(&empty, &front, &popFront, consumed);
+
+                assert(output[0] == got);
+                output = output[1 .. $];
+            }
+
+            assert(output.length == 0);
+        }
+    }
+}
+
+///
+dchar decodeFromEnd(Char)(scope bool delegate() @safe nothrow @nogc empty, scope Char delegate() @safe nothrow @nogc back,
+    scope void delegate() @safe nothrow @nogc popBack, out size_t consumed) {
+    assert(empty !is null);
+    assert(back !is null);
+    assert(popBack !is null);
+
+    consumed = 1;
+    dchar result = replacementCharacter;
+
+    Char[4 / Char.sizeof] temp;
+    size_t soFar;
+
+    while (!empty()) {
+        Char got = back();
+
+        static if (is(Char == char)) {
+            // C0 = 1100 0000 done
+            // & C0) == 80 = 1000 0000 next
+
+            if (soFar == 0) {
+                if (got < 0x80) {
+                    result = got;
+
+                    consumed = 1;
+                    popBack();
+                    break;
+                } else if ((got & 0xC0) == 0x80) {
+                    // continuation
+                    soFar++;
+                    temp[$ - soFar] = got;
+
+                    popBack();
+                    continue;
+                } else {
+                    // unknown
+                    popBack();
+                    break;
+                }
+            } else if (soFar == 1) {
+                if ((got & 0xE0) == 0xC0) {
+                    result = (cast(dchar)got & 0x1F) << 6;
+                    result |= temp[$ - 1] & 0x3F;
+
+                    consumed = 2;
+                    popBack();
+                    break;
+                } else if ((got & 0xC0) == 0x80) {
+                    // continuation
+                    soFar++;
+                    temp[$ - soFar] = got;
+
+                    popBack();
+                    continue;
+                } else {
+                    // unknown
+                    break;
+                }
+            } else if (soFar == 2) {
+                if ((got & 0xF0) == 0xE0) {
+                    result = (cast(dchar)got & 0x0F) << 12;
+                    result |= (cast(dchar)temp[$ - 2] & 0x3F) << 6;
+                    result |= temp[$ - 1] & 0x3F;
+
+                    consumed = 3;
+                    popBack();
+                    break;
+                } else if ((got & 0xC0) == 0x80) {
+                    // continuation
+                    soFar++;
+                    temp[$ - soFar] = got;
+
+                    popBack();
+                    continue;
+                } else {
+                    // unknown
+                    break;
+                }
+            } else if (soFar == 3) {
+                if ((got & 0xF8) == 0xF0 && got <= 0xF4) {
+                    result = (cast(dchar)got & 0x07) << 18;
+                    result |= (cast(dchar)temp[$ - 3] & 0x3F) << 12;
+                    result |= (cast(dchar)temp[$ - 2] & 0x3F) << 6;
+                    result |= temp[$ - 1] & 0x3F;
+
+                    consumed = 4;
+                    popBack();
+                    break;
+                } else {
+                    // unknown
+                    break;
+                }
+            }
+        } else static if (is(Char == wchar)) {
+            if (soFar == 0) {
+                if (got < 0xD800 || got >= 0xE000) {
+                    result = got;
+
+                    consumed = 1;
+                    popBack();
+                    break;
+                } else if (got >= 0xDC00 && got <= 0xDFFF) {
+                    soFar++;
+                    temp[$ - soFar] = got;
+
+                    popBack();
+                    continue;
+                } else {
+                    // unknown state
+                    popBack();
+                    break;
+                }
+            } else {
+                if (got >= 0xD800 && got <= 0xDBFF) {
+                    result = (got & 0x03FF) << 10;
+                    result |= temp[$ - 1] & 0x03FF;
+                    result += 0x10000;
+
+                    consumed = 2;
+                    popBack();
+                    break;
+                } else {
+                    // unknown state
+                    break;
+                }
+            }
+        } else static if (is(Char == dchar)) {
+            result = got;
+
+            consumed = 1;
+            popBack();
+            break;
+        }
+    }
+
+    return result;
+}
+
+///
+unittest {
+    string[] inputs8 = ["\x41\xE2\x89\xA2\xCE\x91\x2E", "\xED\x95\x9C\xEA\xB5\xAD\xEC\x96\xB4", "\xF0\xA3\x8E\xB4"];
+    wstring[] inputs16 = ["\x41\u2262\u0391\x2E"w, "\uD55C\uAD6D\uC5B4"w, cast(wstring)cast(ubyte[])"\x4C\xD8\xB4\xDF"];
+    dstring[] outputs = ["\u0041\u2262\u0391\u002E"d, "\uD55C\uAD6D\uC5B4"d, "\U000233B4"d];
+
+    {
+        foreach (entry; 0 .. inputs8.length) {
+            string input = inputs8[entry];
+            dstring output = outputs[entry];
+
+            char back(){
+                return input[$-1];
+            }
+
+            bool empty() {
+                return input.length == 0;
+            }
+
+            void popBack() {
+                input = input[0 .. $-1];
+            }
+
+            while(!empty()) {
+                size_t consumed;
+                dchar got = decodeFromEnd(&empty, &back, &popBack, consumed);
+
+                assert(output[$-1] == got);
+                output = output[0 .. $-1];
+            }
+
+            assert(output.length == 0);
+        }
+    }
+
+    {
+        foreach (entry; 0 .. inputs16.length) {
+            wstring input = inputs16[entry];
+            dstring output = outputs[entry];
+
+            wchar back(){
+                return input[$-1];
+            }
+
+            bool empty() {
+                return input.length == 0;
+            }
+
+            void popBack() {
+                input = input[0 .. $-1];
+            }
+
+            while(!empty()) {
+                size_t consumed;
+                dchar got = decodeFromEnd(&empty, &back, &popBack, consumed);
+
+                assert(output[$-1] == got);
+                output = output[0 .. $-1];
+            }
+
+            assert(output.length == 0);
+        }
     }
 }
 
@@ -640,6 +1071,86 @@ size_t[2] reEncodeFromEnd(scope const(wchar)[] input, out char[4] output) {
     size_t given = encodeUTF8(temp, output);
 
     return [consumed, given];
+}
+
+/// Supports UTF-8 and UTF-16
+size_t reEncodeLength(U)(scope U refill) if (is(U == function) || is(U == delegate)) {
+    import sidero.base.text.unicode.characters.defs : replacementCharacter;
+
+    auto input = refill();
+    dchar temp;
+
+    enum isUTF8 = is(typeof(cast()input[0]) == char);
+    enum isUTF16 = is(typeof(cast()input[0]) == wchar);
+    static assert(isUTF8 || isUTF16, __FUNCTION__ ~ " only supports char and wchar arrays");
+
+    enum codePointUnits = isUTF8 ? 4 : 2;
+    size_t result;
+
+    while (input.length > 0) {
+        if (input.length < codePointUnits) {
+            typeof(cast()input[0])[8] buffer;
+            buffer[0 .. input.length] = input[];
+            size_t inBuffer = input.length;
+
+            input = refill();
+
+            size_t toCopy = 8 - inBuffer;
+            if (toCopy > input.length)
+                toCopy = input.length;
+
+            buffer[inBuffer .. inBuffer + toCopy] = input[0 .. toCopy];
+            auto tempInput = buffer[0 .. inBuffer + toCopy];
+
+            while (inBuffer > 0) {
+                size_t consumed = decode(tempInput, temp, false);
+
+                if (consumed == 0) {
+                    temp = replacementCharacter;
+                    consumed = 1;
+                }
+
+                static if (isUTF8) {
+                    result += encodeLengthUTF16(temp);
+                } else static if (isUTF16) {
+                    result += encodeLengthUTF8(temp);
+                }
+
+                if (consumed >= inBuffer) {
+                    consumed -= inBuffer;
+                    inBuffer = 0;
+
+                    input = input[consumed .. $];
+                } else
+                    inBuffer -= consumed;
+
+                tempInput = tempInput[consumed .. $];
+            }
+        } else {
+            while (input.length > 0) {
+                size_t consumed = decode(input, temp, false);
+
+                if (consumed == 0) {
+                    if (input.length >= codePointUnits) {
+                        temp = replacementCharacter;
+                        consumed = 1;
+                    } else
+                        break;
+                }
+
+                static if (isUTF8) {
+                    result += encodeLengthUTF16(temp);
+                } else static if (isUTF16) {
+                    result += encodeLengthUTF8(temp);
+                }
+
+                input = input[consumed .. $];
+            }
+        }
+
+        if (input.length == 0)
+            input = refill();
+    }
 }
 
 ///
@@ -817,7 +1328,7 @@ unittest {
 }
 
 ///
-size_t decode(scope const(char)[] input, out dchar result) {
+size_t decode(scope const(char)[] input, out dchar result, bool advanceIfUnrecognized = true) {
     size_t consumed;
     result = replacementCharacter;
 
@@ -841,7 +1352,7 @@ size_t decode(scope const(char)[] input, out dchar result) {
         consumed = 4;
     } else {
         // unrecognizable
-        consumed = cast(size_t)(input.length > 0);
+        consumed = cast(size_t)(advanceIfUnrecognized && input.length > 0);
     }
 
     // surrogate half, reserved for UTF-16.
@@ -852,7 +1363,7 @@ size_t decode(scope const(char)[] input, out dchar result) {
 }
 
 ///
-size_t decodeFromEnd(scope const(char)[] input, out dchar result) {
+size_t decodeFromEnd(scope const(char)[] input, out dchar result, bool advanceIfUnrecognized = true) {
     size_t consumed;
     result = replacementCharacter;
 
@@ -876,7 +1387,7 @@ size_t decodeFromEnd(scope const(char)[] input, out dchar result) {
         consumed = 4;
     } else {
         // unrecognizable
-        consumed = cast(size_t)(input.length > 0);
+        consumed = cast(size_t)(advanceIfUnrecognized && input.length > 0);
     }
 
     // surrogate half, reserved for UTF-16.
@@ -887,7 +1398,7 @@ size_t decodeFromEnd(scope const(char)[] input, out dchar result) {
 }
 
 ///
-size_t decode(scope const(wchar)[] input, out dchar result) {
+size_t decode(scope const(wchar)[] input, out dchar result, bool advanceIfUnrecognized = true) {
     size_t consumed;
     result = replacementCharacter;
 
@@ -901,14 +1412,14 @@ size_t decode(scope const(wchar)[] input, out dchar result) {
         consumed = 2;
     } else {
         // unrecognizable
-        consumed = cast(size_t)(input.length > 0);
+        consumed = cast(size_t)(advanceIfUnrecognized && input.length > 0);
     }
 
     return consumed;
 }
 
 ///
-size_t decodeFromEnd(scope const(wchar)[] input, out dchar result) {
+size_t decodeFromEnd(scope const(wchar)[] input, out dchar result, bool advanceIfUnrecognized = true) {
     size_t consumed;
     result = replacementCharacter;
 
@@ -922,7 +1433,7 @@ size_t decodeFromEnd(scope const(wchar)[] input, out dchar result) {
         consumed = 2;
     } else {
         // unrecognizable
-        consumed = cast(size_t)(input.length > 0);
+        consumed = cast(size_t)(advanceIfUnrecognized && input.length > 0);
     }
 
     return consumed;
@@ -983,6 +1494,12 @@ size_t decodeLength(scope const(dchar)[] input) {
     return input.length > 0 ? 1 : 0;
 }
 
+
+///
+alias encode = encodeUTF8;
+///
+alias encode = encodeUTF16;
+
 ///
 size_t encodeUTF8(dchar input, out char[4] output) {
     if (input <= 0x7F) {
@@ -1008,7 +1525,7 @@ size_t encodeUTF8(dchar input, out char[4] output) {
 
 ///
 size_t encodeUTF16(dchar input, out wchar[2] output) {
-    if (input < 0x10000) {
+    if (input <= 0xD7FF || (input >= 0xE000 && input <= 0xFFFF)) {
         output[0] = cast(wchar)input;
         return 1;
     } else {
@@ -1053,7 +1570,7 @@ size_t encodeLengthUTF8(dchar input) {
 
 ///
 size_t encodeLengthUTF16(dchar input) {
-    if (input < 0x10000)
+    if (input <= 0xD7FF || (input >= 0xE000 && input <= 0xFFFF))
         return 1;
     else
         return 2;
