@@ -250,6 +250,9 @@ nothrow @nogc:
     unittest {
         String_UTF stuff = String_UTF("I have no iterator!");
         assert(stuff.tupleof == stuff.withoutIterator.tupleof);
+
+        stuff.popFront;
+        assert(stuff.tupleof != stuff.withoutIterator.tupleof);
     }
 
 @safe:
@@ -398,12 +401,10 @@ nothrow @nogc:
         String_UTF thing = String_UTF("bar");
         assert(!thing.haveIterator);
 
-        version (none) {
-            assert(!thing.empty);
-            thing.popFront;
+        assert(!thing.empty);
+        thing.popFront;
 
-            assert(thing.haveIterator);
-        }
+        assert(thing.haveIterator);
     }
 
     /**
@@ -1017,6 +1018,7 @@ nothrow @nogc:
     unittest {
         String_UTF thing;
         assert(thing.empty);
+
         thing = cast(LiteralType)"bar";
         assert(!thing.empty);
     }

@@ -39,7 +39,7 @@ mixin template StringBuilderOperations() {
             blockList.clear;
 
             assert(iteratorList.head is null);
-            assert(blockList.head.next is null);
+            assert(blockList.head.next.next is null);
 
             allocator.dispose(&this);
             return false;
@@ -220,7 +220,7 @@ mixin template StringBuilderOperations() {
         }
 
         if (cursor.offsetIntoBlock == 0) {
-            cursor.advanceBackwards(0, cursor.offsetFromHead, maximumOffsetFromHead, false);
+            cursor.advanceBackwards(0, cursor.offsetFromHead, maximumOffsetFromHead, false, false);
             assert(cursor.offsetIntoBlock == cursor.block.length);
             assert(cursor.block.next !is null);
         }
@@ -481,7 +481,7 @@ mixin template StringBuilderOperations() {
 
             if (cursor.block.next is null) {
                 // is tail oh noes...
-                cursor.advanceBackwards(1, cursor.offsetFromHead, maximumOffsetFromHead, false);
+                cursor.advanceBackwards(1, cursor.offsetFromHead, maximumOffsetFromHead, false, false);
                 assert(cursor.offsetIntoBlock == cursor.block.length);
                 // could be head, but we handle that in next statement.
                 assert(cursor.block.next !is null);
@@ -682,7 +682,7 @@ mixin template StringBuilderOperations() {
             maximumOffsetFromHead = iterator.maximumOffsetFromHead;
         }
 
-        while (!cursor.isEmpty(0, maximumOffsetFromHead)) {
+        while (!cursor.isOutOfRange(0, maximumOffsetFromHead)) {
             size_t matchedAmount = isToFind(cursor, maximumOffsetFromHead);
 
             if (matchedAmount > 0) {
@@ -880,7 +880,7 @@ struct OpTest(Char) {
         bool matches(scope Cursor cursor, size_t maximumOffsetFromHead) {
             auto temp = literal;
 
-            while (!cursor.isEmpty(0, maximumOffsetFromHead) && temp.length > 0) {
+            while (!cursor.isOutOfRange(0, maximumOffsetFromHead) && temp.length > 0) {
                 size_t canDo = cursor.block.length - cursor.offsetIntoBlock;
                 if (canDo > temp.length)
                     canDo = temp.length;
@@ -900,7 +900,7 @@ struct OpTest(Char) {
         int compare(scope Cursor cursor, size_t maximumOffsetFromHead) {
             auto temp = literal;
 
-            while (!cursor.isEmpty(0, maximumOffsetFromHead) && temp.length > 0) {
+            while (!cursor.isOutOfRange(0, maximumOffsetFromHead) && temp.length > 0) {
                 size_t canDo = cursor.block.length - cursor.offsetIntoBlock;
                 if (canDo > temp.length)
                     canDo = temp.length;

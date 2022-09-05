@@ -268,11 +268,28 @@ nothrow @safe:
 
     ///
     bool isNull() scope @nogc {
-        return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) { assert(state !is null); return false; },
-                (StateIterator.S16 state, StateIterator.I16 iterator) { assert(state !is null); return false; },
-                (StateIterator.S32 state, StateIterator.I32 iterator) { assert(state !is null); return false; }, () {
-            return true;
-        });
+        return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+            assert(state !is null);
+            return state.externalLength(iterator) == 0 || (iterator !is null && iterator.empty);
+        }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+            assert(state !is null);
+            return state.externalLength(iterator) == 0 || (iterator !is null && iterator.empty);
+        }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+            assert(state !is null);
+            return state.externalLength(iterator) == 0 || (iterator !is null && iterator.empty);
+        }, () { return true; });
+    }
+
+    ///
+    unittest {
+        StringBuilder_UTF stuff;
+        assert(stuff.isNull);
+
+        stuff = StringBuilder_UTF("Abc");
+        assert(!stuff.isNull);
+
+        stuff = stuff[1 .. 1];
+        assert(stuff.isNull);
     }
 
     ///
@@ -284,6 +301,17 @@ nothrow @safe:
                 (StateIterator.S32 state, StateIterator.I32 iterator) { assert(state !is null); return iterator !is null; }, () {
             return false;
         });
+    }
+
+    ///
+    unittest {
+        StringBuilder_UTF thing = StringBuilder_UTF("bar");
+        assert(!thing.haveIterator);
+
+        assert(!thing.empty);
+        thing.popFront;
+
+        assert(thing.haveIterator);
     }
 
     ///
@@ -308,6 +336,15 @@ nothrow @safe:
         });
 
         return ret;
+    }
+
+    ///
+    unittest {
+        StringBuilder_UTF stuff = StringBuilder_UTF("I have no iterator!");
+        assert(stuff.tupleof == stuff.withoutIterator.tupleof);
+
+        stuff.popFront;
+        assert(stuff.tupleof != stuff.withoutIterator.tupleof);
     }
 
     ///
@@ -337,6 +374,26 @@ nothrow @safe:
         });
 
         return ret;
+    }
+
+    ///
+    unittest {
+        static if (is(Char == char)) {
+            StringBuilder_UTF original = StringBuilder_UTF("split me here");
+            StringBuilder_UTF split = original[6 .. 8];
+
+            assert(split.length == 2);
+        } else static if (is(Char == wchar)) {
+            StringBuilder_UTF original = StringBuilder_UTF("split me here"w);
+            StringBuilder_UTF split = original[6 .. 8];
+
+            assert(split.length == 2);
+        } else static if (is(Char == dchar)) {
+            StringBuilder_UTF original = StringBuilder_UTF("split me here"d);
+            StringBuilder_UTF split = original[6 .. 8];
+
+            assert(split.length == 2);
+        }
     }
 
     ///
@@ -381,6 +438,15 @@ nothrow @safe:
     }
 
     ///
+    unittest {
+        StringBuilder_UTF thing;
+        assert(thing.empty);
+
+        thing = StringBuilder_UTF(cast(LiteralType)"bar");
+        assert(!thing.empty);
+    }
+
+    ///
     Char front() scope @nogc {
         return state.handle((StateIterator.S8 state, ref StateIterator.I8 iterator) {
             assert(state !is null);
@@ -413,6 +479,43 @@ nothrow @safe:
     }
 
     ///
+    unittest {
+        static Text8 = "ok it's a live";
+        static Text16 = "I'm up to the"w;
+        static Text32 = "walls can't talk"d;
+
+        StringBuilder_UTF text = StringBuilder_UTF(Text8);
+        foreach (i, c; Text8) {
+            auto got = text.front;
+
+            assert(!text.empty);
+            assert(got == c);
+            text.popFront;
+        }
+        assert(text.empty);
+
+        text = StringBuilder_UTF(Text16);
+        foreach (i, c; Text16) {
+            auto got = text.front;
+
+            assert(!text.empty);
+            assert(got == c);
+            text.popFront;
+        }
+        assert(text.empty);
+
+        text = StringBuilder_UTF(Text32);
+        foreach (i, c; Text32) {
+            auto got = text.front;
+
+            assert(!text.empty);
+            assert(got == c);
+            text.popFront;
+        }
+        assert(text.empty);
+    }
+
+    ///
     Char back() scope @nogc {
         return state.handle((StateIterator.S8 state, ref StateIterator.I8 iterator) {
             assert(state !is null);
@@ -442,6 +545,44 @@ nothrow @safe:
 
             return iterator.backUTF!Char;
         }, () { assert(0); });
+    }
+
+    ///
+    unittest {
+        static Text8 = "ok it's a live";
+        static Text16 = "I'm up to the"w;
+        static Text32 = "walls can't talk"d;
+
+        StringBuilder_UTF text = StringBuilder_UTF(Text8);
+
+        foreach_reverse (i, c; Text8) {
+            auto got = text.back;
+
+            assert(!text.empty);
+            assert(got == c);
+            text.popBack;
+        }
+        assert(text.empty);
+
+        text = StringBuilder_UTF(Text16);
+        foreach_reverse (i, c; Text16) {
+            auto got = text.back;
+
+            assert(!text.empty);
+            assert(got == c);
+            text.popBack;
+        }
+        assert(text.empty);
+
+        text = StringBuilder_UTF(Text32);
+        foreach_reverse (i, c; Text32) {
+            auto got = text.back;
+
+            assert(!text.empty);
+            assert(got == c);
+            text.popBack;
+        }
+        assert(text.empty);
     }
 
     ///
@@ -534,6 +675,22 @@ nothrow @safe:
     }
 
     ///
+    unittest {
+        static Text8 = "ok it's a live";
+        static Text16 = "I'm up to the"w;
+        static Text32 = "walls can't talk"d;
+
+        StringBuilder_UTF text = StringBuilder_UTF(Text8);
+        assert(text.length == text.byUTF8().length);
+
+        text = StringBuilder_UTF(Text16);
+        assert(text.length == text.byUTF8().length);
+
+        text = StringBuilder_UTF(Text32);
+        assert(text.length == text.byUTF8().length);
+    }
+
+    ///
     StringBuilder_UTF!wchar byUTF16() @trusted scope @nogc {
         StringBuilder_UTF!wchar ret;
         ret.state = this.state;
@@ -559,6 +716,22 @@ nothrow @safe:
     }
 
     ///
+    unittest {
+        static Text8 = "ok it's a live";
+        static Text16 = "I'm up to the"w;
+        static Text32 = "walls can't talk"d;
+
+        StringBuilder_UTF text = StringBuilder_UTF(Text8);
+        assert(text.length == text.byUTF16().length);
+
+        text = StringBuilder_UTF(Text16);
+        assert(text.length == text.byUTF16().length);
+
+        text = StringBuilder_UTF(Text32);
+        assert(text.length == text.byUTF16().length);
+    }
+
+    ///
     StringBuilder_UTF!dchar byUTF32() @trusted scope @nogc {
         StringBuilder_UTF!dchar ret;
         ret.state = this.state;
@@ -581,6 +754,22 @@ nothrow @safe:
         });
 
         return ret;
+    }
+
+    ///
+    unittest {
+        static Text8 = "ok it's a live";
+        static Text16 = "I'm up to the"w;
+        static Text32 = "walls can't talk"d;
+
+        StringBuilder_UTF text = StringBuilder_UTF(Text8);
+        assert(text.length == text.byUTF32().length);
+
+        text = StringBuilder_UTF(Text16);
+        assert(text.length == text.byUTF32().length);
+
+        text = StringBuilder_UTF(Text32);
+        assert(text.length == text.byUTF32().length);
     }
 
     // startsWith
@@ -779,8 +968,12 @@ struct UTF_State(Char) {
             const needToUseOtherBuffer = this.emptyInternal && this.forwardItems.length == 0 && this.backwardItems.length > 0;
 
             Cursor forwardsTempDecodeCursor = forwards;
+            size_t advance;
+
             bool emptyInternal() {
-                return forwardsTempDecodeCursor.isEmpty(minimumOffsetFromHead, backwards.offsetFromHead);
+                size_t actualBack = backwards.offsetFromHead + 1;
+                return forwardsTempDecodeCursor.offsetFromHead + 1 >= actualBack || actualBack <= forwardsTempDecodeCursor.offsetFromHead +
+                    1;
             }
 
             Char frontInternal() {
@@ -789,7 +982,9 @@ struct UTF_State(Char) {
             }
 
             void popFrontInternal() {
-                forwardsTempDecodeCursor.advanceForward(1, maximumOffsetFromHead, true);
+                import std.algorithm : min;
+
+                forwardsTempDecodeCursor.advanceForward(1, min(backwards.offsetFromHead + 1, maximumOffsetFromHead), true);
             }
 
             if (needToUseOtherBuffer) {
@@ -803,14 +998,13 @@ struct UTF_State(Char) {
                 static if (is(Char == TargetChar)) {
                     // copy straight
 
-                    while (amountFilled < charBuffer.length && !this.emptyInternal) {
-                        charBuffer[amountFilled++] = this.frontInternal;
-                        this.popFrontInternal;
+                    while (amountFilled < charBuffer.length && !emptyInternal()) {
+                        charBuffer[amountFilled++] = frontInternal();
+                        popFrontInternal();
+                        advance++;
                     }
                 } else static if (is(Char == char)) {
-                    size_t consumed;
-                    dchar decoded = decode(&emptyInternal, &frontInternal, &popFrontInternal, consumed);
-                    forwards.advanceForward(consumed, maximumOffsetFromHead, true);
+                    dchar decoded = decode(&emptyInternal, &frontInternal, &popFrontInternal, advance);
 
                     static if (is(TargetChar == wchar)) {
                         amountFilled = encodeUTF16(decoded, charBuffer);
@@ -818,9 +1012,7 @@ struct UTF_State(Char) {
                         charBuffer[amountFilled++] = decoded;
                     }
                 } else static if (is(Char == wchar)) {
-                    size_t consumed;
-                    dchar decoded = decode(&emptyInternal, &frontInternal, &popFrontInternal, consumed);
-                    forwards.advanceForward(consumed, maximumOffsetFromHead, true);
+                    dchar decoded = decode(&emptyInternal, &frontInternal, &popFrontInternal, advance);
 
                     static if (is(TargetChar == char)) {
                         amountFilled = encodeUTF8(decoded, charBuffer);
@@ -829,7 +1021,7 @@ struct UTF_State(Char) {
                     }
                 } else static if (is(Char == dchar)) {
                     dchar decoded = this.frontInternal;
-                    this.popFrontInternal;
+                    advance = 1;
 
                     static if (is(TargetChar == char)) {
                         amountFilled = encodeUTF8(decoded, charBuffer);
@@ -843,6 +1035,9 @@ struct UTF_State(Char) {
             } else {
                 this.forwardItems = (cast(TargetChar[])this.forwardItems)[1 .. $];
             }
+
+            if (advance > 0)
+                forwards.advanceForward(advance, maximumOffsetFromHead, true);
         }
 
         void popBackInternalUTF(TargetChar)() @trusted {
@@ -852,17 +1047,21 @@ struct UTF_State(Char) {
             const needToUseOtherBuffer = this.emptyInternal && this.forwardItems.length > 0 && needRefill;
 
             Cursor backwardsTempDecodeCursor = backwards;
+            size_t advance;
+
             bool emptyInternal() {
-                return forwards.isEmpty(minimumOffsetFromHead, backwardsTempDecodeCursor.offsetFromHead);
+                size_t actualBack = backwardsTempDecodeCursor.offsetFromHead + 1;
+                return forwards.offsetFromHead + 1 >= actualBack || actualBack <= forwards.offsetFromHead + 1;
             }
 
             Char backInternal() {
-                backwardsTempDecodeCursor.advanceBackwards(0, minimumOffsetFromHead, maximumOffsetFromHead, true);
+                if (!backwardsTempDecodeCursor.inData)
+                    backwardsTempDecodeCursor.advanceBackwards(0, forwards.offsetFromHead, maximumOffsetFromHead, true, true);
                 return backwardsTempDecodeCursor.get();
             }
 
             void popBackInternal() {
-                backwardsTempDecodeCursor.advanceBackwards(1, minimumOffsetFromHead, maximumOffsetFromHead, true);
+                backwardsTempDecodeCursor.advanceBackwards(1, forwards.offsetFromHead, maximumOffsetFromHead, true, true);
             }
 
             if (needToUseOtherBuffer) {
@@ -876,17 +1075,18 @@ struct UTF_State(Char) {
                 static if (is(Char == TargetChar)) {
                     // copy straight
 
-                    while (amountFilled < charBuffer.length && !this.emptyInternal) {
+                    while (amountFilled < charBuffer.length && !emptyInternal()) {
                         amountFilled++;
-                        charBuffer[$ - amountFilled] = this.backInternal;
-                        this.popBackInternal;
+                        advance++;
+
+                        charBuffer[$ - amountFilled] = backInternal();
+
+                        popBackInternal();
                     }
 
                     offsetFilled = charBuffer.length - amountFilled;
                 } else static if (is(Char == char)) {
-                    size_t consumed;
-                    dchar decoded = decodeFromEnd(&emptyInternal, &backInternal, &popBackInternal, consumed);
-                    backwardsTempDecodeCursor.advanceBackwards(consumed, minimumOffsetFromHead, maximumOffsetFromHead, true);
+                    dchar decoded = decodeFromEnd(&emptyInternal, &backInternal, &popBackInternal, advance);
 
                     static if (is(TargetChar == wchar)) {
                         amountFilled = encodeUTF16(decoded, charBuffer);
@@ -894,9 +1094,7 @@ struct UTF_State(Char) {
                         charBuffer[amountFilled++] = decoded;
                     }
                 } else static if (is(Char == wchar)) {
-                    size_t consumed;
-                    dchar decoded = decodeFromEnd(&emptyInternal, &backInternal, &popBackInternal, consumed);
-                    backwardsTempDecodeCursor.advanceBackwards(consumed, minimumOffsetFromHead, maximumOffsetFromHead, true);
+                    dchar decoded = decodeFromEnd(&emptyInternal, &backInternal, &popBackInternal, advance);
 
                     static if (is(TargetChar == char)) {
                         amountFilled = encodeUTF8(decoded, charBuffer);
@@ -904,8 +1102,8 @@ struct UTF_State(Char) {
                         charBuffer[amountFilled++] = decoded;
                     }
                 } else static if (is(Char == dchar)) {
-                    dchar decoded = this.frontInternal;
-                    this.popFrontInternal;
+                    dchar decoded = backInternal();
+                    advance = 1;
 
                     static if (is(TargetChar == char)) {
                         amountFilled = encodeUTF8(decoded, charBuffer);
@@ -918,6 +1116,10 @@ struct UTF_State(Char) {
                 this.backwardItems = (cast(TargetChar[])this.backwardBuffer)[offsetFilled .. offsetFilled + amountFilled];
             } else {
                 this.backwardItems = (cast(TargetChar[])this.backwardItems)[0 .. $ - 1];
+            }
+
+            if (advance > 0) {
+                backwards.advanceBackwards(advance, forwards.offsetFromHead, maximumOffsetFromHead, true, true);
             }
         }
     }
@@ -949,7 +1151,7 @@ struct UTF_State(Char) {
         bool matches(scope Cursor cursor, size_t maximumOffsetFromHead) {
             auto temp = literal;
 
-            while (!cursor.isEmpty(0, maximumOffsetFromHead) && temp.length > 0) {
+            while (!cursor.isOutOfRange(0, maximumOffsetFromHead) && temp.length > 0) {
                 size_t canDo = cursor.block.length - cursor.offsetIntoBlock;
                 if (canDo > temp.length)
                     canDo = temp.length;
@@ -969,7 +1171,7 @@ struct UTF_State(Char) {
         int compare(scope Cursor cursor, size_t maximumOffsetFromHead) {
             auto temp = literal;
 
-            while (!cursor.isEmpty(0, maximumOffsetFromHead) && temp.length > 0) {
+            while (!cursor.isOutOfRange(0, maximumOffsetFromHead) && temp.length > 0) {
                 size_t canDo = cursor.block.length - cursor.offsetIntoBlock;
                 if (canDo > temp.length)
                     canDo = temp.length;
