@@ -116,7 +116,38 @@ struct StringBuilder_UTF(Char_) {
 
     mixin OpApplyCombos!("Char", null, ["@safe", "nothrow", "@nogc"]);
 
+    ///
+    unittest {
+        static Text = cast(LiteralType)"Hello there!";
+        StringBuilder_UTF text = StringBuilder_UTF(Text);
+
+        size_t lastIndex;
+
+        foreach (c; text) {
+            assert(Text[lastIndex] == c);
+            lastIndex++;
+        }
+
+        assert(lastIndex == Text.length);
+    }
+
     mixin OpApplyCombos!("Char", null, ["@safe", "nothrow", "@nogc"], "opApplyReverse");
+
+    ///
+    unittest {
+        static Text = cast(LiteralType)"Hello there!";
+        StringBuilder_UTF text = StringBuilder_UTF(Text);
+
+        size_t lastIndex = Text.length;
+
+        foreach_reverse (c; text) {
+            assert(lastIndex > 0);
+            lastIndex--;
+            assert(Text[lastIndex] == c);
+        }
+
+        assert(lastIndex == 0);
+    }
 
 nothrow @safe:
 
@@ -411,6 +442,12 @@ nothrow @safe:
             assert(state !is null);
             return state.externalLength(iterator);
         }, () { return 0; });
+    }
+
+    ///
+    unittest {
+        StringBuilder_UTF stack = StringBuilder_UTF(cast(LiteralType)"hmm...");
+        assert(stack.length == 6);
     }
 
     // dup
