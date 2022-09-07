@@ -1247,34 +1247,49 @@ struct UTF_State(Char) {
         }
 
         int foreachContiguous(scope int delegate(scope ref  /* ignore this */ TargetChar[] data) @safe @nogc nothrow del) @trusted @nogc nothrow {
-            Cursor forwards;
             int result;
 
-            if (iterator is null)
-                forwards.setup(&state.blockList, 0);
-            else
-                forwards = iterator.forwards;
-
-            size_t maximum() {
-                return iterator is null ? state.blockList.numberOfItems : iterator.backwards.offsetFromHead;
-            }
-
-            bool emptyInternal() {
-                return forwards.isEmpty(0, maximum());
-            }
-
-            Char frontInternal() {
-                forwards.advanceForward(0, maximum(), true);
-                return forwards.get();
-            }
-
-            void popFrontInternal() {
-                forwards.advanceForward(1, maximum(), true);
-            }
-
             static if (is(Char == TargetChar)) {
+                if (iterator !is null) {
+                    foreach (data; iterator.foreachBlocks) {
+                        result = del(data);
 
+                        if (result)
+                            break;
+                    }
+                } else {
+                    foreach (Char[] data; state.blockList) {
+                        result = del(data);
+
+                        if (result)
+                            break;
+                    }
+                }
             } else {
+                Cursor forwards;
+
+                if (iterator is null)
+                    forwards.setup(&state.blockList, 0);
+                else
+                    forwards = iterator.forwards;
+
+                size_t maximum() {
+                    return iterator is null ? state.blockList.numberOfItems : iterator.backwards.offsetFromHead;
+                }
+
+                bool emptyInternal() {
+                    return forwards.isEmpty(0, maximum());
+                }
+
+                Char frontInternal() {
+                    forwards.advanceForward(0, maximum(), true);
+                    return forwards.get();
+                }
+
+                void popFrontInternal() {
+                    forwards.advanceForward(1, maximum(), true);
+                }
+
                 while (!emptyInternal()) {
                     size_t consumed;
                     dchar got = decode(&emptyInternal, &frontInternal, &popFrontInternal, consumed);
@@ -1301,37 +1316,53 @@ struct UTF_State(Char) {
         }
 
         int foreachValue(scope int delegate(ref  /* ignore this */ TargetChar) @safe @nogc nothrow del) @safe @nogc nothrow {
-            Cursor forwards;
             int result;
 
-            if (iterator is null)
-                forwards.setup(&state.blockList, 0);
-            else
-                forwards = iterator.forwards;
-
-            size_t maximum() {
-                return iterator is null ? state.blockList.numberOfItems : iterator.backwards.offsetFromHead;
-            }
-
-            bool emptyInternal() {
-                return forwards.isEmpty(0, maximum());
-            }
-
-            Char frontInternal() {
-                forwards.advanceForward(0, maximum(), true);
-                return forwards.get();
-            }
-
-            void popFrontInternal() {
-                forwards.advanceForward(1, maximum(), true);
-            }
-
             static if (is(Char == TargetChar)) {
-                if (iterator !is null)
-                    return iterator.foreachBlocks(del);
-                else
-                    return state.foreachBlocks(del);
+                if (iterator !is null) {
+                    foreach (data; &iterator.foreachBlocks) {
+                        foreach (c; data) {
+                            result = del(c);
+
+                            if (result)
+                                return result;
+                        }
+                    }
+                } else {
+                    foreach (Char[] data; state.blockList) {
+                        foreach (c; data) {
+                            result = del(c);
+
+                            if (result)
+                                return result;
+                        }
+                    }
+                }
             } else {
+                Cursor forwards;
+
+                if (iterator is null)
+                    forwards.setup(&state.blockList, 0);
+                else
+                    forwards = iterator.forwards;
+
+                size_t maximum() {
+                    return iterator is null ? state.blockList.numberOfItems : iterator.backwards.offsetFromHead;
+                }
+
+                bool emptyInternal() {
+                    return forwards.isEmpty(0, maximum());
+                }
+
+                Char frontInternal() {
+                    forwards.advanceForward(0, maximum(), true);
+                    return forwards.get();
+                }
+
+                void popFrontInternal() {
+                    forwards.advanceForward(1, maximum(), true);
+                }
+
                 while (!emptyInternal()) {
                     size_t consumed;
                     dchar got = decode(&emptyInternal, &frontInternal, &popFrontInternal, consumed);
