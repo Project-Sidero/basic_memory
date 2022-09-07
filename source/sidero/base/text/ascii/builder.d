@@ -132,6 +132,31 @@ nothrow @safe:
     @disable this(this);
 
     ///
+    this(InputChar)(RCAllocator allocator, scope const(InputChar)[] input) @trusted
+            if (is(InputChar == ubyte) || is(InputChar == char)) {
+        this.__ctor(input, allocator);
+    }
+
+    ///
+    @trusted unittest {
+        static literal8 = ["Ding dong gonna bang it", "gimmie dat coco now", "so we'll want that coco now"];
+
+        foreach (entry; 0 .. literal8.length) {
+            auto input = literal8[entry];
+            auto output = literal8[entry];
+
+            StringBuilder_ASCII builder = StringBuilder_ASCII(RCAllocator.init, input);
+
+            foreach (c; builder) {
+                assert(c == output[0]);
+                output = output[1 .. $];
+            }
+
+            assert(output.length == 0);
+        }
+    }
+
+    ///
     this(InputChar)(scope const(InputChar)[] input, RCAllocator allocator = RCAllocator.init) @trusted
             if (is(InputChar == ubyte) || is(InputChar == char)) {
         setupState(allocator);

@@ -187,6 +187,77 @@ nothrow @safe:
     @disable this(this);
 
     ///
+    this(InputChar)(RCAllocator allocator, scope const(InputChar)[] input)
+            if (is(InputChar == char) || is(InputChar == wchar) || is(InputChar == dchar)) {
+        this.__ctor(input, allocator);
+    }
+
+    ///
+    @trusted unittest {
+        string[] literal8 = ["\x41\xE2\x89\xA2\xCE\x91\x2E", "\xED\x95\x9C\xEA\xB5\xAD\xEC\x96\xB4", "\xF0\xA3\x8E\xB4"];
+        wstring[] literal16 = [
+            "\x41\u2262\u0391\x2E"w, "\uD55C\uAD6D\uC5B4"w, cast(wstring)cast(ubyte[])"\x4C\xD8\xB4\xDF"
+        ];
+        dstring[] literal32 = ["\u0041\u2262\u0391\u002E"d, "\uD55C\uAD6D\uC5B4"d, "\U000233B4"d];
+
+        static if (is(Char == char)) {
+            auto expected = literal8;
+        } else static if (is(Char == wchar)) {
+            auto expected = literal16;
+        } else static if (is(Char == dchar)) {
+            auto expected = literal32;
+        }
+
+        {
+            foreach (entry; 0 .. literal8.length) {
+                auto input = literal8[entry];
+                auto output = expected[entry];
+
+                StringBuilder_UTF builder = StringBuilder_UTF(RCAllocator.init, input);
+
+                foreach (c; builder) {
+                    assert(c == output[0]);
+                    output = output[1 .. $];
+                }
+
+                assert(output.length == 0);
+            }
+        }
+
+        {
+            foreach (entry; 0 .. literal16.length) {
+                auto input = literal16[entry];
+                auto output = expected[entry];
+
+                StringBuilder_UTF builder = StringBuilder_UTF(RCAllocator.init, input);
+
+                foreach (c; builder) {
+                    assert(c == output[0]);
+                    output = output[1 .. $];
+                }
+
+                assert(output.length == 0);
+            }
+        }
+
+        {
+            foreach (entry; 0 .. literal32.length) {
+                auto input = literal32[entry];
+                auto output = expected[entry];
+
+                StringBuilder_UTF builder = StringBuilder_UTF(RCAllocator.init, input);
+
+                foreach (c; builder) {
+                    assert(c == output[0]);
+                    output = output[1 .. $];
+                }
+
+                assert(output.length == 0);
+            }
+        }
+    }
+
+    ///
     this(InputChar)(scope const(InputChar)[] input, RCAllocator allocator = RCAllocator.init)
             if (is(InputChar == char) || is(InputChar == wchar) || is(InputChar == dchar)) {
         setupState(allocator);
