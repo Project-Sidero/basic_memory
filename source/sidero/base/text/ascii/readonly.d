@@ -447,6 +447,32 @@ nothrow @nogc:
         }
 
         ///
+        bool opEquals(scope const(char)[] other) scope {
+            return opCmp(cast(LiteralType)other) == 0;
+        }
+
+        ///
+        unittest {
+            String_ASCII first = String_ASCII("first");
+
+            assert(first == "first");
+            assert(first != "third");
+        }
+
+        ///
+        bool opEquals(scope LiteralType other) scope {
+            return opCmp(other) == 0;
+        }
+
+        ///
+        unittest {
+            String_ASCII first = String_ASCII("first");
+
+            assert(first == cast(LiteralType)['f', 'i', 'r', 's', 't']);
+            assert(first != cast(LiteralType)['t', 'h', 'i', 'r', 'd']);
+        }
+
+        ///
         bool ignoreCaseEquals(scope String_ASCII other) scope {
             return ignoreCaseCompare(other.literal) == 0;
         }
@@ -462,19 +488,6 @@ nothrow @nogc:
         }
 
         ///
-        bool opEquals(scope const(char)[] other) scope {
-            return opCmp(cast(LiteralType)other) == 0;
-        }
-
-        ///
-        unittest {
-            String_ASCII first = String_ASCII("first");
-
-            assert(first == "first");
-            assert(first != "third");
-        }
-
-        ///
         bool ignoreCaseEquals(scope const(char)[] other) scope {
             return ignoreCaseCompare(cast(LiteralType)other) == 0;
         }
@@ -485,19 +498,6 @@ nothrow @nogc:
 
             assert(first.ignoreCaseEquals("fIrst"));
             assert(!first.ignoreCaseEquals("third"));
-        }
-
-        ///
-        bool opEquals(scope LiteralType other) scope {
-            return opCmp(other) == 0;
-        }
-
-        ///
-        unittest {
-            String_ASCII first = String_ASCII("first");
-
-            assert(first == cast(LiteralType)['f', 'i', 'r', 's', 't']);
-            assert(first != cast(LiteralType)['t', 'h', 'i', 'r', 'd']);
         }
 
         ///
@@ -560,17 +560,6 @@ nothrow @nogc:
         }
 
         ///
-        int ignoreCaseCompare(scope String_ASCII other) scope {
-            return ignoreCaseCompare(other.literal);
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("A").ignoreCaseCompare(String_ASCII("z")) < 0);
-            assert(String_ASCII("Z").ignoreCaseCompare(String_ASCII("a")) > 0);
-        }
-
-        ///
         int opCmp(scope const(char)[] other) scope {
             return opCmp(cast(LiteralType)other);
         }
@@ -579,17 +568,6 @@ nothrow @nogc:
         unittest {
             assert(String_ASCII("a") < "z");
             assert(String_ASCII("z") > "a");
-        }
-
-        ///
-        int ignoreCaseCompare(scope const(char)[] other) scope {
-            return ignoreCaseCompare(cast(LiteralType)other);
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("A").ignoreCaseCompare("z") < 0);
-            assert(String_ASCII("Z").ignoreCaseCompare("a") > 0);
         }
 
         ///
@@ -614,6 +592,28 @@ nothrow @nogc:
         unittest {
             assert(String_ASCII("a") < cast(LiteralType)['z']);
             assert(String_ASCII("z") > cast(LiteralType)['a']);
+        }
+
+        ///
+        int ignoreCaseCompare(scope const(char)[] other) scope {
+            return ignoreCaseCompare(cast(LiteralType)other);
+        }
+
+        ///
+        unittest {
+            assert(String_ASCII("A").ignoreCaseCompare("z") < 0);
+            assert(String_ASCII("Z").ignoreCaseCompare("a") > 0);
+        }
+
+        ///
+        int ignoreCaseCompare(scope String_ASCII other) scope {
+            return ignoreCaseCompare(other.literal);
+        }
+
+        ///
+        unittest {
+            assert(String_ASCII("A").ignoreCaseCompare(String_ASCII("z")) < 0);
+            assert(String_ASCII("Z").ignoreCaseCompare(String_ASCII("a")) > 0);
         }
 
         ///
@@ -1381,17 +1381,6 @@ nothrow @nogc:
     }
 
     ///
-    bool ignoreCaseStartsWith(scope const(char)[] other...) scope {
-        return this.ignoreCaseStartsWith(cast(LiteralType)other);
-    }
-
-    ///
-    unittest {
-        assert(String_ASCII("heLLo! whatzup").ignoreCaseStartsWith("hello!"));
-        assert(!String_ASCII("heLLo! whatzup").ignoreCaseStartsWith("ello!"));
-    }
-
-    ///
     bool startsWith(scope String_ASCII other) scope {
         return this.startsWith(other.literal);
     }
@@ -1400,17 +1389,6 @@ nothrow @nogc:
     unittest {
         assert(String_ASCII("hello! whatzup").startsWith(String_ASCII("hello!")));
         assert(!String_ASCII("hello! whatzup").startsWith(String_ASCII("ello!")));
-    }
-
-    ///
-    bool ignoreCaseStartsWith(scope String_ASCII other) scope {
-        return this.ignoreCaseStartsWith(other.literal);
-    }
-
-    ///
-    unittest {
-        assert(String_ASCII("heLLo! whatzup").ignoreCaseStartsWith(String_ASCII("hello!")));
-        assert(!String_ASCII("heLLo! whatzup").ignoreCaseStartsWith(String_ASCII("ello!")));
     }
 
     ///
@@ -1430,6 +1408,28 @@ nothrow @nogc:
     unittest {
         assert(String_ASCII("hello! whatzup").startsWith(cast(LiteralType)"hello!"));
         assert(!String_ASCII("hello! whatzup").startsWith(cast(LiteralType)"ello!"));
+    }
+
+    ///
+    bool ignoreCaseStartsWith(scope const(char)[] other...) scope {
+        return this.ignoreCaseStartsWith(cast(LiteralType)other);
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("heLLo! whatzup").ignoreCaseStartsWith("hello!"));
+        assert(!String_ASCII("heLLo! whatzup").ignoreCaseStartsWith("ello!"));
+    }
+
+    ///
+    bool ignoreCaseStartsWith(scope String_ASCII other) scope {
+        return this.ignoreCaseStartsWith(other.literal);
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("heLLo! whatzup").ignoreCaseStartsWith(String_ASCII("hello!")));
+        assert(!String_ASCII("heLLo! whatzup").ignoreCaseStartsWith(String_ASCII("ello!")));
     }
 
     ///
@@ -1544,17 +1544,6 @@ nothrow @nogc:
     }
 
     ///
-    bool ignoreCaseEndsWith(scope const(char)[] other...) scope {
-        return this.ignoreCaseEndsWith(cast(LiteralType)other);
-    }
-
-    ///
-    unittest {
-        assert(String_ASCII("bye bye Aw").ignoreCaseEndsWith("e aw"));
-        assert(!String_ASCII("bye bye Aw").ignoreCaseEndsWith("e w"));
-    }
-
-    ///
     bool endsWith(scope String_ASCII other) scope {
         return this.endsWith(other.literal);
     }
@@ -1563,17 +1552,6 @@ nothrow @nogc:
     unittest {
         assert(String_ASCII("bye bye aw").endsWith(String_ASCII("e aw")));
         assert(!String_ASCII("bye bye aw").endsWith(String_ASCII("e w")));
-    }
-
-    ///
-    bool ignoreCaseEndsWith(scope String_ASCII other) scope {
-        return this.ignoreCaseEndsWith(other.literal);
-    }
-
-    ///
-    unittest {
-        assert(String_ASCII("bye bye Aw").ignoreCaseEndsWith(String_ASCII("e aw")));
-        assert(!String_ASCII("bye bye Aw").ignoreCaseEndsWith(String_ASCII("e w")));
     }
 
     ///
@@ -1593,6 +1571,28 @@ nothrow @nogc:
     unittest {
         assert(String_ASCII("bye bye aw").endsWith(cast(LiteralType)"e aw"));
         assert(!String_ASCII("bye bye aw").endsWith(cast(LiteralType)"e w"));
+    }
+
+    ///
+    bool ignoreCaseEndsWith(scope const(char)[] other...) scope {
+        return this.ignoreCaseEndsWith(cast(LiteralType)other);
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("bye bye Aw").ignoreCaseEndsWith("e aw"));
+        assert(!String_ASCII("bye bye Aw").ignoreCaseEndsWith("e w"));
+    }
+
+    ///
+    bool ignoreCaseEndsWith(scope String_ASCII other) scope {
+        return this.ignoreCaseEndsWith(other.literal);
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("bye bye Aw").ignoreCaseEndsWith(String_ASCII("e aw")));
+        assert(!String_ASCII("bye bye Aw").ignoreCaseEndsWith(String_ASCII("e w")));
     }
 
     ///
@@ -1723,17 +1723,6 @@ nothrow @nogc:
     }
 
     ///
-    ptrdiff_t ignoreCaseIndexOf(scope const(char)[] other...) scope {
-        return ignoreCaseIndexOf(cast(LiteralType)other);
-    }
-
-    ///
-    unittest {
-        assert(String_ASCII("to find this").ignoreCaseIndexOf("nothing") == -1);
-        assert(String_ASCII("to fInd this").ignoreCaseIndexOf("i") == 4);
-    }
-
-    ///
     ptrdiff_t indexOf(scope String_ASCII other) scope {
         return indexOf(other.literal);
     }
@@ -1742,17 +1731,6 @@ nothrow @nogc:
     unittest {
         assert(String_ASCII("to find this").indexOf(String_ASCII("nothing")) == -1);
         assert(String_ASCII("to find this").indexOf(String_ASCII("i")) == 4);
-    }
-
-    ///
-    ptrdiff_t ignoreCaseIndexOf(scope String_ASCII other) scope {
-        return ignoreCaseIndexOf(other.literal);
-    }
-
-    ///
-    unittest {
-        assert(String_ASCII("to find this").ignoreCaseIndexOf(String_ASCII("nothing")) == -1);
-        assert(String_ASCII("to fInd this").ignoreCaseIndexOf(String_ASCII("i")) == 4);
     }
 
     ///
@@ -1778,6 +1756,28 @@ nothrow @nogc:
     unittest {
         assert(String_ASCII("to find this").indexOf(cast(LiteralType)"nothing") == -1);
         assert(String_ASCII("to find this").indexOf(cast(LiteralType)"i") == 4);
+    }
+
+    ///
+    ptrdiff_t ignoreCaseIndexOf(scope const(char)[] other...) scope {
+        return ignoreCaseIndexOf(cast(LiteralType)other);
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("to find this").ignoreCaseIndexOf("nothing") == -1);
+        assert(String_ASCII("to fInd this").ignoreCaseIndexOf("i") == 4);
+    }
+
+    ///
+    ptrdiff_t ignoreCaseIndexOf(scope String_ASCII other) scope {
+        return ignoreCaseIndexOf(other.literal);
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("to find this").ignoreCaseIndexOf(String_ASCII("nothing")) == -1);
+        assert(String_ASCII("to fInd this").ignoreCaseIndexOf(String_ASCII("i")) == 4);
     }
 
     ///
@@ -1908,17 +1908,6 @@ nothrow @nogc:
     }
 
     ///
-    ptrdiff_t ignoreCaseLastIndexOf(scope const(char)[] other...) scope {
-        return ignoreCaseLastIndexOf(cast(LiteralType)other);
-    }
-
-    ///
-    unittest {
-        assert(String_ASCII("to find this").ignoreCaseLastIndexOf("nothing") == -1);
-        assert(String_ASCII("to find thIs").ignoreCaseLastIndexOf("i") == 10);
-    }
-
-    ///
     ptrdiff_t lastIndexOf(scope String_ASCII other) scope {
         return lastIndexOf(other.literal);
     }
@@ -1927,17 +1916,6 @@ nothrow @nogc:
     unittest {
         assert(String_ASCII("to find this").lastIndexOf(String_ASCII("nothing")) == -1);
         assert(String_ASCII("to find this").lastIndexOf(String_ASCII("i")) == 10);
-    }
-
-    ///
-    ptrdiff_t ignoreCaseLastIndexOf(scope String_ASCII other) scope {
-        return ignoreCaseLastIndexOf(other.literal);
-    }
-
-    ///
-    unittest {
-        assert(String_ASCII("to find this").ignoreCaseLastIndexOf(String_ASCII("nothing")) == -1);
-        assert(String_ASCII("to find thIs").ignoreCaseLastIndexOf(String_ASCII("i")) == 10);
     }
 
     ///
@@ -1963,6 +1941,28 @@ nothrow @nogc:
     unittest {
         assert(String_ASCII("to find this").lastIndexOf(cast(LiteralType)"nothing") == -1);
         assert(String_ASCII("to find this").lastIndexOf(cast(LiteralType)"i") == 10);
+    }
+
+    ///
+    ptrdiff_t ignoreCaseLastIndexOf(scope const(char)[] other...) scope {
+        return ignoreCaseLastIndexOf(cast(LiteralType)other);
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("to find this").ignoreCaseLastIndexOf("nothing") == -1);
+        assert(String_ASCII("to find thIs").ignoreCaseLastIndexOf("i") == 10);
+    }
+
+    ///
+    ptrdiff_t ignoreCaseLastIndexOf(scope String_ASCII other) scope {
+        return ignoreCaseLastIndexOf(other.literal);
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("to find this").ignoreCaseLastIndexOf(String_ASCII("nothing")) == -1);
+        assert(String_ASCII("to find thIs").ignoreCaseLastIndexOf(String_ASCII("i")) == 10);
     }
 
     ///
@@ -2105,18 +2105,6 @@ nothrow @nogc:
         assert(String_ASCII("congrats its alive").count("a") == 2);
         assert(String_ASCII("congrats its alive").count("b") == 0);
     }
-
-    ///
-    size_t ignoreCaseCount(scope const(char)[] other...) scope {
-        return ignoreCaseCount(cast(LiteralType)other);
-    }
-
-    ///
-    unittest {
-        assert(String_ASCII("congrAts its alive").ignoreCaseCount("a") == 2);
-        assert(String_ASCII("congrats its alive").ignoreCaseCount("b") == 0);
-    }
-
     ///
     size_t count(scope String_ASCII other) scope {
         return count(other.literal);
@@ -2126,17 +2114,6 @@ nothrow @nogc:
     unittest {
         assert(String_ASCII("congrats its alive").count(String_ASCII("a")) == 2);
         assert(String_ASCII("congrats its alive").count(String_ASCII("b")) == 0);
-    }
-
-    ///
-    size_t ignoreCaseCount(scope String_ASCII other) scope {
-        return ignoreCaseCount(other.literal);
-    }
-
-    ///
-    unittest {
-        assert(String_ASCII("congrats its alive").ignoreCaseCount(String_ASCII("a")) == 2);
-        assert(String_ASCII("congrats its alive").ignoreCaseCount(String_ASCII("b")) == 0);
     }
 
     ///
@@ -2167,6 +2144,28 @@ nothrow @nogc:
     unittest {
         assert(String_ASCII("congrats its alive").count(cast(LiteralType)"a") == 2);
         assert(String_ASCII("congrats its alive").count(cast(LiteralType)"b") == 0);
+    }
+
+    ///
+    size_t ignoreCaseCount(scope const(char)[] other...) scope {
+        return ignoreCaseCount(cast(LiteralType)other);
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("congrAts its alive").ignoreCaseCount("a") == 2);
+        assert(String_ASCII("congrats its alive").ignoreCaseCount("b") == 0);
+    }
+
+    ///
+    size_t ignoreCaseCount(scope String_ASCII other) scope {
+        return ignoreCaseCount(other.literal);
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("congrats its alive").ignoreCaseCount(String_ASCII("a")) == 2);
+        assert(String_ASCII("congrats its alive").ignoreCaseCount(String_ASCII("b")) == 0);
     }
 
     ///
@@ -2314,19 +2313,6 @@ nothrow @nogc:
     }
 
     ///
-    bool ignoreCaseContains(scope const(char)[] other...) scope {
-        if (other is null)
-            return 0;
-        return ignoreCaseIndexOf(other) >= 0;
-    }
-
-    ///
-    unittest {
-        assert(String_ASCII("youwaNNa what?").ignoreCaseContains("wanna"));
-        assert(!String_ASCII("youwanna what?").ignoreCaseContains("bahhhh"));
-    }
-
-    ///
     bool contains(scope String_ASCII other) scope {
         if (other.isNull)
             return 0;
@@ -2340,19 +2326,6 @@ nothrow @nogc:
     }
 
     ///
-    bool ignoreCaseContains(scope String_ASCII other) scope {
-        if (other.isNull)
-            return 0;
-        return ignoreCaseIndexOf(other.literal) >= 0;
-    }
-
-    ///
-    unittest {
-        assert(String_ASCII("youwaNNa what?").ignoreCaseContains(String_ASCII("wanna")));
-        assert(!String_ASCII("youwanna what?").ignoreCaseContains(String_ASCII("bahhhh")));
-    }
-
-    ///
     bool contains(scope LiteralType other...) scope {
         if (other is null)
             return 0;
@@ -2363,6 +2336,32 @@ nothrow @nogc:
     unittest {
         assert(String_ASCII("youwanna what?").contains(cast(LiteralType)"wanna"));
         assert(!String_ASCII("youwanna what?").contains(cast(LiteralType)"bahhhh"));
+    }
+
+    ///
+    bool ignoreCaseContains(scope const(char)[] other...) scope {
+        if (other is null)
+            return 0;
+        return ignoreCaseIndexOf(other) >= 0;
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("youwaNNa what?").ignoreCaseContains("wanna"));
+        assert(!String_ASCII("youwanna what?").ignoreCaseContains("bahhhh"));
+    }
+
+    ///
+    bool ignoreCaseContains(scope String_ASCII other) scope {
+        if (other.isNull)
+            return 0;
+        return ignoreCaseIndexOf(other.literal) >= 0;
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("youwaNNa what?").ignoreCaseContains(String_ASCII("wanna")));
+        assert(!String_ASCII("youwanna what?").ignoreCaseContains(String_ASCII("bahhhh")));
     }
 
     ///
