@@ -409,7 +409,7 @@ nothrow @safe:
     // stripRight
     // toHash
 
-private:
+package(sidero.base.text):
     ASCII_State* state;
     ASCII_State.Iterator* iterator;
 
@@ -429,7 +429,7 @@ private:
     }
 }
 
-private:
+package(sidero.base.text):
 
 struct ASCII_State {
     import sidero.base.text.internal.builder.blocklist;
@@ -552,7 +552,7 @@ struct ASCII_State {
         ASCII_State* state;
         Iterator* iterator;
 
-        void mutex(bool lock) {
+        void mutex(bool lock) @safe nothrow @nogc {
             assert(state !is null);
 
             if (lock)
@@ -609,8 +609,12 @@ struct ASCII_State {
             return result;
         }
 
-        size_t length() {
+        size_t length() @safe @nogc nothrow {
             return iterator is null ? state.blockList.numberOfItems : (iterator.backwards.offsetFromHead - iterator.forwards.offsetFromHead);
+        }
+
+        OtherStateAsTarget!Char get() scope return @trusted {
+            return OtherStateAsTarget!Char(cast(void*)state, &mutex, &foreachContiguous, &foreachValue, &length);
         }
     }
 

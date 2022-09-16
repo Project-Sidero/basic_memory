@@ -3,7 +3,7 @@ import sidero.base.allocators;
 
 /// Assumes that any initial string value will be null terminated
 struct String_ASCII {
-    package(sidero.base.text.ascii) LiteralType literal;
+    package(sidero.base.text) LiteralType literal;
 
     private {
         import sidero.base.internal.meta : OpApplyCombos;
@@ -325,8 +325,8 @@ nothrow @nogc:
         else if (this.lifeTime is null)
             return this.literal[$ - 1] == '\0';
 
-        return this.lifeTime.original[$ - 1] == '\0'
-            && ((this.lifeTime.original.ptr + this.lifeTime.original.length) - (this.literal.length + 1)) is this.literal.ptr;
+        return this.lifeTime.original[$ - 1] == '\0' &&
+            ((this.lifeTime.original.ptr + this.lifeTime.original.length) - (this.literal.length + 1)) is this.literal.ptr;
     }
 
     ///
@@ -393,15 +393,15 @@ nothrow @nogc:
 
         if (this.literal[$ - 1] == '\0')
             zliteral = allocator.makeArray!ubyte(this.literal);
-        else if (this.lifeTime !is null && this.lifeTime.original.length >= this.literal.length
-                && this.lifeTime.original[$ - 1] == '\0'
-                && (this.lifeTime.original.ptr + this.lifeTime.original.length) - this.literal.length is this.literal.ptr)
+        else if (this.lifeTime !is null && this.lifeTime.original.length >= this.literal.length &&
+                this.lifeTime.original[$ - 1] == '\0' &&
+                (this.lifeTime.original.ptr + this.lifeTime.original.length) - this.literal.length is this.literal.ptr)
             zliteral = allocator.makeArray!ubyte(cast(ubyte[])(this.literal.ptr[0 .. this.literal.length + 1]));
         else {
             zliteral = allocator.makeArray!ubyte(this.literal.length + 1);
             zliteral[$ - 1] = 0;
 
-            foreach(i, v; this.literal){
+            foreach (i, v; this.literal) {
                 zliteral[i] = v;
             }
         }
@@ -744,8 +744,8 @@ nothrow @nogc:
     @property {
         ///
         bool empty() scope nothrow @nogc {
-            return (haveIterator && this.iterator.literal.length == 0) || this.literal.length == 0
-                || (this.literal.length == 1 && this.literal[0] == '\0');
+            return (haveIterator && this.iterator.literal.length == 0) || this.literal.length == 0 ||
+                (this.literal.length == 1 && this.literal[0] == '\0');
         }
 
         ///
@@ -2531,7 +2531,7 @@ unittest {
 
     foreach (c; str) {
         bool matched;
-        foreach(c2; str[seen]) {
+        foreach (c2; str[seen]) {
             matched = c2 == c;
             break;
         }
@@ -2552,7 +2552,7 @@ unittest {
 
     foreach_reverse (ubyte c; str) {
         assert(seen < SomeText.length);
-        assert(SomeText[$-(seen + 1)] == cast(char)c);
+        assert(SomeText[$ - (seen + 1)] == cast(char)c);
         seen++;
     }
 

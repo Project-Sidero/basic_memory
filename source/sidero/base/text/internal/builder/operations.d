@@ -99,7 +99,7 @@ mixin template StringBuilderOperations() {
     // exposed /\/\/\/\/\
     // internal \/\/\/\/
 
-    Cursor cursorFor(Iterator* iterator, out size_t maximumOffsetFromHead, size_t offset = 0) {
+    Cursor cursorFor(Iterator* iterator, out size_t maximumOffsetFromHead, size_t offset = 0) scope @trusted {
         if (iterator !is null) {
             offset += iterator.forwards.offsetFromHead;
             maximumOffsetFromHead = iterator.backwards.offsetFromHead;

@@ -1,4 +1,8 @@
 module sidero.base.text.unicode.builder;
+import sidero.base.text.unicode.characters.database : UnicodeLanguage;
+import sidero.base.text.unicode.readonly;
+import sidero.base.text.ascii.readonly;
+import sidero.base.text.ascii.builder;
 import sidero.base.allocators.api;
 
 ///
@@ -521,15 +525,363 @@ nothrow @safe:
         assert(stack.length == 6);
     }
 
-    // dup
-    // asReadOnly
-    // normalize
-    // opIndex
-    // opCast
-    // opEquals
-    // opCmp
-    // ignoreCaseEquals
-    // ignoreCaseCompare
+    // TODO: dup
+    // TODO: asReadOnly
+    // TODO: normalize
+
+    ///
+    bool opCast(T : bool)() scope const @nogc {
+        return !isNull;
+    }
+
+    @disable auto opCast(T)();
+
+    ///
+    alias equals = opEquals;
+
+    @nogc {
+        ///
+        bool opEquals(scope const(char)[] other) scope {
+            return opCmp(other) == 0;
+        }
+
+        ///
+        bool opEquals(scope const(wchar)[] other) scope {
+            return opCmp(other) == 0;
+        }
+
+        ///
+        bool opEquals(scope const(dchar)[] other) scope {
+            return opCmp(other) == 0;
+        }
+
+        ///
+        bool opEquals(scope String_UTF8 other) scope {
+            return opCmp(other) == 0;
+        }
+
+        ///
+        bool opEquals(scope String_UTF16 other) scope {
+            return opCmp(other) == 0;
+        }
+
+        ///
+        bool opEquals(scope String_UTF32 other) scope {
+            return opCmp(other) == 0;
+        }
+
+        ///
+        unittest {
+            StringBuilder_UTF first = StringBuilder_UTF(cast(LiteralType)"first");
+            String_UTF!Char notFirst = String_UTF!Char(cast(LiteralType)"first");
+            String_UTF!Char third = String_UTF!Char(cast(LiteralType)"third");
+
+            assert(first == notFirst);
+            assert(first != third);
+        }
+
+        ///
+        bool opEquals(scope String_ASCII other) scope {
+            return opCmp(other) == 0;
+        }
+
+        ///
+        unittest {
+            StringBuilder_UTF first = StringBuilder_UTF(cast(LiteralType)"first");
+            String_ASCII notFirst = String_ASCII("first");
+            String_ASCII third = String_ASCII("third");
+
+            assert(first == notFirst);
+            assert(first != third);
+        }
+
+        ///
+        bool opEquals(scope StringBuilder_ASCII other) scope {
+            return opCmp(other) == 0;
+        }
+
+        ///
+        unittest {
+            StringBuilder_UTF first = StringBuilder_UTF(cast(LiteralType)"first");
+            StringBuilder_ASCII notFirst = StringBuilder_ASCII("first");
+            StringBuilder_ASCII third = StringBuilder_ASCII("third");
+
+            assert(first == notFirst);
+            assert(first != third);
+        }
+
+        ///
+        bool opEquals(Char)(scope StringBuilder_UTF!Char other) scope {
+            return opCmp(other) == 0;
+        }
+
+        ///
+        unittest {
+            StringBuilder_UTF first = StringBuilder_UTF(cast(LiteralType)"first");
+            StringBuilder_UTF notFirst = StringBuilder_UTF(cast(LiteralType)"first");
+            StringBuilder_UTF third = StringBuilder_UTF(cast(LiteralType)"third");
+
+            assert(first == notFirst);
+            assert(first != third);
+        }
+    }
+
+    @nogc {
+        ///
+        bool ignoreCaseEquals(scope const(char)[] other,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return ignoreCaseCompare(other, language) == 0;
+        }
+
+        ///
+        bool ignoreCaseEquals(scope const(wchar)[] other,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return ignoreCaseCompare(other, language) == 0;
+        }
+
+        ///
+        bool ignoreCaseEquals(scope const(dchar)[] other,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return ignoreCaseCompare(other, language) == 0;
+        }
+
+        ///
+        bool ignoreCaseEquals(scope String_ASCII other,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return ignoreCaseCompare(other, language) == 0;
+        }
+
+        ///
+        bool ignoreCaseEquals(scope String_UTF8 other,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return ignoreCaseCompare(other, language) == 0;
+        }
+
+        ///
+        bool ignoreCaseEquals(scope String_UTF16 other,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return ignoreCaseCompare(other, language) == 0;
+        }
+
+        ///
+        bool ignoreCaseEquals(scope String_UTF32 other,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return ignoreCaseCompare(other, language) == 0;
+        }
+
+        ///
+        bool ignoreCaseEquals(scope StringBuilder_ASCII other,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return ignoreCaseCompare(other, language) == 0;
+        }
+
+        ///
+        bool ignoreCaseEquals(Char)(scope StringBuilder_UTF!Char other,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return ignoreCaseCompare(other, language) == 0;
+        }
+    }
+
+    @nogc {
+        ///
+        alias compare = opCmp;
+
+        ///
+        int opCmp(scope const(char)[] other) scope {
+            return opCmpImplSlice(other, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF(cast(LiteralType)"a").opCmp("z") < 0);
+            assert(StringBuilder_UTF(cast(LiteralType)"z").opCmp("a") > 0);
+        }
+
+        ///
+        int opCmp(scope const(wchar)[] other) scope {
+            return opCmpImplSlice(other, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF(cast(LiteralType)"a").opCmp("z"w) < 0);
+            assert(StringBuilder_UTF(cast(LiteralType)"z").opCmp("a"w) > 0);
+        }
+
+        ///
+        int opCmp(scope const(dchar)[] other) scope {
+            return opCmpImplSlice(other, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF(cast(LiteralType)"a").opCmp("z"d) < 0);
+            assert(StringBuilder_UTF(cast(LiteralType)"z").opCmp("a"d) > 0);
+        }
+
+        ///
+        int opCmp(scope String_ASCII other) scope {
+            return opCmpImplReadOnly(other, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("a").opCmp(String_ASCII("z")) < 0);
+            assert(StringBuilder_UTF("z").opCmp(String_ASCII("a")) > 0);
+        }
+
+        ///
+        int opCmp(scope String_UTF8 other) scope {
+            return opCmpImplReadOnly(other, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("a").opCmp(String_UTF8("z")) < 0);
+            assert(StringBuilder_UTF("z").opCmp(String_UTF8("a")) > 0);
+        }
+
+        ///
+        int opCmp(scope String_UTF16 other) scope {
+            return opCmpImplReadOnly(other, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("a"w).opCmp(String_UTF16("z"w)) < 0);
+            assert(StringBuilder_UTF("z"w).opCmp(String_UTF16("a"w)) > 0);
+        }
+
+        ///
+        int opCmp(scope String_UTF32 other) scope {
+            return opCmpImplReadOnly(other, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("a"d).opCmp(String_UTF32("z"d)) < 0);
+            assert(StringBuilder_UTF("z"d).opCmp(String_UTF32("a"d)) > 0);
+        }
+
+        ///
+        int opCmp(scope StringBuilder_ASCII other) scope {
+            return opCmpImplBuilder(other, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("a").opCmp(StringBuilder_ASCII("z")) < 0);
+            assert(StringBuilder_UTF("z").opCmp(StringBuilder_ASCII("a")) > 0);
+        }
+
+        ///
+        int opCmp(Char)(scope StringBuilder_UTF!Char other) scope {
+            return opCmpImplBuilder(other, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("a"d).opCmp(StringBuilder_UTF("z"d)) < 0);
+            assert(StringBuilder_UTF("z"d).opCmp(StringBuilder_UTF("a"d)) > 0);
+        }
+    }
+
+    @nogc {
+        ///
+        int ignoreCaseCompare(scope const(char)[] other,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return opCmpImplSlice(other, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF(cast(LiteralType)"A").ignoreCaseCompare("z") < 0);
+            assert(StringBuilder_UTF(cast(LiteralType)"Z").ignoreCaseCompare("a") > 0);
+        }
+
+        ///
+        int ignoreCaseCompare(scope const(wchar)[] other,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return opCmpImplSlice(other, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF(cast(LiteralType)"A").ignoreCaseCompare("z"w) < 0);
+            assert(StringBuilder_UTF(cast(LiteralType)"Z").ignoreCaseCompare("a"w) > 0);
+        }
+
+        ///
+        int ignoreCaseCompare(scope const(dchar)[] other,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return opCmpImplSlice(other, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF(cast(LiteralType)"A").ignoreCaseCompare("z"d) < 0);
+            assert(StringBuilder_UTF(cast(LiteralType)"Z").ignoreCaseCompare("a"d) > 0);
+        }
+
+        ///
+        int ignoreCaseCompare(scope String_UTF8 other,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return opCmpImplReadOnly(other, false, language);
+        }
+
+        ///
+        int ignoreCaseCompare(scope String_UTF16 other,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return opCmpImplReadOnly(other, false, language);
+        }
+
+        ///
+        int ignoreCaseCompare(scope String_UTF32 other,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return opCmpImplReadOnly(other, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF(cast(LiteralType)"a").ignoreCaseCompare(String_UTF!Char(cast(LiteralType)"Z")) < 0);
+            assert(StringBuilder_UTF(cast(LiteralType)"Z").ignoreCaseCompare(String_UTF!Char(cast(LiteralType)"a")) > 0);
+        }
+
+        ///
+        int ignoreCaseCompare(scope String_ASCII other,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return opCmpImplReadOnly(other, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF(cast(LiteralType)"a").ignoreCaseCompare(String_ASCII("Z")) < 0);
+            assert(StringBuilder_UTF(cast(LiteralType)"Z").ignoreCaseCompare(String_ASCII("a")) > 0);
+        }
+
+        ///
+        int ignoreCaseCompare(scope StringBuilder_ASCII other,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return opCmpImplBuilder(other, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF(cast(LiteralType)"a").ignoreCaseCompare(StringBuilder_ASCII("Z")) < 0);
+            assert(StringBuilder_UTF(cast(LiteralType)"Z").ignoreCaseCompare(StringBuilder_ASCII("a")) > 0);
+        }
+
+        ///
+        int ignoreCaseCompare(Char)(scope StringBuilder_UTF!Char other) scope {
+            return opCmpImplBuilder(other, false);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("a"d).ignoreCaseCompare(StringBuilder_UTF("Z"d)) < 0);
+            assert(StringBuilder_UTF("Z"d).ignoreCaseCompare(StringBuilder_UTF("a"d)) > 0);
+        }
+    }
 
     ///
     bool empty() scope @nogc {
@@ -932,9 +1284,119 @@ private:
             state.debugPosition(iterator);
         }, () { assert(0); });
     }
+
+    scope {
+        int opCmpImplReadOnly(scope String_ASCII other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            ASCIILiteralAsTarget!dchar alat;
+            alat.literal = other.literal;
+            scope osiu = alat.get;
+
+            return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+                assert(state !is null);
+                return state.externalOpCmp(iterator, osiu, caseSensitive, language);
+            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+                assert(state !is null);
+                return state.externalOpCmp(iterator, osiu, caseSensitive, language);
+            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+                assert(state !is null);
+                return state.externalOpCmp(iterator, osiu, caseSensitive, language);
+            }, () {
+                if (other.length > 0)
+                    return -1;
+                else
+                    return 0;
+            });
+        }
+
+        int opCmpImplReadOnly(Char2)(scope String_UTF!Char2 other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            auto alatc = AnyLiteralAsTargetChar!dchar(other);
+
+            return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+                assert(state !is null);
+                return state.externalOpCmp(iterator, alatc.osat, caseSensitive, language);
+            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+                assert(state !is null);
+                return state.externalOpCmp(iterator, alatc.osat, caseSensitive, language);
+            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+                assert(state !is null);
+                return state.externalOpCmp(iterator, alatc.osat, caseSensitive, language);
+            }, () {
+                if (other.length > 0)
+                    return -1;
+                else
+                    return 0;
+            });
+        }
+
+        int opCmpImplSlice(Char2)(scope const(Char2)[] other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            LiteralAsTargetChar!(Char2, dchar) lat;
+            lat.literal = other;
+            scope osiu = lat.get;
+
+            return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+                assert(state !is null);
+                return state.externalOpCmp(iterator, osiu, caseSensitive, language);
+            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+                assert(state !is null);
+                return state.externalOpCmp(iterator, osiu, caseSensitive, language);
+            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+                assert(state !is null);
+                return state.externalOpCmp(iterator, osiu, caseSensitive, language);
+            }, () {
+                if (other.length > 0)
+                    return -1;
+                else
+                    return 0;
+            });
+        }
+
+        int opCmpImplBuilder(scope StringBuilder_ASCII other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            ASCIIStateAsTarget!dchar asat;
+            asat.state = other.state;
+            asat.iterator = other.iterator;
+            scope osiu = asat.get;
+
+            return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+                assert(state !is null);
+                return state.externalOpCmp(iterator, osiu, caseSensitive, language);
+            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+                assert(state !is null);
+                return state.externalOpCmp(iterator, osiu, caseSensitive, language);
+            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+                assert(state !is null);
+                return state.externalOpCmp(iterator, osiu, caseSensitive, language);
+            }, () {
+                if (other.length > 0)
+                    return -1;
+                else
+                    return 0;
+            });
+        }
+
+        int opCmpImplBuilder(Char2)(scope StringBuilder_UTF!Char2 other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            AnyStateIteratorAsUs!dchar asiau = AnyStateIteratorAsUs!dchar(other.state);
+
+            return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+                assert(state !is null);
+                return state.externalOpCmp(iterator, asiau.osat, caseSensitive, language);
+            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+                assert(state !is null);
+                return state.externalOpCmp(iterator, asiau.osat, caseSensitive, language);
+            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+                assert(state !is null);
+                return state.externalOpCmp(iterator, asiau.osat, caseSensitive, language);
+            }, () {
+                if (other.length > 0)
+                    return -1;
+                else
+                    return 0;
+            });
+        }
+    }
 }
 
 private:
+import sidero.base.text.internal.builder.operations;
 
 struct StateIterator {
     import sidero.base.text.unicode.defs;
@@ -993,10 +1455,43 @@ struct StateIterator {
     }
 }
 
+struct AnyStateIteratorAsUs(TargetChar) {
+    union {
+        UTF_State!char.OtherStateIsUs!TargetChar osiu8;
+        UTF_State!wchar.OtherStateIsUs!TargetChar osiu16;
+        UTF_State!dchar.OtherStateIsUs!TargetChar osiu32;
+    }
+
+    OtherStateAsTarget!TargetChar osat;
+
+    this(scope ref StateIterator stateIterator) @trusted nothrow @nogc {
+        stateIterator.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+            assert(state !is null);
+
+            osiu8.state = state;
+            osiu8.iterator = iterator;
+            osat = osiu8.get;
+        }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+            assert(state !is null);
+
+            osiu16.state = state;
+            osiu16.iterator = iterator;
+            osat = osiu16.get;
+        }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+            assert(state !is null);
+
+            osiu32.state = state;
+            osiu32.iterator = iterator;
+            osat = osiu32.get;
+        }, () {
+            assert(0);
+        });
+    }
+}
+
 struct UTF_State(Char) {
     import sidero.base.text.internal.builder.blocklist;
     import sidero.base.text.internal.builder.iteratorlist;
-    import sidero.base.text.internal.builder.operations;
     import sidero.base.allocators.api;
 
     mixin template CustomIteratorContents() {
@@ -1322,7 +1817,7 @@ struct UTF_State(Char) {
 
             static if (is(Char == TargetChar)) {
                 if (iterator !is null) {
-                    foreach (data; iterator.foreachBlocks) {
+                    foreach (scope TargetChar[] data; &iterator.foreachBlocks) {
                         result = del(data);
 
                         if (result)
@@ -1337,6 +1832,7 @@ struct UTF_State(Char) {
                     }
                 }
             } else {
+                import sidero.base.encoding.utf : decode, encode;
                 Cursor forwards;
 
                 if (iterator is null)
@@ -1349,7 +1845,7 @@ struct UTF_State(Char) {
                 }
 
                 bool emptyInternal() {
-                    return forwards.isEmpty(0, maximum());
+                    return forwards.isOutOfRange(0, maximum());
                 }
 
                 Char frontInternal() {
@@ -1365,10 +1861,11 @@ struct UTF_State(Char) {
                     size_t consumed;
                     dchar got = decode(&emptyInternal, &frontInternal, &popFrontInternal, consumed);
 
-                    static if (is(Char == dchar)) {
-                        dchar[1] temp = [got];
+                    static if (is(TargetChar == dchar)) {
+                        dchar[1] buffer = [got];
+                        TargetChar[] temp = buffer[];
 
-                        result = del(temp[]);
+                        result = del(temp);
                         if (result)
                             return result;
                     } else {
@@ -1410,6 +1907,7 @@ struct UTF_State(Char) {
                     }
                 }
             } else {
+                import sidero.base.encoding.utf : decode, encode;
                 Cursor forwards;
 
                 if (iterator is null)
@@ -1422,7 +1920,7 @@ struct UTF_State(Char) {
                 }
 
                 bool emptyInternal() {
-                    return forwards.isEmpty(0, maximum());
+                    return forwards.isOutOfRange(0, maximum());
                 }
 
                 Char frontInternal() {
@@ -1438,7 +1936,7 @@ struct UTF_State(Char) {
                     size_t consumed;
                     dchar got = decode(&emptyInternal, &frontInternal, &popFrontInternal, consumed);
 
-                    static if (is(Char == dchar)) {
+                    static if (is(TargetChar == dchar)) {
                         result = del(got);
                         if (result)
                             return result;
@@ -1459,7 +1957,7 @@ struct UTF_State(Char) {
             return result;
         }
 
-        size_t length() {
+        size_t length() @safe @nogc nothrow {
             Cursor forwards;
 
             if (iterator is null)
@@ -1472,7 +1970,7 @@ struct UTF_State(Char) {
             }
 
             bool emptyInternal() {
-                return forwards.isEmpty(0, maximum());
+                return forwards.isOutOfRange(0, maximum());
             }
 
             Char frontInternal() {
@@ -1488,6 +1986,7 @@ struct UTF_State(Char) {
                 return iterator is null ? state.blockList.numberOfItems
                     : (iterator.backwards.offsetFromHead - iterator.forwards.offsetFromHead);
             } else {
+                import sidero.base.encoding.utf : decode, encodeLengthUTF8, encodeLengthUTF16;
                 size_t ret;
 
                 while (!emptyInternal()) {
@@ -1507,6 +2006,10 @@ struct UTF_State(Char) {
 
                 return ret;
             }
+        }
+
+        OtherStateAsTarget!TargetChar get() scope return @trusted {
+            return OtherStateAsTarget!TargetChar(cast(void*)state, &mutex, &foreachContiguous, &foreachValue, &length);
         }
     }
 
@@ -1589,11 +2092,94 @@ struct UTF_State(Char) {
             }
         }
     }
+
+    static struct CompareImpl {
+        size_t maximumOffsetFromHead;
+        Cursor cursor;
+
+        this(scope ref UTF_State state, scope Iterator* iterator, size_t offset, bool fromHead) scope {
+            if (fromHead)
+                cursor = state.cursorFor(iterator, maximumOffsetFromHead, offset);
+            else {
+                size_t offsetFromEnd = iterator is null ? state.blockList.numberOfItems : iterator.maximumOffsetFromHead;
+                if (offsetFromEnd <= offset)
+                    offsetFromEnd = 0;
+                else offsetFromEnd -= offset;
+
+                cursor = state.cursorFor(iterator, maximumOffsetFromHead, offsetFromEnd);
+            }
+
+            cursor.advanceForward(0, maximumOffsetFromHead, true);
+        }
+
+        int opApply(scope int delegate(ref dchar) @safe nothrow @nogc del) scope @safe nothrow @nogc {
+            int result;
+
+            Cursor forwardsTempDecodeCursor = cursor;
+            size_t advance;
+
+            bool emptyInternal() {
+                return forwardsTempDecodeCursor.offsetFromHead + 1 >= maximumOffsetFromHead;
+            }
+
+            Char frontInternal() {
+                forwardsTempDecodeCursor.advanceForward(0, maximumOffsetFromHead, true);
+                return forwardsTempDecodeCursor.get();
+            }
+
+            void popFrontInternal() {
+                import std.algorithm : min;
+
+                forwardsTempDecodeCursor.advanceForward(1, maximumOffsetFromHead, true);
+            }
+
+            while(!emptyInternal() && result == 0) {
+                static if (is(Char == dchar)) {
+                    dchar decoded = frontInternal();
+                } else {
+                    import sidero.base.encoding.utf : decode;
+                    dchar decoded = decode(&emptyInternal, &frontInternal, &popFrontInternal, advance);
+                }
+
+                result = del(decoded);
+            }
+
+            return result;
+        }
+    }
+
+    // /\ Internal
+    // \/ Exposed
+
+    int externalOpCmp(scope Iterator* iterator, scope ref OtherStateAsTarget!dchar other, bool caseSensitive, UnicodeLanguage language) {
+        import sidero.base.text.unicode.comparison : CaseAwareComparison;
+        import sidero.base.text.unicode.characters.database : isTurkic;
+
+        blockList.mutex.pureLock;
+        if (other.obj !is &this)
+            other.mutex(true);
+
+        int result;
+        CompareImpl compareImpl = CompareImpl(this, iterator, 0, true);
+
+        OtherStateIsUs!dchar osiu;
+        osiu.state = &this;
+        osiu.iterator = iterator;
+        scope osat = osiu.get;
+
+        CaseAwareComparison cac = CaseAwareComparison(blockList.allocator, language.isTurkic);
+        cac.setAgainst(other.foreachValue, caseSensitive);
+        result = cac.compare(osat.foreachValue, false);
+
+        blockList.mutex.unlock;
+        if (other.obj !is &this)
+            other.mutex(false);
+
+        return result;
+    }
 }
 
 struct LiteralAsTargetChar(SourceChar, TargetChar) {
-    import sidero.base.text.internal.builder.operations;
-
     const(SourceChar)[] literal;
 
 @safe nothrow @nogc:
@@ -1695,5 +2281,184 @@ struct LiteralAsTargetChar(SourceChar, TargetChar) {
 
     OtherStateAsTarget!TargetChar get() scope return @trusted {
         return OtherStateAsTarget!TargetChar(cast(void*)literal.ptr, &mutex, &foreachContiguous, &foreachValue, &length);
+    }
+}
+
+struct AnyLiteralAsTargetChar(TargetChar) {
+    union {
+        LiteralAsTargetChar!(char, TargetChar) latc8;
+        LiteralAsTargetChar!(wchar, TargetChar) latc16;
+        LiteralAsTargetChar!(dchar, TargetChar) latc32;
+    }
+
+    OtherStateAsTarget!TargetChar osat;
+
+    this(Char)(scope String_UTF!Char input) @trusted nothrow @nogc {
+        input.literalEncoding.handle(() {
+            latc8.literal = cast(string)input.literal;
+            osat = latc8.get();
+        }, () {
+            latc16.literal = cast(wstring)input.literal;
+            osat = latc16.get();
+        }, () {
+            latc32.literal = cast(dstring)input.literal;
+            osat = latc32.get();
+        }, () {
+            assert(0);
+        });
+    }
+}
+
+struct ASCIILiteralAsTarget(TargetChar) {
+    const(ubyte)[] literal;
+
+@safe nothrow @nogc:
+
+    void mutex(bool) {
+    }
+
+    int foreachContiguous(scope int delegate(scope ref  /* ignore this */ TargetChar[] data) @safe @nogc nothrow del) @trusted @nogc nothrow {
+        // don't mutate during testing
+        static if (is(TargetChar == char)) {
+            TargetChar[] temp = cast(TargetChar[])literal;
+            return del(temp);
+        } else {
+            TargetChar[1] temp1;
+            TargetChar[] temp2 = temp1[];
+            int result;
+
+            foreach (c; literal) {
+                temp1[0] = cast(TargetChar)c;
+
+                result = del(temp2);
+                if (result)
+                    break;
+            }
+
+            return result;
+        }
+    }
+
+    int foreachValue(scope int delegate(ref  /* ignore this */ TargetChar) @safe @nogc nothrow del) @safe @nogc nothrow {
+        int result;
+
+        foreach (c; literal) {
+            TargetChar temp = cast(TargetChar)c;
+            result = del(temp);
+
+            if (result)
+                break;
+        }
+
+        return result;
+    }
+
+    size_t length() {
+        // we are not mixing types during testing so meh
+        return literal.length;
+    }
+
+    OtherStateAsTarget!TargetChar get() scope return @trusted {
+        return OtherStateAsTarget!TargetChar(cast(void*)literal.ptr, &mutex, &foreachContiguous, &foreachValue, &length);
+    }
+}
+
+static struct ASCIIStateAsTarget(TargetChar) {
+    ASCII_State* state;
+    state.Iterator* iterator;
+
+    void mutex(bool lock) {
+        assert(state !is null);
+
+        if (lock)
+            state.blockList.mutex.pureLock;
+        else
+            state.blockList.mutex.unlock;
+    }
+
+    int foreachContiguous(scope int delegate(scope ref  /* ignore this */ TargetChar[] data) @safe @nogc nothrow del) @trusted @nogc nothrow {
+        int result;
+
+        if (iterator !is null) {
+            foreach (scope data; &iterator.foreachBlocks) {
+                static if (is(TargetChar == char)) {
+                    TargetChar[] temp = cast(TargetChar[])data;
+                    result = del(temp);
+                } else {
+                    TargetChar[1] temp1;
+                    TargetChar[] temp2 = temp1[];
+
+                    foreach (c; data) {
+                        temp1[0] = cast(TargetChar)c;
+
+                        result = del(temp2);
+                        if (result)
+                            break;
+                    }
+                }
+
+                if (result)
+                    break;
+            }
+        } else {
+            foreach (ubyte[] data; state.blockList) {
+                static if (is(TargetChar == char)) {
+                    TargetChar[] temp = cast(TargetChar[])data;
+                    result = del(temp);
+                } else {
+                    TargetChar[1] temp1;
+                    TargetChar[] temp2 = temp1[];
+
+                    foreach (c; data) {
+                        temp1[0] = cast(TargetChar)c;
+
+                        result = del(temp2);
+                        if (result)
+                            break;
+                    }
+                }
+
+                if (result)
+                    break;
+            }
+        }
+
+        return result;
+    }
+
+    int foreachValue(scope int delegate(ref  /* ignore this */ TargetChar) @safe @nogc nothrow del) @safe @nogc nothrow {
+        int result;
+
+        if (iterator !is null) {
+            foreach (scope data; &iterator.foreachBlocks) {
+                foreach (c; data) {
+                    TargetChar temp = cast(TargetChar)c;
+                    result = del(temp);
+
+                    if (result)
+                        return result;
+                }
+            }
+        } else {
+            foreach (ubyte[] data; state.blockList) {
+                foreach (c; data) {
+                    TargetChar temp = cast(TargetChar)c;
+                    result = del(temp);
+
+                    if (result)
+                        return result;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    size_t length() @safe @nogc nothrow {
+        return iterator is null ? state.blockList.numberOfItems : (iterator.backwards.offsetFromHead - iterator.forwards.offsetFromHead);
+    }
+
+    OtherStateAsTarget!TargetChar get() scope return @trusted {
+        return OtherStateAsTarget!TargetChar(cast(void*)state, &mutex, &foreachContiguous, &foreachValue, &length);
     }
 }

@@ -220,7 +220,6 @@ struct CaseAwareComparison {
                     todo++;
                 }
 
-                received += got.length;
                 if (todo > 0)
                     rotate.partial(&handleRotated, got[0 .. todo]);
 
