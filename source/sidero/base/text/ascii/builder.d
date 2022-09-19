@@ -1,4 +1,5 @@
 module sidero.base.text.ascii.builder;
+import sidero.base.text.ascii.readonly;
 import sidero.base.allocators.api;
 
 ///
@@ -287,15 +288,221 @@ nothrow @safe:
         assert(stack.length == 6);
     }
 
-    // dup
-    // asReadOnly
-    // normalize
-    // opIndex
-    // opCast
-    // opEquals
-    // opCmp
-    // ignoreCaseEquals
-    // ignoreCaseCompare
+    // TODO: dup
+    // TODO: asReadOnly
+
+    ///
+    bool opCast(T : bool)() scope const @nogc {
+        return !isNull;
+    }
+
+    @disable auto opCast(T)();
+
+    ///
+    alias equals = opEquals;
+
+    ///
+    bool opEquals(scope const(char)[] other) scope {
+        return opCmpImplSlice(other, true) == 0;
+    }
+
+    ///
+    unittest {
+        StringBuilder_ASCII first = StringBuilder_ASCII("first");
+
+        assert(first == "first");
+        assert(first != "third");
+    }
+
+    ///
+    bool opEquals(scope LiteralType other) scope {
+        return opCmp(other) == 0;
+    }
+
+    ///
+    @trusted unittest {
+        StringBuilder_ASCII first = StringBuilder_ASCII("first");
+
+        assert(first == cast(LiteralType)['f', 'i', 'r', 's', 't']);
+        assert(first != cast(LiteralType)['t', 'h', 'i', 'r', 'd']);
+    }
+
+    ///
+    bool opEquals(scope String_ASCII other) scope {
+        return opCmpImplSlice(other.literal, true) == 0;
+    }
+
+    ///
+    unittest {
+        StringBuilder_ASCII first = StringBuilder_ASCII("first");
+        String_ASCII notFirst = String_ASCII("first");
+        String_ASCII third = String_ASCII("third");
+
+        assert(first == notFirst);
+        assert(first != third);
+    }
+
+    ///
+    bool opEquals(scope StringBuilder_ASCII other) scope {
+        return opCmpImplBuilder(other, true) == 0;
+    }
+
+    ///
+    unittest {
+        StringBuilder_ASCII first = StringBuilder_ASCII("first");
+        StringBuilder_ASCII notFirst = StringBuilder_ASCII("first");
+        StringBuilder_ASCII third = StringBuilder_ASCII("third");
+
+        assert(first == notFirst);
+        assert(first != third);
+    }
+
+    ///
+    bool ignoreCaseEquals(scope const(char)[] other) scope {
+        return opCmpImplSlice(other, false) == 0;
+    }
+
+    ///
+    unittest {
+        StringBuilder_ASCII first = StringBuilder_ASCII("first");
+
+        assert(first.ignoreCaseEquals("fIrst"));
+        assert(!first.ignoreCaseEquals("third"));
+    }
+
+    ///
+    bool ignoreCaseEquals(scope LiteralType other) scope {
+        return ignoreCaseCompare(other) == 0;
+    }
+
+    ///
+    @trusted unittest {
+        StringBuilder_ASCII first = StringBuilder_ASCII("first");
+
+        assert(first.ignoreCaseEquals(cast(LiteralType)['f', 'I', 'r', 's', 't']));
+        assert(!first.ignoreCaseEquals(cast(LiteralType)['t', 'h', 'i', 'r', 'd']));
+    }
+
+    ///
+    bool ignoreCaseEquals(scope String_ASCII other) scope {
+        return opCmpImplSlice(other.literal, false) == 0;
+    }
+
+    ///
+    unittest {
+        StringBuilder_ASCII first = StringBuilder_ASCII("first");
+        String_ASCII notFirst = String_ASCII("fIrst");
+        String_ASCII third = String_ASCII("third");
+
+        assert(first.ignoreCaseEquals(notFirst));
+        assert(!first.ignoreCaseEquals(third));
+    }
+
+    ///
+    bool ignoreCaseEquals(scope StringBuilder_ASCII other) scope {
+        return opCmpImplBuilder(other, false) == 0;
+    }
+
+    ///
+    unittest {
+        StringBuilder_ASCII first = StringBuilder_ASCII("first");
+        StringBuilder_ASCII notFirst = StringBuilder_ASCII("fIrst");
+        StringBuilder_ASCII third = StringBuilder_ASCII("third");
+
+        assert(first.ignoreCaseEquals(notFirst));
+        assert(!first.ignoreCaseEquals(third));
+    }
+
+    ///
+    alias compare = opCmp;
+
+    ///
+    int opCmp(scope const(char)[] other) scope {
+        return opCmpImplSlice(other, true);
+    }
+
+    ///
+    unittest {
+        assert(StringBuilder_ASCII("a") < "z");
+        assert(StringBuilder_ASCII("z") > "a");
+    }
+
+    ///
+    int opCmp(scope LiteralType other) scope {
+        return opCmpImplSlice(other, true);
+    }
+
+    ///
+    @trusted unittest {
+        assert(StringBuilder_ASCII("a") < cast(LiteralType)['z']);
+        assert(StringBuilder_ASCII("z") > cast(LiteralType)['a']);
+    }
+
+    ///
+    int opCmp(scope String_ASCII other) scope {
+        return opCmpImplSlice(other.literal, true);
+    }
+
+    ///
+    unittest {
+        assert(StringBuilder_ASCII("a") < String_ASCII("z"));
+        assert(StringBuilder_ASCII("z") > String_ASCII("a"));
+    }
+
+    ///
+    int opCmp(scope StringBuilder_ASCII other) scope {
+        return opCmpImplBuilder(other, true);
+    }
+
+    ///
+    unittest {
+        assert(StringBuilder_ASCII("a") < StringBuilder_ASCII("z"));
+        assert(StringBuilder_ASCII("z") > StringBuilder_ASCII("a"));
+    }
+
+    ///
+    int ignoreCaseCompare(scope const(char)[] other) scope {
+        return opCmpImplSlice(other, false);
+    }
+
+    ///
+    unittest {
+        assert(StringBuilder_ASCII("A").ignoreCaseCompare("z") < 0);
+        assert(StringBuilder_ASCII("Z").ignoreCaseCompare("a") > 0);
+    }
+
+    ///
+    int ignoreCaseCompare(scope LiteralType other) scope {
+        return opCmpImplSlice(other, false);
+    }
+
+    ///
+    @trusted unittest {
+        assert(StringBuilder_ASCII("A").ignoreCaseCompare(cast(LiteralType)['z']) < 0);
+        assert(StringBuilder_ASCII("Z").ignoreCaseCompare(cast(LiteralType)['a']) > 0);
+    }
+
+    ///
+    int ignoreCaseCompare(scope String_ASCII other) scope {
+        return opCmpImplSlice(other.literal, false);
+    }
+
+    ///
+    unittest {
+        assert(StringBuilder_ASCII("A").ignoreCaseCompare(String_ASCII("z")) < 0);
+        assert(StringBuilder_ASCII("Z").ignoreCaseCompare(String_ASCII("a")) > 0);
+    }
+
+    ///
+    int ignoreCaseCompare(scope StringBuilder_ASCII other) scope {
+        return opCmpImplBuilder(other, false);
+    }
+
+    ///
+    unittest {
+        assert(StringBuilder_ASCII("A").ignoreCaseCompare(StringBuilder_ASCII("z")) < 0);
+        assert(StringBuilder_ASCII("Z").ignoreCaseCompare(StringBuilder_ASCII("a")) > 0);
+    }
 
     ///
     bool empty() scope @nogc {
@@ -426,6 +633,41 @@ package(sidero.base.text):
     void debugPosition() @nogc {
         assert(state !is null);
         state.debugPosition(iterator);
+    }
+
+    scope {
+        int opCmpImplSlice(scope const(char)[] other, bool caseSensitive) @trusted {
+            return opCmpImplSlice(cast(LiteralType)other, caseSensitive);
+        }
+
+        int opCmpImplSlice(scope const(Char)[] other, bool caseSensitive) @trusted {
+            ASCII_State.LiteralAsTarget lat;
+            lat.literal = other;
+            scope osiu = lat.get;
+
+            if (isNull) {
+                if (other.length > 0)
+                    return -1;
+                else
+                    return 0;
+            } else
+                return state.externalOpCmp(iterator, osiu, caseSensitive);
+        }
+
+        int opCmpImplBuilder(scope StringBuilder_ASCII other, bool caseSensitive) @trusted {
+            ASCII_State.OtherStateIsUs asiu;
+            asiu.state = other.state;
+            asiu.iterator = other.iterator;
+            scope osiu = asiu.get;
+
+            if (isNull) {
+                if (other.length > 0)
+                    return -1;
+                else
+                    return 0;
+            } else
+                return state.externalOpCmp(iterator, osiu, caseSensitive);
+        }
     }
 }
 
@@ -613,7 +855,7 @@ struct ASCII_State {
             return iterator is null ? state.blockList.numberOfItems : (iterator.backwards.offsetFromHead - iterator.forwards.offsetFromHead);
         }
 
-        OtherStateAsTarget!Char get() scope return @trusted {
+        OtherStateAsTarget!Char get() scope return nothrow @trusted {
             return OtherStateAsTarget!Char(cast(void*)state, &mutex, &foreachContiguous, &foreachValue, &length);
         }
     }
@@ -696,5 +938,80 @@ struct ASCII_State {
             } catch (Exception) {
             }
         }
+    }
+
+    // /\ internal
+    // \/ external
+
+    int externalOpCmp(scope Iterator* iterator, scope ref OtherStateAsTarget!Char other, bool caseSensitive) {
+        import sidero.base.text.ascii.characters : toLower;
+
+        blockList.mutex.pureLock;
+        if (other.obj !is &this)
+            other.mutex(true);
+
+        int result;
+
+        {
+            Cursor forwardsCursor;
+            size_t maximumOffsetFromHead;
+
+            if (iterator is null) {
+                forwardsCursor.setup(&blockList, 0);
+                maximumOffsetFromHead = blockList.numberOfItems + 1;
+            } else {
+                forwardsCursor = iterator.forwards;
+                maximumOffsetFromHead = iterator.backwards.offsetFromHead + 1;
+            }
+
+            bool emptyInternal() {
+                return forwardsCursor.offsetFromHead + 1 >= maximumOffsetFromHead;
+            }
+
+            Char frontInternal() {
+                forwardsCursor.advanceForward(0, maximumOffsetFromHead, true);
+                return forwardsCursor.get();
+            }
+
+            void popFrontInternal() {
+                import std.algorithm : min;
+
+                forwardsCursor.advanceForward(1, maximumOffsetFromHead, true);
+            }
+
+            foreach (c2; other.foreachValue) {
+                if (emptyInternal()) {
+                    result = -1;
+                    break;
+                }
+
+                Char c1 = frontInternal();
+
+                if (!caseSensitive) {
+                    c1 = c1.toLower;
+                    c2 = c2.toLower;
+                }
+
+                if (c1 < c2) {
+                    result = -1;
+                    break;
+                } else if (c1 > c2) {
+                    result = 1;
+                    break;
+                }
+
+                popFrontInternal();
+            }
+
+            if (result == 0 && !emptyInternal()) {
+                result = 1;
+            }
+        }
+
+        blockList.mutex.unlock;
+        if (other.obj !is &this)
+            other.mutex(false);
+
+        return result;
     }
 }

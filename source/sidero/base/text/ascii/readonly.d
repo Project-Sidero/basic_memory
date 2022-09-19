@@ -431,6 +431,7 @@ nothrow @nogc:
     const {
         ///
         alias equals = opEquals;
+
         ///
         bool opEquals(scope String_ASCII other) scope {
             return opCmp(other.literal) == 0;
@@ -511,38 +512,6 @@ nothrow @nogc:
 
             assert(first.ignoreCaseEquals(cast(LiteralType)['f', 'I', 'r', 's', 't']));
             assert(!first.ignoreCaseEquals(cast(LiteralType)['t', 'h', 'i', 'r', 'd']));
-        }
-
-        version (none) {
-            ///
-            bool opEquals(scope StringBuilder_ASCII other) scope {
-                return opCmp(other) == 0;
-            }
-
-            ///
-            unittest {
-                String_ASCII first = String_ASCII("first");
-                StringBuilder_ASCII notFirst = StringBuilder_ASCII("first");
-                StringBuilder_ASCII third = StringBuilder_ASCII("third");
-
-                assert(first == notFirst);
-                assert(first != third);
-            }
-
-            ///
-            bool ignoreCaseEquals(scope StringBuilder_ASCII other) scope {
-                return ignoreCaseCompare(other) == 0;
-            }
-
-            ///
-            unittest {
-                String_ASCII first = String_ASCII("first");
-                StringBuilder_ASCII notFirst = StringBuilder_ASCII("fIrst");
-                StringBuilder_ASCII third = StringBuilder_ASCII("third");
-
-                assert(first.ignoreCaseEquals(notFirst));
-                assert(!first.ignoreCaseEquals(third));
-            }
         }
 
         ///
@@ -648,94 +617,6 @@ nothrow @nogc:
         unittest {
             assert(String_ASCII("A").ignoreCaseCompare(cast(LiteralType)['z']) < 0);
             assert(String_ASCII("Z").ignoreCaseCompare(cast(LiteralType)['a']) > 0);
-        }
-
-        version (none) {
-            ///
-            int opCmp(scope StringBuilder_ASCII other) scope {
-                LiteralType us = this.literal;
-                if (us.length > 0 && us[$ - 1] == '\0')
-                    us = us[0 .. $ - 1];
-
-                if (other.length == 0)
-                    return 1;
-
-                size_t offsetIntoUs, otherLength;
-                int result;
-
-                other.foreachBlocks((data) {
-                    if (data.length > us.length || otherLength > us.length) {
-                        result = -1;
-                        return 1;
-                    } else if (us[0 .. data.length] < data) {
-                        result = -1;
-                        return 1;
-                    } else if (us[0 .. data.length] > data) {
-                        result = 1;
-                        return 1;
-                    }
-
-                    us = us[data.length .. $];
-                    return 0;
-                }, (size_t otherLength2) { otherLength = otherLength2; });
-
-                return result;
-            }
-
-            ///
-            unittest {
-                assert(String_ASCII("a").opCmp(StringBuilder_ASCII("z")) < 0);
-                assert(String_ASCII("a").opCmp(StringBuilder_ASCII("456")) < 0);
-                assert(String_ASCII("z").opCmp(StringBuilder_ASCII("a")) > 0);
-                assert(String_ASCII("zd").opCmp(StringBuilder_ASCII("a")) > 0);
-            }
-
-            ///
-            int ignoreCaseCompare(scope StringBuilder_ASCII other) scope {
-                import sidero.base.text.ascii.characters : toLower;
-
-                LiteralType us = this.literal;
-                if (us.length > 0 && us[$ - 1] == '\0')
-                    us = us[0 .. $ - 1];
-
-                if (other.length == 0)
-                    return 1;
-
-                size_t offsetIntoUs, otherLength;
-                int result;
-
-                other.foreachBlocks((data) {
-                    if (data.length > us.length || otherLength > us.length) {
-                        result = -1;
-                        return 1;
-                    }
-
-                    foreach (i; 0 .. data.length) {
-                        ubyte a = us[i].toLower, b = data[i].toLower;
-
-                        if (a < b) {
-                            result = -1;
-                            return 1;
-                        } else if (a > b) {
-                            result = 1;
-                            return 1;
-                        }
-                    }
-
-                    us = us[data.length .. $];
-                    return 0;
-                }, (size_t otherLength2) { otherLength = otherLength2; });
-
-                return result;
-            }
-
-            ///
-            unittest {
-                assert(String_ASCII("A").ignoreCaseCompare(StringBuilder_ASCII("z")) < 0);
-                assert(String_ASCII("A").ignoreCaseCompare(StringBuilder_ASCII("456")) < 0);
-                assert(String_ASCII("Z").ignoreCaseCompare(StringBuilder_ASCII("a")) > 0);
-                assert(String_ASCII("Zd").ignoreCaseCompare(StringBuilder_ASCII("a")) > 0);
-            }
         }
     }
 
