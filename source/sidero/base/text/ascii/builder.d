@@ -614,12 +614,51 @@ nothrow @safe:
     // caseIgnoreLastIndexOf
     // stripLeft
     // stripRight
-    // toHash
+
+    ///
+    ulong toHash() scope @trusted {
+        import sidero.base.hash.fnv : fnv_64_1a;
+
+        ulong ret = fnv_64_1a(null);
+
+        foreachContiguous((scope ref data) {
+            ret = fnv_64_1a(cast(ubyte[])data);
+            return 0;
+        });
+
+        return ret;
+    }
+
+    ///
+    unittest {
+        static Text8 = "ok it's a live";
+
+        StringBuilder_ASCII text = StringBuilder_ASCII(Text8);
+        assert(text.toHash() == 1586511100919779533);
+    }
 
 package(sidero.base.text):
     ASCII_State* state;
     ASCII_State.Iterator* iterator;
 
+    int foreachContiguous(scope int delegate(ref scope Char[] data) @safe nothrow @nogc del) scope {
+        if (state is null)
+            return 0;
+
+        ASCII_State.OtherStateIsUs osiu;
+        osiu.state = state;
+        osiu.iterator = iterator;
+
+        scope osat = osiu.get;
+
+        osat.mutex(true);
+        int result = osat.foreachContiguous(del);
+        osat.mutex(false);
+
+        return result;
+    }
+
+private:
     void setupState(RCAllocator allocator = RCAllocator.init) @nogc @trusted {
         if (allocator.isNull)
             allocator = globalAllocator();

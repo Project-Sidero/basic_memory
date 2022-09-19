@@ -1,4 +1,5 @@
 module sidero.base.text.unicode.readonly;
+import sidero.base.text.unicode.builder;
 import sidero.base.text.unicode.defs;
 import sidero.base.text.unicode.characters.database;
 import sidero.base.text.ascii.readonly;
@@ -646,264 +647,316 @@ nothrow @nogc:
 
     @disable auto opCast(T)();
 
-    const {
-        ///
-        alias equals = opEquals;
+    ///
+    alias equals = opEquals;
 
-        ///
-        bool opEquals(scope const(char)[] other) scope {
-            return opCmp(other) == 0;
-        }
-
-        ///
-        bool opEquals(scope const(wchar)[] other) scope {
-            return opCmp(other) == 0;
-        }
-
-        ///
-        bool opEquals(scope const(dchar)[] other) scope {
-            return opCmp(other) == 0;
-        }
-
-        ///
-        bool opEquals(scope String_UTF8 other) scope {
-            return opCmp(other) == 0;
-        }
-
-        ///
-        bool opEquals(scope String_UTF16 other) scope {
-            return opCmp(other) == 0;
-        }
-
-        ///
-        bool opEquals(scope String_UTF32 other) scope {
-            return opCmp(other) == 0;
-        }
-
-        ///
-        unittest {
-            String_UTF first = String_UTF(cast(LiteralType)"first");
-            String_UTF notFirst = String_UTF(cast(LiteralType)"first");
-            String_UTF third = String_UTF(cast(LiteralType)"third");
-
-            assert(first == notFirst);
-            assert(first != third);
-        }
-
-        ///
-        bool opEquals(scope String_ASCII other) scope {
-            return opCmp(other) == 0;
-        }
-
-        ///
-        unittest {
-            String_UTF first = String_UTF(cast(LiteralType)"first");
-            String_ASCII notFirst = String_ASCII("first");
-            String_ASCII third = String_ASCII("third");
-
-            assert(first == notFirst);
-            assert(first != third);
-        }
+    ///
+    bool opEquals(scope const(char)[] other) scope {
+        return opCmp(other) == 0;
     }
 
-    const {
-        ///
-        bool ignoreCaseEquals(scope const(char)[] other, scope RCAllocator allocator = RCAllocator.init,
-                UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return ignoreCaseCompareImplSlice(other, allocator, language.isTurkic) == 0;
-        }
-
-        ///
-        bool ignoreCaseEquals(scope const(wchar)[] other, scope RCAllocator allocator = RCAllocator.init,
-                UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return ignoreCaseCompareImplSlice(other, allocator, language.isTurkic) == 0;
-        }
-
-        ///
-        bool ignoreCaseEquals(scope const(dchar)[] other, scope RCAllocator allocator = RCAllocator.init,
-                UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return ignoreCaseCompareImplSlice(other, allocator, language.isTurkic) == 0;
-        }
-
-        ///
-        bool ignoreCaseEquals(scope String_ASCII other, scope RCAllocator allocator = RCAllocator.init,
-                UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return ignoreCaseEqualsImplReadOnly(other, allocator, language);
-        }
-
-        ///
-        bool ignoreCaseEquals(scope String_UTF8 other, scope RCAllocator allocator = RCAllocator.init,
-                UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return ignoreCaseEqualsImplReadOnly(other, allocator, language);
-        }
-
-        ///
-        bool ignoreCaseEquals(scope String_UTF16 other, scope RCAllocator allocator = RCAllocator.init,
-                UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return ignoreCaseEqualsImplReadOnly(other, allocator, language);
-        }
-
-        ///
-        bool ignoreCaseEquals(scope String_UTF32 other, scope RCAllocator allocator = RCAllocator.init,
-                UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return ignoreCaseEqualsImplReadOnly(other, allocator, language);
-        }
+    ///
+    bool opEquals(scope const(wchar)[] other) scope {
+        return opCmp(other) == 0;
     }
 
-    const {
-        ///
-        alias compare = opCmp;
-
-        ///
-        int opCmp(scope const(char)[] other) scope {
-            return opCmpImplSlice(other);
-        }
-
-        ///
-        unittest {
-            assert(String_UTF(cast(LiteralType)"a").opCmp("z") < 0);
-            assert(String_UTF(cast(LiteralType)"z").opCmp("a") > 0);
-        }
-
-        ///
-        int opCmp(scope const(wchar)[] other) scope {
-            return opCmpImplSlice(other);
-        }
-
-        ///
-        unittest {
-            assert(String_UTF(cast(LiteralType)"a").opCmp("z"w) < 0);
-            assert(String_UTF(cast(LiteralType)"z").opCmp("a"w) > 0);
-        }
-
-        ///
-        int opCmp(scope const(dchar)[] other) scope {
-            return opCmpImplSlice(other);
-        }
-
-        ///
-        unittest {
-            assert(String_UTF(cast(LiteralType)"a").opCmp("z"d) < 0);
-            assert(String_UTF(cast(LiteralType)"z").opCmp("a"d) > 0);
-        }
-
-        ///
-        int opCmp(scope String_ASCII other) scope {
-            return opCmpImplReadOnly(other);
-        }
-
-        ///
-        unittest {
-            assert(String_UTF8("a").opCmp(String_ASCII("z")) < 0);
-            assert(String_UTF8("z").opCmp(String_ASCII("a")) > 0);
-        }
-
-        ///
-        int opCmp(scope String_UTF8 other) scope {
-            return opCmpImplReadOnly(other);
-        }
-
-        ///
-        unittest {
-            assert(String_UTF8("a").opCmp(String_UTF8("z")) < 0);
-            assert(String_UTF8("z").opCmp(String_UTF8("a")) > 0);
-        }
-
-        ///
-        int opCmp(scope String_UTF16 other) scope {
-            return opCmpImplReadOnly(other);
-        }
-
-        ///
-        unittest {
-            assert(String_UTF16("a"w).opCmp(String_UTF16("z"w)) < 0);
-            assert(String_UTF16("z"w).opCmp(String_UTF16("a"w)) > 0);
-        }
-
-        ///
-        int opCmp(scope String_UTF32 other) scope {
-            return opCmpImplReadOnly(other);
-        }
-
-        ///
-        unittest {
-            assert(String_UTF32("a"d).opCmp(String_UTF32("z"d)) < 0);
-            assert(String_UTF32("z"d).opCmp(String_UTF32("a"d)) > 0);
-        }
+    ///
+    bool opEquals(scope const(dchar)[] other) scope {
+        return opCmp(other) == 0;
     }
 
-    const {
-        ///
-        int ignoreCaseCompare(scope const(char)[] other, scope RCAllocator allocator = RCAllocator.init,
-                UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return ignoreCaseCompareImplSlice(other, allocator, language.isTurkic);
-        }
+    ///
+    bool opEquals(scope String_UTF8 other) scope {
+        return opCmp(other) == 0;
+    }
 
-        ///
-        unittest {
-            assert(String_UTF(cast(LiteralType)"A").ignoreCaseCompare("z") < 0);
-            assert(String_UTF(cast(LiteralType)"Z").ignoreCaseCompare("a") > 0);
-        }
+    ///
+    bool opEquals(scope String_UTF16 other) scope {
+        return opCmp(other) == 0;
+    }
 
-        ///
-        int ignoreCaseCompare(scope const(wchar)[] other, scope RCAllocator allocator = RCAllocator.init,
-                UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return ignoreCaseCompareImplSlice(other, allocator, language.isTurkic);
-        }
+    ///
+    bool opEquals(scope String_UTF32 other) scope {
+        return opCmp(other) == 0;
+    }
 
-        ///
-        unittest {
-            assert(String_UTF(cast(LiteralType)"A").ignoreCaseCompare("z"w) < 0);
-            assert(String_UTF(cast(LiteralType)"Z").ignoreCaseCompare("a"w) > 0);
-        }
+    ///
+    unittest {
+        String_UTF first = String_UTF(cast(LiteralType)"first");
+        String_UTF notFirst = String_UTF(cast(LiteralType)"first");
+        String_UTF third = String_UTF(cast(LiteralType)"third");
 
-        ///
-        int ignoreCaseCompare(scope const(dchar)[] other, scope RCAllocator allocator = RCAllocator.init,
-                UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return ignoreCaseCompareImplSlice(other, allocator, language.isTurkic);
-        }
+        assert(first == notFirst);
+        assert(first != third);
+    }
 
-        ///
-        unittest {
-            assert(String_UTF(cast(LiteralType)"A").ignoreCaseCompare("z"d) < 0);
-            assert(String_UTF(cast(LiteralType)"Z").ignoreCaseCompare("a"d) > 0);
-        }
+    ///
+    bool opEquals(scope String_ASCII other) scope {
+        return opCmp(other) == 0;
+    }
 
-        ///
-        int ignoreCaseCompare(scope String_UTF8 other, scope RCAllocator allocator = RCAllocator.init,
-                UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return ignoreCaseCompareImplReadOnly(other, allocator, language);
-        }
+    ///
+    unittest {
+        String_UTF first = String_UTF(cast(LiteralType)"first");
+        String_ASCII notFirst = String_ASCII("first");
+        String_ASCII third = String_ASCII("third");
 
-        ///
-        int ignoreCaseCompare(scope String_UTF16 other, scope RCAllocator allocator = RCAllocator.init,
-                UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return ignoreCaseCompareImplReadOnly(other, allocator, language);
-        }
+        assert(first == notFirst);
+        assert(first != third);
+    }
 
-        ///
-        int ignoreCaseCompare(scope String_UTF32 other, scope RCAllocator allocator = RCAllocator.init,
-                UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return ignoreCaseCompareImplReadOnly(other, allocator, language);
-        }
+    ///
+    bool opEquals(scope StringBuilder_UTF8 other) scope {
+        return other.opEquals(this);
+    }
 
-        ///
-        unittest {
-            assert(String_UTF(cast(LiteralType)"a").ignoreCaseCompare(String_UTF(cast(LiteralType)"Z")) < 0);
-            assert(String_UTF(cast(LiteralType)"Z").ignoreCaseCompare(String_UTF(cast(LiteralType)"a")) > 0);
-        }
+    ///
+    bool opEquals(scope StringBuilder_UTF16 other) scope {
+        return other.opEquals(this);
+    }
 
-        ///
-        int ignoreCaseCompare(scope String_ASCII other, scope RCAllocator allocator = RCAllocator.init,
-                UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return ignoreCaseCompareImplReadOnly(other, allocator, language);
-        }
+    ///
+    bool opEquals(scope StringBuilder_UTF32 other) scope {
+        return other.opEquals(this);
+    }
 
-        ///
-        unittest {
-            assert(String_UTF(cast(LiteralType)"a").ignoreCaseCompare(String_ASCII("Z")) < 0);
-            assert(String_UTF(cast(LiteralType)"Z").ignoreCaseCompare(String_ASCII("a")) > 0);
-        }
+    ///
+    bool ignoreCaseEquals(scope const(char)[] other, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return ignoreCaseCompareImplSlice(other, allocator, language.isTurkic) == 0;
+    }
+
+    ///
+    bool ignoreCaseEquals(scope const(wchar)[] other, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return ignoreCaseCompareImplSlice(other, allocator, language.isTurkic) == 0;
+    }
+
+    ///
+    bool ignoreCaseEquals(scope const(dchar)[] other, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return ignoreCaseCompareImplSlice(other, allocator, language.isTurkic) == 0;
+    }
+
+    ///
+    bool ignoreCaseEquals(scope String_ASCII other, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return ignoreCaseEqualsImplReadOnly(other, allocator, language);
+    }
+
+    ///
+    bool ignoreCaseEquals(scope String_UTF8 other, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return ignoreCaseEqualsImplReadOnly(other, allocator, language);
+    }
+
+    ///
+    bool ignoreCaseEquals(scope String_UTF16 other, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return ignoreCaseEqualsImplReadOnly(other, allocator, language);
+    }
+
+    ///
+    bool ignoreCaseEquals(scope String_UTF32 other, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return ignoreCaseEqualsImplReadOnly(other, allocator, language);
+    }
+
+    ///
+    bool ignoreCaseEquals(scope StringBuilder_UTF8 other, UnicodeLanguage language = UnicodeLanguage.Unknown) {
+        return other.ignoreCaseEquals(this, language);
+    }
+
+    ///
+    bool ignoreCaseEquals(scope StringBuilder_UTF16 other, UnicodeLanguage language = UnicodeLanguage.Unknown) {
+        return other.ignoreCaseEquals(this, language);
+    }
+
+    ///
+    bool ignoreCaseEquals(scope StringBuilder_UTF32 other, UnicodeLanguage language = UnicodeLanguage.Unknown) {
+        return other.ignoreCaseEquals(this, language);
+    }
+
+    ///
+    alias compare = opCmp;
+
+    ///
+    int opCmp(scope const(char)[] other) scope {
+        return opCmpImplSlice(other);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"a").opCmp("z") < 0);
+        assert(String_UTF(cast(LiteralType)"z").opCmp("a") > 0);
+    }
+
+    ///
+    int opCmp(scope const(wchar)[] other) scope {
+        return opCmpImplSlice(other);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"a").opCmp("z"w) < 0);
+        assert(String_UTF(cast(LiteralType)"z").opCmp("a"w) > 0);
+    }
+
+    ///
+    int opCmp(scope const(dchar)[] other) scope {
+        return opCmpImplSlice(other);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"a").opCmp("z"d) < 0);
+        assert(String_UTF(cast(LiteralType)"z").opCmp("a"d) > 0);
+    }
+
+    ///
+    int opCmp(scope String_ASCII other) scope {
+        return opCmpImplReadOnly(other);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF8("a").opCmp(String_ASCII("z")) < 0);
+        assert(String_UTF8("z").opCmp(String_ASCII("a")) > 0);
+    }
+
+    ///
+    int opCmp(scope String_UTF8 other) scope {
+        return opCmpImplReadOnly(other);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF8("a").opCmp(String_UTF8("z")) < 0);
+        assert(String_UTF8("z").opCmp(String_UTF8("a")) > 0);
+    }
+
+    ///
+    int opCmp(scope String_UTF16 other) scope {
+        return opCmpImplReadOnly(other);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF16("a"w).opCmp(String_UTF16("z"w)) < 0);
+        assert(String_UTF16("z"w).opCmp(String_UTF16("a"w)) > 0);
+    }
+
+    ///
+    int opCmp(scope String_UTF32 other) scope {
+        return opCmpImplReadOnly(other);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF32("a"d).opCmp(String_UTF32("z"d)) < 0);
+        assert(String_UTF32("z"d).opCmp(String_UTF32("a"d)) > 0);
+    }
+
+    ///
+    int opCmp(scope StringBuilder_UTF8 other) scope {
+        return -other.opCmp(this);
+    }
+
+    ///
+    int opCmp(scope StringBuilder_UTF16 other) scope {
+        return -other.opCmp(this);
+    }
+
+    ///
+    int opCmp(scope StringBuilder_UTF32 other) scope {
+        return -other.opCmp(this);
+    }
+
+    ///
+    int ignoreCaseCompare(scope const(char)[] other, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return ignoreCaseCompareImplSlice(other, allocator, language.isTurkic);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"A").ignoreCaseCompare("z") < 0);
+        assert(String_UTF(cast(LiteralType)"Z").ignoreCaseCompare("a") > 0);
+    }
+
+    ///
+    int ignoreCaseCompare(scope const(wchar)[] other, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return ignoreCaseCompareImplSlice(other, allocator, language.isTurkic);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"A").ignoreCaseCompare("z"w) < 0);
+        assert(String_UTF(cast(LiteralType)"Z").ignoreCaseCompare("a"w) > 0);
+    }
+
+    ///
+    int ignoreCaseCompare(scope const(dchar)[] other, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return ignoreCaseCompareImplSlice(other, allocator, language.isTurkic);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"A").ignoreCaseCompare("z"d) < 0);
+        assert(String_UTF(cast(LiteralType)"Z").ignoreCaseCompare("a"d) > 0);
+    }
+
+    ///
+    int ignoreCaseCompare(scope String_UTF8 other, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return ignoreCaseCompareImplReadOnly(other, allocator, language);
+    }
+
+    ///
+    int ignoreCaseCompare(scope String_UTF16 other, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return ignoreCaseCompareImplReadOnly(other, allocator, language);
+    }
+
+    ///
+    int ignoreCaseCompare(scope String_UTF32 other, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return ignoreCaseCompareImplReadOnly(other, allocator, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"a").ignoreCaseCompare(String_UTF(cast(LiteralType)"Z")) < 0);
+        assert(String_UTF(cast(LiteralType)"Z").ignoreCaseCompare(String_UTF(cast(LiteralType)"a")) > 0);
+    }
+
+    ///
+    int ignoreCaseCompare(scope String_ASCII other, scope RCAllocator allocator = RCAllocator.init,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return ignoreCaseCompareImplReadOnly(other, allocator, language);
+    }
+
+    ///
+    unittest {
+        assert(String_UTF(cast(LiteralType)"a").ignoreCaseCompare(String_ASCII("Z")) < 0);
+        assert(String_UTF(cast(LiteralType)"Z").ignoreCaseCompare(String_ASCII("a")) > 0);
+    }
+
+    ///
+    int ignoreCaseCompare(scope StringBuilder_UTF8 other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return -other.ignoreCaseCompare(this, language);
+    }
+
+    ///
+    int ignoreCaseCompare(scope StringBuilder_UTF16 other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return -other.ignoreCaseCompare(this, language);
+    }
+
+    ///
+    int ignoreCaseCompare(scope StringBuilder_UTF32 other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        return -other.ignoreCaseCompare(this, language);
     }
 
     ///
@@ -2622,7 +2675,7 @@ private:
         return globalAllocator();
     }
 
-    const scope {
+    scope {
         bool ignoreCaseEqualsImplReadOnly(scope String_ASCII other, scope RCAllocator allocator = RCAllocator.init,
                 UnicodeLanguage language = UnicodeLanguage.Unknown) {
             return ignoreCaseCompareImplSlice(cast(const(char)[])other.literal, allocator, language.isTurkic) == 0;
@@ -2758,9 +2811,7 @@ private:
 
             return icmpUTF32_NFD(&usH.opApply, &otherH.opApply, allocator, turkic);
         }
-    }
 
-    scope {
         bool startsWithImplSlice(String)(scope String input, scope RCAllocator allocator = RCAllocator.init,
                 bool caseSensitive = true, UnicodeLanguage language = UnicodeLanguage.Unknown) @trusted {
             import sidero.base.text.unicode.comparison : CaseAwareComparison;

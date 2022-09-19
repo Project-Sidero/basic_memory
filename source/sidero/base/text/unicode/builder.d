@@ -1246,7 +1246,87 @@ nothrow @safe:
     // caseIgnoreLastIndexOf
     // stripLeft
     // stripRight
-    // toHash
+
+    ///
+    ulong toHash() scope @trusted {
+        import sidero.base.hash.fnv : fnv_64_1a;
+
+        ulong ret = fnv_64_1a(null);
+
+        foreachContiguous((scope ref data) {
+            ret = fnv_64_1a(cast(ubyte[])data);
+            return 0;
+        });
+
+        return ret;
+    }
+
+    ///
+    unittest {
+        static if (is(Char == char)) {
+            static Text8 = "ok it's a live";
+
+            StringBuilder_UTF text = StringBuilder_UTF(Text8);
+            assert(text.toHash() == 1586511100919779533);
+        } else         static if (is(Char == wchar)) {
+            static Text16 = "I'm up to the"w;
+
+            StringBuilder_UTF text = StringBuilder_UTF(Text16);
+            assert(text.toHash() == 10386160303096007217);
+        } else         static if (is(Char == dchar)) {
+            static Text32 = "walls can't talk"d;
+
+            StringBuilder_UTF text = StringBuilder_UTF(Text32);
+            assert(text.toHash() == 3495845543429281309);
+        }
+    }
+
+package(sidero.base.text):
+    int foreachContiguous(scope int delegate(ref scope Char[] data) @safe nothrow @nogc del) {
+        return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) @trusted {
+            assert(state !is null);
+
+            state.OtherStateIsUs!Char osiu;
+            osiu.state = state;
+            osiu.iterator = iterator;
+
+            scope osat = osiu.get;
+
+            osat.mutex(true);
+            int result = osat.foreachContiguous(del);
+            osat.mutex(false);
+
+            return result;
+        }, (StateIterator.S16 state, StateIterator.I16 iterator) @trusted {
+            assert(state !is null);
+
+            state.OtherStateIsUs!Char osiu;
+            osiu.state = state;
+            osiu.iterator = iterator;
+
+            scope osat = osiu.get;
+
+            osat.mutex(true);
+            int result = osat.foreachContiguous(del);
+            osat.mutex(false);
+
+            return result;
+        }, (StateIterator.S32 state, StateIterator.I32 iterator) @trusted {
+            assert(state !is null);
+
+            state.OtherStateIsUs!Char osiu;
+            osiu.state = state;
+            osiu.iterator = iterator;
+
+            scope osat = osiu.get;
+
+            osat.mutex(true);
+            int result = osat.foreachContiguous(del);
+            osat.mutex(false);
+
+            return result;
+        }, () {return 0; });
+    }
 
 private:
     StateIterator state;
