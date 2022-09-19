@@ -302,7 +302,7 @@ nothrow @safe:
     alias equals = opEquals;
 
     ///
-    bool opEquals(scope const(char)[] other) scope {
+    bool opEquals(scope const(char)[] other) scope @nogc {
         return opCmpImplSlice(other, true) == 0;
     }
 
@@ -315,7 +315,7 @@ nothrow @safe:
     }
 
     ///
-    bool opEquals(scope LiteralType other) scope {
+    bool opEquals(scope LiteralType other) scope @nogc {
         return opCmp(other) == 0;
     }
 
@@ -328,7 +328,7 @@ nothrow @safe:
     }
 
     ///
-    bool opEquals(scope String_ASCII other) scope {
+    bool opEquals(scope String_ASCII other) scope @nogc {
         return opCmpImplSlice(other.literal, true) == 0;
     }
 
@@ -343,7 +343,7 @@ nothrow @safe:
     }
 
     ///
-    bool opEquals(scope StringBuilder_ASCII other) scope {
+    bool opEquals(scope StringBuilder_ASCII other) scope @nogc {
         return opCmpImplBuilder(other, true) == 0;
     }
 
@@ -358,7 +358,7 @@ nothrow @safe:
     }
 
     ///
-    bool ignoreCaseEquals(scope const(char)[] other) scope {
+    bool ignoreCaseEquals(scope const(char)[] other) scope @nogc {
         return opCmpImplSlice(other, false) == 0;
     }
 
@@ -371,7 +371,7 @@ nothrow @safe:
     }
 
     ///
-    bool ignoreCaseEquals(scope LiteralType other) scope {
+    bool ignoreCaseEquals(scope LiteralType other) scope @nogc {
         return ignoreCaseCompare(other) == 0;
     }
 
@@ -384,7 +384,7 @@ nothrow @safe:
     }
 
     ///
-    bool ignoreCaseEquals(scope String_ASCII other) scope {
+    bool ignoreCaseEquals(scope String_ASCII other) scope @nogc {
         return opCmpImplSlice(other.literal, false) == 0;
     }
 
@@ -399,7 +399,7 @@ nothrow @safe:
     }
 
     ///
-    bool ignoreCaseEquals(scope StringBuilder_ASCII other) scope {
+    bool ignoreCaseEquals(scope StringBuilder_ASCII other) scope @nogc {
         return opCmpImplBuilder(other, false) == 0;
     }
 
@@ -417,7 +417,7 @@ nothrow @safe:
     alias compare = opCmp;
 
     ///
-    int opCmp(scope const(char)[] other) scope {
+    int opCmp(scope const(char)[] other) scope @nogc {
         return opCmpImplSlice(other, true);
     }
 
@@ -428,7 +428,7 @@ nothrow @safe:
     }
 
     ///
-    int opCmp(scope LiteralType other) scope {
+    int opCmp(scope LiteralType other) scope @nogc {
         return opCmpImplSlice(other, true);
     }
 
@@ -439,7 +439,7 @@ nothrow @safe:
     }
 
     ///
-    int opCmp(scope String_ASCII other) scope {
+    int opCmp(scope String_ASCII other) scope @nogc {
         return opCmpImplSlice(other.literal, true);
     }
 
@@ -450,7 +450,7 @@ nothrow @safe:
     }
 
     ///
-    int opCmp(scope StringBuilder_ASCII other) scope {
+    int opCmp(scope StringBuilder_ASCII other) scope @nogc {
         return opCmpImplBuilder(other, true);
     }
 
@@ -461,7 +461,7 @@ nothrow @safe:
     }
 
     ///
-    int ignoreCaseCompare(scope const(char)[] other) scope {
+    int ignoreCaseCompare(scope const(char)[] other) scope @nogc {
         return opCmpImplSlice(other, false);
     }
 
@@ -472,7 +472,7 @@ nothrow @safe:
     }
 
     ///
-    int ignoreCaseCompare(scope LiteralType other) scope {
+    int ignoreCaseCompare(scope LiteralType other) scope @nogc {
         return opCmpImplSlice(other, false);
     }
 
@@ -483,7 +483,7 @@ nothrow @safe:
     }
 
     ///
-    int ignoreCaseCompare(scope String_ASCII other) scope {
+    int ignoreCaseCompare(scope String_ASCII other) scope @nogc {
         return opCmpImplSlice(other.literal, false);
     }
 
@@ -494,7 +494,7 @@ nothrow @safe:
     }
 
     ///
-    int ignoreCaseCompare(scope StringBuilder_ASCII other) scope {
+    int ignoreCaseCompare(scope StringBuilder_ASCII other) scope @nogc {
         return opCmpImplBuilder(other, false);
     }
 
@@ -616,15 +616,12 @@ nothrow @safe:
     // stripRight
 
     ///
-    ulong toHash() scope @trusted {
+    ulong toHash() scope @trusted @nogc {
         import sidero.base.hash.fnv : fnv_64_1a;
 
         ulong ret = fnv_64_1a(null);
 
-        foreachContiguous((scope ref data) {
-            ret = fnv_64_1a(cast(ubyte[])data);
-            return 0;
-        });
+        foreachContiguous((scope ref data) { ret = fnv_64_1a(cast(ubyte[])data); return 0; });
 
         return ret;
     }
@@ -641,7 +638,7 @@ package(sidero.base.text):
     ASCII_State* state;
     ASCII_State.Iterator* iterator;
 
-    int foreachContiguous(scope int delegate(ref scope Char[] data) @safe nothrow @nogc del) scope {
+    int foreachContiguous(scope int delegate(ref scope Char[] data) @safe nothrow @nogc del) scope @nogc {
         if (state is null)
             return 0;
 
@@ -674,7 +671,7 @@ private:
         state.debugPosition(iterator);
     }
 
-    scope {
+    scope @nogc {
         int opCmpImplSlice(scope const(char)[] other, bool caseSensitive) @trusted {
             return opCmpImplSlice(cast(LiteralType)other, caseSensitive);
         }
@@ -894,7 +891,7 @@ struct ASCII_State {
             return iterator is null ? state.blockList.numberOfItems : (iterator.backwards.offsetFromHead - iterator.forwards.offsetFromHead);
         }
 
-        OtherStateAsTarget!Char get() scope return nothrow @trusted {
+        OtherStateAsTarget!Char get() scope return nothrow @trusted @nogc {
             return OtherStateAsTarget!Char(cast(void*)state, &mutex, &foreachContiguous, &foreachValue, &length);
         }
     }
