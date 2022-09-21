@@ -459,20 +459,20 @@ nothrow @safe:
     }
 
     ///
-    StringBuilder_UTF opSlice(size_t start, size_t end) scope @trusted @nogc {
+    StringBuilder_UTF opSlice(size_t start, size_t end) scope @nogc {
         StringBuilder_UTF ret;
 
-        state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+        state.handle((StateIterator.S8 state, StateIterator.I8 iterator) @trusted {
             assert(state !is null);
             ret.state.encoding = this.state.encoding;
             ret.state.u8 = state;
             ret.state.i8 = state.newIterator(iterator, start, end);
-        }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+        }, (StateIterator.S16 state, StateIterator.I16 iterator)  @trusted{
             assert(state !is null);
             ret.state.encoding = this.state.encoding;
             ret.state.u16 = state;
             ret.state.i16 = state.newIterator(iterator, start, end);
-        }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+        }, (StateIterator.S32 state, StateIterator.I32 iterator) @trusted {
             assert(state !is null);
             ret.state.encoding = this.state.encoding;
             ret.state.u32 = state;
@@ -526,7 +526,42 @@ nothrow @safe:
     }
 
     // TODO: dup
-    // TODO: asReadOnly
+
+    ///
+    String_UTF!Char asReadOnly(RCAllocator allocator = RCAllocator.init) scope @nogc {
+        if (allocator.isNull)
+            allocator = globalAllocator();
+
+        Char[] array;
+        size_t soFar;
+
+        this.foreachContiguous((scope ref Char[] data) {
+            assert(array.length > soFar + data.length, "Encoding length < Encoded");
+
+            foreach(i, Char c; data)
+                array[soFar + i] = c;
+
+            soFar += data.length;
+            return 0;
+        }, (length) {
+            array = allocator.makeArray!Char(length + 1);
+        });
+
+        assert(array.length == soFar + 1, "Encoding length != Encoded");
+        array[$-1] = 0;
+        return typeof(return)(array, allocator);
+    }
+
+    ///
+    @trusted unittest {
+        static Text = cast(LiteralType)"hey mr. helpful.";
+        String_UTF!Char readOnly = StringBuilder_UTF(Text).asReadOnly();
+
+        assert(readOnly.length == 16);
+        assert((cast(LiteralType)readOnly.literal).length == 17);
+        assert(readOnly == Text);
+    }
+
     // TODO: normalize
 
     ///
@@ -1248,7 +1283,7 @@ nothrow @safe:
     // stripRight
 
     ///
-    ulong toHash() scope @trusted {
+    ulong toHash() scope @trusted @nogc {
         import sidero.base.hash.fnv : fnv_64_1a;
 
         ulong ret = fnv_64_1a(null);
@@ -1282,48 +1317,51 @@ nothrow @safe:
     }
 
 package(sidero.base.text):
-    int foreachContiguous(scope int delegate(ref scope Char[] data) @safe nothrow @nogc del) {
-        return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) @trusted {
+    int foreachContiguous(scope int delegate(ref scope Char[] data) @safe nothrow @nogc del, scope void delegate(size_t length) @safe nothrow @nogc lengthDel = null) scope @nogc {
+        return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
             assert(state !is null);
 
             state.OtherStateIsUs!Char osiu;
             osiu.state = state;
             osiu.iterator = iterator;
 
-            scope osat = osiu.get;
+            osiu.mutex(true);
 
-            osat.mutex(true);
-            int result = osat.foreachContiguous(del);
-            osat.mutex(false);
+            if (lengthDel !is null)
+                lengthDel(osiu.length());
+            int result = osiu.foreachContiguous(del);
 
+            osiu.mutex(false);
             return result;
-        }, (StateIterator.S16 state, StateIterator.I16 iterator) @trusted {
+        }, (StateIterator.S16 state, StateIterator.I16 iterator) {
             assert(state !is null);
 
             state.OtherStateIsUs!Char osiu;
             osiu.state = state;
             osiu.iterator = iterator;
 
-            scope osat = osiu.get;
+            osiu.mutex(true);
 
-            osat.mutex(true);
-            int result = osat.foreachContiguous(del);
-            osat.mutex(false);
+            if (lengthDel !is null)
+                lengthDel(osiu.length());
+            int result = osiu.foreachContiguous(del);
 
+            osiu.mutex(false);
             return result;
-        }, (StateIterator.S32 state, StateIterator.I32 iterator) @trusted {
+        }, (StateIterator.S32 state, StateIterator.I32 iterator) {
             assert(state !is null);
 
             state.OtherStateIsUs!Char osiu;
             osiu.state = state;
             osiu.iterator = iterator;
 
-            scope osat = osiu.get;
+            osiu.mutex(true);
 
-            osat.mutex(true);
-            int result = osat.foreachContiguous(del);
-            osat.mutex(false);
+            if (lengthDel !is null)
+                lengthDel(osiu.length());
+            int result = osiu.foreachContiguous(del);
 
+            osiu.mutex(false);
             return result;
         }, () {return 0; });
     }
@@ -1507,9 +1545,11 @@ struct StateIterator {
         }
     }
 
+scope @safe nothrow @nogc:
+
     ///
     auto handle(T, U, V)(scope T utf8Del, scope U utf16Del, scope V utf32Del) {
-        return encoding.handle(() { return utf8Del(u8, i8); }, () { return utf16Del(u16, i16); }, () {
+        return encoding.handle(() @trusted { return utf8Del(u8, i8); }, () @trusted { return utf16Del(u16, i16); }, () @trusted {
             return utf32Del(u32, i32);
         });
     }
@@ -1529,7 +1569,7 @@ struct StateIterator {
                 return nullDel();
         }
 
-        return encoding.handle(() { return utf8Del(u8, i8); }, () { return utf16Del(u16, i16); }, () {
+        return encoding.handle(() @trusted { return utf8Del(u8, i8); }, () @trusted { return utf16Del(u16, i16); }, () @trusted {
             return utf32Del(u32, i32);
         }, &nullFunc);
     }
@@ -2373,17 +2413,17 @@ struct AnyLiteralAsTargetChar(TargetChar) {
 
     OtherStateAsTarget!TargetChar osat;
 
-    this(Char)(scope String_UTF!Char input) @trusted nothrow @nogc {
-        input.literalEncoding.handle(() {
+    this(Char)(scope String_UTF!Char input) @safe nothrow @nogc {
+        input.literalEncoding.handle(() @trusted {
             latc8.literal = cast(string)input.literal;
             osat = latc8.get();
-        }, () {
+        }, () @trusted {
             latc16.literal = cast(wstring)input.literal;
             osat = latc16.get();
-        }, () {
+        }, () @trusted {
             latc32.literal = cast(dstring)input.literal;
             osat = latc32.get();
-        }, () {
+        }, () @trusted {
             assert(0);
         });
     }

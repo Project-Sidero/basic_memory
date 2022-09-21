@@ -195,15 +195,15 @@ nothrow @nogc:
         if (ret.lifeTime !is null)
             atomicOp!"+="(ret.lifeTime.refCount, 1);
 
-        literalEncoding.handle(() {
+        literalEncoding.handle(() @trusted {
             auto actual = cast(const(char)[])this.literal;
             assert(end <= actual.length, "End of slice must be before or equal to length.");
             ret.literal = actual[start .. end];
-        }, () {
+        }, () @trusted {
             auto actual = cast(const(wchar)[])this.literal;
             assert(end <= actual.length, "End of slice must be before or equal to length.");
             ret.literal = actual[start .. end];
-        }, () {
+        }, () @trusted {
             auto actual = cast(const(dchar)[])this.literal;
             assert(end <= actual.length, "End of slice must be before or equal to length.");
             ret.literal = actual[start .. end];
@@ -412,11 +412,11 @@ nothrow @nogc:
     /**
     Returns: if ``ptr`` will return a null terminated const(char)[] or not
     */
-    bool isPtrNullTerminated() scope @trusted {
+    bool isPtrNullTerminated() scope {
         if (isNull)
             return false;
 
-        return literalEncoding.handle(() {
+        return literalEncoding.handle(() @trusted {
             auto actual = cast(const(char)[])this.literal;
 
             if (actual[$ - 1] == '\0')
@@ -427,7 +427,7 @@ nothrow @nogc:
             auto actualOriginal = cast(const(char)[])this.lifeTime.original;
 
             return actualOriginal[$ - 1] == '\0' && ((actualOriginal.ptr + actualOriginal.length) - (actual.length + 1)) is actual.ptr;
-        }, () {
+        }, () @trusted {
             auto actual = cast(const(wchar)[])this.literal;
 
             if (actual[$ - 1] == '\0')
@@ -438,7 +438,7 @@ nothrow @nogc:
             auto actualOriginal = cast(const(wchar)[])this.lifeTime.original;
 
             return actualOriginal[$ - 1] == '\0' && ((actualOriginal.ptr + actualOriginal.length) - (actual.length + 1)) is actual.ptr;
-        }, () {
+        }, () @trusted {
             auto actual = cast(const(dchar)[])this.literal;
 
             if (actual[$ - 1] == '\0')
@@ -2106,7 +2106,7 @@ nothrow @nogc:
     ///
     ptrdiff_t indexOf(scope const(char)[] input, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-        return indexOfImpl(input, allocator, true, language);
+        return indexofImplSlice(input, allocator, true, language);
     }
 
     ///
@@ -2118,7 +2118,7 @@ nothrow @nogc:
     ///
     ptrdiff_t indexOf(scope const(wchar)[] input, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-        return indexOfImpl(input, allocator, true, language);
+        return indexofImplSlice(input, allocator, true, language);
     }
 
     ///
@@ -2130,7 +2130,7 @@ nothrow @nogc:
     ///
     ptrdiff_t indexOf(scope const(dchar)[] input, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-        return indexOfImpl(input, allocator, true, language);
+        return indexofImplSlice(input, allocator, true, language);
     }
 
     ///
@@ -2142,7 +2142,7 @@ nothrow @nogc:
     ///
     ptrdiff_t ignoreCaseIndexOf(scope const(char)[] input, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-        return indexOfImpl(input, allocator, false, language);
+        return indexofImplSlice(input, allocator, false, language);
     }
 
     ///
@@ -2154,7 +2154,7 @@ nothrow @nogc:
     ///
     ptrdiff_t ignoreCaseIndexOf(scope const(wchar)[] input, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-        return indexOfImpl(input, allocator, false, language);
+        return indexofImplSlice(input, allocator, false, language);
     }
 
     ///
@@ -2166,7 +2166,7 @@ nothrow @nogc:
     ///
     ptrdiff_t ignoreCaseIndexOf(scope const(dchar)[] input, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-        return indexOfImpl(input, allocator, false, language);
+        return indexofImplSlice(input, allocator, false, language);
     }
 
     ///
@@ -2629,7 +2629,7 @@ private:
         }
     }
 
-    void setupIterator() @trusted scope {
+    void setupIterator() scope @trusted {
         if (isNull || haveIterator)
             return;
 
@@ -2643,21 +2643,21 @@ private:
         this.iterator = allocator.make!Iterator(1, allocator);
         assert(this.iterator !is null);
 
-        literalEncoding.handle(() {
+        literalEncoding.handle(() @trusted {
             auto actual = cast(const(char)[])this.literal;
 
             if (actual.length > 0 && actual[$ - 1] == '\0')
                 actual = actual[0 .. $ - 1];
 
             this.iterator.literal = actual;
-        }, () {
+        }, () @trusted {
             auto actual = cast(const(wchar)[])this.literal;
 
             if (actual.length > 0 && actual[$ - 1] == '\0')
                 actual = actual[0 .. $ - 1];
 
             this.iterator.literal = actual;
-        }, () {
+        }, () @trusted {
             auto actual = cast(const(dchar)[])this.literal;
 
             if (actual.length > 0 && actual[$ - 1] == '\0')
@@ -2676,6 +2676,22 @@ private:
     }
 
     scope {
+        void stripZero() {
+            literalEncoding.handle(() {
+                auto actual = cast(const(char)[])this.literal;
+                if (actual.length > 0 && actual[$-1] == 0)
+                    this.literal = this.literal[0 .. $-1];
+            }, () {
+                auto actual = cast(const(wchar)[])this.literal;
+                if (actual.length > 0 && actual[$-1] == 0)
+                    this.literal = this.literal[0 .. $-1];
+            }, () {
+                auto actual = cast(const(dchar)[])this.literal;
+                if (actual.length > 0 && actual[$-1] == 0)
+                    this.literal = this.literal[0 .. $-1];
+            });
+        }
+
         bool ignoreCaseEqualsImplReadOnly(scope String_ASCII other, scope RCAllocator allocator = RCAllocator.init,
                 UnicodeLanguage language = UnicodeLanguage.Unknown) {
             return ignoreCaseCompareImplSlice(cast(const(char)[])other.literal, allocator, language.isTurkic) == 0;
@@ -2696,7 +2712,13 @@ private:
         }
 
         int opCmpImplSlice(Char2)(scope const(Char2)[] other) {
+            if (other.length > 0 && other[$ - 1] == '\0')
+                other = other[0 .. $ - 1];
+
             int matches(Type)(Type us) {
+                if (us.length > 0 && us[$ - 1] == '\0')
+                    us = us[0 .. $ - 1];
+
                 if (us.length < other.length)
                     return -1;
                 else if (us.length > other.length)
@@ -2713,6 +2735,9 @@ private:
             }
 
             int needDecode(Type)(Type us) {
+                if (us.length > 0 && us[$ - 1] == '\0')
+                    us = us[0 .. $ - 1];
+
                 while (us.length > 0 && other.length > 0) {
                     dchar usC, otherC;
 
@@ -2765,14 +2790,17 @@ private:
         }
 
         int opCmpImplReadOnly(scope String_ASCII other) {
-            return opCmp(cast(const(char)[])other.literal);
+            return opCmpImplSlice(cast(const(char)[])other.literal);
         }
 
         int opCmpImplReadOnly(Char2)(scope String_UTF!Char2 other) {
-            return other.literalEncoding.handle(() { auto actual = cast(const(char)[])other.literal; return opCmp(actual); }, () {
-                auto actual = cast(const(wchar)[])other.literal;
-                return opCmp(actual);
-            }, () { auto actual = cast(const(dchar)[])other.literal; return opCmp(actual); });
+            return other.literalEncoding.handle(() {
+                auto actual = cast(const(char)[])other.literal;
+                return opCmpImplSlice(actual);
+            }, () { auto actual = cast(const(wchar)[])other.literal; return opCmpImplSlice(actual); }, () {
+                auto actual = cast(const(dchar)[])other.literal;
+                return opCmpImplSlice(actual);
+            });
         }
 
         int ignoreCaseCompareImplReadOnly(scope String_ASCII other, scope RCAllocator allocator = RCAllocator.init,
@@ -2795,39 +2823,62 @@ private:
             });
         }
 
-        int ignoreCaseCompareImplSlice(Other)(scope Other other, scope RCAllocator allocator = RCAllocator.init, bool turkic = false) @trusted {
+        int ignoreCaseCompareImplSlice(Char2)(scope const(Char2)[] other, scope RCAllocator allocator = RCAllocator.init, bool turkic = false) @trusted {
             import sidero.base.text.unicode.comparison;
+
+            if (other.length > 0 && other[$ - 1] == '\0')
+                other = other[0 .. $ - 1];
 
             allocator = pickAllocator(allocator);
             scope ForeachOverAnyUTF usH, otherH = foreachOverAnyUTF(other);
 
             literalEncoding.handle(() @trusted {
                 auto actual = cast(const(char)[])this.literal;
+
+                if (actual.length > 0 && actual[$ - 1] == '\0')
+                    actual = actual[0 .. $ - 1];
+
                 usH = foreachOverAnyUTF(actual);
-            }, () { auto actual = cast(const(wchar)[])this.literal; usH = foreachOverAnyUTF(actual); }, () {
+            }, () @trusted {
+                auto actual = cast(const(wchar)[])this.literal;
+
+                if (actual.length > 0 && actual[$ - 1] == '\0')
+                    actual = actual[0 .. $ - 1];
+
+                usH = foreachOverAnyUTF(actual);
+            }, () @trusted {
                 auto actual = cast(const(dchar)[])this.literal;
+
+                if (actual.length > 0 && actual[$ - 1] == '\0')
+                    actual = actual[0 .. $ - 1];
+
                 usH = foreachOverAnyUTF(actual);
             });
 
             return icmpUTF32_NFD(&usH.opApply, &otherH.opApply, allocator, turkic);
         }
 
-        bool startsWithImplSlice(String)(scope String input, scope RCAllocator allocator = RCAllocator.init,
+        bool startsWithImplSlice(Char2)(scope const(Char2)[] other, scope RCAllocator allocator = RCAllocator.init,
                 bool caseSensitive = true, UnicodeLanguage language = UnicodeLanguage.Unknown) @trusted {
             import sidero.base.text.unicode.comparison : CaseAwareComparison;
 
             allocator = pickAllocator(allocator);
 
-            scope ForeachOverAnyUTF inputOpApply = foreachOverAnyUTF(input);
+            if (other.length > 0 && other[$ - 1] == '\0')
+                other = other[0 .. $ - 1];
+
+            scope ForeachOverAnyUTF inputOpApply = foreachOverAnyUTF(other);
             scope comparison = CaseAwareComparison(allocator, language.isTurkic);
-            scope tempUs = this.byUTF32();
+
+            scope tempUs32 = this.byUTF32();
+            tempUs32.stripZero;
 
             // Most likely we are longer than the input const(char)[].
             // Therefore we must set the input as what to compare against (to try and prevent memory allocations).
             // We also need to tell the comparator to ignore if we are longer.
 
             comparison.setAgainst(&inputOpApply.opApply, caseSensitive);
-            return comparison.compare(&tempUs.opApply, true) == 0;
+            return comparison.compare(&tempUs32.opApply, true) == 0;
         }
 
         bool startsWithImplStrReadOnly(scope String_ASCII other, scope RCAllocator allocator = RCAllocator.init,
@@ -2851,13 +2902,16 @@ private:
             });
         }
 
-        bool endsWithImplSlice(String)(scope String input, scope RCAllocator allocator = RCAllocator.init,
+        bool endsWithImplSlice(Char2)(scope const(Char2)[] other, scope RCAllocator allocator = RCAllocator.init,
                 bool caseSensitive = true, UnicodeLanguage language = UnicodeLanguage.Unknown) @trusted {
             import sidero.base.text.unicode.comparison : CaseAwareComparison;
 
+            if (other.length > 0 && other[$ - 1] == '\0')
+                other = other[0 .. $ - 1];
+
             allocator = pickAllocator(allocator);
 
-            scope ForeachOverAnyUTF inputOpApply = foreachOverAnyUTF(input);
+            scope ForeachOverAnyUTF inputOpApply = foreachOverAnyUTF(other);
             scope comparison = CaseAwareComparison(allocator, language.isTurkic);
 
             // Most likely we are longer than the input const(char)[].
@@ -2881,12 +2935,14 @@ private:
 
             if (toConsumeLength == 0) {
                 // we are smaller or equal in size
-                return toConsumeLength == input.length;
+                return toConsumeLength == other.length;
             }
 
             const offsetForUs = this.length - toConsumeLength;
-            scope tempUs = this[offsetForUs .. offsetForUs + toConsumeLength].byUTF32();
-            return comparison.compare(&tempUs.opApply, true) == 0;
+            scope tempUs32 = this[offsetForUs .. offsetForUs + toConsumeLength].byUTF32();
+            tempUs32.stripZero;
+
+            return comparison.compare(&tempUs32.opApply, true) == 0;
         }
 
         bool endsWithImplReadOnly(scope String_ASCII other, scope RCAllocator allocator = RCAllocator.init,
@@ -2909,19 +2965,23 @@ private:
             });
         }
 
-        size_t countImplSlice(String)(scope String input, scope RCAllocator allocator = RCAllocator.init,
+        size_t countImplSlice(Char2)(scope const(Char2)[] other, scope RCAllocator allocator = RCAllocator.init,
                 bool caseSensitive = true, UnicodeLanguage language = UnicodeLanguage.Unknown) @trusted {
             import sidero.base.text.unicode.comparison : CaseAwareComparison;
 
+            if (other.length > 0 && other[$-1] == '\0')
+                other = other[0 .. $-1];
+
             allocator = pickAllocator(allocator);
 
-            scope ForeachOverAnyUTF inputOpApply = foreachOverAnyUTF(input);
+            scope ForeachOverAnyUTF inputOpApply = foreachOverAnyUTF(other);
             scope comparison = CaseAwareComparison(allocator, language.isTurkic);
             comparison.setAgainst(&inputOpApply.opApply, caseSensitive);
 
-            String_UTF us = this;
-            size_t total;
             const lengthOfOther = comparison.againstLength();
+            size_t total;
+            String_UTF us = this;
+            us.stripZero;
 
             while (us.length > 0) {
                 size_t toIncrease = 1;
@@ -2966,18 +3026,22 @@ private:
             });
         }
 
-        bool containsImplSlice(String)(scope String input, scope RCAllocator allocator = RCAllocator.init,
+        bool containsImplSlice(Char2)(scope const(Char2)[] other, scope RCAllocator allocator = RCAllocator.init,
                 bool caseSensitive = true, UnicodeLanguage language = UnicodeLanguage.Unknown) @trusted {
             import sidero.base.text.unicode.comparison : CaseAwareComparison;
 
+            if (other.length > 0 && other[$-1] == '\0')
+                other = other[0 .. $-1];
+
             allocator = pickAllocator(allocator);
 
-            scope ForeachOverAnyUTF inputOpApply = foreachOverAnyUTF(input);
+            scope ForeachOverAnyUTF inputOpApply = foreachOverAnyUTF(other);
             scope comparison = CaseAwareComparison(allocator, language.isTurkic);
             comparison.setAgainst(&inputOpApply.opApply, caseSensitive);
 
-            String_UTF us = this;
             const lengthOfOther = comparison.againstLength();
+            String_UTF us = this;
+            us.stripZero;
 
             while (us.length > 0) {
                 size_t toIncrease = 1;
@@ -3020,19 +3084,23 @@ private:
             });
         }
 
-        ptrdiff_t indexOfImpl(String)(scope String input, scope RCAllocator allocator = RCAllocator.init,
+        ptrdiff_t indexofImplSlice(Char2)(scope const(Char2)[] other, scope RCAllocator allocator = RCAllocator.init,
                 bool caseSensitive = true, UnicodeLanguage language = UnicodeLanguage.Unknown) @trusted {
             import sidero.base.text.unicode.comparison : CaseAwareComparison;
 
+            if (other.length > 0 && other[$-1] == '\0')
+                other = other[0 .. $-1];
+
             allocator = pickAllocator(allocator);
 
-            scope ForeachOverAnyUTF inputOpApply = foreachOverAnyUTF(input);
+            scope ForeachOverAnyUTF inputOpApply = foreachOverAnyUTF(other);
             scope comparison = CaseAwareComparison(allocator, language.isTurkic);
             comparison.setAgainst(&inputOpApply.opApply, caseSensitive);
 
+            const lengthOfOther = comparison.againstLength();
             ptrdiff_t ret;
             String_UTF us = this;
-            const lengthOfOther = comparison.againstLength();
+            us.stripZero;
 
             while (us.length > 0) {
                 size_t toIncrease = 1;
@@ -3059,36 +3127,40 @@ private:
 
         ptrdiff_t indexOfImplReadOnly(scope String_ASCII other, scope RCAllocator allocator = RCAllocator.init,
                 bool caseSensitive = true, UnicodeLanguage language = UnicodeLanguage.Unknown) {
-            return indexOfImpl(cast(const(char)[])other.literal, allocator, caseSensitive, language);
+            return indexofImplSlice(cast(const(char)[])other.literal, allocator, caseSensitive, language);
         }
 
         ptrdiff_t indexOfImplReadOnly(Char2)(scope String_UTF!Char2 other, scope RCAllocator allocator = RCAllocator.init,
                 bool caseSensitive = true, UnicodeLanguage language = UnicodeLanguage.Unknown) {
             return other.literalEncoding.handle(() {
                 auto actual = cast(const(char)[])other.literal;
-                return indexOfImpl(actual, allocator, caseSensitive, language);
+                return indexofImplSlice(actual, allocator, caseSensitive, language);
             }, () {
                 auto actual = cast(const(wchar)[])other.literal;
-                return indexOfImpl(actual, allocator, caseSensitive, language);
+                return indexofImplSlice(actual, allocator, caseSensitive, language);
             }, () {
                 auto actual = cast(const(dchar)[])other.literal;
-                return indexOfImpl(actual, allocator, caseSensitive, language);
+                return indexofImplSlice(actual, allocator, caseSensitive, language);
             });
         }
 
-        ptrdiff_t lastIndexOfImplSlice(String)(scope String input, scope RCAllocator allocator = RCAllocator.init,
+        ptrdiff_t lastIndexOfImplSlice(Char2)(scope const(Char2)[] other, scope RCAllocator allocator = RCAllocator.init,
                 bool caseSensitive = true, UnicodeLanguage language = UnicodeLanguage.Unknown) @trusted {
             import sidero.base.text.unicode.comparison : CaseAwareComparison;
 
+            if (other.length > 0 && other[$-1] == '\0')
+                other = other[0 .. $-1];
+
             allocator = pickAllocator(allocator);
 
-            scope ForeachOverAnyUTF inputOpApply = foreachOverAnyUTF(input);
+            scope ForeachOverAnyUTF inputOpApply = foreachOverAnyUTF(other);
             scope comparison = CaseAwareComparison(allocator, language.isTurkic);
             comparison.setAgainst(&inputOpApply.opApply, caseSensitive);
 
+            const lengthOfOther = comparison.againstLength();
             ptrdiff_t ret = -1, soFar;
             String_UTF us = this;
-            const lengthOfOther = comparison.againstLength();
+            us.stripZero;
 
             while (us.length > 0) {
                 size_t toIncrease = 1;

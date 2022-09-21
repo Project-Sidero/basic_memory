@@ -289,7 +289,41 @@ nothrow @safe:
     }
 
     // TODO: dup
-    // TODO: asReadOnly
+
+    ///
+    String_ASCII asReadOnly(RCAllocator allocator = RCAllocator.init) scope @nogc {
+        if (allocator.isNull)
+            allocator = globalAllocator();
+
+        Char[] array;
+        size_t soFar;
+
+        this.foreachContiguous((scope ref Char[] data) {
+            assert(array.length > soFar + data.length, "Encoding length < Encoded");
+
+            foreach(i, Char c; data)
+                array[soFar + i] = c;
+
+            soFar += data.length;
+            return 0;
+        }, (length) {
+            array = allocator.makeArray!Char(length + 1);
+        });
+
+        assert(array.length == soFar + 1, "Encoding length != Encoded");
+        array[$-1] = 0;
+        return String_ASCII(array, allocator);
+    }
+
+    ///
+    unittest {
+        static Text = "hey mr. helpful.";
+        String_ASCII readOnly = StringBuilder_ASCII(Text).asReadOnly();
+
+        assert(readOnly.length == 16);
+        assert(readOnly.literal.length == 17);
+        assert(readOnly == Text);
+    }
 
     ///
     bool opCast(T : bool)() scope const @nogc {
@@ -638,7 +672,7 @@ package(sidero.base.text):
     ASCII_State* state;
     ASCII_State.Iterator* iterator;
 
-    int foreachContiguous(scope int delegate(ref scope Char[] data) @safe nothrow @nogc del) scope @nogc {
+    int foreachContiguous(scope int delegate(ref scope Char[] data) @safe nothrow @nogc del, scope void delegate(size_t length) @safe nothrow @nogc lengthDel = null) scope @nogc @trusted {
         if (state is null)
             return 0;
 
@@ -646,12 +680,13 @@ package(sidero.base.text):
         osiu.state = state;
         osiu.iterator = iterator;
 
-        scope osat = osiu.get;
+        osiu.mutex(true);
 
-        osat.mutex(true);
-        int result = osat.foreachContiguous(del);
-        osat.mutex(false);
+        if (lengthDel !is null)
+            lengthDel(osiu.length());
+        int result = osiu.foreachContiguous(del);
 
+        osiu.mutex(false);
         return result;
     }
 

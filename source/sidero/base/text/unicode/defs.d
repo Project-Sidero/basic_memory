@@ -39,7 +39,7 @@ struct UnicodeEncoding {
     ///
     enum For(T : const(dchar)[]) = UTF32;
 
-scope const:
+scope const @safe:
 
     ///
     auto handle(T, U, V)(scope T utf8Del, scope U utf16Del, scope V utf32Del) {
