@@ -191,7 +191,12 @@ nothrow @safe:
     @disable this(this);
 
     ///
-    this(InputChar)(RCAllocator allocator, scope const(InputChar)[] input)
+    this(RCAllocator allocator) {
+        this.__ctor(LiteralType.init, allocator);
+    }
+
+    ///
+    this(InputChar)(RCAllocator allocator, scope const(InputChar)[] input...)
             if (is(InputChar == char) || is(InputChar == wchar) || is(InputChar == dchar)) {
         this.__ctor(input, allocator);
     }
@@ -259,6 +264,30 @@ nothrow @safe:
                 assert(output.length == 0);
             }
         }
+    }
+
+    ///
+    this(RCAllocator allocator, scope String_ASCII input) scope @nogc {
+        this.__ctor(input, allocator);
+    }
+
+    ///
+    unittest {
+        static Text8 = "it is negilible";
+
+        assert(StringBuilder_UTF(RCAllocator.init, String_ASCII(Text8)).length == Text8.length);
+    }
+
+    ///
+    this(Char2)(RCAllocator allocator, scope String_UTF!Char2 input) scope @nogc {
+        this.__ctor(input, allocator);
+    }
+
+    ///
+    unittest {
+        static Text = cast(LiteralType)"it is negilible";
+
+        assert(StringBuilder_UTF(RCAllocator.init, String_UTF!Char(Text)).length == Text.length);
     }
 
     ///
@@ -356,6 +385,42 @@ nothrow @safe:
                 assert(output.length == 0);
             }
         }
+    }
+
+    ///
+    this(scope String_ASCII input, RCAllocator allocator = RCAllocator.init) scope @nogc @trusted{
+        input.stripZero;
+
+        this.__ctor(cast(const(char)[])input.literal, allocator);
+    }
+
+    ///
+    unittest {
+        static Text8 = "it is negilible";
+
+        assert(StringBuilder_UTF(String_ASCII(Text8)).length == Text8.length);
+    }
+
+    ///
+    this(Char2)(scope String_UTF!Char2 input, RCAllocator allocator = RCAllocator.init) scope @nogc @trusted{
+        input.stripZero;
+
+        input.literalEncoding.handle(() {
+            this.__ctor(cast(const(char)[])input.literal, allocator);
+        }, () {
+            this.__ctor(cast(const(wchar)[])input.literal, allocator);
+        }, () {
+            this.__ctor(cast(const(dchar)[])input.literal, allocator);
+        }, () {
+            this.__ctor(LiteralType.init, allocator);
+        });
+    }
+
+    ///
+    unittest {
+        static Text = cast(LiteralType)"it is negilible";
+
+        assert(StringBuilder_UTF(String_UTF!Char(Text)).length == Text.length);
     }
 
     ///
@@ -525,7 +590,20 @@ nothrow @safe:
         assert(stack.length == 6);
     }
 
-    // TODO: dup
+    ///
+    StringBuilder_UTF dup(RCAllocator allocator = RCAllocator.init) {
+        StringBuilder_UTF ret = StringBuilder_UTF(allocator);
+        ret.insertImplBuilder(this);
+        return ret;
+    }
+
+    ///
+    unittest {
+        static Text = cast(LiteralType)"can't be done.";
+
+        StringBuilder_UTF builder = StringBuilder_UTF(Text);
+        assert(builder.dup.length == Text.length);
+    }
 
     ///
     String_UTF!Char asReadOnly(RCAllocator allocator = RCAllocator.init) scope @nogc {
@@ -1508,6 +1586,112 @@ private:
                     return -1;
                 else
                     return 0;
+            });
+        }
+
+        void insertImplReadOnly(scope String_ASCII other) {
+            state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+                assert(state !is null);
+
+                ASCIILiteralAsTarget!char alat;
+                alat.literal = other.literal;
+                scope osiu = alat.get;
+
+                state.externalInsert(iterator, 0, osiu);
+            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+                assert(state !is null);
+
+                ASCIILiteralAsTarget!wchar alat;
+                alat.literal = other.literal;
+                scope osiu = alat.get;
+
+                state.externalInsert(iterator, 0, osiu);
+            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+                assert(state !is null);
+
+                ASCIILiteralAsTarget!dchar alat;
+                alat.literal = other.literal;
+                scope osiu = alat.get;
+
+                state.externalInsert(iterator, 0, osiu);
+            });
+        }
+
+        void insertImplSlice(Char2)(scope const(Char2)[] other) {
+            state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+                assert(state !is null);
+
+                LiteralAsTargetChar!(Char2, char) lat;
+                lat.literal = other;
+                scope osiu = lat.get;
+
+                state.externalInsert(iterator, 0, osiu);
+            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+                assert(state !is null);
+
+                LiteralAsTargetChar!(Char2, wchar) lat;
+                lat.literal = other;
+                scope osiu = lat.get;
+
+                state.externalInsert(iterator, 0, osiu);
+            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+                assert(state !is null);
+
+                LiteralAsTargetChar!(Char2, dchar) lat;
+                lat.literal = other;
+                scope osiu = lat.get;
+
+                state.externalInsert(iterator, 0, osiu);
+            });
+        }
+
+        void insertImplBuilder(scope StringBuilder_ASCII other) {
+            state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+                assert(state !is null);
+
+                ASCIIStateAsTarget!char asat;
+                asat.state = other.state;
+                asat.iterator = other.iterator;
+                scope osiu = asat.get;
+
+                state.externalInsert(iterator, 0, osiu);
+            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+                assert(state !is null);
+
+                ASCIIStateAsTarget!wchar asat;
+                asat.state = other.state;
+                asat.iterator = other.iterator;
+                scope osiu = asat.get;
+
+                state.externalInsert(iterator, 0, osiu);
+            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+                assert(state !is null);
+
+                ASCIIStateAsTarget!dchar asat;
+                asat.state = other.state;
+                asat.iterator = other.iterator;
+                scope osiu = asat.get;
+
+                state.externalInsert(iterator, 0, osiu);
+            });
+        }
+
+        void insertImplBuilder(Char2)(scope StringBuilder_UTF!Char2 other) {
+            state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+                assert(state !is null);
+
+                AnyStateIteratorAsUs!char asiau = AnyStateIteratorAsUs!char(other.state);
+                state.externalInsert(iterator, 0, asiau.osat);
+            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+                assert(state !is null);
+
+                AnyStateIteratorAsUs!wchar asiau = AnyStateIteratorAsUs!wchar(other.state);
+                state.externalInsert(iterator, 0, asiau.osat);
+            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+                assert(state !is null);
+
+                AnyStateIteratorAsUs!dchar asiau = AnyStateIteratorAsUs!dchar(other.state);
+                state.externalInsert(iterator, 0, asiau.osat);
             });
         }
     }

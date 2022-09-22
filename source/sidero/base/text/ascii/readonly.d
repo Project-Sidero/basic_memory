@@ -365,17 +365,15 @@ nothrow @nogc:
         assert(stack.literal.length == 6);
     }
 
-    version (none) {
-        ///
-        StringBuilder_ASCII asMutable(RCAllocator allocator = RCAllocator.init) scope {
-            return StringBuilder_ASCII(allocator, literal);
-        }
+    ///
+    StringBuilder_ASCII asMutable(RCAllocator allocator = RCAllocator.init) scope {
+        return StringBuilder_ASCII(allocator, this);
+    }
 
-        ///
-        unittest {
-            StringBuilder_ASCII got = String_ASCII("stuff goes here, or there, wazzup").asMutable();
-            assert(got.length == 33);
-        }
+    ///
+    unittest {
+        StringBuilder_ASCII got = String_ASCII("stuff goes here, or there, wazzup").asMutable();
+        assert(got.length == 33);
     }
 
     ///
@@ -2376,6 +2374,12 @@ nothrow @nogc:
         assert(value == "  \t abc");
 
         assert(String_ASCII("  \t abc\t\r\n \0").stripRight == "  \t abc");
+    }
+
+package(sidero.base.text):
+    void stripZero() scope {
+        if (this.literal.length > 0 && this.literal[$ - 1] == 0)
+            this.literal = this.literal[0 .. $ - 1];
     }
 
 private:

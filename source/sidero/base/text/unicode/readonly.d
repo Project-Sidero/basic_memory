@@ -514,17 +514,17 @@ nothrow @nogc:
         assert(stack.literal.length == 6);
     }
 
-    version (none) {
-        ///
-        StringBuilder_ASCII asMutable(RCAllocator allocator = RCAllocator.init) scope {
-            return StringBuilder_ASCII(allocator, literal);
-        }
+    ///
+    StringBuilder_UTF!Char asMutable(RCAllocator allocator = RCAllocator.init) scope {
+        return StringBuilder_UTF!Char(allocator, this);
+    }
 
-        ///
-        unittest {
-            StringBuilder_ASCII got = String_ASCII("stuff goes here, or there, wazzup").asMutable();
-            assert(got.length == 33);
-        }
+    ///
+    unittest {
+        static Text = cast(LiteralType)"stuff goes here, or there, wazzup";
+
+        StringBuilder_UTF!Char got = String_UTF(Text).asMutable();
+        assert(got.length == Text.length);
     }
 
     ///
@@ -2600,6 +2600,23 @@ nothrow @nogc:
         assert(text.toHash() == 3495845543429281309);
     }
 
+package(sidero.base.text):
+    void stripZero() scope {
+        literalEncoding.handle(() {
+            auto actual = cast(const(char)[])this.literal;
+            if (actual.length > 0 && actual[$ - 1] == 0)
+                this.literal = this.literal[0 .. $ - 1];
+        }, () {
+            auto actual = cast(const(wchar)[])this.literal;
+            if (actual.length > 0 && actual[$ - 1] == 0)
+                this.literal = this.literal[0 .. $ - 1];
+        }, () {
+            auto actual = cast(const(dchar)[])this.literal;
+            if (actual.length > 0 && actual[$ - 1] == 0)
+                this.literal = this.literal[0 .. $ - 1];
+        });
+    }
+
 private:
     static struct LifeTime {
         shared(int) refCount;
@@ -2676,22 +2693,6 @@ private:
     }
 
     scope {
-        void stripZero() {
-            literalEncoding.handle(() {
-                auto actual = cast(const(char)[])this.literal;
-                if (actual.length > 0 && actual[$-1] == 0)
-                    this.literal = this.literal[0 .. $-1];
-            }, () {
-                auto actual = cast(const(wchar)[])this.literal;
-                if (actual.length > 0 && actual[$-1] == 0)
-                    this.literal = this.literal[0 .. $-1];
-            }, () {
-                auto actual = cast(const(dchar)[])this.literal;
-                if (actual.length > 0 && actual[$-1] == 0)
-                    this.literal = this.literal[0 .. $-1];
-            });
-        }
-
         bool ignoreCaseEqualsImplReadOnly(scope String_ASCII other, scope RCAllocator allocator = RCAllocator.init,
                 UnicodeLanguage language = UnicodeLanguage.Unknown) {
             return ignoreCaseCompareImplSlice(cast(const(char)[])other.literal, allocator, language.isTurkic) == 0;
@@ -2969,8 +2970,8 @@ private:
                 bool caseSensitive = true, UnicodeLanguage language = UnicodeLanguage.Unknown) @trusted {
             import sidero.base.text.unicode.comparison : CaseAwareComparison;
 
-            if (other.length > 0 && other[$-1] == '\0')
-                other = other[0 .. $-1];
+            if (other.length > 0 && other[$ - 1] == '\0')
+                other = other[0 .. $ - 1];
 
             allocator = pickAllocator(allocator);
 
@@ -3030,8 +3031,8 @@ private:
                 bool caseSensitive = true, UnicodeLanguage language = UnicodeLanguage.Unknown) @trusted {
             import sidero.base.text.unicode.comparison : CaseAwareComparison;
 
-            if (other.length > 0 && other[$-1] == '\0')
-                other = other[0 .. $-1];
+            if (other.length > 0 && other[$ - 1] == '\0')
+                other = other[0 .. $ - 1];
 
             allocator = pickAllocator(allocator);
 
@@ -3088,8 +3089,8 @@ private:
                 bool caseSensitive = true, UnicodeLanguage language = UnicodeLanguage.Unknown) @trusted {
             import sidero.base.text.unicode.comparison : CaseAwareComparison;
 
-            if (other.length > 0 && other[$-1] == '\0')
-                other = other[0 .. $-1];
+            if (other.length > 0 && other[$ - 1] == '\0')
+                other = other[0 .. $ - 1];
 
             allocator = pickAllocator(allocator);
 
@@ -3148,8 +3149,8 @@ private:
                 bool caseSensitive = true, UnicodeLanguage language = UnicodeLanguage.Unknown) @trusted {
             import sidero.base.text.unicode.comparison : CaseAwareComparison;
 
-            if (other.length > 0 && other[$-1] == '\0')
-                other = other[0 .. $-1];
+            if (other.length > 0 && other[$ - 1] == '\0')
+                other = other[0 .. $ - 1];
 
             allocator = pickAllocator(allocator);
 

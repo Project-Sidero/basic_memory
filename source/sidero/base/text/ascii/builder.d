@@ -133,7 +133,12 @@ nothrow @safe:
     @disable this(this);
 
     ///
-    this(InputChar)(RCAllocator allocator, scope const(InputChar)[] input) @trusted
+    this(RCAllocator allocator) scope @nogc {
+        this.__ctor(LiteralType.init, allocator);
+    }
+
+    ///
+    this(InputChar)(RCAllocator allocator, scope const(InputChar)[] input...) @trusted scope @nogc
             if (is(InputChar == ubyte) || is(InputChar == char)) {
         this.__ctor(input, allocator);
     }
@@ -158,7 +163,19 @@ nothrow @safe:
     }
 
     ///
-    this(InputChar)(scope const(InputChar)[] input, RCAllocator allocator = RCAllocator.init) @trusted
+    this(RCAllocator allocator, scope String_ASCII input) scope @nogc {
+        this.__ctor(input, allocator);
+    }
+
+    ///
+    unittest {
+        static Text = cast(LiteralType)"it is negilible";
+
+        assert(StringBuilder_ASCII(RCAllocator.init, String_ASCII(Text)).length == Text.length);
+    }
+
+    ///
+    this(InputChar)(scope const(InputChar)[] input, RCAllocator allocator = RCAllocator.init) @trusted scope @nogc
             if (is(InputChar == ubyte) || is(InputChar == char)) {
         setupState(allocator);
         assert(state !is null);
@@ -187,6 +204,20 @@ nothrow @safe:
 
             assert(output.length == 0);
         }
+    }
+
+    ///
+    this(scope String_ASCII input, RCAllocator allocator = RCAllocator.init) scope @nogc {
+        input.stripZero;
+
+        this.__ctor(input.literal, allocator);
+    }
+
+    ///
+    unittest {
+        static Text = cast(LiteralType)"it is negilible";
+
+        assert(StringBuilder_ASCII(String_ASCII(Text)).length == Text.length);
     }
 
     ///
@@ -288,7 +319,20 @@ nothrow @safe:
         assert(stack.length == 6);
     }
 
-    // TODO: dup
+    ///
+    StringBuilder_ASCII dup(RCAllocator allocator = RCAllocator.init) {
+        StringBuilder_ASCII ret = StringBuilder_ASCII(allocator);
+        ret.insertImplBuilder(this);
+        return ret;
+    }
+
+    ///
+    unittest {
+        static Text = cast(LiteralType)"can't be done.";
+
+        StringBuilder_ASCII builder = StringBuilder_ASCII(Text);
+        assert(builder.dup.length == Text.length);
+    }
 
     ///
     String_ASCII asReadOnly(RCAllocator allocator = RCAllocator.init) scope @nogc {
@@ -301,17 +345,15 @@ nothrow @safe:
         this.foreachContiguous((scope ref Char[] data) {
             assert(array.length > soFar + data.length, "Encoding length < Encoded");
 
-            foreach(i, Char c; data)
+            foreach (i, Char c; data)
                 array[soFar + i] = c;
 
             soFar += data.length;
             return 0;
-        }, (length) {
-            array = allocator.makeArray!Char(length + 1);
-        });
+        }, (length) { array = allocator.makeArray!Char(length + 1); });
 
         assert(array.length == soFar + 1, "Encoding length != Encoded");
-        array[$-1] = 0;
+        array[$ - 1] = 0;
         return String_ASCII(array, allocator);
     }
 
@@ -672,7 +714,8 @@ package(sidero.base.text):
     ASCII_State* state;
     ASCII_State.Iterator* iterator;
 
-    int foreachContiguous(scope int delegate(ref scope Char[] data) @safe nothrow @nogc del, scope void delegate(size_t length) @safe nothrow @nogc lengthDel = null) scope @nogc @trusted {
+    int foreachContiguous(scope int delegate(ref scope Char[] data) @safe nothrow @nogc del,
+            scope void delegate(size_t length) @safe nothrow @nogc lengthDel = null) scope @nogc @trusted {
         if (state is null)
             return 0;
 
@@ -738,6 +781,31 @@ private:
                     return 0;
             } else
                 return state.externalOpCmp(iterator, osiu, caseSensitive);
+        }
+
+        void insertImplReadOnly(scope String_ASCII other) {
+            ASCII_State.LiteralAsTarget alat;
+            alat.literal = other.literal;
+            scope osiu = alat.get;
+
+            state.externalInsert(iterator, 0, osiu);
+        }
+
+        void insertImplSlice(Char2)(scope const(Char2)[] other) @trusted {
+            ASCII_State.LiteralAsTarget lat;
+            lat.literal = cast(LiteralType)other;
+            scope osiu = lat.get;
+
+            state.externalInsert(iterator, 0, osiu);
+        }
+
+        void insertImplBuilder(scope StringBuilder_ASCII other) {
+            ASCII_State.OtherStateIsUs asat;
+            asat.state = other.state;
+            asat.iterator = other.iterator;
+            scope osiu = asat.get;
+
+            state.externalInsert(iterator, 0, osiu);
         }
     }
 }
