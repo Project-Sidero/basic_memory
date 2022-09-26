@@ -653,8 +653,8 @@ nothrow @nogc:
     }
 
     ///
-    String_UTF normalize(RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.Unknown,
-            bool compatibility = false, bool compose = false) scope @trusted {
+    String_UTF normalize(bool compatibility = false, bool compose = false,
+            UnicodeLanguage language = UnicodeLanguage.Unknown, RCAllocator allocator = RCAllocator.init) scope @trusted {
         allocator = pickAllocator(allocator);
         scope us32 = this.byUTF32();
 
@@ -662,6 +662,26 @@ nothrow @nogc:
 
         const(dchar)[] got = n.normalize(&us32.opApply, allocator, language.isTurkic, compatibility, compose);
         return String_UTF(got, allocator, got);
+    }
+
+    ///
+    String_UTF toNFD(UnicodeLanguage language = UnicodeLanguage.Unknown, RCAllocator allocator = RCAllocator.init) {
+        return this.normalize(false, false, language, allocator);
+    }
+
+    ///
+    String_UTF toNFC(UnicodeLanguage language = UnicodeLanguage.Unknown, RCAllocator allocator = RCAllocator.init) {
+        return this.normalize(false, true, language, allocator);
+    }
+
+    ///
+    String_UTF toNFKD(UnicodeLanguage language = UnicodeLanguage.Unknown, RCAllocator allocator = RCAllocator.init) {
+        return this.normalize(true, false, language, allocator);
+    }
+
+    ///
+    String_UTF toNFKC(UnicodeLanguage language = UnicodeLanguage.Unknown, RCAllocator allocator = RCAllocator.init) {
+        return this.normalize(true, true, language, allocator);
     }
 
     ///

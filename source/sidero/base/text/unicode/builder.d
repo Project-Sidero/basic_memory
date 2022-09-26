@@ -679,7 +679,41 @@ nothrow @safe:
         assert(readOnly == Text);
     }
 
-    // TODO: normalize
+    ///
+    StringBuilder_UTF normalize(bool compatibility, bool composition, UnicodeLanguage language) {
+        state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+            assert(state !is null);
+            state.externalNormalization(iterator, language, compatibility, composition);
+        }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+            assert(state !is null);
+            state.externalNormalization(iterator, language, compatibility, composition);
+        }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+            assert(state !is null);
+            state.externalNormalization(iterator, language, compatibility, composition);
+        });
+
+        return this;
+    }
+
+    ///
+    StringBuilder_UTF toNFD(UnicodeLanguage language = UnicodeLanguage.Unknown) {
+        return this.normalize(false, false, language);
+    }
+
+    ///
+    StringBuilder_UTF toNFC(UnicodeLanguage language = UnicodeLanguage.Unknown) {
+        return this.normalize(false, true, language);
+    }
+
+    ///
+    StringBuilder_UTF toNFKD(UnicodeLanguage language = UnicodeLanguage.Unknown) {
+        return this.normalize(true, false, language);
+    }
+
+    ///
+    StringBuilder_UTF toNFKC(UnicodeLanguage language = UnicodeLanguage.Unknown) {
+        return this.normalize(true, true, language);
+    }
 
     ///
     bool opCast(T : bool)() scope const @nogc {
@@ -2436,7 +2470,7 @@ struct UTF_State(Char) {
         }
     }
 
-    static struct CompareImpl {
+    static struct ForeachUTF32 {
         size_t maximumOffsetFromHead;
         Cursor cursor;
 
@@ -2503,7 +2537,6 @@ struct UTF_State(Char) {
             other.mutex(true);
 
         int result;
-        CompareImpl compareImpl = CompareImpl(this, iterator, 0, true);
 
         OtherStateIsUs!dchar osiu;
         osiu.state = &this;
@@ -2519,6 +2552,41 @@ struct UTF_State(Char) {
             other.mutex(false);
 
         return result;
+    }
+
+    void externalNormalization(scope Iterator* iterator, UnicodeLanguage language, bool compatibility, bool composition) @trusted {
+        import sidero.base.text.unicode.characters.database : isTurkic;
+        import sidero.base.text.unicode.normalization : normalize;
+
+        blockList.mutex.pureLock;
+        RCAllocator allocator = blockList.allocator;
+        ForeachUTF32 foreachUTF32 = ForeachUTF32(this, iterator, 0, true);
+
+        Cursor cursor;
+        size_t lengthToRemove;
+
+        if (iterator !is null) {
+            cursor = iterator.forwards;
+            lengthToRemove = iterator.maximumOffsetFromHead - iterator.minimumOffsetFromHead;
+        } else {
+            cursor.setup(&blockList, 0);
+            lengthToRemove = blockList.numberOfItems;
+        }
+
+        dstring got = normalize(&foreachUTF32.opApply, allocator, language.isTurkic, compatibility, composition);
+        LiteralAsTargetChar!(dchar, Char) latc;
+        latc.literal = got;
+        scope osat = latc.get;
+
+        // Replicate the behavior of replaceOperation,
+        //  we unfortunately cannot call it, since this is dependent on the iterator,
+        //  rather than using any comparison.
+
+        insertOperation(cursor, lengthToRemove, osat);
+        removeOperation(iterator, cursor, lengthToRemove);
+
+        allocator.dispose(cast(void[])got);
+        blockList.mutex.unlock;
     }
 }
 
