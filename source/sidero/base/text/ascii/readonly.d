@@ -142,6 +142,34 @@ nothrow @nogc:
     }
 
     ///
+    String_ASCII opSlice() scope @trusted {
+        if (isNull)
+            return String_ASCII();
+
+        String_ASCII ret;
+
+        ret.lifeTime = this.lifeTime;
+        if (ret.lifeTime !is null)
+            atomicOp!"+="(ret.lifeTime.refCount, 1);
+
+        ret.literal = this.literal;
+        ret.setupIterator();
+        return ret;
+    }
+
+    ///
+    unittest {
+        static Text = "goods";
+
+        String_ASCII str = Text;
+        assert(!str.haveIterator);
+
+        String_ASCII sliced = str[];
+        assert(sliced.haveIterator);
+        assert(sliced.length == Text.length);
+    }
+
+    ///
     String_ASCII opSlice(size_t start, size_t end) scope @trusted {
         assert(start <= end, "Start of slice must be before or equal to end.");
         assert(end <= this.literal.length, "End of slice must be before or equal to length.");
@@ -156,7 +184,7 @@ nothrow @nogc:
             atomicOp!"+="(ret.lifeTime.refCount, 1);
 
         ret.literal = this.literal[start .. end];
-        return *&ret;
+        return ret;
     }
 
     ///

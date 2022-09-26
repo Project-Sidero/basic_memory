@@ -182,6 +182,35 @@ nothrow @nogc:
     }
 
     ///
+    String_UTF opSlice() scope @trusted {
+        if (isNull)
+            return String_UTF();
+
+        String_UTF ret;
+
+        ret.lifeTime = this.lifeTime;
+        ret.literalEncoding = this.literalEncoding;
+        if (ret.lifeTime !is null)
+            atomicOp!"+="(ret.lifeTime.refCount, 1);
+
+        ret.literal = this.literal;
+        ret.setupIterator();
+        return ret;
+    }
+
+    ///
+    unittest {
+        static Text = cast(LiteralType)"goods";
+
+        String_UTF str = Text;
+        assert(!str.haveIterator);
+
+        String_UTF sliced = str[];
+        assert(sliced.haveIterator);
+        assert(sliced.length == Text.length);
+    }
+
+    ///
     String_UTF opSlice(size_t start, size_t end) scope @trusted {
         assert(start <= end, "Start of slice must be before or equal to end.");
 

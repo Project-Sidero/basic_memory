@@ -524,6 +524,45 @@ nothrow @safe:
     }
 
     ///
+    StringBuilder_UTF opSlice()  scope @trusted {
+        if (isNull)
+            return StringBuilder_UTF();
+
+        StringBuilder_UTF ret;
+
+        state.handle((StateIterator.S8 state, StateIterator.I8 iterator) @trusted {
+            assert(state !is null);
+            ret.state.encoding = this.state.encoding;
+            ret.state.u8 = state;
+            ret.state.i8 = state.newIterator(iterator);
+        }, (StateIterator.S16 state, StateIterator.I16 iterator)  @trusted{
+            assert(state !is null);
+            ret.state.encoding = this.state.encoding;
+            ret.state.u16 = state;
+            ret.state.i16 = state.newIterator(iterator);
+        }, (StateIterator.S32 state, StateIterator.I32 iterator) @trusted {
+            assert(state !is null);
+            ret.state.encoding = this.state.encoding;
+            ret.state.u32 = state;
+            ret.state.i32 = state.newIterator(iterator);
+        });
+
+        return ret;
+    }
+
+    ///
+    unittest {
+        static Text = cast(LiteralType)"goods";
+
+        StringBuilder_UTF str = Text;
+        assert(!str.haveIterator);
+
+        StringBuilder_UTF sliced = str[];
+        assert(sliced.haveIterator);
+        assert(sliced.length == Text.length);
+    }
+
+    ///
     StringBuilder_UTF opSlice(size_t start, size_t end) scope @nogc {
         StringBuilder_UTF ret;
 

@@ -286,6 +286,29 @@ nothrow @safe:
     }
 
     ///
+    StringBuilder_ASCII opSlice() scope @trusted {
+        if (isNull)
+            return StringBuilder_ASCII();
+
+        StringBuilder_ASCII ret;
+        ret.state = state;
+        ret.iterator = state.newIterator(iterator);
+        return ret;
+    }
+
+    ///
+    unittest {
+        static Text = "goods";
+
+        StringBuilder_ASCII str = Text;
+        assert(!str.haveIterator);
+
+        StringBuilder_ASCII sliced = str[];
+        assert(sliced.haveIterator);
+        assert(sliced.length == Text.length);
+    }
+
+    ///
     StringBuilder_ASCII opSlice(size_t start, size_t end) scope @trusted @nogc {
         StringBuilder_ASCII ret;
 
