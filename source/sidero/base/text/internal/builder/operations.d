@@ -683,18 +683,27 @@ mixin template StringBuilderOperations() {
         }
 
         while (!cursor.isOutOfRange(0, maximumOffsetFromHead)) {
-            size_t matchedAmount = isToFind(cursor, maximumOffsetFromHead);
+            // Unfortunately this is required when doing insert then remove.
+            // The remove does not guarantee that it'll point to data
+            if (doRemove)
+                cursor.advanceForward(0, maximumOffsetFromHead, true);
 
+            size_t matchedAmount = isToFind(cursor, maximumOffsetFromHead);
             if (matchedAmount > 0) {
                 count++;
+
+                // Do matching before removal, this is needed if you are inserting
+                //  you can end up with iterators that no longer point to the same
+                //  effective range.
+                // By doing insert first you increase range, and only then decrease
+                //  to the desired range.
+                if (onMatch !is null) {
+                    maximumOffsetFromHead += onMatch(iterator, cursor);
+                }
 
                 if (doRemove) {
                     removeOperation(iterator, cursor, matchedAmount);
                     maximumOffsetFromHead -= matchedAmount;
-                }
-
-                if (onMatch !is null) {
-                    maximumOffsetFromHead += onMatch(iterator, cursor);
                 }
 
                 if (onceOnly)
@@ -721,6 +730,9 @@ mixin template StringBuilderOperations() {
             insertCursor.setup(&opTest.blockList, 0);
             opTest.insertOperation(null, insertCursor, target);
         }
+
+        opTest.Iterator* iterator = opTest.newIterator();
+        assert(iterator.maximumOffsetFromHead == StartText.length);
 
         {
             opTest.Cursor replaceCursor;
@@ -750,6 +762,61 @@ mixin template StringBuilderOperations() {
             assert(matched);
             assert(opTest.blockList.numberOfItems == Result.length);
         }
+
+        assert(iterator.maximumOffsetFromHead == Result.length);
+        opTest.rcIterator(false, iterator);
+    }
+
+    @trusted unittest {
+        enum StartText = cast(Char[])"llll";
+        enum Result = cast(Char[])"zzzz";
+
+        OpTest!Char opTest = OpTest!Char(globalAllocator());
+
+        {
+            opTest.Cursor insertCursor;
+            opTest.LiteralAsTarget lAT;
+            lAT.literal = StartText;
+            scope target = lAT.get();
+
+            insertCursor.setup(&opTest.blockList, 0);
+            opTest.insertOperation(null, insertCursor, target);
+        }
+
+        opTest.Iterator* iterator = opTest.newIterator();
+        assert(iterator.maximumOffsetFromHead == StartText.length);
+
+        {
+            opTest.Cursor replaceCursor;
+            replaceCursor.setup(&opTest.blockList, 0);
+
+            size_t matched = opTest.replaceOperation(null, replaceCursor, (scope opTest.Cursor cursor, size_t maximumOffsetFromHead) {
+                return cast(size_t)(cursor.get() == 'l' ? 1 : 0);
+            }, (scope opTest.Iterator* iterator, scope ref opTest.Cursor cursor) @trusted {
+                opTest.LiteralAsTarget lAT;
+                lAT.literal = cast(Char[])"z";
+                scope target = lAT.get();
+
+                opTest.insertOperation(null, cursor, target);
+                return cast(size_t)1;
+            });
+            assert(matched == 4);
+        }
+
+        {
+            scope opTest.LiteralMatcher literalMatcher;
+            literalMatcher.literal = cast(Char[])Result;
+
+            opTest.Cursor literalCursor;
+            literalCursor.setup(&opTest.blockList, 0);
+
+            bool matched = literalMatcher.matches(literalCursor, opTest.blockList.numberOfItems);
+            assert(matched);
+            assert(opTest.blockList.numberOfItems == Result.length);
+        }
+
+        assert(iterator.maximumOffsetFromHead == Result.length);
+        opTest.rcIterator(false, iterator);
     }
 }
 
