@@ -355,7 +355,7 @@ T[] makeArray(T, Allocator)(auto ref Allocator alloc, size_t length) @trusted {
             import core.lifetime : emplace;
             emplace(&ret[i]);
         }
-    } else {
+    } else static if (!is(T == void)) {
         foreach (ref v; ret)
             v = T.init;
     }

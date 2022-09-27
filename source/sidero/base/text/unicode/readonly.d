@@ -2758,12 +2758,14 @@ private:
             }, () {
                 auto actual = cast(const(dchar)[])other.literal;
                 return ignoreCaseCompareImplSlice(actual, allocator, language.isTurkic);
-            }) == 0;
+            }, () { return other.isNull; }) == 0;
         }
 
         int opCmpImplSlice(Char2)(scope const(Char2)[] other) {
             if (other.length > 0 && other[$ - 1] == '\0')
                 other = other[0 .. $ - 1];
+            if (isNull)
+                return other.length > 0 ? -1 : 0;
 
             int matches(Type)(Type us) {
                 if (us.length > 0 && us[$ - 1] == '\0')
@@ -2836,7 +2838,7 @@ private:
                     return matches(actual);
                 } else
                     return needDecode(actual);
-            });
+            }, () { return other.length > 0 ? -1 : 0; });
         }
 
         int opCmpImplReadOnly(scope String_ASCII other) {
@@ -2870,7 +2872,7 @@ private:
             }, () {
                 auto actual = cast(const(dchar)[])other.literal;
                 return ignoreCaseCompareImplSlice(actual, allocator, language.isTurkic);
-            });
+            }, () { return other.length > 0 ? -1 : 0; });
         }
 
         int ignoreCaseCompareImplSlice(Char2)(scope const(Char2)[] other, scope RCAllocator allocator = RCAllocator.init, bool turkic = false) @trusted {
@@ -2878,6 +2880,8 @@ private:
 
             if (other.length > 0 && other[$ - 1] == '\0')
                 other = other[0 .. $ - 1];
+            if (isNull)
+                return other.length > 0 ? -1 : 0;
 
             allocator = pickAllocator(allocator);
             scope ForeachOverAnyUTF usH, otherH = foreachOverAnyUTF(other);
@@ -2916,6 +2920,8 @@ private:
 
             if (other.length > 0 && other[$ - 1] == '\0')
                 other = other[0 .. $ - 1];
+            if (isNull)
+                return other.length == 0;
 
             scope ForeachOverAnyUTF inputOpApply = foreachOverAnyUTF(other);
             scope comparison = CaseAwareComparison(allocator, language.isTurkic);
@@ -2949,7 +2955,7 @@ private:
             }, () {
                 auto actual = cast(const(dchar)[])other.literal;
                 return startsWithImplSlice(actual, allocator, caseSensitive, language);
-            });
+            }, () { return other.isNull; });
         }
 
         bool endsWithImplSlice(Char2)(scope const(Char2)[] other, scope RCAllocator allocator = RCAllocator.init,
@@ -2958,6 +2964,8 @@ private:
 
             if (other.length > 0 && other[$ - 1] == '\0')
                 other = other[0 .. $ - 1];
+            if (isNull)
+                return false;
 
             allocator = pickAllocator(allocator);
 
@@ -3012,7 +3020,7 @@ private:
             }, () {
                 auto actual = cast(const(dchar)[])other.literal;
                 return endsWithImplSlice(actual, allocator, caseSensitive, language);
-            });
+            }, () { return other.isNull; });
         }
 
         size_t countImplSlice(Char2)(scope const(Char2)[] other, scope RCAllocator allocator = RCAllocator.init,
@@ -3021,6 +3029,8 @@ private:
 
             if (other.length > 0 && other[$ - 1] == '\0')
                 other = other[0 .. $ - 1];
+            if (isNull)
+                return 0;
 
             allocator = pickAllocator(allocator);
 
@@ -3073,7 +3083,7 @@ private:
             }, () {
                 auto actual = cast(const(dchar)[])other.literal;
                 return countImplSlice(actual, allocator, caseSensitive, language);
-            });
+            }, () { return 0; });
         }
 
         bool containsImplSlice(Char2)(scope const(Char2)[] other, scope RCAllocator allocator = RCAllocator.init,
@@ -3082,6 +3092,8 @@ private:
 
             if (other.length > 0 && other[$ - 1] == '\0')
                 other = other[0 .. $ - 1];
+            if (isNull)
+                return false;
 
             allocator = pickAllocator(allocator);
 
@@ -3131,7 +3143,7 @@ private:
             }, () {
                 auto actual = cast(const(dchar)[])other.literal;
                 return containsImplSlice(actual, allocator, caseSensitive, language);
-            });
+            }, () { return other.isNull; });
         }
 
         ptrdiff_t indexofImplSlice(Char2)(scope const(Char2)[] other, scope RCAllocator allocator = RCAllocator.init,
@@ -3140,6 +3152,8 @@ private:
 
             if (other.length > 0 && other[$ - 1] == '\0')
                 other = other[0 .. $ - 1];
+            if (isNull)
+                return -1;
 
             allocator = pickAllocator(allocator);
 
@@ -3191,7 +3205,7 @@ private:
             }, () {
                 auto actual = cast(const(dchar)[])other.literal;
                 return indexofImplSlice(actual, allocator, caseSensitive, language);
-            });
+            }, () { return -1; });
         }
 
         ptrdiff_t lastIndexOfImplSlice(Char2)(scope const(Char2)[] other, scope RCAllocator allocator = RCAllocator.init,
@@ -3200,6 +3214,8 @@ private:
 
             if (other.length > 0 && other[$ - 1] == '\0')
                 other = other[0 .. $ - 1];
+            if (isNull)
+                return -1;
 
             allocator = pickAllocator(allocator);
 
@@ -3252,7 +3268,7 @@ private:
             }, () {
                 auto actual = cast(const(dchar)[])other.literal;
                 return lastIndexOfImplSlice(actual, allocator, caseSensitive, language);
-            });
+            }, () { return -1; });
         }
     }
 }
