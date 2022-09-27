@@ -534,14 +534,22 @@ void locale(String_UTF8 specifier) @trusted {
 
 ///
 UnicodeLanguage unicodeLanguage() @trusted {
-    initMutex.pureLock;
+    static int reentrantCall; // TLS check for reentrant nature
 
-    if (!haveGlobalLocale && !isUnicodeLanguageOverridden)
-        handleUnicodeLanguage;
+    reentrantCall++;
+    UnicodeLanguage ret = UnicodeLanguage.Unknown;
 
-    UnicodeLanguage ret = _unicodeLanguage;
+    if (reentrantCall == 1) {
+        initMutex.pureLock;
 
-    initMutex.unlock;
+        if (!haveGlobalLocale && !isUnicodeLanguageOverridden)
+            handleUnicodeLanguage;
+
+        ret = _unicodeLanguage;
+        initMutex.unlock;
+    }
+
+    reentrantCall--;
     return ret;
 }
 
@@ -620,7 +628,7 @@ Locale getLocaleImpl(ref bool refresh) @trusted {
     return locale;
 }
 
-UnicodeLanguage unicodeLanguageFromLocale(ref Locale Locale) {
+UnicodeLanguage unicodeLanguageFromLocale(ref Locale locale) {
     static assert(__traits(allMembers, UnicodeLanguage).length == 4, "Update UnicodeLanguage detection from environment");
 
     if (locale.language == "lt" || locale.language == "lit")
@@ -637,7 +645,7 @@ void handleUnicodeLanguage() @trusted {
     bool refreshed;
     Locale locale = getLocaleImpl(refreshed);
 
-    _unicodeLanguage = unicodeLanguageFromLocale(locale);
+    _unicodeLanguage = locale.unicodeLanguage;
 }
 
 void handleLocale(ref Locale locale) @trusted {

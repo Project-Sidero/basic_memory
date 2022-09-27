@@ -19,6 +19,7 @@ struct String_UTF(Char_) {
     package(sidero.base.text.unicode) {
         const(void)[] literal;
         UnicodeEncoding literalEncoding;
+        UnicodeLanguage language;
     }
 
     private {
@@ -350,23 +351,24 @@ nothrow @nogc:
     @trusted scope {
         ///
         this(scope return const(char)[] literal, scope return RCAllocator allocator = RCAllocator.init,
-                scope return const(char)[] toDeallocate = null) {
-            initForLiteral(literal, allocator, toDeallocate);
+                scope return const(char)[] toDeallocate = null, UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            initForLiteral(literal, allocator, toDeallocate, language);
         }
 
         ///
         this(scope return const(wchar)[] literal, scope return RCAllocator allocator = RCAllocator.init,
-                scope return const(wchar)[] toDeallocate = null) {
-            initForLiteral(literal, allocator, toDeallocate);
+                scope return const(wchar)[] toDeallocate = null, UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            initForLiteral(literal, allocator, toDeallocate, language);
         }
 
         ///
         this(scope return const(dchar)[] literal, scope return RCAllocator allocator = RCAllocator.init,
-                scope return const(dchar)[] toDeallocate = null) {
-            initForLiteral(literal, allocator, toDeallocate);
+                scope return const(dchar)[] toDeallocate = null, UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            initForLiteral(literal, allocator, toDeallocate, language);
         }
 
-        private void initForLiteral(T, U)(scope return T literal, scope return RCAllocator allocator, scope return U toDeallocate) {
+        private void initForLiteral(T, U)(scope return T literal, scope return RCAllocator allocator,
+                scope return U toDeallocate, UnicodeLanguage language) {
             if (literal.length > 0 || (toDeallocate.length > 0 && !allocator.isNull)) {
                 version (D_BetterC) {
                 } else {
@@ -381,6 +383,7 @@ nothrow @nogc:
 
                 this.literal = literal;
                 this.literalEncoding = UnicodeEncoding.For!T;
+                this.language = language;
 
                 if (!allocator.isNull) {
                     if (toDeallocate is null)
@@ -497,6 +500,16 @@ nothrow @nogc:
     /// Returns: if the underlying encoding is different from the typed encoding.
     bool isEncodingChanged() const scope {
         return this.literalEncoding.codepointSize != Char.sizeof;
+    }
+
+    ///
+    UnicodeLanguage unicodeLanguage() const scope {
+        return this.language;
+    }
+
+    ///
+    void unicodeLanguage(UnicodeLanguage language) scope {
+        this.language = language;
     }
 
     ///
@@ -656,6 +669,8 @@ nothrow @nogc:
     String_UTF normalize(bool compatibility = false, bool compose = false,
             UnicodeLanguage language = UnicodeLanguage.Unknown, RCAllocator allocator = RCAllocator.init) scope @trusted {
         allocator = pickAllocator(allocator);
+        language = pickLanguage(language);
+
         scope us32 = this.byUTF32();
 
         import n = sidero.base.text.unicode.normalization;
@@ -772,19 +787,19 @@ nothrow @nogc:
     ///
     bool ignoreCaseEquals(scope const(char)[] other, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-        return ignoreCaseCompareImplSlice(other, allocator, language.isTurkic) == 0;
+        return ignoreCaseCompareImplSlice(other, allocator, language) == 0;
     }
 
     ///
     bool ignoreCaseEquals(scope const(wchar)[] other, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-        return ignoreCaseCompareImplSlice(other, allocator, language.isTurkic) == 0;
+        return ignoreCaseCompareImplSlice(other, allocator, language) == 0;
     }
 
     ///
     bool ignoreCaseEquals(scope const(dchar)[] other, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-        return ignoreCaseCompareImplSlice(other, allocator, language.isTurkic) == 0;
+        return ignoreCaseCompareImplSlice(other, allocator, language) == 0;
     }
 
     ///
@@ -813,16 +828,19 @@ nothrow @nogc:
 
     ///
     bool ignoreCaseEquals(scope StringBuilder_UTF8 other, UnicodeLanguage language = UnicodeLanguage.Unknown) {
+        language = pickLanguage(language);
         return other.ignoreCaseEquals(this, language);
     }
 
     ///
     bool ignoreCaseEquals(scope StringBuilder_UTF16 other, UnicodeLanguage language = UnicodeLanguage.Unknown) {
+        language = pickLanguage(language);
         return other.ignoreCaseEquals(this, language);
     }
 
     ///
     bool ignoreCaseEquals(scope StringBuilder_UTF32 other, UnicodeLanguage language = UnicodeLanguage.Unknown) {
+        language = pickLanguage(language);
         return other.ignoreCaseEquals(this, language);
     }
 
@@ -924,7 +942,7 @@ nothrow @nogc:
     ///
     int ignoreCaseCompare(scope const(char)[] other, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-        return ignoreCaseCompareImplSlice(other, allocator, language.isTurkic);
+        return ignoreCaseCompareImplSlice(other, allocator, language);
     }
 
     ///
@@ -936,7 +954,7 @@ nothrow @nogc:
     ///
     int ignoreCaseCompare(scope const(wchar)[] other, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-        return ignoreCaseCompareImplSlice(other, allocator, language.isTurkic);
+        return ignoreCaseCompareImplSlice(other, allocator, language);
     }
 
     ///
@@ -948,7 +966,7 @@ nothrow @nogc:
     ///
     int ignoreCaseCompare(scope const(dchar)[] other, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-        return ignoreCaseCompareImplSlice(other, allocator, language.isTurkic);
+        return ignoreCaseCompareImplSlice(other, allocator, language);
     }
 
     ///
@@ -995,16 +1013,19 @@ nothrow @nogc:
 
     ///
     int ignoreCaseCompare(scope StringBuilder_UTF8 other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        language = pickLanguage(language);
         return -other.ignoreCaseCompare(this, language);
     }
 
     ///
     int ignoreCaseCompare(scope StringBuilder_UTF16 other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        language = pickLanguage(language);
         return -other.ignoreCaseCompare(this, language);
     }
 
     ///
     int ignoreCaseCompare(scope StringBuilder_UTF32 other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        language = pickLanguage(language);
         return -other.ignoreCaseCompare(this, language);
     }
 
@@ -1371,6 +1392,7 @@ nothrow @nogc:
         ret.lifeTime = cast(String_UTF8.LifeTime*)this.lifeTime;
         ret.literal = this.literal;
         ret.literalEncoding = this.literalEncoding;
+        ret.language = this.language;
 
         if (this.lifeTime !is null)
             atomicOp!"+="(this.lifeTime.refCount, 1);
@@ -1400,6 +1422,7 @@ nothrow @nogc:
         ret.lifeTime = cast(String_UTF16.LifeTime*)this.lifeTime;
         ret.literal = this.literal;
         ret.literalEncoding = this.literalEncoding;
+        ret.language = this.language;
 
         if (this.lifeTime !is null)
             atomicOp!"+="(this.lifeTime.refCount, 1);
@@ -1429,6 +1452,7 @@ nothrow @nogc:
         ret.lifeTime = cast(String_UTF32.LifeTime*)this.lifeTime;
         ret.literal = this.literal;
         ret.literalEncoding = this.literalEncoding;
+        ret.language = this.language;
 
         if (this.lifeTime !is null)
             atomicOp!"+="(this.lifeTime.refCount, 1);
@@ -2733,7 +2757,7 @@ private:
         });
     }
 
-    RCAllocator pickAllocator(scope return RCAllocator given) const @trusted {
+    RCAllocator pickAllocator(scope return RCAllocator given) scope const @trusted {
         if (!given.isNull)
             return given;
         if (this.lifeTime !is null)
@@ -2741,23 +2765,34 @@ private:
         return globalAllocator();
     }
 
+    UnicodeLanguage pickLanguage(UnicodeLanguage input = UnicodeLanguage.Unknown) const scope {
+        import sidero.base.system : unicodeLanguage;
+
+        if (input != UnicodeLanguage.Unknown)
+            return input;
+        else if (language != UnicodeLanguage.Unknown)
+            return language;
+
+        return unicodeLanguage();
+    }
+
     scope {
         bool ignoreCaseEqualsImplReadOnly(scope String_ASCII other, scope RCAllocator allocator = RCAllocator.init,
                 UnicodeLanguage language = UnicodeLanguage.Unknown) {
-            return ignoreCaseCompareImplSlice(cast(const(char)[])other.literal, allocator, language.isTurkic) == 0;
+            return ignoreCaseCompareImplSlice(cast(const(char)[])other.literal, allocator, language) == 0;
         }
 
         bool ignoreCaseEqualsImplReadOnly(Char2)(scope String_UTF!Char2 other,
                 scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.Unknown) {
             return other.literalEncoding.handle(() {
                 auto actual = cast(const(char)[])other.literal;
-                return ignoreCaseCompareImplSlice(actual, allocator, language.isTurkic);
+                return ignoreCaseCompareImplSlice(actual, allocator, language);
             }, () {
                 auto actual = cast(const(wchar)[])other.literal;
-                return ignoreCaseCompareImplSlice(actual, allocator, language.isTurkic);
+                return ignoreCaseCompareImplSlice(actual, allocator, language);
             }, () {
                 auto actual = cast(const(dchar)[])other.literal;
-                return ignoreCaseCompareImplSlice(actual, allocator, language.isTurkic);
+                return ignoreCaseCompareImplSlice(actual, allocator, language);
             }, () { return other.isNull; }) == 0;
         }
 
@@ -2857,25 +2892,25 @@ private:
 
         int ignoreCaseCompareImplReadOnly(scope String_ASCII other, scope RCAllocator allocator = RCAllocator.init,
                 UnicodeLanguage language = UnicodeLanguage.Unknown) {
-            return ignoreCaseCompareImplSlice(cast(const(char)[])other.literal, allocator, language.isTurkic);
+            return ignoreCaseCompareImplSlice(cast(const(char)[])other.literal, allocator, language);
         }
 
         int ignoreCaseCompareImplReadOnly(Char2)(scope String_UTF!Char2 other,
                 scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.Unknown) {
-
             return other.literalEncoding.handle(() {
                 auto actual = cast(const(char)[])other.literal;
-                return ignoreCaseCompareImplSlice(actual, allocator, language.isTurkic);
+                return ignoreCaseCompareImplSlice(actual, allocator, language);
             }, () {
                 auto actual = cast(const(wchar)[])other.literal;
-                return ignoreCaseCompareImplSlice(actual, allocator, language.isTurkic);
+                return ignoreCaseCompareImplSlice(actual, allocator, language);
             }, () {
                 auto actual = cast(const(dchar)[])other.literal;
-                return ignoreCaseCompareImplSlice(actual, allocator, language.isTurkic);
+                return ignoreCaseCompareImplSlice(actual, allocator, language);
             }, () { return other.length > 0 ? -1 : 0; });
         }
 
-        int ignoreCaseCompareImplSlice(Char2)(scope const(Char2)[] other, scope RCAllocator allocator = RCAllocator.init, bool turkic = false) @trusted {
+        int ignoreCaseCompareImplSlice(Char2)(scope const(Char2)[] other, scope RCAllocator allocator = RCAllocator.init,
+                UnicodeLanguage language = UnicodeLanguage.Unknown) @trusted {
             import sidero.base.text.unicode.comparison;
 
             if (other.length > 0 && other[$ - 1] == '\0')
@@ -2883,6 +2918,7 @@ private:
             if (isNull)
                 return other.length > 0 ? -1 : 0;
 
+            language = pickLanguage(language);
             allocator = pickAllocator(allocator);
             scope ForeachOverAnyUTF usH, otherH = foreachOverAnyUTF(other);
 
@@ -2909,13 +2945,14 @@ private:
                 usH = foreachOverAnyUTF(actual);
             });
 
-            return icmpUTF32_NFD(&usH.opApply, &otherH.opApply, allocator, turkic);
+            return icmpUTF32_NFD(&usH.opApply, &otherH.opApply, allocator, language.isTurkic);
         }
 
         bool startsWithImplSlice(Char2)(scope const(Char2)[] other, scope RCAllocator allocator = RCAllocator.init,
                 bool caseSensitive = true, UnicodeLanguage language = UnicodeLanguage.Unknown) @trusted {
             import sidero.base.text.unicode.comparison : CaseAwareComparison;
 
+            language = pickLanguage(language);
             allocator = pickAllocator(allocator);
 
             if (other.length > 0 && other[$ - 1] == '\0')
@@ -2967,6 +3004,7 @@ private:
             if (isNull)
                 return false;
 
+            language = pickLanguage(language);
             allocator = pickAllocator(allocator);
 
             scope ForeachOverAnyUTF inputOpApply = foreachOverAnyUTF(other);
@@ -3032,6 +3070,7 @@ private:
             if (isNull)
                 return 0;
 
+            language = pickLanguage(language);
             allocator = pickAllocator(allocator);
 
             scope ForeachOverAnyUTF inputOpApply = foreachOverAnyUTF(other);
@@ -3095,6 +3134,7 @@ private:
             if (isNull)
                 return false;
 
+            language = pickLanguage(language);
             allocator = pickAllocator(allocator);
 
             scope ForeachOverAnyUTF inputOpApply = foreachOverAnyUTF(other);
@@ -3155,6 +3195,7 @@ private:
             if (isNull)
                 return -1;
 
+            language = pickLanguage(language);
             allocator = pickAllocator(allocator);
 
             scope ForeachOverAnyUTF inputOpApply = foreachOverAnyUTF(other);
@@ -3217,6 +3258,7 @@ private:
             if (isNull)
                 return -1;
 
+            language = pickLanguage(language);
             allocator = pickAllocator(allocator);
 
             scope ForeachOverAnyUTF inputOpApply = foreachOverAnyUTF(other);
