@@ -291,7 +291,7 @@ nothrow @safe:
     }
 
     ///
-    this(InputChar)(scope const(InputChar)[] input, RCAllocator allocator = RCAllocator.init)
+    this(InputChar)(scope const(InputChar)[] input, RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.init)
             if (is(InputChar == char) || is(InputChar == wchar) || is(InputChar == dchar)) {
         setupState(allocator);
 
@@ -302,6 +302,7 @@ nothrow @safe:
             latc.literal = input;
             auto osat = latc.get;
 
+            state.language = language;
             state.externalInsert(iterator, 0, osat);
         }, (StateIterator.S16 state, StateIterator.I16 iterator) @trusted {
             assert(state !is null);
@@ -310,6 +311,7 @@ nothrow @safe:
             latc.literal = input;
             auto osat = latc.get;
 
+            state.language = language;
             state.externalInsert(iterator, 0, osat);
         }, (StateIterator.S32 state, StateIterator.I32 iterator) @trusted {
             assert(state !is null);
@@ -318,6 +320,7 @@ nothrow @safe:
             latc.literal = input;
             auto osat = latc.get;
 
+            state.language = language;
             state.externalInsert(iterator, 0, osat);
         });
     }
@@ -406,11 +409,11 @@ nothrow @safe:
         input.stripZero;
 
         input.literalEncoding.handle(() {
-            this.__ctor(cast(const(char)[])input.literal, allocator);
+            this.__ctor(cast(const(char)[])input.literal, allocator, input.language);
         }, () {
-            this.__ctor(cast(const(wchar)[])input.literal, allocator);
+            this.__ctor(cast(const(wchar)[])input.literal, allocator, input.language);
         }, () {
-            this.__ctor(cast(const(dchar)[])input.literal, allocator);
+            this.__ctor(cast(const(dchar)[])input.literal, allocator, input.language);
         }, () {
             this.__ctor(LiteralType.init, allocator);
         });
@@ -516,6 +519,42 @@ nothrow @safe:
 
         stuff.popFront;
         assert(stuff.tupleof != stuff.withoutIterator.tupleof);
+    }
+
+    /// Returns: if the underlying encoding is different from the typed encoding.
+    bool isEncodingChanged() const scope {
+        return state.encoding.codepointSize != Char.sizeof;
+    }
+
+    ///
+    UnicodeLanguage unicodeLanguage() scope {
+        return         state.handle((StateIterator.S8 state, StateIterator.I8 iterator) @trusted {
+            assert(state !is null);
+            return state.language;
+        }, (StateIterator.S16 state, StateIterator.I16 iterator)  @trusted{
+            assert(state !is null);
+            return state.language;
+        }, (StateIterator.S32 state, StateIterator.I32 iterator) @trusted {
+            assert(state !is null);
+            return state.language;
+        }, () {
+            return UnicodeLanguage.Unknown;
+        });
+    }
+
+    ///
+    void unicodeLanguage(UnicodeLanguage language) scope {
+        state.handle((StateIterator.S8 state, StateIterator.I8 iterator) @trusted {
+            assert(state !is null);
+            state.language = language;
+        }, (StateIterator.S16 state, StateIterator.I16 iterator)  @trusted{
+            assert(state !is null);
+            state.language = language;
+        }, (StateIterator.S32 state, StateIterator.I32 iterator) @trusted {
+            assert(state !is null);
+            state.language = language;
+        }, () {
+        });
     }
 
     ///
@@ -2127,6 +2166,19 @@ struct UTF_State(Char) {
         assert(iteratorList.head is null);
     }
 
+    UnicodeLanguage language;
+
+    UnicodeLanguage pickLanguage(UnicodeLanguage input = UnicodeLanguage.Unknown) const scope {
+        import sidero.base.system : unicodeLanguage;
+
+        if (input != UnicodeLanguage.Unknown)
+            return input;
+        else if (language != UnicodeLanguage.Unknown)
+            return language;
+
+        return unicodeLanguage();
+    }
+
     void onInsert(scope const Char[] input) scope {
     }
 
@@ -2544,6 +2596,7 @@ struct UTF_State(Char) {
         if (other.obj !is &this)
             other.mutex(true);
 
+        language = pickLanguage(language);
         int result;
 
         OtherStateIsUs!dchar osiu;
@@ -2567,9 +2620,11 @@ struct UTF_State(Char) {
         import sidero.base.text.unicode.normalization : normalize;
 
         blockList.mutex.pureLock;
-        RCAllocator allocator = blockList.allocator;
-        ForeachUTF32 foreachUTF32 = ForeachUTF32(this, iterator, 0, true);
 
+        language = pickLanguage(language);
+        RCAllocator allocator = blockList.allocator;
+
+        ForeachUTF32 foreachUTF32 = ForeachUTF32(this, iterator, 0, true);
         Cursor cursor;
         size_t lengthToRemove;
 
