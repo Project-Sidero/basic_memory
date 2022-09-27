@@ -1663,6 +1663,8 @@ private:
         }
 
         void insertImplReadOnly(scope String_ASCII other) {
+            setupState;
+
             state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
                 assert(state !is null);
 
@@ -1691,6 +1693,8 @@ private:
         }
 
         void insertImplSlice(Char2)(scope const(Char2)[] other) {
+            setupState;
+
             state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
                 assert(state !is null);
 
@@ -1719,6 +1723,8 @@ private:
         }
 
         void insertImplBuilder(scope StringBuilder_ASCII other) {
+            setupState;
+
             state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
                 assert(state !is null);
 
@@ -1750,6 +1756,8 @@ private:
         }
 
         void insertImplBuilder(Char2)(scope StringBuilder_UTF!Char2 other) {
+            setupState;
+
             state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
                 assert(state !is null);
 

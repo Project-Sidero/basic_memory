@@ -757,7 +757,7 @@ package(sidero.base.text):
     }
 
 private:
-    void setupState(RCAllocator allocator = RCAllocator.init) @nogc @trusted {
+    void setupState(RCAllocator allocator = RCAllocator.init) scope @nogc @trusted {
         if (allocator.isNull)
             allocator = globalAllocator();
 
@@ -765,9 +765,9 @@ private:
             state = allocator.make!ASCII_State(allocator);
     }
 
-    @disable void setupState(RCAllocator allocator = RCAllocator.init) const @nogc;
+    @disable void setupState(RCAllocator allocator = RCAllocator.init) scope const @nogc;
 
-    void debugPosition() @nogc {
+    void debugPosition() scope @nogc {
         assert(state !is null);
         state.debugPosition(iterator);
     }
@@ -807,6 +807,8 @@ private:
         }
 
         void insertImplReadOnly(scope String_ASCII other) {
+            setupState;
+
             ASCII_State.LiteralAsTarget alat;
             alat.literal = other.literal;
             scope osiu = alat.get;
@@ -815,6 +817,8 @@ private:
         }
 
         void insertImplSlice(Char2)(scope const(Char2)[] other) @trusted {
+            setupState;
+
             ASCII_State.LiteralAsTarget lat;
             lat.literal = cast(LiteralType)other;
             scope osiu = lat.get;
@@ -823,6 +827,8 @@ private:
         }
 
         void insertImplBuilder(scope StringBuilder_ASCII other) {
+            setupState;
+
             ASCII_State.OtherStateIsUs asat;
             asat.state = other.state;
             asat.iterator = other.iterator;
