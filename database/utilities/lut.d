@@ -1,6 +1,6 @@
 module utilities.lut;
 import utilities.sequential_ranges;
-import std.traits : isNumeric, isSomeChar;
+import std.traits : isNumeric, isSomeChar, isArray;
 
 /*
 
@@ -187,19 +187,31 @@ private:
                 }
 
                 resultAppender ~= currentPrefixReturn;
-                resultAppender ~= "return cast(" ~ lutType ~ ")";
 
                 if (lutDatem.entriesOffset >= 0) {
+                    resultAppender ~= "return cast(" ~ lutType ~ ")";
                     if (lutType[$ - 1] == '*')
                         resultAppender ~= "&";
 
                     resultAppender.formattedWrite!"%s[%s + (input - %s)]"(lutName, lutDatem.entriesOffset,
-                            cast(size_t)lutDatem.datem.range.start);
+                    cast(size_t)lutDatem.datem.range.start);
+                    resultAppender ~= ";\n";
                 } else {
-                    emitLiteral(resultAppender, lutDatem.datem.metadataEntries[0]);
+                    if (lutType == "long[]") {
+                        resultAppender ~= "{ static immutable ret = ";
+                        emitLiteral(resultAppender, lutDatem.datem.metadataEntries[0]);
+                        resultAppender ~= ";\n";
+
+                        resultAppender ~= currentPrefixReturn;
+                        resultAppender ~= "return ret";
+                        resultAppender ~= "; }\n";
+                    } else {
+                        resultAppender ~= "return cast(" ~ lutType ~ ")";
+                        emitLiteral(resultAppender, lutDatem.datem.metadataEntries[0]);
+                        resultAppender ~= ";\n";
+                    }
                 }
 
-                resultAppender ~= ";\n";
             }
         }
 
@@ -258,6 +270,7 @@ private:
         case "dstring":
         case "void*":
         case "void[]":
+        case "long[]":
             resultAppender ~= "    return null;\n";
             break;
         default:
@@ -432,6 +445,10 @@ private:
             into.formattedWrite!"%s.%s"(typeToReplacedName.get(__traits(identifier, Type), __traits(identifier, Type)), entry);
         } else static if (isNumeric!Type) {
             into.formattedWrite!"%s"(entry);
+
+            static if (is(Type == long)) {
+                into ~= "L";
+            }
         } else static if (isSomeChar!Type) {
             into.formattedWrite!"0x%X"(entry);
         } else static if (is(Type == bool)) {
@@ -447,6 +464,16 @@ private:
             }
 
             into ~= ")";
+        } else static if (isArray!Type) {
+            into ~= "[";
+
+            foreach(i, value; entry) {
+                if (i > 0)
+                    into ~= ", ";
+                emitLiteral(into, value);
+            }
+
+            into ~= "]";
         }
     }
 

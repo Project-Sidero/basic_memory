@@ -103,3 +103,14 @@ bool isCaseIgnorable(dchar input) {
 bool isCased(dchar input) {
     return unidb.isUnicodeCased(input);
 }
+
+/// Get numeric value in the form of numerator / denominator. If not a number returns [0, 0].
+long[2] getNumericValue(dchar input) {
+    auto got = unidb.sidero_utf_lut_getNumeric(input);
+
+    if (got is null)
+        return [0, 0];
+
+    assert(got.length == 2);
+    return got[0 .. 2];
+}

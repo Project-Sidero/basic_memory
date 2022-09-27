@@ -732,6 +732,10 @@ export ubyte sidero_utf_lut_lengthOfDecompositionMapping(dchar input, Compatibil
 /// Returns: 0 if not set.
 extern(C) immutable(ubyte) sidero_utf_lut_getCCC(dchar input) @trusted nothrow @nogc pure;
 
+/// Lookup numeric numerator/denominator for character.
+/// Returns: null if not set.
+extern(C) immutable(long[]) sidero_utf_lut_getNumeric(dchar input) @trusted nothrow @nogc pure;
+
 /// Get simplified casing for character.
 /// Returns: non-null for a given entry if changed from input character.
 export immutable(SpecialCasing) sidero_utf_lut_getSimplifiedCasing(dchar input) @trusted nothrow @nogc pure {

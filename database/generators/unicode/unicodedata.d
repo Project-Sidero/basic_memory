@@ -416,6 +416,41 @@ void unicodeData() {
     }
 
     {
+        SequentialRanges!(long[], SequentialRangeSplitGroup, 2) sr;
+
+        foreach (entry; state.entries) {
+            foreach (c; entry.range.start .. entry.range.end + 1) {
+                if (entry.numericValueNumerator != 0 || entry.numericValueDenominator != 0)
+                    sr.add(cast(dchar)c, [entry.numericValueNumerator, entry.numericValueDenominator]);
+            }
+        }
+
+        sr.calculateTrueSpread;
+        sr.joinWhenClose((dchar key) => [0L, 0], 5, 32);
+        sr.splitForSame;
+        sr.calculateTrueSpread;
+        sr.joinWhenClose((dchar key) => [0L, 0], 5, 32);
+        sr.calculateTrueSpread;
+        sr.layerBySingleMulti(0);
+        sr.layerJoinIfEndIsStart(0, 1);
+        sr.layerByRangeMax(1, ushort.max / 8);
+
+        LookupTableGenerator!(long[], SequentialRangeSplitGroup, 2) lut;
+        lut.sr = sr;
+        lut.lutType = "long[]";
+        lut.name = "sidero_utf_lut_getNumeric";
+
+        auto gotDcode = lut.build();
+
+        api ~= "\n";
+        api ~= "/// Lookup numeric numerator/denominator for character.\n";
+        api ~= "/// Returns: null if not set.\n";
+        api ~= gotDcode[0];
+
+        internal ~= gotDcode[1];
+    }
+
+    {
         SequentialRanges!(SimplifiedCasing, SequentialRangeSplitGroup, 2) sr;
 
         foreach (entry; state.entries) {
