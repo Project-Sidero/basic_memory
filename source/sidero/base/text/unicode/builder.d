@@ -602,7 +602,7 @@ nothrow @safe:
     }
 
     ///
-    StringBuilder_UTF opSlice(size_t start, size_t end) scope @nogc {
+    StringBuilder_UTF opSlice(ptrdiff_t start, ptrdiff_t end) scope @nogc {
         StringBuilder_UTF ret;
 
         state.handle((StateIterator.S8 state, StateIterator.I8 iterator) @trusted {

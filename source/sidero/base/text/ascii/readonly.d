@@ -170,7 +170,8 @@ nothrow @nogc:
     }
 
     ///
-    String_ASCII opSlice(size_t start, size_t end) scope @trusted {
+    String_ASCII opSlice(ptrdiff_t start, ptrdiff_t end) scope @trusted {
+        fixOffsetInput(start, end);
         assert(start <= end, "Start of slice must be before or equal to end.");
         assert(end <= this.literal.length, "End of slice must be before or equal to length.");
 
@@ -449,7 +450,7 @@ nothrow @nogc:
     //
 
     ///
-    String_ASCII opIndex(size_t index) scope {
+    String_ASCII opIndex(ptrdiff_t index) scope {
         return this[index .. index + 1];
     }
 
@@ -2453,6 +2454,26 @@ private:
 
         this.iterator = allocator.make!Iterator(1, allocator, us);
         assert(this.iterator !is null);
+    }
+
+    void fixOffsetInput(ref ptrdiff_t a, ref ptrdiff_t b) {
+        size_t actualLength = literal.length;
+
+        if (a < 0) {
+            assert(actualLength > -a, "First offset must be smaller than length");
+            a = actualLength + a;
+        }
+
+        if (b < 0) {
+            assert(actualLength > -b, "First offset must be smaller than length");
+            b = actualLength + b;
+        }
+
+        if (b < a) {
+            ptrdiff_t temp = a;
+            a = b;
+            b = temp;
+        }
     }
 }
 

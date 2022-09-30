@@ -309,7 +309,7 @@ nothrow @safe:
     }
 
     ///
-    StringBuilder_ASCII opSlice(size_t start, size_t end) scope @trusted @nogc {
+    StringBuilder_ASCII opSlice(ptrdiff_t start, ptrdiff_t end) scope @trusted @nogc {
         StringBuilder_ASCII ret;
 
         if (state !is null) {

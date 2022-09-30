@@ -49,17 +49,10 @@ mixin template StringBuilderOperations() {
         return true;
     }
 
-    Iterator* newIterator(scope Iterator* iterator = null, size_t minimumOffsetFromHead = 0, size_t maximumOffsetFromHead = size_t.max) @trusted {
+    Iterator* newIterator(scope Iterator* iterator = null, ptrdiff_t minimumOffsetFromHead = 0,
+            ptrdiff_t maximumOffsetFromHead = ptrdiff_t.max) @trusted {
         blockList.mutex.pureLock;
-
-        if (iterator !is null) {
-            minimumOffsetFromHead += iterator.minimumOffsetFromHead;
-
-            if (maximumOffsetFromHead == size_t.max)
-                maximumOffsetFromHead = iterator.maximumOffsetFromHead;
-            else
-                maximumOffsetFromHead += iterator.minimumOffsetFromHead;
-        }
+        fixOffsetInput(iterator, minimumOffsetFromHead, maximumOffsetFromHead);
 
         this.rcInternal(true);
         Iterator* ret = iteratorList.newIterator(&blockList, minimumOffsetFromHead, maximumOffsetFromHead);
@@ -75,17 +68,19 @@ mixin template StringBuilderOperations() {
 
         if (iterator is null)
             ret = blockList.numberOfItems;
-         else
+        else
             ret = iterator.backwards.offsetFromHead - iterator.forwards.offsetFromHead;
 
         blockList.mutex.unlock;
         return ret;
     }
 
-    void externalInsert(scope Iterator* iterator, size_t offset, scope ref OtherStateAsTarget!Char other) @trusted {
+    void externalInsert(scope Iterator* iterator, ptrdiff_t offset, scope ref OtherStateAsTarget!Char other) @trusted {
         blockList.mutex.pureLock;
         if (other.obj !is &this)
             other.mutex(true);
+
+        fixOffsetInput(iterator, offset);
 
         size_t maximumOffsetFromHead;
         Cursor cursor = cursorFor(iterator, maximumOffsetFromHead, offset);
@@ -99,11 +94,62 @@ mixin template StringBuilderOperations() {
     // exposed /\/\/\/\/\
     // internal \/\/\/\/
 
+    void fixOffsetInput(Iterator* iterator, ref ptrdiff_t a) {
+        size_t actualLength;
+
+        if (iterator is null)
+            actualLength = blockList.numberOfItems;
+        else
+            actualLength = iterator.backwards.offsetFromHead - iterator.forwards.offsetFromHead;
+
+        if (a < 0) {
+            assert(actualLength > -a, "First offset must be smaller than length");
+            a = actualLength + a;
+        }
+    }
+
+    void fixOffsetInput(Iterator* iterator, ref ptrdiff_t a, ref ptrdiff_t b) {
+        size_t actualLength;
+
+        if (iterator !is null) {
+            actualLength = iterator.backwards.offsetFromHead - iterator.forwards.offsetFromHead;
+            if (a == size_t.max)
+                a = iterator.maximumOffsetFromHead;
+            if (b == size_t.max)
+                b = iterator.maximumOffsetFromHead;
+        } else
+            actualLength = blockList.numberOfItems;
+
+        if (a < 0) {
+            assert(actualLength > -a, "First offset must be smaller than length");
+            a = actualLength + a;
+        }
+
+        if (b < 0) {
+            assert(actualLength > -b, "First offset must be smaller than length");
+            b = actualLength + b;
+        }
+
+        if (b < a) {
+            ptrdiff_t temp = a;
+            a = b;
+            b = temp;
+        }
+
+        if (iterator !is null) {
+            a += iterator.minimumOffsetFromHead;
+
+            if (b + iterator.minimumOffsetFromHead <= iterator.maximumOffsetFromHead)
+                b += iterator.minimumOffsetFromHead;
+        }
+    }
+
     Cursor cursorFor(Iterator* iterator, out size_t maximumOffsetFromHead, size_t offset = 0) scope @trusted {
         if (iterator !is null) {
             offset += iterator.forwards.offsetFromHead;
             maximumOffsetFromHead = iterator.backwards.offsetFromHead;
-        } else maximumOffsetFromHead = blockList.numberOfItems;
+        } else
+            maximumOffsetFromHead = blockList.numberOfItems;
 
         Cursor ret;
         ret.setup(&blockList, offset);
@@ -512,7 +558,7 @@ mixin template StringBuilderOperations() {
             assert(cursor.block.next !is null);
         }
 
-        foreach (scope cA; toInsert.foreachContiguous) {
+        toInsert.foreachContiguous((ref scope Char[] cA) {
             onInsert(cA);
 
             while (cA.length > 0) {
@@ -561,7 +607,9 @@ mixin template StringBuilderOperations() {
                     blockList.numberOfItems += canDo;
                 }
             }
-        }
+
+            return 0;
+        });
 
         if (amountInserted > 0) {
             foreach (iterator; iteratorList) {
@@ -824,8 +872,8 @@ struct OtherStateAsTarget(TargetChar) {
     void* obj;
 
     void delegate(bool lockNotUnlock) @safe @nogc nothrow mutex;
-    int delegate(scope int delegate(scope ref /* ignore this */ TargetChar[] data) @safe @nogc nothrow del) @safe @nogc nothrow foreachContiguous;
-    int delegate(scope int delegate(ref /* ignore this */ TargetChar) @safe @nogc nothrow del) @safe @nogc nothrow foreachValue;
+    int delegate(scope int delegate(scope ref  /* ignore this */ TargetChar[] data) @safe @nogc nothrow del) @safe @nogc nothrow foreachContiguous;
+    int delegate(scope int delegate(ref  /* ignore this */ TargetChar) @safe @nogc nothrow del) @safe @nogc nothrow foreachValue;
     size_t delegate() @safe nothrow @nogc length;
 
     bool isNull() @safe nothrow @nogc {
@@ -998,13 +1046,13 @@ struct OpTest(Char) {
         void mutex(bool) {
         }
 
-        int foreachContiguous(scope int delegate(scope ref /* ignore this */ Char[] data) @safe @nogc nothrow del) @trusted @nogc nothrow {
+        int foreachContiguous(scope int delegate(scope ref  /* ignore this */ Char[] data) @safe @nogc nothrow del) @trusted @nogc nothrow {
             // don't mutate during testing
             Char[] temp = cast(Char[])literal;
             return del(temp);
         }
 
-        int foreachValue(scope int delegate(ref /* ignore this */ Char) @safe @nogc nothrow del) @safe @nogc nothrow {
+        int foreachValue(scope int delegate(ref  /* ignore this */ Char) @safe @nogc nothrow del) @safe @nogc nothrow {
             int result;
 
             foreach (Char c; literal) {

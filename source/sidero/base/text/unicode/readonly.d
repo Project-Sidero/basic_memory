@@ -212,7 +212,8 @@ nothrow @nogc:
     }
 
     ///
-    String_UTF opSlice(size_t start, size_t end) scope @trusted {
+    String_UTF opSlice(ptrdiff_t start, ptrdiff_t end) scope @trusted {
+        fixOffsetInput(start, end);
         assert(start <= end, "Start of slice must be before or equal to end.");
 
         if (start == end)
@@ -700,7 +701,7 @@ nothrow @nogc:
     }
 
     ///
-    String_UTF opIndex(size_t index) scope {
+    String_UTF opIndex(ptrdiff_t index) scope {
         return this[index .. index + 1];
     }
 
@@ -2777,6 +2778,32 @@ private:
     }
 
     scope {
+        void fixOffsetInput(ref ptrdiff_t a, ref ptrdiff_t b) {
+            size_t actualLength = literalEncoding.handle(() {
+                auto actual = cast(const(char)[])this.literal;
+                return actual.length;
+            }, () { auto actual = cast(const(wchar)[])this.literal; return actual.length; }, () {
+                auto actual = cast(const(dchar)[])this.literal;
+                return actual.length;
+            });
+
+            if (a < 0) {
+                assert(actualLength > -a, "First offset must be smaller than length");
+                a = actualLength + a;
+            }
+
+            if (b < 0) {
+                assert(actualLength > -b, "First offset must be smaller than length");
+                b = actualLength + b;
+            }
+
+            if (b < a) {
+                ptrdiff_t temp = a;
+                a = b;
+                b = temp;
+            }
+        }
+
         bool ignoreCaseEqualsImplReadOnly(scope String_ASCII other, scope RCAllocator allocator = RCAllocator.init,
                 UnicodeLanguage language = UnicodeLanguage.Unknown) {
             return ignoreCaseCompareImplSlice(cast(const(char)[])other.literal, allocator, language) == 0;
