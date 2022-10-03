@@ -715,6 +715,39 @@ nothrow @safe:
     // stripRight
 
     ///
+    StringBuilder_ASCII insert(ptrdiff_t offset, const(char)[] input...) {
+        this.insertImplSlice(input, offset);
+        return this;
+    }
+
+    ///
+    unittest {
+        assert(StringBuilder_ASCII("abc").insert(-1, "def") == "abdefc");
+    }
+
+    ///
+    StringBuilder_ASCII insert(ptrdiff_t offset, String_ASCII input) {
+        this.insertImplReadOnly(input, offset);
+        return this;
+    }
+
+    ///
+    unittest {
+        assert(StringBuilder_ASCII("abc").insert(-1, String_ASCII("def")) == "abdefc");
+    }
+
+    ///
+    StringBuilder_ASCII insert(ptrdiff_t offset, StringBuilder_ASCII input) {
+        this.insertImplBuilder(input, offset);
+        return this;
+    }
+
+    ///
+    unittest {
+        assert(StringBuilder_ASCII("abc").insert(-1, StringBuilder_ASCII("def")) == "abdefc");
+    }
+
+    ///
     ulong toHash() scope @trusted @nogc {
         import sidero.base.hash.fnv : fnv_64_1a;
 
@@ -806,27 +839,27 @@ private:
                 return state.externalOpCmp(iterator, osiu, caseSensitive);
         }
 
-        void insertImplReadOnly(scope String_ASCII other) {
+        void insertImplReadOnly(scope String_ASCII other, ptrdiff_t offset = 0) {
             setupState;
 
             ASCII_State.LiteralAsTarget alat;
             alat.literal = other.literal;
             scope osiu = alat.get;
 
-            state.externalInsert(iterator, 0, osiu);
+            state.externalInsert(iterator, offset, osiu);
         }
 
-        void insertImplSlice(Char2)(scope const(Char2)[] other) @trusted {
+        void insertImplSlice(Char2)(scope const(Char2)[] other, ptrdiff_t offset = 0) @trusted {
             setupState;
 
             ASCII_State.LiteralAsTarget lat;
             lat.literal = cast(LiteralType)other;
             scope osiu = lat.get;
 
-            state.externalInsert(iterator, 0, osiu);
+            state.externalInsert(iterator, offset, osiu);
         }
 
-        void insertImplBuilder(scope StringBuilder_ASCII other) {
+        void insertImplBuilder(scope StringBuilder_ASCII other, ptrdiff_t offset = 0) {
             setupState;
 
             ASCII_State.OtherStateIsUs asat;
@@ -834,7 +867,7 @@ private:
             asat.iterator = other.iterator;
             scope osiu = asat.get;
 
-            state.externalInsert(iterator, 0, osiu);
+            state.externalInsert(iterator, offset, osiu);
         }
     }
 }

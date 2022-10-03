@@ -558,7 +558,7 @@ mixin template StringBuilderOperations() {
             assert(cursor.block.next !is null);
         }
 
-        toInsert.foreachContiguous((ref scope Char[] cA) {
+        toInsert.foreachContiguous((ref scope Char[] cA) @trusted {
             onInsert(cA);
 
             while (cA.length > 0) {
@@ -587,7 +587,7 @@ mixin template StringBuilderOperations() {
                         canDo = cA.length;
                     assert(canDo > 0);
 
-                    if (cursor.offsetIntoBlock + 1 < cursor.block.length) {
+                    if (cursor.offsetIntoBlock < cursor.block.length) {
                         // oh noes, there stuff on the right!
                         const oldOffsetInBlock = cursor.offsetIntoBlock, newOffsetInBlock = cursor.offsetIntoBlock + canDo;
                         cursor.block.moveRight(oldOffsetInBlock, newOffsetInBlock);

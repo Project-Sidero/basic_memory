@@ -291,8 +291,8 @@ nothrow @safe:
     }
 
     ///
-    this(InputChar)(scope const(InputChar)[] input, RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.init)
-            if (is(InputChar == char) || is(InputChar == wchar) || is(InputChar == dchar)) {
+    this(InputChar)(scope const(InputChar)[] input, RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage
+            .init) if (is(InputChar == char) || is(InputChar == wchar) || is(InputChar == dchar)) {
         setupState(allocator);
 
         state.handle((StateIterator.S8 state, StateIterator.I8 iterator) @trusted {
@@ -391,7 +391,7 @@ nothrow @safe:
     }
 
     ///
-    this(scope String_ASCII input, RCAllocator allocator = RCAllocator.init) scope @nogc @trusted{
+    this(scope String_ASCII input, RCAllocator allocator = RCAllocator.init) scope @nogc @trusted {
         input.stripZero;
 
         this.__ctor(cast(const(char)[])input.literal, allocator);
@@ -405,16 +405,12 @@ nothrow @safe:
     }
 
     ///
-    this(Char2)(scope String_UTF!Char2 input, RCAllocator allocator = RCAllocator.init) scope @nogc @trusted{
+    this(Char2)(scope String_UTF!Char2 input, RCAllocator allocator = RCAllocator.init) scope @nogc @trusted {
         input.stripZero;
 
-        input.literalEncoding.handle(() {
-            this.__ctor(cast(const(char)[])input.literal, allocator, input.language);
-        }, () {
+        input.literalEncoding.handle(() { this.__ctor(cast(const(char)[])input.literal, allocator, input.language); }, () {
             this.__ctor(cast(const(wchar)[])input.literal, allocator, input.language);
-        }, () {
-            this.__ctor(cast(const(dchar)[])input.literal, allocator, input.language);
-        }, () {
+        }, () { this.__ctor(cast(const(dchar)[])input.literal, allocator, input.language); }, () {
             this.__ctor(LiteralType.init, allocator);
         });
     }
@@ -528,18 +524,14 @@ nothrow @safe:
 
     ///
     UnicodeLanguage unicodeLanguage() scope {
-        return         state.handle((StateIterator.S8 state, StateIterator.I8 iterator) @trusted {
+        return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) @trusted {
             assert(state !is null);
             return state.language;
-        }, (StateIterator.S16 state, StateIterator.I16 iterator)  @trusted{
+        }, (StateIterator.S16 state, StateIterator.I16 iterator) @trusted { assert(state !is null); return state.language; },
+                (StateIterator.S32 state, StateIterator.I32 iterator) @trusted {
             assert(state !is null);
             return state.language;
-        }, (StateIterator.S32 state, StateIterator.I32 iterator) @trusted {
-            assert(state !is null);
-            return state.language;
-        }, () {
-            return UnicodeLanguage.Unknown;
-        });
+        }, () { return UnicodeLanguage.Unknown; });
     }
 
     ///
@@ -547,14 +539,13 @@ nothrow @safe:
         state.handle((StateIterator.S8 state, StateIterator.I8 iterator) @trusted {
             assert(state !is null);
             state.language = language;
-        }, (StateIterator.S16 state, StateIterator.I16 iterator)  @trusted{
+        }, (StateIterator.S16 state, StateIterator.I16 iterator) @trusted {
             assert(state !is null);
             state.language = language;
         }, (StateIterator.S32 state, StateIterator.I32 iterator) @trusted {
             assert(state !is null);
             state.language = language;
-        }, () {
-        });
+        }, () {});
     }
 
     ///
@@ -563,7 +554,7 @@ nothrow @safe:
     }
 
     ///
-    StringBuilder_UTF opSlice()  scope @trusted {
+    StringBuilder_UTF opSlice() scope @trusted {
         if (isNull)
             return StringBuilder_UTF();
 
@@ -574,7 +565,7 @@ nothrow @safe:
             ret.state.encoding = this.state.encoding;
             ret.state.u8 = state;
             ret.state.i8 = state.newIterator(iterator);
-        }, (StateIterator.S16 state, StateIterator.I16 iterator)  @trusted{
+        }, (StateIterator.S16 state, StateIterator.I16 iterator) @trusted {
             assert(state !is null);
             ret.state.encoding = this.state.encoding;
             ret.state.u16 = state;
@@ -610,7 +601,7 @@ nothrow @safe:
             ret.state.encoding = this.state.encoding;
             ret.state.u8 = state;
             ret.state.i8 = state.newIterator(iterator, start, end);
-        }, (StateIterator.S16 state, StateIterator.I16 iterator)  @trusted{
+        }, (StateIterator.S16 state, StateIterator.I16 iterator) @trusted {
             assert(state !is null);
             ret.state.encoding = this.state.encoding;
             ret.state.u16 = state;
@@ -694,17 +685,15 @@ nothrow @safe:
         this.foreachContiguous((scope ref Char[] data) {
             assert(array.length > soFar + data.length, "Encoding length < Encoded");
 
-            foreach(i, Char c; data)
+            foreach (i, Char c; data)
                 array[soFar + i] = c;
 
             soFar += data.length;
             return 0;
-        }, (length) {
-            array = allocator.makeArray!Char(length + 1);
-        });
+        }, (length) { array = allocator.makeArray!Char(length + 1); });
 
         assert(array.length == soFar + 1, "Encoding length != Encoded");
-        array[$-1] = 0;
+        array[$ - 1] = 0;
         return typeof(return)(array, allocator);
     }
 
@@ -853,56 +842,47 @@ nothrow @safe:
 
     @nogc {
         ///
-        bool ignoreCaseEquals(scope const(char)[] other,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        bool ignoreCaseEquals(scope const(char)[] other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
             return ignoreCaseCompare(other, language) == 0;
         }
 
         ///
-        bool ignoreCaseEquals(scope const(wchar)[] other,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        bool ignoreCaseEquals(scope const(wchar)[] other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
             return ignoreCaseCompare(other, language) == 0;
         }
 
         ///
-        bool ignoreCaseEquals(scope const(dchar)[] other,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        bool ignoreCaseEquals(scope const(dchar)[] other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
             return ignoreCaseCompare(other, language) == 0;
         }
 
         ///
-        bool ignoreCaseEquals(scope String_ASCII other,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        bool ignoreCaseEquals(scope String_ASCII other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
             return ignoreCaseCompare(other, language) == 0;
         }
 
         ///
-        bool ignoreCaseEquals(scope String_UTF8 other,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        bool ignoreCaseEquals(scope String_UTF8 other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
             return ignoreCaseCompare(other, language) == 0;
         }
 
         ///
-        bool ignoreCaseEquals(scope String_UTF16 other,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        bool ignoreCaseEquals(scope String_UTF16 other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
             return ignoreCaseCompare(other, language) == 0;
         }
 
         ///
-        bool ignoreCaseEquals(scope String_UTF32 other,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        bool ignoreCaseEquals(scope String_UTF32 other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
             return ignoreCaseCompare(other, language) == 0;
         }
 
         ///
-        bool ignoreCaseEquals(scope StringBuilder_ASCII other,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        bool ignoreCaseEquals(scope StringBuilder_ASCII other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
             return ignoreCaseCompare(other, language) == 0;
         }
 
         ///
-        bool ignoreCaseEquals(Char)(scope StringBuilder_UTF!Char other,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        bool ignoreCaseEquals(Char)(scope StringBuilder_UTF!Char other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
             return ignoreCaseCompare(other, language) == 0;
         }
     }
@@ -1013,8 +993,7 @@ nothrow @safe:
 
     @nogc {
         ///
-        int ignoreCaseCompare(scope const(char)[] other,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        int ignoreCaseCompare(scope const(char)[] other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
             return opCmpImplSlice(other, false, language);
         }
 
@@ -1025,8 +1004,7 @@ nothrow @safe:
         }
 
         ///
-        int ignoreCaseCompare(scope const(wchar)[] other,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        int ignoreCaseCompare(scope const(wchar)[] other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
             return opCmpImplSlice(other, false, language);
         }
 
@@ -1037,8 +1015,7 @@ nothrow @safe:
         }
 
         ///
-        int ignoreCaseCompare(scope const(dchar)[] other,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        int ignoreCaseCompare(scope const(dchar)[] other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
             return opCmpImplSlice(other, false, language);
         }
 
@@ -1049,20 +1026,17 @@ nothrow @safe:
         }
 
         ///
-        int ignoreCaseCompare(scope String_UTF8 other,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        int ignoreCaseCompare(scope String_UTF8 other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
             return opCmpImplReadOnly(other, false, language);
         }
 
         ///
-        int ignoreCaseCompare(scope String_UTF16 other,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        int ignoreCaseCompare(scope String_UTF16 other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
             return opCmpImplReadOnly(other, false, language);
         }
 
         ///
-        int ignoreCaseCompare(scope String_UTF32 other,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        int ignoreCaseCompare(scope String_UTF32 other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
             return opCmpImplReadOnly(other, false, language);
         }
 
@@ -1073,8 +1047,7 @@ nothrow @safe:
         }
 
         ///
-        int ignoreCaseCompare(scope String_ASCII other,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        int ignoreCaseCompare(scope String_ASCII other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
             return opCmpImplReadOnly(other, false, language);
         }
 
@@ -1085,8 +1058,7 @@ nothrow @safe:
         }
 
         ///
-        int ignoreCaseCompare(scope StringBuilder_ASCII other,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        int ignoreCaseCompare(scope StringBuilder_ASCII other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
             return opCmpImplBuilder(other, false, language);
         }
 
@@ -1472,16 +1444,136 @@ nothrow @safe:
     // stripLeft
     // stripRight
 
+    @nogc {
+        ///
+        StringBuilder_UTF insert(ptrdiff_t offset, const(char)[] input...) scope return {
+            insertImplSlice(input, offset);
+            return this;
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("abc").insert(-1, cast(string)"def") == "abdefc");
+        }
+
+        ///
+        StringBuilder_UTF insert(ptrdiff_t offset, const(wchar)[] input...) scope return {
+            insertImplSlice(input, offset);
+            return this;
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("abc").insert(-1, "def"w) == "abdefc");
+        }
+
+        ///
+        StringBuilder_UTF insert(ptrdiff_t offset, const(dchar)[] input...) scope return {
+            insertImplSlice(input, offset);
+            return this;
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("abc").insert(-1, "def"d) == "abdefc");
+        }
+
+        ///
+        StringBuilder_UTF insert(ptrdiff_t offset, String_ASCII input) scope return {
+            insertImplReadOnly(input, offset);
+            return this;
+        }
+
+        ///
+        @trusted unittest {
+            assert(StringBuilder_UTF("abc").insert(-1, String_ASCII("def")) == "abdefc");
+        }
+
+        ///
+        StringBuilder_UTF insert(ptrdiff_t offset, String_UTF8 input) scope return {
+            insertImplReadOnly(input, offset);
+            return this;
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("abc").insert(-1, String_UTF8("def")) == "abdefc");
+        }
+
+        ///
+        StringBuilder_UTF insert(ptrdiff_t offset, String_UTF16 input) scope return {
+            insertImplReadOnly(input, offset);
+            return this;
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("abc").insert(-1, String_UTF16("def"w)) == "abdefc");
+        }
+
+        ///
+        StringBuilder_UTF insert(ptrdiff_t offset, String_UTF32 input) scope return {
+            insertImplReadOnly(input, offset);
+            return this;
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("abc").insert(-1, String_UTF32("def"d)) == "abdefc");
+        }
+
+        ///
+        StringBuilder_UTF insert(ptrdiff_t offset, StringBuilder_ASCII input) scope return {
+            insertImplBuilder(input, offset);
+            return this;
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("abc").insert(-1, StringBuilder_ASCII("def")) == "abdefc");
+        }
+
+        ///
+        StringBuilder_UTF insert(ptrdiff_t offset, StringBuilder_UTF8 input) scope return {
+            insertImplBuilder(input, offset);
+            return this;
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("abc"d).insert(-1, StringBuilder_UTF8("def")) == "abdefc");
+        }
+
+        ///
+        StringBuilder_UTF insert(ptrdiff_t offset, StringBuilder_UTF16 input) scope return {
+            insertImplBuilder(input, offset);
+            return this;
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("abc").insert(-1, StringBuilder_UTF16("def"w)) == "abdefc");
+        }
+
+        ///
+        StringBuilder_UTF insert(ptrdiff_t offset, StringBuilder_UTF32 input) scope return {
+            insertImplBuilder(input, offset);
+            return this;
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("abc").insert(-1, StringBuilder_UTF32("def"d)) == "abdefc");
+        }
+    }
+
     ///
     ulong toHash() scope @trusted @nogc {
         import sidero.base.hash.fnv : fnv_64_1a;
 
         ulong ret = fnv_64_1a(null);
 
-        foreachContiguous((scope ref data) {
-            ret = fnv_64_1a(cast(ubyte[])data);
-            return 0;
-        });
+        foreachContiguous((scope ref data) { ret = fnv_64_1a(cast(ubyte[])data); return 0; });
 
         return ret;
     }
@@ -1493,12 +1585,12 @@ nothrow @safe:
 
             StringBuilder_UTF text = StringBuilder_UTF(Text8);
             assert(text.toHash() == 1586511100919779533);
-        } else         static if (is(Char == wchar)) {
+        } else static if (is(Char == wchar)) {
             static Text16 = "I'm up to the"w;
 
             StringBuilder_UTF text = StringBuilder_UTF(Text16);
             assert(text.toHash() == 10386160303096007217);
-        } else         static if (is(Char == dchar)) {
+        } else static if (is(Char == dchar)) {
             static Text32 = "walls can't talk"d;
 
             StringBuilder_UTF text = StringBuilder_UTF(Text32);
@@ -1507,7 +1599,8 @@ nothrow @safe:
     }
 
 package(sidero.base.text):
-    int foreachContiguous(scope int delegate(ref scope Char[] data) @safe nothrow @nogc del, scope void delegate(size_t length) @safe nothrow @nogc lengthDel = null) scope @nogc {
+    int foreachContiguous(scope int delegate(ref scope Char[] data) @safe nothrow @nogc del,
+            scope void delegate(size_t length) @safe nothrow @nogc lengthDel = null) scope @nogc {
         return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
             assert(state !is null);
 
@@ -1553,7 +1646,7 @@ package(sidero.base.text):
 
             osiu.mutex(false);
             return result;
-        }, () {return 0; });
+        }, () { return 0; });
     }
 
 private:
@@ -1681,7 +1774,8 @@ private:
             });
         }
 
-        int opCmpImplBuilder(Char2)(scope StringBuilder_UTF!Char2 other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
+        int opCmpImplBuilder(Char2)(scope StringBuilder_UTF!Char2 other, bool caseSensitive,
+                UnicodeLanguage language = UnicodeLanguage.Unknown) {
             AnyStateIteratorAsUs!dchar asiau = AnyStateIteratorAsUs!dchar(other.state);
 
             return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
@@ -1701,7 +1795,7 @@ private:
             });
         }
 
-        void insertImplReadOnly(scope String_ASCII other) {
+        void insertImplReadOnly(scope String_ASCII other, ptrdiff_t offset = 0) {
             setupState;
 
             state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
@@ -1711,7 +1805,7 @@ private:
                 alat.literal = other.literal;
                 scope osiu = alat.get;
 
-                state.externalInsert(iterator, 0, osiu);
+                state.externalInsert(iterator, offset, osiu);
             }, (StateIterator.S16 state, StateIterator.I16 iterator) {
                 assert(state !is null);
 
@@ -1719,7 +1813,7 @@ private:
                 alat.literal = other.literal;
                 scope osiu = alat.get;
 
-                state.externalInsert(iterator, 0, osiu);
+                state.externalInsert(iterator, offset, osiu);
             }, (StateIterator.S32 state, StateIterator.I32 iterator) {
                 assert(state !is null);
 
@@ -1727,11 +1821,17 @@ private:
                 alat.literal = other.literal;
                 scope osiu = alat.get;
 
-                state.externalInsert(iterator, 0, osiu);
+                state.externalInsert(iterator, offset, osiu);
             });
         }
 
-        void insertImplSlice(Char2)(scope const(Char2)[] other) {
+        void insertImplReadOnly(Char2)(scope String_UTF!Char2 other, ptrdiff_t offset = 0) {
+            other.literalEncoding.handle(() @trusted { insertImplSlice(cast(string)other.literal, offset); }, () @trusted {
+                insertImplSlice(cast(wstring)other.literal, offset);
+            }, () @trusted { insertImplSlice(cast(dstring)other.literal, offset); });
+        }
+
+        void insertImplSlice(Char2)(scope const(Char2)[] other, ptrdiff_t offset = 0) {
             setupState;
 
             state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
@@ -1741,7 +1841,7 @@ private:
                 lat.literal = other;
                 scope osiu = lat.get;
 
-                state.externalInsert(iterator, 0, osiu);
+                state.externalInsert(iterator, offset, osiu);
             }, (StateIterator.S16 state, StateIterator.I16 iterator) {
                 assert(state !is null);
 
@@ -1749,7 +1849,7 @@ private:
                 lat.literal = other;
                 scope osiu = lat.get;
 
-                state.externalInsert(iterator, 0, osiu);
+                state.externalInsert(iterator, offset, osiu);
             }, (StateIterator.S32 state, StateIterator.I32 iterator) {
                 assert(state !is null);
 
@@ -1757,11 +1857,11 @@ private:
                 lat.literal = other;
                 scope osiu = lat.get;
 
-                state.externalInsert(iterator, 0, osiu);
+                state.externalInsert(iterator, offset, osiu);
             });
         }
 
-        void insertImplBuilder(scope StringBuilder_ASCII other) {
+        void insertImplBuilder(scope StringBuilder_ASCII other, ptrdiff_t offset = 0) {
             setupState;
 
             state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
@@ -1772,7 +1872,7 @@ private:
                 asat.iterator = other.iterator;
                 scope osiu = asat.get;
 
-                state.externalInsert(iterator, 0, osiu);
+                state.externalInsert(iterator, offset, osiu);
             }, (StateIterator.S16 state, StateIterator.I16 iterator) {
                 assert(state !is null);
 
@@ -1781,7 +1881,7 @@ private:
                 asat.iterator = other.iterator;
                 scope osiu = asat.get;
 
-                state.externalInsert(iterator, 0, osiu);
+                state.externalInsert(iterator, offset, osiu);
             }, (StateIterator.S32 state, StateIterator.I32 iterator) {
                 assert(state !is null);
 
@@ -1790,28 +1890,28 @@ private:
                 asat.iterator = other.iterator;
                 scope osiu = asat.get;
 
-                state.externalInsert(iterator, 0, osiu);
+                state.externalInsert(iterator, offset, osiu);
             });
         }
 
-        void insertImplBuilder(Char2)(scope StringBuilder_UTF!Char2 other) {
+        void insertImplBuilder(Char2)(scope StringBuilder_UTF!Char2 other, ptrdiff_t offset = 0) {
             setupState;
 
             state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
                 assert(state !is null);
 
                 AnyStateIteratorAsUs!char asiau = AnyStateIteratorAsUs!char(other.state);
-                state.externalInsert(iterator, 0, asiau.osat);
+                state.externalInsert(iterator, offset, asiau.osat);
             }, (StateIterator.S16 state, StateIterator.I16 iterator) {
                 assert(state !is null);
 
                 AnyStateIteratorAsUs!wchar asiau = AnyStateIteratorAsUs!wchar(other.state);
-                state.externalInsert(iterator, 0, asiau.osat);
+                state.externalInsert(iterator, offset, asiau.osat);
             }, (StateIterator.S32 state, StateIterator.I32 iterator) {
                 assert(state !is null);
 
                 AnyStateIteratorAsUs!dchar asiau = AnyStateIteratorAsUs!dchar(other.state);
-                state.externalInsert(iterator, 0, asiau.osat);
+                state.externalInsert(iterator, offset, asiau.osat);
             });
         }
     }
@@ -1907,9 +2007,7 @@ struct AnyStateIteratorAsUs(TargetChar) {
             osiu32.state = state;
             osiu32.iterator = iterator;
             osat = osiu32.get;
-        }, () {
-            assert(0);
-        });
+        }, () { assert(0); });
     }
 }
 
@@ -2254,12 +2352,7 @@ struct UTF_State(Char) {
 
             static if (is(Char == TargetChar)) {
                 if (iterator !is null) {
-                    foreach (scope TargetChar[] data; &iterator.foreachBlocks) {
-                        result = del(data);
-
-                        if (result)
-                            break;
-                    }
+                    iterator.foreachBlocks((scope TargetChar[] data) { result = del(data); return result; });
                 } else {
                     foreach (Char[] data; state.blockList) {
                         result = del(data);
@@ -2270,6 +2363,7 @@ struct UTF_State(Char) {
                 }
             } else {
                 import sidero.base.encoding.utf : decode, encode;
+
                 Cursor forwards;
 
                 if (iterator is null)
@@ -2345,6 +2439,7 @@ struct UTF_State(Char) {
                 }
             } else {
                 import sidero.base.encoding.utf : decode, encode;
+
                 Cursor forwards;
 
                 if (iterator is null)
@@ -2424,6 +2519,7 @@ struct UTF_State(Char) {
                     : (iterator.backwards.offsetFromHead - iterator.forwards.offsetFromHead);
             } else {
                 import sidero.base.encoding.utf : decode, encodeLengthUTF8, encodeLengthUTF16;
+
                 size_t ret;
 
                 while (!emptyInternal()) {
@@ -2436,7 +2532,7 @@ struct UTF_State(Char) {
                     } else static if (is(TargetChar == wchar)) {
                         // decode then encode
                         ret += encodeLengthUTF16(got);
-                    } else static if (is(Char == dchar)) {
+                    } else static if (is(TargetChar == dchar)) {
                         ret++;
                     }
                 }
@@ -2541,7 +2637,8 @@ struct UTF_State(Char) {
                 size_t offsetFromEnd = iterator is null ? state.blockList.numberOfItems : iterator.maximumOffsetFromHead;
                 if (offsetFromEnd <= offset)
                     offsetFromEnd = 0;
-                else offsetFromEnd -= offset;
+                else
+                    offsetFromEnd -= offset;
 
                 cursor = state.cursorFor(iterator, maximumOffsetFromHead, offsetFromEnd);
             }
@@ -2570,11 +2667,12 @@ struct UTF_State(Char) {
                 forwardsTempDecodeCursor.advanceForward(1, maximumOffsetFromHead, true);
             }
 
-            while(!emptyInternal() && result == 0) {
+            while (!emptyInternal() && result == 0) {
                 static if (is(Char == dchar)) {
                     dchar decoded = frontInternal();
                 } else {
                     import sidero.base.encoding.utf : decode;
+
                     dchar decoded = decode(&emptyInternal, &frontInternal, &popFrontInternal, advance);
                 }
 
@@ -2768,18 +2866,10 @@ struct AnyLiteralAsTargetChar(TargetChar) {
     OtherStateAsTarget!TargetChar osat;
 
     this(Char)(scope String_UTF!Char input) @safe nothrow @nogc {
-        input.literalEncoding.handle(() @trusted {
-            latc8.literal = cast(string)input.literal;
-            osat = latc8.get();
-        }, () @trusted {
+        input.literalEncoding.handle(() @trusted { latc8.literal = cast(string)input.literal; osat = latc8.get(); }, () @trusted {
             latc16.literal = cast(wstring)input.literal;
             osat = latc16.get();
-        }, () @trusted {
-            latc32.literal = cast(dstring)input.literal;
-            osat = latc32.get();
-        }, () @trusted {
-            assert(0);
-        });
+        }, () @trusted { latc32.literal = cast(dstring)input.literal; osat = latc32.get(); }, () @trusted { assert(0); });
     }
 }
 
@@ -2798,13 +2888,15 @@ struct ASCIILiteralAsTarget(TargetChar) {
             return del(temp);
         } else {
             TargetChar[1] temp1;
-            TargetChar[] temp2 = temp1[];
+            TargetChar[] temp2;
             int result;
 
             foreach (c; literal) {
+                temp2 = temp1[];
                 temp1[0] = cast(TargetChar)c;
 
                 result = del(temp2);
+
                 if (result)
                     break;
             }
@@ -2854,15 +2946,16 @@ static struct ASCIIStateAsTarget(TargetChar) {
         int result;
 
         if (iterator !is null) {
-            foreach (scope data; &iterator.foreachBlocks) {
+            iterator.foreachBlocks((scope data) {
                 static if (is(TargetChar == char)) {
                     TargetChar[] temp = cast(TargetChar[])data;
                     result = del(temp);
                 } else {
                     TargetChar[1] temp1;
-                    TargetChar[] temp2 = temp1[];
+                    TargetChar[] temp2;
 
                     foreach (c; data) {
+                        temp2 = temp1[];
                         temp1[0] = cast(TargetChar)c;
 
                         result = del(temp2);
@@ -2871,9 +2964,8 @@ static struct ASCIIStateAsTarget(TargetChar) {
                     }
                 }
 
-                if (result)
-                    break;
-            }
+                return result;
+            });
         } else {
             foreach (ubyte[] data; state.blockList) {
                 static if (is(TargetChar == char)) {
@@ -2881,9 +2973,10 @@ static struct ASCIIStateAsTarget(TargetChar) {
                     result = del(temp);
                 } else {
                     TargetChar[1] temp1;
-                    TargetChar[] temp2 = temp1[];
+                    TargetChar[] temp2;
 
                     foreach (c; data) {
+                        temp2 = temp1[];
                         temp1[0] = cast(TargetChar)c;
 
                         result = del(temp2);
@@ -2904,15 +2997,17 @@ static struct ASCIIStateAsTarget(TargetChar) {
         int result;
 
         if (iterator !is null) {
-            foreach (scope data; &iterator.foreachBlocks) {
+            iterator.foreachBlocks((scope data) {
                 foreach (c; data) {
                     TargetChar temp = cast(TargetChar)c;
                     result = del(temp);
 
                     if (result)
-                        return result;
+                        break;
                 }
-            }
+
+                return result;
+            });
         } else {
             foreach (ubyte[] data; state.blockList) {
                 foreach (c; data) {
