@@ -344,7 +344,7 @@ nothrow @safe:
     }
 
     ///
-    StringBuilder_ASCII dup(RCAllocator allocator = RCAllocator.init) {
+    StringBuilder_ASCII dup(RCAllocator allocator = RCAllocator.init) scope @nogc {
         StringBuilder_ASCII ret = StringBuilder_ASCII(allocator);
         ret.insertImplBuilder(this);
         return ret;
@@ -715,37 +715,234 @@ nothrow @safe:
     // stripLeft
     // stripRight
 
-    ///
-    StringBuilder_ASCII insert(ptrdiff_t offset, const(char)[] input...) {
-        this.insertImplSlice(input, offset);
-        return this;
+    @nogc {
+        ///
+        StringBuilder_ASCII insert(ptrdiff_t index, scope const(char)[] input...) scope return {
+            this.insertImplSlice(input, index);
+            return this;
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_ASCII("abc").insert(-1, "def") == "abdefc");
+        }
+
+        ///
+        StringBuilder_ASCII insert(ptrdiff_t index, scope LiteralType input...) scope return {
+            this.insertImplSlice(input, index);
+            return this;
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_ASCII("abc").insert(-1, cast(LiteralType)"def") == "abdefc");
+        }
+
+        ///
+        StringBuilder_ASCII insert(ptrdiff_t index, scope String_ASCII input) scope return {
+            this.insertImplReadOnly(input, index);
+            return this;
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_ASCII("abc").insert(-1, String_ASCII("def")) == "abdefc");
+        }
+
+        ///
+        StringBuilder_ASCII insert(ptrdiff_t index, scope StringBuilder_ASCII input) scope return {
+            this.insertImplBuilder(input, index);
+            return this;
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_ASCII("abc").insert(-1, StringBuilder_ASCII("def")) == "abdefc");
+        }
     }
 
-    ///
-    unittest {
-        assert(StringBuilder_ASCII("abc").insert(-1, "def") == "abdefc");
+    @nogc {
+        ///
+        StringBuilder_ASCII prepend(scope const(char)[] input...) scope return {
+            return this.insert(0, input);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_ASCII("world").prepend("hello ") == "hello world");
+        }
+
+        ///
+        StringBuilder_ASCII prepend(scope LiteralType input...) scope return {
+            return this.insert(0, input);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_ASCII("world").prepend(cast(LiteralType)"hello ") == "hello world");
+        }
+
+        ///
+        StringBuilder_ASCII prepend(scope String_ASCII input) scope return {
+            return this.insert(0, input);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_ASCII("world").prepend(String_ASCII("hello ")) == "hello world");
+        }
+
+        ///
+        StringBuilder_ASCII prepend(scope StringBuilder_ASCII input) scope return {
+            return this.insert(0, input);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_ASCII("world").prepend(StringBuilder_ASCII("hello ")) == "hello world");
+        }
     }
 
-    ///
-    StringBuilder_ASCII insert(ptrdiff_t offset, String_ASCII input) {
-        this.insertImplReadOnly(input, offset);
-        return this;
-    }
+    @nogc {
+        ///
+        StringBuilder_ASCII opBinary(string op : "~")(scope const(char)[] input) scope {
+            StringBuilder_ASCII ret = this.dup;
+            ret.append(input);
+            return ret;
+        }
 
-    ///
-    unittest {
-        assert(StringBuilder_ASCII("abc").insert(-1, String_ASCII("def")) == "abdefc");
-    }
+        ///
+        unittest {
+            StringBuilder_ASCII builder = "hello";
+            assert((builder ~ " world") == "hello world");
+        }
 
-    ///
-    StringBuilder_ASCII insert(ptrdiff_t offset, StringBuilder_ASCII input) {
-        this.insertImplBuilder(input, offset);
-        return this;
-    }
+        ///
+        StringBuilder_ASCII opBinary(string op : "~")(scope LiteralType input) scope {
+            StringBuilder_ASCII ret = this.dup;
+            ret.append(input);
+            return ret;
+        }
 
-    ///
-    unittest {
-        assert(StringBuilder_ASCII("abc").insert(-1, StringBuilder_ASCII("def")) == "abdefc");
+        ///
+        unittest {
+            StringBuilder_ASCII builder = "hello";
+            assert((builder ~ cast(LiteralType)" world") == "hello world");
+        }
+
+        ///
+        StringBuilder_ASCII opBinary(string op : "~")(scope String_ASCII input) scope {
+            StringBuilder_ASCII ret = this.dup;
+            ret.append(input);
+            return ret;
+        }
+
+        ///
+        unittest {
+            StringBuilder_ASCII builder = "hello";
+            assert((builder ~ String_ASCII(" world")) == "hello world");
+        }
+
+        ///
+        StringBuilder_ASCII opBinary(string op : "~")(scope StringBuilder_ASCII input) scope {
+            StringBuilder_ASCII ret = this.dup;
+            ret.append(input);
+            return ret;
+        }
+
+        ///
+        unittest {
+            StringBuilder_ASCII builder = "hello";
+            assert((builder ~ StringBuilder_ASCII(" world")) == "hello world");
+        }
+
+        ///
+        void opOpAssign(string op : "~")(scope const(char)[] input) scope return {
+            this.append(input);
+        }
+
+        ///
+        unittest {
+            StringBuilder_ASCII builder = "hello";
+            builder ~= " world";
+            assert(builder == "hello world");
+        }
+
+        ///
+        void opOpAssign(string op : "~")(scope LiteralType input) scope return {
+            this.append(input);
+        }
+
+        ///
+        unittest {
+            StringBuilder_ASCII builder = "hello";
+            builder ~= cast(LiteralType)" world";
+            assert(builder == "hello world");
+        }
+
+        ///
+        void opOpAssign(string op : "~")(scope String_ASCII input) scope return {
+            this.append(input);
+        }
+
+        ///
+        unittest {
+            StringBuilder_ASCII builder = "hello";
+            builder ~= String_ASCII(" world");
+            assert(builder == "hello world");
+        }
+
+        ///
+        void opOpAssign(string op : "~")(scope StringBuilder_ASCII input) scope return {
+            this.append(input);
+        }
+
+        ///
+        unittest {
+            StringBuilder_ASCII builder = "hello";
+            builder ~= StringBuilder_ASCII(" world");
+            assert(builder == "hello world");
+        }
+
+        ///
+        StringBuilder_ASCII append(scope const(char)[] input...) scope return {
+            return this.insert(ptrdiff_t.max, input);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_ASCII("hello").append(" world") == "hello world");
+        }
+
+        ///
+        StringBuilder_ASCII append(scope LiteralType input...) scope return {
+            return this.insert(ptrdiff_t.max, input);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_ASCII("hello").append(cast(LiteralType)" world") == "hello world");
+        }
+
+        ///
+        StringBuilder_ASCII append(scope String_ASCII input) scope return {
+            return this.insert(ptrdiff_t.max, input);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_ASCII("hello").append(String_ASCII(" world")) == "hello world");
+        }
+
+        ///
+        StringBuilder_ASCII append(scope StringBuilder_ASCII input) scope return {
+            return this.insert(ptrdiff_t.max, input);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_ASCII("hello").append(StringBuilder_ASCII(" world")) == "hello world");
+        }
     }
 
     ///

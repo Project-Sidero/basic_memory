@@ -661,7 +661,7 @@ nothrow @safe:
     }
 
     ///
-    StringBuilder_UTF dup(RCAllocator allocator = RCAllocator.init) {
+    StringBuilder_UTF dup(RCAllocator allocator = RCAllocator.init) scope @nogc {
         StringBuilder_UTF ret = StringBuilder_UTF(allocator);
         ret.insertImplBuilder(this);
         return ret;
@@ -1447,8 +1447,8 @@ nothrow @safe:
 
     @nogc {
         ///
-        StringBuilder_UTF insert(ptrdiff_t offset, const(char)[] input...) scope return {
-            insertImplSlice(input, offset);
+        StringBuilder_UTF insert(ptrdiff_t index, scope const(char)[] input...) scope return {
+            insertImplSlice(input, index);
             return this;
         }
 
@@ -1458,8 +1458,8 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_UTF insert(ptrdiff_t offset, const(wchar)[] input...) scope return {
-            insertImplSlice(input, offset);
+        StringBuilder_UTF insert(ptrdiff_t index, scope const(wchar)[] input...) scope return {
+            insertImplSlice(input, index);
             return this;
         }
 
@@ -1469,8 +1469,8 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_UTF insert(ptrdiff_t offset, const(dchar)[] input...) scope return {
-            insertImplSlice(input, offset);
+        StringBuilder_UTF insert(ptrdiff_t index, scope const(dchar)[] input...) scope return {
+            insertImplSlice(input, index);
             return this;
         }
 
@@ -1480,8 +1480,8 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_UTF insert(ptrdiff_t offset, String_ASCII input) scope return {
-            insertImplReadOnly(input, offset);
+        StringBuilder_UTF insert(ptrdiff_t index, scope String_ASCII input) scope return {
+            insertImplReadOnly(input, index);
             return this;
         }
 
@@ -1491,8 +1491,8 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_UTF insert(ptrdiff_t offset, String_UTF8 input) scope return {
-            insertImplReadOnly(input, offset);
+        StringBuilder_UTF insert(ptrdiff_t index, scope String_UTF8 input) scope return {
+            insertImplReadOnly(input, index);
             return this;
         }
 
@@ -1502,8 +1502,8 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_UTF insert(ptrdiff_t offset, String_UTF16 input) scope return {
-            insertImplReadOnly(input, offset);
+        StringBuilder_UTF insert(ptrdiff_t index, scope String_UTF16 input) scope return {
+            insertImplReadOnly(input, index);
             return this;
         }
 
@@ -1513,8 +1513,8 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_UTF insert(ptrdiff_t offset, String_UTF32 input) scope return {
-            insertImplReadOnly(input, offset);
+        StringBuilder_UTF insert(ptrdiff_t index, scope String_UTF32 input) scope return {
+            insertImplReadOnly(input, index);
             return this;
         }
 
@@ -1524,8 +1524,8 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_UTF insert(ptrdiff_t offset, StringBuilder_ASCII input) scope return {
-            insertImplBuilder(input, offset);
+        StringBuilder_UTF insert(ptrdiff_t index, scope StringBuilder_ASCII input) scope return {
+            insertImplBuilder(input, index);
             return this;
         }
 
@@ -1535,8 +1535,8 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_UTF insert(ptrdiff_t offset, StringBuilder_UTF8 input) scope return {
-            insertImplBuilder(input, offset);
+        StringBuilder_UTF insert(ptrdiff_t index, scope StringBuilder_UTF8 input) scope return {
+            insertImplBuilder(input, index);
             return this;
         }
 
@@ -1546,8 +1546,8 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_UTF insert(ptrdiff_t offset, StringBuilder_UTF16 input) scope return {
-            insertImplBuilder(input, offset);
+        StringBuilder_UTF insert(ptrdiff_t index, scope StringBuilder_UTF16 input) scope return {
+            insertImplBuilder(input, index);
             return this;
         }
 
@@ -1557,14 +1557,513 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_UTF insert(ptrdiff_t offset, StringBuilder_UTF32 input) scope return {
-            insertImplBuilder(input, offset);
+        StringBuilder_UTF insert(ptrdiff_t index, scope StringBuilder_UTF32 input) scope return {
+            insertImplBuilder(input, index);
             return this;
         }
 
         ///
         unittest {
             assert(StringBuilder_UTF("abc").insert(-1, StringBuilder_UTF32("def"d)) == "abdefc");
+        }
+    }
+
+    @nogc {
+        ///
+        StringBuilder_UTF prepend(scope const(char)[] input...) scope return {
+            return this.insert(0, input);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("world").prepend(cast(string)"hello ") == "hello world");
+        }
+
+        ///
+        StringBuilder_UTF prepend(scope const(wchar)[] input...) scope return {
+            return this.insert(0, input);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("world").prepend("hello "w) == "hello world");
+        }
+
+        ///
+        StringBuilder_UTF prepend(scope const(dchar)[] input...) scope return {
+            return this.insert(0, input);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("world").prepend("hello "d) == "hello world");
+        }
+
+        ///
+        StringBuilder_UTF prepend(scope String_ASCII input) scope return {
+            return this.insert(0, input);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("world").prepend(String_ASCII("hello ")) == "hello world");
+        }
+
+        ///
+        StringBuilder_UTF prepend(scope String_UTF8 input) scope return {
+            return this.insert(0, input);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("world").prepend(String_UTF8("hello ")) == "hello world");
+        }
+
+        ///
+        StringBuilder_UTF prepend(scope String_UTF16 input) scope return {
+            return this.insert(0, input);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("world").prepend(String_UTF16("hello ")) == "hello world");
+        }
+
+        ///
+        StringBuilder_UTF prepend(scope String_UTF32 input) scope return {
+            return this.insert(0, input);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("world").prepend(String_UTF32("hello ")) == "hello world");
+        }
+
+        ///
+        StringBuilder_UTF prepend(scope StringBuilder_ASCII input) scope return {
+            return this.insert(0, input);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("world").prepend(StringBuilder_ASCII("hello ")) == "hello world");
+        }
+
+        ///
+        StringBuilder_UTF prepend(scope StringBuilder_UTF8 input) scope return {
+            return this.insert(0, input);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("world").prepend(StringBuilder_UTF8("hello ")) == "hello world");
+        }
+
+        ///
+        StringBuilder_UTF prepend(scope StringBuilder_UTF16 input) scope return {
+            return this.insert(0, input);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("world").prepend(StringBuilder_UTF16("hello ")) == "hello world");
+        }
+
+        ///
+        StringBuilder_UTF prepend(scope StringBuilder_UTF32 input) scope return {
+            return this.insert(0, input);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("world").prepend(StringBuilder_UTF32("hello ")) == "hello world");
+        }
+    }
+
+    @nogc {
+        ///
+        void opOpAssign(string op : "~")(scope const(char)[] input) scope return {
+            this.append(input);
+        }
+
+        ///
+        unittest {
+            StringBuilder_UTF builder = "hello";
+            builder ~= " world";
+            assert(builder == "hello world");
+        }
+
+        ///
+        void opOpAssign(string op : "~")(scope const(wchar)[] input) scope return {
+            this.append(input);
+        }
+
+        ///
+        unittest {
+            StringBuilder_UTF builder = "hello";
+            builder ~= " world"w;
+            assert(builder == "hello world");
+        }
+
+        ///
+        void opOpAssign(string op : "~")(scope const(dchar)[] input) scope return {
+            this.append(input);
+        }
+
+        ///
+        unittest {
+            StringBuilder_UTF builder = "hello";
+            builder ~= " world"d;
+            assert(builder == "hello world");
+        }
+
+        ///
+        void opOpAssign(string op : "~")(scope String_ASCII input) scope return {
+            this.append(input);
+        }
+
+        ///
+        unittest {
+            StringBuilder_UTF builder = "hello";
+            builder ~= String_ASCII(" world");
+            assert(builder == "hello world");
+        }
+
+        ///
+        void opOpAssign(string op : "~")(scope String_UTF8 input) scope return {
+            this.append(input);
+        }
+
+        ///
+        unittest {
+            StringBuilder_UTF builder = "hello";
+            builder ~= String_UTF8(" world");
+            assert(builder == "hello world");
+        }
+
+        ///
+        void opOpAssign(string op : "~")(scope String_UTF16 input) scope return {
+            this.append(input);
+        }
+
+        ///
+        unittest {
+            StringBuilder_UTF builder = "hello";
+            builder ~= String_UTF16(" world");
+            assert(builder == "hello world");
+        }
+
+        ///
+        void opOpAssign(string op : "~")(scope String_UTF32 input) scope return {
+            this.append(input);
+        }
+
+        ///
+        unittest {
+            StringBuilder_UTF builder = "hello";
+            builder ~= String_UTF32(" world");
+            assert(builder == "hello world");
+        }
+
+        ///
+        void opOpAssign(string op : "~")(scope StringBuilder_ASCII input) scope return {
+            this.append(input);
+        }
+
+        ///
+        unittest {
+            StringBuilder_UTF builder = "hello";
+            builder ~= StringBuilder_ASCII(" world");
+            assert(builder == "hello world");
+        }
+
+        ///
+        void opOpAssign(string op : "~")(scope StringBuilder_UTF8 input) scope return {
+            this.append(input);
+        }
+
+        ///
+        unittest {
+            StringBuilder_UTF builder = "hello";
+            builder ~= StringBuilder_UTF8(" world");
+            assert(builder == "hello world");
+        }
+
+        ///
+        void opOpAssign(string op : "~")(scope StringBuilder_UTF16 input) scope return {
+            this.append(input);
+        }
+
+        ///
+        unittest {
+            StringBuilder_UTF builder = "hello";
+            builder ~= StringBuilder_UTF16(" world");
+            assert(builder == "hello world");
+        }
+
+        ///
+        void opOpAssign(string op : "~")(scope StringBuilder_UTF32 input) scope return {
+            this.append(input);
+        }
+
+        ///
+        unittest {
+            StringBuilder_UTF builder = "hello";
+            builder ~= StringBuilder_UTF32(" world");
+            assert(builder == "hello world");
+        }
+
+        ///
+        StringBuilder_UTF opBinary(string op : "~")(scope const(char)[] input) scope {
+            StringBuilder_UTF ret = this.dup;
+            ret.append(input);
+            return ret;
+        }
+
+        ///
+        unittest {
+            StringBuilder_UTF builder = "hello";
+            assert((builder ~ " world") == "hello world");
+        }
+
+        ///
+        StringBuilder_UTF opBinary(string op : "~")(scope const(wchar)[] input) scope {
+            StringBuilder_UTF ret = this.dup;
+            ret.append(input);
+            return ret;
+        }
+
+        ///
+        unittest {
+            StringBuilder_UTF builder = "hello";
+            assert((builder ~ " world"w) == "hello world");
+        }
+
+        ///
+        StringBuilder_UTF opBinary(string op : "~")(scope const(dchar)[] input) scope {
+            StringBuilder_UTF ret = this.dup;
+            ret.append(input);
+            return ret;
+        }
+
+        ///
+        unittest {
+            StringBuilder_UTF builder = "hello";
+            assert((builder ~ " world"d) == "hello world");
+        }
+
+        ///
+        StringBuilder_UTF opBinary(string op : "~")(scope String_ASCII input) scope {
+            StringBuilder_UTF ret = this.dup;
+            ret.append(input);
+            return ret;
+        }
+
+        ///
+        unittest {
+            StringBuilder_UTF builder = "hello";
+            assert((builder ~ String_ASCII(" world")) == "hello world");
+        }
+
+        ///
+        StringBuilder_UTF opBinary(string op : "~")(scope String_UTF8 input) scope {
+            StringBuilder_UTF ret = this.dup;
+            ret.append(input);
+            return ret;
+        }
+
+        ///
+        unittest {
+            StringBuilder_UTF builder = "hello";
+            assert((builder ~ String_UTF8(" world")) == "hello world");
+        }
+
+        ///
+        StringBuilder_UTF opBinary(string op : "~")(scope String_UTF16 input) scope {
+            StringBuilder_UTF ret = this.dup;
+            ret.append(input);
+            return ret;
+        }
+
+        ///
+        unittest {
+            StringBuilder_UTF builder = "hello";
+            assert((builder ~ String_UTF16(" world")) == "hello world");
+        }
+
+        ///
+        StringBuilder_UTF opBinary(string op : "~")(scope String_UTF32 input) scope {
+            StringBuilder_UTF ret = this.dup;
+            ret.append(input);
+            return ret;
+        }
+
+        ///
+        unittest {
+            StringBuilder_UTF builder = "hello";
+            assert((builder ~ String_UTF32(" world")) == "hello world");
+        }
+
+        ///
+        StringBuilder_UTF opBinary(string op : "~")(scope StringBuilder_ASCII input) scope {
+            StringBuilder_UTF ret = this.dup;
+            ret.append(input);
+            return ret;
+        }
+
+        ///
+        unittest {
+            StringBuilder_UTF builder = "hello";
+            assert((builder ~ StringBuilder_ASCII(" world")) == "hello world");
+        }
+
+        ///
+        StringBuilder_UTF opBinary(string op : "~")(scope StringBuilder_UTF8 input) scope {
+            StringBuilder_UTF ret = this.dup;
+            ret.append(input);
+            return ret;
+        }
+
+        ///
+        unittest {
+            StringBuilder_UTF builder = "hello";
+            assert((builder ~ StringBuilder_UTF8(" world")) == "hello world");
+        }
+
+        ///
+        StringBuilder_UTF opBinary(string op : "~")(scope StringBuilder_UTF16 input) scope {
+            StringBuilder_UTF ret = this.dup;
+            ret.append(input);
+            return ret;
+        }
+
+        ///
+        unittest {
+            StringBuilder_UTF builder = "hello";
+            assert((builder ~ StringBuilder_UTF16(" world")) == "hello world");
+        }
+
+        ///
+        StringBuilder_UTF opBinary(string op : "~")(scope StringBuilder_UTF32 input) scope {
+            StringBuilder_UTF ret = this.dup;
+            ret.append(input);
+            return ret;
+        }
+
+        ///
+        unittest {
+            StringBuilder_UTF builder = "hello";
+            assert((builder ~ StringBuilder_UTF32(" world")) == "hello world");
+        }
+
+        ///
+        StringBuilder_UTF append(scope const(char)[] input...) scope return {
+            return this.insert(ptrdiff_t.max, input);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("hello").append(cast(string)" world") == "hello world");
+        }
+
+        ///
+        StringBuilder_UTF append(scope const(wchar)[] input...) scope return {
+            return this.insert(ptrdiff_t.max, input);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("hello").append(" world"w) == "hello world");
+        }
+
+        ///
+        StringBuilder_UTF append(scope const(dchar)[] input...) scope return {
+            return this.insert(ptrdiff_t.max, input);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("hello").append(" world"d) == "hello world");
+        }
+
+        ///
+        StringBuilder_UTF append(scope String_ASCII input) scope return {
+            return this.insert(ptrdiff_t.max, input);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("hello").append(String_ASCII(" world")) == "hello world");
+        }
+
+        ///
+        StringBuilder_UTF append(scope String_UTF8 input) scope return {
+            return this.insert(ptrdiff_t.max, input);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("hello").append(String_UTF8(" world")) == "hello world");
+        }
+
+        ///
+        StringBuilder_UTF append(scope String_UTF16 input) scope return {
+            return this.insert(ptrdiff_t.max, input);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("hello").append(String_UTF16(" world")) == "hello world");
+        }
+
+        ///
+        StringBuilder_UTF append(scope String_UTF32 input) scope return {
+            return this.insert(ptrdiff_t.max, input);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("hello").append(String_UTF32(" world")) == "hello world");
+        }
+
+        ///
+        StringBuilder_UTF append(scope StringBuilder_ASCII input) scope return {
+            return this.insert(ptrdiff_t.max, input);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("hello").append(StringBuilder_ASCII(" world")) == "hello world");
+        }
+
+        ///
+        StringBuilder_UTF append(scope StringBuilder_UTF8 input) scope return {
+            return this.insert(ptrdiff_t.max, input);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("hello").append(StringBuilder_UTF8(" world")) == "hello world");
+        }
+
+        ///
+        StringBuilder_UTF append(scope StringBuilder_UTF16 input) scope return {
+            return this.insert(ptrdiff_t.max, input);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("hello").append(StringBuilder_UTF16(" world")) == "hello world");
+        }
+
+        ///
+        StringBuilder_UTF append(scope StringBuilder_UTF32 input) scope return {
+            return this.insert(ptrdiff_t.max, input);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("hello").append(StringBuilder_UTF32(" world")) == "hello world");
         }
     }
 
