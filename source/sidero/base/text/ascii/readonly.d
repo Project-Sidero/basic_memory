@@ -171,7 +171,7 @@ nothrow @nogc:
 
     ///
     String_ASCII opSlice(ptrdiff_t start, ptrdiff_t end) scope @trusted {
-        fixOffsetInput(start, end);
+        changeIndexToOffset(start, end);
         assert(start <= end, "Start of slice must be before or equal to end.");
         assert(end <= this.literal.length, "End of slice must be before or equal to length.");
 
@@ -2456,7 +2456,7 @@ private:
         assert(this.iterator !is null);
     }
 
-    void fixOffsetInput(ref ptrdiff_t a, ref ptrdiff_t b) {
+    void changeIndexToOffset(ref ptrdiff_t a, ref ptrdiff_t b) {
         size_t actualLength = literal.length;
 
         if (a < 0) {

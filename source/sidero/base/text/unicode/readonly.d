@@ -213,7 +213,7 @@ nothrow @nogc:
 
     ///
     String_UTF opSlice(ptrdiff_t start, ptrdiff_t end) scope @trusted {
-        fixOffsetInput(start, end);
+        changeIndexToOffset(start, end);
         assert(start <= end, "Start of slice must be before or equal to end.");
 
         if (start == end)
@@ -2778,7 +2778,7 @@ private:
     }
 
     scope {
-        void fixOffsetInput(ref ptrdiff_t a, ref ptrdiff_t b) {
+        void changeIndexToOffset(ref ptrdiff_t a, ref ptrdiff_t b) {
             size_t actualLength = literalEncoding.handle(() {
                 auto actual = cast(const(char)[])this.literal;
                 return actual.length;

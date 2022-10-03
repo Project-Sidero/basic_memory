@@ -52,7 +52,7 @@ mixin template StringBuilderOperations() {
     Iterator* newIterator(scope Iterator* iterator = null, ptrdiff_t minimumOffsetFromHead = 0,
             ptrdiff_t maximumOffsetFromHead = ptrdiff_t.max) @trusted {
         blockList.mutex.pureLock;
-        fixOffsetInput(iterator, minimumOffsetFromHead, maximumOffsetFromHead);
+        changeIndexToOffset(iterator, minimumOffsetFromHead, maximumOffsetFromHead);
 
         this.rcInternal(true);
         Iterator* ret = iteratorList.newIterator(&blockList, minimumOffsetFromHead, maximumOffsetFromHead);
@@ -80,7 +80,7 @@ mixin template StringBuilderOperations() {
         if (other.obj !is &this)
             other.mutex(true);
 
-        fixOffsetInput(iterator, offset);
+        changeIndexToOffset(iterator, offset);
 
         size_t maximumOffsetFromHead;
         Cursor cursor = cursorFor(iterator, maximumOffsetFromHead, offset);
@@ -94,7 +94,7 @@ mixin template StringBuilderOperations() {
     // exposed /\/\/\/\/\
     // internal \/\/\/\/
 
-    void fixOffsetInput(Iterator* iterator, ref ptrdiff_t a) {
+    void changeIndexToOffset(Iterator* iterator, ref ptrdiff_t a) {
         size_t actualLength;
 
         if (iterator is null)
@@ -108,7 +108,7 @@ mixin template StringBuilderOperations() {
         }
     }
 
-    void fixOffsetInput(Iterator* iterator, ref ptrdiff_t a, ref ptrdiff_t b) {
+    void changeIndexToOffset(Iterator* iterator, ref ptrdiff_t a, ref ptrdiff_t b) {
         size_t actualLength;
 
         if (iterator !is null) {
