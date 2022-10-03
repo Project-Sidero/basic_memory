@@ -605,6 +605,9 @@ nothrow @safe:
     }
 
     ///
+    alias put = append;
+
+    ///
     bool empty() scope @nogc {
         return state is null ? true : (iterator is null ? (this.length == 0) : iterator.empty);
     }

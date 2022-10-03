@@ -1082,6 +1082,9 @@ nothrow @safe:
     }
 
     ///
+    alias put = append;
+
+    ///
     bool empty() scope @nogc {
         return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
             assert(state !is null);
