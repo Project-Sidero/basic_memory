@@ -113,9 +113,9 @@ mixin template StringBuilderOperations() {
 
         if (iterator !is null) {
             actualLength = iterator.backwards.offsetFromHead - iterator.forwards.offsetFromHead;
-            if (a == size_t.max)
+            if (a == ptrdiff_t.max)
                 a = iterator.maximumOffsetFromHead;
-            if (b == size_t.max)
+            if (b == ptrdiff_t.max)
                 b = iterator.maximumOffsetFromHead;
         } else
             actualLength = blockList.numberOfItems;

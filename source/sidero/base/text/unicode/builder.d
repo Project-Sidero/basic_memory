@@ -549,8 +549,9 @@ nothrow @safe:
     }
 
     ///
-    StringBuilder_UTF opIndex(size_t index) scope @nogc {
-        return this[index .. index + 1];
+    StringBuilder_UTF opIndex(ptrdiff_t index) scope @nogc {
+        ptrdiff_t end = index < 0 ? ptrdiff_t.max : index + 1;
+        return this[index .. end];
     }
 
     ///
