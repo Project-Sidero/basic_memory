@@ -91,6 +91,18 @@ mixin template StringBuilderOperations() {
             other.mutex(false);
     }
 
+    void externalRemove(scope Iterator* iterator, ptrdiff_t offset, size_t amount) @trusted {
+        blockList.mutex.pureLock;
+
+        changeIndexToOffset(iterator, offset);
+
+        size_t maximumOffsetFromHead;
+        Cursor cursor = cursorFor(iterator, maximumOffsetFromHead, offset);
+        removeOperation(cursor, maximumOffsetFromHead, amount);
+
+        blockList.mutex.unlock;
+    }
+
     // exposed /\/\/\/\/\
     // internal \/\/\/\/
 
@@ -159,23 +171,27 @@ mixin template StringBuilderOperations() {
 
     // keeps position the same position
     void removeOperation(scope Iterator* iterator, scope ref Cursor cursor, size_t amount) {
-        size_t minimumOffsetFromHead = 0, maximumOffsetFromHead = blockList.numberOfItems;
+        size_t maximumOffsetFromHead = blockList.numberOfItems;
 
         if (iterator !is null) {
-            minimumOffsetFromHead = iterator.minimumOffsetFromHead;
             maximumOffsetFromHead = iterator.maximumOffsetFromHead;
         }
 
+        removeOperation(cursor, maximumOffsetFromHead, amount);
+    }
+
+    // keeps position the same position
+    void removeOperation(scope ref Cursor cursor, size_t maximumOffsetFromHead, size_t amount) {
         if (cursor.offsetFromHead + amount > maximumOffsetFromHead) {
             assert(cursor.offsetFromHead < maximumOffsetFromHead);
             amount = maximumOffsetFromHead - cursor.offsetFromHead;
         }
 
-        // nothing to do
-        if (minimumOffsetFromHead == maximumOffsetFromHead || amount == 0)
-            return;
-
         size_t amountRemoved = amount;
+
+        // nothing to do
+        if (cursor.offsetFromHead >= maximumOffsetFromHead || amount == 0)
+            return;
 
         foreach (iterator; iteratorList) {
             iterator.onRemoveDecreaseFromHead(cursor.offsetFromHead, amount);

@@ -1448,6 +1448,30 @@ nothrow @safe:
     // stripLeft
     // stripRight
 
+    ///
+    void remove(ptrdiff_t index, size_t amount) scope @nogc {
+        state.handle((StateIterator.S8 state, ref StateIterator.I8 iterator) {
+            assert(state !is null);
+            state.externalRemove(iterator, index, amount);
+        }, (StateIterator.S16 state, ref StateIterator.I16 iterator) {
+            assert(state !is null);
+            state.externalRemove(iterator, index, amount);
+        }, (StateIterator.S32 state, ref StateIterator.I32 iterator) {
+            assert(state !is null);
+            state.externalRemove(iterator, index, amount);
+        });
+    }
+
+    ///
+    unittest {
+        StringBuilder_UTF builder = "hello world!";
+
+        builder.remove(-1, 2);
+        builder.remove(2, 2);
+
+        assert(builder == "heo world");
+    }
+
     @nogc {
         ///
         StringBuilder_UTF insert(ptrdiff_t index, scope const(char)[] input...) scope return {

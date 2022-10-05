@@ -718,6 +718,22 @@ nothrow @safe:
     // stripLeft
     // stripRight
 
+    ///
+    void remove(ptrdiff_t index, size_t amount) scope @nogc {
+        if (state !is null)
+            state.externalRemove(iterator, index, amount);
+    }
+
+    ///
+    unittest {
+        StringBuilder_ASCII builder = "hello world!";
+
+        builder.remove(-1, 2);
+        builder.remove(2, 2);
+
+        assert(builder == "heo world");
+    }
+
     @nogc {
         ///
         StringBuilder_ASCII insert(ptrdiff_t index, scope const(char)[] input...) scope return {
