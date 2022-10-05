@@ -303,7 +303,7 @@ nothrow @safe:
             auto osat = latc.get;
 
             state.language = language;
-            state.externalInsert(iterator, 0, osat);
+            state.externalInsert(iterator, 0, osat, false);
         }, (StateIterator.S16 state, StateIterator.I16 iterator) @trusted {
             assert(state !is null);
 
@@ -312,7 +312,7 @@ nothrow @safe:
             auto osat = latc.get;
 
             state.language = language;
-            state.externalInsert(iterator, 0, osat);
+            state.externalInsert(iterator, 0, osat, false);
         }, (StateIterator.S32 state, StateIterator.I32 iterator) @trusted {
             assert(state !is null);
 
@@ -321,7 +321,7 @@ nothrow @safe:
             auto osat = latc.get;
 
             state.language = language;
-            state.externalInsert(iterator, 0, osat);
+            state.externalInsert(iterator, 0, osat, false);
         });
     }
 
@@ -2070,6 +2070,129 @@ nothrow @safe:
         }
     }
 
+    @nogc {
+        ///
+        StringBuilder_UTF clobberInsert(ptrdiff_t index, scope const(char)[] input...) scope return {
+            insertImplSlice(input, index, true);
+            return this;
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("abc").clobberInsert(-1, cast(string)"def") == "abdef");
+        }
+
+        ///
+        StringBuilder_UTF clobberInsert(ptrdiff_t index, scope const(wchar)[] input...) scope return {
+            insertImplSlice(input, index, true);
+            return this;
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("abc").clobberInsert(-1, "def"w) == "abdef");
+        }
+
+        ///
+        StringBuilder_UTF clobberInsert(ptrdiff_t index, scope const(dchar)[] input...) scope return {
+            insertImplSlice(input, index, true);
+            return this;
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("abc").clobberInsert(-1, "def"d) == "abdef");
+        }
+
+        ///
+        StringBuilder_UTF clobberInsert(ptrdiff_t index, scope String_ASCII input) scope return {
+            insertImplReadOnly(input, index, true);
+            return this;
+        }
+
+        ///
+        @trusted unittest {
+            assert(StringBuilder_UTF("abc").clobberInsert(-1, String_ASCII("def")) == "abdef");
+        }
+
+        ///
+        StringBuilder_UTF clobberInsert(ptrdiff_t index, scope String_UTF8 input) scope return {
+            insertImplReadOnly(input, index, true);
+            return this;
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("abc").clobberInsert(-1, String_UTF8("def")) == "abdef");
+        }
+
+        ///
+        StringBuilder_UTF clobberInsert(ptrdiff_t index, scope String_UTF16 input) scope return {
+            insertImplReadOnly(input, index, true);
+            return this;
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("abc").clobberInsert(-1, String_UTF16("def"w)) == "abdef");
+        }
+
+        ///
+        StringBuilder_UTF clobberInsert(ptrdiff_t index, scope String_UTF32 input) scope return {
+            insertImplReadOnly(input, index, true);
+            return this;
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("abc").clobberInsert(-1, String_UTF32("def"d)) == "abdef");
+        }
+
+        ///
+        StringBuilder_UTF clobberInsert(ptrdiff_t index, scope StringBuilder_ASCII input) scope return {
+            insertImplBuilder(input, index, true);
+            return this;
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("abc").clobberInsert(-1, StringBuilder_ASCII("def")) == "abdef");
+        }
+
+        ///
+        StringBuilder_UTF clobberInsert(ptrdiff_t index, scope StringBuilder_UTF8 input) scope return {
+            insertImplBuilder(input, index, true);
+            return this;
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("abc"d).clobberInsert(-1, StringBuilder_UTF8("def")) == "abdef");
+        }
+
+        ///
+        StringBuilder_UTF clobberInsert(ptrdiff_t index, scope StringBuilder_UTF16 input) scope return {
+            insertImplBuilder(input, index, true);
+            return this;
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("abc").clobberInsert(-1, StringBuilder_UTF16("def"w)) == "abdef");
+        }
+
+        ///
+        StringBuilder_UTF clobberInsert(ptrdiff_t index, scope StringBuilder_UTF32 input) scope return {
+            insertImplBuilder(input, index, true);
+            return this;
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("abc").clobberInsert(-1, StringBuilder_UTF32("def"d)) == "abdef");
+        }
+    }
+
     ///
     ulong toHash() scope @trusted @nogc {
         import sidero.base.hash.fnv : fnv_64_1a;
@@ -2298,7 +2421,7 @@ private:
             });
         }
 
-        void insertImplReadOnly(scope String_ASCII other, ptrdiff_t offset = 0) {
+        void insertImplReadOnly(scope String_ASCII other, ptrdiff_t offset = 0, bool clobber = false) {
             setupState;
 
             state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
@@ -2308,7 +2431,7 @@ private:
                 alat.literal = other.literal;
                 scope osiu = alat.get;
 
-                state.externalInsert(iterator, offset, osiu);
+                state.externalInsert(iterator, offset, osiu, clobber);
             }, (StateIterator.S16 state, StateIterator.I16 iterator) {
                 assert(state !is null);
 
@@ -2316,7 +2439,7 @@ private:
                 alat.literal = other.literal;
                 scope osiu = alat.get;
 
-                state.externalInsert(iterator, offset, osiu);
+                state.externalInsert(iterator, offset, osiu, clobber);
             }, (StateIterator.S32 state, StateIterator.I32 iterator) {
                 assert(state !is null);
 
@@ -2324,17 +2447,17 @@ private:
                 alat.literal = other.literal;
                 scope osiu = alat.get;
 
-                state.externalInsert(iterator, offset, osiu);
+                state.externalInsert(iterator, offset, osiu, clobber);
             });
         }
 
-        void insertImplReadOnly(Char2)(scope String_UTF!Char2 other, ptrdiff_t offset = 0) {
-            other.literalEncoding.handle(() @trusted { insertImplSlice(cast(string)other.literal, offset); }, () @trusted {
-                insertImplSlice(cast(wstring)other.literal, offset);
-            }, () @trusted { insertImplSlice(cast(dstring)other.literal, offset); });
+        void insertImplReadOnly(Char2)(scope String_UTF!Char2 other, ptrdiff_t offset = 0, bool clobber = false) {
+            other.literalEncoding.handle(() @trusted { insertImplSlice(cast(string)other.literal, offset, clobber); }, () @trusted {
+                insertImplSlice(cast(wstring)other.literal, offset, clobber);
+            }, () @trusted { insertImplSlice(cast(dstring)other.literal, offset, clobber); });
         }
 
-        void insertImplSlice(Char2)(scope const(Char2)[] other, ptrdiff_t offset = 0) {
+        void insertImplSlice(Char2)(scope const(Char2)[] other, ptrdiff_t offset = 0, bool clobber = false) {
             setupState;
 
             state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
@@ -2344,7 +2467,7 @@ private:
                 lat.literal = other;
                 scope osiu = lat.get;
 
-                state.externalInsert(iterator, offset, osiu);
+                state.externalInsert(iterator, offset, osiu, clobber);
             }, (StateIterator.S16 state, StateIterator.I16 iterator) {
                 assert(state !is null);
 
@@ -2352,7 +2475,7 @@ private:
                 lat.literal = other;
                 scope osiu = lat.get;
 
-                state.externalInsert(iterator, offset, osiu);
+                state.externalInsert(iterator, offset, osiu, clobber);
             }, (StateIterator.S32 state, StateIterator.I32 iterator) {
                 assert(state !is null);
 
@@ -2360,11 +2483,11 @@ private:
                 lat.literal = other;
                 scope osiu = lat.get;
 
-                state.externalInsert(iterator, offset, osiu);
+                state.externalInsert(iterator, offset, osiu, clobber);
             });
         }
 
-        void insertImplBuilder(scope StringBuilder_ASCII other, ptrdiff_t offset = 0) {
+        void insertImplBuilder(scope StringBuilder_ASCII other, ptrdiff_t offset = 0, bool clobber = false) {
             setupState;
 
             state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
@@ -2375,7 +2498,7 @@ private:
                 asat.iterator = other.iterator;
                 scope osiu = asat.get;
 
-                state.externalInsert(iterator, offset, osiu);
+                state.externalInsert(iterator, offset, osiu, clobber);
             }, (StateIterator.S16 state, StateIterator.I16 iterator) {
                 assert(state !is null);
 
@@ -2384,7 +2507,7 @@ private:
                 asat.iterator = other.iterator;
                 scope osiu = asat.get;
 
-                state.externalInsert(iterator, offset, osiu);
+                state.externalInsert(iterator, offset, osiu, clobber);
             }, (StateIterator.S32 state, StateIterator.I32 iterator) {
                 assert(state !is null);
 
@@ -2393,28 +2516,28 @@ private:
                 asat.iterator = other.iterator;
                 scope osiu = asat.get;
 
-                state.externalInsert(iterator, offset, osiu);
+                state.externalInsert(iterator, offset, osiu, clobber);
             });
         }
 
-        void insertImplBuilder(Char2)(scope StringBuilder_UTF!Char2 other, ptrdiff_t offset = 0) {
+        void insertImplBuilder(Char2)(scope StringBuilder_UTF!Char2 other, ptrdiff_t offset = 0, bool clobber = false) {
             setupState;
 
             state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
                 assert(state !is null);
 
                 AnyStateIteratorAsUs!char asiau = AnyStateIteratorAsUs!char(other.state);
-                state.externalInsert(iterator, offset, asiau.osat);
+                state.externalInsert(iterator, offset, asiau.osat, clobber);
             }, (StateIterator.S16 state, StateIterator.I16 iterator) {
                 assert(state !is null);
 
                 AnyStateIteratorAsUs!wchar asiau = AnyStateIteratorAsUs!wchar(other.state);
-                state.externalInsert(iterator, offset, asiau.osat);
+                state.externalInsert(iterator, offset, asiau.osat, clobber);
             }, (StateIterator.S32 state, StateIterator.I32 iterator) {
                 assert(state !is null);
 
                 AnyStateIteratorAsUs!dchar asiau = AnyStateIteratorAsUs!dchar(other.state);
-                state.externalInsert(iterator, offset, asiau.osat);
+                state.externalInsert(iterator, offset, asiau.osat, clobber);
             });
         }
     }

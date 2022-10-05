@@ -75,7 +75,7 @@ mixin template StringBuilderOperations() {
         return ret;
     }
 
-    void externalInsert(scope Iterator* iterator, ptrdiff_t offset, scope ref OtherStateAsTarget!Char other) @trusted {
+    void externalInsert(scope Iterator* iterator, ptrdiff_t offset, scope ref OtherStateAsTarget!Char other, bool clobber) @trusted {
         blockList.mutex.pureLock;
         if (other.obj !is &this)
             other.mutex(true);
@@ -84,7 +84,7 @@ mixin template StringBuilderOperations() {
 
         size_t maximumOffsetFromHead;
         Cursor cursor = cursorFor(iterator, maximumOffsetFromHead, offset);
-        insertOperation(cursor, maximumOffsetFromHead, other);
+        insertOperation(cursor, maximumOffsetFromHead, other, clobber);
 
         blockList.mutex.unlock;
         if (other.obj !is &this)
@@ -155,90 +155,6 @@ mixin template StringBuilderOperations() {
         ret.setup(&blockList, offset);
 
         return ret;
-    }
-
-    size_t clobberInsertOperation(scope Iterator* iterator, scope ref Cursor cursor, scope Char[] literal...) {
-        size_t maximumOffsetFromHead = blockList.numberOfItems;
-
-        if (iterator !is null)
-            maximumOffsetFromHead = iterator.maximumOffsetFromHead;
-
-        return clobberInsertOperation(cursor, maximumOffsetFromHead, literal);
-    }
-
-    size_t clobberInsertOperation(scope ref Cursor cursor, size_t maximumOffsetFromHead, scope Char[] literal...) {
-        size_t canDo = maximumOffsetFromHead - cursor.offsetFromHead, done;
-        if (literal.length < canDo)
-            canDo = literal.length;
-
-        while (canDo > 0) {
-            size_t toDo = cursor.block.length - cursor.offsetIntoBlock;
-            if (toDo > canDo)
-                toDo = canDo;
-
-            scope blockData = cursor.block.get()[cursor.offsetIntoBlock .. cursor.offsetIntoBlock + toDo];
-            onRemove(blockData);
-            onInsert(literal[0 .. toDo]);
-
-            foreach (i, ref c; blockData)
-                c = literal[i];
-
-            canDo -= toDo;
-            done += toDo;
-
-            literal = literal[toDo .. $];
-            cursor.advanceForward(toDo, maximumOffsetFromHead, true);
-            assert(canDo == 0 || cursor.offsetIntoBlock == 0);
-        }
-
-        if (literal.length > 0) {
-            LiteralAsTarget literalAsTarget;
-            literalAsTarget.literal = literal;
-            scope lAT = literalAsTarget.get;
-
-            done += this.insertOperation(cursor, maximumOffsetFromHead, lAT);
-        }
-
-        return done;
-    }
-
-    @trusted unittest {
-        enum StartText = cast(Char[])"Hello, world!Hello, world!Hello, world!Hello, world!";
-        enum ReplaceFor = cast(Char[])"stop it";
-        enum Result = cast(Char[])"Hello, world!Hello, world!Hello, stop itHello, world!";
-        enum Offset = 33;
-        enum Max = 39;
-
-        OpTest!Char opTest = OpTest!Char(globalAllocator());
-
-        {
-            opTest.Cursor insertCursor;
-            opTest.LiteralAsTarget lAT;
-            lAT.literal = StartText;
-            scope target = lAT.get();
-
-            insertCursor.setup(&opTest.blockList, 0);
-            opTest.insertOperation(null, insertCursor, target);
-        }
-
-        {
-            opTest.Cursor cursor;
-            cursor.setup(&opTest.blockList, Offset);
-
-            opTest.clobberInsertOperation(cursor, Max, ReplaceFor);
-        }
-
-        {
-            scope opTest.LiteralMatcher literalMatcher;
-            literalMatcher.literal = cast(Char[])Result;
-
-            opTest.Cursor literalCursor;
-            literalCursor.setup(&opTest.blockList, 0);
-
-            bool matched = literalMatcher.matches(literalCursor, opTest.blockList.numberOfItems);
-            assert(matched);
-            assert(opTest.blockList.numberOfItems == Result.length);
-        }
     }
 
     // keeps position the same position
@@ -508,17 +424,19 @@ mixin template StringBuilderOperations() {
         }
     }
 
-    size_t insertOperation(scope Iterator* iterator, scope ref Cursor cursor, scope ref OtherStateAsTarget!Char toInsert) {
+    size_t insertOperation(scope Iterator* iterator, scope ref Cursor cursor, scope ref OtherStateAsTarget!Char toInsert,
+            bool clobber = false) {
         size_t maximumOffsetFromHead = blockList.numberOfItems;
 
         if (iterator !is null)
             maximumOffsetFromHead = iterator.maximumOffsetFromHead;
 
-        return insertOperation(cursor, maximumOffsetFromHead, toInsert);
+        return insertOperation(cursor, maximumOffsetFromHead, toInsert, clobber);
     }
 
     // advances to end of inserted content
-    size_t insertOperation(scope ref Cursor cursor, size_t maximumOffsetFromHead, scope ref OtherStateAsTarget!Char toInsert) {
+    size_t insertOperation(scope ref Cursor cursor, size_t maximumOffsetFromHead,
+            scope ref OtherStateAsTarget!Char toInsert, bool clobber = false) {
         const amountInserted = toInsert.length();
         size_t amountToInsert = amountInserted, startOffsetFromHead = cursor.offsetFromHead;
 
@@ -558,53 +476,95 @@ mixin template StringBuilderOperations() {
             assert(cursor.block.next !is null);
         }
 
-        toInsert.foreachContiguous((ref scope Char[] cA) @trusted {
-            onInsert(cA);
+        void ensureNotInFullBlock() {
+            if (cursor.block.length == BlockList.Count) {
+                // we are maxed out, oh noes
 
-            while (cA.length > 0) {
-                if (cursor.block.length == BlockList.Count) {
-                    // we are maxed out, oh noes
+                if (cursor.offsetIntoBlock == BlockList.Count) {
+                    // at end of the current block,
+                    // new block time!
+                    Block* newBlock = blockList.insert(cursor.block);
+                    cursor.block = newBlock;
+                    cursor.offsetIntoBlock = 0;
+                } else {
+                    // split everything at and to the right
+                    Block* splitInto = blockList.insert(cursor.block);
+                    cursor.block.moveFromInto(cursor.offsetIntoBlock, cursor.block.length - cursor.offsetIntoBlock, splitInto, 0);
 
-                    if (cursor.offsetIntoBlock == BlockList.Count) {
-                        // at end of the current block,
-                        // new block time!
-                        Block* newBlock = blockList.insert(cursor.block);
-                        cursor.block = newBlock;
-                        cursor.offsetIntoBlock = 0;
-                    } else {
-                        // split everything at and to the right
-                        Block* splitInto = blockList.insert(cursor.block);
-                        cursor.block.moveFromInto(cursor.offsetIntoBlock, cursor.block.length - cursor.offsetIntoBlock, splitInto, 0);
-
-                        assert(cursor.offsetIntoBlock == cursor.block.length);
-                        assert(splitInto.length == BlockList.Count - cursor.offsetIntoBlock);
-                    }
+                    assert(cursor.offsetIntoBlock == cursor.block.length);
+                    assert(splitInto.length == BlockList.Count - cursor.offsetIntoBlock);
                 }
+            }
+        }
 
-                {
-                    size_t canDo = BlockList.Count - cursor.offsetIntoBlock;
+        toInsert.foreachContiguous((ref scope Char[] cA) @trusted {
+            // clobbering only
+            {
+                if (cursor.offsetFromHead >= maximumOffsetFromHead)
+                    clobber = false;
+
+                if (clobber) {
+                    size_t canDo = maximumOffsetFromHead - cursor.offsetFromHead;
                     if (canDo > cA.length)
                         canDo = cA.length;
-                    assert(canDo > 0);
 
-                    if (cursor.offsetIntoBlock < cursor.block.length) {
-                        // oh noes, there stuff on the right!
-                        const oldOffsetInBlock = cursor.offsetIntoBlock, newOffsetInBlock = cursor.offsetIntoBlock + canDo;
-                        cursor.block.moveRight(oldOffsetInBlock, newOffsetInBlock);
-                    } else
-                        cursor.block.length += canDo;
+                    while (cA.length > 0 && canDo > 0) {
+                        size_t canDoBlock = canDo;
+                        if (canDoBlock > cursor.block.length - cursor.offsetIntoBlock)
+                            canDoBlock = cursor.block.length - cursor.offsetIntoBlock;
 
-                    Char[] got = cursor.block.get()[cursor.offsetIntoBlock .. $];
-                    foreach (i, c; cA[0 .. canDo])
-                        got[i] = c;
+                        if (canDoBlock == 0)
+                            break;
 
-                    cA = cA[canDo .. $];
-                    assert(amountToInsert >= canDo);
-                    amountToInsert -= canDo;
+                        Char[] got = cursor.block.get()[cursor.offsetIntoBlock .. $];
 
-                    maximumOffsetFromHead += canDo;
-                    cursor.advanceForward(canDo, maximumOffsetFromHead, false);
-                    blockList.numberOfItems += canDo;
+                        foreach (i, c; cA[0 .. canDoBlock])
+                            got[i] = c;
+
+                        onRemove(got[0 .. canDoBlock]);
+                        cA = cA[canDoBlock .. $];
+
+                        assert(amountToInsert >= canDoBlock);
+                        canDo -= canDoBlock;
+                        amountToInsert -= canDoBlock;
+                        cursor.advanceForward(canDoBlock, maximumOffsetFromHead, false);
+                    }
+
+                }
+            }
+
+            // insertion only
+            {
+                while (cA.length > 0) {
+                    ensureNotInFullBlock;
+
+                    {
+                        size_t canDo = BlockList.Count - cursor.offsetIntoBlock;
+                        if (canDo > cA.length)
+                            canDo = cA.length;
+                        assert(canDo > 0);
+
+                        if (cursor.offsetIntoBlock < cursor.block.length) {
+                            // oh noes, there stuff on the right!
+                            const oldOffsetInBlock = cursor.offsetIntoBlock, newOffsetInBlock = cursor.offsetIntoBlock + canDo;
+                            cursor.block.moveRight(oldOffsetInBlock, newOffsetInBlock);
+                        } else
+                            cursor.block.length += canDo;
+
+                        Char[] got = cursor.block.get()[cursor.offsetIntoBlock .. $];
+                        foreach (i, c; cA[0 .. canDo])
+                            got[i] = c;
+
+                        onInsert(cA[0 .. canDo]);
+
+                        cA = cA[canDo .. $];
+                        assert(amountToInsert >= canDo);
+                        amountToInsert -= canDo;
+
+                        maximumOffsetFromHead += canDo;
+                        cursor.advanceForward(canDo, maximumOffsetFromHead, false);
+                        blockList.numberOfItems += canDo;
+                    }
                 }
             }
 
@@ -719,6 +679,49 @@ mixin template StringBuilderOperations() {
         opTest.iteratorList.rcIteratorInternal(false, iterator2);
         opTest.iteratorList.rcIteratorInternal(false, iterator3);
         opTest.iteratorList.rcIteratorInternal(false, iterator4);
+    }
+
+    @trusted unittest {
+        enum StartText = cast(Char[])"Hello, world!Hello, world!Hello, world!Hello, world!";
+        enum ReplaceFor = cast(Char[])"stop it";
+        enum Result = cast(Char[])"Hello, world!Hello, world!Hello, stop itHello, world!";
+        enum Offset = 33;
+        enum Max = 39;
+
+        OpTest!Char opTest = OpTest!Char(globalAllocator());
+
+        {
+            opTest.Cursor insertCursor;
+            opTest.LiteralAsTarget lAT;
+            lAT.literal = StartText;
+            scope target = lAT.get();
+
+            insertCursor.setup(&opTest.blockList, 0);
+            opTest.insertOperation(null, insertCursor, target);
+        }
+
+        {
+            opTest.Cursor cursor;
+            cursor.setup(&opTest.blockList, Offset);
+
+            scope opTest.LiteralAsTarget literalAsTarget;
+            literalAsTarget.literal = ReplaceFor;
+            scope osat = literalAsTarget.get;
+
+            opTest.insertOperation(cursor, Max, osat, true);
+        }
+
+        {
+            scope opTest.LiteralMatcher literalMatcher;
+            literalMatcher.literal = cast(Char[])Result;
+
+            opTest.Cursor literalCursor;
+            literalCursor.setup(&opTest.blockList, 0);
+
+            bool matched = literalMatcher.matches(literalCursor, opTest.blockList.numberOfItems);
+            assert(matched);
+            assert(opTest.blockList.numberOfItems == Result.length);
+        }
     }
 
     size_t replaceOperation(scope Iterator* iterator, scope ref Cursor cursor, scope size_t delegate(scope Cursor,

@@ -184,7 +184,7 @@ nothrow @safe:
         latc.literal = cast(LiteralType)input;
         auto osat = latc.get;
 
-        state.externalInsert(iterator, 0, osat);
+        state.externalInsert(iterator, 0, osat, false);
     }
 
     ///
@@ -948,6 +948,52 @@ nothrow @safe:
         }
     }
 
+    @nogc {
+        ///
+        StringBuilder_ASCII clobberInsert(ptrdiff_t index, scope const(char)[] input...) scope return {
+            this.insertImplSlice(input, index, true);
+            return this;
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_ASCII("abc").clobberInsert(-1, "def") == "abdef");
+        }
+
+        ///
+        StringBuilder_ASCII clobberInsert(ptrdiff_t index, scope LiteralType input...) scope return {
+            this.insertImplSlice(input, index, true);
+            return this;
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_ASCII("abc").clobberInsert(-1, cast(LiteralType)"def") == "abdef");
+        }
+
+        ///
+        StringBuilder_ASCII clobberInsert(ptrdiff_t index, scope String_ASCII input) scope return {
+            this.insertImplReadOnly(input, index, true);
+            return this;
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_ASCII("abc").clobberInsert(-1, String_ASCII("def")) == "abdef");
+        }
+
+        ///
+        StringBuilder_ASCII clobberInsert(ptrdiff_t index, scope StringBuilder_ASCII input) scope return {
+            this.insertImplBuilder(input, index, true);
+            return this;
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_ASCII("abc").clobberInsert(-1, StringBuilder_ASCII("def")) == "abdef");
+        }
+    }
+
     ///
     ulong toHash() scope @trusted @nogc {
         import sidero.base.hash.fnv : fnv_64_1a;
@@ -1040,27 +1086,27 @@ private:
                 return state.externalOpCmp(iterator, osiu, caseSensitive);
         }
 
-        void insertImplReadOnly(scope String_ASCII other, ptrdiff_t offset = 0) {
+        void insertImplReadOnly(scope String_ASCII other, ptrdiff_t offset = 0, bool clobber = false) {
             setupState;
 
             ASCII_State.LiteralAsTarget alat;
             alat.literal = other.literal;
             scope osiu = alat.get;
 
-            state.externalInsert(iterator, offset, osiu);
+            state.externalInsert(iterator, offset, osiu, clobber);
         }
 
-        void insertImplSlice(Char2)(scope const(Char2)[] other, ptrdiff_t offset = 0) @trusted {
+        void insertImplSlice(Char2)(scope const(Char2)[] other, ptrdiff_t offset = 0, bool clobber = false) @trusted {
             setupState;
 
             ASCII_State.LiteralAsTarget lat;
             lat.literal = cast(LiteralType)other;
             scope osiu = lat.get;
 
-            state.externalInsert(iterator, offset, osiu);
+            state.externalInsert(iterator, offset, osiu, clobber);
         }
 
-        void insertImplBuilder(scope StringBuilder_ASCII other, ptrdiff_t offset = 0) {
+        void insertImplBuilder(scope StringBuilder_ASCII other, ptrdiff_t offset = 0, bool clobber = false) {
             setupState;
 
             ASCII_State.OtherStateIsUs asat;
@@ -1068,7 +1114,7 @@ private:
             asat.iterator = other.iterator;
             scope osiu = asat.get;
 
-            state.externalInsert(iterator, offset, osiu);
+            state.externalInsert(iterator, offset, osiu, clobber);
         }
     }
 }
