@@ -394,7 +394,7 @@ bool expandArray(T, Allocator)(scope auto ref Allocator alloc, scope ref T[] arr
     }
 
     array[originalLength .. $] = T.init;
-    array = temp;
+    array = cast(T[])temp;
     return true;
 }
 
