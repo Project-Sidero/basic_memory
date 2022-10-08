@@ -106,7 +106,7 @@ mixin template StringBuilderOperations() {
     // exposed /\/\/\/\/\
     // internal \/\/\/\/
 
-    void changeIndexToOffset(Iterator* iterator, ref ptrdiff_t a) {
+    void changeIndexToOffset(scope Iterator* iterator, scope ref ptrdiff_t a) {
         size_t actualLength;
 
         if (iterator is null)
@@ -120,7 +120,7 @@ mixin template StringBuilderOperations() {
         }
     }
 
-    void changeIndexToOffset(Iterator* iterator, ref ptrdiff_t a, ref ptrdiff_t b) {
+    void changeIndexToOffset(scope Iterator* iterator, scope ref ptrdiff_t a, scope ref ptrdiff_t b) {
         size_t actualLength;
 
         if (iterator !is null) {

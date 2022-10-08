@@ -771,6 +771,21 @@ nothrow @safe:
         }
 
         ///
+        bool opEquals(scope String_ASCII other) scope {
+            return opCmp(other) == 0;
+        }
+
+        ///
+        unittest {
+            StringBuilder_UTF first = StringBuilder_UTF(cast(LiteralType)"first");
+            String_ASCII notFirst = String_ASCII("first");
+            String_ASCII third = String_ASCII("third");
+
+            assert(first == notFirst);
+            assert(first != third);
+        }
+
+        ///
         bool opEquals(scope String_UTF8 other) scope {
             return opCmp(other) == 0;
         }
@@ -790,21 +805,6 @@ nothrow @safe:
             StringBuilder_UTF first = StringBuilder_UTF(cast(LiteralType)"first");
             String_UTF!Char notFirst = String_UTF!Char(cast(LiteralType)"first");
             String_UTF!Char third = String_UTF!Char(cast(LiteralType)"third");
-
-            assert(first == notFirst);
-            assert(first != third);
-        }
-
-        ///
-        bool opEquals(scope String_ASCII other) scope {
-            return opCmp(other) == 0;
-        }
-
-        ///
-        unittest {
-            StringBuilder_UTF first = StringBuilder_UTF(cast(LiteralType)"first");
-            String_ASCII notFirst = String_ASCII("first");
-            String_ASCII third = String_ASCII("third");
 
             assert(first == notFirst);
             assert(first != third);
@@ -1433,10 +1433,498 @@ nothrow @safe:
         assert(text.length == text.byUTF32().length);
     }
 
-    // startsWith
-    // ignoreCaseStartsWith
-    // endsWith
-    // ignoreCaseEndsWith
+    @nogc {
+        ///
+        bool startsWith(scope const(char)[] input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return startsWithImplSlice(input, true, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").startsWith("don't"));
+            assert(!StringBuilder_UTF("don't cha").startsWith("cha"));
+        }
+
+        ///
+        bool startsWith(scope const(wchar)[] input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return startsWithImplSlice(input, true, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").startsWith("don't"w));
+            assert(!StringBuilder_UTF("don't cha").startsWith("cha"w));
+        }
+
+        ///
+        bool startsWith(scope const(dchar)[] input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return startsWithImplSlice(input, true, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").startsWith("don't"d));
+            assert(!StringBuilder_UTF("don't cha").startsWith("cha"d));
+        }
+
+        ///
+        bool startsWith(scope String_ASCII input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return startsWithImplReadOnly(input, true, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").startsWith(String_ASCII("don't")));
+            assert(!StringBuilder_UTF("don't cha").startsWith(String_ASCII("cha")));
+        }
+
+        ///
+        bool startsWith(scope String_UTF8 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return startsWithImplReadOnly(input, true, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").startsWith(String_UTF8("don't")));
+            assert(!StringBuilder_UTF("don't cha").startsWith(String_UTF8("cha")));
+        }
+
+        ///
+        bool startsWith(scope String_UTF16 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return startsWithImplReadOnly(input, true, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").startsWith(String_UTF16("don't"w)));
+            assert(!StringBuilder_UTF("don't cha").startsWith(String_UTF16("cha"w)));
+        }
+
+        ///
+        bool startsWith(scope String_UTF32 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return startsWithImplReadOnly(input, true, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").startsWith(String_UTF32("don't"d)));
+            assert(!StringBuilder_UTF("don't cha").startsWith(String_UTF32("cha"d)));
+        }
+
+        ///
+        bool startsWith(scope StringBuilder_ASCII input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return startsWithImplBuilder(input, true, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").startsWith(StringBuilder_ASCII("don't")));
+            assert(!StringBuilder_UTF("don't cha").startsWith(StringBuilder_ASCII("cha")));
+        }
+
+        ///
+        bool startsWith(scope StringBuilder_UTF8 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return startsWithImplBuilder(input, true, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").startsWith(StringBuilder_UTF8("don't")));
+            assert(!StringBuilder_UTF("don't cha").startsWith(StringBuilder_UTF8("cha")));
+        }
+
+        ///
+        bool startsWith(scope StringBuilder_UTF16 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return startsWithImplBuilder(input, true, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").startsWith(StringBuilder_UTF16("don't"w)));
+            assert(!StringBuilder_UTF("don't cha").startsWith(StringBuilder_UTF16("cha"w)));
+        }
+
+        ///
+        bool startsWith(scope StringBuilder_UTF32 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return startsWithImplBuilder(input, true, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").startsWith(StringBuilder_UTF32("don't"d)));
+            assert(!StringBuilder_UTF("don't cha").startsWith(StringBuilder_UTF32("cha"d)));
+        }
+    }
+
+    @nogc {
+        ///
+        bool ignoreCaseStartsWith(scope const(char)[] input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return startsWithImplSlice(input, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").ignoreCaseStartsWith("dOn't"));
+            assert(!StringBuilder_UTF("don't cha").ignoreCaseStartsWith("cha"));
+        }
+
+        ///
+        bool ignoreCaseStartsWith(scope const(wchar)[] input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return startsWithImplSlice(input, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").ignoreCaseStartsWith("dOn't"w));
+            assert(!StringBuilder_UTF("don't cha").ignoreCaseStartsWith("cha"w));
+        }
+
+        ///
+        bool ignoreCaseStartsWith(scope const(dchar)[] input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return startsWithImplSlice(input, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").ignoreCaseStartsWith("dOn't"d));
+            assert(!StringBuilder_UTF("don't cha").ignoreCaseStartsWith("cha"d));
+        }
+
+        ///
+        bool ignoreCaseStartsWith(scope String_ASCII input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return startsWithImplReadOnly(input, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").ignoreCaseStartsWith(String_ASCII("dOn't")));
+            assert(!StringBuilder_UTF("don't cha").ignoreCaseStartsWith(String_ASCII("cha")));
+        }
+
+        ///
+        bool ignoreCaseStartsWith(scope String_UTF8 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return startsWithImplReadOnly(input, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").ignoreCaseStartsWith(String_UTF8("dOn't")));
+            assert(!StringBuilder_UTF("don't cha").ignoreCaseStartsWith(String_UTF8("cha")));
+        }
+
+        ///
+        bool ignoreCaseStartsWith(scope String_UTF16 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return startsWithImplReadOnly(input, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").ignoreCaseStartsWith(String_UTF16("dOn't"w)));
+            assert(!StringBuilder_UTF("don't cha").ignoreCaseStartsWith(String_UTF16("cha"w)));
+        }
+
+        ///
+        bool ignoreCaseStartsWith(scope String_UTF32 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return startsWithImplReadOnly(input, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").ignoreCaseStartsWith(String_UTF32("dOn't"d)));
+            assert(!StringBuilder_UTF("don't cha").ignoreCaseStartsWith(String_UTF32("cha"d)));
+        }
+
+        ///
+        bool ignoreCaseStartsWith(scope StringBuilder_ASCII input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return startsWithImplBuilder(input, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").ignoreCaseStartsWith(StringBuilder_ASCII("dOn't")));
+            assert(!StringBuilder_UTF("don't cha").ignoreCaseStartsWith(StringBuilder_ASCII("cha")));
+        }
+
+        ///
+        bool ignoreCaseStartsWith(scope StringBuilder_UTF8 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return startsWithImplBuilder(input, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").ignoreCaseStartsWith(StringBuilder_UTF8("dOn't")));
+            assert(!StringBuilder_UTF("don't cha").ignoreCaseStartsWith(StringBuilder_UTF8("cha")));
+        }
+
+        ///
+        bool ignoreCaseStartsWith(scope StringBuilder_UTF16 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return startsWithImplBuilder(input, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").ignoreCaseStartsWith(StringBuilder_UTF16("dOn't"w)));
+            assert(!StringBuilder_UTF("don't cha").ignoreCaseStartsWith(StringBuilder_UTF16("cha"w)));
+        }
+
+        ///
+        bool ignoreCaseStartsWith(scope StringBuilder_UTF32 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return startsWithImplBuilder(input, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").ignoreCaseStartsWith(StringBuilder_UTF32("dOn't"d)));
+            assert(!StringBuilder_UTF("don't cha").ignoreCaseStartsWith(StringBuilder_UTF32("cha"d)));
+        }
+    }
+
+    @nogc {
+        ///
+        bool endsWith(scope const(char)[] input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return endsWithImplSlice(input, true, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").endsWith("cha"));
+            assert(!StringBuilder_UTF("don't cha").endsWith("don't"));
+        }
+
+        ///
+        bool endsWith(scope const(wchar)[] input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return endsWithImplSlice(input, true, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").endsWith("cha"w));
+            assert(!StringBuilder_UTF("don't cha").endsWith("don't"w));
+        }
+
+        ///
+        bool endsWith(scope const(dchar)[] input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return endsWithImplSlice(input, true, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").endsWith("cha"d));
+            assert(!StringBuilder_UTF("don't cha").endsWith("don't"d));
+        }
+
+        ///
+        bool endsWith(scope String_ASCII input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return endsWithImplReadOnly(input, true, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").endsWith(String_ASCII("cha")));
+            assert(!StringBuilder_UTF("don't cha").endsWith(String_ASCII("don't")));
+        }
+
+        ///
+        bool endsWith(scope String_UTF8 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return endsWithImplReadOnly(input, true, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").endsWith(String_UTF8("cha")));
+            assert(!StringBuilder_UTF("don't cha").endsWith(String_UTF8("don't")));
+        }
+
+        ///
+        bool endsWith(scope String_UTF16 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return endsWithImplReadOnly(input, true, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").endsWith(String_UTF16("cha"w)));
+            assert(!StringBuilder_UTF("don't cha").endsWith(String_UTF16("don't"w)));
+        }
+
+        ///
+        bool endsWith(scope String_UTF32 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return endsWithImplReadOnly(input, true, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").endsWith(String_UTF32("cha"d)));
+            assert(!StringBuilder_UTF("don't cha").endsWith(String_UTF32("don't"d)));
+        }
+
+        ///
+        bool endsWith(scope StringBuilder_ASCII input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return endsWithImplBuilder(input, true, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").endsWith(StringBuilder_ASCII("cha")));
+            assert(!StringBuilder_UTF("don't cha").endsWith(StringBuilder_ASCII("don't")));
+        }
+
+        ///
+        bool endsWith(scope StringBuilder_UTF8 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return endsWithImplBuilder(input, true, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").endsWith(StringBuilder_UTF8("cha")));
+            assert(!StringBuilder_UTF("don't cha").endsWith(StringBuilder_UTF8("don't")));
+        }
+
+        ///
+        bool endsWith(scope StringBuilder_UTF16 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return endsWithImplBuilder(input, true, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").endsWith(StringBuilder_UTF16("cha"w)));
+            assert(!StringBuilder_UTF("don't cha").endsWith(StringBuilder_UTF16("don't"w)));
+        }
+
+        ///
+        bool endsWith(scope StringBuilder_UTF32 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return endsWithImplBuilder(input, true, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").endsWith(StringBuilder_UTF32("cha"d)));
+            assert(!StringBuilder_UTF("don't cha").endsWith(StringBuilder_UTF32("don't"d)));
+        }
+    }
+
+    @nogc {
+        ///
+        bool ignoreCaseEndsWith(scope const(char)[] input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return endsWithImplSlice(input, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").ignoreCaseEndsWith("cHa"));
+            assert(!StringBuilder_UTF("don't cha").ignoreCaseEndsWith("don't"));
+        }
+
+        ///
+        bool ignoreCaseEndsWith(scope const(wchar)[] input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return endsWithImplSlice(input, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").ignoreCaseEndsWith("cHa"w));
+            assert(!StringBuilder_UTF("don't cha").ignoreCaseEndsWith("don't"w));
+        }
+
+        ///
+        bool ignoreCaseEndsWith(scope const(dchar)[] input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return endsWithImplSlice(input, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").ignoreCaseEndsWith("cHa"d));
+            assert(!StringBuilder_UTF("don't cha").ignoreCaseEndsWith("don't"d));
+        }
+
+        ///
+        bool ignoreCaseEndsWith(scope String_ASCII input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return endsWithImplReadOnly(input, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").ignoreCaseEndsWith(String_ASCII("cHa")));
+            assert(!StringBuilder_UTF("don't cha").ignoreCaseEndsWith(String_ASCII("don't")));
+        }
+
+        ///
+        bool ignoreCaseEndsWith(scope String_UTF8 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return endsWithImplReadOnly(input, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").ignoreCaseEndsWith(String_UTF8("cHa")));
+            assert(!StringBuilder_UTF("don't cha").ignoreCaseEndsWith(String_UTF8("don't")));
+        }
+
+        ///
+        bool ignoreCaseEndsWith(scope String_UTF16 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return endsWithImplReadOnly(input, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").ignoreCaseEndsWith(String_UTF16("cHa"w)));
+            assert(!StringBuilder_UTF("don't cha").ignoreCaseEndsWith(String_UTF16("don't"w)));
+        }
+
+        ///
+        bool ignoreCaseEndsWith(scope String_UTF32 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return endsWithImplReadOnly(input, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").ignoreCaseEndsWith(String_UTF32("cHa"d)));
+            assert(!StringBuilder_UTF("don't cha").ignoreCaseEndsWith(String_UTF32("don't"d)));
+        }
+
+        ///
+        bool ignoreCaseEndsWith(scope StringBuilder_ASCII input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return endsWithImplBuilder(input, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").ignoreCaseEndsWith(StringBuilder_ASCII("cHa")));
+            assert(!StringBuilder_UTF("don't cha").ignoreCaseEndsWith(StringBuilder_ASCII("don't")));
+        }
+
+        ///
+        bool ignoreCaseEndsWith(scope StringBuilder_UTF8 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return endsWithImplBuilder(input, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").ignoreCaseEndsWith(StringBuilder_UTF8("cHa")));
+            assert(!StringBuilder_UTF("don't cha").ignoreCaseEndsWith(StringBuilder_UTF8("don't")));
+        }
+
+        ///
+        bool ignoreCaseEndsWith(scope StringBuilder_UTF16 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return endsWithImplBuilder(input, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").ignoreCaseEndsWith(StringBuilder_UTF16("cHa"w)));
+            assert(!StringBuilder_UTF("don't cha").ignoreCaseEndsWith(StringBuilder_UTF16("don't"w)));
+        }
+
+        ///
+        bool ignoreCaseEndsWith(scope StringBuilder_UTF32 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return endsWithImplBuilder(input, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("don't cha").ignoreCaseEndsWith(StringBuilder_UTF32("cHa"d)));
+            assert(!StringBuilder_UTF("don't cha").ignoreCaseEndsWith(StringBuilder_UTF32("don't"d)));
+        }
+    }
+
     // count
     // ignoreCaseCount
     // contains
@@ -2564,6 +3052,174 @@ private:
                 state.externalInsert(iterator, offset, asiau.osat, clobber);
             });
         }
+
+        bool startsWithImplReadOnly(scope String_ASCII other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            ASCIILiteralAsTarget!dchar alat;
+            alat.literal = other.literal;
+            scope osiu = alat.get;
+
+            return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+                assert(state !is null);
+                return state.externalStartsWith(iterator, osiu, caseSensitive, language);
+            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+                assert(state !is null);
+                return state.externalStartsWith(iterator, osiu, caseSensitive, language);
+            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+                assert(state !is null);
+                return state.externalStartsWith(iterator, osiu, caseSensitive, language);
+            }, () { return false; });
+        }
+
+        bool startsWithImplReadOnly(Char2)(scope String_UTF!Char2 other, bool caseSensitive,
+                UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            auto alatc = AnyLiteralAsTargetChar!dchar(other);
+
+            return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+                assert(state !is null);
+                return state.externalStartsWith(iterator, alatc.osat, caseSensitive, language);
+            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+                assert(state !is null);
+                return state.externalStartsWith(iterator, alatc.osat, caseSensitive, language);
+            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+                assert(state !is null);
+                return state.externalStartsWith(iterator, alatc.osat, caseSensitive, language);
+            }, () { return false; });
+        }
+
+        bool startsWithImplSlice(Char2)(scope const(Char2)[] other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            LiteralAsTargetChar!(Char2, dchar) lat;
+            lat.literal = other;
+            scope osiu = lat.get;
+
+            return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+                assert(state !is null);
+                return state.externalStartsWith(iterator, osiu, caseSensitive, language);
+            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+                assert(state !is null);
+                return state.externalStartsWith(iterator, osiu, caseSensitive, language);
+            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+                assert(state !is null);
+                return state.externalStartsWith(iterator, osiu, caseSensitive, language);
+            }, () { return false; });
+        }
+
+        bool startsWithImplBuilder(scope StringBuilder_ASCII other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            ASCIIStateAsTarget!dchar asat;
+            asat.state = other.state;
+            asat.iterator = other.iterator;
+            scope osiu = asat.get;
+
+            return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+                assert(state !is null);
+                return state.externalStartsWith(iterator, osiu, caseSensitive, language);
+            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+                assert(state !is null);
+                return state.externalStartsWith(iterator, osiu, caseSensitive, language);
+            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+                assert(state !is null);
+                return state.externalStartsWith(iterator, osiu, caseSensitive, language);
+            }, () { return false; });
+        }
+
+        bool startsWithImplBuilder(Char2)(scope StringBuilder_UTF!Char2 other, bool caseSensitive,
+                UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            AnyStateIteratorAsUs!dchar asiau = AnyStateIteratorAsUs!dchar(other.state);
+
+            return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+                assert(state !is null);
+                return state.externalStartsWith(iterator, asiau.osat, caseSensitive, language);
+            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+                assert(state !is null);
+                return state.externalStartsWith(iterator, asiau.osat, caseSensitive, language);
+            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+                assert(state !is null);
+                return state.externalStartsWith(iterator, asiau.osat, caseSensitive, language);
+            }, () { return false; });
+        }
+
+        bool endsWithImplReadOnly(scope String_ASCII other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            ASCIILiteralAsTarget!dchar alat;
+            alat.literal = other.literal;
+            scope osiu = alat.get;
+
+            return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+                assert(state !is null);
+                return state.externalEndsWith(iterator, osiu, caseSensitive, language);
+            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+                assert(state !is null);
+                return state.externalEndsWith(iterator, osiu, caseSensitive, language);
+            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+                assert(state !is null);
+                return state.externalEndsWith(iterator, osiu, caseSensitive, language);
+            }, () { return false; });
+        }
+
+        bool endsWithImplReadOnly(Char2)(scope String_UTF!Char2 other, bool caseSensitive,
+                UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            auto alatc = AnyLiteralAsTargetChar!dchar(other);
+
+            return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+                assert(state !is null);
+                return state.externalEndsWith(iterator, alatc.osat, caseSensitive, language);
+            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+                assert(state !is null);
+                return state.externalEndsWith(iterator, alatc.osat, caseSensitive, language);
+            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+                assert(state !is null);
+                return state.externalEndsWith(iterator, alatc.osat, caseSensitive, language);
+            }, () { return false; });
+        }
+
+        bool endsWithImplSlice(Char2)(scope const(Char2)[] other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            LiteralAsTargetChar!(Char2, dchar) lat;
+            lat.literal = other;
+            scope osiu = lat.get;
+
+            return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+                assert(state !is null);
+                return state.externalEndsWith(iterator, osiu, caseSensitive, language);
+            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+                assert(state !is null);
+                return state.externalEndsWith(iterator, osiu, caseSensitive, language);
+            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+                assert(state !is null);
+                return state.externalEndsWith(iterator, osiu, caseSensitive, language);
+            }, () { return false; });
+        }
+
+        bool endsWithImplBuilder(scope StringBuilder_ASCII other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            ASCIIStateAsTarget!dchar asat;
+            asat.state = other.state;
+            asat.iterator = other.iterator;
+            scope osiu = asat.get;
+
+            return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+                assert(state !is null);
+                return state.externalEndsWith(iterator, osiu, caseSensitive, language);
+            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+                assert(state !is null);
+                return state.externalEndsWith(iterator, osiu, caseSensitive, language);
+            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+                assert(state !is null);
+                return state.externalEndsWith(iterator, osiu, caseSensitive, language);
+            }, () { return false; });
+        }
+
+        bool endsWithImplBuilder(Char2)(scope StringBuilder_UTF!Char2 other, bool caseSensitive,
+                UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            AnyStateIteratorAsUs!dchar asiau = AnyStateIteratorAsUs!dchar(other.state);
+
+            return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+                assert(state !is null);
+                return state.externalEndsWith(iterator, asiau.osat, caseSensitive, language);
+            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+                assert(state !is null);
+                return state.externalEndsWith(iterator, asiau.osat, caseSensitive, language);
+            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+                assert(state !is null);
+                return state.externalEndsWith(iterator, asiau.osat, caseSensitive, language);
+            }, () { return false; });
+        }
     }
 }
 
@@ -3398,6 +4054,90 @@ struct UTF_State(Char) {
 
         allocator.dispose(cast(void[])got);
         blockList.mutex.unlock;
+    }
+
+    bool externalStartsWith(scope Iterator* iterator, scope ref OtherStateAsTarget!dchar other, bool caseSensitive,
+            UnicodeLanguage language) {
+        import sidero.base.text.unicode.comparison : CaseAwareComparison;
+        import sidero.base.text.unicode.characters.database : isTurkic;
+
+        blockList.mutex.pureLock;
+        if (other.obj !is &this)
+            other.mutex(true);
+
+        language = pickLanguage(language);
+        int result;
+
+        OtherStateIsUs!dchar osiu;
+        osiu.state = &this;
+        osiu.iterator = iterator;
+        scope osat = osiu.get;
+
+        CaseAwareComparison cac = CaseAwareComparison(blockList.allocator, language.isTurkic);
+        cac.setAgainst(other.foreachValue, caseSensitive);
+        result = cac.compare(osat.foreachValue, true);
+
+        blockList.mutex.unlock;
+        if (other.obj !is &this)
+            other.mutex(false);
+
+        return result == 0;
+    }
+
+    bool externalEndsWith(scope Iterator* iterator, scope ref OtherStateAsTarget!dchar other, bool caseSensitive, UnicodeLanguage language) {
+        import sidero.base.text.unicode.comparison : CaseAwareComparison;
+        import sidero.base.text.unicode.characters.database : isTurkic;
+
+        blockList.mutex.pureLock;
+        if (other.obj !is &this)
+            other.mutex(true);
+
+        language = pickLanguage(language);
+        int result;
+
+        // this may be costly, but this is in fact the best way to do it
+        {
+            size_t otherLength = other.length(), usLength;
+
+            if (iterator !is null)
+                usLength = iterator.backwards.offsetFromHead - iterator.forwards.offsetFromHead;
+            else
+                usLength = blockList.numberOfItems;
+
+            if (otherLength > usLength) {
+                blockList.mutex.unlock;
+                if (other.obj !is &this)
+                    other.mutex(false);
+
+                return false;
+            }
+
+            ptrdiff_t minimumOffsetFromHead = otherLength, maximumOffsetFromHead = usLength;
+            minimumOffsetFromHead = -minimumOffsetFromHead;
+
+            changeIndexToOffset(iterator, minimumOffsetFromHead);
+            iterator = iteratorList.newIterator(&blockList, minimumOffsetFromHead, maximumOffsetFromHead);
+        }
+
+        OtherStateIsUs!dchar osiu;
+        osiu.state = &this;
+        osiu.iterator = iterator;
+        scope osat = osiu.get;
+
+        CaseAwareComparison cac = CaseAwareComparison(blockList.allocator, language.isTurkic);
+        cac.setAgainst(other.foreachValue, caseSensitive);
+        result = cac.compare(osat.foreachValue, true);
+
+        {
+            iteratorList.rcIteratorInternal(false, iterator);
+            this.rcInternal(false);
+        }
+
+        blockList.mutex.unlock;
+        if (other.obj !is &this)
+            other.mutex(false);
+
+        return result == 0;
     }
 }
 

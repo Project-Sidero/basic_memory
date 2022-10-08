@@ -703,10 +703,190 @@ nothrow @safe:
         iterator.popBack;
     }
 
-    // startsWith
-    // ignoreCaseStartsWith
-    // endsWith
-    // ignoreCaseEndsWith
+    @nogc {
+        ///
+        bool startsWith(scope const(char[]) input) scope {
+            return startsWithImplSlice(input, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_ASCII("Imma do").startsWith("Imma"));
+            assert(!StringBuilder_ASCII("Imma do").startsWith("do"));
+        }
+
+        ///
+        bool startsWith(scope LiteralType input) scope {
+            return startsWithImplSlice(input, true);
+        }
+
+        ///
+        @trusted unittest {
+            assert(StringBuilder_ASCII("Imma do").startsWith(cast(LiteralType)"Imma"));
+            assert(!StringBuilder_ASCII("Imma do").startsWith(cast(LiteralType)"do"));
+        }
+
+        ///
+        bool startsWith(scope String_ASCII input) scope {
+            return startsWithImplSlice(input.literal, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_ASCII("Imma do").startsWith(String_ASCII("Imma")));
+            assert(!StringBuilder_ASCII("Imma do").startsWith(String_ASCII("do")));
+        }
+
+        ///
+        bool startsWith(scope StringBuilder_ASCII input) scope {
+            return startsWithImplBuilder(input, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_ASCII("Imma do").startsWith(StringBuilder_ASCII("Imma")));
+            assert(!StringBuilder_ASCII("Imma do").startsWith(StringBuilder_ASCII("do")));
+        }
+    }
+
+    @nogc {
+        ///
+        bool ignoreCaseStartsWith(scope const(char[]) input) scope {
+            return startsWithImplSlice(input, false);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_ASCII("Imma do").ignoreCaseStartsWith("imma"));
+            assert(!StringBuilder_ASCII("Imma do").ignoreCaseStartsWith("do"));
+        }
+
+        ///
+        bool ignoreCaseStartsWith(scope LiteralType input) scope {
+            return startsWithImplSlice(input, false);
+        }
+
+        ///
+        @trusted unittest {
+            assert(StringBuilder_ASCII("Imma do").ignoreCaseStartsWith(cast(LiteralType)"imma"));
+            assert(!StringBuilder_ASCII("Imma do").ignoreCaseStartsWith(cast(LiteralType)"do"));
+        }
+
+        ///
+        bool ignoreCaseStartsWith(scope String_ASCII input) scope {
+            return startsWithImplSlice(input.literal, false);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_ASCII("Imma do").ignoreCaseStartsWith(String_ASCII("imma")));
+            assert(!StringBuilder_ASCII("Imma do").ignoreCaseStartsWith(String_ASCII("do")));
+        }
+
+        ///
+        bool ignoreCaseStartsWith(scope StringBuilder_ASCII input) scope {
+            return startsWithImplBuilder(input, false);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_ASCII("Imma do").ignoreCaseStartsWith(StringBuilder_ASCII("imma")));
+            assert(!StringBuilder_ASCII("Imma do").ignoreCaseStartsWith(StringBuilder_ASCII("do")));
+        }
+    }
+
+    @nogc {
+        ///
+        bool endsWith(scope const(char[]) input) scope {
+            return endsWithImplSlice(input, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_ASCII("Imma do").endsWith("do"));
+            assert(!StringBuilder_ASCII("Imma do").endsWith("imma"));
+        }
+
+        ///
+        bool endsWith(scope LiteralType input) scope {
+            return endsWithImplSlice(input, true);
+        }
+
+        ///
+        @trusted unittest {
+            assert(StringBuilder_ASCII("Imma do").endsWith(cast(LiteralType)"do"));
+            assert(!StringBuilder_ASCII("Imma do").endsWith(cast(LiteralType)"imma"));
+        }
+
+        ///
+        bool endsWith(scope String_ASCII input) scope {
+            return endsWithImplSlice(input.literal, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_ASCII("Imma do").endsWith(String_ASCII("do")));
+            assert(!StringBuilder_ASCII("Imma do").endsWith(String_ASCII("imma")));
+        }
+
+        ///
+        bool endsWith(scope StringBuilder_ASCII input) scope {
+            return endsWithImplBuilder(input, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_ASCII("Imma do").endsWith(StringBuilder_ASCII("do")));
+            assert(!StringBuilder_ASCII("Imma do").endsWith(StringBuilder_ASCII("imma")));
+        }
+    }
+
+    @nogc {
+        ///
+        bool ignoreCaseEndsWith(scope const(char[]) input) scope {
+            return endsWithImplSlice(input, false);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_ASCII("Imma do").ignoreCaseEndsWith("Do"));
+            assert(!StringBuilder_ASCII("Imma do").ignoreCaseEndsWith("imma"));
+        }
+
+        ///
+        bool ignoreCaseEndsWith(scope LiteralType input) scope {
+            return endsWithImplSlice(input, false);
+        }
+
+        ///
+        @trusted unittest {
+            assert(StringBuilder_ASCII("Imma do").ignoreCaseEndsWith(cast(LiteralType)"Do"));
+            assert(!StringBuilder_ASCII("Imma do").ignoreCaseEndsWith(cast(LiteralType)"imma"));
+        }
+
+        ///
+        bool ignoreCaseEndsWith(scope String_ASCII input) scope {
+            return endsWithImplSlice(input.literal, false);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_ASCII("Imma do").ignoreCaseEndsWith(String_ASCII("Do")));
+            assert(!StringBuilder_ASCII("Imma do").ignoreCaseEndsWith(String_ASCII("imma")));
+        }
+
+        ///
+        bool ignoreCaseEndsWith(scope StringBuilder_ASCII input) scope {
+            return endsWithImplBuilder(input, false);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_ASCII("Imma do").ignoreCaseEndsWith(StringBuilder_ASCII("Do")));
+            assert(!StringBuilder_ASCII("Imma do").ignoreCaseEndsWith(StringBuilder_ASCII("imma")));
+        }
+    }
+
     // count
     // ignoreCaseCount
     // contains
@@ -1132,6 +1312,60 @@ private:
 
             state.externalInsert(iterator, offset, osiu, clobber);
         }
+
+        bool startsWithImplSlice(scope const(char)[] other, bool caseSensitive) @trusted {
+            return startsWithImplSlice(cast(LiteralType)other, caseSensitive);
+        }
+
+        bool startsWithImplSlice(scope const(Char)[] other, bool caseSensitive) @trusted {
+            ASCII_State.LiteralAsTarget lat;
+            lat.literal = other;
+            scope osiu = lat.get;
+
+            if (isNull)
+                return false;
+            else
+                return state.externalStartsWith(iterator, osiu, caseSensitive);
+        }
+
+        bool startsWithImplBuilder(scope StringBuilder_ASCII other, bool caseSensitive) @trusted {
+            ASCII_State.OtherStateIsUs asiu;
+            asiu.state = other.state;
+            asiu.iterator = other.iterator;
+            scope osiu = asiu.get;
+
+            if (isNull)
+                return false;
+            else
+                return state.externalStartsWith(iterator, osiu, caseSensitive);
+        }
+
+        bool endsWithImplSlice(scope const(char)[] other, bool caseSensitive) @trusted {
+            return endsWithImplSlice(cast(LiteralType)other, caseSensitive);
+        }
+
+        bool endsWithImplSlice(scope const(Char)[] other, bool caseSensitive) @trusted {
+            ASCII_State.LiteralAsTarget lat;
+            lat.literal = other;
+            scope osiu = lat.get;
+
+            if (isNull)
+                return false;
+            else
+                return state.externalEndsWith(iterator, osiu, caseSensitive);
+        }
+
+        bool endsWithImplBuilder(scope StringBuilder_ASCII other, bool caseSensitive) @trusted {
+            ASCII_State.OtherStateIsUs asiu;
+            asiu.state = other.state;
+            asiu.iterator = other.iterator;
+            scope osiu = asiu.get;
+
+            if (isNull)
+                return false;
+            else
+                return state.externalEndsWith(iterator, osiu, caseSensitive);
+        }
     }
 }
 
@@ -1422,14 +1656,14 @@ struct ASCII_State {
 
             if (iterator is null) {
                 forwardsCursor.setup(&blockList, 0);
-                maximumOffsetFromHead = blockList.numberOfItems + 1;
+                maximumOffsetFromHead = blockList.numberOfItems;
             } else {
                 forwardsCursor = iterator.forwards;
-                maximumOffsetFromHead = iterator.backwards.offsetFromHead + 1;
+                maximumOffsetFromHead = iterator.backwards.offsetFromHead;
             }
 
             bool emptyInternal() {
-                return forwardsCursor.offsetFromHead + 1 >= maximumOffsetFromHead;
+                return forwardsCursor.offsetFromHead >= maximumOffsetFromHead;
             }
 
             Char frontInternal() {
@@ -1469,6 +1703,154 @@ struct ASCII_State {
 
             if (result == 0 && !emptyInternal()) {
                 result = 1;
+            }
+        }
+
+        blockList.mutex.unlock;
+        if (other.obj !is &this)
+            other.mutex(false);
+
+        return result;
+    }
+
+    bool externalStartsWith(scope Iterator* iterator, scope ref OtherStateAsTarget!Char other, bool caseSensitive) {
+        import sidero.base.text.ascii.characters : toLower;
+
+        blockList.mutex.pureLock;
+        if (other.obj !is &this)
+            other.mutex(true);
+
+        bool result = true;
+
+        {
+            Cursor forwardsCursor;
+            size_t maximumOffsetFromHead;
+
+            if (iterator is null) {
+                forwardsCursor.setup(&blockList, 0);
+                maximumOffsetFromHead = blockList.numberOfItems;
+            } else {
+                forwardsCursor = iterator.forwards;
+                maximumOffsetFromHead = iterator.backwards.offsetFromHead;
+            }
+
+            bool emptyInternal() {
+                return forwardsCursor.offsetFromHead >= maximumOffsetFromHead;
+            }
+
+            Char frontInternal() {
+                forwardsCursor.advanceForward(0, maximumOffsetFromHead, true);
+                return forwardsCursor.get();
+            }
+
+            void popFrontInternal() {
+                import std.algorithm : min;
+
+                forwardsCursor.advanceForward(1, maximumOffsetFromHead, true);
+            }
+
+            foreach (c2; other.foreachValue) {
+                if (emptyInternal()) {
+                    result = false;
+                    break;
+                }
+
+                Char c1 = frontInternal();
+
+                if (!caseSensitive) {
+                    c1 = c1.toLower;
+                    c2 = c2.toLower;
+                }
+
+                if (c1 < c2) {
+                    result = false;
+                    break;
+                } else if (c1 > c2) {
+                    result = false;
+                    break;
+                }
+
+                popFrontInternal();
+            }
+        }
+
+        blockList.mutex.unlock;
+        if (other.obj !is &this)
+            other.mutex(false);
+
+        return result;
+    }
+
+    bool externalEndsWith(scope Iterator* iterator, scope ref OtherStateAsTarget!Char other, bool caseSensitive) {
+        import sidero.base.text.ascii.characters : toLower;
+
+        blockList.mutex.pureLock;
+        if (other.obj !is &this)
+            other.mutex(true);
+
+        bool result = true;
+
+        {
+            Cursor forwardsCursor;
+            ptrdiff_t maximumOffsetFromHead;
+
+            {
+                size_t otherLength = other.length();
+
+                if (iterator !is null)
+                    maximumOffsetFromHead = iterator.backwards.offsetFromHead - iterator.forwards.offsetFromHead;
+                else
+                    maximumOffsetFromHead = blockList.numberOfItems;
+
+                if (otherLength > maximumOffsetFromHead) {
+                    blockList.mutex.unlock;
+                    if (other.obj !is &this)
+                        other.mutex(false);
+
+                    return false;
+                }
+
+                ptrdiff_t minimumOffsetFromHead = otherLength;
+                minimumOffsetFromHead = -minimumOffsetFromHead;
+
+                changeIndexToOffset(iterator, minimumOffsetFromHead);
+                forwardsCursor.setup(&blockList, minimumOffsetFromHead);
+            }
+
+            bool emptyInternal() {
+                return forwardsCursor.offsetFromHead >= maximumOffsetFromHead;
+            }
+
+            Char frontInternal() {
+                forwardsCursor.advanceForward(0, maximumOffsetFromHead, true);
+                return forwardsCursor.get();
+            }
+
+            void popFrontInternal() {
+                import std.algorithm : min;
+
+                forwardsCursor.advanceForward(1, maximumOffsetFromHead, true);
+            }
+
+            foreach (c2; other.foreachValue) {
+                if (emptyInternal()) {
+                    result = false;
+                    break;
+                }
+
+                Char c1 = frontInternal();
+
+                if (!caseSensitive) {
+                    c1 = c1.toLower;
+                    c2 = c2.toLower;
+                }
+
+                if (c1 != c2) {
+                    result = false;
+                    break;
+                }
+
+                popFrontInternal();
             }
         }
 
