@@ -4,13 +4,8 @@ import sidero.base.text.ascii.readonly;
 import sidero.base.text.ascii.builder;
 import sidero.base.text.unicode.readonly;
 import sidero.base.text.unicode.builder;
-
-/// UDA for formatting
-struct PrintIgnore {
-}
-/// UDA for pretty formatting
-struct PrettyPrintIgnore {
-}
+public import sidero.base.attributes : PrintIgnore, PrettyPrintIgnore;
+import sidero.base.traits : isUTF, isASCII, isBuilderString, isReadOnlyString;
 
 ///
 StringBuilder_UTF8 format(Format, Args...)(scope Format format, scope Args args) {
@@ -80,11 +75,6 @@ void formattedWrite(Builder, Format, Args...)(scope Builder builder, scope Forma
 private:
 import sidero.base.allocators;
 import std.traits;
-
-enum isReadOnlyString(String) = is(String == String_ASCII) || is(String == String_UTF!Char, Char);
-enum isBuilderString(String) = is(String == StringBuilder_ASCII) || is(String == StringBuilder_UTF!Char, Char);
-enum isASCII(String) = is(String == String_ASCII) || is(String == StringBuilder_ASCII);
-enum isUTF(String) = is(String == String_UTF!Char, Char) || is(String == StringBuilder_UTF!Char, Char);
 
 struct FormatValue(Builder) if (isBuilderString!Builder) {
     Builder builder;
