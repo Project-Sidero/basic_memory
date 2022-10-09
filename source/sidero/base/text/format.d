@@ -122,10 +122,10 @@ scope:
     alias opCall = write;
 
     void write(Format, Input)(scope Format format, scope Input input, bool needQuotes = false) @trusted
-            if (is(Format == String_UTF8) || is(Format == String_ASCII)) {
+            if (isReadOnlyString!Format) {
 
-        static if (is(Builder == StringBuilder_ASCII) && is(Format == String_UTF8)) {
-            static assert(0, "You cannot use an ASCII string builder with UTF8 format specifier");
+        static if (is(Builder == StringBuilder_ASCII) && isUTF!Format) {
+            static assert(0, "You cannot use an ASCII string builder with Unicode format specifier");
         }
 
         import core.stdc.stdio : snprintf;
