@@ -4,6 +4,7 @@ import sidero.base.text.ascii.readonly;
 import sidero.base.text.ascii.builder;
 import sidero.base.text.unicode.readonly;
 import sidero.base.text.unicode.builder;
+import sidero.base.errors.result;
 public import sidero.base.attributes : PrintIgnore, PrettyPrintIgnore;
 import sidero.base.traits : isUTF, isASCII, isBuilderString, isReadOnlyString;
 
@@ -177,6 +178,29 @@ scope:
                         builder ~= ")";
                     }
                 }
+            }
+        } else static if (is(ActualType : Result!WrappedType, WrappedType)) {
+            if (input) {
+                // ok print the thing
+
+                static if (is(WrappedType == void)) {
+                    builder ~= "no-error";
+                } else {
+                    scope temp = input.assumeOkay;
+                    this.write(format, temp, true);
+                }
+            } else {
+                builder ~= "error: ";
+
+                builder ~= input.error.info.id;
+                builder ~= ":";
+                builder ~= input.error.info.message;
+
+                builder ~= "`";
+                builder ~= input.error.moduleName;
+                builder ~= ":";
+                this.write(String_ASCII.init, input.error.line);
+                builder ~= "`";
             }
         } else static if (isAssociativeArray!ActualType) {
             builder ~= ActualType.stringof ~ "[";
@@ -378,6 +402,12 @@ unittest {
 
     Struct struc;
     fv(String_UTF8(""), struc);
+
+    ErrorResult errorResult;
+    fv(String_UTF8(""), errorResult);
+
+    Result!int iResult = 3;
+    fv(String_UTF8(""), iResult);
 }
 
 enum DefaultFormatForType(Type) = () {
