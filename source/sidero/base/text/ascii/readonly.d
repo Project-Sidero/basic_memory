@@ -142,6 +142,20 @@ nothrow @nogc:
     }
 
     ///
+    const(Char)[] unsafeGetLiteral() @system {
+        return this.literal;
+    }
+
+    ///
+    unittest {
+        String_ASCII text;
+        assert(text.ptr is null);
+
+        text = String_ASCII("Me haz data!");
+        assert(text.unsafeGetLiteral !is null);
+    }
+
+    ///
     String_ASCII opSlice() scope @trusted {
         if (isNull)
             return String_ASCII();

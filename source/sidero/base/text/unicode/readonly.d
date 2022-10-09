@@ -147,8 +147,6 @@ nothrow @nogc:
     const(Char)* ptr() @system {
         if (UnicodeEncoding.For!Char != literalEncoding)
             return null;
-        else if (this.lifeTime !is null)
-            return cast(const(Char)*)this.lifeTime.original.ptr;
         else
             return cast(const(Char)*)this.literal.ptr;
     }
@@ -179,6 +177,43 @@ nothrow @nogc:
             assert(text.ptr is null);
             text = String_UTF("Me haz data!"w);
             assert(text.ptr is null);
+        }
+    }
+
+    ///
+    const(Char)[] unsafeGetLiteral() @system {
+        if (UnicodeEncoding.For!Char != literalEncoding)
+            return null;
+        else
+            return cast(const(Char)[])this.literal;
+    }
+
+    ///
+    unittest {
+        String_UTF text;
+        assert(text.unsafeGetLiteral is null);
+
+        static if (is(Char == char)) {
+            text = String_UTF("Me haz data!");
+            assert(text.unsafeGetLiteral !is null);
+            text = String_UTF("Me haz data!"w);
+            assert(text.unsafeGetLiteral is null);
+            text = String_UTF("Me haz data!"d);
+            assert(text.unsafeGetLiteral is null);
+        } else static if (is(Char == wchar)) {
+            text = String_UTF("Me haz data!"w);
+            assert(text.unsafeGetLiteral !is null);
+            text = String_UTF("Me haz data!");
+            assert(text.unsafeGetLiteral is null);
+            text = String_UTF("Me haz data!"d);
+            assert(text.unsafeGetLiteral is null);
+        } else static if (is(Char == dchar)) {
+            text = String_UTF("Me haz data!"d);
+            assert(text.unsafeGetLiteral !is null);
+            text = String_UTF("Me haz data!");
+            assert(text.unsafeGetLiteral is null);
+            text = String_UTF("Me haz data!"w);
+            assert(text.unsafeGetLiteral is null);
         }
     }
 

@@ -51,9 +51,7 @@ scope nothrow @nogc @safe:
             if (!error.checked)
                 assert(0, "You forgot to check if value had an error. assert(thing, thing.error.toString());");
 
-            // FIXME: assert(opCast!bool(), error.toString());
-            assert(opCast!bool(), error.info.message);
-
+            assert(opCast!bool(), error.toString().unsafeGetLiteral);
             return value;
         }
 
@@ -62,9 +60,7 @@ scope nothrow @nogc @safe:
 
         /// Will check and only error if there is an error.
         Type assumeOkay() @system {
-            // FIXME: assert(opCast!bool(), error.toString());
-            assert(opCast!bool(), error.info.message);
-
+            assert(opCast!bool(), error.toString().unsafeGetLiteral);
             return value;
         }
     }
@@ -104,8 +100,7 @@ scope nothrow @nogc @safe:
         if (!error.checked)
             assert(0, "You forgot to check if value had an error. assert(thing, thing.error.toString());");
 
-        // FIXME: assert(opCast!bool(), error.toString());
-        assert(opCast!bool(), error.info.message);
+        assert(opCast!bool(), error.toString().unsafeGetLiteral);
 
         static if (__traits(hasMember, Type, "isNull")) {
             return value.isNull;

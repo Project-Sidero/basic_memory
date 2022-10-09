@@ -39,7 +39,7 @@ void formattedWrite(alias Format, Builder, Args...)(scope Builder builder, scope
 }
 
 ///
-void formattedWrite(Builder, Format, Args...)(scope Builder builder, scope Format format, scope Args args)
+void formattedWrite(Builder, Format, Args...)(scope Builder builder, scope Format format, scope Args args) @trusted
         if (isBuilderString!Builder && (isReadOnlyString!Format || isSomeString!Format)) {
     import std.algorithm : startsWith;
 

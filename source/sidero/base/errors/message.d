@@ -1,4 +1,6 @@
 module sidero.base.errors.message;
+import sidero.base.text.unicode.readonly;
+import sidero.base.text.unicode.builder;
 
 ///
 struct ErrorMessage {
@@ -45,24 +47,23 @@ struct ErrorInfo {
     int line;
     package(sidero.base.errors) bool checked;
 
-@safe nothrow @nogc pure:
+@safe nothrow @nogc:
 
-    // TODO once we have a string builder and formatting.
-    version (none) {
-        ///
-        RCStringZ toString() const {
-            RCStringZ ret;
-            this.toString(ret);
-            return ret;
-        }
-
-        ///
-        void toString(S)(scope ref S sink) const {
-            import bc.string.format;
-
-            sink.nogcFormatTo!"Error at %s:%d %s:%s"(this.moduleName, this.line, this.info.id, this.info.message);
-        }
+    ///
+    String_UTF8 toString() const {
+        StringBuilder_UTF8 ret;
+        this.toString(ret);
+        return ret.asReadOnly();
     }
+
+    ///
+    void toString(S)(scope ref S sink) const {
+        import sidero.base.text.format;
+
+        sink.formattedWrite!"Error at %s:%d %s:%s"(this.moduleName, this.line, this.info.id, this.info.message);
+    }
+
+pure:
 
     ///
     bool opEquals(scope const ErrorMessage other) const {
