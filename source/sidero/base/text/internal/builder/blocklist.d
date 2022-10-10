@@ -105,7 +105,7 @@ struct BlockListImpl(Char) {
         assert(bl.head.next.next is null);
     }
 
-    Block* blockForOffset(ref size_t offset, out size_t offsetIntoBlock) pure @trusted {
+    Block* blockForOffset(ref size_t offset, out size_t offsetIntoBlock) @trusted {
         size_t retActualOffsetFromHead;
         Block* ret = &head;
         size_t canDo = ret.length;
@@ -126,7 +126,7 @@ struct BlockListImpl(Char) {
             } else
                 assert(0);
         }
-        while (ret.next !is null && offset > 0);
+        while ((ret.next !is null || canDo > 0) && offset > 0);
 
         if (ret.length == offsetIntoBlock && ret.next !is null) {
             offsetIntoBlock = 0;
@@ -154,6 +154,7 @@ struct BlockListImpl(Char) {
 
         a.length = 10;
         b.length = 5;
+        bl.numberOfItems = a.length + b.length;
 
         size_t adjustedOffset, offsetIntoBlock;
         Block* got;
@@ -195,6 +196,16 @@ struct BlockListImpl(Char) {
         assert(offsetIntoBlock == 0);
 
         bl.clear;
+    }
+
+    bool canFindEverything() @safe nothrow @nogc {
+        size_t found;
+
+        foreach(Block* block; this) {
+            found += block.length;
+        }
+
+        return found == this.numberOfItems;
     }
 
     int opApply(scope int delegate(Block* block) @safe nothrow @nogc del) @safe nothrow @nogc {

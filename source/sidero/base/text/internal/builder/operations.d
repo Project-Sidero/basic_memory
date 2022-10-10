@@ -182,7 +182,7 @@ mixin template StringBuilderOperations() {
 
     // keeps position the same position
     void removeOperation(scope ref Cursor cursor, size_t maximumOffsetFromHead, size_t amount) {
-        if (cursor.offsetFromHead + amount > maximumOffsetFromHead) {
+        if (amount > maximumOffsetFromHead || cursor.offsetFromHead + amount > maximumOffsetFromHead) {
             assert(cursor.offsetFromHead < maximumOffsetFromHead);
             amount = maximumOffsetFromHead - cursor.offsetFromHead;
         }
@@ -210,7 +210,11 @@ mixin template StringBuilderOperations() {
             if (offsetIntoBlock == block.length) {
                 block = block.next;
                 offsetIntoBlock = 0;
-                assert(block.next !is null);
+
+                if (block.next is null) {
+                    // we are at tail block, done!
+                    break;
+                }
             }
 
             size_t canDo = block.length - offsetIntoBlock;
@@ -453,8 +457,7 @@ mixin template StringBuilderOperations() {
     // advances to end of inserted content
     size_t insertOperation(scope ref Cursor cursor, size_t maximumOffsetFromHead,
             scope ref OtherStateAsTarget!Char toInsert, bool clobber = false) {
-        const amountInserted = toInsert.length();
-        size_t amountToInsert = amountInserted, startOffsetFromHead = cursor.offsetFromHead;
+        size_t amountInserted = toInsert.length(), amountToInsert = amountInserted, startOffsetFromHead = cursor.offsetFromHead;
 
         {
             // sanitize cursor locations (head/tail) to ensure we have a place to actually store stuff
@@ -534,23 +537,31 @@ mixin template StringBuilderOperations() {
 
                         Char[] got = cursor.block.get()[cursor.offsetIntoBlock .. $];
 
+                        onRemove(got[0 .. canDoBlock]);
                         foreach (i, c; cA[0 .. canDoBlock])
                             got[i] = c;
 
-                        onRemove(got[0 .. canDoBlock]);
+                        onInsert(cA[0 .. canDoBlock]);
                         cA = cA[canDoBlock .. $];
 
                         assert(amountToInsert >= canDoBlock);
                         canDo -= canDoBlock;
-                        amountToInsert -= canDoBlock;
                         cursor.advanceForward(canDoBlock, maximumOffsetFromHead, false);
+
+                        amountToInsert -= canDoBlock;
+                        amountInserted -= canDoBlock;
+                        startOffsetFromHead += canDoBlock;
                     }
 
+                    if (cA.length > 0)
+                        clobber = false;
                 }
             }
 
             // insertion only
             {
+                assert(cA.length == 0 || !clobber);
+
                 while (cA.length > 0) {
                     ensureNotInFullBlock;
 
@@ -578,8 +589,11 @@ mixin template StringBuilderOperations() {
                         amountToInsert -= canDo;
 
                         maximumOffsetFromHead += canDo;
-                        cursor.advanceForward(canDo, maximumOffsetFromHead, false);
                         blockList.numberOfItems += canDo;
+
+                        size_t oldOffsetFromHead = cursor.offsetFromHead;
+                        cursor.advanceForward(canDo, maximumOffsetFromHead, false);
+                        assert(cursor.offsetFromHead == oldOffsetFromHead + canDo);
                     }
                 }
             }

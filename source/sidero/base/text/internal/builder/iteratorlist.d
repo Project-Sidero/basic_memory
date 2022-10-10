@@ -36,6 +36,9 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
 
         assert(ret.forwards.block !is null);
         assert(ret.backwards.block !is null);
+        assert(ret.forwards.offsetFromHead == ret.minimumOffsetFromHead);
+        assert(ret.backwards.offsetFromHead == ret.maximumOffsetFromHead);
+
         return ret;
     }
 
@@ -51,6 +54,8 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
             a.get()[i] = c;
         foreach (i, c; "world!")
             b.get()[i] = c;
+
+        ilt.blockList.numberOfItems = a.length + b.length;
 
         auto iterator = ilt.iteratorList.newIterator(&ilt.blockList);
         ilt.iteratorList.rcIteratorInternal(false, iterator);
