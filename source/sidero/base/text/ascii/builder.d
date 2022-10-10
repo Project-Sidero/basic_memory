@@ -429,6 +429,7 @@ nothrow @safe:
 
     ///
     bool opEquals(scope String_ASCII other) scope @nogc {
+        other.stripZero;
         return opCmpImplSlice(other.literal, true) == 0;
     }
 
@@ -485,6 +486,7 @@ nothrow @safe:
 
     ///
     bool ignoreCaseEquals(scope String_ASCII other) scope @nogc {
+        other.stripZero;
         return opCmpImplSlice(other.literal, false) == 0;
     }
 
@@ -540,6 +542,7 @@ nothrow @safe:
 
     ///
     int opCmp(scope String_ASCII other) scope @nogc {
+        other.stripZero;
         return opCmpImplSlice(other.literal, true);
     }
 
@@ -584,6 +587,7 @@ nothrow @safe:
 
     ///
     int ignoreCaseCompare(scope String_ASCII other) scope @nogc {
+        other.stripZero;
         return opCmpImplSlice(other.literal, false);
     }
 
@@ -727,8 +731,10 @@ nothrow @safe:
         }
 
         ///
-        bool startsWith(scope String_ASCII input) scope {
-            return startsWithImplSlice(input.literal, true);
+        bool startsWith(scope String_ASCII other) scope {
+            other.stripZero;
+
+            return startsWithImplSlice(other.literal, true);
         }
 
         ///
@@ -773,8 +779,10 @@ nothrow @safe:
         }
 
         ///
-        bool ignoreCaseStartsWith(scope String_ASCII input) scope {
-            return startsWithImplSlice(input.literal, false);
+        bool ignoreCaseStartsWith(scope String_ASCII other) scope {
+            other.stripZero;
+
+            return startsWithImplSlice(other.literal, false);
         }
 
         ///
@@ -819,8 +827,10 @@ nothrow @safe:
         }
 
         ///
-        bool endsWith(scope String_ASCII input) scope {
-            return endsWithImplSlice(input.literal, true);
+        bool endsWith(scope String_ASCII other) scope {
+            other.stripZero;
+
+            return endsWithImplSlice(other.literal, true);
         }
 
         ///
@@ -865,8 +875,10 @@ nothrow @safe:
         }
 
         ///
-        bool ignoreCaseEndsWith(scope String_ASCII input) scope {
-            return endsWithImplSlice(input.literal, false);
+        bool ignoreCaseEndsWith(scope String_ASCII other) scope {
+            other.stripZero;
+
+            return endsWithImplSlice(other.literal, false);
         }
 
         ///
@@ -938,8 +950,10 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_ASCII insert(ptrdiff_t index, scope String_ASCII input) scope return {
-            this.insertImplReadOnly(input, index);
+        StringBuilder_ASCII insert(ptrdiff_t index, scope String_ASCII other) scope return {
+            other.stripZero;
+
+            this.insertImplReadOnly(other, index);
             return this;
         }
 
@@ -982,8 +996,10 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_ASCII prepend(scope String_ASCII input) scope return {
-            return this.insert(0, input);
+        StringBuilder_ASCII prepend(scope String_ASCII other) scope return {
+            other.stripZero;
+
+            return this.insert(0, other);
         }
 
         ///
@@ -1030,9 +1046,11 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_ASCII opBinary(string op : "~")(scope String_ASCII input) scope {
+        StringBuilder_ASCII opBinary(string op : "~")(scope String_ASCII other) scope {
+            other.stripZero;
+
             StringBuilder_ASCII ret = this.dup;
-            ret.append(input);
+            ret.append(other);
             return ret;
         }
 
@@ -1080,8 +1098,10 @@ nothrow @safe:
         }
 
         ///
-        void opOpAssign(string op : "~")(scope String_ASCII input) scope return {
-            this.append(input);
+        void opOpAssign(string op : "~")(scope String_ASCII other) scope return {
+            other.stripZero;
+
+            this.append(other);
         }
 
         ///
@@ -1124,8 +1144,10 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_ASCII append(scope String_ASCII input) scope return {
-            return this.insert(ptrdiff_t.max, input);
+        StringBuilder_ASCII append(scope String_ASCII other) scope return {
+            other.stripZero;
+
+            return this.insert(ptrdiff_t.max, other);
         }
 
         ///
@@ -1168,8 +1190,10 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_ASCII clobberInsert(ptrdiff_t index, scope String_ASCII input) scope return {
-            this.insertImplReadOnly(input, index, true);
+        StringBuilder_ASCII clobberInsert(ptrdiff_t index, scope String_ASCII other) scope return {
+            other.stripZero;
+
+            this.insertImplReadOnly(other, index, true);
             return this;
         }
 

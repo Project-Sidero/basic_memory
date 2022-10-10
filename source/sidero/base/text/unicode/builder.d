@@ -2826,6 +2826,8 @@ private:
 
     scope {
         int opCmpImplReadOnly(scope String_ASCII other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            other.stripZero;
+
             ASCIILiteralAsTarget!dchar alat;
             alat.literal = other.literal;
             scope osiu = alat.get;
@@ -2848,6 +2850,7 @@ private:
         }
 
         int opCmpImplReadOnly(Char2)(scope String_UTF!Char2 other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            other.stripZero;
             auto alatc = AnyLiteralAsTargetChar!dchar(other);
 
             return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
@@ -2935,6 +2938,7 @@ private:
 
         void insertImplReadOnly(scope String_ASCII other, ptrdiff_t offset = 0, bool clobber = false) {
             setupState;
+            other.stripZero;
 
             state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
                 assert(state !is null);
@@ -2964,6 +2968,8 @@ private:
         }
 
         void insertImplReadOnly(Char2)(scope String_UTF!Char2 other, ptrdiff_t offset = 0, bool clobber = false) {
+            other.stripZero;
+
             other.literalEncoding.handle(() @trusted { insertImplSlice(cast(string)other.literal, offset, clobber); }, () @trusted {
                 insertImplSlice(cast(wstring)other.literal, offset, clobber);
             }, () @trusted { insertImplSlice(cast(dstring)other.literal, offset, clobber); });
@@ -3054,6 +3060,8 @@ private:
         }
 
         bool startsWithImplReadOnly(scope String_ASCII other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            other.stripZero;
+
             ASCIILiteralAsTarget!dchar alat;
             alat.literal = other.literal;
             scope osiu = alat.get;
@@ -3072,6 +3080,7 @@ private:
 
         bool startsWithImplReadOnly(Char2)(scope String_UTF!Char2 other, bool caseSensitive,
                 UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            other.stripZero;
             auto alatc = AnyLiteralAsTargetChar!dchar(other);
 
             return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
@@ -3138,6 +3147,8 @@ private:
         }
 
         bool endsWithImplReadOnly(scope String_ASCII other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            other.stripZero;
+
             ASCIILiteralAsTarget!dchar alat;
             alat.literal = other.literal;
             scope osiu = alat.get;
@@ -3156,6 +3167,7 @@ private:
 
         bool endsWithImplReadOnly(Char2)(scope String_UTF!Char2 other, bool caseSensitive,
                 UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            other.stripZero;
             auto alatc = AnyLiteralAsTargetChar!dchar(other);
 
             return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
