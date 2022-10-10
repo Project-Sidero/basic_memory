@@ -68,9 +68,476 @@ void formattedWrite(Builder, Format, Args...)(scope Builder builder, scope Forma
     }
 
     static foreach (i; 0 .. Args.length) {
-        if (offset < i)
-            fv(String_ASCII(""), args[i]);
+        if (offset <= i)
+            fv(String_ASCII.init, args[i]);
     }
+}
+
+///
+struct PrettyPrint(ConstantsType)
+        if (isReadOnlyString!ConstantsType || isBuilderString!ConstantsType || isSomeString!ConstantsType) {
+    /// For each line emit: prefix? prefixToRepeat{depth} prefixSuffix?
+    ConstantsType prefix, prefixToRepeat = ConstantsType("\t"), prefixSuffix = ConstantsType("- ");
+    /// The text divider to emit for between arguments to pretty printer
+    ConstantsType betweenArgumentDivider = ConstantsType(", ");
+    /// The text divider to emit for between sequential values
+    ConstantsType betweenValueDivider = ConstantsType(", ");
+
+    ///
+    uint depth;
+    ///
+    bool useQuotes;
+
+    ///
+    void opCall(Builder, Args...)(scope Builder builder, scope Args args) @trusted if (isBuilderString!Builder) {
+        static if (is(Builder == StringBuilder_ASCII) && isUTF!ConstantsType) {
+            static assert(0, "You cannot use an ASCII string builder with Unicode prefix type");
+        }
+
+        Impl!Builder impl;
+        impl.parent = &this;
+        impl.builder = builder;
+
+        if (builder.length == 0 || builder.endsWith("\n"))
+            impl.handlePrefix;
+
+        foreach (i, ref arg; args) {
+            if (i > 0 && !betweenArgumentDivider.isNull)
+                impl.builder ~= betweenArgumentDivider;
+
+            impl.handle(arg, useQuotes);
+        }
+    }
+
+private:
+    static struct Impl(Builder) {
+        PrettyPrint* parent;
+        Builder builder;
+
+        enum haveToString(T) = __traits(hasMember, T, "toString") && (__traits(compiles, {
+                    Builder builder;
+                    T value;
+                    value.toString(builder);
+                }) || __traits(compiles, { Builder builder; T value; builder ~= value.toString(); }) || __traits(compiles, {
+                    Builder builder;
+                    T value;
+                    value.toString(&builder.put);
+                }));
+
+        enum haveToStringPretty(T) = __traits(hasMember, T, "toStringPretty") && (__traits(compiles, {
+                    Builder builder;
+                    T value;
+                    value.toStringPretty(builder);
+                }) || __traits(compiles, { Builder builder; T value; builder ~= value.toStringPretty(); }) || __traits(compiles, {
+                    Builder builder;
+                    T value;
+                    value.toStringPretty(&builder.put);
+                }));
+
+        void handlePrefix(bool onlyRepeat = false, bool usePrefix = true, bool useSuffix = true) @safe nothrow @nogc {
+            if (!onlyRepeat && usePrefix)
+                builder ~= parent.prefix;
+
+            if (!parent.prefixToRepeat.isNull) {
+                foreach (i; 0 .. parent.depth) {
+                    builder ~= parent.prefixToRepeat;
+                }
+            }
+
+            if (!onlyRepeat && useSuffix)
+                builder ~= parent.prefixSuffix;
+        }
+
+        void handle(Type)(scope ref Type input, bool useQuotes = true, bool useName = true, bool forcePrint = false) @trusted {
+            static if (__traits(compiles, hasUDA!(ActualType, PrettyPrintIgnore))) {
+                if (!forcePrint && hasUDA!(ActualType, PrettyPrintIgnore))
+                    return;
+            }
+
+            alias ActualType = Unqual!Type;
+
+            if (builder.endsWith(")") || builder.endsWith("]")) {
+                if (!parent.betweenValueDivider.isNull)
+                    builder ~= parent.betweenValueDivider;
+            }
+
+            static if (isSomeString!ActualType) {
+                if (input is null) {
+                    builder ~= "null";
+                    return;
+                }
+
+                if (useQuotes)
+                    builder ~= "\"";
+
+                builder ~= input;
+
+                if (useQuotes)
+                    builder ~= "\"";
+            } else static if (isReadOnlyString!ActualType || isBuilderString!ActualType) {
+                if (input.isNull) {
+                    builder ~= "null";
+                    return;
+                }
+
+                if (useQuotes)
+                    builder ~= "\"";
+
+                builder ~= input;
+
+                if (useQuotes)
+                    builder ~= "\"";
+            } else static if (isPointer!ActualType) {
+                alias SubType = typeof(input[0]);
+
+                static if (__traits(compiles, fullyQualifiedName!SubType))
+                    enum EntryName = fullyQualifiedName!SubType;
+                else
+                    enum EntryName = SubType.stringof;
+
+                builder ~= EntryName;
+
+                if (input !is null) {
+                    static if (is(SubType == class) || isAssociativeArray!SubType || isArray!SubType) {
+                        if (*input is null) {
+                            builder ~= "@null";
+                        } else {
+                            static if (is(SubType == class) || isAssociativeArray!SubType) {
+                                builder.formattedWrite!"@%X"(cast(size_t)cast(void*)*input);
+                            } else static if (isArray!SubType) {
+                                builder.formattedWrite!"@%X"(cast(size_t)(*input).ptr);
+                            }
+                        }
+                    }
+                }
+
+                static if (!(is(SubType == struct) || isBasicType!SubType))
+                    builder ~= "*";
+
+                if (input is null)
+                    builder ~= "@null";
+                else {
+                    builder.formattedWrite!"@%X"(cast(size_t)input);
+
+                    static if (!is(SubType == void)) {
+                        handle(*input, true, false);
+                    }
+                }
+            } else static if (is(ActualType : Result!WrappedType, WrappedType)) {
+                if (input) {
+                    // ok print the thing
+
+                    static if (!is(WrappedType == void)) {
+                        scope temp = input.assumeOkay;
+                        handle(temp, useQuotes, useName, forcePrint);
+                        return;
+                    }
+                }
+
+                builder.formattedWrite(String_ASCII.init, input);
+            } else static if (is(ActualType == struct) || is(ActualType == class)) {
+                static FQN = fullyQualifiedName!ActualType;
+
+                if (useName) {
+                    builder ~= FQN;
+
+                    static if (is(ActualType == class)) {
+                        if (input is null)
+                            builder ~= "@null";
+                        else
+                            builder.formattedWrite("@%X", cast(size_t)cast(void*)input);
+                    }
+                }
+
+                static if (is(ActualType == class)) {
+                    if (input is null)
+                        return;
+                }
+
+                builder ~= "(";
+                parent.depth++;
+
+                static foreach (name; FieldNameTuple!ActualType) {
+                    static if (__traits(compiles, __traits(getMember, input, name)) && !hasUDA!(__traits(getMember,
+                            input, name), PrettyPrintIgnore) && __traits(getVisibility, __traits(getMember, input, name)) != "private") {
+                        builder ~= "\n";
+
+                        handlePrefix(false, true, false);
+                        builder ~= name;
+                        builder ~= ": ";
+                        handle(__traits(getMember, input, name), true);
+                        builder ~= ",";
+                    }
+                }
+
+                static if (is(ActualType == class)) {
+                    static foreach (i, Base; BaseClassesTuple!ActualType) {
+                        static foreach (name; FieldNameTuple!Base) {
+                            static if (!hasUDA!(__traits(getMember, input, name), PrettyPrintIgnore) &&
+                                    __traits(getVisibility, __traits(getMember, input, name)) != "private") {
+                                builder ~= "\n";
+
+                                handlePrefix(false, true, false);
+                                builder ~= "---- ";
+                                builder ~= fullyQualifiedName!Base;
+                                builder ~= " ----";
+
+                                static if (__traits(compiles, __traits(getMember, input, name))) {
+                                    builder ~= "\n";
+                                    handlePrefix(false, true, false);
+                                    builder ~= name;
+                                    builder ~= ": ";
+                                    handle(__traits(getMember, input, name), true);
+                                    builder ~= ",";
+                                }
+                            }
+                        }
+                    }
+                }
+
+                static if (isIterable!ActualType) {
+                    if (builder.endsWith("("))
+                        builder ~= "[";
+                    else
+                        builder ~= " [";
+
+                    static if (__traits(compiles, {
+                            foreach (key, value; input) {
+                            }
+                        })) {
+                        foreach (k, v; input) {
+                            builder ~= "\n";
+                            handlePrefix();
+
+                            handleWrapper(k);
+                            builder ~= ": ";
+
+                            handleWrapper(v);
+                            builder ~= ",";
+                        }
+                    } else {
+                        foreach (v; input) {
+                            builder ~= "\n";
+                            handlePrefix();
+                            handle(v);
+                            builder ~= ",";
+                        }
+                    }
+
+                    if (builder.endsWith(","))
+                        builder.clobberInsert(builder.length - 1, cast(string)"]");
+                    else
+                        builder ~= "]";
+                }
+
+                static if (haveToStringPretty!ActualType && !hasUDA!(__traits(getMember, input, "toStringPretty"), PrettyPrintIgnore)) {
+                    size_t offsetForToString = builder.length;
+
+                    static if (__traits(compiles, { builder.toStringPretty(output); })) {
+                        input.toStringPretty(builder);
+                    } else static if (__traits(compiles, { builder ~= input.toStringPretty(); })) {
+                        builder ~= input.toStringPretty();
+                    } else static if (__traits(compiles, { input.toStringPretty(&builder.put); })) {
+                        input.toStringPretty(&builder.put);
+                    }
+
+                    if (builder.length > offsetForToString) {
+                        Builder subset = builder[offsetForToString .. $];
+
+                        if (subset == FQN)
+                            builder.remove(offsetForToString, size_t.max);
+                        else if (subset.startsWith(", ")) {
+                            builder.remove(offsetForToString, 1);
+                            builder.insert(offsetForToString + 1, "->\n");
+                        } else
+                            builder.insert(offsetForToString, " ->\n");
+                    }
+                } else static if (haveToString!ActualType && !hasUDA!(__traits(getMember, input, "toString"), PrettyPrintIgnore)) {
+                    size_t offsetForToString = builder.length;
+
+                    static if (__traits(compiles, { input.toString(builder); })) {
+                        input.toString(builder);
+                    } else static if (__traits(compiles, { builder ~= input.toString(); })) {
+                        builder ~= input.toString();
+                    } else static if (__traits(compiles, { input.toString(&builder.put); })) {
+                        input.toString(&builder.put);
+                    }
+
+                    if (builder.length > offsetForToString) {
+                        Builder subset = builder[offsetForToString .. $];
+
+                        if (subset == FQN)
+                            builder.remove(offsetForToString, size_t.max);
+                        else
+                            builder.insert(offsetForToString, cast(string)" ->\n");
+                    }
+                }
+
+                parent.depth--;
+
+                if (builder.endsWith(","))
+                    builder.clobberInsert(builder.length - 1, cast(string)")");
+                else
+                    builder ~= ")";
+            } else static if (isArray!ActualType) {
+                alias SubType = Unqual!(typeof(input[0]));
+
+                static if (__traits(compiles, fullyQualifiedName!SubType)) {
+                    enum EntryName = fullyQualifiedName!SubType;
+                } else
+                    enum EntryName = __traits(identifier, SubType);
+
+                bool handled;
+
+                static if (isBasicType!SubType) {
+                    if (input.length <= 5) {
+                        handlePrefix(false, true, false);
+                        if (useName) {
+                            builder ~= EntryName;
+
+                            if (input is null)
+                                builder ~= "@null";
+                            else
+                                builder.formattedWrite("@%X", cast(size_t)input.ptr);
+                        }
+
+                        static if (!is(SubType == void)) {
+                            builder ~= "[";
+
+                            foreach (i, ref entry; input) {
+                                if (i > 0 && !parent.betweenValueDivider.isNull)
+                                    builder ~= parent.betweenValueDivider;
+                                handle(entry);
+                            }
+
+                            builder ~= "]";
+                        } else {
+                            builder ~= "=0x[";
+                            auto temp = input;
+
+                            while (temp.length > 0) {
+                                builder.formattedWrite("%.2X", *cast(const(ubyte)*)&temp[0]);
+                                temp = temp[1 .. $];
+                            }
+
+                            builder ~= "]";
+                        }
+
+                        handled = true;
+                    }
+                }
+
+                if (!handled) {
+                    if (useName) {
+                        builder ~= EntryName;
+
+                        if (input is null)
+                            builder ~= "@null";
+                        else
+                            builder.formattedWrite("@%X", cast(size_t)input.ptr);
+                    }
+
+                    static if (!is(SubType == void)) {
+                        builder ~= "[\n";
+                        parent.depth++;
+
+                        foreach (i, ref entry; input) {
+                            handlePrefix();
+                            handle(entry, true, true, true);
+                            builder ~= "\n";
+                        }
+
+                        parent.depth--;
+                        builder ~= "]";
+                    } else {
+                        builder ~= "=0x";
+                        auto temp = input;
+
+                        while (temp.length > 0) {
+                            builder.formattedWrite("%.2X", *cast(const(ubyte)*)&temp[0]);
+                            temp = temp[1 .. $];
+                        }
+
+                        builder ~= "]";
+                    }
+                }
+            } else static if (isAssociativeArray!ActualType) {
+                alias Key = KeyType!ActualType;
+                alias Value = ValueType!ActualType;
+
+                static if (__traits(compiles, fullyQualifiedName!Key))
+                    enum KeyName = fullyQualifiedName!Key;
+                else
+                    enum KeyName = Key.stringof;
+                static if (__traits(compiles, fullyQualifiedName!Value))
+                    enum ValueName = fullyQualifiedName!Value;
+                else
+                    enum ValueName = Value.stringof;
+
+                enum EntryName = ValueName ~ "[" ~ KeyName ~ "]";
+
+                if (useName) {
+                    builder ~= EntryName;
+                    builder.formattedWrite("@%X", cast(void*)input);
+                }
+
+                builder ~= "[\n";
+                parent.depth++;
+
+                foreach (key, ref value; input) {
+                    handlePrefix();
+                    handle(key, true, true, true);
+                    builder ~= ": ";
+
+                    handle(value, true, true, true);
+                    builder ~= "\n";
+                }
+
+                parent.depth--;
+                builder ~= "]";
+            } else {
+                builder.formattedWrite(String_ASCII.init, input);
+            }
+        }
+    }
+}
+
+///
+unittest {
+    PrettyPrint!String_UTF8 prettyPrint;
+    prettyPrint.useQuotes = true;
+
+    struct Pointer {
+        int foobar = 27;
+    }
+
+    StringBuilder_UTF8 builder = StringBuilder_UTF8(globalAllocator());
+
+    Pointer pointer;
+    ErrorResult errorResult;
+    Result!int iResult = 3;
+
+    static class Parent {
+        double d = 22;
+    }
+
+    static class Class : Parent {
+        int x = 7;
+    }
+
+    static struct Struct {
+        bool b = true;
+
+        string toString() {
+            return "Hi there!";
+        }
+    }
+
+    Class clasz = new Class;
+    Struct struc;
+
+    prettyPrint(builder, &pointer, errorResult, iResult, "hello world!", String_UTF8("More Text muahah1"), [12: 13],
+            [22, 24], ["abc", "xyz"], clasz, struc);
 }
 
 private:
@@ -288,9 +755,8 @@ scope:
                 }
 
                 if (builder.length > offsetForToString) {
-                    auto subset = builder[offsetForToString .. $];
-
                     static FQN = fullyQualifiedName!ActualType;
+                    auto subset = builder[offsetForToString .. $];
 
                     if (subset == FQN)
                         builder.remove(offsetForToString, FQN.length);
@@ -531,7 +997,11 @@ scope:
                     actualBuffer[soFar++] = c;
                 actualBuffer[soFar++] = 0;
 
-                temp = typeof(temp)(actualBuffer[0 .. soFar]);
+                static if (isSomeString!String) {
+                    temp = cast(String)(actualBuffer[0 .. soFar]);
+                } else {
+                    temp = String(cast(String.LiteralType)actualBuffer[0 .. soFar]);
+                }
 
                 result = del(temp);
                 working = working[formatStringLength .. $];
