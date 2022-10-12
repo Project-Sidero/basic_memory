@@ -80,11 +80,14 @@ mixin template StringBuilderOperations() {
         if (other.obj !is &this)
             other.mutex(true);
 
+        assert(other.length() > 0);
         changeIndexToOffset(iterator, offset);
 
         size_t maximumOffsetFromHead;
         Cursor cursor = cursorFor(iterator, maximumOffsetFromHead, offset);
+        assert(other.length() > 0);
         insertOperation(cursor, maximumOffsetFromHead, other, clobber);
+        assert(other.length() > 0);
 
         blockList.mutex.unlock;
         if (other.obj !is &this)
@@ -156,7 +159,7 @@ mixin template StringBuilderOperations() {
         }
     }
 
-    Cursor cursorFor(Iterator* iterator, out size_t maximumOffsetFromHead, size_t offset = 0) scope @trusted {
+    Cursor cursorFor(scope Iterator* iterator, out size_t maximumOffsetFromHead, size_t offset = 0) scope @trusted {
         if (iterator !is null) {
             offset += iterator.forwards.offsetFromHead;
             maximumOffsetFromHead = iterator.backwards.offsetFromHead;
@@ -516,7 +519,7 @@ mixin template StringBuilderOperations() {
             }
         }
 
-        toInsert.foreachContiguous((ref scope Char[] cA) @trusted {
+        toInsert.foreachContiguous((scope ref Char[] cA) @trusted {
             // clobbering only
             {
                 if (cursor.offsetFromHead >= maximumOffsetFromHead)
@@ -566,7 +569,7 @@ mixin template StringBuilderOperations() {
                     ensureNotInFullBlock;
 
                     {
-                        size_t canDo = BlockList.Count - cursor.offsetIntoBlock;
+                        size_t canDo = BlockList.Count - cursor.block.length;
                         if (canDo > cA.length)
                             canDo = cA.length;
                         assert(canDo > 0);
@@ -578,7 +581,12 @@ mixin template StringBuilderOperations() {
                         } else
                             cursor.block.length += canDo;
 
+                        assert(cursor.block.length <= BlockList.Count);
+
                         Char[] got = cursor.block.get()[cursor.offsetIntoBlock .. $];
+                        assert(got.length >= canDo);
+                        assert(cA.length >= canDo);
+
                         foreach (i, c; cA[0 .. canDo])
                             got[i] = c;
 
@@ -798,7 +806,7 @@ mixin template StringBuilderOperations() {
 
     @trusted unittest {
         enum StartText = cast(Char[])"Hello, world!Hello, world!Hello, world!Hello, world!";
-        enum Result = cast(Char[])"Hezzo, worzd!Hezzo, worzd!Hezzo, worzd!Hezzo, worzd!";
+        enum Result = cast(Char[])"Hezzo, worzdzHezzo, worzdzHezzo, worzdzHezzo, worzdz";
 
         OpTest!Char opTest = OpTest!Char(globalAllocator());
 
@@ -820,7 +828,7 @@ mixin template StringBuilderOperations() {
             replaceCursor.setup(&opTest.blockList, 0);
 
             size_t matched = opTest.replaceOperation(null, replaceCursor, (scope opTest.Cursor cursor, size_t maximumOffsetFromHead) {
-                return cast(size_t)(cursor.get() == 'l' ? 1 : 0);
+                return cast(size_t)((cursor.get() == 'l' || cursor.get() == '!') ? 1 : 0);
             }, (scope opTest.Iterator* iterator, scope ref opTest.Cursor cursor) @trusted {
                 opTest.LiteralAsTarget lAT;
                 lAT.literal = cast(Char[])"z";
@@ -829,7 +837,7 @@ mixin template StringBuilderOperations() {
                 opTest.insertOperation(null, cursor, target);
                 return cast(size_t)1;
             });
-            assert(matched == 12);
+            assert(matched == 16);
         }
 
         {

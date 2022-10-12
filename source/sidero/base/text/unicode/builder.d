@@ -295,34 +295,38 @@ nothrow @safe:
             .init) if (is(InputChar == char) || is(InputChar == wchar) || is(InputChar == dchar)) {
         setupState(allocator);
 
-        state.handle((StateIterator.S8 state, StateIterator.I8 iterator) @trusted {
-            assert(state !is null);
+        if (input.length > 0) {
+            state.handle((StateIterator.S8 state, StateIterator.I8 iterator) @trusted {
+                assert(state !is null);
 
-            LiteralAsTargetChar!(InputChar, char) latc;
-            latc.literal = input;
-            auto osat = latc.get;
+                LiteralAsTargetChar!(InputChar, char) latc;
+                latc.literal = input;
+                auto osat = latc.get;
 
-            state.language = language;
-            state.externalInsert(iterator, 0, osat, false);
-        }, (StateIterator.S16 state, StateIterator.I16 iterator) @trusted {
-            assert(state !is null);
+                state.language = language;
+                assert(osat.length() > 0);
+                state.externalInsert(iterator, 0, osat, false);
+                assert(osat.length() > 0);
+            }, (StateIterator.S16 state, StateIterator.I16 iterator) @trusted {
+                assert(state !is null);
 
-            LiteralAsTargetChar!(InputChar, wchar) latc;
-            latc.literal = input;
-            auto osat = latc.get;
+                LiteralAsTargetChar!(InputChar, wchar) latc;
+                latc.literal = input;
+                auto osat = latc.get;
 
-            state.language = language;
-            state.externalInsert(iterator, 0, osat, false);
-        }, (StateIterator.S32 state, StateIterator.I32 iterator) @trusted {
-            assert(state !is null);
+                state.language = language;
+                state.externalInsert(iterator, 0, osat, false);
+            }, (StateIterator.S32 state, StateIterator.I32 iterator) @trusted {
+                assert(state !is null);
 
-            LiteralAsTargetChar!(InputChar, dchar) latc;
-            latc.literal = input;
-            auto osat = latc.get;
+                LiteralAsTargetChar!(InputChar, dchar) latc;
+                latc.literal = input;
+                auto osat = latc.get;
 
-            state.language = language;
-            state.externalInsert(iterator, 0, osat, false);
-        });
+                state.language = language;
+                state.externalInsert(iterator, 0, osat, false);
+            });
+        }
     }
 
     ///
@@ -2705,6 +2709,715 @@ nothrow @safe:
         }
     }
 
+    @nogc {
+        ///
+        size_t replace(scope String_ASCII toFind, scope String_ASCII toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            StringBuilder_UTF builder = StringBuilder_UTF("its a lala world");
+            size_t count = builder.replace(String_ASCII("la"), String_ASCII("woof"));
+            assert(count == 2);
+            assert(builder == "its a woofwoof world");
+        }
+
+        ///
+        size_t replace(scope String_ASCII toFind, scope StringBuilder_ASCII toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(String_ASCII("la"), StringBuilder_ASCII("woof")) == 2);
+        }
+
+        ///
+        size_t replace(scope String_ASCII toFind, scope const(char)[] toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(String_ASCII("la"), cast(string)"woof") == 2);
+        }
+
+        ///
+        size_t replace(scope String_ASCII toFind, scope const(wchar)[] toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(String_ASCII("la"), "woof"w) == 2);
+        }
+
+        ///
+        size_t replace(scope String_ASCII toFind, scope const(dchar)[] toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(String_ASCII("la"), "woof"d) == 2);
+        }
+
+        ///
+        size_t replace(scope String_ASCII toFind, scope StringBuilder_UTF8 toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(String_ASCII("la"), StringBuilder_UTF8(cast(string)"woof")) == 2);
+        }
+
+        ///
+        size_t replace(scope String_ASCII toFind, scope StringBuilder_UTF16 toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(String_ASCII("la"), StringBuilder_UTF16("woof"w)) == 2);
+        }
+
+        ///
+        size_t replace(scope String_ASCII toFind, scope StringBuilder_UTF32 toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(String_ASCII("la"), StringBuilder_UTF32("woof"d)) == 2);
+        }
+
+        ///
+        size_t replace(scope StringBuilder_ASCII toFind, scope String_ASCII toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_ASCII("la"), String_ASCII("woof")) == 2);
+        }
+
+        ///
+        size_t replace(scope StringBuilder_ASCII toFind, scope StringBuilder_ASCII toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_ASCII("la"), StringBuilder_ASCII("woof")) == 2);
+        }
+
+        ///
+        size_t replace(scope StringBuilder_ASCII toFind, scope const(char)[] toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_ASCII("la"), cast(string)"woof") == 2);
+        }
+
+        ///
+        size_t replace(scope StringBuilder_ASCII toFind, scope const(wchar)[] toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_ASCII("la"), "woof"w) == 2);
+        }
+
+        ///
+        size_t replace(scope StringBuilder_ASCII toFind, scope const(dchar)[] toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_ASCII("la"), "woof"d) == 2);
+        }
+
+        ///
+        size_t replace(scope StringBuilder_ASCII toFind, scope StringBuilder_UTF8 toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_ASCII("la"), StringBuilder_UTF8(cast(string)"woof")) == 2);
+        }
+
+        ///
+        size_t replace(scope StringBuilder_ASCII toFind, scope StringBuilder_UTF16 toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_ASCII("la"), StringBuilder_UTF16("woof"w)) == 2);
+        }
+
+        ///
+        size_t replace(scope StringBuilder_ASCII toFind, scope StringBuilder_UTF32 toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_ASCII("la"), StringBuilder_UTF32("woof"d)) == 2);
+        }
+
+        ///
+        size_t replace(scope const(char)[] toFind, scope String_ASCII toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(cast(string)"la", String_ASCII("woof")) == 2);
+        }
+
+        ///
+        size_t replace(scope const(char)[] toFind, scope StringBuilder_ASCII toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(cast(string)"la", StringBuilder_ASCII("woof")) == 2);
+        }
+
+        ///
+        size_t replace(scope const(char)[] toFind, scope const(char)[] toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(cast(string)"la", cast(string)"woof") == 2);
+        }
+
+        ///
+        size_t replace(scope const(char)[] toFind, scope const(wchar)[] toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(cast(string)"la", "woof"w) == 2);
+        }
+
+        ///
+        size_t replace(scope const(char)[] toFind, scope const(dchar)[] toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(cast(string)"la", "woof"d) == 2);
+        }
+
+        ///
+        size_t replace(scope const(char)[] toFind, scope StringBuilder_UTF8 toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(cast(string)"la", StringBuilder_UTF8(cast(string)"woof")) == 2);
+        }
+
+        ///
+        size_t replace(scope const(char)[] toFind, scope StringBuilder_UTF16 toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(cast(string)"la", StringBuilder_UTF16("woof"w)) == 2);
+        }
+
+        ///
+        size_t replace(scope const(char)[] toFind, scope StringBuilder_UTF32 toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(cast(string)"la", StringBuilder_UTF32("woof"d)) == 2);
+        }
+
+        ///
+        size_t replace(scope const(wchar)[] toFind, scope String_ASCII toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace("la"w, String_ASCII("woof")) == 2);
+        }
+
+        ///
+        size_t replace(scope const(wchar)[] toFind, scope StringBuilder_ASCII toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace("la"w, StringBuilder_ASCII("woof")) == 2);
+        }
+
+        ///
+        size_t replace(scope const(wchar)[] toFind, scope const(char)[] toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace("la"w, cast(string)"woof") == 2);
+        }
+
+        ///
+        size_t replace(scope const(wchar)[] toFind, scope const(wchar)[] toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace("la"w, "woof"w) == 2);
+        }
+
+        ///
+        size_t replace(scope const(wchar)[] toFind, scope const(dchar)[] toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace("la"w, "woof"d) == 2);
+        }
+
+        ///
+        size_t replace(scope const(wchar)[] toFind, scope StringBuilder_UTF8 toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace("la"w, StringBuilder_UTF8(cast(string)"woof")) == 2);
+        }
+
+        ///
+        size_t replace(scope const(wchar)[] toFind, scope StringBuilder_UTF16 toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace("la"w, StringBuilder_UTF16("woof"w)) == 2);
+        }
+
+        ///
+        size_t replace(scope const(wchar)[] toFind, scope StringBuilder_UTF32 toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace("la"w, StringBuilder_UTF32("woof"d)) == 2);
+        }
+
+        ///
+        size_t replace(scope const(dchar)[] toFind, scope String_ASCII toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace("la"d, String_ASCII("woof")) == 2);
+        }
+
+        ///
+        size_t replace(scope const(dchar)[] toFind, scope StringBuilder_ASCII toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace("la"d, StringBuilder_ASCII("woof")) == 2);
+        }
+
+        ///
+        size_t replace(scope const(dchar)[] toFind, scope const(char)[] toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace("la"d, cast(string)"woof") == 2);
+        }
+
+        ///
+        size_t replace(scope const(dchar)[] toFind, scope const(wchar)[] toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace("la"d, "woof"w) == 2);
+        }
+
+        ///
+        size_t replace(scope const(dchar)[] toFind, scope const(dchar)[] toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace("la"d, "woof"d) == 2);
+        }
+
+        ///
+        size_t replace(scope const(dchar)[] toFind, scope StringBuilder_UTF8 toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace("la"d, StringBuilder_UTF8(cast(string)"woof")) == 2);
+        }
+
+        ///
+        size_t replace(scope const(dchar)[] toFind, scope StringBuilder_UTF16 toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace("la"d, StringBuilder_UTF16("woof"w)) == 2);
+        }
+
+        ///
+        size_t replace(scope const(dchar)[] toFind, scope StringBuilder_UTF32 toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace("la"d, StringBuilder_UTF32("woof"d)) == 2);
+        }
+
+        ///
+        size_t replace(scope StringBuilder_UTF8 toFind, scope String_ASCII toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF8("la"), String_ASCII("woof")) == 2);
+        }
+
+        ///
+        size_t replace(scope StringBuilder_UTF8 toFind, scope StringBuilder_ASCII toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF8("la"), StringBuilder_ASCII("woof")) == 2);
+        }
+
+        ///
+        size_t replace(scope StringBuilder_UTF8 toFind, scope const(char)[] toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF8("la"), cast(string)"woof") == 2);
+        }
+
+        ///
+        size_t replace(scope StringBuilder_UTF8 toFind, scope const(wchar)[] toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF8("la"), "woof"w) == 2);
+        }
+
+        ///
+        size_t replace(scope StringBuilder_UTF8 toFind, scope const(dchar)[] toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF8("la"), "woof"d) == 2);
+        }
+
+        ///
+        size_t replace(scope StringBuilder_UTF8 toFind, scope StringBuilder_UTF8 toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF8("la"), StringBuilder_UTF8(cast(string)"woof")) == 2);
+        }
+
+        ///
+        size_t replace(scope StringBuilder_UTF8 toFind, scope StringBuilder_UTF16 toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF8("la"), StringBuilder_UTF16("woof"w)) == 2);
+        }
+
+        ///
+        size_t replace(scope StringBuilder_UTF8 toFind, scope StringBuilder_UTF32 toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF8("la"), StringBuilder_UTF32("woof"d)) == 2);
+        }
+
+        ///
+        size_t replace(scope StringBuilder_UTF16 toFind, scope String_ASCII toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF16("la"w), String_ASCII("woof")) == 2);
+        }
+
+        ///
+        size_t replace(scope StringBuilder_UTF16 toFind, scope StringBuilder_ASCII toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF16("la"w), StringBuilder_ASCII("woof")) == 2);
+        }
+
+        ///
+        size_t replace(scope StringBuilder_UTF16 toFind, scope const(char)[] toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF16("la"w), cast(string)"woof") == 2);
+        }
+
+        ///
+        size_t replace(scope StringBuilder_UTF16 toFind, scope const(wchar)[] toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF16("la"w), "woof"w) == 2);
+        }
+
+        ///
+        size_t replace(scope StringBuilder_UTF16 toFind, scope const(dchar)[] toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF16("la"w), "woof"d) == 2);
+        }
+
+        ///
+        size_t replace(scope StringBuilder_UTF16 toFind, scope StringBuilder_UTF8 toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF16("la"w), StringBuilder_UTF8(cast(string)"woof")) == 2);
+        }
+
+        ///
+        size_t replace(scope StringBuilder_UTF16 toFind, scope StringBuilder_UTF16 toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF16("la"w), StringBuilder_UTF16("woof"w)) == 2);
+        }
+
+        ///
+        size_t replace(scope StringBuilder_UTF16 toFind, scope StringBuilder_UTF32 toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF16("la"w), StringBuilder_UTF32("woof"d)) == 2);
+        }
+
+        ///
+        size_t replace(scope StringBuilder_UTF32 toFind, scope String_ASCII toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF32("la"d), String_ASCII("woof")) == 2);
+        }
+
+        ///
+        size_t replace(scope StringBuilder_UTF32 toFind, scope StringBuilder_ASCII toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF32("la"d), StringBuilder_ASCII("woof")) == 2);
+        }
+
+        ///
+        size_t replace(scope StringBuilder_UTF32 toFind, scope const(char)[] toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF32("la"d), cast(string)"woof") == 2);
+        }
+
+        ///
+        size_t replace(scope StringBuilder_UTF32 toFind, scope const(wchar)[] toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF32("la"d), "woof"w) == 2);
+        }
+
+        ///
+        size_t replace(scope StringBuilder_UTF32 toFind, scope const(dchar)[] toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF32("la"d), "woof"d) == 2);
+        }
+
+        ///
+        size_t replace(scope StringBuilder_UTF32 toFind, scope StringBuilder_UTF8 toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF32("la"d), StringBuilder_UTF8(cast(string)"woof")) == 2);
+        }
+
+        ///
+        size_t replace(scope StringBuilder_UTF32 toFind, scope StringBuilder_UTF16 toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF32("la"d), StringBuilder_UTF16("woof"w)) == 2);
+        }
+
+        ///
+        size_t replace(scope StringBuilder_UTF32 toFind, scope StringBuilder_UTF32 toReplace, bool caseSensitive = true,
+                bool onlyOnce = false, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return replaceImpl(toFind, toReplace, caseSensitive, onlyOnce, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF32("la"d), StringBuilder_UTF32("woof"d)) == 2);
+        }
+    }
+
     ///
     ulong toHash() scope @trusted @nogc {
         import sidero.base.hash.fnv : fnv_64_1a;
@@ -2824,7 +3537,7 @@ private:
         }, () { assert(0); });
     }
 
-    scope {
+    scope @nogc {
         int opCmpImplReadOnly(scope String_ASCII other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
             other.stripZero;
 
@@ -3231,6 +3944,31 @@ private:
                 assert(state !is null);
                 return state.externalEndsWith(iterator, asiau.osat, caseSensitive, language);
             }, () { return false; });
+        }
+
+        size_t replaceImpl(ToFind, ToReplace)(scope ToFind toFind, scope ToReplace toReplace, bool caseSensitive,
+                bool onlyOnce, UnicodeLanguage language) {
+            if (isNull)
+                return 0;
+
+            scope toFindState = AnyAsTargetChar!dchar(toFind);
+
+            return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+                assert(state !is null);
+
+                scope toReplaceState = AnyAsTargetChar!char(toReplace);
+                return state.externalReplace(iterator, toFindState.osat, toReplaceState.osat, caseSensitive, onlyOnce, language);
+            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+                assert(state !is null);
+
+                scope toReplaceState = AnyAsTargetChar!wchar(toReplace);
+                return state.externalReplace(iterator, toFindState.osat, toReplaceState.osat, caseSensitive, onlyOnce, language);
+            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+                assert(state !is null);
+
+                scope toReplaceState = AnyAsTargetChar!dchar(toReplace);
+                return state.externalReplace(iterator, toFindState.osat, toReplaceState.osat, caseSensitive, onlyOnce, language);
+            }, () { return 0; });
         }
     }
 }
@@ -3670,10 +4408,15 @@ struct UTF_State(Char) {
 
             static if (is(Char == TargetChar)) {
                 if (iterator !is null) {
-                    iterator.foreachBlocks((scope TargetChar[] data) { result = del(data); return result; });
+                    iterator.foreachBlocks((scope TargetChar[] data) {
+                        if (data.length > 0)
+                            result = del(data);
+                        return result;
+                    });
                 } else {
                     foreach (Char[] data; state.blockList) {
-                        result = del(data);
+                        if (data.length > 0)
+                            result = del(data);
 
                         if (result)
                             break;
@@ -3945,10 +4688,17 @@ struct UTF_State(Char) {
     }
 
     static struct ForeachUTF32 {
-        size_t maximumOffsetFromHead;
         Cursor cursor;
+        size_t maximumOffsetFromHead;
+        // when delegate == 0
+        size_t lastIteratedCount0;
 
-        this(scope ref UTF_State state, scope Iterator* iterator, size_t offset, bool fromHead) scope {
+        this(return scope Cursor cursor, size_t maximumOffsetFromHead) scope @safe nothrow @nogc {
+            this.cursor = cursor;
+            this.maximumOffsetFromHead = maximumOffsetFromHead;
+        }
+
+        this(scope ref UTF_State state, scope Iterator* iterator, size_t offset, bool fromHead) scope @safe nothrow @nogc {
             if (fromHead)
                 cursor = state.cursorFor(iterator, maximumOffsetFromHead, offset);
             else {
@@ -3967,11 +4717,12 @@ struct UTF_State(Char) {
         int opApply(scope int delegate(ref dchar) @safe nothrow @nogc del) scope @safe nothrow @nogc {
             int result;
 
+            lastIteratedCount0 = 0;
             Cursor forwardsTempDecodeCursor = cursor;
-            size_t advance;
+            size_t advance = 1;
 
             bool emptyInternal() {
-                return forwardsTempDecodeCursor.offsetFromHead + 1 >= maximumOffsetFromHead;
+                return forwardsTempDecodeCursor.offsetFromHead >= maximumOffsetFromHead;
             }
 
             Char frontInternal() {
@@ -3988,6 +4739,7 @@ struct UTF_State(Char) {
             while (!emptyInternal() && result == 0) {
                 static if (is(Char == dchar)) {
                     dchar decoded = frontInternal();
+                    popFrontInternal();
                 } else {
                     import sidero.base.encoding.utf : decode;
 
@@ -3995,6 +4747,8 @@ struct UTF_State(Char) {
                 }
 
                 result = del(decoded);
+                if (result == 0)
+                    lastIteratedCount0 += advance;
             }
 
             return result;
@@ -4151,6 +4905,47 @@ struct UTF_State(Char) {
 
         return result == 0;
     }
+
+    size_t externalReplace(scope Iterator* iterator, scope ref OtherStateAsTarget!dchar toFind,
+            scope ref OtherStateAsTarget!Char toReplace, bool caseSensitive, bool onlyOnce, UnicodeLanguage language) @trusted {
+        import sidero.base.text.unicode.comparison : CaseAwareComparison;
+        import sidero.base.text.unicode.characters.database : isTurkic;
+
+        blockList.mutex.pureLock;
+        if (toFind.obj !is &this)
+            toFind.mutex(true);
+        if (toReplace.obj !is &this && toReplace.obj !is toFind.obj)
+            toReplace.mutex(true);
+
+        language = pickLanguage(language);
+
+        size_t maximumOffsetFromHead;
+        scope Cursor cursor = cursorFor(iterator, maximumOffsetFromHead, 0);
+
+        CaseAwareComparison cac = CaseAwareComparison(blockList.allocator, language.isTurkic);
+        cac.setAgainst(toFind.foreachValue, caseSensitive);
+
+        size_t ret = replaceOperation(iterator, cursor, (scope Cursor cursor, size_t maximumOffsetFromHead) @trusted nothrow @nogc {
+            ForeachUTF32 f32 = ForeachUTF32(cursor, maximumOffsetFromHead);
+
+            auto got = cac.compare(&f32.opApply, true);
+            if (got != 0)
+                return 0;
+
+            assert(f32.lastIteratedCount0 != 0);
+            return f32.lastIteratedCount0;
+        }, (scope Iterator* iterator, scope ref Cursor cursor) @trusted {
+            return insertOperation(iterator, cursor, toReplace);
+        }, true, onlyOnce);
+
+        blockList.mutex.unlock;
+        if (toFind.obj !is &this)
+            toFind.mutex(false);
+        if (toReplace.obj !is &this && toReplace.obj !is toFind.obj)
+            toReplace.mutex(false);
+
+        return ret;
+    }
 }
 
 struct LiteralAsTargetChar(SourceChar, TargetChar) {
@@ -4164,8 +4959,11 @@ struct LiteralAsTargetChar(SourceChar, TargetChar) {
     int foreachContiguous(scope int delegate(scope ref  /* ignore this */ TargetChar[] data) @safe @nogc nothrow del) @trusted @nogc nothrow {
         static if (is(SourceChar == TargetChar)) {
             // don't mutate during testing
-            SourceChar[] temp = cast(SourceChar[])literal;
-            return del(temp);
+            TargetChar[] temp = cast(TargetChar[])literal;
+            if (temp.length > 0)
+                return del(temp);
+            else
+                return 0;
         } else {
             return foreachValue((ref TargetChar value) {
                 TargetChar[1] temp1 = [value];
@@ -4267,7 +5065,24 @@ struct AnyLiteralAsTargetChar(TargetChar) {
 
     OtherStateAsTarget!TargetChar osat;
 
-    this(Char)(scope String_UTF!Char input) @safe nothrow @nogc {
+@trusted nothrow @nogc:
+
+    this(Char : char)(const(Char)[] input) {
+        latc8.literal = input;
+        osat = latc8.get();
+    }
+
+    this(Char : wchar)(const(Char)[] input) {
+        latc16.literal = input;
+        osat = latc16.get();
+    }
+
+    this(Char : dchar)(const(Char)[] input) {
+        latc32.literal = input;
+        osat = latc32.get();
+    }
+
+    this(Char)(scope String_UTF!Char input) {
         input.literalEncoding.handle(() @trusted { latc8.literal = cast(string)input.literal; osat = latc8.get(); }, () @trusted {
             latc16.literal = cast(wstring)input.literal;
             osat = latc16.get();
@@ -4287,7 +5102,10 @@ struct ASCIILiteralAsTarget(TargetChar) {
         // don't mutate during testing
         static if (is(TargetChar == char)) {
             TargetChar[] temp = cast(TargetChar[])literal;
-            return del(temp);
+            if (temp.length > 0)
+                return del(temp);
+            else
+                return 0;
         } else {
             TargetChar[1] temp1;
             TargetChar[] temp2;
@@ -4349,6 +5167,9 @@ static struct ASCIIStateAsTarget(TargetChar) {
 
         if (iterator !is null) {
             iterator.foreachBlocks((scope data) {
+                if (data.length == 0)
+                    return 0;
+
                 static if (is(TargetChar == char)) {
                     TargetChar[] temp = cast(TargetChar[])data;
                     result = del(temp);
@@ -4431,5 +5252,79 @@ static struct ASCIIStateAsTarget(TargetChar) {
 
     OtherStateAsTarget!TargetChar get() scope return @trusted {
         return OtherStateAsTarget!TargetChar(cast(void*)state, &mutex, &foreachContiguous, &foreachValue, &length);
+    }
+}
+
+struct AnyAsTargetChar(TargetChar) {
+    union {
+        UTF_State!char.OtherStateIsUs!TargetChar osiu8;
+        UTF_State!wchar.OtherStateIsUs!TargetChar osiu16;
+        UTF_State!dchar.OtherStateIsUs!TargetChar osiu32;
+
+        LiteralAsTargetChar!(char, TargetChar) latc8;
+        LiteralAsTargetChar!(wchar, TargetChar) latc16;
+        LiteralAsTargetChar!(dchar, TargetChar) latc32;
+
+        ASCIIStateAsTarget!TargetChar asat;
+        ASCIILiteralAsTarget!TargetChar alat;
+    }
+
+    OtherStateAsTarget!TargetChar osat;
+
+    this(Input)(scope ref Input input) @trusted {
+        static if (is(Input == String_ASCII)) {
+            input.stripZero;
+            scope actualInput = input.literal;
+        } else {
+            scope actualInput = input;
+        }
+
+        static if (is(Input == StringBuilder_ASCII)) {
+            asat.state = input.state;
+            asat.iterator = input.iterator;
+            osat = asat.get();
+        } else static if (is(Input == StringBuilder_UTF!Char2, Char2)) {
+            input.state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+                assert(state !is null);
+
+                osiu8.state = state;
+                osiu8.iterator = iterator;
+                osat = osiu8.get;
+            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+                assert(state !is null);
+
+                osiu16.state = state;
+                osiu16.iterator = iterator;
+                osat = osiu16.get;
+            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+                assert(state !is null);
+
+                osiu32.state = state;
+                osiu32.iterator = iterator;
+                osat = osiu32.get;
+            }, () { assert(0); });
+        } else static if (is(Input == String_UTF!Char2, Char2)) {
+            input.stripZero;
+
+            input.literalEncoding.handle(() @trusted { latc8.literal = cast(string)input.literal; osat = latc8.get(); }, () @trusted {
+                latc16.literal = cast(wstring)input.literal;
+                osat = latc16.get();
+            }, () @trusted { latc32.literal = cast(dstring)input.literal; osat = latc32.get(); }, () @trusted {
+                assert(0);
+            });
+        } else static if (is(typeof(actualInput) == const(char)[])) {
+            latc8.literal = input;
+            osat = latc8.get();
+        } else static if (is(typeof(actualInput) == const(wchar)[])) {
+            latc16.literal = input;
+            osat = latc16.get();
+        } else static if (is(typeof(actualInput) == const(dchar)[])) {
+            latc32.literal = input;
+            osat = latc32.get();
+        } else static if (is(typeof(actualInput) == const(ubyte)[])) {
+            alat.literal = cast(const(ubyte)[])actualInput;
+            osat = alat.get();
+        } else
+            static assert(0, typeof(actualInput).stringof);
     }
 }
