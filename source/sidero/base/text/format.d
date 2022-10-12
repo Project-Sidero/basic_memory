@@ -542,9 +542,6 @@ unittest {
 
     prettyPrint(builder, &pointer, errorResult, iResult, "hello \"\t world!", String_UTF8("More Text muahah1"), [12: 13],
             [22, 24], ["abc", "xyz"], clasz, struc);
-
-    import std.stdio;
-    debug writeln(builder);
 }
 
 /// Escapes all of the standard escapes for ASCII and optionally do quotes (must provide as character literal as to which to use)
