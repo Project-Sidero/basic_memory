@@ -170,7 +170,9 @@ private:
                 if (useQuotes)
                     builder ~= "\"";
 
+                size_t oldOffset = builder.length;
                 builder ~= input;
+                builder[oldOffset .. $].escape(useQuotes ? '"' : 0);
 
                 if (useQuotes)
                     builder ~= "\"";
@@ -183,7 +185,9 @@ private:
                 if (useQuotes)
                     builder ~= "\"";
 
+                size_t oldOffset = builder.length;
                 builder ~= input;
+                builder[oldOffset .. $].escape(useQuotes ? '"' : 0);
 
                 if (useQuotes)
                     builder ~= "\"";
@@ -536,13 +540,154 @@ unittest {
     Class clasz = new Class;
     Struct struc;
 
-    prettyPrint(builder, &pointer, errorResult, iResult, "hello world!", String_UTF8("More Text muahah1"), [12: 13],
+    prettyPrint(builder, &pointer, errorResult, iResult, "hello \"\t world!", String_UTF8("More Text muahah1"), [12: 13],
             [22, 24], ["abc", "xyz"], clasz, struc);
+
+    import std.stdio;
+    debug writeln(builder);
+}
+
+/// Escapes all of the standard escapes for ASCII and optionally do quotes (must provide as character literal as to which to use)
+StringBuilder_ASCII escape(return scope StringBuilder_ASCII builder, char quote = 0) @safe nothrow @nogc {
+    return escapeImpl(builder, quote);
+}
+
+///
+unittest {
+    StringBuilder_ASCII builder = "\\\0\a\b\f\n\r\t\v\"";
+    builder.escape('"');
+    assert(builder == "\\\\\\0\\a\\b\\f\\n\\r\\t\\v\\\"");
+}
+
+/// Ditto
+StringBuilder_UTF8 escape(return scope StringBuilder_UTF8 builder, dchar quote = 0) @safe nothrow @nogc {
+    return escapeImpl(builder, quote);
+}
+
+///
+unittest {
+    StringBuilder_UTF8 builder = "\\\0\a\b\f\n\r\t\v\"";
+    builder.escape('"');
+    assert(builder == "\\\\\\0\\a\\b\\f\\n\\r\\t\\v\\\"");
+}
+
+/// Ditto
+StringBuilder_UTF16 escape(return scope StringBuilder_UTF16 builder, dchar quote = 0) @safe nothrow @nogc {
+    return escapeImpl(builder, quote);
+}
+
+///
+unittest {
+    StringBuilder_UTF16 builder = "\\\0\a\b\f\n\r\t\v\"";
+    builder.escape('"');
+    assert(builder == "\\\\\\0\\a\\b\\f\\n\\r\\t\\v\\\"");
+}
+
+/// Ditto
+StringBuilder_UTF32 escape(return scope StringBuilder_UTF32 builder, dchar quote = 0) @safe nothrow @nogc {
+    return escapeImpl(builder, quote);
+}
+
+///
+unittest {
+    StringBuilder_UTF32 builder = "\\\0\a\b\f\n\r\t\v\"";
+    builder.escape('"');
+    assert(builder == "\\\\\\0\\a\\b\\f\\n\\r\\t\\v\\\"");
+}
+
+/// Unescapes all of the standard escapes for ASCII and optionally do quotes (must provide as character literal as to which to use)
+StringBuilder_ASCII unescape(return scope StringBuilder_ASCII builder, char quote = 0) @safe nothrow @nogc {
+    return unescapeImpl(builder, quote);
+}
+
+///
+unittest {
+    StringBuilder_ASCII builder = "\\\\\\0\\a\\b\\f\\n\\r\\t\\v\\\"";
+    builder.unescape('"');
+    assert(builder == "\\\0\a\b\f\n\r\t\v\"");
+}
+
+/// Ditto
+StringBuilder_UTF8 unescape(return scope StringBuilder_UTF8 builder, dchar quote = 0) @safe nothrow @nogc {
+    return unescapeImpl(builder, quote);
+}
+
+///
+unittest {
+    StringBuilder_UTF8 builder = "\\\\\\0\\a\\b\\f\\n\\r\\t\\v\\\"";
+    builder.unescape('"');
+    assert(builder == "\\\0\a\b\f\n\r\t\v\"");
+}
+
+/// Ditto
+StringBuilder_UTF16 unescape(return scope StringBuilder_UTF16 builder, dchar quote = 0) @safe nothrow @nogc {
+    return unescapeImpl(builder, quote);
+}
+
+///
+unittest {
+    StringBuilder_UTF16 builder = "\\\\\\0\\a\\b\\f\\n\\r\\t\\v\\\"";
+    builder.unescape('"');
+    assert(builder == "\\\0\a\b\f\n\r\t\v\"");
+}
+
+/// Ditto
+StringBuilder_UTF32 unescape(return scope StringBuilder_UTF32 builder, dchar quote = 0) @safe nothrow @nogc {
+    return unescapeImpl(builder, quote);
+}
+
+///
+unittest {
+    StringBuilder_UTF32 builder = "\\\\\\0\\a\\b\\f\\n\\r\\t\\v\\\"";
+    builder.unescape('"');
+    assert(builder == "\\\0\a\b\f\n\r\t\v\"");
 }
 
 private:
 import sidero.base.allocators;
 import std.traits;
+
+Builder escapeImpl(Builder, Char)(return scope Builder builder, Char quote) @trusted nothrow @nogc
+        if (isBuilderString!Builder) {
+    static if (isUTF!Builder) {
+        static Find = ["\\"d, "\0", "\a", "\b", "\f", "\n", "\r", "\t", "\v"];
+        static Replace = ["\\\\"d, "\\0", "\\a", "\\b", "\\f", "\\n", "\\r", "\\t", "\\v"];
+    } else static if (isASCII!Builder) {
+        static Find = ["\\", "\0", "\a", "\b", "\f", "\n", "\r", "\t", "\v"];
+        static Replace = ["\\\\", "\\0", "\\a", "\\b", "\\f", "\\n", "\\r", "\\t", "\\v"];
+    }
+
+    foreach (i; 0 .. Find.length)
+        builder.replace(Find[i], Replace[i]);
+
+    if (quote != 0) {
+        Char[2] temp = ['\\', quote];
+        builder.replace(temp[1 .. 2], temp[]);
+    }
+
+    return builder;
+}
+
+Builder unescapeImpl(Builder, Char)(return scope Builder builder, Char quote) @safe nothrow @nogc
+        if (isBuilderString!Builder) {
+    static if (isUTF!Builder) {
+        static Find = ["\\\\"d, "\\0", "\\a", "\\b", "\\f", "\\n", "\\r", "\\t", "\\v"];
+        static Replace = ["\\"d, "\0", "\a", "\b", "\f", "\n", "\r", "\t", "\v"];
+    } else static if (isASCII!Builder) {
+        static Find = ["\\\\", "\\0", "\\a", "\\b", "\\f", "\\n", "\\r", "\\t", "\\v"];
+        static Replace = ["\\", "\0", "\a", "\b", "\f", "\n", "\r", "\t", "\v"];
+    }
+
+    foreach (i; 0 .. Find.length)
+        builder.replace(Find[i], Replace[i]);
+
+    if (quote != 0) {
+        Char[2] temp = ['\\', quote];
+        builder.replace(temp[], temp[1 .. 2]);
+    }
+
+    return builder;
+}
 
 struct FormatValue(Builder) if (isBuilderString!Builder) {
     Builder builder;
