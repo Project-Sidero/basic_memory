@@ -839,6 +839,11 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
             ilt.iteratorList.rcIteratorInternal(false, iterator3);
         }
 
+        void moveCursorsFromTail() {
+            forwards.moveFromTail;
+            backwards.moveFromTail;
+        }
+
         bool emptyInternal() {
             size_t actualBack = backwards.offsetFromHead + 1;
             return forwards.offsetFromHead + 1 >= actualBack || actualBack <= forwards.offsetFromHead + 1;
@@ -1164,6 +1169,13 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
             assert(cursor.block is a);
             assert(cursor.offsetFromHead == 10);
             assert(cursor.offsetIntoBlock == 10);
+        }
+
+        void moveFromTail() {
+            if (block !is null && block.length == 0 && offsetIntoBlock == 0) {
+                block = block.previous;
+                offsetIntoBlock = block.length;
+            }
         }
     }
 

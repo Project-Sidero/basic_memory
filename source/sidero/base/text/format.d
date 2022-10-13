@@ -738,7 +738,9 @@ scope:
             if (needQuotes)
                 builder ~= "\"";
 
+            size_t oldOffset = builder.length;
             builder ~= input;
+            builder[oldOffset .. $].escape(needQuotes ? '"' : 0);
 
             if (needQuotes)
                 builder ~= "\"";
@@ -748,7 +750,10 @@ scope:
                     builder ~= "'";
 
                 ActualType[1] temp = [input];
+
+                size_t oldOffset = builder.length;
                 builder ~= temp[];
+                builder[oldOffset .. $].escape(needQuotes ? '\'' : 0);
 
                 if (needQuotes)
                     builder ~= "'";

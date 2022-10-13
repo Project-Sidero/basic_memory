@@ -467,8 +467,7 @@ mixin template StringBuilderOperations() {
 
             if (cursor.block.next is null) {
                 // is tail oh noes...
-                cursor.advanceBackwards(1, cursor.offsetFromHead, maximumOffsetFromHead, false, false);
-                assert(cursor.offsetIntoBlock == cursor.block.length);
+                cursor.moveFromTail;
                 // could be head, but we handle that in next statement.
                 assert(cursor.block.next !is null);
             }
@@ -496,6 +495,11 @@ mixin template StringBuilderOperations() {
             // cannot be at head or tail at this point
             assert(cursor.block.previous !is null);
             assert(cursor.block.next !is null);
+        }
+
+        foreach (iterator; iteratorList) {
+            // prevent all cursors from being at the tail node
+            iterator.moveCursorsFromTail;
         }
 
         void ensureNotInFullBlock() {
