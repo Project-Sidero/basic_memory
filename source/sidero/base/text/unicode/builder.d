@@ -396,7 +396,7 @@ nothrow @safe:
 
     ///
     this(scope String_ASCII input, RCAllocator allocator = RCAllocator.init) scope @nogc @trusted {
-        input.stripZero;
+        input.stripZeroTerminator;
 
         this.__ctor(cast(const(char)[])input.literal, allocator);
     }
@@ -410,7 +410,7 @@ nothrow @safe:
 
     ///
     this(Char2)(scope String_UTF!Char2 input, RCAllocator allocator = RCAllocator.init) scope @nogc @trusted {
-        input.stripZero;
+        input.stripZeroTerminator;
 
         input.literalEncoding.handle(() { this.__ctor(cast(const(char)[])input.literal, allocator, input.language); }, () {
             this.__ctor(cast(const(wchar)[])input.literal, allocator, input.language);
@@ -3539,7 +3539,7 @@ private:
 
     scope @nogc {
         int opCmpImplReadOnly(scope String_ASCII other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
-            other.stripZero;
+            other.stripZeroTerminator;
 
             ASCIILiteralAsTarget!dchar alat;
             alat.literal = other.literal;
@@ -3563,7 +3563,7 @@ private:
         }
 
         int opCmpImplReadOnly(Char2)(scope String_UTF!Char2 other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
-            other.stripZero;
+            other.stripZeroTerminator;
             auto alatc = AnyLiteralAsTargetChar!dchar(other);
 
             return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
@@ -3651,7 +3651,7 @@ private:
 
         void insertImplReadOnly(scope String_ASCII other, ptrdiff_t offset = 0, bool clobber = false) {
             setupState;
-            other.stripZero;
+            other.stripZeroTerminator;
 
             state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
                 assert(state !is null);
@@ -3681,7 +3681,7 @@ private:
         }
 
         void insertImplReadOnly(Char2)(scope String_UTF!Char2 other, ptrdiff_t offset = 0, bool clobber = false) {
-            other.stripZero;
+            other.stripZeroTerminator;
 
             other.literalEncoding.handle(() @trusted { insertImplSlice(cast(string)other.literal, offset, clobber); }, () @trusted {
                 insertImplSlice(cast(wstring)other.literal, offset, clobber);
@@ -3773,7 +3773,7 @@ private:
         }
 
         bool startsWithImplReadOnly(scope String_ASCII other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
-            other.stripZero;
+            other.stripZeroTerminator;
 
             ASCIILiteralAsTarget!dchar alat;
             alat.literal = other.literal;
@@ -3793,7 +3793,7 @@ private:
 
         bool startsWithImplReadOnly(Char2)(scope String_UTF!Char2 other, bool caseSensitive,
                 UnicodeLanguage language = UnicodeLanguage.Unknown) {
-            other.stripZero;
+            other.stripZeroTerminator;
             auto alatc = AnyLiteralAsTargetChar!dchar(other);
 
             return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
@@ -3860,7 +3860,7 @@ private:
         }
 
         bool endsWithImplReadOnly(scope String_ASCII other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
-            other.stripZero;
+            other.stripZeroTerminator;
 
             ASCIILiteralAsTarget!dchar alat;
             alat.literal = other.literal;
@@ -3880,7 +3880,7 @@ private:
 
         bool endsWithImplReadOnly(Char2)(scope String_UTF!Char2 other, bool caseSensitive,
                 UnicodeLanguage language = UnicodeLanguage.Unknown) {
-            other.stripZero;
+            other.stripZeroTerminator;
             auto alatc = AnyLiteralAsTargetChar!dchar(other);
 
             return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
@@ -5273,7 +5273,7 @@ struct AnyAsTargetChar(TargetChar) {
 
     this(Input)(scope ref Input input) @trusted {
         static if (is(Input == String_ASCII)) {
-            input.stripZero;
+            input.stripZeroTerminator;
             scope actualInput = input.literal;
         } else {
             scope actualInput = input;
@@ -5304,7 +5304,7 @@ struct AnyAsTargetChar(TargetChar) {
                 osat = osiu32.get;
             }, () { assert(0); });
         } else static if (is(Input == String_UTF!Char2, Char2)) {
-            input.stripZero;
+            input.stripZeroTerminator;
 
             input.literalEncoding.handle(() @trusted { latc8.literal = cast(string)input.literal; osat = latc8.get(); }, () @trusted {
                 latc16.literal = cast(wstring)input.literal;

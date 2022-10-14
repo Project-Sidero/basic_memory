@@ -210,7 +210,7 @@ nothrow @safe:
 
     ///
     this(scope String_ASCII input, RCAllocator allocator = RCAllocator.init) scope @nogc {
-        input.stripZero;
+        input.stripZeroTerminator;
 
         this.__ctor(input.literal, allocator);
     }
@@ -431,7 +431,7 @@ nothrow @safe:
 
     ///
     bool opEquals(scope String_ASCII other) scope @nogc {
-        other.stripZero;
+        other.stripZeroTerminator;
         return opCmpImplSlice(other.literal, true) == 0;
     }
 
@@ -488,7 +488,7 @@ nothrow @safe:
 
     ///
     bool ignoreCaseEquals(scope String_ASCII other) scope @nogc {
-        other.stripZero;
+        other.stripZeroTerminator;
         return opCmpImplSlice(other.literal, false) == 0;
     }
 
@@ -544,7 +544,7 @@ nothrow @safe:
 
     ///
     int opCmp(scope String_ASCII other) scope @nogc {
-        other.stripZero;
+        other.stripZeroTerminator;
         return opCmpImplSlice(other.literal, true);
     }
 
@@ -589,7 +589,7 @@ nothrow @safe:
 
     ///
     int ignoreCaseCompare(scope String_ASCII other) scope @nogc {
-        other.stripZero;
+        other.stripZeroTerminator;
         return opCmpImplSlice(other.literal, false);
     }
 
@@ -734,7 +734,7 @@ nothrow @safe:
 
         ///
         bool startsWith(scope String_ASCII other) scope {
-            other.stripZero;
+            other.stripZeroTerminator;
 
             return startsWithImplSlice(other.literal, true);
         }
@@ -782,7 +782,7 @@ nothrow @safe:
 
         ///
         bool ignoreCaseStartsWith(scope String_ASCII other) scope {
-            other.stripZero;
+            other.stripZeroTerminator;
 
             return startsWithImplSlice(other.literal, false);
         }
@@ -830,7 +830,7 @@ nothrow @safe:
 
         ///
         bool endsWith(scope String_ASCII other) scope {
-            other.stripZero;
+            other.stripZeroTerminator;
 
             return endsWithImplSlice(other.literal, true);
         }
@@ -878,7 +878,7 @@ nothrow @safe:
 
         ///
         bool ignoreCaseEndsWith(scope String_ASCII other) scope {
-            other.stripZero;
+            other.stripZeroTerminator;
 
             return endsWithImplSlice(other.literal, false);
         }
@@ -953,7 +953,7 @@ nothrow @safe:
 
         ///
         StringBuilder_ASCII insert(ptrdiff_t index, scope String_ASCII other) scope return {
-            other.stripZero;
+            other.stripZeroTerminator;
 
             this.insertImplReadOnly(other, index);
             return this;
@@ -999,7 +999,7 @@ nothrow @safe:
 
         ///
         StringBuilder_ASCII prepend(scope String_ASCII other) scope return {
-            other.stripZero;
+            other.stripZeroTerminator;
 
             return this.insert(0, other);
         }
@@ -1049,7 +1049,7 @@ nothrow @safe:
 
         ///
         StringBuilder_ASCII opBinary(string op : "~")(scope String_ASCII other) scope {
-            other.stripZero;
+            other.stripZeroTerminator;
 
             StringBuilder_ASCII ret = this.dup;
             ret.append(other);
@@ -1101,7 +1101,7 @@ nothrow @safe:
 
         ///
         void opOpAssign(string op : "~")(scope String_ASCII other) scope return {
-            other.stripZero;
+            other.stripZeroTerminator;
 
             this.append(other);
         }
@@ -1147,7 +1147,7 @@ nothrow @safe:
 
         ///
         StringBuilder_ASCII append(scope String_ASCII other) scope return {
-            other.stripZero;
+            other.stripZeroTerminator;
 
             return this.insert(ptrdiff_t.max, other);
         }
@@ -1193,7 +1193,7 @@ nothrow @safe:
 
         ///
         StringBuilder_ASCII clobberInsert(ptrdiff_t index, scope String_ASCII other) scope return {
-            other.stripZero;
+            other.stripZeroTerminator;
 
             this.insertImplReadOnly(other, index, true);
             return this;
@@ -1567,7 +1567,7 @@ private:
             static void handle(Input)(scope ref Input input, scope out ASCII_State.OtherStateAsTarget!ubyte osat,
                     scope out ASCII_State.OtherStateIsUs osiu, scope out ASCII_State.LiteralAsTarget lat) @trusted {
                 static if (is(Input == String_ASCII)) {
-                    input.stripZero;
+                    input.stripZeroTerminator;
                     scope actualInput = input.literal;
                 } else {
                     scope actualInput = input;

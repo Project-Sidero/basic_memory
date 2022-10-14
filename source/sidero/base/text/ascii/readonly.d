@@ -2419,10 +2419,18 @@ nothrow @nogc:
         assert(String_ASCII("  \t abc\t\r\n \0").stripRight == "  \t abc");
     }
 
-package(sidero.base.text):
-    void stripZero() scope {
+    ///
+    void stripZeroTerminator() scope {
         if (this.literal.length > 0 && this.literal[$ - 1] == 0)
             this.literal = this.literal[0 .. $ - 1];
+    }
+
+    ///
+    unittest {
+        String_ASCII value = String_ASCII("foobar\0");
+        assert(value.literal.length == 7);
+        value.stripZeroTerminator();
+        assert(value.literal.length == 6);
     }
 
 private:

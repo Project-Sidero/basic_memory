@@ -2709,8 +2709,8 @@ nothrow @nogc:
         assert(text.toHash() == 3495845543429281309);
     }
 
-package(sidero.base.text):
-    void stripZero() scope {
+    ///
+    void stripZeroTerminator() scope {
         literalEncoding.handle(() {
             auto actual = cast(const(char)[])this.literal;
             if (actual.length > 0 && actual[$ - 1] == 0)
@@ -2724,6 +2724,14 @@ package(sidero.base.text):
             if (actual.length > 0 && actual[$ - 1] == 0)
                 this.literal = this.literal[0 .. $ - 1];
         });
+    }
+
+    ///
+    unittest {
+        String_UTF value = String_UTF("foobar\0");
+        assert(value.literal.length == 7);
+        value.stripZeroTerminator();
+        assert(value.literal.length == 6);
     }
 
 private:
@@ -3026,7 +3034,7 @@ private:
             scope comparison = CaseAwareComparison(allocator, language.isTurkic);
 
             scope tempUs32 = this.byUTF32();
-            tempUs32.stripZero;
+            tempUs32.stripZeroTerminator;
 
             // Most likely we are longer than the input const(char)[].
             // Therefore we must set the input as what to compare against (to try and prevent memory allocations).
@@ -3098,7 +3106,7 @@ private:
 
             const offsetForUs = this.length - toConsumeLength;
             scope tempUs32 = this[offsetForUs .. offsetForUs + toConsumeLength].byUTF32();
-            tempUs32.stripZero;
+            tempUs32.stripZeroTerminator;
 
             return comparison.compare(&tempUs32.opApply, true) == 0;
         }
@@ -3142,7 +3150,7 @@ private:
             const lengthOfOther = comparison.againstLength();
             size_t total;
             String_UTF us = this;
-            us.stripZero;
+            us.stripZeroTerminator;
 
             while (us.length > 0) {
                 size_t toIncrease = 1;
@@ -3205,7 +3213,7 @@ private:
 
             const lengthOfOther = comparison.againstLength();
             String_UTF us = this;
-            us.stripZero;
+            us.stripZeroTerminator;
 
             while (us.length > 0) {
                 size_t toIncrease = 1;
@@ -3267,7 +3275,7 @@ private:
             const lengthOfOther = comparison.againstLength();
             ptrdiff_t ret;
             String_UTF us = this;
-            us.stripZero;
+            us.stripZeroTerminator;
 
             while (us.length > 0) {
                 size_t toIncrease = 1;
@@ -3330,7 +3338,7 @@ private:
             const lengthOfOther = comparison.againstLength();
             ptrdiff_t ret = -1, soFar;
             String_UTF us = this;
-            us.stripZero;
+            us.stripZeroTerminator;
 
             while (us.length > 0) {
                 size_t toIncrease = 1;
