@@ -4023,33 +4023,47 @@ struct StateIterator {
         }
     }
 
-scope @safe nothrow @nogc:
+scope nothrow @nogc:
 
     ///
-    auto handle(T, U, V)(scope T utf8Del, scope U utf16Del, scope V utf32Del) {
-        return encoding.handle(() @trusted { return utf8Del(u8, i8); }, () @trusted { return utf16Del(u16, i16); }, () @trusted {
+    auto handle(T, U, V)(scope T utf8Del, scope U utf16Del, scope V utf32Del) @trusted {
+        assert(utf8Del !is null);
+        assert(utf16Del !is null);
+        assert(utf32Del !is null);
+
+        if (encoding.codepointSize == 8)
+            return utf8Del(u8, i8);
+        else if (encoding.codepointSize == 16)
+            return utf16Del(u16, i16);
+        else if (encoding.codepointSize == 32)
             return utf32Del(u32, i32);
-        });
+        else static if (!is(typeof(return) == void))
+            return typeof(return).init;
     }
 
     ///
-    auto handle(T, U, V, W)(scope T utf8Del, scope U utf16Del, scope V utf32Del, scope W nullDel) {
+    auto handle(T, U, V, W)(scope T utf8Del, scope U utf16Del, scope V utf32Del, scope W nullDel) @trusted {
         import std.traits : ReturnType;
 
-        ReturnType!utf8Del nullFunc() {
-            static if (is(ReturnType!nullDel == void)) {
-                nullDel();
+        assert(utf8Del !is null);
+        assert(utf16Del !is null);
+        assert(utf32Del !is null);
 
-                static if (!is(typeof(return) == void)) {
-                    return typeof(return).init;
-                }
-            } else
-                return nullDel();
-        }
-
-        return encoding.handle(() @trusted { return utf8Del(u8, i8); }, () @trusted { return utf16Del(u16, i16); }, () @trusted {
+        if (encoding.codepointSize == 8)
+            return utf8Del(u8, i8);
+        else if (encoding.codepointSize == 16)
+            return utf16Del(u16, i16);
+        else if (encoding.codepointSize == 32)
             return utf32Del(u32, i32);
-        }, &nullFunc);
+        else {
+            static if (is(ReturnType!W == void)) {
+                nullDel();
+                static if (!is(typeof(return) == void))
+                    return typeof(return).init;
+            } else {
+                return nullDel();
+            }
+        }
     }
 }
 
