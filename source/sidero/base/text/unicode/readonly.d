@@ -403,27 +403,31 @@ nothrow @nogc:
             initForLiteral(literal, allocator, toDeallocate, language);
         }
 
-        private void initForLiteral(T, U)(scope return T literal, scope return RCAllocator allocator,
-                scope return U toDeallocate, UnicodeLanguage language) {
-            if (literal.length > 0 || (toDeallocate.length > 0 && !allocator.isNull)) {
+        private void initForLiteral(T, U)(scope return T input, scope return RCAllocator allocator, scope return U toDeallocate,
+                UnicodeLanguage language) {
+            if (input.length > 0 || (toDeallocate.length > 0 && !allocator.isNull)) {
                 version (D_BetterC) {
                 } else {
-                    if (__ctfe && literal[$ - 1] != '\0') {
+                    if (__ctfe && input[$ - 1] != '\0') {
                         static T justDoIt(T input) {
                             return input ~ '\0';
                         }
 
-                        literal = (cast(T function(T)@safe nothrow @nogc)&justDoIt)(literal);
+                        input = (cast(T function(T)@safe nothrow @nogc)&justDoIt)(input);
                     }
                 }
 
-                this.literal = literal;
+                alias InputChar = typeof(T.init[0]);
+
+                this.literal = input;
+                assert(input.length * InputChar.sizeof == this.literal.length);
+
                 this.literalEncoding = UnicodeEncoding.For!T;
                 this.language = language;
 
                 if (!allocator.isNull) {
                     if (toDeallocate is null)
-                        toDeallocate = literal;
+                        toDeallocate = input;
 
                     lifeTime = allocator.make!LifeTime(1, allocator, toDeallocate);
                     assert(this.lifeTime !is null);
@@ -2711,18 +2715,18 @@ nothrow @nogc:
 
     ///
     void stripZeroTerminator() scope {
-        literalEncoding.handle(() {
+        literalEncoding.handle(() @trusted {
             auto actual = cast(const(char)[])this.literal;
             if (actual.length > 0 && actual[$ - 1] == 0)
-                this.literal = this.literal[0 .. $ - 1];
-        }, () {
+                this.literal = actual[0 .. $ - 1];
+        }, () @trusted {
             auto actual = cast(const(wchar)[])this.literal;
             if (actual.length > 0 && actual[$ - 1] == 0)
-                this.literal = this.literal[0 .. $ - 1];
-        }, () {
+                this.literal = actual[0 .. $ - 1];
+        }, () @trusted {
             auto actual = cast(const(dchar)[])this.literal;
             if (actual.length > 0 && actual[$ - 1] == 0)
-                this.literal = this.literal[0 .. $ - 1];
+                this.literal = actual[0 .. $ - 1];
         });
     }
 
