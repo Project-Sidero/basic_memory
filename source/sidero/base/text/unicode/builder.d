@@ -1322,18 +1322,24 @@ nothrow @safe:
         ret.state.handle((StateIterator.S8 state, ref StateIterator.I8 iterator) {
             assert(state !is null);
 
-            if (iterator is null)
+            if (iterator !is null)
                 iterator = state.newIterator(iterator);
+            else
+                state.rc(true);
         }, (StateIterator.S16 state, ref StateIterator.I16 iterator) {
             assert(state !is null);
 
-            if (iterator is null)
+            if (iterator !is null)
                 iterator = state.newIterator(iterator);
+            else
+                state.rc(true);
         }, (StateIterator.S32 state, ref StateIterator.I32 iterator) {
             assert(state !is null);
 
-            if (iterator is null)
+            if (iterator !is null)
                 iterator = state.newIterator(iterator);
+            else
+                state.rc(true);
         });
 
         return ret;
@@ -1363,18 +1369,24 @@ nothrow @safe:
         ret.state.handle((StateIterator.S8 state, ref StateIterator.I8 iterator) {
             assert(state !is null);
 
-            if (iterator is null)
+            if (iterator !is null)
                 iterator = state.newIterator(iterator);
+            else
+                state.rc(true);
         }, (StateIterator.S16 state, ref StateIterator.I16 iterator) {
             assert(state !is null);
 
-            if (iterator is null)
+            if (iterator !is null)
                 iterator = state.newIterator(iterator);
+            else
+                state.rc(true);
         }, (StateIterator.S32 state, ref StateIterator.I32 iterator) {
             assert(state !is null);
 
-            if (iterator is null)
+            if (iterator !is null)
                 iterator = state.newIterator(iterator);
+            else
+                state.rc(true);
         });
 
         return ret;
@@ -1404,18 +1416,24 @@ nothrow @safe:
         ret.state.handle((StateIterator.S8 state, ref StateIterator.I8 iterator) {
             assert(state !is null);
 
-            if (iterator is null)
+            if (iterator !is null)
                 iterator = state.newIterator(iterator);
+            else
+                state.rc(true);
         }, (StateIterator.S16 state, ref StateIterator.I16 iterator) {
             assert(state !is null);
 
-            if (iterator is null)
+            if (iterator !is null)
                 iterator = state.newIterator(iterator);
+            else
+                state.rc(true);
         }, (StateIterator.S32 state, ref StateIterator.I32 iterator) {
             assert(state !is null);
 
-            if (iterator is null)
+            if (iterator !is null)
                 iterator = state.newIterator(iterator);
+            else
+                state.rc(true);
         });
 
         return ret;

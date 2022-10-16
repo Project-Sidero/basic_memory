@@ -67,13 +67,13 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
         if (addRef)
             iterator.refCount++;
         else if (iterator.refCount == 1) {
-            if (iterator.previous is null)
-                head = iterator.next;
+            if (iterator.next is null)
+                head = iterator.previous;
             else
-                iterator.previous.next = iterator.next;
-
-            if (iterator.next !is null)
                 iterator.next.previous = iterator.previous;
+
+            if (iterator.previous !is null)
+                iterator.previous.next = iterator.next;
 
             RCAllocator allocator = iterator.blockList.allocator;
             allocator.dispose(iterator);
