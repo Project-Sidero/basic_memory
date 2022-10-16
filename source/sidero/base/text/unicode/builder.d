@@ -1991,7 +1991,7 @@ nothrow @safe:
 
         ///
         unittest {
-            assert(StringBuilder_UTF("abc").insert(-1, cast(string)"def") == "abdefc");
+            assert(StringBuilder_UTF("abc").insert(-1, "def"c) == "abdefc");
         }
 
         ///
@@ -2113,7 +2113,7 @@ nothrow @safe:
 
         ///
         unittest {
-            assert(StringBuilder_UTF("world").prepend(cast(string)"hello ") == "hello world");
+            assert(StringBuilder_UTF("world").prepend("hello "c) == "hello world");
         }
 
         ///
@@ -2500,7 +2500,7 @@ nothrow @safe:
 
         ///
         unittest {
-            assert(StringBuilder_UTF("hello").append(cast(string)" world") == "hello world");
+            assert(StringBuilder_UTF("hello").append(" world"c) == "hello world");
         }
 
         ///
@@ -2613,7 +2613,7 @@ nothrow @safe:
 
         ///
         unittest {
-            assert(StringBuilder_UTF("abc").clobberInsert(-1, cast(string)"def") == "abdef");
+            assert(StringBuilder_UTF("abc").clobberInsert(-1, "def"c) == "abdef");
         }
 
         ///
@@ -2761,7 +2761,7 @@ nothrow @safe:
 
         ///
         unittest {
-            assert(StringBuilder_UTF("its a lala world").replace(String_ASCII("la"), cast(string)"woof") == 2);
+            assert(StringBuilder_UTF("its a lala world").replace(String_ASCII("la"), "woof"c) == 2);
         }
 
         ///
@@ -2794,7 +2794,7 @@ nothrow @safe:
 
         ///
         unittest {
-            assert(StringBuilder_UTF("its a lala world").replace(String_ASCII("la"), StringBuilder_UTF8(cast(string)"woof")) == 2);
+            assert(StringBuilder_UTF("its a lala world").replace(String_ASCII("la"), StringBuilder_UTF8("woof"c)) == 2);
         }
 
         ///
@@ -2849,7 +2849,7 @@ nothrow @safe:
 
         ///
         unittest {
-            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_ASCII("la"), cast(string)"woof") == 2);
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_ASCII("la"), "woof"c) == 2);
         }
 
         ///
@@ -2882,7 +2882,7 @@ nothrow @safe:
 
         ///
         unittest {
-            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_ASCII("la"), StringBuilder_UTF8(cast(string)"woof")) == 2);
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_ASCII("la"), StringBuilder_UTF8("woof"c)) == 2);
         }
 
         ///
@@ -2915,7 +2915,7 @@ nothrow @safe:
 
         ///
         unittest {
-            assert(StringBuilder_UTF("its a lala world").replace(cast(string)"la", String_ASCII("woof")) == 2);
+            assert(StringBuilder_UTF("its a lala world").replace("la"c, String_ASCII("woof")) == 2);
         }
 
         ///
@@ -2926,7 +2926,7 @@ nothrow @safe:
 
         ///
         unittest {
-            assert(StringBuilder_UTF("its a lala world").replace(cast(string)"la", StringBuilder_ASCII("woof")) == 2);
+            assert(StringBuilder_UTF("its a lala world").replace("la"c, StringBuilder_ASCII("woof")) == 2);
         }
 
         ///
@@ -2937,7 +2937,7 @@ nothrow @safe:
 
         ///
         unittest {
-            assert(StringBuilder_UTF("its a lala world").replace(cast(string)"la", cast(string)"woof") == 2);
+            assert(StringBuilder_UTF("its a lala world").replace("la"c, "woof"c) == 2);
         }
 
         ///
@@ -2948,7 +2948,7 @@ nothrow @safe:
 
         ///
         unittest {
-            assert(StringBuilder_UTF("its a lala world").replace(cast(string)"la", "woof"w) == 2);
+            assert(StringBuilder_UTF("its a lala world").replace("la"c, "woof"w) == 2);
         }
 
         ///
@@ -2959,7 +2959,7 @@ nothrow @safe:
 
         ///
         unittest {
-            assert(StringBuilder_UTF("its a lala world").replace(cast(string)"la", "woof"d) == 2);
+            assert(StringBuilder_UTF("its a lala world").replace("la"c, "woof"d) == 2);
         }
 
         ///
@@ -2970,7 +2970,7 @@ nothrow @safe:
 
         ///
         unittest {
-            assert(StringBuilder_UTF("its a lala world").replace(cast(string)"la", StringBuilder_UTF8(cast(string)"woof")) == 2);
+            assert(StringBuilder_UTF("its a lala world").replace("la"c, StringBuilder_UTF8("woof"c)) == 2);
         }
 
         ///
@@ -2981,7 +2981,7 @@ nothrow @safe:
 
         ///
         unittest {
-            assert(StringBuilder_UTF("its a lala world").replace(cast(string)"la", StringBuilder_UTF16("woof"w)) == 2);
+            assert(StringBuilder_UTF("its a lala world").replace("la"c, StringBuilder_UTF16("woof"w)) == 2);
         }
 
         ///
@@ -2992,7 +2992,7 @@ nothrow @safe:
 
         ///
         unittest {
-            assert(StringBuilder_UTF("its a lala world").replace(cast(string)"la", StringBuilder_UTF32("woof"d)) == 2);
+            assert(StringBuilder_UTF("its a lala world").replace("la"c, StringBuilder_UTF32("woof"d)) == 2);
         }
 
         ///
@@ -3025,7 +3025,7 @@ nothrow @safe:
 
         ///
         unittest {
-            assert(StringBuilder_UTF("its a lala world").replace("la"w, cast(string)"woof") == 2);
+            assert(StringBuilder_UTF("its a lala world").replace("la"w, "woof"c) == 2);
         }
 
         ///
@@ -3058,7 +3058,7 @@ nothrow @safe:
 
         ///
         unittest {
-            assert(StringBuilder_UTF("its a lala world").replace("la"w, StringBuilder_UTF8(cast(string)"woof")) == 2);
+            assert(StringBuilder_UTF("its a lala world").replace("la"w, StringBuilder_UTF8("woof"c)) == 2);
         }
 
         ///
@@ -3113,7 +3113,7 @@ nothrow @safe:
 
         ///
         unittest {
-            assert(StringBuilder_UTF("its a lala world").replace("la"d, cast(string)"woof") == 2);
+            assert(StringBuilder_UTF("its a lala world").replace("la"d, "woof"c) == 2);
         }
 
         ///
@@ -3146,7 +3146,7 @@ nothrow @safe:
 
         ///
         unittest {
-            assert(StringBuilder_UTF("its a lala world").replace("la"d, StringBuilder_UTF8(cast(string)"woof")) == 2);
+            assert(StringBuilder_UTF("its a lala world").replace("la"d, StringBuilder_UTF8("woof"c)) == 2);
         }
 
         ///
@@ -3201,7 +3201,7 @@ nothrow @safe:
 
         ///
         unittest {
-            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF8("la"), cast(string)"woof") == 2);
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF8("la"), "woof"c) == 2);
         }
 
         ///
@@ -3234,7 +3234,7 @@ nothrow @safe:
 
         ///
         unittest {
-            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF8("la"), StringBuilder_UTF8(cast(string)"woof")) == 2);
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF8("la"), StringBuilder_UTF8("woof"c)) == 2);
         }
 
         ///
@@ -3289,7 +3289,7 @@ nothrow @safe:
 
         ///
         unittest {
-            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF16("la"w), cast(string)"woof") == 2);
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF16("la"w), "woof"c) == 2);
         }
 
         ///
@@ -3322,7 +3322,7 @@ nothrow @safe:
 
         ///
         unittest {
-            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF16("la"w), StringBuilder_UTF8(cast(string)"woof")) == 2);
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF16("la"w), StringBuilder_UTF8("woof"c)) == 2);
         }
 
         ///
@@ -3377,7 +3377,7 @@ nothrow @safe:
 
         ///
         unittest {
-            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF32("la"d), cast(string)"woof") == 2);
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF32("la"d), "woof"c) == 2);
         }
 
         ///
@@ -3410,7 +3410,7 @@ nothrow @safe:
 
         ///
         unittest {
-            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF32("la"d), StringBuilder_UTF8(cast(string)"woof")) == 2);
+            assert(StringBuilder_UTF("its a lala world").replace(StringBuilder_UTF32("la"d), StringBuilder_UTF8("woof"c)) == 2);
         }
 
         ///
