@@ -1,13 +1,14 @@
 module sidero.base.console;
+import sidero.base.text;
 
-import sidero.base.text.ascii.readonly;
-import sidero.base.text.ascii.builder;
-import sidero.base.text.unicode.builder;
-import sidero.base.text.unicode.readonly;
+@safe nothrow @nogc:
 
-void rawWrite(scope String_ASCII input) {
+///
+void rawWrite(scope String_ASCII input) @trusted {
     import core.stdc.stdio : fwrite, fflush;
 
+    if (!input.isPtrNullTerminated())
+        input = input.dup;
     input.stripZeroTerminator;
 
     uint useLength = cast(uint)input.length;
@@ -32,51 +33,140 @@ void rawWrite(scope String_ASCII input) {
     }
 }
 
+///
 void rawWrite(scope StringBuilder_ASCII input) {
-
+    rawWrite(input.asReadOnly());
 }
 
-version(none) {
+///
+void rawWrite(scope const(char)[] input...) @trusted {
+    rawWrite(String_UTF8(input));
+}
 
-    void rawWrite(scope const(char)[] input...) {
-        rawWrite(String_UTF8(input));
+///
+void rawWrite(scope const(wchar)[] input...) @trusted {
+    rawWrite(String_UTF16(input));
+}
+
+///
+void rawWrite(scope const(dchar)[] input...) @trusted {
+    rawWrite(String_UTF32(input));
+}
+
+///
+void rawWrite(scope String_UTF8 input) @trusted {
+    import core.stdc.stdio : fwrite, fflush;
+
+    uint useLength;
+
+    version (Windows) {
+        if (useWindows) {
+            import core.sys.windows.windows : WriteConsoleW;
+
+            String_UTF16 input16 = input.byUTF16();
+
+            {
+                if (!input16.isPtrNullTerminated())
+                    input16 = input16.dup;
+
+                input16.stripZeroTerminator;
+
+                useLength = cast(uint)input16.length;
+                if (input16.length == 0)
+                    return;
+            }
+
+            allocateWindowsConsole();
+            if (WriteConsoleW(hStdout, cast(void*)input16.ptr, useLength, null, null))
+                return;
+
+            initializeForStdio(null, null, false, true);
+        }
     }
 
-    void rawWrite(scope const(wchar)[] input...) {
-        rawWrite(String_UTF16(input));
-    }
+    if (useStdio) {
+        {
+            if (!input.isPtrNullTerminated())
+                input = input.dup;
 
-    void rawWrite(scope const(dchar)[] input...) {
-        rawWrite(String_UTF32(input));
-    }
+            input.stripZeroTerminator;
 
-    void rawWrite(scope String_UTF8 input) {
+            useLength = cast(uint)input.length;
+            if (input.length == 0)
+                return;
+        }
 
-    }
-
-    void rawWrite(scope String_UTF16 input) {
-        rawWrite(input.byUTF8());
-    }
-
-    void rawWrite(scope String_UTF32 input) {
-        rawWrite(input.byUTF8());
+        fwrite(input.ptr, char.sizeof, useLength, stdioOut);
+        fflush(stdioOut);
     }
 }
 
-    void rawWrite(scope StringBuilder_UTF8 input) {
+///
+void rawWrite(scope String_UTF16 input) {
+    rawWrite(input.byUTF8());
+}
 
+///
+void rawWrite(scope String_UTF32 input) {
+    rawWrite(input.byUTF8());
+}
+
+///
+void rawWrite(scope StringBuilder_UTF8 input) @trusted {
+    import core.stdc.stdio : fwrite, fflush;
+
+    uint useLength;
+
+    version (Windows) {
+        if (useWindows) {
+            import core.sys.windows.windows : WriteConsoleW;
+
+            String_UTF16 input16 = input.byUTF16().asReadOnly();
+
+            {
+                input16.stripZeroTerminator;
+
+                useLength = cast(uint)input16.length;
+                if (input16.length == 0)
+                    return;
+            }
+
+            allocateWindowsConsole();
+            if (WriteConsoleW(hStdout, cast(void*)input16.ptr, useLength, null, null))
+                return;
+
+            initializeForStdio(null, null, false, true);
+        }
     }
 
-    void rawWrite(scope StringBuilder_UTF16 input) {
-        rawWrite(input.byUTF8());
-    }
+    if (useStdio) {
+        String_UTF8 input8 = input.asReadOnly();
 
-    void rawWrite(scope StringBuilder_UTF32 input) {
-        rawWrite(input.byUTF8());
-    }
+        {
+            input8.stripZeroTerminator;
 
-/// Initializes defaults automatically, has the environment variable SpewDem_Console to set either Windows, stdio, or stdio_ansi backend.
-pragma(crt_constructor) extern (C) void initializeConsoleDefault() {
+            useLength = cast(uint)input8.length;
+            if (input8.length == 0)
+                return;
+        }
+
+        fwrite(input8.ptr, char.sizeof, useLength, stdioOut);
+        fflush(stdioOut);
+    }
+}
+
+///
+void rawWrite(scope StringBuilder_UTF16 input) {
+    rawWrite(input.byUTF8());
+}
+
+///
+void rawWrite(scope StringBuilder_UTF32 input) {
+    rawWrite(input.byUTF8());
+}
+
+/// Initializes defaults automatically, has the environment variable SideroBase_Console to set either Windows, stdio, or stdio_ansi backend.
+pragma(crt_constructor) extern (C) void initializeConsoleDefault() @trusted {
     import sidero.base.system : EnvironmentVariables;
 
     String_ASCII config = EnvironmentVariables[String_ASCII("SideroBase_Console")];
@@ -106,7 +196,7 @@ pragma(crt_constructor) extern (C) void initializeConsoleDefault() {
 }
 
 ///
-version (Windows) void initializeForWindows() {
+version (Windows) void initializeForWindows() @trusted {
     useWindows = true;
     useANSI = false;
     useStdio = false;
@@ -116,8 +206,9 @@ version (Windows) void initializeForWindows() {
 }
 
 ///
-void initializeForStdio(FILE* useIn = null, FILE* useOut = null, bool autoClose = false, bool keepState = false) @trusted nothrow @nogc {
+void initializeForStdio(FILE* useIn = null, FILE* useOut = null, bool autoClose = false, bool keepState = false) @trusted {
     import sidero.base.system : EnvironmentVariables;
+
     useStdio = true;
 
     if (useWindows && keepState) {
@@ -143,12 +234,12 @@ void initializeForStdio(FILE* useIn = null, FILE* useOut = null, bool autoClose 
 }
 
 ///
-void enableANSI(bool value = true) {
+void enableANSI(bool value = true) @trusted {
     useANSI = value;
 }
 
 ///
-pragma(crt_destructor) extern (C) void deinitializeConsole() @trusted nothrow @nogc {
+pragma(crt_destructor) extern (C) void deinitializeConsole() @trusted {
     import core.stdc.stdio : fflush, fclose;
 
     if (useStdio && autoCloseStdio && (stdioIn !is null || stdioOut !is null) && (stdioIn !is stdin || stdioOut !is stdout)) {
@@ -224,9 +315,10 @@ version (Windows) {
     import core.sys.windows.windows : HANDLE, ULONG;
 
     void allocateWindowsConsole() @trusted nothrow @nogc {
-        import core.sys.windows.windows : DWORD, AllocConsole, GetStdHandle, STD_INPUT_HANDLE, STD_OUTPUT_HANDLE, GetLastError, GetConsoleMode, SetConsoleMode,
-        ENABLE_VIRTUAL_TERMINAL_PROCESSING, ENABLE_PROCESSED_OUTPUT, SetConsoleOutputCP, GetConsoleOutputCP,
-        SetConsoleCP, GetConsoleCP;
+        import core.sys.windows.windows : DWORD, AllocConsole, GetStdHandle, STD_INPUT_HANDLE, STD_OUTPUT_HANDLE,
+            GetLastError, GetConsoleMode, SetConsoleMode,
+            ENABLE_VIRTUAL_TERMINAL_PROCESSING, ENABLE_PROCESSED_OUTPUT, SetConsoleOutputCP, GetConsoleOutputCP,
+            SetConsoleCP, GetConsoleCP;
 
         if (AllocConsole())
             createdConsole = true;
