@@ -378,6 +378,9 @@ nothrow @safe:
             return 0;
         }, (length) { array = allocator.makeArray!Char(length + 1); });
 
+        if (array.length == 0)
+            return String_ASCII.init;
+
         assert(array.length == soFar + 1, "Encoding length != Encoded");
         array[$ - 1] = 0;
         return String_ASCII(array, allocator);
