@@ -1,9 +1,169 @@
 module sidero.base.console;
 import sidero.base.text;
+import sidero.base.allocators;
 
 @safe nothrow @nogc:
 
 ///
+StringBuilder_UTF8 readLine() {
+    StringBuilder_UTF8 builder;
+    readLine(builder);
+    return builder;
+}
+
+/// Includes new line terminator
+StringBuilder_ASCII readLine(scope return StringBuilder_ASCII builder) @trusted {
+    import core.stdc.stdio : getc, EOF;
+
+    mutex.pureLock;
+
+    if (builder.isNull)
+        builder = StringBuilder_ASCII(globalAllocator());
+
+    version (Windows) {
+        if (useWindows) {
+            import core.sys.windows.windows : ReadConsoleA, INVALID_HANDLE_VALUE, CHAR, DWORD, GetLastError;
+
+            allocateWindowsConsole();
+
+            if (hStdin == INVALID_HANDLE_VALUE) {
+                initializeForStdioImpl(null, null, false, true);
+            } else {
+                CONSOLE_READCONSOLE_CONTROL cReadControl;
+                cReadControl.nLength = CONSOLE_READCONSOLE_CONTROL.sizeof;
+
+                const originalBuilderLength = builder.length;
+                CHAR[128] buffer;
+                DWORD readLength;
+
+                for (;;) {
+                    if (ReadConsoleA(hStdin, buffer.ptr, cast(uint)buffer.length, &readLength, &cReadControl)) {
+                        bool more = readLength == buffer.length && buffer[$ - 1] != '\n';
+                        builder ~= buffer[0 .. readLength];
+
+                        if (!more)
+                            break;
+                    } else if (builder.length == originalBuilderLength) {
+                        initializeForStdioImpl(null, null, false, true);
+                        goto StdIO;
+                    } else {
+                        break;
+                    }
+                }
+
+                mutex.unlock;
+                return builder;
+            }
+        }
+    }
+
+StdIO:
+
+    if (useStdio && stdioIn !is null) {
+        for (;;) {
+            int got = getc(stdioIn);
+
+            if (got == EOF)
+                break;
+
+            char[1] buffer = [cast(char)got];
+            builder ~= buffer[];
+
+            if (got == '\n')
+                break;
+        }
+    }
+
+    mutex.unlock;
+    return builder;
+}
+
+/// Includes new line terminator
+StringBuilder_UTF8 readLine(scope return StringBuilder_UTF8 builder) @trusted {
+    import core.stdc.stdio : getc, EOF;
+
+    mutex.pureLock;
+
+    if (builder.isNull)
+        builder = StringBuilder_UTF8(globalAllocator());
+
+    version (Windows) {
+        if (useWindows) {
+            import core.sys.windows.windows : ReadConsoleW, INVALID_HANDLE_VALUE, WCHAR, DWORD, GetLastError;
+
+            allocateWindowsConsole();
+
+            if (hStdin == INVALID_HANDLE_VALUE) {
+                initializeForStdioImpl(null, null, false, true);
+            } else {
+                CONSOLE_READCONSOLE_CONTROL cReadControl;
+                cReadControl.nLength = CONSOLE_READCONSOLE_CONTROL.sizeof;
+
+                const originalBuilderLength = builder.length;
+                WCHAR[128] buffer;
+                DWORD readLength;
+
+                for (;;) {
+                    if (ReadConsoleW(hStdin, buffer.ptr, cast(uint)buffer.length, &readLength, &cReadControl)) {
+                        bool more = readLength == buffer.length && buffer[$ - 1] != '\n';
+                        builder ~= buffer[0 .. readLength];
+
+                        if (!more)
+                            break;
+                    } else if (builder.length == originalBuilderLength) {
+                        initializeForStdioImpl(null, null, false, true);
+                        goto StdIO;
+                    } else {
+                        break;
+                    }
+                }
+
+                mutex.unlock;
+                return builder;
+            }
+        }
+    }
+
+StdIO:
+
+    if (useStdio && stdioIn !is null) {
+        for (;;) {
+            int got = getc(stdioIn);
+
+            if (got == EOF)
+                break;
+
+            char[1] buffer = [cast(char)got];
+            builder ~= buffer[];
+
+            if (got == '\n')
+                break;
+        }
+    }
+
+    mutex.unlock;
+    return builder;
+}
+
+/// Ditto
+StringBuilder_UTF16 readLine(scope return StringBuilder_UTF16 builder) {
+    if (builder.isNull)
+        builder = StringBuilder_UTF16(globalAllocator());
+
+    readLine(builder.byUTF8());
+    return builder;
+}
+
+/// Ditto
+StringBuilder_UTF32 readLine(scope return StringBuilder_UTF32 builder) {
+    if (builder.isNull)
+        builder = StringBuilder_UTF32(globalAllocator());
+
+    readLine(builder.byUTF8());
+    return builder;
+}
+
+/// Writes string data to console (ASCII/Unicode aware) and immediately flushes.
 void rawWrite(scope String_ASCII input) @trusted {
     import core.stdc.stdio : fwrite, fflush;
 
@@ -27,7 +187,7 @@ void rawWrite(scope String_ASCII input) @trusted {
             if (WriteConsoleA(hStdout, cast(void*)input.ptr, useLength, null, null))
                 return;
 
-            initializeForStdio(null, null, false, true);
+            initializeForStdioImpl(null, null, false, true);
         }
     }
 
@@ -37,27 +197,27 @@ void rawWrite(scope String_ASCII input) @trusted {
     }
 }
 
-///
+/// Ditto
 void rawWrite(scope StringBuilder_ASCII input) {
     rawWrite(input.asReadOnly());
 }
 
-///
+/// Ditto
 void rawWrite(scope const(char)[] input...) @trusted {
     rawWrite(String_UTF8(input));
 }
 
-///
+/// Ditto
 void rawWrite(scope const(wchar)[] input...) @trusted {
     rawWrite(String_UTF16(input));
 }
 
-///
+/// Ditto
 void rawWrite(scope const(dchar)[] input...) @trusted {
     rawWrite(String_UTF32(input));
 }
 
-///
+/// Ditto
 void rawWrite(scope String_UTF8 input) @trusted {
     import core.stdc.stdio : fwrite, fflush;
 
@@ -88,7 +248,7 @@ void rawWrite(scope String_UTF8 input) @trusted {
             if (WriteConsoleW(hStdout, cast(void*)input16.ptr, useLength, null, null))
                 return;
 
-            initializeForStdio(null, null, false, true);
+            initializeForStdioImpl(null, null, false, true);
         }
     }
 
@@ -109,17 +269,17 @@ void rawWrite(scope String_UTF8 input) @trusted {
     }
 }
 
-///
+/// Ditto
 void rawWrite(scope String_UTF16 input) {
     rawWrite(input.byUTF8());
 }
 
-///
+/// Ditto
 void rawWrite(scope String_UTF32 input) {
     rawWrite(input.byUTF8());
 }
 
-///
+/// Ditto
 void rawWrite(scope StringBuilder_UTF8 input) @trusted {
     import core.stdc.stdio : fwrite, fflush;
 
@@ -147,7 +307,7 @@ void rawWrite(scope StringBuilder_UTF8 input) @trusted {
             if (WriteConsoleW(hStdout, cast(void*)input16.ptr, useLength, null, null))
                 return;
 
-            initializeForStdio(null, null, false, true);
+            initializeForStdioImpl(null, null, false, true);
         }
     }
 
@@ -167,12 +327,12 @@ void rawWrite(scope StringBuilder_UTF8 input) @trusted {
     }
 }
 
-///
+/// Ditto
 void rawWrite(scope StringBuilder_UTF16 input) {
     rawWrite(input.byUTF8());
 }
 
-///
+/// Ditto
 void rawWrite(scope StringBuilder_UTF32 input) {
     rawWrite(input.byUTF8());
 }
