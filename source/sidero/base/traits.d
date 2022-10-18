@@ -1,9 +1,11 @@
 ///
 module sidero.base.traits;
-import sidero.base.text.ascii.readonly;
-import sidero.base.text.ascii.builder;
-import sidero.base.text.unicode.readonly;
-import sidero.base.text.unicode.builder;
+import sidero.base.text;
+public import std.traits : isSomeString;
+
+///
+enum isAnyString(String) = isSomeString!String || is(String == String_ASCII) || is(String == String_UTF!Char, Char) ||
+    is(String == StringBuilder_ASCII) || is(String == StringBuilder_UTF!Char, Char);
 
 ///
 enum isReadOnlyString(String) = is(String == String_ASCII) || is(String == String_UTF!Char, Char);

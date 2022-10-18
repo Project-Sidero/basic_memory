@@ -833,12 +833,13 @@ scope:
 
             builder ~= "]";
         } else static if (isIterable!ActualType) {
-            builder ~= __traits(identifier, ActualType) ~ "[";
+            alias SubType = Unqual!(typeof(ActualType.init[0]));
+            builder ~= SubType.stringof ~ "[";
 
             size_t i;
             foreach (v; input) {
                 if (i++ > 0)
-                    output ~= ", ";
+                    builder ~= ", ";
 
                 this.write(String_ASCII.init, v, true);
             }
