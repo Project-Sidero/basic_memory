@@ -1,6 +1,7 @@
 module sidero.base.console;
 import sidero.base.text;
 import sidero.base.allocators;
+import sidero.base.typecons : Optional;
 
 @safe nothrow @nogc:
 
@@ -284,16 +285,14 @@ enum ConsoleColor {
 
 ///
 struct InBandInfo {
-    import std.typecons : Nullable;
-
     ///
     bool resetDefaults;
     ///
-    Nullable!bool deliminateArguments;
+    Optional!bool deliminateArguments;
     ///
     ConsoleColor backgroundColor, foregroundColor;
     ///
-    Nullable!bool prettyPrintActive;
+    Optional!bool prettyPrintActive;
 
 @trusted nothrow @nogc scope:
 

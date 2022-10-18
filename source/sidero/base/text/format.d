@@ -336,10 +336,10 @@ private:
 
                     static if (__traits(compiles, { builder.toStringPretty(output); })) {
                         input.toStringPretty(builder);
-                    } else static if (__traits(compiles, { builder ~= input.toStringPretty(); })) {
-                        builder ~= input.toStringPretty();
                     } else static if (__traits(compiles, { input.toStringPretty(&builder.put); })) {
                         input.toStringPretty(&builder.put);
+                    } else static if (__traits(compiles, { builder ~= input.toStringPretty(); })) {
+                        builder ~= input.toStringPretty();
                     }
 
                     if (builder.length > offsetForToString) {
@@ -358,10 +358,10 @@ private:
 
                     static if (__traits(compiles, { input.toString(builder); })) {
                         input.toString(builder);
-                    } else static if (__traits(compiles, { builder ~= input.toString(); })) {
-                        builder ~= input.toString();
                     } else static if (__traits(compiles, { input.toString(&builder.put); })) {
                         input.toString(&builder.put);
+                    } else static if (__traits(compiles, { builder ~= input.toString(); })) {
+                        builder ~= input.toString();
                     }
 
                     if (builder.length > offsetForToString) {
