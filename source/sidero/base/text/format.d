@@ -1,12 +1,9 @@
 ///
 module sidero.base.text.format;
-import sidero.base.text.ascii.readonly;
-import sidero.base.text.ascii.builder;
-import sidero.base.text.unicode.readonly;
-import sidero.base.text.unicode.builder;
+import sidero.base.text;
 import sidero.base.errors.result;
 public import sidero.base.attributes : PrintIgnore, PrettyPrintIgnore;
-import sidero.base.traits : isUTF, isASCII, isBuilderString, isReadOnlyString;
+import sidero.base.traits;
 
 ///
 StringBuilder_UTF8 format(Format, Args...)(scope Format format, scope Args args) {
@@ -540,8 +537,8 @@ unittest {
     Class clasz = new Class;
     Struct struc;
 
-    prettyPrint(builder, &pointer, errorResult, iResult, "hello \"\t world!", String_UTF8("More Text muahah1"), [12: 13],
-            [22, 24], ["abc", "xyz"], clasz, struc);
+    prettyPrint(builder, &pointer, errorResult, iResult, "hello \"\t world!", String_UTF8("More Text muahah1"),
+            [12: 13], [22, 24], ["abc", "xyz"], clasz, struc);
 }
 
 /// Escapes all of the standard escapes for ASCII and optionally do quotes (must provide as character literal as to which to use)
@@ -642,7 +639,8 @@ unittest {
 
 private:
 import sidero.base.allocators;
-import std.traits;
+import std.traits : isSomeChar, isPointer, isIntegral, isFloatingPoint, Unqual, ForeachType, isBasicType, isIterable,
+    isAssociativeArray, fullyQualifiedName, isArray, FieldNameTuple, hasUDA, KeyType, ValueType, BaseClassesTuple, isCopyable;
 
 Builder escapeImpl(Builder, Char)(return scope Builder builder, Char quote) @trusted nothrow @nogc
         if (isBuilderString!Builder) {
@@ -1230,8 +1228,6 @@ bool isValidSpecifierEnd(char c, ptrdiff_t index) @safe nothrow @nogc pure {
 // This is a very strict type check, except for %s which accepts anything
 template CheckParameters(alias Format, Args...) if (isSomeString!(typeof(Format))) {
     enum CheckParameters = () {
-        import std.string : indexOf;
-
         auto working = Format;
 
         ptrdiff_t index;
@@ -1328,3 +1324,12 @@ template CheckParameters(alias Format, Args...) if (isSomeString!(typeof(Format)
 static assert(!is(CheckParameters!("Abc%s")));
 static assert(!is(CheckParameters!("Abc", int)));
 static assert(CheckParameters!("%%%X%f%c%s%s%s%p%n", byte, double, wchar, string, StringBuilder_ASCII, String_UTF8, char*, int*));
+
+ptrdiff_t indexOf(Char)(const(Char)[] input, Char toFind) if (isSomeChar!Char) {
+    foreach(i, c; input) {
+        if (c == toFind)
+            return i;
+    }
+
+    return -1;
+}

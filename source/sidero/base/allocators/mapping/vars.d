@@ -4,7 +4,6 @@
     License: Boost
  */
 module sidero.base.allocators.mapping.vars;
-import std.algorithm.comparison : max;
 @trusted nothrow @nogc:
 
 /// Size of the L1 cpu cache line
