@@ -1788,77 +1788,83 @@ struct ASCII_State {
     }
 
     void debugPosition(scope Block* cursorBlock, size_t offsetIntoBlock) @trusted {
-        debug {
-            try {
-                import std.stdio;
+        version (D_BetterC) {
+        } else {
+            debug {
+                try {
+                    import std.stdio;
 
-                Block* block = &blockList.head;
-                size_t offsetFromHead;
+                    Block* block = &blockList.head;
+                    size_t offsetFromHead;
 
-                writeln("====================");
+                    writeln("====================");
 
-                while (block !is null) {
-                    if (block is cursorBlock)
-                        write(">");
-                    writef!"%s:%X@(%s)"(offsetFromHead, block, *block);
-                    if (block is cursorBlock)
-                        writef!":%s<"(offsetIntoBlock);
-                    write("    [[[", cast(char[])block.get(), "]]]\n");
+                    while (block !is null) {
+                        if (block is cursorBlock)
+                            write(">");
+                        writef!"%s:%X@(%s)"(offsetFromHead, block, *block);
+                        if (block is cursorBlock)
+                            writef!":%s<"(offsetIntoBlock);
+                        write("    [[[", cast(char[])block.get(), "]]]\n");
 
-                    offsetFromHead += block.length;
-                    block = block.next;
-                }
-
-                writeln;
-
-                foreach (iterator; iteratorList) {
-                    try {
-                        writef!"%X@"(iterator);
-                        foreach (v; (*iterator).tupleof)
-                            write(" ", v);
-                        writeln;
-                    } catch (Exception) {
+                        offsetFromHead += block.length;
+                        block = block.next;
                     }
+
+                    writeln;
+
+                    foreach (iterator; iteratorList) {
+                        try {
+                            writef!"%X@"(iterator);
+                            foreach (v; (*iterator).tupleof)
+                                write(" ", v);
+                            writeln;
+                        } catch (Exception) {
+                        }
+                    }
+                } catch (Exception) {
                 }
-            } catch (Exception) {
             }
         }
     }
 
     void debugPosition(scope Iterator* iterator) @trusted {
-        debug {
-            try {
-                import std.stdio;
+        version (D_BetterC) {
+        } else {
+            debug {
+                try {
+                    import std.stdio;
 
-                Block* block = &blockList.head;
-                size_t offsetFromHead;
+                    Block* block = &blockList.head;
+                    size_t offsetFromHead;
 
-                writeln("====================");
+                    writeln("====================");
 
-                while (block !is null) {
-                    if (iterator !is null && block is iterator.forwards.block)
-                        write(iterator.forwards.offsetIntoBlock, ">");
-                    writef!"%s:%X@(%s)"(offsetFromHead, block, *block);
-                    if (iterator !is null && block is iterator.backwards.block)
-                        writef!":%s<"(iterator.backwards.offsetIntoBlock);
-                    write("    [[[", cast(char[])block.get(), "]]]\n");
+                    while (block !is null) {
+                        if (iterator !is null && block is iterator.forwards.block)
+                            write(iterator.forwards.offsetIntoBlock, ">");
+                        writef!"%s:%X@(%s)"(offsetFromHead, block, *block);
+                        if (iterator !is null && block is iterator.backwards.block)
+                            writef!":%s<"(iterator.backwards.offsetIntoBlock);
+                        write("    [[[", cast(char[])block.get(), "]]]\n");
 
-                    offsetFromHead += block.length;
-                    block = block.next;
-                }
-
-                writeln;
-
-                foreach (iterator; iteratorList) {
-                    try {
-                        writef!"%X@"(iterator);
-                        foreach (v; (*iterator).tupleof)
-                            write(" ", v);
-                        writeln;
-                    } catch (Exception) {
+                        offsetFromHead += block.length;
+                        block = block.next;
                     }
+
+                    writeln;
+
+                    foreach (iterator; iteratorList) {
+                        try {
+                            writef!"%X@"(iterator);
+                            foreach (v; (*iterator).tupleof)
+                                write(" ", v);
+                            writeln;
+                        } catch (Exception) {
+                        }
+                    }
+                } catch (Exception) {
                 }
-            } catch (Exception) {
             }
         }
     }
