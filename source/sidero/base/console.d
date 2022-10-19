@@ -171,6 +171,7 @@ void write(Args...)(scope Args args) @trusted {
 
     uint prettyPrintDepth;
     bool prettyPrintActive = false, deliminateArguments = false, setPrettyDelim;
+    bool isFirstPrettyPrint = true;
 
     void doOneWrapper(Type)(scope Type arg) {
         import sidero.base.allocators;
@@ -201,6 +202,10 @@ void write(Args...)(scope Args args) @trusted {
             if (prettyPrintActive) {
                 PrettyPrint!String_UTF8 prettyPrint;
                 prettyPrint.useQuotes = deliminateArguments;
+
+                if (!isFirstPrettyPrint)
+                    builder ~= "\n";
+                isFirstPrettyPrint = false;
 
                 prettyPrint.depth = prettyPrintDepth;
                 prettyPrint(builder, arg);

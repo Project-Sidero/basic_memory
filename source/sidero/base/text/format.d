@@ -392,7 +392,6 @@ private:
 
                 static if (isBasicType!SubType) {
                     if (input.length <= 5) {
-                        handlePrefix(false, true, false);
                         if (useName) {
                             builder ~= EntryName;
 

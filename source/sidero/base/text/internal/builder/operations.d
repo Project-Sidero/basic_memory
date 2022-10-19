@@ -118,7 +118,7 @@ mixin template StringBuilderOperations() {
             actualLength = iterator.backwards.offsetFromHead - iterator.forwards.offsetFromHead;
 
         if (a < 0) {
-            assert(actualLength > -a, "First offset must be smaller than length");
+            assert(actualLength >= -a, "First offset must be smaller than length");
             a = actualLength + a;
         }
     }
@@ -136,12 +136,12 @@ mixin template StringBuilderOperations() {
             actualLength = blockList.numberOfItems;
 
         if (a < 0) {
-            assert(actualLength > -a, "First offset must be smaller than length");
+            assert(actualLength >= -a, "First offset must be smaller than length");
             a = actualLength + a;
         }
 
         if (b < 0) {
-            assert(actualLength > -b, "First offset must be smaller than length");
+            assert(actualLength >= -b, "First offset must be smaller than length");
             b = actualLength + b;
         }
 

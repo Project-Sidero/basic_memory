@@ -741,6 +741,7 @@ nothrow @nogc:
 
     ///
     String_UTF opIndex(ptrdiff_t index) scope {
+        changeIndexToOffset(index);
         return this[index .. index + 1];
     }
 
@@ -2825,6 +2826,21 @@ private:
     }
 
     scope {
+        void changeIndexToOffset(ref ptrdiff_t a) {
+            size_t actualLength = literalEncoding.handle(() {
+                auto actual = cast(const(char)[])this.literal;
+                return actual.length;
+            }, () { auto actual = cast(const(wchar)[])this.literal; return actual.length; }, () {
+                auto actual = cast(const(dchar)[])this.literal;
+                return actual.length;
+            });
+
+            if (a < 0) {
+                assert(actualLength >= -a, "First offset must be smaller than length");
+                a = actualLength + a;
+            }
+        }
+
         void changeIndexToOffset(ref ptrdiff_t a, ref ptrdiff_t b) {
             size_t actualLength = literalEncoding.handle(() {
                 auto actual = cast(const(char)[])this.literal;
@@ -2835,12 +2851,12 @@ private:
             });
 
             if (a < 0) {
-                assert(actualLength > -a, "First offset must be smaller than length");
+                assert(actualLength >= -a, "First offset must be smaller than length");
                 a = actualLength + a;
             }
 
             if (b < 0) {
-                assert(actualLength > -b, "First offset must be smaller than length");
+                assert(actualLength >= -b, "First offset must be smaller than length");
                 b = actualLength + b;
             }
 
