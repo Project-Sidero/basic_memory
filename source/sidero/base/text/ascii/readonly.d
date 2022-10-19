@@ -278,8 +278,8 @@ nothrow @nogc:
 
     @trusted {
         ///
-        this(scope return string literal, scope return RCAllocator allocator = RCAllocator.init, scope return LiteralType toDeallocate = null) scope {
-            this(cast(LiteralType)literal, allocator, toDeallocate);
+        this(scope return string literal, scope return RCAllocator allocator = RCAllocator.init, scope return string toDeallocate = null) scope {
+            this(cast(LiteralType)literal, allocator, cast(LiteralType)toDeallocate);
         }
 
         ///
@@ -309,7 +309,7 @@ nothrow @nogc:
         }
 
         @disable this(scope return string literal, scope return RCAllocator allocator = RCAllocator.init,
-                scope return LiteralType toDeallocate = null) scope const;
+                scope return string toDeallocate = null) scope const;
         @disable this(scope return LiteralType literal, scope return RCAllocator allocator = RCAllocator.init,
                 scope return LiteralType toDeallocate = null) scope const;
     }
@@ -465,6 +465,7 @@ nothrow @nogc:
 
     ///
     String_ASCII opIndex(ptrdiff_t index) scope {
+        changeIndexToOffset(index);
         return this[index .. index + 1];
     }
 
@@ -684,7 +685,7 @@ nothrow @nogc:
 
     @property {
         ///
-        bool empty() scope nothrow @nogc {
+        bool empty() scope {
             return (haveIterator && this.iterator.literal.length == 0) || this.literal.length == 0 ||
                 (this.literal.length == 1 && this.literal[0] == '\0');
         }
@@ -2478,7 +2479,16 @@ private:
         assert(this.iterator !is null);
     }
 
-    void changeIndexToOffset(ref ptrdiff_t a, ref ptrdiff_t b) {
+    void changeIndexToOffset(ref ptrdiff_t a) scope {
+        size_t actualLength = literal.length;
+
+        if (a < 0) {
+            assert(actualLength > -a, "First offset must be smaller than length");
+            a = actualLength + a;
+        }
+    }
+
+    void changeIndexToOffset(ref ptrdiff_t a, ref ptrdiff_t b) scope {
         size_t actualLength = literal.length;
 
         if (a < 0) {

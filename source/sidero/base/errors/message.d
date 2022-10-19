@@ -50,6 +50,18 @@ struct ErrorInfo {
 @safe nothrow @nogc:
 
     ///
+    this(ErrorMessage errorMessage, string moduleName = __MODULE__, int line = __LINE__) {
+        this.info = errorMessage;
+        this.moduleName = moduleName;
+        this.line = line;
+    }
+
+    ///
+    bool isSet() {
+        return info.id.length > 0;
+    }
+
+    ///
     String_UTF8 toString() const {
         StringBuilder_UTF8 ret;
         this.toString(ret);

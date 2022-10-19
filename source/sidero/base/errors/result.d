@@ -66,8 +66,10 @@ scope nothrow @nogc @safe:
     }
 
     ///
-    this(ErrorInfo errorInfo) {
+    this(ErrorInfo errorInfo, string moduleName = __MODULE__, int line = __LINE__) {
         error = errorInfo;
+        error.moduleName = moduleName;
+        error.line = line;
         error.checked = false;
     }
 
@@ -115,7 +117,7 @@ scope nothrow @nogc @safe:
 
     static if (HaveValue) {
         ///
-        bool opEquals(scope const Type other) const {
+        bool opEquals(scope Type other) {
             if (error.info.message !is null)
                 return false;
 
@@ -123,7 +125,7 @@ scope nothrow @nogc @safe:
         }
 
         ///
-        bool opEquals(scope const Result!Type other) const {
+        bool opEquals(scope Result!Type other) {
             if (error.info.message !is null)
                 return other.error.info.message !is null;
             return this.value == other;

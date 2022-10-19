@@ -165,7 +165,7 @@ StringBuilder_UTF32 readLine(scope return StringBuilder_UTF32 builder) {
 }
 
 ///
-void write(Args...)(scope Args args) {
+void write(Args...)(scope Args args) @trusted {
     import sidero.base.traits : isAnyString;
     import core.stdc.stdio : fwrite, fflush;
 

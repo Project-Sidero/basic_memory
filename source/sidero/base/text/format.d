@@ -310,10 +310,10 @@ private:
                             builder ~= "\n";
                             handlePrefix();
 
-                            handleWrapper(k);
+                            handle(k);
                             builder ~= ": ";
 
-                            handleWrapper(v);
+                            handle(v);
                             builder ~= ",";
                         }
                     } else {
@@ -831,8 +831,7 @@ scope:
 
             builder ~= "]";
         } else static if (isIterable!ActualType) {
-            alias SubType = Unqual!(typeof(ActualType.init[0]));
-            builder ~= SubType.stringof ~ "[";
+            builder ~= "[";
 
             size_t i;
             foreach (v; input) {
