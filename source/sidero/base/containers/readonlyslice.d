@@ -432,6 +432,18 @@ nothrow @nogc:
         }
     }
 
+    ///
+    ulong toHash() scope {
+        import sidero.base.hash.utils : hashOf;
+        ulong ret = hashOf();
+
+        foreach(ref v; this.literal) {
+            ret = hashOf(v);
+        }
+
+        return ret;
+    }
+
     @property {
         ///
         bool empty() scope {

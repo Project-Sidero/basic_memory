@@ -2692,26 +2692,9 @@ nothrow @nogc:
     }
 
     ///
-    ulong toHash() const scope @trusted {
-        import sidero.base.hash.fnv : fnv_64_1a;
-
-        return fnv_64_1a(cast(ubyte[])this.literal);
-    }
-
-    ///
-    unittest {
-        static Text8 = "ok it's a live";
-        static Text16 = "I'm up to the"w;
-        static Text32 = "walls can't talk"d;
-
-        String_UTF text = String_UTF(Text8);
-        assert(text.toHash() == 1586511100919779533);
-
-        text = String_UTF(Text16);
-        assert(text.toHash() == 10386160303096007217);
-
-        text = String_UTF(Text32);
-        assert(text.toHash() == 3495845543429281309);
+    ulong toHash() scope {
+        import sidero.base.hash.utils : hashOf;
+        return hashOf(this.literal);
     }
 
     ///

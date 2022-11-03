@@ -390,7 +390,7 @@ nothrow @nogc:
     alias opDollar = length;
 
     /// Removes null terminator at the end if it has one
-    size_t length() const scope nothrow @nogc {
+    size_t length() const scope {
         size_t ret = this.literal.length;
         if (ret > 0 && this.literal[$ - 1] == '\0')
             ret--;
@@ -679,6 +679,12 @@ nothrow @nogc:
     ///
     int ignoreCaseCompare(scope StringBuilder_ASCII other) scope {
         return -other.ignoreCaseCompare(this);
+    }
+
+    ///
+    ulong toHash() scope {
+        import sidero.base.hash.utils : hashOf;
+        return hashOf(this.literal);
     }
 
     //
@@ -2497,7 +2503,7 @@ private:
         }
 
         if (b < 0) {
-            assert(actualLength >= -b, "First offset must be smaller than length");
+            assert(actualLength >= -b, "Second offset must be smaller than length");
             b = actualLength + b;
         }
 

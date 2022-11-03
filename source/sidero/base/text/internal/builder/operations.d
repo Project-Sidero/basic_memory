@@ -4,6 +4,7 @@ import sidero.base.text.internal.builder.blocklist;
 import sidero.base.allocators;
 
 mixin template StringBuilderOperations() {
+    import sidero.base.errors.message : ErrorInfo;
     alias BlockList = BlockListImpl!Char;
 
     BlockList blockList;
@@ -97,11 +98,13 @@ mixin template StringBuilderOperations() {
     void externalRemove(scope Iterator* iterator, ptrdiff_t offset, size_t amount) @trusted {
         blockList.mutex.pureLock;
 
-        changeIndexToOffset(iterator, offset);
+        auto errorInfo = changeIndexToOffset(iterator, offset);
 
-        size_t maximumOffsetFromHead;
-        Cursor cursor = cursorFor(iterator, maximumOffsetFromHead, offset);
-        removeOperation(cursor, maximumOffsetFromHead, amount);
+        if (!errorInfo.isSet) {
+            size_t maximumOffsetFromHead;
+            Cursor cursor = cursorFor(iterator, maximumOffsetFromHead, offset);
+            removeOperation(cursor, maximumOffsetFromHead, amount);
+        }
 
         blockList.mutex.unlock;
     }
@@ -109,7 +112,8 @@ mixin template StringBuilderOperations() {
     // exposed /\/\/\/\/\
     // internal \/\/\/\/
 
-    void changeIndexToOffset(scope Iterator* iterator, scope ref ptrdiff_t a) {
+    ErrorInfo changeIndexToOffset(scope Iterator* iterator, scope ref ptrdiff_t a) {
+        import sidero.base.errors.stock;
         size_t actualLength;
 
         if (iterator is null)
@@ -118,12 +122,19 @@ mixin template StringBuilderOperations() {
             actualLength = iterator.backwards.offsetFromHead - iterator.forwards.offsetFromHead;
 
         if (a < 0) {
-            assert(actualLength >= -a, "First offset must be smaller than length");
+            if (actualLength < -a) {
+                a = actualLength;
+                return ErrorInfo(RangeException("First offset must be smaller than length"));
+            }
+
             a = actualLength + a;
         }
+
+        return ErrorInfo.init;
     }
 
-    void changeIndexToOffset(scope Iterator* iterator, scope ref ptrdiff_t a, scope ref ptrdiff_t b) {
+    ErrorInfo changeIndexToOffset(scope Iterator* iterator, scope ref ptrdiff_t a, scope ref ptrdiff_t b) {
+        import sidero.base.errors.stock;
         size_t actualLength;
 
         if (iterator !is null) {
@@ -136,12 +147,21 @@ mixin template StringBuilderOperations() {
             actualLength = blockList.numberOfItems;
 
         if (a < 0) {
-            assert(actualLength >= -a, "First offset must be smaller than length");
+            if (actualLength < -a) {
+                a = actualLength;
+                b = actualLength;
+                return ErrorInfo(RangeException("First offset must be smaller than length"));
+            }
+
             a = actualLength + a;
         }
 
         if (b < 0) {
-            assert(actualLength >= -b, "First offset must be smaller than length");
+            if (actualLength < -b) {
+                b = actualLength;
+                return ErrorInfo(RangeException("Second offset must be smaller than length"));
+            }
+
             b = actualLength + b;
         }
 
@@ -157,6 +177,8 @@ mixin template StringBuilderOperations() {
             if (b + iterator.minimumOffsetFromHead <= iterator.maximumOffsetFromHead)
                 b += iterator.minimumOffsetFromHead;
         }
+
+        return ErrorInfo.init;
     }
 
     Cursor cursorFor(scope Iterator* iterator, out size_t maximumOffsetFromHead, size_t offset = 0) scope @trusted {

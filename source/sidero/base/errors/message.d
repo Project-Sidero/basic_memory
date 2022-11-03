@@ -1,6 +1,4 @@
 module sidero.base.errors.message;
-import sidero.base.text.unicode.readonly;
-import sidero.base.text.unicode.builder;
 
 ///
 struct ErrorMessage {
@@ -47,7 +45,7 @@ struct ErrorInfo {
     int line;
     package(sidero.base.errors) bool checked;
 
-@safe nothrow @nogc:
+scope @safe nothrow @nogc:
 
     ///
     this(ErrorMessage errorMessage, string moduleName = __MODULE__, int line = __LINE__) {
@@ -62,7 +60,9 @@ struct ErrorInfo {
     }
 
     ///
-    String_UTF8 toString() const {
+    auto toString() const {
+        import sidero.base.text.unicode.builder;
+
         StringBuilder_UTF8 ret;
         this.toString(ret);
         return ret.asReadOnly();

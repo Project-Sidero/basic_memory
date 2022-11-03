@@ -562,12 +562,15 @@ scope nothrow @nogc:
     }
 
     ///
-    int opCmp(scope Slice!ElementType other) @trusted {
+    alias compare = opCmp;
+
+    ///
+    int opCmp(scope Slice!ElementType other) @trusted scope {
         return this.opCmp(other.unsafeGetLiteral);
     }
 
     ///
-    int opCmp(scope const(ElementType)[] other) @trusted {
+    int opCmp(scope const(ElementType)[] other) @trusted scope {
         auto us = unsafeGetLiteral();
 
         if (us.length < other.length)
@@ -588,23 +591,34 @@ scope nothrow @nogc:
     }
 
     ///
-    int opCmp(scope DynamicArray other) @trusted {
+    int opCmp(scope DynamicArray other) @trusted scope {
         return opCmp(other.unsafeGetLiteral());
     }
 
     ///
-    bool opEquals(scope Slice!ElementType other) {
+    bool opEquals(scope Slice!ElementType other) scope {
         return opCmp(other) == 0;
     }
 
     ///
-    bool opEquals(scope const(ElementType)[] other) {
+    alias equals = opEquals;
+
+    ///
+    bool opEquals(scope const(ElementType)[] other) scope {
         return opCmp(other) == 0;
     }
 
     ///
-    bool opEquals(scope DynamicArray other) {
+    bool opEquals(scope DynamicArray other) scope {
         return opCmp(other) == 0;
+    }
+
+    ///
+    ulong toHash() @trusted scope {
+        import sidero.base.hash.utils : hashOf;
+
+        scope temp = this.unsafeGetLiteral();
+        return hashOf(temp);
     }
 
     ///

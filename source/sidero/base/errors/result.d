@@ -33,6 +33,15 @@ struct Result(Type) {
                 return value.opAssign(args);
             }
         }
+
+        static if (__traits(hasMember, Type, "toHash")) {
+            ///
+            auto toHash(Args...)(Args args) {
+                if (isNull)
+                    return 0;
+                return value.toHash();
+            }
+        }
     }
 
     ///
@@ -175,5 +184,165 @@ unittest {
         }
     } else {
         assert(0, "Null, but no error");
+    }
+}
+
+///
+struct ResultReference(Type) {
+    alias RCHandle = void delegate(bool addRef, scope void* _user) @safe nothrow @nogc;
+
+    private {
+        Type* _value;
+        void* _user;
+
+        RCHandle _rcHandle;
+    }
+
+    ///
+    ErrorInfo error;
+
+scope nothrow @nogc @safe:
+
+    ///
+    this(scope return Type* value, scope return void* user, scope return RCHandle rcHandle) {
+        assert(value !is null);
+        assert(user !is null);
+        assert(rcHandle !is null);
+
+        this._value = value;
+        this._user = user;
+        this._rcHandle = rcHandle;
+    }
+
+    ///
+    this(ErrorInfo errorInfo, string moduleName = __MODULE__, int line = __LINE__) {
+        error = errorInfo;
+        error.moduleName = moduleName;
+        error.line = line;
+        error.checked = false;
+    }
+
+    ///
+    this(ErrorMessage errorMessage, string moduleName = __MODULE__, int line = __LINE__) {
+        error = ErrorInfo(errorMessage, moduleName, line);
+    }
+
+    ///
+    this(ref ResultReference other) @trusted {
+        static foreach (i; 0 .. this.tupleof.length)
+            this.tupleof[i] = other.tupleof[i];
+
+        this.error.checked = false;
+
+        if (this._rcHandle !is null)
+            this._rcHandle(true, this._user);
+    }
+
+    ~this() @trusted {
+        if (this._rcHandle !is null)
+            this._rcHandle(false, this._user);
+    }
+
+    ///
+    void opAssign(ErrorMessage errorMessage, string moduleName = __MODULE__, int line = __LINE__) {
+        error = ErrorInfo(errorMessage, moduleName, line);
+    }
+
+    ///
+    void opAssign(Type value) {
+        if (isNull || _value is null)
+            return;
+        *_value = value;
+    }
+
+    static if (__traits(hasMember, Type, "opAssign")) {
+        ///
+        auto opAssign(Args...)(Args args) {
+            if (isNull)
+                assert(0);
+            return _value.opAssign(args);
+        }
+    }
+
+    static if (__traits(hasMember, Type, "toHash")) {
+        ///
+        auto opAssign(Args...)(Args args) {
+            if (isNull)
+                return 0;
+            return _value.toHash();
+        }
+    }
+
+    ///
+    @disable void opAssign(ref ResultReference other) const;
+    ///
+    @disable void opAssign(ResultReference other) const;
+    ///
+    @disable void opAssign(Type value) const;
+
+    /// Will check and only error if there is an error.
+    ref Type assumeOkay() @system {
+        assert(opCast!bool(), error.toString().unsafeGetLiteral);
+        assert(this._value !is null);
+        return *_value;
+    }
+
+    ///
+    bool opCast(T : bool)() {
+        error.checked = true;
+        return error.info.message is null && _value !is null;
+    }
+
+    ///
+    bool isNull() @trusted {
+        if (!error.checked)
+            assert(0, "You forgot to check if value had an error. assert(thing, thing.error.toString());");
+
+        assert(opCast!bool(), error.toString().unsafeGetLiteral);
+
+        static if (__traits(hasMember, Type, "isNull")) {
+            return _value.isNull;
+        } else
+            return false;
+    }
+
+    /// Will verify that you checked
+    ref Type get() return @trusted {
+        if (!error.checked)
+            assert(0, "You forgot to check if value had an error. assert(thing, thing.error.toString());");
+
+        assert(opCast!bool(), error.toString().unsafeGetLiteral);
+        assert(_value !is null);
+        return *_value;
+    }
+
+    ///
+    alias get this;
+
+    ///
+    bool opEquals(scope const ErrorMessage other) const {
+        return error.info.id !is null && error.info.id == other.id;
+    }
+
+    ///
+    bool opEquals(scope Type other) {
+        if (!opCast!bool())
+            return false;
+
+        return (*this._value) == other;
+    }
+
+    ///
+    bool opEquals(scope Result!Type other) {
+        if (error.isSet || other.error.isSet || !opCast!bool() || !other.opCast!bool())
+            return error.isSet && other.error.isSet;
+        return (*this._value) == other.value;
+    }
+
+    ///
+    bool opEquals(scope ResultReference!Type other) {
+        if (error.isSet || other.error.isSet || !opCast!bool() || !other.opCast!bool())
+            return error.isSet && other.error.isSet;
+        return (*this._value) == (*other._value);
     }
 }

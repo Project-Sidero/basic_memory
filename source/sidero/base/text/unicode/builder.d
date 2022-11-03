@@ -667,7 +667,7 @@ nothrow @safe:
     ///
     StringBuilder_UTF dup(RCAllocator allocator = RCAllocator.init) scope @nogc {
         StringBuilder_UTF ret = StringBuilder_UTF(allocator);
-        ret.insertImplBuilder(this);
+        ret.insertImpl(this);
         return ret;
     }
 
@@ -901,7 +901,7 @@ nothrow @safe:
 
         ///
         int opCmp(scope const(char)[] other) scope {
-            return opCmpImplSlice(other, true);
+            return opCmpImpl(other, true);
         }
 
         ///
@@ -912,7 +912,7 @@ nothrow @safe:
 
         ///
         int opCmp(scope const(wchar)[] other) scope {
-            return opCmpImplSlice(other, true);
+            return opCmpImpl(other, true);
         }
 
         ///
@@ -923,7 +923,7 @@ nothrow @safe:
 
         ///
         int opCmp(scope const(dchar)[] other) scope {
-            return opCmpImplSlice(other, true);
+            return opCmpImpl(other, true);
         }
 
         ///
@@ -934,7 +934,7 @@ nothrow @safe:
 
         ///
         int opCmp(scope String_ASCII other) scope {
-            return opCmpImplReadOnly(other, true);
+            return opCmpImpl(other, true);
         }
 
         ///
@@ -945,7 +945,7 @@ nothrow @safe:
 
         ///
         int opCmp(scope String_UTF8 other) scope {
-            return opCmpImplReadOnly(other, true);
+            return opCmpImpl(other, true);
         }
 
         ///
@@ -956,7 +956,7 @@ nothrow @safe:
 
         ///
         int opCmp(scope String_UTF16 other) scope {
-            return opCmpImplReadOnly(other, true);
+            return opCmpImpl(other, true);
         }
 
         ///
@@ -967,7 +967,7 @@ nothrow @safe:
 
         ///
         int opCmp(scope String_UTF32 other) scope {
-            return opCmpImplReadOnly(other, true);
+            return opCmpImpl(other, true);
         }
 
         ///
@@ -978,7 +978,7 @@ nothrow @safe:
 
         ///
         int opCmp(scope StringBuilder_ASCII other) scope {
-            return opCmpImplBuilder(other, true);
+            return opCmpImpl(other, true);
         }
 
         ///
@@ -989,7 +989,7 @@ nothrow @safe:
 
         ///
         int opCmp(Char)(scope StringBuilder_UTF!Char other) scope {
-            return opCmpImplBuilder(other, true);
+            return opCmpImpl(other, true);
         }
 
         ///
@@ -1002,7 +1002,7 @@ nothrow @safe:
     @nogc {
         ///
         int ignoreCaseCompare(scope const(char)[] other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return opCmpImplSlice(other, false, language);
+            return opCmpImpl(other, false, language);
         }
 
         ///
@@ -1013,7 +1013,7 @@ nothrow @safe:
 
         ///
         int ignoreCaseCompare(scope const(wchar)[] other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return opCmpImplSlice(other, false, language);
+            return opCmpImpl(other, false, language);
         }
 
         ///
@@ -1024,7 +1024,7 @@ nothrow @safe:
 
         ///
         int ignoreCaseCompare(scope const(dchar)[] other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return opCmpImplSlice(other, false, language);
+            return opCmpImpl(other, false, language);
         }
 
         ///
@@ -1035,17 +1035,17 @@ nothrow @safe:
 
         ///
         int ignoreCaseCompare(scope String_UTF8 other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return opCmpImplReadOnly(other, false, language);
+            return opCmpImpl(other, false, language);
         }
 
         ///
         int ignoreCaseCompare(scope String_UTF16 other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return opCmpImplReadOnly(other, false, language);
+            return opCmpImpl(other, false, language);
         }
 
         ///
         int ignoreCaseCompare(scope String_UTF32 other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return opCmpImplReadOnly(other, false, language);
+            return opCmpImpl(other, false, language);
         }
 
         ///
@@ -1056,7 +1056,7 @@ nothrow @safe:
 
         ///
         int ignoreCaseCompare(scope String_ASCII other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return opCmpImplReadOnly(other, false, language);
+            return opCmpImpl(other, false, language);
         }
 
         ///
@@ -1067,7 +1067,7 @@ nothrow @safe:
 
         ///
         int ignoreCaseCompare(scope StringBuilder_ASCII other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return opCmpImplBuilder(other, false, language);
+            return opCmpImpl(other, false, language);
         }
 
         ///
@@ -1078,7 +1078,7 @@ nothrow @safe:
 
         ///
         int ignoreCaseCompare(Char)(scope StringBuilder_UTF!Char other) scope {
-            return opCmpImplBuilder(other, false);
+            return opCmpImpl(other, false);
         }
 
         ///
@@ -1461,7 +1461,7 @@ nothrow @safe:
     @nogc {
         ///
         bool startsWith(scope const(char)[] input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return startsWithImplSlice(input, true, language);
+            return startsWithImpl(input, true, language);
         }
 
         ///
@@ -1472,7 +1472,7 @@ nothrow @safe:
 
         ///
         bool startsWith(scope const(wchar)[] input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return startsWithImplSlice(input, true, language);
+            return startsWithImpl(input, true, language);
         }
 
         ///
@@ -1483,7 +1483,7 @@ nothrow @safe:
 
         ///
         bool startsWith(scope const(dchar)[] input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return startsWithImplSlice(input, true, language);
+            return startsWithImpl(input, true, language);
         }
 
         ///
@@ -1494,7 +1494,7 @@ nothrow @safe:
 
         ///
         bool startsWith(scope String_ASCII input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return startsWithImplReadOnly(input, true, language);
+            return startsWithImpl(input, true, language);
         }
 
         ///
@@ -1505,7 +1505,7 @@ nothrow @safe:
 
         ///
         bool startsWith(scope String_UTF8 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return startsWithImplReadOnly(input, true, language);
+            return startsWithImpl(input, true, language);
         }
 
         ///
@@ -1516,7 +1516,7 @@ nothrow @safe:
 
         ///
         bool startsWith(scope String_UTF16 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return startsWithImplReadOnly(input, true, language);
+            return startsWithImpl(input, true, language);
         }
 
         ///
@@ -1527,7 +1527,7 @@ nothrow @safe:
 
         ///
         bool startsWith(scope String_UTF32 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return startsWithImplReadOnly(input, true, language);
+            return startsWithImpl(input, true, language);
         }
 
         ///
@@ -1538,7 +1538,7 @@ nothrow @safe:
 
         ///
         bool startsWith(scope StringBuilder_ASCII input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return startsWithImplBuilder(input, true, language);
+            return startsWithImpl(input, true, language);
         }
 
         ///
@@ -1549,7 +1549,7 @@ nothrow @safe:
 
         ///
         bool startsWith(scope StringBuilder_UTF8 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return startsWithImplBuilder(input, true, language);
+            return startsWithImpl(input, true, language);
         }
 
         ///
@@ -1560,7 +1560,7 @@ nothrow @safe:
 
         ///
         bool startsWith(scope StringBuilder_UTF16 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return startsWithImplBuilder(input, true, language);
+            return startsWithImpl(input, true, language);
         }
 
         ///
@@ -1571,7 +1571,7 @@ nothrow @safe:
 
         ///
         bool startsWith(scope StringBuilder_UTF32 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return startsWithImplBuilder(input, true, language);
+            return startsWithImpl(input, true, language);
         }
 
         ///
@@ -1584,7 +1584,7 @@ nothrow @safe:
     @nogc {
         ///
         bool ignoreCaseStartsWith(scope const(char)[] input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return startsWithImplSlice(input, false, language);
+            return startsWithImpl(input, false, language);
         }
 
         ///
@@ -1595,7 +1595,7 @@ nothrow @safe:
 
         ///
         bool ignoreCaseStartsWith(scope const(wchar)[] input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return startsWithImplSlice(input, false, language);
+            return startsWithImpl(input, false, language);
         }
 
         ///
@@ -1606,7 +1606,7 @@ nothrow @safe:
 
         ///
         bool ignoreCaseStartsWith(scope const(dchar)[] input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return startsWithImplSlice(input, false, language);
+            return startsWithImpl(input, false, language);
         }
 
         ///
@@ -1617,7 +1617,7 @@ nothrow @safe:
 
         ///
         bool ignoreCaseStartsWith(scope String_ASCII input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return startsWithImplReadOnly(input, false, language);
+            return startsWithImpl(input, false, language);
         }
 
         ///
@@ -1628,7 +1628,7 @@ nothrow @safe:
 
         ///
         bool ignoreCaseStartsWith(scope String_UTF8 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return startsWithImplReadOnly(input, false, language);
+            return startsWithImpl(input, false, language);
         }
 
         ///
@@ -1639,7 +1639,7 @@ nothrow @safe:
 
         ///
         bool ignoreCaseStartsWith(scope String_UTF16 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return startsWithImplReadOnly(input, false, language);
+            return startsWithImpl(input, false, language);
         }
 
         ///
@@ -1650,7 +1650,7 @@ nothrow @safe:
 
         ///
         bool ignoreCaseStartsWith(scope String_UTF32 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return startsWithImplReadOnly(input, false, language);
+            return startsWithImpl(input, false, language);
         }
 
         ///
@@ -1661,7 +1661,7 @@ nothrow @safe:
 
         ///
         bool ignoreCaseStartsWith(scope StringBuilder_ASCII input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return startsWithImplBuilder(input, false, language);
+            return startsWithImpl(input, false, language);
         }
 
         ///
@@ -1672,7 +1672,7 @@ nothrow @safe:
 
         ///
         bool ignoreCaseStartsWith(scope StringBuilder_UTF8 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return startsWithImplBuilder(input, false, language);
+            return startsWithImpl(input, false, language);
         }
 
         ///
@@ -1683,7 +1683,7 @@ nothrow @safe:
 
         ///
         bool ignoreCaseStartsWith(scope StringBuilder_UTF16 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return startsWithImplBuilder(input, false, language);
+            return startsWithImpl(input, false, language);
         }
 
         ///
@@ -1694,7 +1694,7 @@ nothrow @safe:
 
         ///
         bool ignoreCaseStartsWith(scope StringBuilder_UTF32 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return startsWithImplBuilder(input, false, language);
+            return startsWithImpl(input, false, language);
         }
 
         ///
@@ -1707,7 +1707,7 @@ nothrow @safe:
     @nogc {
         ///
         bool endsWith(scope const(char)[] input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return endsWithImplSlice(input, true, language);
+            return endsWithImpl(input, true, language);
         }
 
         ///
@@ -1718,7 +1718,7 @@ nothrow @safe:
 
         ///
         bool endsWith(scope const(wchar)[] input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return endsWithImplSlice(input, true, language);
+            return endsWithImpl(input, true, language);
         }
 
         ///
@@ -1729,7 +1729,7 @@ nothrow @safe:
 
         ///
         bool endsWith(scope const(dchar)[] input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return endsWithImplSlice(input, true, language);
+            return endsWithImpl(input, true, language);
         }
 
         ///
@@ -1740,7 +1740,7 @@ nothrow @safe:
 
         ///
         bool endsWith(scope String_ASCII input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return endsWithImplReadOnly(input, true, language);
+            return endsWithImpl(input, true, language);
         }
 
         ///
@@ -1751,7 +1751,7 @@ nothrow @safe:
 
         ///
         bool endsWith(scope String_UTF8 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return endsWithImplReadOnly(input, true, language);
+            return endsWithImpl(input, true, language);
         }
 
         ///
@@ -1762,7 +1762,7 @@ nothrow @safe:
 
         ///
         bool endsWith(scope String_UTF16 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return endsWithImplReadOnly(input, true, language);
+            return endsWithImpl(input, true, language);
         }
 
         ///
@@ -1773,7 +1773,7 @@ nothrow @safe:
 
         ///
         bool endsWith(scope String_UTF32 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return endsWithImplReadOnly(input, true, language);
+            return endsWithImpl(input, true, language);
         }
 
         ///
@@ -1784,7 +1784,7 @@ nothrow @safe:
 
         ///
         bool endsWith(scope StringBuilder_ASCII input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return endsWithImplBuilder(input, true, language);
+            return endsWithImpl(input, true, language);
         }
 
         ///
@@ -1795,7 +1795,7 @@ nothrow @safe:
 
         ///
         bool endsWith(scope StringBuilder_UTF8 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return endsWithImplBuilder(input, true, language);
+            return endsWithImpl(input, true, language);
         }
 
         ///
@@ -1806,7 +1806,7 @@ nothrow @safe:
 
         ///
         bool endsWith(scope StringBuilder_UTF16 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return endsWithImplBuilder(input, true, language);
+            return endsWithImpl(input, true, language);
         }
 
         ///
@@ -1817,7 +1817,7 @@ nothrow @safe:
 
         ///
         bool endsWith(scope StringBuilder_UTF32 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return endsWithImplBuilder(input, true, language);
+            return endsWithImpl(input, true, language);
         }
 
         ///
@@ -1830,7 +1830,7 @@ nothrow @safe:
     @nogc {
         ///
         bool ignoreCaseEndsWith(scope const(char)[] input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return endsWithImplSlice(input, false, language);
+            return endsWithImpl(input, false, language);
         }
 
         ///
@@ -1841,7 +1841,7 @@ nothrow @safe:
 
         ///
         bool ignoreCaseEndsWith(scope const(wchar)[] input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return endsWithImplSlice(input, false, language);
+            return endsWithImpl(input, false, language);
         }
 
         ///
@@ -1852,7 +1852,7 @@ nothrow @safe:
 
         ///
         bool ignoreCaseEndsWith(scope const(dchar)[] input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return endsWithImplSlice(input, false, language);
+            return endsWithImpl(input, false, language);
         }
 
         ///
@@ -1863,7 +1863,7 @@ nothrow @safe:
 
         ///
         bool ignoreCaseEndsWith(scope String_ASCII input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return endsWithImplReadOnly(input, false, language);
+            return endsWithImpl(input, false, language);
         }
 
         ///
@@ -1874,7 +1874,7 @@ nothrow @safe:
 
         ///
         bool ignoreCaseEndsWith(scope String_UTF8 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return endsWithImplReadOnly(input, false, language);
+            return endsWithImpl(input, false, language);
         }
 
         ///
@@ -1885,7 +1885,7 @@ nothrow @safe:
 
         ///
         bool ignoreCaseEndsWith(scope String_UTF16 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return endsWithImplReadOnly(input, false, language);
+            return endsWithImpl(input, false, language);
         }
 
         ///
@@ -1896,7 +1896,7 @@ nothrow @safe:
 
         ///
         bool ignoreCaseEndsWith(scope String_UTF32 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return endsWithImplReadOnly(input, false, language);
+            return endsWithImpl(input, false, language);
         }
 
         ///
@@ -1907,7 +1907,7 @@ nothrow @safe:
 
         ///
         bool ignoreCaseEndsWith(scope StringBuilder_ASCII input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return endsWithImplBuilder(input, false, language);
+            return endsWithImpl(input, false, language);
         }
 
         ///
@@ -1918,7 +1918,7 @@ nothrow @safe:
 
         ///
         bool ignoreCaseEndsWith(scope StringBuilder_UTF8 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return endsWithImplBuilder(input, false, language);
+            return endsWithImpl(input, false, language);
         }
 
         ///
@@ -1929,7 +1929,7 @@ nothrow @safe:
 
         ///
         bool ignoreCaseEndsWith(scope StringBuilder_UTF16 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return endsWithImplBuilder(input, false, language);
+            return endsWithImpl(input, false, language);
         }
 
         ///
@@ -1940,7 +1940,7 @@ nothrow @safe:
 
         ///
         bool ignoreCaseEndsWith(scope StringBuilder_UTF32 input, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-            return endsWithImplBuilder(input, false, language);
+            return endsWithImpl(input, false, language);
         }
 
         ///
@@ -1988,7 +1988,7 @@ nothrow @safe:
     @nogc {
         ///
         StringBuilder_UTF insert(ptrdiff_t index, scope const(char)[] input...) scope return {
-            insertImplSlice(input, index);
+            insertImpl(input, index);
             return this;
         }
 
@@ -1999,7 +1999,7 @@ nothrow @safe:
 
         ///
         StringBuilder_UTF insert(ptrdiff_t index, scope const(wchar)[] input...) scope return {
-            insertImplSlice(input, index);
+            insertImpl(input, index);
             return this;
         }
 
@@ -2010,7 +2010,7 @@ nothrow @safe:
 
         ///
         StringBuilder_UTF insert(ptrdiff_t index, scope const(dchar)[] input...) scope return {
-            insertImplSlice(input, index);
+            insertImpl(input, index);
             return this;
         }
 
@@ -2021,7 +2021,7 @@ nothrow @safe:
 
         ///
         StringBuilder_UTF insert(ptrdiff_t index, scope String_ASCII input) scope return {
-            insertImplReadOnly(input, index);
+            insertImpl(input, index);
             return this;
         }
 
@@ -2032,7 +2032,7 @@ nothrow @safe:
 
         ///
         StringBuilder_UTF insert(ptrdiff_t index, scope String_UTF8 input) scope return {
-            insertImplReadOnly(input, index);
+            insertImpl(input, index);
             return this;
         }
 
@@ -2043,7 +2043,7 @@ nothrow @safe:
 
         ///
         StringBuilder_UTF insert(ptrdiff_t index, scope String_UTF16 input) scope return {
-            insertImplReadOnly(input, index);
+            insertImpl(input, index);
             return this;
         }
 
@@ -2054,7 +2054,7 @@ nothrow @safe:
 
         ///
         StringBuilder_UTF insert(ptrdiff_t index, scope String_UTF32 input) scope return {
-            insertImplReadOnly(input, index);
+            insertImpl(input, index);
             return this;
         }
 
@@ -2065,7 +2065,7 @@ nothrow @safe:
 
         ///
         StringBuilder_UTF insert(ptrdiff_t index, scope StringBuilder_ASCII input) scope return {
-            insertImplBuilder(input, index);
+            insertImpl(input, index);
             return this;
         }
 
@@ -2076,7 +2076,7 @@ nothrow @safe:
 
         ///
         StringBuilder_UTF insert(ptrdiff_t index, scope StringBuilder_UTF8 input) scope return {
-            insertImplBuilder(input, index);
+            insertImpl(input, index);
             return this;
         }
 
@@ -2087,7 +2087,7 @@ nothrow @safe:
 
         ///
         StringBuilder_UTF insert(ptrdiff_t index, scope StringBuilder_UTF16 input) scope return {
-            insertImplBuilder(input, index);
+            insertImpl(input, index);
             return this;
         }
 
@@ -2098,7 +2098,7 @@ nothrow @safe:
 
         ///
         StringBuilder_UTF insert(ptrdiff_t index, scope StringBuilder_UTF32 input) scope return {
-            insertImplBuilder(input, index);
+            insertImpl(input, index);
             return this;
         }
 
@@ -2610,7 +2610,7 @@ nothrow @safe:
     @nogc {
         ///
         StringBuilder_UTF clobberInsert(ptrdiff_t index, scope const(char)[] input...) scope return {
-            insertImplSlice(input, index, true);
+            insertImpl(input, index, true);
             return this;
         }
 
@@ -2621,7 +2621,7 @@ nothrow @safe:
 
         ///
         StringBuilder_UTF clobberInsert(ptrdiff_t index, scope const(wchar)[] input...) scope return {
-            insertImplSlice(input, index, true);
+            insertImpl(input, index, true);
             return this;
         }
 
@@ -2632,7 +2632,7 @@ nothrow @safe:
 
         ///
         StringBuilder_UTF clobberInsert(ptrdiff_t index, scope const(dchar)[] input...) scope return {
-            insertImplSlice(input, index, true);
+            insertImpl(input, index, true);
             return this;
         }
 
@@ -2643,7 +2643,7 @@ nothrow @safe:
 
         ///
         StringBuilder_UTF clobberInsert(ptrdiff_t index, scope String_ASCII input) scope return {
-            insertImplReadOnly(input, index, true);
+            insertImpl(input, index, true);
             return this;
         }
 
@@ -2654,7 +2654,7 @@ nothrow @safe:
 
         ///
         StringBuilder_UTF clobberInsert(ptrdiff_t index, scope String_UTF8 input) scope return {
-            insertImplReadOnly(input, index, true);
+            insertImpl(input, index, true);
             return this;
         }
 
@@ -2665,7 +2665,7 @@ nothrow @safe:
 
         ///
         StringBuilder_UTF clobberInsert(ptrdiff_t index, scope String_UTF16 input) scope return {
-            insertImplReadOnly(input, index, true);
+            insertImpl(input, index, true);
             return this;
         }
 
@@ -2676,7 +2676,7 @@ nothrow @safe:
 
         ///
         StringBuilder_UTF clobberInsert(ptrdiff_t index, scope String_UTF32 input) scope return {
-            insertImplReadOnly(input, index, true);
+            insertImpl(input, index, true);
             return this;
         }
 
@@ -2687,7 +2687,7 @@ nothrow @safe:
 
         ///
         StringBuilder_UTF clobberInsert(ptrdiff_t index, scope StringBuilder_ASCII input) scope return {
-            insertImplBuilder(input, index, true);
+            insertImpl(input, index, true);
             return this;
         }
 
@@ -2698,7 +2698,7 @@ nothrow @safe:
 
         ///
         StringBuilder_UTF clobberInsert(ptrdiff_t index, scope StringBuilder_UTF8 input) scope return {
-            insertImplBuilder(input, index, true);
+            insertImpl(input, index, true);
             return this;
         }
 
@@ -2709,7 +2709,7 @@ nothrow @safe:
 
         ///
         StringBuilder_UTF clobberInsert(ptrdiff_t index, scope StringBuilder_UTF16 input) scope return {
-            insertImplBuilder(input, index, true);
+            insertImpl(input, index, true);
             return this;
         }
 
@@ -2720,7 +2720,7 @@ nothrow @safe:
 
         ///
         StringBuilder_UTF clobberInsert(ptrdiff_t index, scope StringBuilder_UTF32 input) scope return {
-            insertImplBuilder(input, index, true);
+            insertImpl(input, index, true);
             return this;
         }
 
@@ -3441,33 +3441,13 @@ nothrow @safe:
 
     ///
     ulong toHash() scope @trusted @nogc {
-        import sidero.base.hash.fnv : fnv_64_1a;
+        import sidero.base.hash.utils : hashOf;
 
-        ulong ret = fnv_64_1a(null);
+        ulong ret = hashOf();
 
-        foreachContiguous((scope ref data) { ret = fnv_64_1a(cast(ubyte[])data); return 0; });
+        foreachContiguous((scope ref data) { ret = hashOf(data, ret); return 0; });
 
         return ret;
-    }
-
-    ///
-    unittest {
-        static if (is(Char == char)) {
-            static Text8 = "ok it's a live";
-
-            StringBuilder_UTF text = StringBuilder_UTF(Text8);
-            assert(text.toHash() == 1586511100919779533);
-        } else static if (is(Char == wchar)) {
-            static Text16 = "I'm up to the"w;
-
-            StringBuilder_UTF text = StringBuilder_UTF(Text16);
-            assert(text.toHash() == 10386160303096007217);
-        } else static if (is(Char == dchar)) {
-            static Text32 = "walls can't talk"d;
-
-            StringBuilder_UTF text = StringBuilder_UTF(Text32);
-            assert(text.toHash() == 3495845543429281309);
-        }
     }
 
 package(sidero.base.text):
@@ -3559,22 +3539,22 @@ private:
     }
 
     scope @nogc {
-        int opCmpImplReadOnly(scope String_ASCII other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
-            other.stripZeroTerminator;
+        int opCmpImpl(Other)(scope Other other, bool caseSensitive,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            scope otherState = AnyAsTargetChar!dchar(other);
 
-            ASCIILiteralAsTarget!dchar alat;
-            alat.literal = other.literal;
-            scope osiu = alat.get;
+            if (other.length == 0)
+                return this.length == 0 ? 0 : 1;
 
             return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
                 assert(state !is null);
-                return state.externalOpCmp(iterator, osiu, caseSensitive, language);
+                return state.externalOpCmp(iterator, otherState.osat, caseSensitive, language);
             }, (StateIterator.S16 state, StateIterator.I16 iterator) {
                 assert(state !is null);
-                return state.externalOpCmp(iterator, osiu, caseSensitive, language);
+                return state.externalOpCmp(iterator, otherState.osat, caseSensitive, language);
             }, (StateIterator.S32 state, StateIterator.I32 iterator) {
                 assert(state !is null);
-                return state.externalOpCmp(iterator, osiu, caseSensitive, language);
+                return state.externalOpCmp(iterator, otherState.osat, caseSensitive, language);
             }, () {
                 if (other.length > 0)
                     return -1;
@@ -3583,387 +3563,56 @@ private:
             });
         }
 
-        int opCmpImplReadOnly(Char2)(scope String_UTF!Char2 other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
-            other.stripZeroTerminator;
-            auto alatc = AnyLiteralAsTargetChar!dchar(other);
-
-            return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
-                assert(state !is null);
-                return state.externalOpCmp(iterator, alatc.osat, caseSensitive, language);
-            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
-                assert(state !is null);
-                return state.externalOpCmp(iterator, alatc.osat, caseSensitive, language);
-            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
-                assert(state !is null);
-                return state.externalOpCmp(iterator, alatc.osat, caseSensitive, language);
-            }, () {
-                if (other.length > 0)
-                    return -1;
-                else
-                    return 0;
-            });
-        }
-
-        int opCmpImplSlice(Char2)(scope const(Char2)[] other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
-            LiteralAsTargetChar!(Char2, dchar) lat;
-            lat.literal = other;
-            scope osiu = lat.get;
-
-            return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
-                assert(state !is null);
-                return state.externalOpCmp(iterator, osiu, caseSensitive, language);
-            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
-                assert(state !is null);
-                return state.externalOpCmp(iterator, osiu, caseSensitive, language);
-            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
-                assert(state !is null);
-                return state.externalOpCmp(iterator, osiu, caseSensitive, language);
-            }, () {
-                if (other.length > 0)
-                    return -1;
-                else
-                    return 0;
-            });
-        }
-
-        int opCmpImplBuilder(scope StringBuilder_ASCII other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
-            ASCIIStateAsTarget!dchar asat;
-            asat.state = other.state;
-            asat.iterator = other.iterator;
-            scope osiu = asat.get;
-
-            return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
-                assert(state !is null);
-                return state.externalOpCmp(iterator, osiu, caseSensitive, language);
-            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
-                assert(state !is null);
-                return state.externalOpCmp(iterator, osiu, caseSensitive, language);
-            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
-                assert(state !is null);
-                return state.externalOpCmp(iterator, osiu, caseSensitive, language);
-            }, () {
-                if (other.length > 0)
-                    return -1;
-                else
-                    return 0;
-            });
-        }
-
-        int opCmpImplBuilder(Char2)(scope StringBuilder_UTF!Char2 other, bool caseSensitive,
-                UnicodeLanguage language = UnicodeLanguage.Unknown) {
-            AnyStateIteratorAsUs!dchar asiau = AnyStateIteratorAsUs!dchar(other.state);
-
-            return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
-                assert(state !is null);
-                return state.externalOpCmp(iterator, asiau.osat, caseSensitive, language);
-            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
-                assert(state !is null);
-                return state.externalOpCmp(iterator, asiau.osat, caseSensitive, language);
-            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
-                assert(state !is null);
-                return state.externalOpCmp(iterator, asiau.osat, caseSensitive, language);
-            }, () {
-                if (other.length > 0)
-                    return -1;
-                else
-                    return 0;
-            });
-        }
-
-        void insertImplReadOnly(scope String_ASCII other, ptrdiff_t offset = 0, bool clobber = false) {
+        void insertImpl(Other)(scope Other other, ptrdiff_t offset = 0, bool clobber = false) {
             setupState;
-            other.stripZeroTerminator;
+
+            if (other.length == 0)
+                return;
 
             state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
                 assert(state !is null);
-
-                ASCIILiteralAsTarget!char alat;
-                alat.literal = other.literal;
-                scope osiu = alat.get;
-
-                state.externalInsert(iterator, offset, osiu, clobber);
+                scope otherState = AnyAsTargetChar!char(other);
+                state.externalInsert(iterator, offset, otherState.osat, clobber);
             }, (StateIterator.S16 state, StateIterator.I16 iterator) {
                 assert(state !is null);
-
-                ASCIILiteralAsTarget!wchar alat;
-                alat.literal = other.literal;
-                scope osiu = alat.get;
-
-                state.externalInsert(iterator, offset, osiu, clobber);
+                scope otherState = AnyAsTargetChar!wchar(other);
+                state.externalInsert(iterator, offset, otherState.osat, clobber);
             }, (StateIterator.S32 state, StateIterator.I32 iterator) {
                 assert(state !is null);
-
-                ASCIILiteralAsTarget!dchar alat;
-                alat.literal = other.literal;
-                scope osiu = alat.get;
-
-                state.externalInsert(iterator, offset, osiu, clobber);
+                scope otherState = AnyAsTargetChar!dchar(other);
+                state.externalInsert(iterator, offset, otherState.osat, clobber);
             });
         }
 
-        void insertImplReadOnly(Char2)(scope String_UTF!Char2 other, ptrdiff_t offset = 0, bool clobber = false) {
-            other.stripZeroTerminator;
-
-            other.literalEncoding.handle(() @trusted { insertImplSlice(cast(string)other.literal, offset, clobber); }, () @trusted {
-                insertImplSlice(cast(wstring)other.literal, offset, clobber);
-            }, () @trusted { insertImplSlice(cast(dstring)other.literal, offset, clobber); });
-        }
-
-        void insertImplSlice(Char2)(scope const(Char2)[] other, ptrdiff_t offset = 0, bool clobber = false) {
-            setupState;
-
-            state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
-                assert(state !is null);
-
-                LiteralAsTargetChar!(Char2, char) lat;
-                lat.literal = other;
-                scope osiu = lat.get;
-
-                state.externalInsert(iterator, offset, osiu, clobber);
-            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
-                assert(state !is null);
-
-                LiteralAsTargetChar!(Char2, wchar) lat;
-                lat.literal = other;
-                scope osiu = lat.get;
-
-                state.externalInsert(iterator, offset, osiu, clobber);
-            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
-                assert(state !is null);
-
-                LiteralAsTargetChar!(Char2, dchar) lat;
-                lat.literal = other;
-                scope osiu = lat.get;
-
-                state.externalInsert(iterator, offset, osiu, clobber);
-            });
-        }
-
-        void insertImplBuilder(scope StringBuilder_ASCII other, ptrdiff_t offset = 0, bool clobber = false) {
-            setupState;
-
-            state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
-                assert(state !is null);
-
-                ASCIIStateAsTarget!char asat;
-                asat.state = other.state;
-                asat.iterator = other.iterator;
-                scope osiu = asat.get;
-
-                state.externalInsert(iterator, offset, osiu, clobber);
-            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
-                assert(state !is null);
-
-                ASCIIStateAsTarget!wchar asat;
-                asat.state = other.state;
-                asat.iterator = other.iterator;
-                scope osiu = asat.get;
-
-                state.externalInsert(iterator, offset, osiu, clobber);
-            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
-                assert(state !is null);
-
-                ASCIIStateAsTarget!dchar asat;
-                asat.state = other.state;
-                asat.iterator = other.iterator;
-                scope osiu = asat.get;
-
-                state.externalInsert(iterator, offset, osiu, clobber);
-            });
-        }
-
-        void insertImplBuilder(Char2)(scope StringBuilder_UTF!Char2 other, ptrdiff_t offset = 0, bool clobber = false) {
-            setupState;
-
-            state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
-                assert(state !is null);
-
-                AnyStateIteratorAsUs!char asiau = AnyStateIteratorAsUs!char(other.state);
-                state.externalInsert(iterator, offset, asiau.osat, clobber);
-            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
-                assert(state !is null);
-
-                AnyStateIteratorAsUs!wchar asiau = AnyStateIteratorAsUs!wchar(other.state);
-                state.externalInsert(iterator, offset, asiau.osat, clobber);
-            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
-                assert(state !is null);
-
-                AnyStateIteratorAsUs!dchar asiau = AnyStateIteratorAsUs!dchar(other.state);
-                state.externalInsert(iterator, offset, asiau.osat, clobber);
-            });
-        }
-
-        bool startsWithImplReadOnly(scope String_ASCII other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
-            other.stripZeroTerminator;
-
-            ASCIILiteralAsTarget!dchar alat;
-            alat.literal = other.literal;
-            scope osiu = alat.get;
+        bool startsWithImpl(Other)(scope Other other, bool caseSensitive,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            scope otherState = AnyAsTargetChar!dchar(other);
 
             return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
                 assert(state !is null);
-                return state.externalStartsWith(iterator, osiu, caseSensitive, language);
+                return state.externalStartsWith(iterator, otherState.osat, caseSensitive, language);
             }, (StateIterator.S16 state, StateIterator.I16 iterator) {
                 assert(state !is null);
-                return state.externalStartsWith(iterator, osiu, caseSensitive, language);
+                return state.externalStartsWith(iterator, otherState.osat, caseSensitive, language);
             }, (StateIterator.S32 state, StateIterator.I32 iterator) {
                 assert(state !is null);
-                return state.externalStartsWith(iterator, osiu, caseSensitive, language);
+                return state.externalStartsWith(iterator, otherState.osat, caseSensitive, language);
             }, () { return false; });
         }
 
-        bool startsWithImplReadOnly(Char2)(scope String_UTF!Char2 other, bool caseSensitive,
-                UnicodeLanguage language = UnicodeLanguage.Unknown) {
-            other.stripZeroTerminator;
-            auto alatc = AnyLiteralAsTargetChar!dchar(other);
+        bool endsWithImpl(Other)(scope Other other, bool caseSensitive,
+            UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            scope otherState = AnyAsTargetChar!dchar(other);
 
             return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
                 assert(state !is null);
-                return state.externalStartsWith(iterator, alatc.osat, caseSensitive, language);
+                return state.externalEndsWith(iterator, otherState.osat, caseSensitive, language);
             }, (StateIterator.S16 state, StateIterator.I16 iterator) {
                 assert(state !is null);
-                return state.externalStartsWith(iterator, alatc.osat, caseSensitive, language);
+                return state.externalEndsWith(iterator, otherState.osat, caseSensitive, language);
             }, (StateIterator.S32 state, StateIterator.I32 iterator) {
                 assert(state !is null);
-                return state.externalStartsWith(iterator, alatc.osat, caseSensitive, language);
-            }, () { return false; });
-        }
-
-        bool startsWithImplSlice(Char2)(scope const(Char2)[] other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
-            LiteralAsTargetChar!(Char2, dchar) lat;
-            lat.literal = other;
-            scope osiu = lat.get;
-
-            return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
-                assert(state !is null);
-                return state.externalStartsWith(iterator, osiu, caseSensitive, language);
-            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
-                assert(state !is null);
-                return state.externalStartsWith(iterator, osiu, caseSensitive, language);
-            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
-                assert(state !is null);
-                return state.externalStartsWith(iterator, osiu, caseSensitive, language);
-            }, () { return false; });
-        }
-
-        bool startsWithImplBuilder(scope StringBuilder_ASCII other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
-            ASCIIStateAsTarget!dchar asat;
-            asat.state = other.state;
-            asat.iterator = other.iterator;
-            scope osiu = asat.get;
-
-            return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
-                assert(state !is null);
-                return state.externalStartsWith(iterator, osiu, caseSensitive, language);
-            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
-                assert(state !is null);
-                return state.externalStartsWith(iterator, osiu, caseSensitive, language);
-            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
-                assert(state !is null);
-                return state.externalStartsWith(iterator, osiu, caseSensitive, language);
-            }, () { return false; });
-        }
-
-        bool startsWithImplBuilder(Char2)(scope StringBuilder_UTF!Char2 other, bool caseSensitive,
-                UnicodeLanguage language = UnicodeLanguage.Unknown) {
-            AnyStateIteratorAsUs!dchar asiau = AnyStateIteratorAsUs!dchar(other.state);
-
-            return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
-                assert(state !is null);
-                return state.externalStartsWith(iterator, asiau.osat, caseSensitive, language);
-            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
-                assert(state !is null);
-                return state.externalStartsWith(iterator, asiau.osat, caseSensitive, language);
-            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
-                assert(state !is null);
-                return state.externalStartsWith(iterator, asiau.osat, caseSensitive, language);
-            }, () { return false; });
-        }
-
-        bool endsWithImplReadOnly(scope String_ASCII other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
-            other.stripZeroTerminator;
-
-            ASCIILiteralAsTarget!dchar alat;
-            alat.literal = other.literal;
-            scope osiu = alat.get;
-
-            return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
-                assert(state !is null);
-                return state.externalEndsWith(iterator, osiu, caseSensitive, language);
-            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
-                assert(state !is null);
-                return state.externalEndsWith(iterator, osiu, caseSensitive, language);
-            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
-                assert(state !is null);
-                return state.externalEndsWith(iterator, osiu, caseSensitive, language);
-            }, () { return false; });
-        }
-
-        bool endsWithImplReadOnly(Char2)(scope String_UTF!Char2 other, bool caseSensitive,
-                UnicodeLanguage language = UnicodeLanguage.Unknown) {
-            other.stripZeroTerminator;
-            auto alatc = AnyLiteralAsTargetChar!dchar(other);
-
-            return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
-                assert(state !is null);
-                return state.externalEndsWith(iterator, alatc.osat, caseSensitive, language);
-            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
-                assert(state !is null);
-                return state.externalEndsWith(iterator, alatc.osat, caseSensitive, language);
-            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
-                assert(state !is null);
-                return state.externalEndsWith(iterator, alatc.osat, caseSensitive, language);
-            }, () { return false; });
-        }
-
-        bool endsWithImplSlice(Char2)(scope const(Char2)[] other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
-            LiteralAsTargetChar!(Char2, dchar) lat;
-            lat.literal = other;
-            scope osiu = lat.get;
-
-            return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
-                assert(state !is null);
-                return state.externalEndsWith(iterator, osiu, caseSensitive, language);
-            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
-                assert(state !is null);
-                return state.externalEndsWith(iterator, osiu, caseSensitive, language);
-            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
-                assert(state !is null);
-                return state.externalEndsWith(iterator, osiu, caseSensitive, language);
-            }, () { return false; });
-        }
-
-        bool endsWithImplBuilder(scope StringBuilder_ASCII other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
-            ASCIIStateAsTarget!dchar asat;
-            asat.state = other.state;
-            asat.iterator = other.iterator;
-            scope osiu = asat.get;
-
-            return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
-                assert(state !is null);
-                return state.externalEndsWith(iterator, osiu, caseSensitive, language);
-            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
-                assert(state !is null);
-                return state.externalEndsWith(iterator, osiu, caseSensitive, language);
-            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
-                assert(state !is null);
-                return state.externalEndsWith(iterator, osiu, caseSensitive, language);
-            }, () { return false; });
-        }
-
-        bool endsWithImplBuilder(Char2)(scope StringBuilder_UTF!Char2 other, bool caseSensitive,
-                UnicodeLanguage language = UnicodeLanguage.Unknown) {
-            AnyStateIteratorAsUs!dchar asiau = AnyStateIteratorAsUs!dchar(other.state);
-
-            return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
-                assert(state !is null);
-                return state.externalEndsWith(iterator, asiau.osat, caseSensitive, language);
-            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
-                assert(state !is null);
-                return state.externalEndsWith(iterator, asiau.osat, caseSensitive, language);
-            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
-                assert(state !is null);
-                return state.externalEndsWith(iterator, asiau.osat, caseSensitive, language);
+                return state.externalEndsWith(iterator, otherState.osat, caseSensitive, language);
             }, () { return false; });
         }
 
@@ -4067,38 +3716,6 @@ scope nothrow @nogc:
                 return nullDel();
             }
         }
-    }
-}
-
-struct AnyStateIteratorAsUs(TargetChar) {
-    union {
-        UTF_State!char.OtherStateIsUs!TargetChar osiu8;
-        UTF_State!wchar.OtherStateIsUs!TargetChar osiu16;
-        UTF_State!dchar.OtherStateIsUs!TargetChar osiu32;
-    }
-
-    OtherStateAsTarget!TargetChar osat;
-
-    this(scope ref StateIterator stateIterator) @trusted nothrow @nogc {
-        stateIterator.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
-            assert(state !is null);
-
-            osiu8.state = state;
-            osiu8.iterator = iterator;
-            osat = osiu8.get;
-        }, (StateIterator.S16 state, StateIterator.I16 iterator) {
-            assert(state !is null);
-
-            osiu16.state = state;
-            osiu16.iterator = iterator;
-            osat = osiu16.get;
-        }, (StateIterator.S32 state, StateIterator.I32 iterator) {
-            assert(state !is null);
-
-            osiu32.state = state;
-            osiu32.iterator = iterator;
-            osat = osiu32.get;
-        }, () { assert(0); });
     }
 }
 
@@ -5094,40 +4711,6 @@ struct LiteralAsTargetChar(SourceChar, TargetChar) {
 
     OtherStateAsTarget!TargetChar get() scope return @trusted {
         return OtherStateAsTarget!TargetChar(cast(void*)literal.ptr, &mutex, &foreachContiguous, &foreachValue, &length);
-    }
-}
-
-struct AnyLiteralAsTargetChar(TargetChar) {
-    union {
-        LiteralAsTargetChar!(char, TargetChar) latc8;
-        LiteralAsTargetChar!(wchar, TargetChar) latc16;
-        LiteralAsTargetChar!(dchar, TargetChar) latc32;
-    }
-
-    OtherStateAsTarget!TargetChar osat;
-
-@trusted nothrow @nogc:
-
-    this(Char : char)(const(Char)[] input) {
-        latc8.literal = input;
-        osat = latc8.get();
-    }
-
-    this(Char : wchar)(const(Char)[] input) {
-        latc16.literal = input;
-        osat = latc16.get();
-    }
-
-    this(Char : dchar)(const(Char)[] input) {
-        latc32.literal = input;
-        osat = latc32.get();
-    }
-
-    this(Char)(scope String_UTF!Char input) {
-        input.literalEncoding.handle(() @trusted { latc8.literal = cast(string)input.literal; osat = latc8.get(); }, () @trusted {
-            latc16.literal = cast(wstring)input.literal;
-            osat = latc16.get();
-        }, () @trusted { latc32.literal = cast(dstring)input.literal; osat = latc32.get(); }, () @trusted { assert(0); });
     }
 }
 

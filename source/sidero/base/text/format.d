@@ -224,7 +224,7 @@ private:
                         handle(*input, true, false);
                     }
                 }
-            } else static if (is(ActualType : Result!WrappedType, WrappedType)) {
+            } else static if (is(ActualType : Result!WrappedType, WrappedType) || is(ActualType : ResultReference!WrappedType, WrappedType)) {
                 if (input) {
                     // ok print the thing
 
@@ -790,7 +790,7 @@ scope:
                     }
                 }
             }
-        } else static if (is(ActualType : Result!WrappedType, WrappedType)) {
+        } else static if (is(ActualType : Result!WrappedType, WrappedType) || is(ActualType : ResultReference!WrappedType, WrappedType)) {
             if (input) {
                 // ok print the thing
 

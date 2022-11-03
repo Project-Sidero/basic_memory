@@ -1384,21 +1384,13 @@ nothrow @safe:
 
     ///
     ulong toHash() scope @trusted @nogc {
-        import sidero.base.hash.fnv : fnv_64_1a;
+        import sidero.base.hash.utils : hashOf;
 
-        ulong ret = fnv_64_1a(null);
+        ulong ret = hashOf();
 
-        foreachContiguous((scope ref data) { ret = fnv_64_1a(cast(ubyte[])data); return 0; });
+        foreachContiguous((scope ref data) { ret = hashOf(data, ret); return 0; });
 
         return ret;
-    }
-
-    ///
-    unittest {
-        static Text8 = "ok it's a live";
-
-        StringBuilder_ASCII text = StringBuilder_ASCII(Text8);
-        assert(text.toHash() == 1586511100919779533);
     }
 
 package(sidero.base.text):
