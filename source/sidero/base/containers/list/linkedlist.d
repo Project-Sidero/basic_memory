@@ -248,15 +248,106 @@ nothrow @nogc:
     // TODO: alias compare = opCmp;
     // TODO: opCmp
 
-    @property {
-        // TODO: empty
-        // TODO: front
-        // TODO: back
-        // TODO: put
+    ///
+    ulong toHash() scope {
+        setupState;
+        setupIterator;
+
+        return state.hashExternal(iterator);
     }
 
-    // TODO: popFront
-    // TODO: popBack
+    @property {
+        ///
+        bool empty() scope {
+            if (this.isNull())
+                return true;
+
+            setupIterator;
+            return state.emptyExternal(iterator);
+        }
+
+        ///
+        unittest {
+            ConcurrentLinkedList thing;
+            assert(thing.empty);
+
+            thing ~= Type.init;
+            assert(!thing.empty);
+        }
+
+        ///
+        ResultReference!Type front() scope {
+            if (this.isNull())
+                return ResultReference!Type(NullPointerException);
+
+            setupIterator;
+            return state.frontExternal(iterator);
+        }
+
+        ///
+        unittest {
+            ConcurrentLinkedList thing;
+            assert(thing.empty);
+
+            thing ~= Type.init;
+            assert(!thing.empty);
+
+            auto got = thing.front;
+
+            assert(got);
+            assert(got == Type.init);
+            thing.popFront;
+
+            assert(thing.empty);
+        }
+
+        ///
+        ResultReference!Type back() scope {
+            if (this.isNull())
+                return ResultReference!Type(NullPointerException);
+
+            setupIterator;
+            return state.backExternal(iterator);
+        }
+
+        ///
+        unittest {
+            ConcurrentLinkedList thing;
+            assert(thing.empty);
+
+            thing ~= Type.init;
+            assert(!thing.empty);
+
+            auto got = thing.back;
+
+            assert(got);
+            assert(got == Type.init);
+            thing.popBack;
+
+            assert(thing.empty);
+        }
+
+        ///
+        alias put = append;
+    }
+
+    ///
+    void popFront() scope {
+        if (this.isNull())
+            return;
+
+        setupIterator;
+        state.popFrontExternal(iterator);
+    }
+
+    ///
+    void popBack() scope {
+        if (this.isNull())
+            return;
+
+        setupIterator;
+        state.popBackExternal(iterator);
+    }
 
     // TODO: startsWith
     // TODO: endsWith
@@ -458,6 +549,14 @@ private:
         state = allocator.make!(ConcurrentLinkedListImpl!Type)(allocator, RCAllocator.init);
     }
 
+    void setupIterator() scope {
+        if (state is null || iterator !is null)
+            return;
+
+        iterator = state.createIteratorExternal(null);
+        state.rcExternal(false, null);
+    }
+
     void debugPosition() scope {
         if (!isNull)
             state.debugPosition(iterator);
@@ -483,13 +582,14 @@ struct ConcurrentLinkedListImpl(Type) {
         nodeList = typeof(nodeList)(allocator, valueAllocator);
     }
 
-    void rcExternal(bool addRef, scope Iterator* iterator) scope {
+    void rcExternal(bool addRef, scope Iterator* iterator) scope @trusted {
         mutex.pureLock;
+
         if (rcInternal(addRef, iterator))
             mutex.unlock;
     }
 
-    void rcNodeExternal(bool addRef, scope Node* node) scope {
+    void rcNodeExternal(bool addRef, scope Node* node) scope @trusted {
         mutex.pureLock;
 
         if (node !is null) {
@@ -500,8 +600,8 @@ struct ConcurrentLinkedListImpl(Type) {
 
             if (node.refCount == 0 && node.isDeleted)
                 nodeList.removeNode(node);
-
         }
+
         if (rcInternal(addRef, null))
             mutex.unlock;
     }
@@ -771,6 +871,76 @@ struct ConcurrentLinkedListImpl(Type) {
         mutex.unlock;
     }
 
+    ulong hashExternal(scope Iterator* iterator) scope @trusted {
+        import sidero.base.hash.utils : hashOf;
+        mutex.pureLock;
+
+        ulong ret = hashOf();
+        foreachValue(iterator, (scope ref Type value) {
+            ret = hashOf(value, ret);
+            return 0;
+        });
+
+        mutex.unlock;
+        return ret;
+    }
+
+    ResultReference!Type frontExternal(scope Iterator* iterator) scope @trusted {
+        assert(iterator !is null);
+        mutex.pureLock;
+
+        ResultReference!Type ret = ResultReference!Type(&iterator.forwards.node.value, iterator.forwards.node, cast(typeof(return).RCHandle)&rcNodeExternal);
+        iterator.forwards.node.onIteratorIn;
+        this.rcInternal(true, null);
+
+        mutex.unlock;
+        return ret;
+    }
+
+    ResultReference!Type backExternal(scope Iterator* iterator) scope @trusted {
+        assert(iterator !is null);
+        mutex.pureLock;
+
+        if (iterator.backwards.offsetFromHead == iterator.maximumOffsetFromHead)
+            iterator.backwards.advanceBackwards(1, iterator.forwards.offsetFromHead);
+
+        ResultReference!Type ret = ResultReference!Type(&iterator.backwards.node.value, iterator.backwards.node, cast(typeof(return).RCHandle)&rcNodeExternal);
+        iterator.backwards.node.onIteratorIn;
+        this.rcInternal(true, null);
+
+        mutex.unlock;
+        return ret;
+    }
+
+    bool emptyExternal(scope Iterator* iterator) scope {
+        assert(iterator !is null);
+        mutex.pureLock;
+
+        bool ret = iterator.forwards.offsetFromHead == iterator.backwards.offsetFromHead;
+
+        mutex.unlock;
+        return ret;
+    }
+
+    void popFrontExternal(scope Iterator* iterator) scope {
+        assert(iterator !is null);
+        mutex.pureLock;
+
+        iterator.forwards.advanceForwards(1, iterator.backwards.offsetFromHead);
+        mutex.unlock;
+    }
+
+    void popBackExternal(scope Iterator* iterator) scope {
+        assert(iterator !is null);
+        mutex.pureLock;
+
+        if (iterator.backwards.offsetFromHead == iterator.maximumOffsetFromHead)
+            iterator.backwards.advanceBackwards(1, iterator.forwards.offsetFromHead);
+
+        iterator.backwards.advanceBackwards(1, iterator.forwards.offsetFromHead);
+        mutex.unlock;
+    }
+
     bool rcInternal(bool addRef, scope Iterator* iterator) scope @trusted {
         if (addRef) {
             nodeList.refCount++;
@@ -950,6 +1120,23 @@ struct ConcurrentLinkedListImpl(Type) {
         return ErrorInfo.init;
     }
 
+    int foreachValue(scope Iterator* iterator, scope int delegate(scope ref Type value) @safe nothrow @nogc del) scope {
+        int result;
+
+        if (iterator !is null) {
+            Cursor cursor = iteratorList.cursorFor(nodeList, iterator.minimumOffsetFromHead);
+            cursor.node.onIteratorIn;
+
+            while(result == 0 && !cursor.isOutOfRange(0, iterator.maximumOffsetFromHead)) {
+                result = del(cursor.node.value);
+                cursor.advanceForwards(1, iterator.maximumOffsetFromHead);
+            }
+
+            cursor.onEOL(nodeList);
+        }
+        return result;
+    }
+
     void debugPosition(scope Iterator* iterator = null) scope @trusted {
         version (D_BetterC) {
         } else {
@@ -958,6 +1145,7 @@ struct ConcurrentLinkedListImpl(Type) {
             Node* current = &nodeList.head;
 
             try {
+                debug writeln("aliveNodes: ", nodeList.aliveNodes, " allNodes: ", nodeList.allNodes);
                 if (iterator !is null)
                     debug writeln("min: ", iterator.minimumOffsetFromHead, " forwards: ", iterator.forwards.offsetFromHead,
                             " backwards: ", iterator.backwards.offsetFromHead, " max: ", iterator.maximumOffsetFromHead);
@@ -974,6 +1162,7 @@ struct ConcurrentLinkedListImpl(Type) {
                         debug writef!"0x%X = %s "(current, current.value);
                     }
 
+                    debug write("refcount ", current.refCount);
                     if (current.previousReadyToBeDeleted !is null)
                         debug writef!" prtbd 0x%X"(current.previousReadyToBeDeleted);
 
@@ -1130,17 +1319,22 @@ struct ConcurrentLinkedListIteratorList(Type) {
         void onEOL(scope ref NodeList nodeList) {
             node.onIteratorOut;
 
-            if (node.isDeleted) {
+            if (node.isDeleted && node.refCount == 0) {
                 nodeList.removeNode(node);
             }
 
             this.node = null;
         }
 
+        bool isOutOfRange(size_t start, size_t end) scope {
+            return offsetFromHead < start || offsetFromHead >= end;
+        }
+
         void advanceForwards(size_t amount, size_t maximumOffsetFromHead) {
+            ifDeletedBringIntoLife();
             node.onIteratorOut;
 
-            while (node.next !is null && node.next.next !is null && amount > 0 && offsetFromHead < maximumOffsetFromHead) {
+            while (node.next !is null && amount > 0 && offsetFromHead < maximumOffsetFromHead) {
                 node = node.next;
                 amount--;
                 offsetFromHead++;
@@ -1150,9 +1344,10 @@ struct ConcurrentLinkedListIteratorList(Type) {
         }
 
         void advanceBackwards(size_t amount, size_t minimumOffsetFromHead) {
+            ifDeletedBringIntoLife();
             node.onIteratorOut;
 
-            while (node.previous !is null && node.previous.previous !is null && amount > 0 && offsetFromHead >= minimumOffsetFromHead) {
+            while (node.previous !is null && amount > 0 && offsetFromHead > minimumOffsetFromHead) {
                 node = node.previous;
                 amount--;
                 offsetFromHead--;
@@ -1238,10 +1433,15 @@ struct ConcurrentLinkedListNodeList(Type) {
 
         if (node.previous !is null)
             node.previous.next = node.next;
-        node.next.previous = node.previous;
 
-        if (node.previousReadyToBeDeleted !is null)
-            mergeDeletedListToNewParent(node, node.next);
+        if (node.next.previousReadyToBeDeleted is node)
+            node.next.previousReadyToBeDeleted = node.previous;
+        else {
+            node.next.previous = node.previous;
+
+            if (node.previousReadyToBeDeleted !is null)
+                mergeDeletedListToNewParent(node, node.next);
+        }
 
         if (!node.isDeleted)
             this.aliveNodes--;
