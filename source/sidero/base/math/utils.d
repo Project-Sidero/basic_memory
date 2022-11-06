@@ -1,5 +1,5 @@
 module sidero.base.math.utils;
-import std.traits : isFloatingPoint;
+import std.traits : isFloatingPoint, isNumeric;
 
 @safe nothrow @nogc:
 
@@ -7,6 +7,11 @@ import std.traits : isFloatingPoint;
 enum DefaultMaxRelativeDifference(ForType) = (cast(ForType)10) ^^ -(ForType.dig / 2);
 
 /// Similar to std.math : isClose.
+bool isClose(A, B)(A a, B b) if (isNumeric!A && isNumeric!B && !(isFloatingPoint!A && isFloatingPoint!B)) {
+    return isClose(cast(double)a, cast(double)b);
+}
+
+/// Ditto
 bool isClose(A, B, CommonType = typeof(A.init + B.init))(A a, B b,
         CommonType maxRelativeDifference = DefaultMaxRelativeDifference!CommonType, CommonType maxAbsoluteDifference = 0f)
         if (isFloatingPoint!A && isFloatingPoint!B) {
