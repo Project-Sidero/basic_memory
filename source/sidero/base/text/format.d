@@ -1022,7 +1022,7 @@ unittest {
 
 enum DefaultFormatForType(Type) = () {
     static if (is(Type == real))
-        return "%Lf\0";
+        return "%." ~ Type.dig.stringof ~ "lf\0";
     else static if (is(Type == byte))
         return "%hhi\0";
     else static if (is(Type == ubyte))
@@ -1048,7 +1048,7 @@ enum DefaultFormatForType(Type) = () {
     else static if (is(Type == float))
         return "%f\0";
     else static if (is(Type == double))
-        return "%Lf\0";
+        return "%." ~ Type.dig.stringof ~ "lf\0";
     else static if (isPointer!Type)
         return "%p\0";
     else
