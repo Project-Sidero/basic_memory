@@ -199,7 +199,7 @@ private:
                 builder ~= EntryName;
 
                 if (input !is null) {
-                    static if (is(SubType == class) || isAssociativeArray!SubType || isArray!SubType) {
+                    static if (is(SubType == class) || isAssociativeArray!SubType || isDynamicArray!SubType) {
                         if (*input is null) {
                             builder ~= "@null";
                         } else {
@@ -395,10 +395,12 @@ private:
                         if (useName) {
                             builder ~= EntryName;
 
-                            if (input is null)
-                                builder ~= "@null";
-                            else
-                                builder.formattedWrite("@%X", cast(size_t)input.ptr);
+                            static if (isDynamicArray!ActualType) {
+                                if (input is null)
+                                    builder ~= "@null";
+                                else
+                                    builder.formattedWrite("@%X", cast(size_t)input.ptr);
+                            }
                         }
 
                         static if (!is(SubType == void)) {
@@ -431,10 +433,12 @@ private:
                     if (useName) {
                         builder ~= EntryName;
 
-                        if (input is null)
-                            builder ~= "@null";
-                        else
-                            builder.formattedWrite("@%X", cast(size_t)input.ptr);
+                        static if (isDynamicArray!ActualType) {
+                            if (input is null)
+                                builder ~= "@null";
+                            else
+                                builder.formattedWrite("@%X", cast(size_t)input.ptr);
+                        }
                     }
 
                     static if (!is(SubType == void)) {
@@ -639,7 +643,8 @@ unittest {
 private:
 import sidero.base.allocators;
 import std.traits : isSomeChar, isPointer, isIntegral, isFloatingPoint, Unqual, ForeachType, isBasicType, isIterable,
-    isAssociativeArray, fullyQualifiedName, isArray, FieldNameTuple, hasUDA, KeyType, ValueType, BaseClassesTuple, isCopyable;
+    isAssociativeArray, fullyQualifiedName, isArray, isDynamicArray, FieldNameTuple, hasUDA, KeyType, ValueType,
+    BaseClassesTuple, isCopyable;
 
 Builder escapeImpl(Builder, Char)(return scope Builder builder, Char quote) @trusted nothrow @nogc
         if (isBuilderString!Builder) {
@@ -1324,7 +1329,7 @@ static assert(!is(CheckParameters!("Abc", int)));
 static assert(CheckParameters!("%%%X%f%c%s%s%s%p%n", byte, double, wchar, string, StringBuilder_ASCII, String_UTF8, char*, int*));
 
 ptrdiff_t indexOf(Char)(const(Char)[] input, Char toFind) if (isSomeChar!Char) {
-    foreach(i, c; input) {
+    foreach (i, c; input) {
         if (c == toFind)
             return i;
     }
