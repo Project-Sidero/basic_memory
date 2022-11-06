@@ -11,15 +11,102 @@ private {
 ///
 struct ConcurrentLinkedList(Type) {
     private {
+        import sidero.base.internal.meta : OpApplyCombos;
+
         ConcurrentLinkedListImpl!(Type)* state;
         typeof(state).Iterator* iterator;
 
-        // TODO: opApplyImpl
-        // TODO: opApplyReverseImpl
+        int opApplyImpl(Del)(scope Del del) @trusted scope {
+            if (isNull)
+                return 0;
+
+            int result;
+
+            while (!empty) {
+                ElementType got = front();
+                if (!got)
+                    return result;
+
+                static if (__traits(compiles, del(got)))
+                    result = del(got);
+                else
+                    static assert(0);
+
+                if (result)
+                    return result;
+
+                popFront();
+            }
+
+            return result;
+        }
+
+        int opApplyReverseImpl(Del)(scope Del del) @trusted scope {
+            if (isNull)
+                return 0;
+
+            int result;
+
+            while (!empty) {
+                ElementType got = back();
+                if (!got)
+                    return result;
+
+                static if (__traits(compiles, del(got)))
+                    result = del(got);
+                else
+                    static assert(0);
+
+                if (result)
+                    return result;
+
+                popBack();
+            }
+
+            return result;
+        }
     }
 
-    // FIXME: actually no, its not Type, its a wrapper around it!
-    alias ElementType = Type;
+    ///
+    mixin OpApplyCombos!("ElementType", null, ["@safe", "nothrow", "@nogc"]);
+
+    ///
+    unittest {
+        ConcurrentLinkedList cll;
+        cll ~= Type.init;
+
+        int count;
+
+        foreach (v; cll) {
+            assert(v);
+            assert(v == Type.init);
+            count++;
+        }
+
+        assert(count == 1);
+    }
+
+    ///
+    mixin OpApplyCombos!("ElementType", null, ["@safe", "nothrow", "@nogc"], "opApplyReverse");
+
+    ///
+    unittest {
+        ConcurrentLinkedList cll;
+        cll ~= Type.init;
+
+        int count;
+
+        foreach_reverse (v; cll) {
+            assert(v);
+            assert(v == Type.init);
+            count++;
+        }
+
+        assert(count == 1);
+    }
+
+    ///
+    alias ElementType = ResultReference!Type;
     ///
     alias LiteralType = const(Type)[];
 
@@ -242,11 +329,115 @@ nothrow @nogc:
 
     @disable auto opCast(T)();
 
-    // TODO: alias equals = opEquals;
-    // TODO: opEquals;
+    ///
+    alias equals = opEquals;
 
-    // TODO: alias compare = opCmp;
-    // TODO: opCmp
+    ///
+    bool opEquals(Input)(scope Input other) scope if (HaveOpApply!(Input, Type)) {
+        return opCmp(other) == 0;
+    }
+
+    ///
+    unittest {
+        struct Thing {
+            int opApply(scope int delegate(ref Type) @safe nothrow @nogc del) @safe nothrow @nogc {
+                Type temp;
+                return del(temp);
+            }
+        }
+
+        Thing thing;
+        ConcurrentLinkedList cll;
+
+        cll ~= Type.init;
+        assert(cll.equals(thing));
+    }
+
+    /// Takes in an opApply
+    bool opEquals(scope int delegate(scope int delegate(ref Type) @safe nothrow @nogc) @safe nothrow @nogc del) {
+        return opCmp(del) == 0;
+    }
+
+    ///
+    unittest {
+        int handle(scope int delegate(ref Type) @safe nothrow @nogc del) @safe nothrow @nogc {
+            Type temp;
+            return del(temp);
+        }
+
+        ConcurrentLinkedList cll;
+        cll ~= Type.init;
+        assert(cll.equals(&handle));
+    }
+
+    ///
+    bool opEquals(scope Type other) {
+        return opCmp(other) == 0;
+    }
+
+    ///
+    unittest {
+        ConcurrentLinkedList ccl;
+        ccl ~= Type.init;
+        assert(ccl.equals(Type.init));
+    }
+
+    ///
+    alias compare = opCmp;
+
+    ///
+    int opCmp(Input)(scope Input other) scope if (HaveOpApply!(Input, Type)) {
+        return this.opCmp(GetOpApply!Type(other));
+    }
+
+    ///
+    unittest {
+        struct Thing {
+            int opApply(scope int delegate(ref Type) @safe nothrow @nogc del) @safe nothrow @nogc {
+                Type temp;
+                return del(temp);
+            }
+        }
+
+        Thing thing;
+        ConcurrentLinkedList cll;
+
+        cll ~= Type.init;
+        assert(cll.compare(thing) == 0);
+    }
+
+    /// Takes in an opApply
+    int opCmp(scope int delegate(scope int delegate(ref Type) @safe nothrow @nogc) @safe nothrow @nogc del) {
+        if (isNull)
+            return del is null ? 0 : (del((ref Type) => 1) ? -1 : 0);
+        return state.opCmpExternal(iterator, del);
+    }
+
+    ///
+    unittest {
+        int handle(scope int delegate(ref Type) @safe nothrow @nogc del) @safe nothrow @nogc {
+            Type temp;
+            return del(temp);
+        }
+
+        ConcurrentLinkedList cll;
+        cll ~= Type.init;
+        assert(cll.compare(&handle) == 0);
+    }
+
+    ///
+    int opCmp(scope Type[] other...) scope {
+        if (isNull)
+            return other.length == 0 ? 0 : -1;
+        return state.opCmpExternal(iterator, other);
+    }
+
+    ///
+    unittest {
+        ConcurrentLinkedList cll;
+        cll ~= Type.init;
+        assert(cll.compare(Type.init) == 0);
+    }
 
     ///
     ulong toHash() scope {
@@ -873,13 +1064,11 @@ struct ConcurrentLinkedListImpl(Type) {
 
     ulong hashExternal(scope Iterator* iterator) scope @trusted {
         import sidero.base.hash.utils : hashOf;
+
         mutex.pureLock;
 
         ulong ret = hashOf();
-        foreachValue(iterator, (scope ref Type value) {
-            ret = hashOf(value, ret);
-            return 0;
-        });
+        foreachValue(iterator, (scope ref Type value) { ret = hashOf(value, ret); return 0; });
 
         mutex.unlock;
         return ret;
@@ -889,7 +1078,8 @@ struct ConcurrentLinkedListImpl(Type) {
         assert(iterator !is null);
         mutex.pureLock;
 
-        ResultReference!Type ret = ResultReference!Type(&iterator.forwards.node.value, iterator.forwards.node, cast(typeof(return).RCHandle)&rcNodeExternal);
+        ResultReference!Type ret = ResultReference!Type(&iterator.forwards.node.value, iterator.forwards.node,
+                cast(typeof(return).RCHandle)&rcNodeExternal);
         iterator.forwards.node.onIteratorIn;
         this.rcInternal(true, null);
 
@@ -904,7 +1094,8 @@ struct ConcurrentLinkedListImpl(Type) {
         if (iterator.backwards.offsetFromHead == iterator.maximumOffsetFromHead)
             iterator.backwards.advanceBackwards(1, iterator.forwards.offsetFromHead);
 
-        ResultReference!Type ret = ResultReference!Type(&iterator.backwards.node.value, iterator.backwards.node, cast(typeof(return).RCHandle)&rcNodeExternal);
+        ResultReference!Type ret = ResultReference!Type(&iterator.backwards.node.value, iterator.backwards.node,
+                cast(typeof(return).RCHandle)&rcNodeExternal);
         iterator.backwards.node.onIteratorIn;
         this.rcInternal(true, null);
 
@@ -939,6 +1130,85 @@ struct ConcurrentLinkedListImpl(Type) {
 
         iterator.backwards.advanceBackwards(1, iterator.forwards.offsetFromHead);
         mutex.unlock;
+    }
+
+    int opCmpExternal(scope Iterator* iterator, scope Type[] other) {
+        int ret;
+        mutex.pureLock;
+
+        size_t offset, count = nodeList.aliveNodes, maximumOffsetFromHead = count;
+
+        if (iterator !is null) {
+            offset = iterator.minimumOffsetFromHead;
+            count = iterator.maximumOffsetFromHead - offset;
+            maximumOffsetFromHead = iterator.maximumOffsetFromHead;
+        }
+
+        if (other.length < count)
+            ret = -1;
+        else if (other.length > count)
+            ret = 1;
+        else {
+            Cursor cursor = iteratorList.cursorFor(nodeList, offset);
+
+            while (ret == 0 && !cursor.isOutOfRange(offset, maximumOffsetFromHead)) {
+                if (cursor.node.value < other[0])
+                    ret = -1;
+                else if (cursor.node.value > other[0])
+                    ret = 1;
+
+                other = other[1 .. $];
+                cursor.advanceForwards(1, maximumOffsetFromHead);
+            }
+
+            assert(other.length == 0);
+            cursor.onEOL(nodeList);
+        }
+
+        mutex.unlock;
+        return ret;
+    }
+
+    int opCmpExternal(scope Iterator* iterator, scope int delegate(scope int delegate(ref Type) @safe nothrow @nogc) @safe nothrow @nogc del) {
+        int ret;
+        mutex.pureLock;
+
+        size_t offset, count = nodeList.aliveNodes, maximumOffsetFromHead = count;
+
+        if (iterator !is null) {
+            offset = iterator.minimumOffsetFromHead;
+            count = iterator.maximumOffsetFromHead - offset;
+            maximumOffsetFromHead = iterator.maximumOffsetFromHead;
+        }
+
+        Cursor cursor = iteratorList.cursorFor(nodeList, offset);
+
+        foreach(ref otherValue; del) {
+            if (ret != 0)
+                break;
+            else if (cursor.isOutOfRange(offset, maximumOffsetFromHead)) {
+                ret = -1;
+                break;
+            }
+
+            if (cursor.node.value < otherValue) {
+                ret = -1;
+                break;
+            } else if (cursor.node.value > otherValue) {
+                ret = 1;
+                break;
+            }
+
+            cursor.advanceForwards(1, maximumOffsetFromHead);
+        }
+
+        if (ret == 0 && !cursor.isOutOfRange(offset, maximumOffsetFromHead)) {
+            ret = 1;
+        }
+
+        cursor.onEOL(nodeList);
+        mutex.unlock;
+        return ret;
     }
 
     bool rcInternal(bool addRef, scope Iterator* iterator) scope @trusted {
@@ -1127,7 +1397,7 @@ struct ConcurrentLinkedListImpl(Type) {
             Cursor cursor = iteratorList.cursorFor(nodeList, iterator.minimumOffsetFromHead);
             cursor.node.onIteratorIn;
 
-            while(result == 0 && !cursor.isOutOfRange(0, iterator.maximumOffsetFromHead)) {
+            while (result == 0 && !cursor.isOutOfRange(0, iterator.maximumOffsetFromHead)) {
                 result = del(cursor.node.value);
                 cursor.advanceForwards(1, iterator.maximumOffsetFromHead);
             }
