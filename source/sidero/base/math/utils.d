@@ -1,5 +1,5 @@
 module sidero.base.math.utils;
-import std.traits : isFloatingPoint, isNumeric;
+import std.traits : isFloatingPoint, isNumeric, Unqual;
 
 @safe nothrow @nogc:
 
@@ -12,7 +12,7 @@ bool isClose(A, B)(A a, B b) if (isNumeric!A && isNumeric!B && !(isFloatingPoint
 }
 
 /// Ditto
-bool isClose(A, B, CommonType = typeof(A.init + B.init))(A a, B b,
+bool isClose(A, B, CommonType = Unqual!(typeof(A.init + B.init)))(A a, B b,
         CommonType maxRelativeDifference = DefaultMaxRelativeDifference!CommonType, CommonType maxAbsoluteDifference = 0f)
         if (isFloatingPoint!A && isFloatingPoint!B) {
 
