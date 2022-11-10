@@ -539,20 +539,6 @@ nothrow @safe:
     }
 
     ///
-    void unicodeLanguage(UnicodeLanguage language) scope {
-        state.handle((StateIterator.S8 state, StateIterator.I8 iterator) @trusted {
-            assert(state !is null);
-            state.language = language;
-        }, (StateIterator.S16 state, StateIterator.I16 iterator) @trusted {
-            assert(state !is null);
-            state.language = language;
-        }, (StateIterator.S32 state, StateIterator.I32 iterator) @trusted {
-            assert(state !is null);
-            state.language = language;
-        }, () {});
-    }
-
-    ///
     StringBuilder_UTF opIndex(ptrdiff_t index) scope @nogc {
         ptrdiff_t end = index < 0 ? ptrdiff_t.max : index + 1;
         return this[index .. end];
@@ -1950,16 +1936,16 @@ nothrow @safe:
         }
     }
 
-    // count
-    // ignoreCaseCount
-    // contains
-    // ignoreCaseContains
-    // indexOf
-    // caseIgnoreIndexOf
-    // lastIndexOf
-    // caseIgnoreLastIndexOf
-    // stripLeft
-    // stripRight
+    // TODO: count
+    // TODO: ignoreCaseCount
+    // TODO: contains
+    // TODO: ignoreCaseContains
+    // TODO: indexOf
+    // TODO: caseIgnoreIndexOf
+    // TODO: lastIndexOf
+    // TODO: caseIgnoreLastIndexOf
+    // TODO: stripLeft
+    // TODO: stripRight
 
     ///
     void remove(ptrdiff_t index, size_t amount) scope @nogc {

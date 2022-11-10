@@ -904,16 +904,16 @@ nothrow @safe:
         }
     }
 
-    // count
-    // ignoreCaseCount
-    // contains
-    // ignoreCaseContains
-    // indexOf
-    // caseIgnoreIndexOf
-    // lastIndexOf
-    // caseIgnoreLastIndexOf
-    // stripLeft
-    // stripRight
+    // TODO: count
+    // TODO: ignoreCaseCount
+    // TODO: contains
+    // TODO: ignoreCaseContains
+    // TODO: indexOf
+    // TODO: caseIgnoreIndexOf
+    // TODO: lastIndexOf
+    // TODO: caseIgnoreLastIndexOf
+    // TODO: stripLeft
+    // TODO: stripRight
 
     ///
     void remove(ptrdiff_t index, size_t amount) scope @nogc {

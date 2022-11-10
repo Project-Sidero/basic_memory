@@ -214,7 +214,8 @@ scope nothrow @nogc:
         auto original = this.unsafeGetLiteral();
         auto slice = original[0 .. input.length];
 
-        slice[] = input[];
+        foreach (i, ref v; slice[])
+            v = input[i];
     }
 
     //@disable void opAssign(ref DynamicArray other) const;
@@ -468,7 +469,8 @@ scope nothrow @nogc:
         }
 
         assert(state.amountUsed + values.length <= state.slice.length);
-        this.state.slice[state.amountUsed .. state.amountUsed + values.length] = values[];
+        foreach (i, ref v; this.state.slice[state.amountUsed .. state.amountUsed + values.length])
+            v = values[i];
         state.amountUsed += values.length;
 
         if (this.maximumOffset != size_t.max)
