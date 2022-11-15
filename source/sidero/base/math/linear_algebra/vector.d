@@ -365,14 +365,29 @@ struct Vector(Type, size_t Dimension) {
 
 ///
 Type magnitude(Type)(scope const Type[] values) if (isNumeric!Type) {
+    import std.algorithm.iteration : sum;
     import std.math : sqrt;
 
-    double temp = 0;
+    static struct Handler {
+        const(Type)[] values;
 
-    foreach (v; values)
-        temp += v * v;
+        Type front() {
+            return values[0] * values[0];
+        }
 
-    return cast(Type)sqrt(temp);
+        bool empty() {
+            return values.length == 0;
+        }
+
+        void popFront() {
+            values = values[1 .. $];
+        }
+    }
+
+    Handler handler;
+    handler.values = values;
+
+    return cast(Type)sqrt(handler.sum);
 }
 
 ///
@@ -408,21 +423,38 @@ unittest {
 }
 
 ///
-Result!CommonType distance(A, B, CommonType = typeof(A.init + B.init))(scope const A[] input1, scope const B[] input2)
+Result!CommonType distance(A, B, CommonType = typeof(A.init + B.init))(scope const(A)[] input1, scope const(B)[] input2)
         if (isNumeric!A && isNumeric!B) {
+    import std.algorithm.iteration : sum;
     import std.math : sqrt;
 
     if (input1.length != input2.length)
         return typeof(return)(RangeException("Input lengths must match"));
 
-    CommonType temp = 0;
+    static struct Handler {
+        const(A)[] input1;
+        const(B)[] input2;
 
-    foreach (i; 0 .. input1.length) {
-        CommonType temp2 = input1[i] - input2[i];
-        temp += temp2 * temp2;
+        CommonType front() {
+            CommonType v = input1[0] - input2[0];
+            return v * v;
+        }
+
+        bool empty() {
+            return input1.length == 0;
+        }
+
+        void popFront() {
+            input1 = input1[1 .. $];
+            input2 = input2[1 .. $];
+        }
     }
 
-    return typeof(return)(sqrt(temp));
+    Handler handler;
+    handler.input1 = input1;
+    handler.input2 = input2;
+
+    return typeof(return)(sqrt(handler.sum));
 }
 
 ///
@@ -493,18 +525,32 @@ unittest {
 }
 
 ///
-Type standardDeviation(Type)(scope const Type[] values) if (isNumeric!Type) {
+Type standardDeviation(Type)(scope const(Type)[] values) if (isNumeric!Type) {
     import std.algorithm.iteration : sum;
 
-    const average = sum(values) / values.length;
-    Type temp = 0;
+    static struct Handler {
+        const(Type)[] values;
+        Type average;
 
-    foreach (v; values) {
-        const temp2 = v - average;
-        temp += temp2 * temp2;
+        Type front() {
+            Type v = values[0] - average;
+            return v * v;
+        }
+
+        bool empty() {
+            return values.length == 0;
+        }
+
+        void popFront() {
+            values = values[1 .. $];
+        }
     }
 
-    return temp / values.length;
+    Handler handler;
+    handler.values = values;
+    handler.average = sum(values) / values.length;
+
+    return handler.sum / values.length;
 }
 
 ///
