@@ -259,7 +259,8 @@ struct Vector(Type, size_t Dimension) {
 
     ///
     Type sum() scope const {
-        return .sum(this.data[]);
+        import algorithm = std.algorithm.iteration;
+        return algorithm.sum(this.data[]);
     }
 
     ///
@@ -360,22 +361,6 @@ struct Vector(Type, size_t Dimension) {
 
         return 0;
     }
-}
-
-///
-Type sum(Type)(scope const Type[] values) if (isNumeric!Type) {
-    Type ret = 0;
-
-    foreach (v; values)
-        ret += v;
-
-    return ret;
-}
-
-///
-unittest {
-    static Values = [1, 2, 3];
-    assert(Values.sum == 6);
 }
 
 ///
@@ -509,6 +494,8 @@ unittest {
 
 ///
 Type standardDeviation(Type)(scope const Type[] values) if (isNumeric!Type) {
+    import std.algorithm.iteration : sum;
+
     const average = sum(values) / values.length;
     Type temp = 0;
 
