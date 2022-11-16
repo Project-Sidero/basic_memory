@@ -500,7 +500,7 @@ ErrorResult crossProduct(A, B, C)(scope A[] output, scope const B[] input1, scop
     if (output.length != input1.length || input1.length != input2.length)
         return typeof(return)(RangeException("Input lengths must match output"));
     else if (output.length != 3)
-        return typeof(return)(MalformedInputException("Only 3rd dimension is support for vector cross product"));
+        return typeof(return)(MalformedInputException("Only 3rd dimension is defined for vector cross product"));
 
     if (output.length == 3) {
         output[0] = (input1[1] * input2[2]) - (input1[2] * input2[1]);
