@@ -15,7 +15,7 @@ size_t decomposeLength(scope dstring input, bool compatibility = false) @trusted
 ///
 size_t decomposeLength(scope ForeachOverUTF32Delegate input, bool compatibility = false) @trusted {
     size_t len;
-    dchar[3] hangulMap;
+    dchar[3] hangulMap = void;
 
     foreach (dchar c; input) {
         auto decmap = sidero_utf_lut_getDecompositionMap(c);
@@ -46,7 +46,7 @@ bool isDecomposed(scope dstring input, bool compatibility = false) @trusted {
 
 ///
 bool isDecomposed(scope ForeachOverUTF32Delegate input, bool compatibility = false,) @trusted {
-    dchar[3] hangulMap;
+    dchar[3] hangulMap = void;
 
     foreach (dchar c; input) {
         auto decmap = sidero_utf_lut_getDecompositionMap(c);
@@ -85,7 +85,7 @@ dstring toDecompose(scope ForeachOverUTF32Delegate input, RCAllocator allocator,
 ///
 void decompose(scope dchar[] array, scope ForeachOverUTF32Delegate input, bool compatibility) @trusted {
     size_t soFar;
-    dchar[3] hangulMap;
+    dchar[3] hangulMap = void;
 
     foreach (dchar c; input) {
         auto decmap = sidero_utf_lut_getDecompositionMap(c);

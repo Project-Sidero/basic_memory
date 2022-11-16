@@ -1223,7 +1223,7 @@ nothrow @nogc:
         } else if (needRefill) {
             assert(canRefill);
 
-            Char[4 / Char.sizeof] charBuffer;
+            Char[4 / Char.sizeof] charBuffer = void;
             size_t amountFilled;
 
             literalEncoding.handle(() {
@@ -1335,7 +1335,7 @@ nothrow @nogc:
         } else if (needRefill) {
             assert(canRefill);
 
-            Char[4 / Char.sizeof] charBuffer;
+            Char[4 / Char.sizeof] charBuffer = void;
             size_t amountFilled;
 
             literalEncoding.handle(() {

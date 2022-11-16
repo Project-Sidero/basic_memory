@@ -201,7 +201,8 @@ scope nothrow @nogc:
 
     ///
     void opAssign(scope ElementType input) @trusted {
-        this.unsafeGetLiteral[] = input;
+        foreach (ref v; this.unsafeGetLiteral)
+            v = input;
     }
 
     ///
@@ -573,23 +574,9 @@ scope nothrow @nogc:
 
     ///
     int opCmp(scope const(ElementType)[] other) @trusted scope {
+        import sidero.base.containers.utils : genericCompare;
         auto us = unsafeGetLiteral();
-
-        if (us.length < other.length)
-            return -1;
-        else if (us.length > other.length)
-            return 1;
-
-        foreach (i; 0 .. us.length) {
-            ElementType a = us[i], b = other[i];
-
-            if (a < b)
-                return -1;
-            else if (a > b)
-                return 1;
-        }
-
-        return 0;
+        return genericCompare(us, other);
     }
 
     ///

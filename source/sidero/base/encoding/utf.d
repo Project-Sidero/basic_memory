@@ -152,7 +152,7 @@ void decode(T, U)(scope U refill, scope T handle) if (isSomeFunction!T && isSome
 
     while (input.length > 0) {
         if (input.length < codePointUnits) {
-            typeof(cast()input[0])[8] buffer;
+            typeof(cast()input[0])[8] buffer = void;
             buffer[0 .. input.length] = input[];
             size_t inBuffer = input.length;
 
@@ -308,7 +308,7 @@ unittest {
 
 ///
 void encodeUTF8(T)(const(dchar)[] input, scope T handle) if (isSomeFunction!T) {
-    char[4] temp;
+    char[4] temp = void;
 
     while (input.length > 0) {
         size_t given = encodeUTF8(input[0], temp);
@@ -341,7 +341,7 @@ unittest {
 
 ///
 void encodeUTF16(T)(const(dchar)[] input, scope T handle) if (isSomeFunction!T) {
-    wchar[2] temp;
+    wchar[2] temp = void;
 
     while (input.length > 0) {
         size_t given = encodeUTF16(input[0], temp);
@@ -516,7 +516,7 @@ void reEncode(T, U)(scope U refill, scope T handle) if (isSomeFunction!T && isSo
 
     while (input.length > 0) {
         if (input.length < codePointUnits) {
-            typeof(cast()input[0])[8] buffer;
+            typeof(cast()input[0])[8] buffer = void;
             buffer[0 .. input.length] = input[];
             size_t inBuffer = input.length;
 
@@ -593,7 +593,7 @@ void reEncode(T, U)(scope U refill, scope T handle) if (isSomeFunction!T && isSo
 
 ///
 void reEncode(T)(scope const(char)[] input, scope T handle) if (isSomeFunction!T) {
-    wchar[2] temp;
+    wchar[2] temp = void;
 
     while (input.length > 0) {
         size_t[2] consumedGot = reEncode(input, temp);
@@ -609,7 +609,7 @@ void reEncode(T)(scope const(char)[] input, scope T handle) if (isSomeFunction!T
 
 ///
 void reEncode(T)(scope const(wchar)[] input, scope T handle) if (isSomeFunction!T) {
-    char[4] temp;
+    char[4] temp = void;
 
     while (input.length > 0) {
         size_t[2] consumedGot = reEncode(input, temp);
@@ -629,7 +629,7 @@ void reEncode(T)(scope const(wchar)[] input, scope T handle) if (isSomeFunction!
 
 ///
 dchar decode(Char)(scope bool delegate() @safe nothrow @nogc empty, scope Char delegate() @safe nothrow @nogc front,
-    scope void delegate() @safe nothrow @nogc popFront, out size_t consumed) {
+    scope void delegate() @safe nothrow @nogc popFront, ref size_t consumed) {
     assert(empty !is null);
     assert(front !is null);
     assert(popFront !is null);
@@ -637,7 +637,7 @@ dchar decode(Char)(scope bool delegate() @safe nothrow @nogc empty, scope Char d
     consumed = 1;
     dchar result = replacementCharacter;
 
-    Char[4 / Char.sizeof] temp;
+    Char[4 / Char.sizeof] temp = void;
     size_t soFar, expecting;
 
     while (!empty()) {
@@ -822,7 +822,7 @@ unittest {
 
 ///
 dchar decodeFromEnd(Char)(scope bool delegate() @safe nothrow @nogc empty, scope Char delegate() @safe nothrow @nogc back,
-    scope void delegate() @safe nothrow @nogc popBack, out size_t consumed) {
+    scope void delegate() @safe nothrow @nogc popBack, ref size_t consumed) {
     assert(empty !is null);
     assert(back !is null);
     assert(popBack !is null);
@@ -830,7 +830,7 @@ dchar decodeFromEnd(Char)(scope bool delegate() @safe nothrow @nogc empty, scope
     consumed = 1;
     dchar result = replacementCharacter;
 
-    Char[4 / Char.sizeof] temp;
+    Char[4 / Char.sizeof] temp = void;
     size_t soFar;
 
     while (!empty()) {
@@ -1026,7 +1026,7 @@ unittest {
 @safe nothrow @nogc pure:
 
 ///
-size_t[2] reEncode(scope const(char)[] input, out wchar[2] output) {
+size_t[2] reEncode(scope const(char)[] input, ref wchar[2] output) {
     if (input.length == 0)
         return [0, 0];
 
@@ -1038,7 +1038,7 @@ size_t[2] reEncode(scope const(char)[] input, out wchar[2] output) {
 }
 
 ///
-size_t[2] reEncodeFromEnd(scope const(char)[] input, out wchar[2] output) {
+size_t[2] reEncodeFromEnd(scope const(char)[] input, ref wchar[2] output) {
     if (input.length == 0)
         return [0, 0];
 
@@ -1050,7 +1050,7 @@ size_t[2] reEncodeFromEnd(scope const(char)[] input, out wchar[2] output) {
 }
 
 ///
-size_t[2] reEncode(scope const(wchar)[] input, out char[4] output) {
+size_t[2] reEncode(scope const(wchar)[] input, ref char[4] output) {
     if (input.length == 0)
         return [0, 0];
 
@@ -1062,7 +1062,7 @@ size_t[2] reEncode(scope const(wchar)[] input, out char[4] output) {
 }
 
 ///
-size_t[2] reEncodeFromEnd(scope const(wchar)[] input, out char[4] output) {
+size_t[2] reEncodeFromEnd(scope const(wchar)[] input, ref char[4] output) {
     if (input.length == 0)
         return [0, 0];
 
@@ -1328,7 +1328,7 @@ unittest {
 }
 
 ///
-size_t decode(scope const(char)[] input, out dchar result, bool advanceIfUnrecognized = true) {
+size_t decode(scope const(char)[] input, ref dchar result, bool advanceIfUnrecognized = true) {
     size_t consumed;
     result = replacementCharacter;
 
@@ -1363,7 +1363,7 @@ size_t decode(scope const(char)[] input, out dchar result, bool advanceIfUnrecog
 }
 
 ///
-size_t decodeFromEnd(scope const(char)[] input, out dchar result, bool advanceIfUnrecognized = true) {
+size_t decodeFromEnd(scope const(char)[] input, ref dchar result, bool advanceIfUnrecognized = true) {
     size_t consumed;
     result = replacementCharacter;
 
@@ -1398,7 +1398,7 @@ size_t decodeFromEnd(scope const(char)[] input, out dchar result, bool advanceIf
 }
 
 ///
-size_t decode(scope const(wchar)[] input, out dchar result, bool advanceIfUnrecognized = true) {
+size_t decode(scope const(wchar)[] input, ref dchar result, bool advanceIfUnrecognized = true) {
     size_t consumed;
     result = replacementCharacter;
 
@@ -1419,7 +1419,7 @@ size_t decode(scope const(wchar)[] input, out dchar result, bool advanceIfUnreco
 }
 
 ///
-size_t decodeFromEnd(scope const(wchar)[] input, out dchar result, bool advanceIfUnrecognized = true) {
+size_t decodeFromEnd(scope const(wchar)[] input, ref dchar result, bool advanceIfUnrecognized = true) {
     size_t consumed;
     result = replacementCharacter;
 
@@ -1501,7 +1501,7 @@ alias encode = encodeUTF8;
 alias encode = encodeUTF16;
 
 ///
-size_t encodeUTF8(dchar input, out char[4] output) {
+size_t encodeUTF8(dchar input, ref char[4] output) {
     if (input <= 0x7F) {
         output[0] = cast(char)input;
         return 1;
@@ -1524,7 +1524,7 @@ size_t encodeUTF8(dchar input, out char[4] output) {
 }
 
 ///
-size_t encodeUTF16(dchar input, out wchar[2] output) {
+size_t encodeUTF16(dchar input, ref wchar[2] output) {
     if (input <= 0xD7FF || (input >= 0xE000 && input <= 0xFFFF)) {
         output[0] = cast(wchar)input;
         return 1;

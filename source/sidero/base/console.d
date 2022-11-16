@@ -101,7 +101,7 @@ StringBuilder_UTF8 readLine(scope return StringBuilder_UTF8 builder) @trusted {
                 cReadControl.nLength = CONSOLE_READCONSOLE_CONTROL.sizeof;
 
                 const originalBuilderLength = builder.length;
-                WCHAR[128] buffer;
+                WCHAR[128] buffer = void;
                 DWORD readLength;
 
                 for (;;) {

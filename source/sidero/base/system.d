@@ -602,7 +602,7 @@ Locale getLocaleImpl(ref bool refresh) @trusted {
 
         if (locale.full.isNull) {
             version (Windows) {
-                wchar[LOCALE_NAME_MAX_LENGTH] buffer;
+                wchar[LOCALE_NAME_MAX_LENGTH] buffer = void;
                 auto length = GetUserDefaultLocaleName(buffer.ptr, cast(int)buffer.length);
 
                 locale.full = String_UTF8(buffer[0 .. length]).dup;

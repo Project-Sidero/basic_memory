@@ -14,7 +14,7 @@ size_t caseFoldLength(scope dstring input, bool turkic = false, bool compatibili
 
 /// Gets length of Case_Folding with support for turkic rules, hangul and compatibility
 size_t caseFoldLength(scope ForeachOverUTF32Delegate input, bool turkic = false, bool compatibility = false, bool decompose = false) @trusted {
-    dchar[3] hangulMap;
+    dchar[3] hangulMap = void;
     size_t ret;
 
     /*
@@ -79,7 +79,7 @@ bool isCasefolded(scope dstring input, bool turkic = false, bool compatibility =
 
 ///
 bool isCasefolded(scope ForeachOverUTF32Delegate input, bool turkic = false, bool compatibility = false, bool decompose = false) @trusted {
-    dchar[3] hangulMap;
+    dchar[3] hangulMap = void;
 
     bool handleDecompose(dchar c) {
         auto decmap = sidero_utf_lut_getDecompositionMap(c);
@@ -153,7 +153,7 @@ alias CaseFoldHandlerDelegate = bool delegate(scope const(dchar)[] got...) @safe
 
 ///
 void caseFold(scope CaseFoldHandlerDelegate handle, scope ForeachOverUTF32Delegate input, bool turkic, bool compatibility, bool decompose) @trusted {
-    dchar[3] hangulMap;
+    dchar[3] hangulMap = void;
 
     /*
     3.13 The full case mappings for Unicode characters are obtained by using the mappings from

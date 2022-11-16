@@ -3811,7 +3811,7 @@ struct UTF_State(Char) {
             } else if (needRefill) {
                 assert(!this.emptyInternal);
 
-                TargetChar[4 / TargetChar.sizeof] charBuffer;
+                TargetChar[4 / TargetChar.sizeof] charBuffer = void;
                 size_t amountFilled;
 
                 static if (is(Char == TargetChar)) {
@@ -3888,7 +3888,7 @@ struct UTF_State(Char) {
             } else if (needRefill) {
                 assert(!this.emptyInternal);
 
-                TargetChar[4 / TargetChar.sizeof] charBuffer;
+                TargetChar[4 / TargetChar.sizeof] charBuffer = void;
                 size_t amountFilled, offsetFilled;
 
                 static if (is(Char == TargetChar)) {
@@ -4100,7 +4100,7 @@ struct UTF_State(Char) {
                             return result;
                     } else {
                         // encode
-                        TargetChar[4 / TargetChar.sizeof] buffer;
+                        TargetChar[4 / TargetChar.sizeof] buffer = void;
                         TargetChar[] temp = buffer[0 .. encode(got, buffer)];
 
                         result = del(temp);
@@ -4173,7 +4173,7 @@ struct UTF_State(Char) {
                             return result;
                     } else {
                         // encode
-                        TargetChar[4 / TargetChar.sizeof] buffer;
+                        TargetChar[4 / TargetChar.sizeof] buffer = void;
                         TargetChar[] temp = buffer[0 .. encode(got, buffer)];
 
                         foreach (c; temp) {
@@ -4628,7 +4628,7 @@ struct LiteralAsTargetChar(SourceChar, TargetChar) {
                     result = del(c);
                 } else if (is(SourceChar == dchar)) {
                     // just encode
-                    TargetChar[4 / TargetChar.sizeof] buffer;
+                    TargetChar[4 / TargetChar.sizeof] buffer = void;
                     TargetChar[] temp = buffer[0 .. encode(c, buffer)];
 
                     foreach (c2; temp) {
@@ -4649,7 +4649,7 @@ struct LiteralAsTargetChar(SourceChar, TargetChar) {
                     if (result)
                         return true;
                 } else {
-                    TargetChar[4 / TargetChar.sizeof] buffer;
+                    TargetChar[4 / TargetChar.sizeof] buffer = void;
                     scope temp = buffer[0 .. encode(got, buffer)];
 
                     foreach (TargetChar c; temp) {
@@ -4717,7 +4717,7 @@ struct ASCIILiteralAsTarget(TargetChar) {
             else
                 return 0;
         } else {
-            TargetChar[1] temp1;
+            TargetChar[1] temp1 = void;
             TargetChar[] temp2;
             int result;
 
@@ -4784,7 +4784,7 @@ static struct ASCIIStateAsTarget(TargetChar) {
                     TargetChar[] temp = cast(TargetChar[])data;
                     result = del(temp);
                 } else {
-                    TargetChar[1] temp1;
+                    TargetChar[1] temp1 = void;
                     TargetChar[] temp2;
 
                     foreach (c; data) {
@@ -4805,7 +4805,7 @@ static struct ASCIIStateAsTarget(TargetChar) {
                     TargetChar[] temp = cast(TargetChar[])data;
                     result = del(temp);
                 } else {
-                    TargetChar[1] temp1;
+                    TargetChar[1] temp1 = void;
                     TargetChar[] temp2;
 
                     foreach (c; data) {
