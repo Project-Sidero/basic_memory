@@ -16,17 +16,12 @@ bool isClose(A, B, CommonType = Unqual!(typeof(A.init + B.init)))(A a, B b,
         CommonType maxRelativeDifference = DefaultMaxRelativeDifference!CommonType, CommonType maxAbsoluteDifference = 0f)
         if (isFloatingPoint!A && isFloatingPoint!B) {
 
-    import core.stdc.math : fabs, fabsf;
-
     if (a == A.infinity || a == -A.infinity || b == B.infinity || b == -B.infinity)
         return false;
 
-    static if (is(CommonType == float)) {
-        alias abs = fabsf;
-    } else static if (is(CommonType == double)) {
-        alias abs = fabs;
-    } else
-        static assert(0, "Unimplemented");
+    CommonType abs(CommonType input) {
+        return input >= 0 ? input : -input;
+    }
 
     CommonType absoluteA = abs(a), absoluteB = abs(b), difference = abs(a - b);
 
