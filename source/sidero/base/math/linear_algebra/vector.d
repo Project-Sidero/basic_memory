@@ -351,6 +351,9 @@ struct Vector(Type, size_t Dimension) {
     }
 
     ///
+    alias equals = opEquals;
+
+    ///
     bool opEquals(scope const Vector other) scope const {
         foreach (i; 0 .. Dimension) {
             if (!this.data[i].isClose(other.data[i]))
@@ -359,6 +362,19 @@ struct Vector(Type, size_t Dimension) {
 
         return true;
     }
+
+    ///
+    bool equals(scope const Vector other, Type maxRelativeDifference, Type maxAbsoluteDifference = 0) scope const {
+        foreach (i; 0 .. Dimension) {
+            if (!this.data[i].isClose(other.data[i], maxRelativeDifference, maxAbsoluteDifference))
+                return false;
+        }
+
+        return true;
+    }
+
+    ///
+    alias compare = opCmp;
 
     ///
     int opCmp(scope const Vector other) scope const {

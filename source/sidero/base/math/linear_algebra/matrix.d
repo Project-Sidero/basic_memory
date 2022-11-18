@@ -340,6 +340,9 @@ struct Matrix(Type, size_t Rows, size_t Columns) {
     }
 
     ///
+    alias equals = opEquals;
+
+    ///
     bool opEquals(scope const Matrix other) scope const {
         foreach (i; 0 .. this.data.length) {
             if (!this.data[i].isClose(other.data[i]))
@@ -348,6 +351,19 @@ struct Matrix(Type, size_t Rows, size_t Columns) {
 
         return true;
     }
+
+    ///
+    bool equals(scope const Matrix other, Type maxRelativeDifference, Type maxAbsoluteDifference = 0) scope const {
+        foreach (i; 0 .. this.data.length) {
+            if (!this.data[i].isClose(other.data[i], maxRelativeDifference, maxAbsoluteDifference))
+                return false;
+        }
+
+        return true;
+    }
+
+    ///
+    alias compare = opCmp;
 
     ///
     int opCmp(scope const Matrix other) scope const {
@@ -557,7 +573,8 @@ unittest {
 }
 
 /// The nominal method of multiplicating two matrices together
-ErrorResult dotProduct(TypeOut, TypeIn1, TypeIn2)(scope TypeOut[] output, scope const TypeIn1[] input1, size_t columns1, scope const TypeIn2[] input2, size_t columns2) {
+ErrorResult dotProduct(TypeOut, TypeIn1, TypeIn2)(scope TypeOut[] output, scope const TypeIn1[] input1, size_t columns1,
+        scope const TypeIn2[] input2, size_t columns2) {
     const rows1 = input1.length / columns1, rows2 = input2.length / columns2;
 
     size_t outputRows, outputColumns;
