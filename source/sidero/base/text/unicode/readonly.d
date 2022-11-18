@@ -2692,7 +2692,7 @@ nothrow @nogc:
     }
 
     ///
-    ulong toHash() scope {
+    ulong toHash() scope const {
         import sidero.base.hash.utils : hashOf;
         return hashOf(this.literal);
     }
