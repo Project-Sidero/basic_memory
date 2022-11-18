@@ -340,6 +340,11 @@ struct Matrix(Type, size_t Rows, size_t Columns) {
     }
 
     ///
+    ulong toHash() scope const {
+        return hashOf(this.data[]);
+    }
+
+    ///
     alias equals = opEquals;
 
     ///

@@ -351,6 +351,11 @@ struct Vector(Type, size_t Dimension) {
     }
 
     ///
+    ulong toHash() scope const {
+        return hashOf(this.data[]);
+    }
+
+    ///
     alias equals = opEquals;
 
     ///
