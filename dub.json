@@ -10,8 +10,8 @@
     
     "importPaths": ["source", "database/generated"],
     "sourcePaths": ["source", "database/generated"],
-    "dflags": ["-preview=dip1000", "-preview=dip25"],
-    "dflags-ldc": ["--fvisibility=public"],
+    "dflags": ["-preview=dip1000", "-preview=dip25", "-allinst"],
+    "dflags-windows-ldc": ["--fvisibility=public"],
     "injectSourceFiles": ["source/sidero/base/allocators/gc_hook.d"],
 
     "subPackages": [
