@@ -8,6 +8,8 @@ import std.traits : isNumeric;
 
 ///
 alias Mat3x3f = Matrix!(float, 3, 3);
+///
+alias Mat3x3d = Matrix!(double, 3, 3);
 
 // RxC
 struct Matrix(Type, size_t Rows, size_t Columns) {
@@ -80,6 +82,18 @@ struct Matrix(Type, size_t Rows, size_t Columns) {
         assert(mat[1, 0].isClose(9));
     }
 
+    ///
+    void opIndexOpAssign(string op, Scalar)(Scalar input, size_t x, size_t y) scope if (isNumeric!Scalar) {
+        mixin("this.data[(y * Columns) + x] " ~ op ~ "= input;");
+    }
+
+    ///
+    unittest {
+        Matrix mat = Matrix.one;
+        mat[0, 0] *= 2;
+        assert(mat[0, 0].isClose(2));
+    }
+
     /// Element wise
     Matrix opBinary(string op)(scope const Matrix other) scope const {
         Matrix ret = this;
@@ -93,7 +107,7 @@ struct Matrix(Type, size_t Rows, size_t Columns) {
     }
 
     /// Element wise
-    Matrix opBinary(string op, Scalar)(Scalar input) scope {
+    Matrix opBinary(string op, Scalar)(Scalar input) scope if (isNumeric!Scalar) {
         Matrix ret = this;
         ret.opOpAssign!op(input);
         return ret;
@@ -106,8 +120,8 @@ struct Matrix(Type, size_t Rows, size_t Columns) {
 
     /// Element wise
     void opOpAssign(string op)(scope const Matrix other) scope {
-        foreach(i; 0 .. this.data.length) {
-            mixin("this.data[i] " ~ op ~"= other.data[i];");
+        foreach (i; 0 .. this.data.length) {
+            mixin("this.data[i] " ~ op ~ "= other.data[i];");
         }
     }
 
@@ -131,10 +145,10 @@ struct Matrix(Type, size_t Rows, size_t Columns) {
     }
 
     ///
-    Matrix opUnary(string op:"-")() scope const {
+    Matrix opUnary(string op : "-")() scope const {
         Matrix ret;
 
-        foreach(i; 0 .. this.data.length)
+        foreach (i; 0 .. this.data.length)
             ret.data[i] = -this.data[i];
 
         return ret;
@@ -158,8 +172,8 @@ struct Matrix(Type, size_t Rows, size_t Columns) {
     }
 
     ///
-    Matrix!(CommonType, Rows, 1) dotProduct(TypeOther, size_t OtherRows,
-    CommonType = typeof(Type.init + TypeOther.init))(const Vector!(TypeOther, OtherRows) other) scope const {
+    Vector!(CommonType, Rows) dotProduct(TypeOther, size_t OtherRows, CommonType = typeof(Type.init + TypeOther.init))(
+            const Vector!(TypeOther, OtherRows) other) scope const {
 
         typeof(return) ret;
 
@@ -543,7 +557,7 @@ unittest {
 }
 
 /// The nominal method of multiplicating two matrices together
-ErrorResult dotProduct(Type)(scope Type[] output, scope const Type[] input1, size_t columns1, scope const Type[] input2, size_t columns2) {
+ErrorResult dotProduct(TypeOut, TypeIn1, TypeIn2)(scope TypeOut[] output, scope const TypeIn1[] input1, size_t columns1, scope const TypeIn2[] input2, size_t columns2) {
     const rows1 = input1.length / columns1, rows2 = input2.length / columns2;
 
     size_t outputRows, outputColumns;
@@ -566,7 +580,7 @@ ErrorResult dotProduct(Type)(scope Type[] output, scope const Type[] input1, siz
 
     foreach (outputRow; 0 .. rows1) {
         foreach (outputColumn; 0 .. columns2) {
-            Type temp = 0;
+            TypeOut temp = 0;
 
             foreach (offset; 0 .. Length) {
                 temp += input1[(outputRow * columns1) + offset] * input2[(offset * columns2) + outputColumn];

@@ -7,6 +7,8 @@ import std.traits : isNumeric, isSigned;
 
 ///
 alias Vec3f = Vector!(float, 3);
+///
+alias Vec3d = Vector!(double, 3);
 
 ///
 struct Vector(Type, size_t Dimension) {
@@ -17,6 +19,14 @@ struct Vector(Type, size_t Dimension) {
     alias data this;
 
 @safe nothrow @nogc:
+
+    ///
+    this(scope Type[] data...) scope {
+        assert(data.length == this.data.length);
+
+        foreach (i, v; data)
+            this.data[i] = v;
+    }
 
     ///
     ref Type x() scope {
