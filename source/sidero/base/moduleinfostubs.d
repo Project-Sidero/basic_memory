@@ -55,4 +55,8 @@ enum Stubs = [
         ModuleInfoStub("_D6sidero4base7console12__ModuleInfoZ", "sidero.base.console"),
         ModuleInfoStub("_D6sidero4base6traits12__ModuleInfoZ", "sidero.base.traits"),
         ModuleInfoStub("_D6sidero4base4text6format12__ModuleInfoZ", "sidero.base.text.format"),
+        ModuleInfoStub("_D6sidero4base6errors12__ModuleInfoZ", "sidero.base.errors"),
+        ModuleInfoStub("_D6sidero4base10containers13readonlyslice12__ModuleInfoZ", "sidero.base.containers.readonlyslice"),
+        ModuleInfoStub("_D6sidero4base4math14linear_algebra12__ModuleInfoZ", "sidero.base.math.linear_algebra"),
+        ModuleInfoStub("_D6sidero4base6errors6result__T6ResultTvZQk9__xtoHashFNbNeKxSQChQCdQCbQBx__TQBtTvZQBzZm", "sidero.base.errors.result"),
     ];
