@@ -7,7 +7,7 @@ import sidero.base.text.unicode.database;
 import sidero.base.encoding.utf;
 import sidero.base.allocators.api;
 
-@safe nothrow @nogc:
+export @safe nothrow @nogc:
 
 ///
 int icmpUTF32_NFD(scope ForeachOverUTF32Delegate input1, scope ForeachOverUTF32Delegate input2,

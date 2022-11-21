@@ -116,7 +116,7 @@ struct Slice(Type) {
     alias LiteralType = const(Type)[];
 
     ///
-    mixin OpApplyCombos!("ElementType", null, ["@safe", "nothrow", "@nogc"]);
+    mixin OpApplyCombos!("ElementType", "size_t", ["@safe", "nothrow", "@nogc"]);
 
     ///
     unittest {
@@ -134,7 +134,7 @@ struct Slice(Type) {
     }
 
     ///
-    mixin OpApplyCombos!("ElementType", null, ["@safe", "nothrow", "@nogc"], "opApplyReverse");
+    mixin OpApplyCombos!("ElementType", "size_t", ["@safe", "nothrow", "@nogc"], "opApplyReverse");
 
     ///
     unittest {

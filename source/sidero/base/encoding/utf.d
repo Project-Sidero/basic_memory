@@ -6,6 +6,8 @@ module sidero.base.encoding.utf;
 import sidero.base.text.unicode.characters.defs;
 import std.traits : isSomeString, isSomeFunction;
 
+export:
+
 ///
 alias ForeachOverUTF32handle = int delegate(ref dchar) @safe nothrow @nogc;
 ///
