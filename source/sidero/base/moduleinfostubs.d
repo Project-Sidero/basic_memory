@@ -65,4 +65,5 @@ enum Stubs = [
                 "sidero.base.errors.result"),
         ModuleInfoStub("_D6sidero4base4hash5utils12__ModuleInfoZ", "sidero.base.hash.utils"),
         ModuleInfoStub("_D6sidero4base4hash3fnv12__ModuleInfoZ", "sidero.base.hash.fnv"),
+        ModuleInfoStub("_D6sidero4base9algorithm12__ModuleInfoZ", "sidero.base.algorithm")
     ];

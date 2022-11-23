@@ -51,7 +51,7 @@ scope nothrow @nogc @safe:
 
     static if (HaveValue) {
         ///
-        this(scope Type value) {
+        this(scope return Type value) @trusted {
             this.value = value;
         }
 
@@ -137,7 +137,7 @@ scope nothrow @nogc @safe:
         bool opEquals(scope Result!Type other) {
             if (error.info.message !is null)
                 return other.error.info.message !is null;
-            return this.value == other;
+            return this.value == other.value;
         }
     }
 }
@@ -204,7 +204,7 @@ struct ResultReference(Type) {
 scope nothrow @nogc @safe:
 
     ///
-    this(scope return Type* value, scope return void* user, scope return RCHandle rcHandle) {
+    this(scope return Type* value, scope return void* user, scope return RCHandle rcHandle) @trusted {
         assert(value !is null);
         assert(user !is null);
         assert(rcHandle !is null);
