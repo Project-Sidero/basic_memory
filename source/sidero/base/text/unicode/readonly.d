@@ -1,18 +1,10 @@
 module sidero.base.text.unicode.readonly;
-import sidero.base.text.unicode.builder;
 import sidero.base.text.unicode.defs;
 import sidero.base.text.unicode.characters.database;
-import sidero.base.text.ascii.readonly;
+import sidero.base.text;
 import sidero.base.encoding.utf;
 import sidero.base.allocators;
 import sidero.base.errors;
-
-///
-alias String_UTF8 = String_UTF!char;
-///
-alias String_UTF16 = String_UTF!wchar;
-///
-alias String_UTF32 = String_UTF!dchar;
 
 ///
 struct String_UTF(Char_) {

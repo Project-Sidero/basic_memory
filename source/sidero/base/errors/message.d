@@ -61,7 +61,7 @@ scope @safe nothrow @nogc:
 
     ///
     auto toString() const {
-        import sidero.base.text.unicode.builder;
+        import sidero.base.text;
 
         StringBuilder_UTF8 ret;
         this.toString(ret);

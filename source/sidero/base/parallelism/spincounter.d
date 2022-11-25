@@ -68,8 +68,7 @@ struct SpinCounterValue {
     version (none) {
         ///
         void toString(scope ref StringBuilder_ASCII writer) const {
-            import sidero.base.text.ascii.readonly;
-            import sidero.base.text.format;
+            import sidero.base.text;
 
             String_ASCII("%s").formattedWrite(writer, value);
         }

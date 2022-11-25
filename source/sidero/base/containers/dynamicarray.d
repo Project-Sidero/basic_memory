@@ -3,7 +3,6 @@ import sidero.base.containers.readonlyslice;
 import sidero.base.allocators;
 import sidero.base.errors;
 import sidero.base.text;
-import sidero.base.text.format;
 
 private {
     alias DAint = DynamicArray!int;

@@ -1,5 +1,5 @@
 module sidero.base.text.ascii.builder;
-import sidero.base.text.ascii.readonly;
+import sidero.base.text;
 import sidero.base.allocators.api;
 
 ///

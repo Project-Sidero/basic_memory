@@ -1,16 +1,7 @@
 module sidero.base.text.unicode.builder;
 import sidero.base.text.unicode.characters.database : UnicodeLanguage;
-import sidero.base.text.unicode.readonly;
-import sidero.base.text.ascii.readonly;
-import sidero.base.text.ascii.builder;
+import sidero.base.text;
 import sidero.base.allocators.api;
-
-///
-alias StringBuilder_UTF8 = StringBuilder_UTF!char;
-///
-alias StringBuilder_UTF16 = StringBuilder_UTF!wchar;
-///
-alias StringBuilder_UTF32 = StringBuilder_UTF!dchar;
 
 ///
 struct StringBuilder_UTF(Char_) {

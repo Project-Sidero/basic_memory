@@ -175,7 +175,6 @@ void write(Args...)(scope Args args) @trusted {
 
     void doOneWrapper(Type)(scope Type arg) {
         import sidero.base.allocators;
-        import sidero.base.text.format;
 
         static if (isAnyString!Type) {
             if (deliminateArguments)

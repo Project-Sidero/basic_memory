@@ -82,8 +82,6 @@ struct Optional(T) {
 
     ///
     void toString(S)(scope ref S sink) scope const {
-        import sidero.base.text.format;
-
         if (!this.isSet)
             sink ~= "not-set";
         else

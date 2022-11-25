@@ -206,7 +206,6 @@ scope nothrow @nogc @safe:
     ///
     this(scope return Type* value, scope return void* user, scope return RCHandle rcHandle) @trusted {
         assert(value !is null);
-        assert(user !is null);
         assert(rcHandle !is null);
 
         this._value = value;

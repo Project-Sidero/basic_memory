@@ -1,8 +1,5 @@
 module sidero.base.system;
-import sidero.base.text.unicode.readonly;
-import sidero.base.text.unicode.builder;
-import sidero.base.text.ascii.readonly;
-import sidero.base.text.ascii.builder;
+import sidero.base.text;
 import sidero.base.text.unicode.characters.database : UnicodeLanguage;
 
 @safe nothrow @nogc:
