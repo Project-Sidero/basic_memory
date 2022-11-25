@@ -12,6 +12,7 @@ Copyright: 2022 Richard Andrew Cattermole
  */
 module sidero.base.hash.crc;
 import sidero.base.math.fixednum;
+export:
 
 /+
 // The contents of this module are generated from the parameters below, using Chrome devtools

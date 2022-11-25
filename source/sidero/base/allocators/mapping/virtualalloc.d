@@ -6,14 +6,15 @@ Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
  */
 module sidero.base.allocators.mapping.virtualalloc;
+export:
 
 version (Windows) {
-
     /**
         Note: this is designed for 4k increments! It will do 4k increments regardless of what you want.
         It cannot reallocate, use HeapAllocMapper instead.
      */
     struct VirtualAllocMapper {
+    export:
         ///
         enum NeedsLocking = false;
 
@@ -61,6 +62,7 @@ version (Windows) {
         Windows HeapAlloc family of mappers.
      */
     struct HeapAllocMapper {
+    export:
         ///
         enum NeedsLocking = false;
 

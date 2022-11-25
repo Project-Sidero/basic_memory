@@ -2,6 +2,7 @@
 module sidero.base.traits;
 import sidero.base.text;
 public import std.traits;
+export:
 
 ///
 enum isAnyString(String) = isSomeString!String || is(String == String_ASCII) || is(String == String_UTF!Char, Char) ||

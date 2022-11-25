@@ -7,6 +7,7 @@ Copyright: 2022 Richard Andrew Cattermole
  */
 module sidero.base.allocators.locking;
 import std.typecons : Ternary;
+export:
 
 /**
     Adds a lock around all allocator operations to make it thread safe.

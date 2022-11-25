@@ -25,12 +25,15 @@ private {
     alias AL = AllocatedList!(RCAllocator, RCAllocator);
 }
 
+export:
+
 /**
     A free list dedicated for house keeping tasks.
 
     Fixed sized allocations, does not handle alignment, coalesce blocks of memory together nor splitting.
  */
 struct HouseKeepingFreeList(PoolAllocator) {
+export:
     /// Source for all memory
     PoolAllocator poolAllocator;
 
@@ -41,7 +44,7 @@ struct HouseKeepingFreeList(PoolAllocator) {
         assert(head.next is null || !poolAllocator.isNull);
 
         Node* current = cast(Node*)head.next;
-        while(current !is null)
+        while (current !is null)
             current = current.next;
     }
 
@@ -125,7 +128,7 @@ scope @safe @nogc pure nothrow:
     static if (__traits(hasMember, PoolAllocator, "deallocateAll")) {
         ///
         bool deallocateAll() {
-            if(poolAllocator.deallocateAll()) {
+            if (poolAllocator.deallocateAll()) {
                 head.next = null;
                 return true;
             }
@@ -199,7 +202,9 @@ unittest {
 
     See_Also: FreeTree
  */
-struct FreeList(PoolAllocator, FitsStrategy Strategy = FitsStrategy.NextFit, size_t DefaultAlignment = GoodAlignment, size_t DefaultMinimumStoredSize = 0) {
+struct FreeList(PoolAllocator, FitsStrategy Strategy = FitsStrategy.NextFit, size_t DefaultAlignment = GoodAlignment,
+        size_t DefaultMinimumStoredSize = 0) {
+export:
     /// Source for all memory
     PoolAllocator poolAllocator;
     /// Ensure all return pointers from stored source are aligned to a multiply of this
@@ -596,6 +601,7 @@ unittest {
     Warning: You must remove all memory (i.e. by deallocateAll) prior to destruction or you will get an error.
 */
 struct AllocatedList(InternalAllocator = HouseKeepingAllocator!(), PoolAllocator = void) {
+export:
     ///
     InternalAllocator internalAllocator;
 

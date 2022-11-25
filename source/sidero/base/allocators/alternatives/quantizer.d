@@ -14,10 +14,13 @@ private {
     alias QRC = Quantizer!(RCAllocator, length => length * 2);
 }
 
+export:
+
 /**
     Applies rounding (up) function to all sizes provided, but will not return it complete.
  */
 struct Quantizer(PoolAllocator, alias roundFunction) {
+export:
     ///
     PoolAllocator poolAllocator;
 

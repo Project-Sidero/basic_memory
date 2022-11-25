@@ -3,6 +3,8 @@ import sidero.base.text.wordbreak;
 import sidero.base.text.unicode.characters.database : isAlpha;
 import sidero.base.text.unicode.database;
 
+export:
+
 /**
 This function is based upon Unicode's word break algorithm as defined in [TR29](https://unicode.org/reports/tr29/#Word_Boundary_Rules).
 
@@ -168,7 +170,7 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
         for (;;) {
             if (lookahead == 0x200D || isExtend(lookahead.value) || isFormat(lookahead.value)) {
                 // WB4
-                version(none) {
+                version (none) {
                     debugWriteln("WB4-2");
                 }
 

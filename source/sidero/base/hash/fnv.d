@@ -25,7 +25,7 @@ private enum {
             FixedUNum!16(0xc8b1536847b6bbb3, 0x1023b4c8caee0535)),
 }
 
-@safe nothrow @nogc pure:
+export @safe nothrow @nogc pure:
 
 /**
 Performs a Fowler Noll Vo 0 hash

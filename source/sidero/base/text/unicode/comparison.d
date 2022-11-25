@@ -82,7 +82,7 @@ struct CaseAwareComparison {
         dchar[] against;
     }
 
-@safe nothrow @nogc:
+export @safe nothrow @nogc:
 
     ///
     this(scope RCAllocator allocator, bool isTurkic) scope @trusted {

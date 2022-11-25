@@ -1,4 +1,5 @@
 module sidero.base.errors.message;
+export:
 
 ///
 struct ErrorMessage {
@@ -7,7 +8,7 @@ struct ErrorMessage {
     ///
     string message;
 
-@safe nothrow @nogc pure:
+export @safe nothrow @nogc pure:
 
     ///
     this(string id, string message) scope {
@@ -45,7 +46,7 @@ struct ErrorInfo {
     int line;
     package(sidero.base.errors) bool checked;
 
-scope @safe nothrow @nogc:
+export scope @safe nothrow @nogc:
 
     ///
     this(ErrorMessage errorMessage, string moduleName = __MODULE__, int line = __LINE__) {

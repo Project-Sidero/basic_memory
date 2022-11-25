@@ -2,6 +2,7 @@
 */
 module sidero.base.text.ascii.wordbreak;
 import sidero.base.text.wordbreak;
+export:
 
 /**
 This function is based upon Unicode's word break algorithm as defined in [TR29](https://unicode.org/reports/tr29/#Word_Boundary_Rules).

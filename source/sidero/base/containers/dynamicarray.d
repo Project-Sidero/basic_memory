@@ -4,6 +4,8 @@ import sidero.base.allocators;
 import sidero.base.errors;
 import sidero.base.text;
 
+export:
+
 private {
     alias DAint = DynamicArray!int;
 }
@@ -91,6 +93,7 @@ struct DynamicArray(Type) {
             return result;
         }
     }
+export:
 
     ///
     mixin OpApplyCombos!("ElementType", "size_t", ["@safe", "nothrow", "@nogc"]);

@@ -2,8 +2,11 @@ module sidero.base.text.ascii.builder;
 import sidero.base.text;
 import sidero.base.allocators.api;
 
+export:
+
 ///
 struct StringBuilder_ASCII {
+export:
     ///
     alias Char = ubyte;
     ///

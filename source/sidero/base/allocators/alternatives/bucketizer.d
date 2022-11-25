@@ -14,10 +14,13 @@ private {
     alias BRC = Bucketizer!(RCAllocator, 0, 10, 1);
 }
 
+export:
+
 /**
     Uses buckets to segregate memory.
  */
 struct Bucketizer(PoolAllocator, size_t min, size_t max, size_t step) {
+export:
     PoolAllocator[((max + 1) - min) / step] poolAllocators;
 
     static if (__traits(hasMember, PoolAllocator, "NeedsLocking")) {
@@ -31,7 +34,7 @@ struct Bucketizer(PoolAllocator, size_t min, size_t max, size_t step) {
 scope @trusted @nogc pure nothrow:
 
     this(scope return ref Bucketizer other) @trusted {
-        foreach(i, ref v; this.poolAllocators)
+        foreach (i, ref v; this.poolAllocators)
             v = other.poolAllocators[i];
         other = Bucketizer.init;
     }

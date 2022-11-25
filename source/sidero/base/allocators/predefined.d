@@ -20,6 +20,8 @@ private {
     alias HouseKeepingAllocatorTest = HouseKeepingAllocator!RCAllocator;
 }
 
+export:
+
 public import sidero.base.allocators.mapping : DefaultMapper, GoodAlignment;
 
 /// An allocator specializing in fixed size allocations that can be deallocated all at once.

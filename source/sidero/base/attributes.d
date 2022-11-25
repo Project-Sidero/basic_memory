@@ -1,5 +1,6 @@
 ///
 module sidero.base.attributes;
+export:
 
 /// Disables printing of field
 struct PrintIgnore {

@@ -3,7 +3,7 @@ import sidero.base.text;
 import sidero.base.allocators;
 import sidero.base.typecons : Optional;
 
-@safe nothrow @nogc:
+export @safe nothrow @nogc:
 
 ///
 StringBuilder_UTF8 readLine() {
@@ -298,7 +298,7 @@ struct InBandInfo {
     ///
     Optional!bool prettyPrintActive;
 
-@trusted nothrow @nogc scope:
+export @trusted nothrow @nogc scope:
 
     this(scope return ref InBandInfo other) {
         this.tupleof = other.tupleof;

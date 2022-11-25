@@ -3,7 +3,7 @@ import sidero.base.math.utils : isClose;
 import sidero.base.errors;
 import std.traits : isNumeric, isSigned;
 
-@safe nothrow @nogc:
+export @safe nothrow @nogc:
 
 ///
 alias Vec3f = Vector!(float, 3);

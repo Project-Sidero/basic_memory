@@ -1,10 +1,11 @@
 /**
  */
 module sidero.base.text.wordbreak;
-@safe nothrow @nogc:
+export @safe nothrow @nogc:
 
 /// This struct works with a word breaking algorithm i.e. Unicode's TR29, expecting Function to return ptrdiff_t with no args apart from us.
 struct WordBreaker(Char, alias Function) {
+export:
     @disable this(this);
 
     ///

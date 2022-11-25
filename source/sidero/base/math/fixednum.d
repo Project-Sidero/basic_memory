@@ -6,6 +6,7 @@ Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
 */
 module sidero.base.math.fixednum;
+export:
 
 /**
 Fixed sized unsigned big integer implementation.
@@ -45,7 +46,7 @@ struct FixedUNum(size_t ByteCount) {
         }
     }
 
-@safe nothrow @nogc pure:
+export @safe nothrow @nogc pure:
 
     static if (ByteCount == 16) {
         ///

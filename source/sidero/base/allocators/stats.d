@@ -14,6 +14,8 @@ private {
     alias Stats = StatsAllocator!RCAllocator;
 }
 
+export:
+
 /// Tracks some information related to allocation
 struct StatsAllocator(PoolAllocator) {
     ///

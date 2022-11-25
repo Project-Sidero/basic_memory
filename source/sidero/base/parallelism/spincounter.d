@@ -6,6 +6,7 @@ Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
 */
 module sidero.base.parallelism.spincounter;
+export:
 
 ///
 struct SpinCounter {
@@ -13,7 +14,7 @@ struct SpinCounter {
 
     @disable this(this);
 
-@safe nothrow @nogc pure:
+export @safe nothrow @nogc pure:
 
     ///
     SpinCounterValue get() {
@@ -49,7 +50,7 @@ unittest {
 struct SpinCounterValue {
     private int value;
 
-@safe nothrow @nogc:
+export @safe nothrow @nogc:
 
     ///
     int opCmp(const SpinCounterValue other) const {

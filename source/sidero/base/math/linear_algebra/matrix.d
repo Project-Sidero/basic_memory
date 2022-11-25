@@ -4,7 +4,7 @@ import sidero.base.math.utils;
 import sidero.base.errors;
 import std.traits : isNumeric;
 
-@safe nothrow @nogc:
+export @safe nothrow @nogc:
 
 ///
 alias Mat3x3f = Matrix!(float, 3, 3);

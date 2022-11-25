@@ -1,7 +1,7 @@
 module sidero.base.math.utils;
 import std.traits : isFloatingPoint, isNumeric, Unqual;
 
-@safe nothrow @nogc:
+export @safe nothrow @nogc:
 
 ///
 enum DefaultMaxRelativeDifference(ForType) = (cast(ForType)10) ^^ -(ForType.dig / 2);

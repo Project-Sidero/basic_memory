@@ -6,6 +6,8 @@ import sidero.base.text;
 import sidero.base.text.format;
 import sidero.base.errors;
 
+export:
+
 private alias SliceI = Slice!int;
 
 ///
@@ -109,6 +111,7 @@ struct Slice(Type) {
             return result;
         }
     }
+export:
 
     ///
     alias ElementType = Type;
@@ -435,9 +438,10 @@ nothrow @nogc:
     ///
     ulong toHash() scope {
         import sidero.base.hash.utils : hashOf;
+
         ulong ret = hashOf();
 
-        foreach(ref v; this.literal) {
+        foreach (ref v; this.literal) {
             ret = hashOf(v);
         }
 

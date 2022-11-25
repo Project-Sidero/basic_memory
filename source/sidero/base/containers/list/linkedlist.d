@@ -4,6 +4,8 @@ import sidero.base.allocators;
 import sidero.base.traits;
 import sidero.base.errors;
 
+export:
+
 private {
     alias CLLI = ConcurrentLinkedList!int;
 }
@@ -66,6 +68,7 @@ struct ConcurrentLinkedList(Type) {
             return result;
         }
     }
+export:
 
     ///
     mixin OpApplyCombos!("ElementType", null, ["@safe", "nothrow", "@nogc"]);
@@ -1183,7 +1186,7 @@ struct ConcurrentLinkedListImpl(Type) {
 
         Cursor cursor = iteratorList.cursorFor(nodeList, offset);
 
-        foreach(ref otherValue; del) {
+        foreach (ref otherValue; del) {
             if (ret != 0)
                 break;
             else if (cursor.isOutOfRange(offset, maximumOffsetFromHead)) {

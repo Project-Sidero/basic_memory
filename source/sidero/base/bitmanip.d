@@ -8,6 +8,8 @@ Copyright: 2022 Richard Andrew Cattermole
 module sidero.base.bitmanip;
 import std.traits : isIntegral;
 
+export:
+
 /// Get a bit mask for a given number of bits.
 Return bitMaskForNumberOfBits(Return = size_t, Arg)(Arg numberOfBits) if (isIntegral!Arg) {
     if (numberOfBits >= Return.sizeof * 8)
@@ -46,7 +48,7 @@ struct BitFlags {
     ///
     ulong flags;
 
-@safe nothrow @nogc pure:
+export @safe nothrow @nogc pure:
 
     ///
     this(Input)(Input input) {
@@ -116,8 +118,7 @@ struct BitFlags {
     }
 
     ///
-    void opOpAssign(string op : "&")(BitFlags value)
-             {
+    void opOpAssign(string op : "&")(BitFlags value) {
         flags &= value.flags;
     }
 
@@ -134,8 +135,7 @@ struct BitFlags {
     }
 
     ///
-    void opOpAssign(string op : "|")(BitFlags value)
-            {
+    void opOpAssign(string op : "|")(BitFlags value) {
         flags |= value.flags;
     }
 
@@ -152,8 +152,7 @@ struct BitFlags {
     }
 
     ///
-    void opOpAssign(string op : "^")(BitFlags value)
-           {
+    void opOpAssign(string op : "^")(BitFlags value) {
         flags |= value.flags;
     }
 
@@ -221,8 +220,7 @@ struct BitFlags {
     }
 
     ///
-    BitFlags opBinary(string op : "&")(BitFlags value)
-            {
+    BitFlags opBinary(string op : "&")(BitFlags value) {
         return BitFlags(flags & value.flags);
     }
 
@@ -238,8 +236,7 @@ struct BitFlags {
     }
 
     ///
-    BitFlags opBinary(string op : "|")(BitFlags value)
-            {
+    BitFlags opBinary(string op : "|")(BitFlags value) {
         return BitFlags(flags | value.flags);
     }
 
@@ -255,8 +252,7 @@ struct BitFlags {
     }
 
     ///
-    BitFlags opBinary(string op : "^")(BitFlags value)
-             {
+    BitFlags opBinary(string op : "^")(BitFlags value) {
         return BitFlags(flags ^ value.flags);
     }
 
@@ -315,14 +311,14 @@ struct BitFlags {
         return flags;
     }
 
-   ///
+    ///
     struct For(Enum) {
         static assert(__traits(allMembers, Enum).length <= typeof(this.bitFlags.flags).sizeof * 8);
 
         ///
         BitFlags bitFlags;
 
-        @safe nothrow @nogc pure:
+    @safe nothrow @nogc pure:
 
         ///
         this(Input)(Input input) {
@@ -354,20 +350,17 @@ struct BitFlags {
         }
 
         ///
-        void opOpAssign(string op : "&")(BitFlags value)
-        {
+        void opOpAssign(string op : "&")(BitFlags value) {
             bitFlags &= value;
         }
 
         ///
-        void opOpAssign(string op : "|")(BitFlags value)
-        {
+        void opOpAssign(string op : "|")(BitFlags value) {
             bitFlags |= value;
         }
 
         ///
-        void opOpAssign(string op : "^")(BitFlags value)
-        {
+        void opOpAssign(string op : "^")(BitFlags value) {
             bitFlags ^= value;
         }
 

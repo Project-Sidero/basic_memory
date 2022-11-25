@@ -1,21 +1,22 @@
 module sidero.base.hash.utils;
+export @safe nothrow @nogc:
 
 ///
-alias HashFunction(Type) = ulong function(scope ref Type) @safe nothrow @nogc;
+alias HashFunction(Type) = ulong function(scope ref Type);
 
 ///
-ulong hashOf() @trusted nothrow @nogc {
+ulong hashOf() @trusted {
     import sidero.base.hash.fnv;
     return fnv_64_1a(null);
 }
 
 ///
-ulong hashOf(Type)(scope ref Type value) @trusted nothrow @nogc {
+ulong hashOf(Type)(scope ref Type value) @trusted {
     return hashOf(value, hashOf());
 }
 
 ///
-ulong hashOf(Type)(scope ref Type value, ulong previousHash) @trusted nothrow @nogc {
+ulong hashOf(Type)(scope ref Type value, ulong previousHash) @trusted {
     import sidero.base.hash.fnv;
 
     ulong ret = previousHash;

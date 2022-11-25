@@ -6,6 +6,7 @@ Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
 */
 module sidero.base.allocators.gc;
+export:
 
 ///
 alias EnableFunction = extern (C) void function() nothrow pure;

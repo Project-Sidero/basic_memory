@@ -2,7 +2,7 @@ module sidero.base.system;
 import sidero.base.text;
 import sidero.base.text.unicode.characters.database : UnicodeLanguage;
 
-@safe nothrow @nogc:
+export @safe nothrow @nogc:
 
 version (Posix) {
     ///
@@ -15,7 +15,7 @@ version (Posix) {
 
 ///
 struct EnvironmentVariables {
-@safe nothrow @nogc:
+export @safe nothrow @nogc:
 
     ///
     static String_ASCII opIndex(scope String_ASCII key) @trusted nothrow @nogc {
@@ -488,6 +488,7 @@ unittest {
 
 ///
 struct Locale {
+export:
     ///
     this(return scope ref Locale other) scope @safe nothrow @nogc {
         this.tupleof = other.tupleof;

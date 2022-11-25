@@ -14,6 +14,8 @@ private {
     alias BL = BuddyList!(RCAllocator);
 }
 
+export:
+
 /**
     The famous buddy list!
     It keeps your memory close to its buddies!
@@ -24,6 +26,7 @@ private {
     https://en.wikipedia.org/wiki/Buddy_memory_allocation
  */
 struct BuddyList(PoolAllocator, size_t minExponent = 3, size_t maxExponent = 20) {
+export:
     static assert(minExponent >= calculatePower2Size((void*).sizeof, 0)[1], "Minimum exponent must be large enough to fit a pointer in.");
     static assert(minExponent < maxExponent, "Maxinum exponent must be larger than minimum exponent.");
 
@@ -36,7 +39,7 @@ struct BuddyList(PoolAllocator, size_t minExponent = 3, size_t maxExponent = 20)
     invariant {
         assert(!poolAllocator.isNull);
 
-        foreach(block; blocks) {
+        foreach (block; blocks) {
             assert(block is null);
         }
 

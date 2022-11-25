@@ -6,6 +6,7 @@ Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
  */
 module sidero.base.allocators.mapping.malloc;
+export:
 
 /**
     LibC malloc/free/realloc based memory mapping allocator.
@@ -14,6 +15,8 @@ module sidero.base.allocators.mapping.malloc;
  */
 struct Mallocator {
     import core.memory : pureMalloc, pureFree, pureRealloc;
+
+export:
 
     ///
     enum NeedsLocking = false;

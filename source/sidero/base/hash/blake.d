@@ -4,6 +4,7 @@ BLAKE hash algorithm ported from C
 License: Creative Commons Zero v1.0 Universal
 */
 module sidero.hash.blake;
+export:
 
 ///
 ubyte[28] blake224_hash(const(ubyte)[] input, uint[4] salt = [0, 0, 0, 0]) @safe {

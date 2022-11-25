@@ -3,6 +3,8 @@ import sidero.base.text.unicode.characters.database : UnicodeLanguage;
 import sidero.base.text;
 import sidero.base.allocators.api;
 
+export:
+
 ///
 struct StringBuilder_UTF(Char_) {
     ///
@@ -109,6 +111,7 @@ struct StringBuilder_UTF(Char_) {
         }
     }
 
+export:
     mixin OpApplyCombos!("Char", null, ["@safe", "nothrow", "@nogc"]);
 
     ///
@@ -3516,8 +3519,7 @@ private:
     }
 
     scope @nogc {
-        int opCmpImpl(Other)(scope Other other, bool caseSensitive,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) {
+        int opCmpImpl(Other)(scope Other other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
             scope otherState = AnyAsTargetChar!dchar(other);
 
             if (other.length == 0)
@@ -3561,8 +3563,7 @@ private:
             });
         }
 
-        bool startsWithImpl(Other)(scope Other other, bool caseSensitive,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) {
+        bool startsWithImpl(Other)(scope Other other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
             scope otherState = AnyAsTargetChar!dchar(other);
 
             return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
@@ -3577,8 +3578,7 @@ private:
             }, () { return false; });
         }
 
-        bool endsWithImpl(Other)(scope Other other, bool caseSensitive,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) {
+        bool endsWithImpl(Other)(scope Other other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
             scope otherState = AnyAsTargetChar!dchar(other);
 
             return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {

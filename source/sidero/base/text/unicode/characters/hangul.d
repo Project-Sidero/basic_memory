@@ -1,6 +1,6 @@
 ﻿module sidero.base.text.unicode.characters.hangul;
 
-@safe nothrow @nogc pure:
+export @safe nothrow @nogc pure:
 
 private enum {
     SBase = 0xAC00,

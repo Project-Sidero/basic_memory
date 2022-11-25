@@ -23,6 +23,8 @@ private {
     alias AT = AllocatedTree!(RCAllocator, RCAllocator);
 }
 
+export:
+
 /**
     An implementation of cartesian tree for storing free memory with optional alignment and minimum stored size.
 
@@ -33,6 +35,7 @@ private {
     See_Also: FreeList
 */
 struct FreeTree(PoolAllocator, FitsStrategy Strategy, size_t DefaultAlignment = GoodAlignment, size_t DefaultMinimumStoredSize = 0) {
+export:
     /// Source for all memory
     PoolAllocator poolAllocator;
     /// Ensure all return pointers from stored source are aligned to a multiply of this
@@ -635,6 +638,7 @@ unittest {
     Warning: You must remove all memory (i.e. by deallocateAll) prior to destruction or you will get an error.
 */
 struct AllocatedTree(InternalAllocator = HouseKeepingAllocator!(), PoolAllocator = void) {
+export:
     ///
     InternalAllocator internalAllocator;
 

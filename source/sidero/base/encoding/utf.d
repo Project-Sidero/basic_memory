@@ -49,7 +49,7 @@ struct ForeachOverAnyUTF {
 
     @disable this(this);
 
-@safe nothrow @nogc scope:
+export @safe nothrow @nogc scope:
 
     ///
     this(scope return const(char)[] input, size_t limitCharacters = size_t.max, scope return ForeachOverUTF32PeekDelegate peekDel = null) @trusted {
@@ -102,7 +102,7 @@ struct ForeachOverUTF(Type) if (isSomeString!Type) {
 
     @disable this(this);
 
-@safe nothrow @nogc:
+export @safe nothrow @nogc:
 
     ///
     ForeachOverUTF32PeekDelegate peekAtReadAmountDelegate;

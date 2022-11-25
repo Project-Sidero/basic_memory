@@ -16,8 +16,11 @@ private {
     alias RegionRC = Region!RCAllocator;
 }
 
+export:
+
 /// A bump the pointer allocator for a set slice of memory, will automically allocate if required and can guarantee alignment.
 struct Region(PoolAllocator = void, size_t DefaultAlignment = GoodAlignment, size_t DefaultSize = 0) {
+export:
     ///
     void[] memory;
 
@@ -168,15 +171,15 @@ struct Region(PoolAllocator = void, size_t DefaultAlignment = GoodAlignment, siz
             return memory is null || allocated == memory.length;
     }
 
-package(sidero.base.allocators) {
-    bool isOnlyOneAllocationOfSize(size_t size) {
-        size_t padding = alignedTo - ((cast(size_t)memory.ptr) % alignedTo);
-        if (padding == alignedTo)
-            padding = 0;
+    package(sidero.base.allocators) {
+        bool isOnlyOneAllocationOfSize(size_t size) {
+            size_t padding = alignedTo - ((cast(size_t)memory.ptr) % alignedTo);
+            if (padding == alignedTo)
+                padding = 0;
 
-        return padding + size == allocated;
+            return padding + size == allocated;
+        }
     }
-}
 
 private:
     bool fitsAlignment(void[] into, size_t needed, size_t alignedTo) @trusted {

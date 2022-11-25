@@ -1,4 +1,6 @@
 module sidero.base.dllmain;
+export:
+
 version (DynamicSideroBase)  : version (Windows)  : version (D_BetterC) {
     import core.sys.windows.windef : HINSTANCE, BOOL, DWORD, LPVOID;
 

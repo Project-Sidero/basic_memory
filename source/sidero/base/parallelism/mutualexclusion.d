@@ -6,6 +6,7 @@ Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
 */
 module sidero.base.parallelism.mutualexclusion;
+export:
 
 version(D_BetterC) {
 } else {
@@ -18,7 +19,7 @@ struct TestTestSetLockInline {
 
     @disable this(this);
 
-@safe @nogc nothrow:
+export @safe @nogc nothrow:
 
     version(D_BetterC) {
     } else {

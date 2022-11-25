@@ -6,7 +6,7 @@ import sidero.base.text.unicode.database;
 import sidero.base.encoding.utf;
 import sidero.base.allocators.api;
 
-@safe nothrow @nogc:
+export @safe nothrow @nogc:
 
 ///
 dstring toNFD(scope ForeachOverUTF32Delegate input, RCAllocator allocator, bool turkic = false) {
@@ -223,7 +223,7 @@ size_t compose_(scope ref dchar[] array, scope RCAllocator allocator) @trusted {
 alias RotatePartialHandlerDelegate = bool delegate(dchar) @safe nothrow @nogc;
 
 struct Rotate {
-@safe nothrow @nogc:
+export @safe nothrow @nogc:
     @disable this(this);
 
     this(scope RCAllocator allocator) scope @trusted {

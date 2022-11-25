@@ -1,6 +1,8 @@
 module sidero.base.errors.result;
 import sidero.base.errors.message;
 
+export:
+
 ///
 auto result(Type)(Type argument) {
     import std.traits : Unqual;
@@ -17,6 +19,7 @@ alias ErrorResult = Result!void;
 
 ///
 struct Result(Type) {
+export:
     ///
     enum HaveValue = !is(Type == void);
 
@@ -189,6 +192,7 @@ unittest {
 
 ///
 struct ResultReference(Type) {
+export:
     alias RCHandle = void delegate(bool addRef, scope void* _user) @safe nothrow @nogc;
 
     private {

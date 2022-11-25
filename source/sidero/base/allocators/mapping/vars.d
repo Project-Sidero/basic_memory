@@ -4,7 +4,7 @@
     License: Boost
  */
 module sidero.base.allocators.mapping.vars;
-@trusted nothrow @nogc:
+export @trusted nothrow @nogc:
 
 /// Size of the L1 cpu cache line
 enum GoodAlignment = 64;

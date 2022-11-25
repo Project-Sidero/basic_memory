@@ -17,6 +17,8 @@ private {
     __gshared RCAllocator globalAllocator_;
 }
 
+export:
+
 /**
     Get the global allocator for the process
 
@@ -69,7 +71,7 @@ struct RCAllocator {
         bool delegate() @safe @nogc pure nothrow empty_;
     }
 
-@safe @nogc pure nothrow:
+export @safe @nogc pure nothrow:
 
     /// Acquire an RCAllocator from a built up memory allocator with support for getting the default instance from its static member.
     static RCAllocator instanceOf(T)(T* value = defaultInstanceForAllocator!T) @trusted {

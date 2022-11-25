@@ -8,9 +8,12 @@ Copyright: 2022 Richard Andrew Cattermole
 module sidero.base.allocators.mapping.mmap;
 import core.sys.posix.sys.mman;
 
+export:
+
 version (Posix) {
     ///
     struct MMap {
+    export:
         ///
         enum NeedsLocking = false;
 

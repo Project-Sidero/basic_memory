@@ -2,7 +2,7 @@ module sidero.base.algorithm;
 import std.range : isInputRange, isBidirectionalRange;
 import std.traits : isDynamicArray;
 
-@safe nothrow @nogc:
+export @safe nothrow @nogc:
 
 ///
 bool startsWith(Input1, Input2)(scope Input1 input1, scope Input2 input2)

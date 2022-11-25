@@ -1,6 +1,7 @@
 ///
 module sidero.base.typecons;
 import sidero.base.text;
+export:
 
 /// Similar to std.typecons : Nullable except -betterC compatible
 struct Optional(T) {
@@ -9,7 +10,7 @@ struct Optional(T) {
         bool isSet;
     }
 
-@safe nothrow @nogc:
+export @safe nothrow @nogc:
 
     ///
     this(scope T value) scope {

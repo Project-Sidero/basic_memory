@@ -14,10 +14,13 @@ private {
     alias FBRC = FallbackAllocator!(RCAllocator, RCAllocator);
 }
 
+export:
+
 /**
     A simple fall back allocator, try primary if not try secondary otherwise use primary.
  */
 struct FallbackAllocator(Primary, Secondary) {
+export:
     ///
     Primary primary;
     ///

@@ -1,5 +1,6 @@
 module sidero.base.text.unicode.defs;
 import sidero.base.errors.message;
+export:
 
 ///
 struct UnicodeEncoding {
@@ -39,7 +40,7 @@ struct UnicodeEncoding {
     ///
     enum For(T : const(dchar)[]) = UTF32;
 
-scope const @safe:
+export scope const @safe:
 
     ///
     auto handle(T, U, V)(scope T utf8Del, scope U utf16Del, scope V utf32Del) {

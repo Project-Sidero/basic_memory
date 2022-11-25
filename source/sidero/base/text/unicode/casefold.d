@@ -4,7 +4,7 @@ import sidero.base.text.unicode.database;
 import sidero.base.encoding.utf;
 import sidero.base.allocators.api;
 
-@safe nothrow @nogc:
+export @safe nothrow @nogc:
 
 ///
 size_t caseFoldLength(scope dstring input, bool turkic = false, bool compatibility = false, bool decompose = false) @trusted {

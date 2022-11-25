@@ -14,10 +14,13 @@ private {
     alias SegRC = Segregator!(RCAllocator, RCAllocator, 1024);
 }
 
+export:
+
 /**
     Splits memory allocations based upon size. Uses small <= threshold < large.
  */
 struct Segregator(SmallAllocator, LargeAllocator, size_t threshold) {
+export:
     ///
     SmallAllocator smallAllocator;
     ///

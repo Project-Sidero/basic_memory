@@ -7,6 +7,7 @@ Copyright: 2022 Richard Andrew Cattermole
 */
 module sidero.base.parallelism.rwmutex;
 import core.atomic : cas, atomicLoad, atomicFence;
+export:
 
 ///
 struct ReaderWriterLockInline {
@@ -20,7 +21,7 @@ struct ReaderWriterLockInline {
         shared(size_t) state;
     }
 
-@safe nothrow @nogc:
+export @safe nothrow @nogc:
 
     version(D_BetterC) {
     } else {

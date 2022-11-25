@@ -2,7 +2,7 @@ module sidero.base.text.unicode.characters.database;
 import sidero.base.bitmanip : BitFlags;
 import unidb = sidero.base.text.unicode.database;
 
-@safe nothrow @nogc pure:
+export @safe nothrow @nogc pure:
 
 /**
     Enum members: Unknown, Lithuanian, Turkish, Azeri.

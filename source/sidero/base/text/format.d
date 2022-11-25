@@ -5,6 +5,8 @@ import sidero.base.errors.result;
 public import sidero.base.attributes : PrintIgnore, PrettyPrintIgnore;
 import sidero.base.traits;
 
+export:
+
 ///
 StringBuilder_UTF8 format(Format, Args...)(scope Format format, scope Args args) {
     StringBuilder_UTF8 builder = StringBuilder_UTF8(globalAllocator());
@@ -84,6 +86,7 @@ struct PrettyPrint(ConstantsType)
     uint depth;
     ///
     bool useQuotes;
+export:
 
     ///
     void opCall(Builder, Args...)(scope Builder builder, scope Args args) @trusted if (isBuilderString!Builder) {

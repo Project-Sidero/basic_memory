@@ -7,7 +7,7 @@ Copyright: 2022 Richard Andrew Cattermole
 */
 module sidero.base.hash.adler32;
 
-@safe nothrow @nogc:
+export @safe nothrow @nogc:
 
 /**
 Performs an Adler32 hash (32-bit).

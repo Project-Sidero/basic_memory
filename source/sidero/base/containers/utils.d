@@ -1,6 +1,6 @@
 module sidero.base.containers.utils;
 
-@safe nothrow @nogc:
+export @safe nothrow @nogc:
 
 ///
 int genericCompare(Type)(scope Type first, scope Type second) {

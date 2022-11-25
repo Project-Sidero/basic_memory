@@ -15,12 +15,15 @@ private {
     alias ALRC = AllocatorList!(RCAllocator, (ref poolAllocator) => poolAllocator);
 }
 
+export:
+
 /**
     A simple allocator list that relies on a given allocators (as provided by the factory function) to provide its own memory.
 
     Supports isOnlyOneAllocationOfSize method on the pool allocator to allow knowing if it can free a given allocator instance.
  */
 struct AllocatorList(PoolAllocator, alias factory) {
+export:
     static assert(__traits(hasMember, TypeOfAllocator, "deallocateAll"),
             "Allocator allocated by factory function must have deallocateAll method.");
     static assert(__traits(hasMember, TypeOfAllocator, "owns"), "Allocator allocated by factory function must have owns method.");

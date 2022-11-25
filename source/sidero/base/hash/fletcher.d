@@ -7,7 +7,7 @@ Copyright: 2022 Richard Andrew Cattermole
 */
 module sidero.base.hash.fletcher;
 
-@safe nothrow @nogc pure:
+export @safe nothrow @nogc pure:
 
 /**
 Performs an Fletcher hash (16-bit).

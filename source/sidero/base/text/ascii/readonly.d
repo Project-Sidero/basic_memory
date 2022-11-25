@@ -1,6 +1,7 @@
 module sidero.base.text.ascii.readonly;
 import sidero.base.text;
 import sidero.base.allocators;
+export:
 
 /// Assumes that any initial string value will be null terminated
 struct String_ASCII {

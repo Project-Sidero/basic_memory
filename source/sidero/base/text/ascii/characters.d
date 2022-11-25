@@ -1,5 +1,5 @@
 module sidero.base.text.ascii.characters;
-@safe nothrow @nogc pure:
+export @safe nothrow @nogc pure:
 
 ///
 ubyte toUpper(ubyte input) {

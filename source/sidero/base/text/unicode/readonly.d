@@ -6,6 +6,8 @@ import sidero.base.encoding.utf;
 import sidero.base.allocators;
 import sidero.base.errors;
 
+export:
+
 ///
 struct String_UTF(Char_) {
     package(sidero.base.text.unicode) {
@@ -86,6 +88,7 @@ struct String_UTF(Char_) {
             return result;
         }
     }
+export:
 
     ///
     alias Char = Char_;
@@ -2686,6 +2689,7 @@ nothrow @nogc:
     ///
     ulong toHash() scope const {
         import sidero.base.hash.utils : hashOf;
+
         return hashOf(this.literal);
     }
 
