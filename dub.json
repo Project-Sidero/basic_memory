@@ -7,12 +7,17 @@
     "license": "Artistic-2.0",
     "name": "sidero_base",
     "homepage": "https://github.com/Project-Sidero/basic_memory",
-    
-    "importPaths": ["source", "database/generated"],
-    "sourcePaths": ["source", "database/generated"],
+
+    "importPaths": ["imports"],
+    "sourcePaths": [],
+    "sourceFiles": ["source/ignoreme.d"],
+    "injectSourceFiles": ["source/sidero/base/allocators/gc_hook.d"],
     "dflags": ["-preview=dip1000", "-preview=dip25", "-allinst"],
     "dflags-windows-ldc": ["--fvisibility=public"],
-    "injectSourceFiles": ["source/sidero/base/allocators/gc_hook.d"],
+
+    "dependencies": {
+        "sidero_base:source": "*"
+    },
 
     "subPackages": [
         {
@@ -26,6 +31,14 @@
             "sourcePaths": ["database/generated", "database/verify_generated", "source"],
             "targetType": "executable",
             "workingDirectory": "database"
+        },
+        {
+            "name": "source",
+            "targetType": "sourceLibrary",
+            "importPaths": ["source", "database/generated"],
+            "sourcePaths": ["source", "database/generated"],
+            "dflags": ["-preview=dip1000", "-preview=dip25", "-allinst"],
+            "dflags-windows-ldc": ["--fvisibility=public"]
         }
     ],
 

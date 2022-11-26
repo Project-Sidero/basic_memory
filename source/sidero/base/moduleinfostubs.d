@@ -1,45 +1,53 @@
 module sidero.base.moduleinfostubs;
-version (D_BetterC)  : static foreach (Stub; Stubs) {
-    mixin(() {
-        import std.format : format;
 
-        string ret = "export extern(C) void " ~ Stub.mangleName ~ "() { asm { naked; ";
+version (DynamicSideroBase)
+    version = NeedStubs;
+else version (D_BetterC)
+    version = NeedStubs;
 
-        void add(ubyte b) {
-            ret ~= "db 0x";
+version (NeedStubs) {
+    static foreach (Stub; Stubs) {
+        mixin(() {
+            import std.format : format;
 
-            ubyte temp = b & 0xF;
-            if (temp > 9)
-                ret ~= 'A' + (temp - 10);
-            else
-                ret ~= '0' + temp;
+            string ret = "export extern(C) void " ~ Stub.mangleName ~ "() { asm { naked; ";
 
-            temp = (b >> 4) & 0xF;
-            if (temp > 9)
-                ret ~= 'A' + (temp - 10);
-            else
-                ret ~= '0' + temp;
+            void add(ubyte b) {
+                ret ~= "db 0x";
 
-            ret ~= ";";
-        }
+                ubyte temp = b & 0xF;
+                if (temp > 9)
+                    ret ~= 'A' + (temp - 10);
+                else
+                    ret ~= '0' + temp;
 
-        add(MIname & 0xFF);
-        add((MIname >> 8) & 0xFF);
-        add(0);
-        add(0);
+                temp = (b >> 4) & 0xF;
+                if (temp > 9)
+                    ret ~= 'A' + (temp - 10);
+                else
+                    ret ~= '0' + temp;
 
-        add(0);
-        add(0);
-        add(0);
-        add(0);
+                ret ~= ";";
+            }
 
-        foreach (c; Stub.moduleName) {
-            add(c);
-        }
-        add(0);
+            add(MIname & 0xFF);
+            add((MIname >> 8) & 0xFF);
+            add(0);
+            add(0);
 
-        return ret ~ "}\n}\n";
-    }());
+            add(0);
+            add(0);
+            add(0);
+            add(0);
+
+            foreach (c; Stub.moduleName) {
+                add(c);
+            }
+            add(0);
+
+            return ret ~ "}\n}\n";
+        }());
+    }
 }
 
 private:
