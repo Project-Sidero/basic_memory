@@ -1,4 +1,5 @@
 module generators.main;
+import generators.constants;
 
 void main() {
     import std.array : appender;
@@ -10,8 +11,7 @@ void main() {
     } catch (Exception e) {
     }
 
-    mkdirRecurse("generated/sidero/base/internal/unicode");
-    mkdirRecurse("generated/sidero/base/text/unicode");
+    mkdirRecurse(UnicodeLUTDirectory);
 
     createAPIfile;
 
@@ -519,5 +519,5 @@ bool isUnicodeGraphemeExtend(dchar input) @safe nothrow @nogc pure {
 
 `;
 
-    write("generated/sidero/base/text/unicode/database.d", api.data);
+    write(UnicodeAPIFile, api.data);
 }

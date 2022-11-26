@@ -1,5 +1,6 @@
 ﻿module generators.unicode.unicodedata;
 import generators.unicode.compositionexclusions;
+import generators.constants;
 
 void unicodeData() {
     import std.file : readText, write, append;
@@ -694,8 +695,8 @@ struct DM {
 
     }
 
-    append("generated/sidero/base/text/unicode/database.d", api.data);
-    write("generated/sidero/base/internal/unicode/unicodedata.d", internal.data);
+    append(UnicodeAPIFile, api.data);
+    write(UnicodeLUTDirectory ~ "unicodedata.d", internal.data);
 }
 
 /*

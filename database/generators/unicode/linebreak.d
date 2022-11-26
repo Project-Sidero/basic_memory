@@ -1,4 +1,5 @@
 module generators.unicode.linebreak;
+import generators.constants;
 
 void lineBreak() {
     import std.file : readText, write, append;
@@ -45,8 +46,8 @@ void lineBreak() {
         internal ~= gotDcode[1];
     }
 
-    append("generated/sidero/base/text/unicode/database.d", api.data);
-    write("generated/sidero/base/internal/unicode/linebreak.d", internal.data);
+    append(UnicodeAPIFile, api.data);
+    write(UnicodeLUTDirectory ~ "linebreak.d", internal.data);
 }
 
 private:

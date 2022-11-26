@@ -1,4 +1,5 @@
 module generators.unicode.emoji_data;
+import generators.constants;
 
 void emojiData() {
     import std.file : readText, write, append;
@@ -46,8 +47,8 @@ void emojiData() {
         }
     }
 
-    append("generated/sidero/base/text/unicode/database.d", api.data);
-    write("generated/sidero/base/internal/unicode/emoji_data.d", internal.data);
+    append(UnicodeAPIFile, api.data);
+    write(UnicodeLUTDirectory ~ "emoji_data.d", internal.data);
 }
 
 private:

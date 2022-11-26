@@ -1,4 +1,5 @@
 module generators.unicode.casefolding;
+import generators.constants;
 
 void caseFolding() {
     import std.file : readText, write, append;
@@ -160,8 +161,8 @@ void caseFolding() {
         internal ~= gotDcode[1];
     }
 
-    append("generated/sidero/base/text/unicode/database.d", api.data);
-    write("generated/sidero/base/internal/unicode/casefolding.d", internal.data);
+    append(UnicodeAPIFile, api.data);
+    write(UnicodeLUTDirectory ~ "casefolding.d", internal.data);
 }
 
 private:

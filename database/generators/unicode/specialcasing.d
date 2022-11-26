@@ -1,4 +1,5 @@
 ﻿module generators.unicode.specialcasing;
+import generators.constants;
 
 void specialCasing() {
     import std.file : readText, write, append;
@@ -128,8 +129,8 @@ export immutable(SpecialCasing) sidero_utf_lut_getSpecialCasingTurkic(dchar inpu
 };
     }
 
-    append("generated/sidero/base/text/unicode/database.d", api.data);
-    write("generated/sidero/base/internal/unicode/specialcasing.d", internal.data);
+    append(UnicodeAPIFile, api.data);
+    write(UnicodeLUTDirectory ~ "specialcasing.d", internal.data);
 }
 
 private:

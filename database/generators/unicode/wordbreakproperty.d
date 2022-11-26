@@ -1,4 +1,5 @@
 ﻿module generators.unicode.wordbreakproperty;
+import generators.constants;
 
 void wordBreakProperty() {
     import std.file : readText, write, append;
@@ -47,8 +48,8 @@ void wordBreakProperty() {
         internal ~= gotDcode[1];
     }
 
-    append("generated/sidero/base/text/unicode/database.d", api.data);
-    write("generated/sidero/base/internal/unicode/wordbreakproperty.d", internal.data);
+    append(UnicodeAPIFile, api.data);
+    write(UnicodeLUTDirectory ~ "wordbreakproperty.d", internal.data);
 }
 
 private:

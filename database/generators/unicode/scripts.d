@@ -1,4 +1,5 @@
 module generators.unicode.scripts;
+import generators.constants;
 
 void handleScripts() {
     import std.file : readText, write, append;
@@ -92,8 +93,8 @@ void handleScripts() {
         }
     }
 
-    append("generated/sidero/base/text/unicode/database.d", api.data);
-    write("generated/sidero/base/internal/unicode/scripts.d", internal.data);
+    append(UnicodeAPIFile, api.data);
+    write(UnicodeLUTDirectory ~ "scripts.d", internal.data);
 }
 
 private:

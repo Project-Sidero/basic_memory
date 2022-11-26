@@ -12,8 +12,6 @@
     "sourcePaths": [],
     "sourceFiles": ["source/ignoreme.d"],
     "injectSourceFiles": ["source/sidero/base/allocators/gc_hook.d"],
-    "dflags": ["-preview=dip1000", "-preview=dip25", "-allinst"],
-    "dflags-windows-ldc": ["--fvisibility=public"],
 
     "dependencies": {
         "sidero_base:source": "*"
@@ -35,8 +33,9 @@
         {
             "name": "source",
             "targetType": "sourceLibrary",
-            "importPaths": ["source", "database/generated"],
+            "importPaths": ["source"],
             "sourcePaths": ["source", "database/generated"],
+            "sourceFiles": ["imports/sidero/base/text/unicode/database.d"],
             "dflags": ["-preview=dip1000", "-preview=dip25", "-allinst"],
             "dflags-windows-ldc": ["--fvisibility=public"]
         }

@@ -109,6 +109,54 @@ struct StringBuilder_UTF(Char_) {
 
             return result;
         }
+
+        void construct(InputChar)(scope const(InputChar)[] input, RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage
+        .init) {
+            setupState(allocator);
+
+            if (input.length > 0) {
+                state.handle((StateIterator.S8 state, StateIterator.I8 iterator) @trusted {
+                    assert(state !is null);
+
+                    LiteralAsTargetChar!(InputChar, char) latc;
+                    latc.literal = input;
+                    auto osat = latc.get;
+
+                    state.language = language;
+                    assert(osat.length() > 0);
+                    state.externalInsert(iterator, 0, osat, false);
+                    assert(osat.length() > 0);
+                }, (StateIterator.S16 state, StateIterator.I16 iterator) @trusted {
+                    assert(state !is null);
+
+                    LiteralAsTargetChar!(InputChar, wchar) latc;
+                    latc.literal = input;
+                    auto osat = latc.get;
+
+                    state.language = language;
+                    state.externalInsert(iterator, 0, osat, false);
+                }, (StateIterator.S32 state, StateIterator.I32 iterator) @trusted {
+                    assert(state !is null);
+
+                    LiteralAsTargetChar!(InputChar, dchar) latc;
+                    latc.literal = input;
+                    auto osat = latc.get;
+
+                    state.language = language;
+                    state.externalInsert(iterator, 0, osat, false);
+                });
+            }
+        }
+
+        void construct(Char2)(scope String_UTF!Char2 input, RCAllocator allocator = RCAllocator.init) scope @nogc @trusted {
+            input.stripZeroTerminator;
+
+            input.literalEncoding.handle(() { this.__ctor(cast(const(char)[])input.literal, allocator, input.language); }, () {
+                this.__ctor(cast(const(wchar)[])input.literal, allocator, input.language);
+            }, () { this.__ctor(cast(const(dchar)[])input.literal, allocator, input.language); }, () {
+                this.__ctor(LiteralType.init, allocator);
+            });
+        }
     }
 
 export:
@@ -302,42 +350,21 @@ nothrow @safe:
     }
 
     ///
-    this(InputChar)(scope const(InputChar)[] input, RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage
-            .init) if (is(InputChar == char) || is(InputChar == wchar) || is(InputChar == dchar)) {
-        setupState(allocator);
+    this(scope const(char)[] input, RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage
+            .init) {
+        this.construct(input, allocator, language);
+    }
 
-        if (input.length > 0) {
-            state.handle((StateIterator.S8 state, StateIterator.I8 iterator) @trusted {
-                assert(state !is null);
+    ///
+    this(scope const(wchar)[] input, RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage
+    .init) {
+        this.construct(input, allocator, language);
+    }
 
-                LiteralAsTargetChar!(InputChar, char) latc;
-                latc.literal = input;
-                auto osat = latc.get;
-
-                state.language = language;
-                assert(osat.length() > 0);
-                state.externalInsert(iterator, 0, osat, false);
-                assert(osat.length() > 0);
-            }, (StateIterator.S16 state, StateIterator.I16 iterator) @trusted {
-                assert(state !is null);
-
-                LiteralAsTargetChar!(InputChar, wchar) latc;
-                latc.literal = input;
-                auto osat = latc.get;
-
-                state.language = language;
-                state.externalInsert(iterator, 0, osat, false);
-            }, (StateIterator.S32 state, StateIterator.I32 iterator) @trusted {
-                assert(state !is null);
-
-                LiteralAsTargetChar!(InputChar, dchar) latc;
-                latc.literal = input;
-                auto osat = latc.get;
-
-                state.language = language;
-                state.externalInsert(iterator, 0, osat, false);
-            });
-        }
+    ///
+    this(scope const(dchar)[] input, RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage
+    .init) {
+        this.construct(input, allocator, language);
     }
 
     ///
@@ -420,14 +447,18 @@ nothrow @safe:
     }
 
     ///
-    this(Char2)(scope String_UTF!Char2 input, RCAllocator allocator = RCAllocator.init) scope @nogc @trusted {
-        input.stripZeroTerminator;
+    this(scope String_UTF!char input, RCAllocator allocator = RCAllocator.init) scope @nogc @trusted {
+        this.construct(input, allocator);
+    }
 
-        input.literalEncoding.handle(() { this.__ctor(cast(const(char)[])input.literal, allocator, input.language); }, () {
-            this.__ctor(cast(const(wchar)[])input.literal, allocator, input.language);
-        }, () { this.__ctor(cast(const(dchar)[])input.literal, allocator, input.language); }, () {
-            this.__ctor(LiteralType.init, allocator);
-        });
+    ///
+    this(scope String_UTF!wchar input, RCAllocator allocator = RCAllocator.init) scope @nogc @trusted {
+        this.construct(input, allocator);
+    }
+
+    ///
+    this(scope String_UTF!dchar input, RCAllocator allocator = RCAllocator.init) scope @nogc @trusted {
+        this.construct(input, allocator);
     }
 
     ///
@@ -712,40 +743,42 @@ nothrow @safe:
         assert(readOnly == Text);
     }
 
-    ///
-    StringBuilder_UTF normalize(bool compatibility, bool composition, UnicodeLanguage language) scope @nogc @trusted {
-        state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
-            assert(state !is null);
-            state.externalNormalization(iterator, language, compatibility, composition);
-        }, (StateIterator.S16 state, StateIterator.I16 iterator) {
-            assert(state !is null);
-            state.externalNormalization(iterator, language, compatibility, composition);
-        }, (StateIterator.S32 state, StateIterator.I32 iterator) {
-            assert(state !is null);
-            state.externalNormalization(iterator, language, compatibility, composition);
-        });
+    @nogc {
+        ///
+        StringBuilder_UTF normalize(bool compatibility, bool composition, UnicodeLanguage language) scope @trusted {
+            state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+                assert(state !is null);
+                state.externalNormalization(iterator, language, compatibility, composition);
+            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+                assert(state !is null);
+                state.externalNormalization(iterator, language, compatibility, composition);
+            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+                assert(state !is null);
+                state.externalNormalization(iterator, language, compatibility, composition);
+            });
 
-        return this;
-    }
+            return this;
+        }
 
-    ///
-    StringBuilder_UTF toNFD(UnicodeLanguage language = UnicodeLanguage.Unknown) scope @nogc {
-        return this.normalize(false, false, language);
-    }
+        ///
+        StringBuilder_UTF toNFD(UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return this.normalize(false, false, language);
+        }
 
-    ///
-    StringBuilder_UTF toNFC(UnicodeLanguage language = UnicodeLanguage.Unknown) scope @nogc {
-        return this.normalize(false, true, language);
-    }
+        ///
+        StringBuilder_UTF toNFC(UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return this.normalize(false, true, language);
+        }
 
-    ///
-    StringBuilder_UTF toNFKD(UnicodeLanguage language = UnicodeLanguage.Unknown) scope @nogc {
-        return this.normalize(true, false, language);
-    }
+        ///
+        StringBuilder_UTF toNFKD(UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return this.normalize(true, false, language);
+        }
 
-    ///
-    StringBuilder_UTF toNFKC(UnicodeLanguage language = UnicodeLanguage.Unknown) scope @nogc {
-        return this.normalize(true, true, language);
+        ///
+        StringBuilder_UTF toNFKC(UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return this.normalize(true, true, language);
+        }
     }
 
     ///
@@ -912,10 +945,10 @@ nothrow @safe:
         }
     }
 
-    @nogc {
-        ///
-        alias compare = opCmp;
+    ///
+    alias compare = opCmp;
 
+    @nogc {
         ///
         int opCmp(scope const(char)[] other) scope {
             return opCmpImpl(other, true);

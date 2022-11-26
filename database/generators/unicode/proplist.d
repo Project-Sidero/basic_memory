@@ -1,4 +1,5 @@
 ﻿module generators.unicode.proplist;
+import generators.constants;
 
 void propList() {
     import std.file : readText, write, append;
@@ -53,8 +54,8 @@ void propList() {
 alias isUnicodeWhiteSpace = sidero_utf_lut_isMemberOfWhite_Space;
 };
 
-    append("generated/sidero/base/text/unicode/database.d", api.data);
-    write("generated/sidero/base/internal/unicode/proplist.d", internal.data);
+    append(UnicodeAPIFile, api.data);
+    write(UnicodeLUTDirectory ~ "proplist.d", internal.data);
 }
 
 private:

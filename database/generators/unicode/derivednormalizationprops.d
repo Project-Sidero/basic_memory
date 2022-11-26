@@ -1,4 +1,5 @@
 ﻿module generators.unicode.derivednormalizationprops;
+import generators.constants;
 
 void derivedNormalizationProps() {
     import std.file : readText, write, append;
@@ -45,8 +46,8 @@ void derivedNormalizationProps() {
         internal ~= gotDcode[1];
     }
 
-    append("generated/sidero/base/text/unicode/database.d", api.data);
-    write("generated/sidero/base/internal/unicode/derivednormalizationprops.d", internal.data);
+    append(UnicodeAPIFile, api.data);
+    write(UnicodeLUTDirectory ~ "derivednormalizationprops.d", internal.data);
 }
 
 private:

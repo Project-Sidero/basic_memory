@@ -1,4 +1,5 @@
 ﻿module generators.unicode.hangulsyllabletype;
+import generators.constants;
 
 void hangulSyllableType() {
     import std.file : readText, write, append;
@@ -127,8 +128,8 @@ struct ValueRange {
         internal ~= "}\n";
     }
 
-    append("generated/sidero/base/text/unicode/database.d", api.data);
-    write("generated/sidero/base/internal/unicode/hangulsyllabletype.d", internal.data);
+    append(UnicodeAPIFile, api.data);
+    write(UnicodeLUTDirectory ~ "hangulsyllabletype.d", internal.data);
 }
 
 private:
