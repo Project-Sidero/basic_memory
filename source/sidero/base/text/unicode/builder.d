@@ -163,8 +163,6 @@ nothrow @safe:
     @disable auto opCast(T)();
 
     this(ref return scope StringBuilder_UTF other) @trusted scope @nogc {
-        import core.atomic : atomicOp;
-
         this.tupleof = other.tupleof;
 
         state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
@@ -185,13 +183,22 @@ nothrow @safe:
     @disable this(this);
 
     ///
-    this(RCAllocator allocator) {
+    this(RCAllocator allocator) scope @nogc {
         this.__ctor(LiteralType.init, allocator);
     }
 
     ///
-    this(InputChar)(RCAllocator allocator, scope const(InputChar)[] input...)
-            if (is(InputChar == char) || is(InputChar == wchar) || is(InputChar == dchar)) {
+    this(RCAllocator allocator, scope const(char)[] input...) scope @nogc {
+        this.__ctor(input, allocator);
+    }
+
+    ///
+    this(RCAllocator allocator, scope const(wchar)[] input...) scope @nogc {
+        this.__ctor(input, allocator);
+    }
+
+    ///
+    this(RCAllocator allocator, scope const(dchar)[] input...) scope @nogc {
         this.__ctor(input, allocator);
     }
 
@@ -273,7 +280,17 @@ nothrow @safe:
     }
 
     ///
-    this(Char2)(RCAllocator allocator, scope String_UTF!Char2 input) scope @nogc {
+    this(RCAllocator allocator, scope String_UTF!char input = String_UTF!char.init) scope @nogc {
+        this.__ctor(input, allocator);
+    }
+
+    ///
+    this(RCAllocator allocator, scope String_UTF!wchar input = String_UTF!wchar.init) scope @nogc {
+        this.__ctor(input, allocator);
+    }
+
+    ///
+    this(RCAllocator allocator, scope String_UTF!dchar input = String_UTF!dchar.init) scope @nogc {
         this.__ctor(input, allocator);
     }
 
@@ -696,7 +713,7 @@ nothrow @safe:
     }
 
     ///
-    StringBuilder_UTF normalize(bool compatibility, bool composition, UnicodeLanguage language) {
+    StringBuilder_UTF normalize(bool compatibility, bool composition, UnicodeLanguage language) scope @nogc @trusted {
         state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
             assert(state !is null);
             state.externalNormalization(iterator, language, compatibility, composition);
@@ -712,22 +729,22 @@ nothrow @safe:
     }
 
     ///
-    StringBuilder_UTF toNFD(UnicodeLanguage language = UnicodeLanguage.Unknown) {
+    StringBuilder_UTF toNFD(UnicodeLanguage language = UnicodeLanguage.Unknown) scope @nogc {
         return this.normalize(false, false, language);
     }
 
     ///
-    StringBuilder_UTF toNFC(UnicodeLanguage language = UnicodeLanguage.Unknown) {
+    StringBuilder_UTF toNFC(UnicodeLanguage language = UnicodeLanguage.Unknown) scope @nogc {
         return this.normalize(false, true, language);
     }
 
     ///
-    StringBuilder_UTF toNFKD(UnicodeLanguage language = UnicodeLanguage.Unknown) {
+    StringBuilder_UTF toNFKD(UnicodeLanguage language = UnicodeLanguage.Unknown) scope @nogc {
         return this.normalize(true, false, language);
     }
 
     ///
-    StringBuilder_UTF toNFKC(UnicodeLanguage language = UnicodeLanguage.Unknown) {
+    StringBuilder_UTF toNFKC(UnicodeLanguage language = UnicodeLanguage.Unknown) scope @nogc {
         return this.normalize(true, true, language);
     }
 
@@ -813,7 +830,17 @@ nothrow @safe:
         }
 
         ///
-        bool opEquals(Char)(scope StringBuilder_UTF!Char other) scope {
+        bool opEquals(scope StringBuilder_UTF!char other) scope {
+            return opCmp(other) == 0;
+        }
+
+        ///
+        bool opEquals(scope StringBuilder_UTF!wchar other) scope {
+            return opCmp(other) == 0;
+        }
+
+        ///
+        bool opEquals(scope StringBuilder_UTF!dchar other) scope {
             return opCmp(other) == 0;
         }
 
@@ -870,7 +897,17 @@ nothrow @safe:
         }
 
         ///
-        bool ignoreCaseEquals(Char)(scope StringBuilder_UTF!Char other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        bool ignoreCaseEquals(scope StringBuilder_UTF!char other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return ignoreCaseCompare(other, language) == 0;
+        }
+
+        ///
+        bool ignoreCaseEquals(scope StringBuilder_UTF!wchar other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return ignoreCaseCompare(other, language) == 0;
+        }
+
+        ///
+        bool ignoreCaseEquals(scope StringBuilder_UTF!dchar other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
             return ignoreCaseCompare(other, language) == 0;
         }
     }
@@ -968,7 +1005,17 @@ nothrow @safe:
         }
 
         ///
-        int opCmp(Char)(scope StringBuilder_UTF!Char other) scope {
+        int opCmp(scope StringBuilder_UTF!char other) scope {
+            return opCmpImpl(other, true);
+        }
+
+        ///
+        int opCmp(scope StringBuilder_UTF!wchar other) scope {
+            return opCmpImpl(other, true);
+        }
+
+        ///
+        int opCmp(scope StringBuilder_UTF!dchar other) scope {
             return opCmpImpl(other, true);
         }
 
@@ -1057,8 +1104,18 @@ nothrow @safe:
         }
 
         ///
-        int ignoreCaseCompare(Char)(scope StringBuilder_UTF!Char other) scope {
-            return opCmpImpl(other, false);
+        int ignoreCaseCompare(scope StringBuilder_UTF!char other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return opCmpImpl(other, false, language);
+        }
+
+        ///
+        int ignoreCaseCompare(scope StringBuilder_UTF!wchar other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return opCmpImpl(other, false, language);
+        }
+
+        ///
+        int ignoreCaseCompare(scope StringBuilder_UTF!dchar other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return opCmpImpl(other, false, language);
         }
 
         ///
