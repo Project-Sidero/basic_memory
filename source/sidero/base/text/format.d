@@ -41,7 +41,7 @@ void formattedWrite(alias Format, Builder, Args...)(scope Builder builder, scope
 ///
 void formattedWrite(Builder, Format, Args...)(scope Builder builder, scope Format format, scope Args args) @trusted
         if (isBuilderString!Builder && (isReadOnlyString!Format || isSomeString!Format)) {
-    import std.algorithm : startsWith;
+    import sidero.base.algorithm : startsWith;
 
     auto rfs = RetrieveFormatSpecifier!Format(format);
     auto fv = FormatValue!Builder(builder);
@@ -866,10 +866,15 @@ scope:
             static if (is(ActualType == class)) {
                 static foreach_reverse (i, Base; BaseClassesTuple!ActualType) {
                     static foreach (name; FieldNameTuple!Base) {
-                        static if (!(hasUDA!(__traits(getMember, input, name), PrintIgnore) ||
-                                hasUDA!(__traits(getMember, input, name), PrettyPrintIgnore)) && __traits(getVisibility,
-                                __traits(getMember, input, name)) != "private") {
-                            static if (__traits(compiles, __traits(getMember, input, name))) {
+                        {
+                            alias member = __traits(getMember, cast(Base)input, name);
+                            bool ignore;
+
+                            foreach(attr; __traits(getAttributes, member)) {
+                                ignore = ignore || is(attr == PrintIgnore) || is(attr == PrettyPrintIgnore);
+                            }
+
+                            if (!ignore) {
                                 if (!isFirst)
                                     builder ~= ", ";
                                 else
@@ -883,15 +888,22 @@ scope:
             }
 
             static foreach (name; FieldNameTuple!ActualType) {
-                static if (__traits(compiles, __traits(getMember, input, name)) && !(hasUDA!(__traits(getMember,
-                        input, name), PrintIgnore) || hasUDA!(__traits(getMember, input, name), PrettyPrintIgnore)) &&
-                        __traits(getVisibility, __traits(getMember, input, name)) != "private") {
-                    if (!isFirst)
-                        builder ~= ", ";
-                    else
-                        isFirst = false;
+                {
+                    alias member = __traits(getMember, input, name);
+                    bool ignore;
 
-                    this.write(String_ASCII.init, __traits(getMember, input, name), true);
+                    foreach(attr; __traits(getAttributes, member)) {
+                        ignore = ignore || is(attr == PrintIgnore) || is(attr == PrettyPrintIgnore);
+                    }
+
+                    if (!ignore) {
+                        if (!isFirst)
+                            builder ~= ", ";
+                        else
+                            isFirst = false;
+
+                        this.write(String_ASCII.init, __traits(getMember, input, name), true);
+                    }
                 }
             }
 

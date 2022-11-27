@@ -201,8 +201,6 @@ nothrow @nogc:
 
     ///
     this(ref return scope ConcurrentLinkedList other) @trusted scope {
-        import core.atomic : atomicOp;
-
         this.tupleof = other.tupleof;
 
         if (!isNull)

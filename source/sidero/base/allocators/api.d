@@ -7,7 +7,6 @@ Copyright: 2022 Richard Andrew Cattermole
  */
 module sidero.base.allocators.api;
 import std.typecons : Ternary;
-public import std.experimental.allocator : dispose;
 
 ///
 private {
@@ -276,7 +275,7 @@ auto make(T, Allocator, Args...)(scope auto ref Allocator alloc, scope return au
         sizeToAllocate = __traits(classInstanceSize, T);
     }
 
-    version(D_BetterC) {
+    version (D_BetterC) {
         void[] array = alloc.allocate(sizeToAllocate);
     } else {
         void[] array = alloc.allocate(sizeToAllocate, typeid(T));
@@ -375,7 +374,7 @@ T[] makeArray(T, Allocator)(auto ref Allocator alloc, const(T)[] initValues) @tr
         alloc.deallocate(cast(void[])ret);
         return null;
     } else {
-        foreach(i, ref v; initValues)
+        foreach (i, ref v; initValues)
             ret[i] = v;
         return ret;
     }
@@ -432,8 +431,46 @@ bool shrinkArray(T, Allocator)(scope auto ref Allocator alloc, scope ref T[] arr
     return result;
 }
 
+/// A subset of std.experimental.allocator one simplified to be faster to compile.
+void dispose(Type, Allocator)(auto ref Allocator alloc, scope auto ref Type* p) {
+    destroy(*p);
+    alloc.deallocate((cast(void*)p)[0 .. Type.sizeof]);
+    p = null;
+}
+
+/// Ditto
+void dispose(Type, Allocator)(auto ref Allocator alloc, scope auto ref Type p) if (is(Type == class) || is(Type == interface)) {
+    if (!p)
+        return;
+    static if (is(Type == interface)) {
+        version (Windows) {
+            import core.sys.windows.unknwn : IUnknown;
+
+            static assert(!is(T : IUnknown), "COM interfaces can't be destroyed in " ~ __PRETTY_FUNCTION__);
+        }
+        auto ob = cast(Object)p;
+    } else
+        alias ob = p;
+    auto support = (cast(void*)ob)[0 .. typeid(ob).initializer.length];
+    destroy(p);
+    alloc.deallocate(support);
+    p = null;
+}
+
+/// Ditto
+void dispose(Type, Allocator)(auto ref Allocator alloc, scope auto ref Type[] array) {
+    static if (!is(typeof(array[0]) == void)) {
+        foreach (ref e; array) {
+            destroy(e);
+        }
+    }
+
+    alloc.deallocate(array);
+    array = null;
+}
+
 private:
-import std.meta : staticMap, AliasSeq;
+import std.meta : AliasSeq;
 
 T* defaultInstanceForAllocator(T)() {
     import std.traits : isPointer;
@@ -447,5 +484,10 @@ T* defaultInstanceForAllocator(T)() {
         return null;
 }
 
-alias MakeAllArray(Types...) = staticMap!(MakeArray, Types);
-alias MakeArray(T) = T[];
+template MakeAllArray(Types...) {
+    alias MakeAllArray = AliasSeq!();
+
+    static foreach (Type; Types) {
+        MakeAllArray = AliasSeq!(MakeAllArray, Type[]);
+    }
+}

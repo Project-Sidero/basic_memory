@@ -359,8 +359,6 @@ nothrow @nogc:
 
     ///
     this(ref return scope String_UTF other) @trusted scope {
-        import core.atomic : atomicOp;
-
         this.tupleof = other.tupleof;
 
         if (haveIterator)
@@ -2736,8 +2734,6 @@ private:
     scope @nogc nothrow:
 
         void rc(bool add) @trusted {
-            import core.atomic : atomicOp;
-
             if (add)
                 atomicOp!"+="(refCount, 1);
             else if (atomicOp!"-="(refCount, 1) == 0) {
@@ -2747,7 +2743,7 @@ private:
         }
     }
 
-    void setupIterator() scope @trusted {
+    void setupIterator()() scope @trusted {
         if (isNull || haveIterator)
             return;
 

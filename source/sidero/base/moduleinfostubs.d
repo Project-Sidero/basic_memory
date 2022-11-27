@@ -8,8 +8,6 @@ else version (D_BetterC)
 version (NeedStubs) {
     static foreach (Stub; Stubs) {
         mixin(() {
-            import std.format : format;
-
             string ret = "export extern(C) void " ~ Stub.mangleName ~ "() { asm { naked; ";
 
             void add(ubyte b) {

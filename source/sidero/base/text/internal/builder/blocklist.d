@@ -1,7 +1,6 @@
 module sidero.base.text.internal.builder.blocklist;
 import sidero.base.allocators;
 import sidero.base.parallelism.mutualexclusion;
-import core.atomic;
 
 alias BLIb = BlockListImpl!ubyte;
 alias BLIc = BlockListImpl!char;

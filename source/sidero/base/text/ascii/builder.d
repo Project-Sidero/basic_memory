@@ -122,8 +122,6 @@ nothrow @safe:
     @disable auto opCast(T)();
 
     this(ref return scope StringBuilder_ASCII other) @trusted scope @nogc {
-        import core.atomic : atomicOp;
-
         this.tupleof = other.tupleof;
 
         if (state !is null)
