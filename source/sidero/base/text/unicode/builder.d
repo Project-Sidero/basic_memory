@@ -110,8 +110,8 @@ struct StringBuilder_UTF(Char_) {
             return result;
         }
 
-        void construct(InputChar)(scope const(InputChar)[] input, RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage
-        .init) {
+        void construct(InputChar)(scope const(InputChar)[] input, RCAllocator allocator = RCAllocator.init,
+                UnicodeLanguage language = UnicodeLanguage.init) {
             setupState(allocator);
 
             if (input.length > 0) {
@@ -350,20 +350,17 @@ nothrow @safe:
     }
 
     ///
-    this(scope const(char)[] input, RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage
-            .init) {
+    this(scope const(char)[] input, RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.init) {
         this.construct(input, allocator, language);
     }
 
     ///
-    this(scope const(wchar)[] input, RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage
-    .init) {
+    this(scope const(wchar)[] input, RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.init) {
         this.construct(input, allocator, language);
     }
 
     ///
-    this(scope const(dchar)[] input, RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage
-    .init) {
+    this(scope const(dchar)[] input, RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.init) {
         this.construct(input, allocator, language);
     }
 
@@ -2180,7 +2177,7 @@ nothrow @safe:
 
     @nogc {
         ///
-        StringBuilder_UTF prepend(scope const(char)[] input...) scope return {
+        StringBuilder_UTF prepend(scope const(char)[] input...) scope return @trusted {
             return this.insert(0, input);
         }
 
@@ -2190,7 +2187,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_UTF prepend(scope const(wchar)[] input...) scope return {
+        StringBuilder_UTF prepend(scope const(wchar)[] input...) scope return @trusted {
             return this.insert(0, input);
         }
 
@@ -2200,7 +2197,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_UTF prepend(scope const(dchar)[] input...) scope return {
+        StringBuilder_UTF prepend(scope const(dchar)[] input...) scope return @trusted {
             return this.insert(0, input);
         }
 
@@ -2210,7 +2207,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_UTF prepend(scope String_ASCII input) scope return {
+        StringBuilder_UTF prepend(scope String_ASCII input) scope return @trusted {
             return this.insert(0, input);
         }
 
@@ -2220,7 +2217,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_UTF prepend(scope String_UTF8 input) scope return {
+        StringBuilder_UTF prepend(scope String_UTF8 input) scope return @trusted {
             return this.insert(0, input);
         }
 
@@ -2230,7 +2227,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_UTF prepend(scope String_UTF16 input) scope return {
+        StringBuilder_UTF prepend(scope String_UTF16 input) scope return @trusted {
             return this.insert(0, input);
         }
 
@@ -2240,7 +2237,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_UTF prepend(scope String_UTF32 input) scope return {
+        StringBuilder_UTF prepend(scope String_UTF32 input) scope return @trusted {
             return this.insert(0, input);
         }
 
@@ -2250,7 +2247,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_UTF prepend(scope StringBuilder_ASCII input) scope return {
+        StringBuilder_UTF prepend(scope StringBuilder_ASCII input) scope return @trusted {
             return this.insert(0, input);
         }
 
@@ -2260,7 +2257,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_UTF prepend(scope StringBuilder_UTF8 input) scope return {
+        StringBuilder_UTF prepend(scope StringBuilder_UTF8 input) scope return @trusted {
             return this.insert(0, input);
         }
 
@@ -2270,7 +2267,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_UTF prepend(scope StringBuilder_UTF16 input) scope return {
+        StringBuilder_UTF prepend(scope StringBuilder_UTF16 input) scope return @trusted {
             return this.insert(0, input);
         }
 
@@ -2280,7 +2277,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_UTF prepend(scope StringBuilder_UTF32 input) scope return {
+        StringBuilder_UTF prepend(scope StringBuilder_UTF32 input) scope return @trusted {
             return this.insert(0, input);
         }
 
@@ -2292,7 +2289,7 @@ nothrow @safe:
 
     @nogc {
         ///
-        void opOpAssign(string op : "~")(scope const(char)[] input) scope return {
+        void opOpAssign(string op : "~")(scope const(char)[] input) scope return @trusted {
             this.append(input);
         }
 
@@ -2304,7 +2301,7 @@ nothrow @safe:
         }
 
         ///
-        void opOpAssign(string op : "~")(scope const(wchar)[] input) scope return {
+        void opOpAssign(string op : "~")(scope const(wchar)[] input) scope return @trusted {
             this.append(input);
         }
 
@@ -2316,7 +2313,7 @@ nothrow @safe:
         }
 
         ///
-        void opOpAssign(string op : "~")(scope const(dchar)[] input) scope return {
+        void opOpAssign(string op : "~")(scope const(dchar)[] input) scope return @trusted {
             this.append(input);
         }
 
@@ -2328,7 +2325,7 @@ nothrow @safe:
         }
 
         ///
-        void opOpAssign(string op : "~")(scope String_ASCII input) scope return {
+        void opOpAssign(string op : "~")(scope String_ASCII input) scope return @trusted {
             this.append(input);
         }
 
@@ -2340,7 +2337,7 @@ nothrow @safe:
         }
 
         ///
-        void opOpAssign(string op : "~")(scope String_UTF8 input) scope return {
+        void opOpAssign(string op : "~")(scope String_UTF8 input) scope return @trusted {
             this.append(input);
         }
 
@@ -2352,7 +2349,7 @@ nothrow @safe:
         }
 
         ///
-        void opOpAssign(string op : "~")(scope String_UTF16 input) scope return {
+        void opOpAssign(string op : "~")(scope String_UTF16 input) scope return @trusted {
             this.append(input);
         }
 
@@ -2364,7 +2361,7 @@ nothrow @safe:
         }
 
         ///
-        void opOpAssign(string op : "~")(scope String_UTF32 input) scope return {
+        void opOpAssign(string op : "~")(scope String_UTF32 input) scope return @trusted {
             this.append(input);
         }
 
@@ -2376,7 +2373,7 @@ nothrow @safe:
         }
 
         ///
-        void opOpAssign(string op : "~")(scope StringBuilder_ASCII input) scope return {
+        void opOpAssign(string op : "~")(scope StringBuilder_ASCII input) scope return @trusted {
             this.append(input);
         }
 
@@ -2388,7 +2385,7 @@ nothrow @safe:
         }
 
         ///
-        void opOpAssign(string op : "~")(scope StringBuilder_UTF8 input) scope return {
+        void opOpAssign(string op : "~")(scope StringBuilder_UTF8 input) scope return @trusted {
             this.append(input);
         }
 
@@ -2400,7 +2397,7 @@ nothrow @safe:
         }
 
         ///
-        void opOpAssign(string op : "~")(scope StringBuilder_UTF16 input) scope return {
+        void opOpAssign(string op : "~")(scope StringBuilder_UTF16 input) scope return @trusted {
             this.append(input);
         }
 
@@ -2412,7 +2409,7 @@ nothrow @safe:
         }
 
         ///
-        void opOpAssign(string op : "~")(scope StringBuilder_UTF32 input) scope return {
+        void opOpAssign(string op : "~")(scope StringBuilder_UTF32 input) scope return @trusted {
             this.append(input);
         }
 
@@ -2567,7 +2564,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_UTF append(scope const(char)[] input...) scope return {
+        StringBuilder_UTF append(scope const(char)[] input...) scope return @trusted {
             return this.insert(ptrdiff_t.max, input);
         }
 
@@ -2577,7 +2574,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_UTF append(scope const(wchar)[] input...) scope return {
+        StringBuilder_UTF append(scope const(wchar)[] input...) scope return @trusted {
             return this.insert(ptrdiff_t.max, input);
         }
 
@@ -2587,7 +2584,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_UTF append(scope const(dchar)[] input...) scope return {
+        StringBuilder_UTF append(scope const(dchar)[] input...) scope return @trusted {
             return this.insert(ptrdiff_t.max, input);
         }
 
@@ -2597,7 +2594,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_UTF append(scope String_ASCII input) scope return {
+        StringBuilder_UTF append(scope String_ASCII input) scope return @trusted {
             return this.insert(ptrdiff_t.max, input);
         }
 
@@ -2607,7 +2604,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_UTF append(scope String_UTF8 input) scope return {
+        StringBuilder_UTF append(scope String_UTF8 input) scope return @trusted {
             return this.insert(ptrdiff_t.max, input);
         }
 
@@ -2617,7 +2614,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_UTF append(scope String_UTF16 input) scope return {
+        StringBuilder_UTF append(scope String_UTF16 input) scope return @trusted {
             return this.insert(ptrdiff_t.max, input);
         }
 
@@ -2627,7 +2624,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_UTF append(scope String_UTF32 input) scope return {
+        StringBuilder_UTF append(scope String_UTF32 input) scope return @trusted {
             return this.insert(ptrdiff_t.max, input);
         }
 
@@ -2637,7 +2634,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_UTF append(scope StringBuilder_ASCII input) scope return {
+        StringBuilder_UTF append(scope StringBuilder_ASCII input) scope return @trusted {
             return this.insert(ptrdiff_t.max, input);
         }
 
@@ -2647,7 +2644,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_UTF append(scope StringBuilder_UTF8 input) scope return {
+        StringBuilder_UTF append(scope StringBuilder_UTF8 input) scope return @trusted {
             return this.insert(ptrdiff_t.max, input);
         }
 
@@ -2657,7 +2654,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_UTF append(scope StringBuilder_UTF16 input) scope return {
+        StringBuilder_UTF append(scope StringBuilder_UTF16 input) scope return @trusted {
             return this.insert(ptrdiff_t.max, input);
         }
 
@@ -2667,7 +2664,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_UTF append(scope StringBuilder_UTF32 input) scope return {
+        StringBuilder_UTF append(scope StringBuilder_UTF32 input) scope return @trusted {
             return this.insert(ptrdiff_t.max, input);
         }
 
@@ -4483,7 +4480,7 @@ struct UTF_State(Char) {
     // /\ Internal
     // \/ Exposed
 
-    int externalOpCmp(scope Iterator* iterator, scope ref OtherStateAsTarget!dchar other, bool caseSensitive, UnicodeLanguage language) {
+    int externalOpCmp(scope Iterator* iterator, scope ref OtherStateAsTarget!dchar other, bool caseSensitive, UnicodeLanguage language) @trusted {
         import sidero.base.text.unicode.comparison : CaseAwareComparison;
         import sidero.base.text.unicode.characters.database : isTurkic;
 
@@ -4548,7 +4545,7 @@ struct UTF_State(Char) {
     }
 
     bool externalStartsWith(scope Iterator* iterator, scope ref OtherStateAsTarget!dchar other, bool caseSensitive,
-            UnicodeLanguage language) {
+            UnicodeLanguage language) @trusted {
         import sidero.base.text.unicode.comparison : CaseAwareComparison;
         import sidero.base.text.unicode.characters.database : isTurkic;
 
@@ -4575,7 +4572,7 @@ struct UTF_State(Char) {
         return result == 0;
     }
 
-    bool externalEndsWith(scope Iterator* iterator, scope ref OtherStateAsTarget!dchar other, bool caseSensitive, UnicodeLanguage language) {
+    bool externalEndsWith(scope Iterator* iterator, scope ref OtherStateAsTarget!dchar other, bool caseSensitive, UnicodeLanguage language) @trusted {
         import sidero.base.text.unicode.comparison : CaseAwareComparison;
         import sidero.base.text.unicode.characters.database : isTurkic;
 

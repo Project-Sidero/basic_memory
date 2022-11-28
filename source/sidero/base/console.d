@@ -472,12 +472,12 @@ void rawWrite(scope String_UTF8 input) @trusted {
 }
 
 /// Ditto
-void rawWrite(scope String_UTF16 input) {
+void rawWrite(scope String_UTF16 input) @trusted {
     rawWrite(input.byUTF8());
 }
 
 /// Ditto
-void rawWrite(scope String_UTF32 input) {
+void rawWrite(scope String_UTF32 input) @trusted {
     rawWrite(input.byUTF8());
 }
 

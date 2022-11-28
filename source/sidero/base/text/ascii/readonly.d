@@ -2358,7 +2358,7 @@ nothrow @nogc:
     //
 
     ///
-    String_ASCII strip() scope return {
+    String_ASCII strip() scope return @trusted {
         stripLeft();
         stripRight();
         return this;

@@ -982,7 +982,7 @@ nothrow @safe:
 
     @nogc {
         ///
-        StringBuilder_ASCII prepend(scope const(char)[] input...) scope return {
+        StringBuilder_ASCII prepend(scope const(char)[] input...) scope return @trusted {
             return this.insert(0, input);
         }
 
@@ -992,7 +992,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_ASCII prepend(scope LiteralType input...) scope return {
+        StringBuilder_ASCII prepend(scope LiteralType input...) scope return @trusted {
             return this.insert(0, input);
         }
 
@@ -1002,7 +1002,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_ASCII prepend(scope String_ASCII other) scope return {
+        StringBuilder_ASCII prepend(scope String_ASCII other) scope return @trusted {
             other.stripZeroTerminator;
 
             return this.insert(0, other);
@@ -1014,7 +1014,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_ASCII prepend(scope StringBuilder_ASCII input) scope return {
+        StringBuilder_ASCII prepend(scope StringBuilder_ASCII input) scope return @trusted {
             return this.insert(0, input);
         }
 
@@ -1026,7 +1026,7 @@ nothrow @safe:
 
     @nogc {
         ///
-        StringBuilder_ASCII opBinary(string op : "~")(scope const(char)[] input) scope {
+        StringBuilder_ASCII opBinary(string op : "~")(scope const(char)[] input) scope @trusted {
             StringBuilder_ASCII ret = this.dup;
             ret.append(input);
             return ret;
@@ -1039,7 +1039,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_ASCII opBinary(string op : "~")(scope LiteralType input) scope {
+        StringBuilder_ASCII opBinary(string op : "~")(scope LiteralType input) scope @trusted {
             StringBuilder_ASCII ret = this.dup;
             ret.append(input);
             return ret;
@@ -1052,7 +1052,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_ASCII opBinary(string op : "~")(scope String_ASCII other) scope {
+        StringBuilder_ASCII opBinary(string op : "~")(scope String_ASCII other) scope @trusted {
             other.stripZeroTerminator;
 
             StringBuilder_ASCII ret = this.dup;
@@ -1067,7 +1067,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_ASCII opBinary(string op : "~")(scope StringBuilder_ASCII input) scope {
+        StringBuilder_ASCII opBinary(string op : "~")(scope StringBuilder_ASCII input) scope @trusted {
             StringBuilder_ASCII ret = this.dup;
             ret.append(input);
             return ret;
@@ -1080,7 +1080,7 @@ nothrow @safe:
         }
 
         ///
-        void opOpAssign(string op : "~")(scope const(char)[] input) scope return {
+        void opOpAssign(string op : "~")(scope const(char)[] input) scope return @trusted {
             this.append(input);
         }
 
@@ -1092,7 +1092,7 @@ nothrow @safe:
         }
 
         ///
-        void opOpAssign(string op : "~")(scope LiteralType input) scope return {
+        void opOpAssign(string op : "~")(scope LiteralType input) scope return @trusted {
             this.append(input);
         }
 
@@ -1104,7 +1104,7 @@ nothrow @safe:
         }
 
         ///
-        void opOpAssign(string op : "~")(scope String_ASCII other) scope return {
+        void opOpAssign(string op : "~")(scope String_ASCII other) scope return @trusted {
             other.stripZeroTerminator;
 
             this.append(other);
@@ -1118,7 +1118,7 @@ nothrow @safe:
         }
 
         ///
-        void opOpAssign(string op : "~")(scope StringBuilder_ASCII input) scope return {
+        void opOpAssign(string op : "~")(scope StringBuilder_ASCII input) scope return @trusted {
             this.append(input);
         }
 
@@ -1130,7 +1130,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_ASCII append(scope const(char)[] input...) scope return {
+        StringBuilder_ASCII append(scope const(char)[] input...) scope return @trusted {
             return this.insert(ptrdiff_t.max, input);
         }
 
@@ -1140,7 +1140,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_ASCII append(scope LiteralType input...) scope return {
+        StringBuilder_ASCII append(scope LiteralType input...) scope return @trusted {
             return this.insert(ptrdiff_t.max, input);
         }
 
@@ -1150,7 +1150,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_ASCII append(scope String_ASCII other) scope return {
+        StringBuilder_ASCII append(scope String_ASCII other) scope return @trusted {
             other.stripZeroTerminator;
 
             return this.insert(ptrdiff_t.max, other);
@@ -1162,7 +1162,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_ASCII append(scope StringBuilder_ASCII input) scope return {
+        StringBuilder_ASCII append(scope StringBuilder_ASCII input) scope return @trusted {
             return this.insert(ptrdiff_t.max, input);
         }
 
@@ -1467,7 +1467,7 @@ private:
                 return state.externalOpCmp(iterator, osiu, caseSensitive);
         }
 
-        void insertImplReadOnly(scope String_ASCII other, ptrdiff_t offset = 0, bool clobber = false) {
+        void insertImplReadOnly(scope String_ASCII other, ptrdiff_t offset = 0, bool clobber = false) @trusted {
             setupState;
 
             ASCII_State.LiteralAsTarget alat;
@@ -1487,7 +1487,7 @@ private:
             state.externalInsert(iterator, offset, osiu, clobber);
         }
 
-        void insertImplBuilder(scope StringBuilder_ASCII other, ptrdiff_t offset = 0, bool clobber = false) {
+        void insertImplBuilder(scope StringBuilder_ASCII other, ptrdiff_t offset = 0, bool clobber = false) @trusted {
             setupState;
 
             ASCII_State.OtherStateIsUs asat;

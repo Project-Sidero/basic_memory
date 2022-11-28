@@ -2547,7 +2547,7 @@ nothrow @nogc:
     }
 
     ///
-    String_UTF strip() scope return {
+    String_UTF strip() scope return @trusted {
         stripLeft();
         stripRight();
         return this;
