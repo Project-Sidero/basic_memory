@@ -1515,7 +1515,7 @@ struct ConcurrentLinkedListIteratorList(Type) {
     static struct Iterator {
         Iterator* previous, next;
         size_t minimumOffsetFromHead, maximumOffsetFromHead;
-        int refCount;
+        ptrdiff_t refCount;
 
         Cursor forwards, backwards;
 
@@ -1663,7 +1663,7 @@ struct ConcurrentLinkedListNodeList(Type) {
     RCAllocator allocator, valueAllocator;
     Node head, tail;
     size_t allNodes, aliveNodes;
-    int refCount;
+    ptrdiff_t refCount;
 
     @disable this(this);
 
@@ -1777,7 +1777,7 @@ struct ConcurrentLinkedListNodeList(Type) {
 
     static struct Node {
         Node* previous, previousReadyToBeDeleted, next;
-        int refCount;
+        ptrdiff_t refCount;
         bool isDeleted;
         Type value;
 

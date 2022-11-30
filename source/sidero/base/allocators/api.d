@@ -133,13 +133,11 @@ scope:
 
     ///
     void opAssign(scope ref RCAllocator other) @trusted {
-        this.__xdtor;
         opAssign_(&other);
     }
 
     ///
     void opAssign(scope RCAllocator other) @trusted {
-        this.__xdtor;
         opAssign_(&other);
     }
 

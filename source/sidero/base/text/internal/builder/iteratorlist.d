@@ -125,7 +125,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
         size_t minimumOffsetFromHead, maximumOffsetFromHead;
 
         BlockListImpl!Char* blockList;
-        int refCount;
+        ptrdiff_t refCount;
 
         static if (is(CustomIteratorContents == void)) {
         } else {

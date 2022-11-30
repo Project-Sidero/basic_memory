@@ -2443,13 +2443,13 @@ nothrow @nogc:
 
 private:
     static struct LifeTime {
-        shared(int) refCount;
+        shared(ptrdiff_t) refCount;
         RCAllocator allocator;
         LiteralType original;
     }
 
     static struct Iterator {
-        shared(int) refCount;
+        shared(ptrdiff_t) refCount;
         RCAllocator allocator;
         LiteralType literal;
 

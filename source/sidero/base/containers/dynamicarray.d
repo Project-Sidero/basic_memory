@@ -20,7 +20,7 @@ struct DynamicArray(Type) {
             ElementType[] slice;
             size_t amountUsed;
             RCAllocator allocator;
-            shared(int) refCount;
+            shared(ptrdiff_t) refCount;
             bool copyOnWrite;
 
             invariant {

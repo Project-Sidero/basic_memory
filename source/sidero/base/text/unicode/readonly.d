@@ -2718,13 +2718,13 @@ nothrow @nogc:
 
 private:
     static struct LifeTime {
-        shared(int) refCount;
+        shared(ptrdiff_t) refCount;
         RCAllocator allocator;
         const(void)[] original;
     }
 
     static struct Iterator {
-        shared(int) refCount;
+        shared(ptrdiff_t) refCount;
         RCAllocator allocator;
         const(void)[] literal;
 

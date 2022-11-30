@@ -115,7 +115,10 @@ export:
                 toAddAlignment = 0;
 
             allocated += toAddAlignment + size;
-            return toGo[toAddAlignment .. toAddAlignment + size];
+            auto toReturn = toGo[toAddAlignment .. toAddAlignment + size];
+            if (alignedTo > 0)
+                assert(cast(size_t)toReturn.ptr % alignedTo == 0);
+            return toReturn;
         } else
             return null;
     }
