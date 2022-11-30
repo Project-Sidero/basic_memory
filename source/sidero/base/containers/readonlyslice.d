@@ -392,17 +392,17 @@ nothrow @nogc:
     alias equals = opEquals;
 
     ///
-    bool opEquals(scope DynamicArray!Type other) scope {
+    bool opEquals(scope DynamicArray!Type other) scope const {
         return opCmp(other) == 0;
     }
 
     ///
-    bool opEquals(scope Slice!Type other) scope {
+    bool opEquals(scope Slice!Type other) scope const {
         return opCmp(other) == 0;
     }
 
     ///
-    bool opEquals(scope LiteralType other) scope {
+    bool opEquals(scope LiteralType other) scope const {
         return opCmp(other) == 0;
     }
 
@@ -410,17 +410,17 @@ nothrow @nogc:
     alias compare = opCmp;
 
     ///
-    int opCmp(scope DynamicArray!Type other) scope @trusted {
+    int opCmp(scope DynamicArray!Type other) scope @trusted const {
         return opCmp(other.unsafeGetLiteral);
     }
 
     ///
-    int opCmp(scope Slice!Type other) scope @trusted {
+    int opCmp(scope Slice!Type other) scope @trusted const {
         return opCmp(other.unsafeGetLiteral);
     }
 
     ///
-    int opCmp(scope LiteralType other) scope {
+    int opCmp(scope LiteralType other) scope const {
         LiteralType us = this.literal;
 
         if (us < other)
@@ -434,7 +434,7 @@ nothrow @nogc:
     }
 
     ///
-    ulong toHash() scope {
+    ulong toHash() scope const {
         import sidero.base.hash.utils : hashOf;
 
         ulong ret = hashOf();

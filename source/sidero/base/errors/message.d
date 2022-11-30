@@ -56,7 +56,7 @@ export scope @safe nothrow @nogc:
     }
 
     ///
-    bool isSet() {
+    bool isSet() const {
         return info.id.length > 0;
     }
 

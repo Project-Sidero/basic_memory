@@ -129,7 +129,7 @@ scope nothrow @nogc @safe:
 
     static if (HaveValue) {
         ///
-        bool opEquals(scope Type other) {
+        bool opEquals(scope Type other) const {
             if (error.info.message !is null)
                 return false;
 
@@ -137,7 +137,7 @@ scope nothrow @nogc @safe:
         }
 
         ///
-        bool opEquals(scope Result!Type other) {
+        bool opEquals(scope Result!Type other) const {
             if (error.info.message !is null)
                 return other.error.info.message !is null;
             return this.value == other.value;
@@ -297,11 +297,11 @@ scope nothrow @nogc @safe:
     }
 
     ///
-    bool isNull() @trusted {
+    bool isNull() @trusted const {
         if (!error.checked)
             assert(0, "You forgot to check if value had an error. assert(thing, thing.error.toString());");
 
-        assert(opCast!bool(), error.toString().unsafeGetLiteral);
+        assert(error.info.message is null && _value !is null, error.toString().unsafeGetLiteral);
 
         static if (__traits(hasMember, Type, "isNull")) {
             return _value.isNull;
@@ -328,23 +328,23 @@ scope nothrow @nogc @safe:
     }
 
     ///
-    bool opEquals(scope Type other) {
-        if (!opCast!bool())
+    bool opEquals(scope Type other) const {
+        if (error.info.message !is null || _value is null)
             return false;
 
         return (*this._value) == other;
     }
 
     ///
-    bool opEquals(scope Result!Type other) {
-        if (error.isSet || other.error.isSet || !opCast!bool() || !other.opCast!bool())
+    bool opEquals(scope Result!Type other) const {
+        if (error.isSet || other.error.isSet || error.info.message !is null || _value is null || other.error.info.message !is null)
             return error.isSet && other.error.isSet;
         return (*this._value) == other.value;
     }
 
     ///
-    bool opEquals(scope ResultReference!Type other) {
-        if (error.isSet || other.error.isSet || !opCast!bool() || !other.opCast!bool())
+    bool opEquals(scope ResultReference!Type other) const {
+        if (error.isSet || other.error.isSet || error.info.message !is null || _value is null || other.error.info.message !is null || other._value is null)
             return error.isSet && other.error.isSet;
         return (*this._value) == (*other._value);
     }

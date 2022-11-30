@@ -113,7 +113,7 @@ export:
     }
 
     ///
-    ElementType[] unsafeGetLiteral() @system nothrow return @nogc {
+    inout(ElementType)[] unsafeGetLiteral() @system nothrow return @nogc inout {
         if (state is null)
             return null;
         else if (maximumOffset == size_t.max)
@@ -570,24 +570,24 @@ scope nothrow @nogc:
     alias compare = opCmp;
 
     ///
-    int opCmp(scope Slice!ElementType other) @trusted scope {
+    int opCmp(scope Slice!ElementType other) @trusted scope const {
         return this.opCmp(other.unsafeGetLiteral);
     }
 
     ///
-    int opCmp(scope const(ElementType)[] other) @trusted scope {
+    int opCmp(scope const(ElementType)[] other) @trusted scope const {
         import sidero.base.containers.utils : genericCompare;
         auto us = unsafeGetLiteral();
         return genericCompare(us, other);
     }
 
     ///
-    int opCmp(scope DynamicArray other) @trusted scope {
+    int opCmp(scope DynamicArray other) @trusted scope const {
         return opCmp(other.unsafeGetLiteral());
     }
 
     ///
-    bool opEquals(scope Slice!ElementType other) scope {
+    bool opEquals(scope Slice!ElementType other) scope const {
         return opCmp(other) == 0;
     }
 
@@ -595,17 +595,17 @@ scope nothrow @nogc:
     alias equals = opEquals;
 
     ///
-    bool opEquals(scope const(ElementType)[] other) scope {
+    bool opEquals(scope const(ElementType)[] other) scope const {
         return opCmp(other) == 0;
     }
 
     ///
-    bool opEquals(scope DynamicArray other) scope {
+    bool opEquals(scope DynamicArray other) scope const {
         return opCmp(other) == 0;
     }
 
     ///
-    ulong toHash() @trusted scope {
+    ulong toHash() @trusted scope const {
         import sidero.base.hash.utils : hashOf;
 
         scope temp = this.unsafeGetLiteral();
