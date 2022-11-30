@@ -1,5 +1,6 @@
 module sidero.base.errors.result;
 import sidero.base.errors.message;
+import sidero.base.math.utils : isClose;
 
 export:
 
@@ -133,14 +134,21 @@ scope nothrow @nogc @safe:
             if (error.info.message !is null)
                 return false;
 
-            return this.value == other;
+            static if (is(Type == float) || is(Type == double))
+                return this.value.isClose(other);
+            else
+                return this.value == other;
         }
 
         ///
         bool opEquals(scope Result!Type other) const {
             if (error.info.message !is null)
                 return other.error.info.message !is null;
-            return this.value == other.value;
+
+            static if (is(Type == float) || is(Type == double))
+                return this.value.isClose(other.value);
+            else
+                return this.value == other.value;
         }
     }
 }
@@ -332,20 +340,29 @@ scope nothrow @nogc @safe:
         if (error.info.message !is null || _value is null)
             return false;
 
-        return (*this._value) == other;
+        static if (is(Type == float) || is(Type == double))
+            return (*this._value).isClose(other);
+        else
+            return (*this._value) == other;
     }
 
     ///
     bool opEquals(scope Result!Type other) const {
         if (error.isSet || other.error.isSet || error.info.message !is null || _value is null || other.error.info.message !is null)
             return error.isSet && other.error.isSet;
-        return (*this._value) == other.value;
+        static if (is(Type == float) || is(Type == double))
+            return (*this._value).isClose(other.value);
+        else
+            return (*this._value) == other.value;
     }
 
     ///
     bool opEquals(scope ResultReference!Type other) const {
         if (error.isSet || other.error.isSet || error.info.message !is null || _value is null || other.error.info.message !is null || other._value is null)
             return error.isSet && other.error.isSet;
-        return (*this._value) == (*other._value);
+        static if (is(Type == float) || is(Type == double))
+            return (*this._value).isClose(*other._value);
+        else
+            return (*this._value) == (*other._value);
     }
 }
