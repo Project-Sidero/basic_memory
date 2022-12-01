@@ -541,29 +541,31 @@ scope nothrow @nogc:
         return Slice!ElementType(allocator.makeArray!ElementType(this.unsafeGetLiteral), allocator);
     }
 
-    ///
-    @PrintIgnore String_UTF8 toString(RCAllocator allocator = RCAllocator.init) @trusted {
-        StringBuilder_UTF8 ret = StringBuilder_UTF8(allocator);
-        toString(ret);
-        return ret.asReadOnly;
-    }
+    @PrintIgnore @PrettyPrintIgnore {
+        ///
+        String_UTF8 toString(RCAllocator allocator = RCAllocator.init) @trusted {
+            StringBuilder_UTF8 ret = StringBuilder_UTF8(allocator);
+            toString(ret);
+            return ret.asReadOnly;
+        }
 
-    ///
-    @PrintIgnore void toString(Sink)(scope ref Sink sink) @trusted {
-        sink.formattedWrite(String_ASCII.init, this.unsafeGetLiteral());
-    }
+        ///
+        void toString(Sink)(scope ref Sink sink) @trusted {
+            sink.formattedWrite(String_ASCII.init, this.unsafeGetLiteral());
+        }
 
-    ///
-    @PrettyPrintIgnore String_UTF8 toStringPretty(RCAllocator allocator = RCAllocator.init) @trusted {
-        StringBuilder_UTF8 ret = StringBuilder_UTF8(allocator);
-        toString(ret);
-        return ret.asReadOnly;
-    }
+        ///
+        String_UTF8 toStringPretty(RCAllocator allocator = RCAllocator.init) @trusted {
+            StringBuilder_UTF8 ret = StringBuilder_UTF8(allocator);
+            toStringPretty(ret);
+            return ret.asReadOnly;
+        }
 
-    ///
-    @PrettyPrintIgnore void toStringPretty(Sink)(scope ref Sink sink) @trusted {
-        PrettyPrint!String_ASCII prettyPrint;
-        prettyPrint(sink, this.unsafeGetLiteral());
+        ///
+        void toStringPretty(Sink)(scope ref Sink sink) @trusted {
+            PrettyPrint!String_ASCII prettyPrint;
+            prettyPrint(sink, this.unsafeGetLiteral());
+        }
     }
 
     ///

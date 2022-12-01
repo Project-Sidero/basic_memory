@@ -4,7 +4,7 @@ module sidero.base.internal.meta;
 mixin template OpApplyCombos(string ValueType, string KeyType = "size_t", string[] Attributes = [
     "@safe", "nothrow", "@nogc", "pure"
 ], string Name = "opApply", string ToCall = Name ~ "Impl") {
-    mixin(() {
+    enum Code = () {
         string ret;
         ptrdiff_t safeOffset = -1;
 
@@ -48,7 +48,7 @@ mixin template OpApplyCombos(string ValueType, string KeyType = "size_t", string
                     else if (active[i])
                         ret ~= " " ~ attribute;
                     else if (i == safeOffset)
-                            ret ~= " @system";
+                        ret ~= " @system";
                 }
 
                 ret ~= " del) scope";
@@ -59,37 +59,10 @@ mixin template OpApplyCombos(string ValueType, string KeyType = "size_t", string
                     else if (active[i])
                         ret ~= " " ~ attribute;
                     else if (i == safeOffset)
-                            ret ~= " @system";
+                        ret ~= " @system";
                 }
 
                 ret ~= " {\nreturn " ~ ToCall ~ "(del);\n}\n";
-
-                if (Name == "opApply" && (withKeyOffset < 0 || active[withKeyOffset] == false)) {
-                    ret ~= "void toString(scope void delegate(";
-                    ret ~= ValueType ~ ")";
-
-                    foreach (i, attribute; attributes) {
-                        if (withKeyOffset == i)
-                            continue;
-                        else if (active[i])
-                            ret ~= " " ~ attribute;
-                        else if (i == safeOffset)
-                                ret ~= " @system";
-                    }
-
-                    ret ~= " sink)";
-
-                    foreach (i, attribute; attributes) {
-                        if (withKeyOffset == i)
-                            continue;
-                        else if (active[i])
-                            ret ~= " " ~ attribute;
-                        else if (i == safeOffset)
-                                ret ~= " @system";
-                    }
-
-                    ret ~= " {\nforeach(v; this) sink(v);\n}\n";
-                }
             } else {
                 active[depth] = false;
                 handle(depth + 1);
@@ -101,14 +74,16 @@ mixin template OpApplyCombos(string ValueType, string KeyType = "size_t", string
         handle(0);
 
         return ret;
-    }());
+    }();
+
+    mixin(Code);
 }
 
 // Ditto except without any bodies
 mixin template OpApplyComboInterfaces(string ValueType, string KeyType = "size_t", string[] Attributes = [
     "@safe", "nothrow", "@nogc", "pure"
 ], string Name = "opApply", string ToCall = Name ~ "Impl") {
-    mixin(() {
+    enum Code = () {
         string ret;
         ptrdiff_t safeOffset = -1;
 
@@ -152,7 +127,7 @@ mixin template OpApplyComboInterfaces(string ValueType, string KeyType = "size_t
                     else if (active[i])
                         ret ~= " " ~ attribute;
                     else if (i == safeOffset)
-                            ret ~= " @system";
+                        ret ~= " @system";
                 }
 
                 ret ~= " del) scope";
@@ -163,37 +138,10 @@ mixin template OpApplyComboInterfaces(string ValueType, string KeyType = "size_t
                     else if (active[i])
                         ret ~= " " ~ attribute;
                     else if (i == safeOffset)
-                            ret ~= " @system";
+                        ret ~= " @system";
                 }
 
                 ret ~= ";\n";
-
-                if (Name == "opApply" && (withKeyOffset < 0 || active[withKeyOffset] == false)) {
-                    ret ~= "void toString(scope void delegate(";
-                    ret ~= ValueType ~ ")";
-
-                    foreach (i, attribute; attributes) {
-                        if (withKeyOffset == i)
-                            continue;
-                        else if (active[i])
-                            ret ~= " " ~ attribute;
-                        else if (i == safeOffset)
-                                ret ~= " @system";
-                    }
-
-                    ret ~= " sink)";
-
-                    foreach (i, attribute; attributes) {
-                        if (withKeyOffset == i)
-                            continue;
-                        else if (active[i])
-                            ret ~= " " ~ attribute;
-                        else if (i == safeOffset)
-                                ret ~= " @system";
-                    }
-
-                    ret ~= ";\n";
-                }
             } else {
                 active[depth] = false;
                 handle(depth + 1);
@@ -205,5 +153,7 @@ mixin template OpApplyComboInterfaces(string ValueType, string KeyType = "size_t
         handle(0);
 
         return ret;
-    }());
+    }();
+
+    mixin(Code);
 }

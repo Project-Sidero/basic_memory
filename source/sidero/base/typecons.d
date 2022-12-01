@@ -93,7 +93,7 @@ export @safe nothrow @nogc:
         ///
         String_UTF8 toStringPretty() scope const {
             StringBuilder_UTF8 ret;
-            this.toString(ret);
+            this.toStringPretty(ret);
             return ret.asReadOnly();
         }
 

@@ -86,7 +86,7 @@ struct PrettyPrint(ConstantsType)
     uint depth;
     ///
     bool useQuotes;
-export:
+export nothrow @nogc:
 
     ///
     void opCall(Builder, Args...)(scope Builder builder, scope Args args) @trusted if (isBuilderString!Builder) {
@@ -148,7 +148,7 @@ private:
                 builder ~= parent.prefixSuffix;
         }
 
-        void handle(Type)(scope ref Type input, bool useQuotes = true, bool useName = true, bool forcePrint = false) @trusted {
+        void handle(Type)(scope ref Type input, bool useQuotes = true, bool useName = true, bool forcePrint = false) @trusted nothrow @nogc {
             static if (__traits(compiles, hasUDA!(ActualType, PrettyPrintIgnore))) {
                 if (!forcePrint && hasUDA!(ActualType, PrettyPrintIgnore))
                     return;
@@ -337,11 +337,11 @@ private:
                 static if (haveToStringPretty!ActualType && !hasUDA!(__traits(getMember, input, "toStringPretty"), PrettyPrintIgnore)) {
                     size_t offsetForToString = builder.length;
 
-                    static if (__traits(compiles, { builder.toStringPretty(output); })) {
+                    static if (__traits(compiles, builder.toStringPretty(output))) {
                         input.toStringPretty(builder);
-                    } else static if (__traits(compiles, { input.toStringPretty(&builder.put); })) {
+                    } else static if (__traits(compiles, input.toStringPretty(&builder.put))) {
                         input.toStringPretty(&builder.put);
-                    } else static if (__traits(compiles, { builder ~= input.toStringPretty(); })) {
+                    } else static if (__traits(compiles, builder ~= input.toStringPretty())) {
                         builder ~= input.toStringPretty();
                     }
 
@@ -352,18 +352,18 @@ private:
                             builder.remove(offsetForToString, size_t.max);
                         else if (subset.startsWith(", ")) {
                             builder.remove(offsetForToString, 1);
-                            builder.insert(offsetForToString + 1, "->\n");
+                            builder.insert(offsetForToString + 1, "->\n"c);
                         } else
-                            builder.insert(offsetForToString, " ->\n");
+                            builder.insert(offsetForToString, " ->\n"c);
                     }
                 } else static if (haveToString!ActualType && !hasUDA!(__traits(getMember, input, "toString"), PrettyPrintIgnore)) {
                     size_t offsetForToString = builder.length;
 
-                    static if (__traits(compiles, { input.toString(builder); })) {
+                    static if (__traits(compiles, input.toString(builder))) {
                         input.toString(builder);
-                    } else static if (__traits(compiles, { input.toString(&builder.put); })) {
+                    } else static if (__traits(compiles, input.toString(&builder.put))) {
                         input.toString(&builder.put);
-                    } else static if (__traits(compiles, { builder ~= input.toString(); })) {
+                    } else static if (__traits(compiles, builder ~= input.toString())) {
                         builder ~= input.toString();
                     }
 
@@ -373,14 +373,14 @@ private:
                         if (subset == FQN)
                             builder.remove(offsetForToString, size_t.max);
                         else
-                            builder.insert(offsetForToString, cast(string)" ->\n");
+                            builder.insert(offsetForToString, " ->\n"c);
                     }
                 }
 
                 parent.depth--;
 
                 if (builder.endsWith(","))
-                    builder.clobberInsert(builder.length - 1, cast(string)")");
+                    builder.clobberInsert(builder.length - 1, ")"c);
                 else
                     builder ~= ")";
             } else static if (isArray!ActualType) {
@@ -646,8 +646,7 @@ unittest {
 private:
 import sidero.base.allocators;
 import std.traits : isSomeChar, isPointer, isIntegral, isFloatingPoint, Unqual, ForeachType, isBasicType, isIterable,
-    isAssociativeArray, fullyQualifiedName, isArray, isDynamicArray, FieldNameTuple, hasUDA, KeyType, ValueType,
-    BaseClassesTuple, isCopyable;
+    isAssociativeArray, isArray, isDynamicArray, FieldNameTuple, hasUDA, KeyType, ValueType, BaseClassesTuple, isCopyable;
 
 Builder escapeImpl(Builder, Char)(return scope Builder builder, Char quote) @trusted nothrow @nogc
         if (isBuilderString!Builder) {
@@ -870,7 +869,7 @@ scope:
                             alias member = __traits(getMember, cast(Base)input, name);
                             bool ignore;
 
-                            foreach(attr; __traits(getAttributes, member)) {
+                            foreach (attr; __traits(getAttributes, member)) {
                                 ignore = ignore || is(attr == PrintIgnore) || is(attr == PrettyPrintIgnore);
                             }
 
@@ -892,7 +891,7 @@ scope:
                     alias member = __traits(getMember, input, name);
                     bool ignore;
 
-                    foreach(attr; __traits(getAttributes, member)) {
+                    foreach (attr; __traits(getAttributes, member)) {
                         ignore = ignore || is(attr == PrintIgnore) || is(attr == PrettyPrintIgnore);
                     }
 
@@ -1041,8 +1040,8 @@ unittest {
 }
 
 enum DefaultFormatForType(Type) = () {
-    static if (is(Type == real))
-        return "%." ~ Type.dig.stringof ~ "lf\0";
+    static if (is(Type == real) || is(Type == float) || is(Type == double))
+        return "%." ~ Type.dig.stringof ~ "g\0";
     else static if (is(Type == byte))
         return "%hhi\0";
     else static if (is(Type == ubyte))
@@ -1065,10 +1064,6 @@ enum DefaultFormatForType(Type) = () {
         return "%hc\0";
     else static if (is(Type == dchar))
         return "%lc\0";
-    else static if (is(Type == float))
-        return "%f\0";
-    else static if (is(Type == double))
-        return "%." ~ Type.dig.stringof ~ "lf\0";
     else static if (isPointer!Type)
         return "%p\0";
     else
