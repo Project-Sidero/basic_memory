@@ -67,13 +67,12 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
         if (addRef)
             iterator.refCount++;
         else if (iterator.refCount == 1) {
-            if (iterator.next is null)
-                head = iterator.previous;
-            else
+            if (iterator.next !is null)
                 iterator.next.previous = iterator.previous;
-
             if (iterator.previous !is null)
                 iterator.previous.next = iterator.next;
+            else
+                head = iterator.next;
 
             RCAllocator allocator = iterator.blockList.allocator;
             allocator.dispose(iterator);
@@ -104,7 +103,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
         ilt.iteratorList.rcIteratorInternal(false, b);
     }
 
-    int opApply(scope int delegate(scope Iterator*) @safe nothrow @nogc pure del) {
+    int opApply(scope int delegate(scope Iterator*) @safe nothrow @nogc del) {
         Iterator* current = head;
         int result;
 
@@ -1172,7 +1171,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
         }
 
         void moveFromTail() {
-            if (block !is null && block.length == 0 && offsetIntoBlock == 0) {
+            if (block !is null && block.previous !is null && block.length == 0 && offsetIntoBlock == 0) {
                 block = block.previous;
                 offsetIntoBlock = block.length;
             }

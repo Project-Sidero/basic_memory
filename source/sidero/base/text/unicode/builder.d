@@ -4375,10 +4375,17 @@ struct UTF_State(Char) {
                 try {
                     import std.stdio;
 
+                    writeln("====================");
+
+                    if (iterator !is null) {
+                        writef!">>%X@"(iterator);
+                        foreach (v; (*iterator).tupleof)
+                            write(" ", v);
+                        writeln;
+                    }
+
                     Block* block = &blockList.head;
                     size_t offsetFromHead;
-
-                    writeln("====================");
 
                     while (block !is null) {
                         if (iterator !is null && block is iterator.forwards.block)
@@ -4394,10 +4401,12 @@ struct UTF_State(Char) {
 
                     writeln;
 
-                    foreach (iterator; iteratorList) {
+                    foreach (iterator2; iteratorList) {
                         try {
-                            writef!"%X@"(iterator);
-                            foreach (v; (*iterator).tupleof)
+                            if (iterator is iterator2)
+                                write(">>>");
+                            writef!"%X@"(iterator2);
+                            foreach (v; (*iterator2).tupleof)
                                 write(" ", v);
                             writeln;
                         } catch (Exception) {
@@ -4477,6 +4486,14 @@ struct UTF_State(Char) {
         }
     }
 
+    void checkForNullIterator() {
+        foreach (iterator; iteratorList) {
+            if (iterator.forwards.block is null && iterator.backwards.block is null) {
+                assert(0);
+            }
+        }
+    }
+
     // /\ Internal
     // \/ Exposed
 
@@ -4487,6 +4504,8 @@ struct UTF_State(Char) {
         blockList.mutex.pureLock;
         if (other.obj !is &this)
             other.mutex(true);
+
+        debug checkForNullIterator;
 
         language = pickLanguage(language);
         int result;
@@ -4504,6 +4523,7 @@ struct UTF_State(Char) {
         if (other.obj !is &this)
             other.mutex(false);
 
+        debug checkForNullIterator;
         return result;
     }
 
@@ -4512,6 +4532,7 @@ struct UTF_State(Char) {
         import sidero.base.text.unicode.normalization : normalize;
 
         blockList.mutex.pureLock;
+        debug checkForNullIterator;
 
         language = pickLanguage(language);
         RCAllocator allocator = blockList.allocator;
@@ -4541,6 +4562,7 @@ struct UTF_State(Char) {
         removeOperation(iterator, cursor, lengthToRemove);
 
         allocator.dispose(cast(void[])got);
+        debug checkForNullIterator;
         blockList.mutex.unlock;
     }
 
@@ -4552,6 +4574,7 @@ struct UTF_State(Char) {
         blockList.mutex.pureLock;
         if (other.obj !is &this)
             other.mutex(true);
+        debug checkForNullIterator;
 
         language = pickLanguage(language);
         int result;
@@ -4569,6 +4592,7 @@ struct UTF_State(Char) {
         if (other.obj !is &this)
             other.mutex(false);
 
+        debug checkForNullIterator;
         return result == 0;
     }
 
@@ -4579,6 +4603,7 @@ struct UTF_State(Char) {
         blockList.mutex.pureLock;
         if (other.obj !is &this)
             other.mutex(true);
+        debug checkForNullIterator;
 
         language = pickLanguage(language);
         int result;
@@ -4593,6 +4618,7 @@ struct UTF_State(Char) {
                 usLength = blockList.numberOfItems;
 
             if (otherLength > usLength) {
+                debug checkForNullIterator;
                 blockList.mutex.unlock;
                 if (other.obj !is &this)
                     other.mutex(false);
@@ -4605,6 +4631,7 @@ struct UTF_State(Char) {
 
             changeIndexToOffset(iterator, minimumOffsetFromHead);
             iterator = iteratorList.newIterator(&blockList, minimumOffsetFromHead, maximumOffsetFromHead);
+            debug checkForNullIterator;
         }
 
         OtherStateIsUs!dchar osiu;
@@ -4616,11 +4643,14 @@ struct UTF_State(Char) {
         cac.setAgainst(other.foreachValue, caseSensitive);
         result = cac.compare(osat.foreachValue, true);
 
+        debugPosition(iterator);
+
         {
             iteratorList.rcIteratorInternal(false, iterator);
             this.rcInternal(false);
         }
 
+        debug checkForNullIterator;
         blockList.mutex.unlock;
         if (other.obj !is &this)
             other.mutex(false);
@@ -4638,6 +4668,7 @@ struct UTF_State(Char) {
             toFind.mutex(true);
         if (toReplace.obj !is &this && toReplace.obj !is toFind.obj)
             toReplace.mutex(true);
+        debug checkForNullIterator;
 
         language = pickLanguage(language);
 
@@ -4660,6 +4691,7 @@ struct UTF_State(Char) {
             return insertOperation(iterator, cursor, toReplace);
         }, true, onlyOnce);
 
+        debug checkForNullIterator;
         blockList.mutex.unlock;
         if (toFind.obj !is &this)
             toFind.mutex(false);
