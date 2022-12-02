@@ -4643,8 +4643,6 @@ struct UTF_State(Char) {
         cac.setAgainst(other.foreachValue, caseSensitive);
         result = cac.compare(osat.foreachValue, true);
 
-        debugPosition(iterator);
-
         {
             iteratorList.rcIteratorInternal(false, iterator);
             this.rcInternal(false);
