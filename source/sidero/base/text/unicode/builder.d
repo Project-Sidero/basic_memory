@@ -2017,14 +2017,888 @@ nothrow @safe:
         }
     }
 
-    // TODO: count
-    // TODO: ignoreCaseCount
-    // TODO: contains
-    // TODO: ignoreCaseContains
-    // TODO: indexOf
-    // TODO: caseIgnoreIndexOf
-    // TODO: lastIndexOf
-    // TODO: caseIgnoreLastIndexOf
+    @nogc {
+        ///
+        size_t count(scope const(char)[] toFind) scope {
+            return countImpl(toFind, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLohello").count("hello"c) == 2);
+        }
+
+        ///
+        size_t count(scope const(wchar)[] toFind) scope {
+            return countImpl(toFind, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLohello").count("hello"w) == 2);
+        }
+
+        ///
+        size_t count(scope const(dchar)[] toFind) scope {
+            return countImpl(toFind, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLohello").count("hello"d) == 2);
+        }
+
+        ///
+        size_t count(scope String_ASCII toFind) scope {
+            return countImpl(toFind, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLohello").count(String_ASCII("hello")) == 2);
+        }
+
+        ///
+        size_t count(scope String_UTF8 toFind) scope {
+            return countImpl(toFind, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLohello").count(String_UTF8("hello"c)) == 2);
+        }
+
+        ///
+        size_t count(scope String_UTF16 toFind) scope {
+            return countImpl(toFind, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLohello").count(String_UTF16("hello"w)) == 2);
+        }
+
+        ///
+        size_t count(scope String_UTF32 toFind) scope {
+            return countImpl(toFind, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLohello").count(String_UTF32("hello"d)) == 2);
+        }
+
+        ///
+        size_t count(scope StringBuilder_ASCII toFind) scope {
+            return countImpl(toFind, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLohello").count(StringBuilder_ASCII("hello")) == 2);
+        }
+
+        ///
+        size_t count(scope StringBuilder_UTF8 toFind) scope {
+            return countImpl(toFind, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLohello").count(StringBuilder_UTF8("hello"c)) == 2);
+        }
+
+        ///
+        size_t count(scope StringBuilder_UTF16 toFind) scope {
+            return countImpl(toFind, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLohello").count(StringBuilder_UTF16("hello"w)) == 2);
+        }
+
+        ///
+        size_t count(scope StringBuilder_UTF32 toFind) scope {
+            return countImpl(toFind, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLohello").count(StringBuilder_UTF32("hello"d)) == 2);
+        }
+
+        ///
+        size_t ignoreCaseCount(scope const(char)[] toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return countImpl(toFind, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLoHELLO").ignoreCaseCount("hello"c) == 3);
+        }
+
+        ///
+        size_t ignoreCaseCount(scope const(wchar)[] toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return countImpl(toFind, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLoHELLO").ignoreCaseCount("hello"w) == 3);
+        }
+
+        ///
+        size_t ignoreCaseCount(scope const(dchar)[] toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return countImpl(toFind, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLoHELLO").ignoreCaseCount("hello"d) == 3);
+        }
+
+        ///
+        size_t ignoreCaseCount(scope String_ASCII toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return countImpl(toFind, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLoHELLO").ignoreCaseCount(String_ASCII("hello")) == 3);
+        }
+
+        ///
+        size_t ignoreCaseCount(scope String_UTF8 toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return countImpl(toFind, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLoHELLO").ignoreCaseCount(String_UTF8("hello"c)) == 3);
+        }
+
+        ///
+        size_t ignoreCaseCount(scope String_UTF16 toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return countImpl(toFind, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLoHELLO").ignoreCaseCount(String_UTF16("hello"w)) == 3);
+        }
+
+        ///
+        size_t ignoreCaseCount(scope String_UTF32 toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return countImpl(toFind, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLoHELLO").ignoreCaseCount(String_UTF32("hello"d)) == 3);
+        }
+
+        ///
+        size_t ignoreCaseCount(scope StringBuilder_ASCII toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return countImpl(toFind, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLoHELLO").ignoreCaseCount(StringBuilder_ASCII("hello")) == 3);
+        }
+
+        ///
+        size_t ignoreCaseCount(scope StringBuilder_UTF8 toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return countImpl(toFind, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLoHELLO").ignoreCaseCount(StringBuilder_UTF8("hello"c)) == 3);
+        }
+
+        ///
+        size_t ignoreCaseCount(scope StringBuilder_UTF16 toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return countImpl(toFind, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLoHELLO").ignoreCaseCount(StringBuilder_UTF16("hello"w)) == 3);
+        }
+
+        ///
+        size_t ignoreCaseCount(scope StringBuilder_UTF32 toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return countImpl(toFind, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLoHELLO").ignoreCaseCount(StringBuilder_UTF32("hello"d)) == 3);
+        }
+
+        ///
+        bool contains(scope const(char)[] toFind) scope {
+            return containsImpl(toFind, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLo").contains("hello"c));
+        }
+
+        ///
+        bool contains(scope const(wchar)[] toFind) scope {
+            return containsImpl(toFind, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLo").contains("hello"w));
+        }
+
+        ///
+        bool contains(scope const(dchar)[] toFind) scope {
+            return containsImpl(toFind, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLo").contains("hello"d));
+        }
+
+        ///
+        bool contains(scope String_ASCII toFind) scope {
+            return containsImpl(toFind, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLo").contains(String_ASCII("hello")));
+        }
+
+        ///
+        bool contains(scope String_UTF8 toFind) scope {
+            return containsImpl(toFind, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLo").contains(String_UTF8("hello"c)));
+        }
+
+        ///
+        bool contains(scope String_UTF16 toFind) scope {
+            return containsImpl(toFind, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLo").contains(String_UTF16("hello"w)));
+        }
+
+        ///
+        bool contains(scope String_UTF32 toFind) scope {
+            return containsImpl(toFind, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLo").contains(String_UTF32("hello"d)));
+        }
+
+        ///
+        bool contains(scope StringBuilder_ASCII toFind) scope {
+            return containsImpl(toFind, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLo").contains(StringBuilder_ASCII("hello")));
+        }
+
+        ///
+        bool contains(scope StringBuilder_UTF8 toFind) scope {
+            return containsImpl(toFind, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLo").contains(StringBuilder_UTF8("hello"c)));
+        }
+
+        ///
+        bool contains(scope StringBuilder_UTF16 toFind) scope {
+            return containsImpl(toFind, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLo").contains(StringBuilder_UTF16("hello"w)));
+        }
+
+        ///
+        bool contains(scope StringBuilder_UTF32 toFind) scope {
+            return containsImpl(toFind, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLo").contains(StringBuilder_UTF32("hello"d)));
+        }
+
+        ///
+        bool ignoreCaseContains(scope const(char)[] toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return containsImpl(toFind, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLo").ignoreCaseContains("hello"c));
+        }
+
+        ///
+        bool ignoreCaseContains(scope const(wchar)[] toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return containsImpl(toFind, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLo").ignoreCaseContains("hello"w));
+        }
+
+        ///
+        bool ignoreCaseContains(scope const(dchar)[] toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return containsImpl(toFind, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLo").ignoreCaseContains("hello"d));
+        }
+
+        ///
+        bool ignoreCaseContains(scope String_ASCII toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return containsImpl(toFind, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLo").ignoreCaseContains(String_ASCII("hello")));
+        }
+
+        ///
+        bool ignoreCaseContains(scope String_UTF8 toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return containsImpl(toFind, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLo").ignoreCaseContains(String_UTF8("hello"c)));
+        }
+
+        ///
+        bool ignoreCaseContains(scope String_UTF16 toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return containsImpl(toFind, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLo").ignoreCaseContains(String_UTF16("hello"w)));
+        }
+
+        ///
+        bool ignoreCaseContains(scope String_UTF32 toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return containsImpl(toFind, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLo").ignoreCaseContains(String_UTF32("hello"d)));
+        }
+
+        ///
+        bool ignoreCaseContains(scope StringBuilder_ASCII toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return containsImpl(toFind, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLo").ignoreCaseContains(StringBuilder_ASCII("hello")));
+        }
+
+        ///
+        bool ignoreCaseContains(scope StringBuilder_UTF8 toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return containsImpl(toFind, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLo").ignoreCaseContains(StringBuilder_UTF8("hello"c)));
+        }
+
+        ///
+        bool ignoreCaseContains(scope StringBuilder_UTF16 toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return containsImpl(toFind, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLo").ignoreCaseContains(StringBuilder_UTF16("hello"w)));
+        }
+
+        ///
+        bool ignoreCaseContains(scope StringBuilder_UTF32 toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return containsImpl(toFind, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLo").ignoreCaseContains(StringBuilder_UTF32("hello"d)));
+        }
+
+        ///
+        ptrdiff_t indexOf(scope const(char)[] toFind) scope {
+            return offsetOfImpl(toFind, true, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLohello").indexOf("hello"c) == 5);
+        }
+
+        ///
+        ptrdiff_t indexOf(scope const(wchar)[] toFind) scope {
+            return offsetOfImpl(toFind, true, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLohello").indexOf("hello"w) == 5);
+        }
+
+        ///
+        ptrdiff_t indexOf(scope const(dchar)[] toFind) scope {
+            return offsetOfImpl(toFind, true, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLohello").indexOf("hello"d) == 5);
+        }
+
+        ///
+        ptrdiff_t indexOf(scope String_ASCII toFind) scope {
+            return offsetOfImpl(toFind, true, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLohello").indexOf(String_ASCII("hello")) == 5);
+        }
+
+        ///
+        ptrdiff_t indexOf(scope String_UTF8 toFind) scope {
+            return offsetOfImpl(toFind, true, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLohello").indexOf(String_UTF8("hello"c)) == 5);
+        }
+
+        ///
+        ptrdiff_t indexOf(scope String_UTF16 toFind) scope {
+            return offsetOfImpl(toFind, true, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLohello").indexOf(String_UTF16("hello"w)) == 5);
+        }
+
+        ///
+        ptrdiff_t indexOf(scope String_UTF32 toFind) scope {
+            return offsetOfImpl(toFind, true, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLohello").indexOf(String_UTF32("hello"d)) == 5);
+        }
+
+        ///
+        ptrdiff_t indexOf(scope StringBuilder_ASCII toFind) scope {
+            return offsetOfImpl(toFind, true, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLohello").indexOf(StringBuilder_ASCII("hello")) == 5);
+        }
+
+        ///
+        ptrdiff_t indexOf(scope StringBuilder_UTF8 toFind) scope {
+            return offsetOfImpl(toFind, true, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLohello").indexOf(StringBuilder_UTF8("hello"c)) == 5);
+        }
+
+        ///
+        ptrdiff_t indexOf(scope StringBuilder_UTF16 toFind) scope {
+            return offsetOfImpl(toFind, true, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLohello").indexOf(StringBuilder_UTF16("hello"w)) == 5);
+        }
+
+        ///
+        ptrdiff_t indexOf(scope StringBuilder_UTF32 toFind) scope {
+            return offsetOfImpl(toFind, true, true);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLohello").indexOf(StringBuilder_UTF32("hello"d)) == 5);
+        }
+
+        ///
+        ptrdiff_t ignoreCaseIndexOf(scope const(char)[] toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return offsetOfImpl(toFind, false, true, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLo").ignoreCaseIndexOf("hello"c) == 0);
+        }
+
+        ///
+        ptrdiff_t ignoreCaseIndexOf(scope const(wchar)[] toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return offsetOfImpl(toFind, false, true, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLo").ignoreCaseIndexOf("hello"w) == 0);
+        }
+
+        ///
+        ptrdiff_t ignoreCaseIndexOf(scope const(dchar)[] toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return offsetOfImpl(toFind, false, true, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLo").ignoreCaseIndexOf("hello"d) == 0);
+        }
+
+        ///
+        ptrdiff_t ignoreCaseIndexOf(scope String_ASCII toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return offsetOfImpl(toFind, false, true, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLo").ignoreCaseIndexOf(String_ASCII("hello")) == 0);
+        }
+
+        ///
+        ptrdiff_t ignoreCaseIndexOf(scope String_UTF8 toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return offsetOfImpl(toFind, false, true, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLo").ignoreCaseIndexOf(String_UTF8("hello"c)) == 0);
+        }
+
+        ///
+        ptrdiff_t ignoreCaseIndexOf(scope String_UTF16 toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return offsetOfImpl(toFind, false, true, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLo").ignoreCaseIndexOf(String_UTF16("hello"w)) == 0);
+        }
+
+        ///
+        ptrdiff_t ignoreCaseIndexOf(scope String_UTF32 toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return offsetOfImpl(toFind, false, true, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLo").ignoreCaseIndexOf(String_UTF32("hello"d)) == 0);
+        }
+
+        ///
+        ptrdiff_t ignoreCaseIndexOf(scope StringBuilder_ASCII toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return offsetOfImpl(toFind, false, true, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLo").ignoreCaseIndexOf(StringBuilder_ASCII("hello")) == 0);
+        }
+
+        ///
+        ptrdiff_t ignoreCaseIndexOf(scope StringBuilder_UTF8 toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return offsetOfImpl(toFind, false, true, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLo").ignoreCaseIndexOf(StringBuilder_UTF8("hello"c)) == 0);
+        }
+
+        ///
+        ptrdiff_t ignoreCaseIndexOf(scope StringBuilder_UTF16 toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return offsetOfImpl(toFind, false, true, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLo").ignoreCaseIndexOf(StringBuilder_UTF16("hello"w)) == 0);
+        }
+
+        ///
+        ptrdiff_t ignoreCaseIndexOf(scope StringBuilder_UTF32 toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return offsetOfImpl(toFind, false, true, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLo").ignoreCaseIndexOf(StringBuilder_UTF32("hello"d)) == 0);
+        }
+
+        ///
+        ptrdiff_t lastIndexOf(scope const(char)[] toFind) scope {
+            return offsetOfImpl(toFind, true, false);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLohello").lastIndexOf("hello"c) == 5);
+        }
+
+        ///
+        ptrdiff_t lastIndexOf(scope const(wchar)[] toFind) scope {
+            return offsetOfImpl(toFind, true, false);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLohello").lastIndexOf("hello"w) == 5);
+        }
+
+        ///
+        ptrdiff_t lastIndexOf(scope const(dchar)[] toFind) scope {
+            return offsetOfImpl(toFind, true, false);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLohello").lastIndexOf("hello"d) == 5);
+        }
+
+        ///
+        ptrdiff_t lastIndexOf(scope String_ASCII toFind) scope {
+            return offsetOfImpl(toFind, true, false);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLohello").lastIndexOf(String_ASCII("hello")) == 5);
+        }
+
+        ///
+        ptrdiff_t lastIndexOf(scope String_UTF8 toFind) scope {
+            return offsetOfImpl(toFind, true, false);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLohello").lastIndexOf(String_UTF8("hello"c)) == 5);
+        }
+
+        ///
+        ptrdiff_t lastIndexOf(scope String_UTF16 toFind) scope {
+            return offsetOfImpl(toFind, true, false);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLohello").lastIndexOf(String_UTF16("hello"w)) == 5);
+        }
+
+        ///
+        ptrdiff_t lastIndexOf(scope String_UTF32 toFind) scope {
+            return offsetOfImpl(toFind, true, false);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLohello").lastIndexOf(String_UTF32("hello"d)) == 5);
+        }
+
+        ///
+        ptrdiff_t lastIndexOf(scope StringBuilder_ASCII toFind) scope {
+            return offsetOfImpl(toFind, true, false);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLohello").lastIndexOf(StringBuilder_ASCII("hello")) == 5);
+        }
+
+        ///
+        ptrdiff_t lastIndexOf(scope StringBuilder_UTF8 toFind) scope {
+            return offsetOfImpl(toFind, true, false);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLohello").lastIndexOf(StringBuilder_UTF8("hello"c)) == 5);
+        }
+
+        ///
+        ptrdiff_t lastIndexOf(scope StringBuilder_UTF16 toFind) scope {
+            return offsetOfImpl(toFind, true, false);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLohello").lastIndexOf(StringBuilder_UTF16("hello"w)) == 5);
+        }
+
+        ///
+        ptrdiff_t lastIndexOf(scope StringBuilder_UTF32 toFind) scope {
+            return offsetOfImpl(toFind, true, false);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("heLLohello").lastIndexOf(StringBuilder_UTF32("hello"d)) == 5);
+        }
+
+        ///
+        ptrdiff_t ignoreCaseLastIndexOf(scope const(char)[] toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return offsetOfImpl(toFind, false, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLo").ignoreCaseLastIndexOf("hello"c) == 5);
+        }
+
+        ///
+        ptrdiff_t ignoreCaseLastIndexOf(scope const(wchar)[] toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return offsetOfImpl(toFind, false, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLo").ignoreCaseLastIndexOf("hello"w) == 5);
+        }
+
+        ///
+        ptrdiff_t ignoreCaseLastIndexOf(scope const(dchar)[] toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return offsetOfImpl(toFind, false, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLo").ignoreCaseLastIndexOf("hello"d) == 5);
+        }
+
+        ///
+        ptrdiff_t ignoreCaseLastIndexOf(scope String_ASCII toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return offsetOfImpl(toFind, false, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLo").ignoreCaseLastIndexOf(String_ASCII("hello")) == 5);
+        }
+
+        ///
+        ptrdiff_t ignoreCaseLastIndexOf(scope String_UTF8 toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return offsetOfImpl(toFind, false, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLo").ignoreCaseLastIndexOf(String_UTF8("hello"c)) == 5);
+        }
+
+        ///
+        ptrdiff_t ignoreCaseLastIndexOf(scope String_UTF16 toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return offsetOfImpl(toFind, false, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLo").ignoreCaseLastIndexOf(String_UTF16("hello"w)) == 5);
+        }
+
+        ///
+        ptrdiff_t ignoreCaseLastIndexOf(scope String_UTF32 toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return offsetOfImpl(toFind, false, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLo").ignoreCaseLastIndexOf(String_UTF32("hello"d)) == 5);
+        }
+
+        ///
+        ptrdiff_t ignoreCaseLastIndexOf(scope StringBuilder_ASCII toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return offsetOfImpl(toFind, false, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLo").ignoreCaseLastIndexOf(StringBuilder_ASCII("hello")) == 5);
+        }
+
+        ///
+        ptrdiff_t ignoreCaseLastIndexOf(scope StringBuilder_UTF8 toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return offsetOfImpl(toFind, false, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLo").ignoreCaseLastIndexOf(StringBuilder_UTF8("hello"c)) == 5);
+        }
+
+        ///
+        ptrdiff_t ignoreCaseLastIndexOf(scope StringBuilder_UTF16 toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return offsetOfImpl(toFind, false, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLo").ignoreCaseLastIndexOf(StringBuilder_UTF16("hello"w)) == 5);
+        }
+
+        ///
+        ptrdiff_t ignoreCaseLastIndexOf(scope StringBuilder_UTF32 toFind, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+            return offsetOfImpl(toFind, false, false, language);
+        }
+
+        ///
+        unittest {
+            assert(StringBuilder_UTF("helloheLLo").ignoreCaseLastIndexOf(StringBuilder_UTF32("hello"d)) == 5);
+        }
+    }
+
     // TODO: stripLeft
     // TODO: stripRight
 
@@ -3704,6 +4578,61 @@ private:
                 return state.externalReplace(iterator, toFindState.osat, toReplaceState.osat, caseSensitive, onlyOnce, language);
             }, () { return 0; });
         }
+
+        size_t countImpl(ToFind)(scope ToFind toFind, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            if (isNull)
+                return 0;
+
+            scope toFindState = AnyAsTargetChar!dchar(toFind);
+
+            return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+                assert(state !is null);
+                return state.externalCount(iterator, toFindState.osat, caseSensitive, false, language);
+            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+                assert(state !is null);
+                return state.externalCount(iterator, toFindState.osat, caseSensitive, false, language);
+            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+                assert(state !is null);
+                return state.externalCount(iterator, toFindState.osat, caseSensitive, false, language);
+            }, () { return 0; });
+        }
+
+        bool containsImpl(ToFind)(scope ToFind toFind, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            if (isNull)
+                return false;
+
+            scope toFindState = AnyAsTargetChar!dchar(toFind);
+
+            return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+                assert(state !is null);
+                return state.externalCount(iterator, toFindState.osat, caseSensitive, true, language) == 1;
+            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+                assert(state !is null);
+                return state.externalCount(iterator, toFindState.osat, caseSensitive, true, language) == 1;
+            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+                assert(state !is null);
+                return state.externalCount(iterator, toFindState.osat, caseSensitive, true, language) == 1;
+            }, () { return false; });
+        }
+
+        ptrdiff_t offsetOfImpl(ToFind)(scope ToFind toFind, bool caseSensitive, bool onlyOnce,
+                UnicodeLanguage language = UnicodeLanguage.Unknown) {
+            if (isNull)
+                return -1;
+
+            scope toFindState = AnyAsTargetChar!dchar(toFind);
+
+            return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+                assert(state !is null);
+                return state.externalOffsetOf(iterator, toFindState.osat, caseSensitive, onlyOnce, language);
+            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+                assert(state !is null);
+                return state.externalOffsetOf(iterator, toFindState.osat, caseSensitive, onlyOnce, language);
+            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+                assert(state !is null);
+                return state.externalOffsetOf(iterator, toFindState.osat, caseSensitive, onlyOnce, language);
+            }, () { return -1; });
+        }
     }
 }
 
@@ -4695,6 +5624,94 @@ struct UTF_State(Char) {
             toFind.mutex(false);
         if (toReplace.obj !is &this && toReplace.obj !is toFind.obj)
             toReplace.mutex(false);
+
+        return ret;
+    }
+
+    size_t externalCount(scope Iterator* iterator, scope ref OtherStateAsTarget!dchar toFind, bool caseSensitive,
+            bool onlyOnce, UnicodeLanguage language) @trusted {
+        import sidero.base.text.unicode.comparison : CaseAwareComparison;
+        import sidero.base.text.unicode.characters.database : isTurkic;
+
+        blockList.mutex.pureLock;
+        if (toFind.obj !is &this)
+            toFind.mutex(true);
+        debug checkForNullIterator;
+
+        language = pickLanguage(language);
+
+        size_t maximumOffsetFromHead, lastConsumed;
+        scope Cursor cursor = cursorFor(iterator, maximumOffsetFromHead, 0);
+
+        CaseAwareComparison cac = CaseAwareComparison(blockList.allocator, language.isTurkic);
+        cac.setAgainst(toFind.foreachValue, caseSensitive);
+
+        size_t ret = replaceOperation(iterator, cursor, (scope Cursor cursor, size_t maximumOffsetFromHead) @trusted nothrow @nogc {
+            ForeachUTF32 f32 = ForeachUTF32(cursor, maximumOffsetFromHead);
+
+            auto got = cac.compare(&f32.opApply, true);
+            if (got != 0)
+                return 0;
+
+            lastConsumed = f32.lastIteratedCount0;
+            assert(lastConsumed != 0);
+            return lastConsumed;
+        }, (scope Iterator* iterator, scope ref Cursor cursor) {
+            cursor.advanceForward(lastConsumed, maximumOffsetFromHead, true);
+            return size_t(0);
+        }, false, onlyOnce);
+
+        debug checkForNullIterator;
+        blockList.mutex.unlock;
+        if (toFind.obj !is &this)
+            toFind.mutex(false);
+
+        return ret;
+    }
+
+    ptrdiff_t externalOffsetOf(scope Iterator* iterator, scope ref OtherStateAsTarget!dchar toFind, bool caseSensitive,
+            bool onlyOnce, UnicodeLanguage language) @trusted {
+        import sidero.base.text.unicode.comparison : CaseAwareComparison;
+        import sidero.base.text.unicode.characters.database : isTurkic;
+
+        blockList.mutex.pureLock;
+        if (toFind.obj !is &this)
+            toFind.mutex(true);
+        debug checkForNullIterator;
+
+        language = pickLanguage(language);
+
+        size_t maximumOffsetFromHead, lastConsumed;
+        scope Cursor cursor = cursorFor(iterator, maximumOffsetFromHead, 0);
+        const startingOffset = cursor.offsetFromHead;
+
+        CaseAwareComparison cac = CaseAwareComparison(blockList.allocator, language.isTurkic);
+        cac.setAgainst(toFind.foreachValue, caseSensitive);
+
+        ptrdiff_t ret = -1;
+        replaceOperation(iterator, cursor, (scope Cursor cursor, size_t maximumOffsetFromHead) @trusted nothrow @nogc {
+            ForeachUTF32 f32 = ForeachUTF32(cursor, maximumOffsetFromHead);
+
+            auto got = cac.compare(&f32.opApply, true);
+            if (got != 0)
+                return 0;
+
+            lastConsumed = f32.lastIteratedCount0;
+            assert(lastConsumed != 0);
+            return lastConsumed;
+        }, (scope Iterator* iterator, scope ref Cursor cursor) {
+            ret = cursor.offsetFromHead;
+            cursor.advanceForward(lastConsumed, maximumOffsetFromHead, true);
+            return size_t(0);
+        }, false, onlyOnce);
+
+        debug checkForNullIterator;
+        blockList.mutex.unlock;
+        if (toFind.obj !is &this)
+            toFind.mutex(false);
+
+        if (ret >= 0)
+            ret -= startingOffset;
 
         return ret;
     }

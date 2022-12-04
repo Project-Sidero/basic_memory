@@ -346,15 +346,20 @@ private:
                     }
 
                     if (builder.length > offsetForToString) {
-                        Builder subset = builder[offsetForToString .. $];
+                        Builder prior = builder[0 .. offsetForToString], subset = builder[offsetForToString .. $];
 
                         if (subset == FQN)
                             builder.remove(offsetForToString, size_t.max);
                         else if (subset.startsWith(", ")) {
                             builder.remove(offsetForToString, 1);
                             builder.insert(offsetForToString + 1, "->\n"c);
-                        } else
+                        } else if (subset.contains("\n") || subset.length > 40) {
+                            // forty was chosen mostly at random,
+                            // but its half a lot of max line lengths (80) so can't be too bad
+                            builder.insert(offsetForToString, "->\n"c);
+                        } else if (!prior.endsWith("(")) {
                             builder.insert(offsetForToString, " ->\n"c);
+                        }
                     }
                 } else static if (haveToString!ActualType && !hasUDA!(__traits(getMember, input, "toString"), PrettyPrintIgnore)) {
                     size_t offsetForToString = builder.length;
@@ -368,12 +373,17 @@ private:
                     }
 
                     if (builder.length > offsetForToString) {
-                        Builder subset = builder[offsetForToString .. $];
+                        Builder prior = builder[0 .. offsetForToString], subset = builder[offsetForToString .. $];
 
-                        if (subset == FQN)
+                        if (subset == FQN) {
                             builder.remove(offsetForToString, size_t.max);
-                        else
+                        } else if (subset.contains("\n") || subset.length > 40) {
+                            // forty was chosen mostly at random,
+                            // but its half a lot of max line lengths (80) so can't be too bad
+                            builder.insert(offsetForToString, "->\n"c);
+                        } else if (!prior.endsWith("(")) {
                             builder.insert(offsetForToString, " ->\n"c);
+                        }
                     }
                 }
 
@@ -491,13 +501,19 @@ private:
                 builder ~= "[\n";
                 parent.depth++;
 
-                foreach (key, ref value; input) {
-                    handlePrefix();
-                    handle(key, true, true, true);
-                    builder ~= ": ";
+                version (D_BetterC) {
+                } else {
+                    try {
+                        foreach (key, ref value; input) {
+                            handlePrefix();
+                            handle(key, true, true, true);
+                            builder ~= ": ";
 
-                    handle(value, true, true, true);
-                    builder ~= "\n";
+                            handle(value, true, true, true);
+                            builder ~= "\n";
+                        }
+                    } catch (Exception) {
+                    }
                 }
 
                 parent.depth--;
@@ -824,15 +840,21 @@ scope:
             builder ~= ActualType.stringof ~ "[";
             bool isFirst = true;
 
-            foreach (key, value2; input) {
-                if (isFirst)
-                    isFirst = false;
-                else
-                    builder ~= ", ";
+            version (D_BetterC) {
+            } else {
+                try {
+                    foreach (key, value2; input) {
+                        if (isFirst)
+                            isFirst = false;
+                        else
+                            builder ~= ", ";
 
-                this.write(String_ASCII.init, key, true);
-                builder ~= ": ";
-                this.write(String_ASCII.init, value2, true);
+                        this.write(String_ASCII.init, key, true);
+                        builder ~= ": ";
+                        this.write(String_ASCII.init, value2, true);
+                    }
+                } catch (Exception) {
+                }
             }
 
             builder ~= "]";
@@ -1072,7 +1094,6 @@ enum DefaultFormatForType(Type) = () {
 
 // Will extra specifiers strings as zero terminated ASCII/UTF8, for in band mixed in text no alterations.
 struct RetrieveFormatSpecifier(String) if (isReadOnlyString!String || isSomeString!String) {
-@safe nothrow @nogc:
 
     private {
         static if (isSomeString!String) {
@@ -1094,7 +1115,7 @@ struct RetrieveFormatSpecifier(String) if (isReadOnlyString!String || isSomeStri
 
 scope:
 
-    this(scope String source) @trusted {
+    this(scope String source) nothrow @nogc @trusted {
         static if (is(typeof(this.source) == typeof(source))) {
             this.source = source;
         } else {
@@ -1107,7 +1128,7 @@ scope:
 
     @disable this(this);
 
-    ~this() {
+    ~this() @safe nothrow @nogc {
         if (actualBuffer.length > stackBuffer.length) {
             allocator.dispose(actualBuffer);
         }
@@ -1174,7 +1195,7 @@ scope:
         return result;
     }
 
-    void checkBufferLength(size_t needed) {
+    void checkBufferLength(size_t needed) @safe nothrow @nogc {
         if (actualBuffer.length >= needed)
             return;
 

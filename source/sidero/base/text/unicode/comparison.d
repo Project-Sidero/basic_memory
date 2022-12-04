@@ -230,7 +230,7 @@ export @safe nothrow @nogc:
                     return true;
                 }
 
-                return ret != 0;
+                return todo == 0 || ret != 0;
             }, input, isTurkic, false, true);
         }
 
