@@ -659,7 +659,7 @@ unittest {
     assert(builder == "\\\0\a\b\f\n\r\t\v\"");
 }
 
-private:
+//FIXME: private:
 import sidero.base.allocators;
 import std.traits : isSomeChar, isPointer, isIntegral, isFloatingPoint, Unqual, ForeachType, isBasicType, isIterable,
     isAssociativeArray, isArray, isDynamicArray, FieldNameTuple, hasUDA, KeyType, ValueType, BaseClassesTuple, isCopyable;

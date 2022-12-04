@@ -392,7 +392,9 @@ bool expandArray(T, Allocator)(scope auto ref Allocator alloc, scope ref T[] arr
         return false;
     }
 
-    array[originalLength .. $] = T.init;
+    foreach(ref v; array[originalLength .. $])
+        v = T.init;
+
     array = cast(T[])temp;
     return true;
 }

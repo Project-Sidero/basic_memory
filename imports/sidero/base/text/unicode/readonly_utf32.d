@@ -380,12 +380,18 @@ nothrow @nogc:
         info = "abcd"d;
     }
 
+    ///
+    void opAssign(scope return typeof(this) other) scope @trusted {
+        this.__ctor(other);
+    }
+
     @disable void opAssign(scope const(char)[] other) scope const;
     @disable void opAssign(scope const(wchar)[] other) scope const;
     @disable void opAssign(scope const(dchar)[] other) scope const;
+    @disable void opAssign(scope return typeof(this) other) scope const;
 
     ///
-    this(ref return scope typeof(this) other) @trusted scope {
+    this(scope return ref typeof(this) other) @trusted scope {
         this.tupleof = other.tupleof;
 
         if (haveIterator)

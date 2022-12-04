@@ -70,6 +70,7 @@ export:
             return result;
         }
     }
+export:
 
     mixin OpApplyCombos!("Char", null, ["@safe", "nothrow", "@nogc"]);
 

@@ -80,6 +80,7 @@ struct String_ASCII {
             return result;
         }
     }
+export:
 
     ///
     alias Char = ubyte;
@@ -253,8 +254,14 @@ nothrow @nogc:
         info = cast(LiteralType)['a', 'b', 'c', 'd'];
     }
 
+    ///
+    void opAssign(scope return typeof(this) other) scope @trusted {
+        this.__ctor(other);
+    }
+
     @disable void opAssign(scope const(char)[] other) scope const;
     @disable void opAssign(scope LiteralType other) scope const;
+    @disable void opAssign(scope return typeof(this) other) scope const;
 
     ///
     this(ref return scope String_ASCII other) @trusted scope {

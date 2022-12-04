@@ -184,14 +184,14 @@ struct Matrix(Type, size_t Rows, size_t Columns) {
     }
 
     ///
-    Type sum() {
+    Type sum() scope const {
         import std.algorithm.iteration : sum;
 
         return sum(this.data[]);
     }
 
     ///
-    Matrix transpose() {
+    Matrix transpose() scope const {
         Matrix ret;
 
         auto got = .transpose(ret.data[], this.data[], Columns);
@@ -1166,7 +1166,7 @@ unittest {
 
 private:
 
-Result!size_t moveAllZeroVectorsToBottom(Type)(scope Type[] data, size_t columns) {
+export Result!size_t moveAllZeroVectorsToBottom(Type)(scope Type[] data, size_t columns) {
     if (data.length % columns != 0)
         return Result!size_t(RangeException("Data length must be a multiple of columns"));
 
@@ -1223,7 +1223,7 @@ alias OnSwapDel = void delegate(size_t first, size_t second) @safe nothrow @nogc
 alias OnMultiplyDel(Type) = void delegate(size_t target, Type constant) @safe nothrow @nogc;
 alias OnSubMultiplyDel(Type) = void delegate(size_t target, size_t from, Type constant) @safe nothrow @nogc;
 
-ErrorResult reduceViaRowEchelonForm(Type)(scope Type[] output, scope const Type[] input, size_t columns, bool makeOne = true,
+export ErrorResult reduceViaRowEchelonForm(Type)(scope Type[] output, scope const Type[] input, size_t columns, bool makeOne = true,
         bool reducedForm = true, scope OnSwapDel onSwap = null, scope OnMultiplyDel!Type onMultiply = null,
         scope OnSubMultiplyDel!Type onSubMultiply = null) {
     if (output.length != input.length)
