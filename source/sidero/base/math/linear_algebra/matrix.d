@@ -84,7 +84,12 @@ struct Matrix(Type, size_t Rows, size_t Columns) {
 
     ///
     void opIndexOpAssign(string op, Scalar)(Scalar input, size_t x, size_t y) scope if (isNumeric!Scalar) {
-        mixin("this.data[(y * Columns) + x] " ~ op ~ "= input;");
+        static if (op == "^^") {
+            import core.stdc.math : pow;
+
+            this.data[(y * Columns) + x] = pow(this.data[(y * Columns) + x], input);
+        } else
+            mixin("this.data[(y * Columns) + x] " ~ op ~ "= input;");
     }
 
     ///
@@ -120,8 +125,13 @@ struct Matrix(Type, size_t Rows, size_t Columns) {
 
     /// Element wise
     void opOpAssign(string op)(scope const Matrix other) scope {
-        foreach (i; 0 .. this.data.length) {
-            mixin("this.data[i] " ~ op ~ "= other.data[i];");
+        foreach (i, v; this.data) {
+            static if (op == "^^") {
+                import core.stdc.math : pow;
+
+                v = pow(v, other.data[i]);
+            } else
+                mixin("v " ~ op ~ "= other.data[i];");
         }
     }
 
@@ -134,7 +144,13 @@ struct Matrix(Type, size_t Rows, size_t Columns) {
 
     /// Element wise
     void opOpAssign(string op, Scalar)(Scalar input) scope if (isNumeric!Scalar) {
-        mixin("this.data[] " ~ op ~ "= input;");
+        static if (op == "^^") {
+            import core.stdc.math : pow;
+
+            foreach (i, ref v; this.data)
+                v = pow(v, input);
+        } else
+            mixin("this.data[] " ~ op ~ "= input;");
     }
 
     ///
@@ -1223,9 +1239,9 @@ alias OnSwapDel = void delegate(size_t first, size_t second) @safe nothrow @nogc
 alias OnMultiplyDel(Type) = void delegate(size_t target, Type constant) @safe nothrow @nogc;
 alias OnSubMultiplyDel(Type) = void delegate(size_t target, size_t from, Type constant) @safe nothrow @nogc;
 
-export ErrorResult reduceViaRowEchelonForm(Type)(scope Type[] output, scope const Type[] input, size_t columns, bool makeOne = true,
-        bool reducedForm = true, scope OnSwapDel onSwap = null, scope OnMultiplyDel!Type onMultiply = null,
-        scope OnSubMultiplyDel!Type onSubMultiply = null) {
+export ErrorResult reduceViaRowEchelonForm(Type)(scope Type[] output, scope const Type[] input, size_t columns,
+        bool makeOne = true, bool reducedForm = true, scope OnSwapDel onSwap = null,
+        scope OnMultiplyDel!Type onMultiply = null, scope OnSubMultiplyDel!Type onSubMultiply = null) {
     if (output.length != input.length)
         return ErrorResult(RangeException("Input length must match output"));
     else if (output.length % columns != 0)

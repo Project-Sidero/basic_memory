@@ -58,7 +58,7 @@ struct Vector(Type, size_t Dimension) {
     static Vector zero() {
         Vector ret;
 
-        foreach(i; 0 .. Dimension)
+        foreach (i; 0 .. Dimension)
             ret.data[i] = 0;
 
         return ret;
@@ -68,7 +68,7 @@ struct Vector(Type, size_t Dimension) {
     unittest {
         Vector vec = Vector.zero();
 
-        foreach(v; vec.data)
+        foreach (v; vec.data)
             assert(v.isClose(0));
     }
 
@@ -76,7 +76,7 @@ struct Vector(Type, size_t Dimension) {
     static Vector one() {
         Vector ret;
 
-        foreach(i; 0 .. Dimension)
+        foreach (i; 0 .. Dimension)
             ret.data[i] = 1;
 
         return ret;
@@ -86,7 +86,7 @@ struct Vector(Type, size_t Dimension) {
     unittest {
         Vector vec = Vector.one();
 
-        foreach(v; vec.data)
+        foreach (v; vec.data)
             assert(v.isClose(1));
     }
 
@@ -137,7 +137,13 @@ struct Vector(Type, size_t Dimension) {
 
     ///
     void opOpAssign(string op)(const Type other) scope {
-        mixin("this.data[] " ~ op ~ "= other;");
+        static if (op == "^^") {
+            import core.stdc.math : pow;
+
+            foreach (i, ref v; this.data)
+                v = pow(v, other);
+        } else
+            mixin("this.data[] " ~ op ~ "= other.data[];");
     }
 
     ///
@@ -149,7 +155,13 @@ struct Vector(Type, size_t Dimension) {
 
     ///
     void opOpAssign(string op)(const Vector other) scope {
-        mixin("this.data[] " ~ op ~ "= other.data[];");
+        static if (op == "^^") {
+            import core.stdc.math : pow;
+
+            foreach (i, ref v; this.data)
+                v = pow(v, other.data[i]);
+        } else
+            mixin("this.data[] " ~ op ~ "= other.data[];");
     }
 
     ///
@@ -185,7 +197,7 @@ struct Vector(Type, size_t Dimension) {
 
     ///
     void opAssign(const Type input) scope {
-        foreach(i; 0 .. Dimension)
+        foreach (i; 0 .. Dimension)
             this.data[i] = input;
     }
 
@@ -202,10 +214,10 @@ struct Vector(Type, size_t Dimension) {
         if (input.length < canDo)
             canDo = input.length;
 
-        foreach(i; 0 .. canDo)
+        foreach (i; 0 .. canDo)
             this.data[i] = input[i];
 
-        foreach(i; canDo .. Dimension)
+        foreach (i; canDo .. Dimension)
             this.data[i] = 0;
     }
 
@@ -216,7 +228,6 @@ struct Vector(Type, size_t Dimension) {
         assert(vec == Vector.zero);
     }
 
-
     ///
     Vector!(Type, Dimension2) subVector(size_t Dimension2)(size_t offset) scope const {
         const overlapTemp = Dimension - offset;
@@ -226,7 +237,7 @@ struct Vector(Type, size_t Dimension) {
 
         foreach (i; 0 .. overlap)
             ret.data[i] = this.data[offset + i];
-        foreach(i; overlap .. Dimension2)
+        foreach (i; overlap .. Dimension2)
             ret.data[i] = 0;
 
         return ret;
@@ -270,6 +281,7 @@ struct Vector(Type, size_t Dimension) {
     ///
     Type sum() scope const {
         import algorithm = std.algorithm.iteration;
+
         return algorithm.sum(this.data[]);
     }
 
@@ -397,7 +409,7 @@ struct Vector(Type, size_t Dimension) {
 ///
 Type magnitude(Type)(scope const Type[] values) if (isNumeric!Type) {
     import std.algorithm.iteration : sum;
-    import std.math : sqrt;
+    import core.math : sqrt;
 
     static struct Handler {
         const(Type)[] values;
