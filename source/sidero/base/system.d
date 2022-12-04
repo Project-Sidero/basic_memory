@@ -66,12 +66,18 @@ export @safe nothrow @nogc:
     }
 
     ///
-    static String_UTF!Char opIndex(Char)(scope StringBuilder_UTF!Char key) @trusted {
-        version (Windows) {
-            return opIndex(key.byUTF16.asReadOnly);
-        } else {
-            return opIndex(key.byUTF8.asReadOnly);
-        }
+    static String_UTF8 opIndex(scope StringBuilder_UTF8 key) @trusted {
+        return opIndex(key.asReadOnly);
+    }
+
+    ///
+    static String_UTF16 opIndex(scope StringBuilder_UTF16 key) @trusted {
+        return opIndex(key.asReadOnly);
+    }
+
+    ///
+    static String_UTF32 opIndex(scope StringBuilder_UTF32 key) @trusted {
+        return opIndex(key.asReadOnly);
     }
 
     ///

@@ -7,45 +7,78 @@
     "license": "Artistic-2.0",
     "name": "sidero_base",
     "homepage": "https://github.com/Project-Sidero/basic_memory",
-
-    "importPaths": ["imports"],
+    "importPaths": [
+        "imports"
+    ],
     "sourcePaths": [],
-    "sourceFiles": ["source/ignoreme.d"],
-    "injectSourceFiles": ["source/sidero/base/allocators/gc_hook.d"],
-
+    "sourceFiles": [
+        "source/ignoreme.d"
+    ],
+    "injectSourceFiles": [
+        "source/sidero/base/allocators/gc_hook.d"
+    ],
     "dependencies": {
         "sidero_base:source": "*"
     },
-
     "subPackages": [
         {
             "name": "generators",
-            "sourcePaths": ["database/generators", "database/utilities"],
+            "sourcePaths": [
+                "database/generators",
+                "database/utilities"
+            ],
             "targetType": "executable",
             "workingDirectory": "database"
         },
         {
             "name": "verify_generated",
-            "sourcePaths": ["database/generated", "database/verify_generated", "source"],
+            "sourcePaths": [
+                "database/generated",
+                "database/verify_generated",
+                "source"
+            ],
             "targetType": "executable",
             "workingDirectory": "database"
         },
         {
             "name": "source",
             "targetType": "sourceLibrary",
-            "importPaths": ["source"],
-            "sourcePaths": ["source", "database/generated"],
-            "sourceFiles": ["imports/sidero/base/text/unicode/database.d"],
-            "dflags": ["-preview=dip1000", "-preview=dip25", "-allinst"],
-            "dflags-windows-ldc": ["--fvisibility=public"]
+            "importPaths": [
+                "source"
+            ],
+            "sourcePaths": [
+                "source",
+                "database/generated"
+            ],
+            "sourceFiles": [
+                "imports/sidero/base/text/unicode/database.d",
+                "imports/sidero/base/text/unicode/builder_utf8.d",
+                "imports/sidero/base/text/unicode/builder_utf16.d",
+                "imports/sidero/base/text/unicode/builder_utf32.d"
+            ],
+            "excludedSourceFiles": [
+                "source/sidero/base/text/unicode/builder.d"
+            ],
+            "dflags": [
+                "-preview=dip1000",
+                "-preview=dip25"
+            ],
+            "dflags-windows-ldc": [
+                "--fvisibility=public",
+                "--linkonce-templates"
+            ],
+            "preBuildCommands": [
+                "$DUB_EXE run --single tools/unicode_builder.d"
+            ]
         }
     ],
-
     "configurations": [
         {
             "name": "library",
             "targetType": "dynamicLibrary",
-            "versions": ["DynamicSideroBase"],
+            "versions": [
+                "DynamicSideroBase"
+            ],
             "buildOptions": [
                 "betterC"
             ]

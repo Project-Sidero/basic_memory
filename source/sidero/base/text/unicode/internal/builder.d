@@ -1868,6 +1868,8 @@ struct AnyAsTargetChar(TargetChar) {
     OtherStateAsTarget!TargetChar osat;
 
     this(Input)(scope ref Input input) @trusted {
+        import sidero.base.traits : isUTFBuilder;
+
         static if (is(Input == String_ASCII)) {
             input.stripZeroTerminator;
             scope actualInput = input.literal;
@@ -1879,7 +1881,7 @@ struct AnyAsTargetChar(TargetChar) {
             asat.state = input.state;
             asat.iterator = input.iterator;
             osat = asat.get();
-        } else static if (is(Input == StringBuilder_UTF!Char2, Char2)) {
+        } else static if (isUTFBuilder!Input) {
             input.state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
                 assert(state !is null);
 

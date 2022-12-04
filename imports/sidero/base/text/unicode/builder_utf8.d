@@ -1,4 +1,4 @@
-module sidero.base.text.unicode.builder;
+module sidero.base.text.unicode.builder_utf8;
 import sidero.base.text.unicode.internal.builder;
 import sidero.base.text.unicode.characters.database : UnicodeLanguage;
 import sidero.base.text;
@@ -7,7 +7,7 @@ import sidero.base.allocators.api;
 export:
 
 ///
-struct StringBuilder_UTF {
+struct StringBuilder_UTF8 {
     ///
     alias Char = char;
     ///
@@ -4159,7 +4159,7 @@ package(sidero.base.text.unicode):
     StateIterator state;
 
     int foreachContiguous(scope int delegate(ref scope Char[] data) @safe nothrow @nogc del,
-            scope void delegate(size_t length) @safe nothrow @nogc lengthDel = null) scope @nogc {
+        scope void delegate(size_t length) @safe nothrow @nogc lengthDel = null) scope @nogc {
         return state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
             assert(state !is null);
 

@@ -7,17 +7,19 @@ export:
 
 ///
 enum isAnyString(String) = isSomeString!String || is(String == String_ASCII) || is(String == String_UTF!Char, Char) ||
-    is(String == StringBuilder_ASCII) || is(String == StringBuilder_UTF!Char, Char);
+    is(String == StringBuilder_ASCII) || is(String == StringBuilder_UTF8) || is(String == StringBuilder_UTF16) || is(String == StringBuilder_UTF32);
 
 ///
 enum isReadOnlyString(String) = is(String == String_ASCII) || is(String == String_UTF!Char, Char);
 ///
-enum isBuilderString(String) = is(String == StringBuilder_ASCII) || is(String == StringBuilder_UTF!Char, Char);
+enum isBuilderString(String) = is(String == StringBuilder_ASCII) || isUTFBuilder!String;
 
 ///
 enum isASCII(String) = is(String == String_ASCII) || is(String == StringBuilder_ASCII);
 ///
-enum isUTF(String) = is(String == String_UTF!Char, Char) || is(String == StringBuilder_UTF!Char, Char);
+enum isUTFBuilder(String) = is(String == StringBuilder_UTF8) || is(String == StringBuilder_UTF16) || is(String == StringBuilder_UTF32);
+///
+enum isUTF(String) = is(String == String_UTF!Char, Char) || isUTFBuilder!String;
 
 ///
 enum isAnyPointer(Type) = (isPointer!Type && !(isFunctionPointer!Type || isDelegate!Type)) || isDynamicArray!Type ||

@@ -589,9 +589,21 @@ nothrow @nogc:
         assert(stack.literal.length == 6);
     }
 
-    ///
-    StringBuilder_UTF!Char asMutable(RCAllocator allocator = RCAllocator.init) scope {
-        return StringBuilder_UTF!Char(allocator, this);
+    static if (is(Char == char)) {
+        ///
+        StringBuilder_UTF8 asMutable(RCAllocator allocator = RCAllocator.init) scope {
+            return StringBuilder_UTF8(allocator, this);
+        }
+    } else static if (is(Char == wchar)) {
+        ///
+        StringBuilder_UTF16 asMutable(RCAllocator allocator = RCAllocator.init) scope {
+            return StringBuilder_UTF16(allocator, this);
+        }
+    } else static if (is(Char == dchar)) {
+        ///
+        StringBuilder_UTF32 asMutable(RCAllocator allocator = RCAllocator.init) scope {
+            return StringBuilder_UTF32(allocator, this);
+        }
     }
 
     ///
