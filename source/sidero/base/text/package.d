@@ -2,25 +2,23 @@
 module sidero.base.text;
 public import sidero.base.text.ascii.readonly;
 public import sidero.base.text.ascii.builder;
-public import sidero.base.text.unicode.readonly;
-//public import sidero.base.text.unicode.builder;
+public import sidero.base.text.unicode.readonly_utf8;
+public import sidero.base.text.unicode.readonly_utf16;
+public import sidero.base.text.unicode.readonly_utf32;
 public import sidero.base.text.unicode.builder_utf8;
 public import sidero.base.text.unicode.builder_utf16;
 public import sidero.base.text.unicode.builder_utf32;
 public import sidero.base.text.format;
 
 ///
-alias String_UTF8 = String_UTF!char;
+alias String_UTF(Char:char) = String_UTF8;
 ///
-alias String_UTF16 = String_UTF!wchar;
+alias String_UTF(Char:wchar) = String_UTF16;
 ///
-alias String_UTF32 = String_UTF!dchar;
-
-/+
+alias String_UTF(Char:dchar) = String_UTF32;
 ///
-alias StringBuilder_UTF8 = StringBuilder_UTF!char;
+alias StringBuilder_UTF(Char:char) = StringBuilder_UTF8;
 ///
-alias StringBuilder_UTF16 = StringBuilder_UTF!wchar;
+alias StringBuilder_UTF(Char:wchar) = StringBuilder_UTF16;
 ///
-alias StringBuilder_UTF32 = StringBuilder_UTF!dchar;
-+/
+alias StringBuilder_UTF(Char:dchar) = StringBuilder_UTF32;

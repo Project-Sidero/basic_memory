@@ -197,17 +197,17 @@ nothrow @safe:
     }
 
     ///
-    this(RCAllocator allocator, scope String_UTF!char input = String_UTF!char.init) scope @nogc {
+    this(RCAllocator allocator, scope String_UTF8 input = String_UTF8.init) scope @nogc {
         this.__ctor(input, allocator);
     }
 
     ///
-    this(RCAllocator allocator, scope String_UTF!wchar input = String_UTF!wchar.init) scope @nogc {
+    this(RCAllocator allocator, scope String_UTF16 input = String_UTF16.init) scope @nogc {
         this.__ctor(input, allocator);
     }
 
     ///
-    this(RCAllocator allocator, scope String_UTF!dchar input = String_UTF!dchar.init) scope @nogc {
+    this(RCAllocator allocator, scope String_UTF32 input = String_UTF32.init) scope @nogc {
         this.__ctor(input, allocator);
     }
 
@@ -317,19 +317,19 @@ nothrow @safe:
     }
 
     ///
-    this(scope String_UTF!char input, RCAllocator allocator = RCAllocator.init) scope @nogc @trusted {
+    this(scope String_UTF8 input, RCAllocator allocator = RCAllocator.init) scope @nogc @trusted {
         state.setup(Char.sizeof, allocator);
         state.construct(input, allocator);
     }
 
     ///
-    this(scope String_UTF!wchar input, RCAllocator allocator = RCAllocator.init) scope @nogc @trusted {
+    this(scope String_UTF16 input, RCAllocator allocator = RCAllocator.init) scope @nogc @trusted {
         state.setup(Char.sizeof, allocator);
         state.construct(input, allocator);
     }
 
     ///
-    this(scope String_UTF!dchar input, RCAllocator allocator = RCAllocator.init) scope @nogc @trusted {
+    this(scope String_UTF32 input, RCAllocator allocator = RCAllocator.init) scope @nogc @trusted {
         state.setup(Char.sizeof, allocator);
         state.construct(input, allocator);
     }

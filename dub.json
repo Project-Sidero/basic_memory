@@ -52,11 +52,15 @@
             ],
             "sourceFiles": [
                 "imports/sidero/base/text/unicode/database.d",
+                "imports/sidero/base/text/unicode/readonly_utf8.d",
+                "imports/sidero/base/text/unicode/readonly_utf16.d",
+                "imports/sidero/base/text/unicode/readonly_utf32.d",
                 "imports/sidero/base/text/unicode/builder_utf8.d",
                 "imports/sidero/base/text/unicode/builder_utf16.d",
                 "imports/sidero/base/text/unicode/builder_utf32.d"
             ],
             "excludedSourceFiles": [
+                "source/sidero/base/text/unicode/readonly.d",
                 "source/sidero/base/text/unicode/builder.d"
             ],
             "dflags": [
@@ -68,7 +72,7 @@
                 "--linkonce-templates"
             ],
             "preBuildCommands": [
-                "$DUB_EXE run --single tools/unicode_builder.d"
+                "$DUB_EXE run --single tools/unicode.d"
             ]
         }
     ],

@@ -1,6 +1,7 @@
 module sidero.base.system;
 import sidero.base.text;
 import sidero.base.text.unicode.characters.database : UnicodeLanguage;
+import sidero.base.traits : isUTFReadOnly, isUTFBuilder;
 
 export @safe nothrow @nogc:
 
@@ -66,28 +67,28 @@ export @safe nothrow @nogc:
     }
 
     ///
-    static String_UTF8 opIndex(scope StringBuilder_UTF8 key) @trusted {
+    static String_UTF8 opIndex(scope StringBuilder_UTF8 key) {
         return opIndex(key.asReadOnly);
     }
 
     ///
-    static String_UTF16 opIndex(scope StringBuilder_UTF16 key) @trusted {
+    static String_UTF16 opIndex(scope StringBuilder_UTF16 key) {
         return opIndex(key.asReadOnly);
     }
 
     ///
-    static String_UTF32 opIndex(scope StringBuilder_UTF32 key) @trusted {
+    static String_UTF32 opIndex(scope StringBuilder_UTF32 key) {
         return opIndex(key.asReadOnly);
     }
 
     ///
-    static String_UTF!Char opIndex(Char)(scope String_UTF!Char key) @trusted {
+    static Other opIndex(Other)(scope Other key) @trusted if (isUTFReadOnly!Other) {
         import sidero.base.allocators.api;
         import std.algorithm : countUntil;
         import core.stdc.string : strlen;
 
         if (key.isNull)
-            return String_UTF!Char.init;
+            return typeof(return).init;
 
         RCAllocator allocator = globalAllocator();
 
@@ -108,7 +109,7 @@ export @safe nothrow @nogc:
                 const valueSize = GetEnvironmentVariableW(cast(LPWSTR)toUse.ptr, null, 0);
 
                 if (valueSize <= 1)
-                    return String_UTF!Char.init;
+                    return typeof(return).init;
 
                 wchar[] buffer = allocator.makeArray!wchar(valueSize);
                 const valueSize2 = GetEnvironmentVariableW(cast(LPWSTR)toUse.ptr, cast(LPWSTR)buffer.ptr, cast(uint)buffer.length);
@@ -118,7 +119,7 @@ export @safe nothrow @nogc:
                     continue;
                 }
 
-                return String_UTF!Char(buffer[0 .. valueSize2], allocator, buffer);
+                return typeof(return)(buffer[0 .. valueSize2], allocator, buffer);
             }
         } else version (Posix) {
             import core.stdc.stdlib : getenv;
@@ -135,17 +136,17 @@ export @safe nothrow @nogc:
             char* got = getenv(cast(char*)toUse.ptr);
 
             if (got is null)
-                return String_UTF!Char.init;
+                return typeof(return).init;
 
             size_t length = strlen(cast(char*)got);
 
-            return String_UTF!Char(got[0 .. length]).dup;
+            return typeof(return)(got[0 .. length]).dup;
         } else
             static assert(0, "Unimplemented");
     }
 
     ///
-    static void opIndexAssign(scope String_ASCII value, scope String_ASCII key) @trusted nothrow @nogc {
+    static void opIndexAssign(scope String_ASCII value, scope String_ASCII key) @trusted {
         if (key.isNull)
             return;
 
@@ -171,34 +172,26 @@ export @safe nothrow @nogc:
     }
 
     ///
-    static void opIndexAssign(CharV, CharK)(scope String_UTF!CharV value, scope StringBuilder_UTF!CharK key) @trusted nothrow @nogc {
-        version (Windows) {
-            opIndexAssign(value, key.byUTF16.asReadOnly);
-        } else {
-            opIndexAssign(value, key.byUTF8.asReadOnly);
-        }
+    static void opIndexAssign(Input1, Input2)(scope Input1 value, scope Input2 key)
+            if (isUTFReadOnly!Input1 && isUTFBuilder!Input2) {
+        opIndexAssign(value, key.asReadOnly);
     }
 
     ///
-    static void opIndexAssign(CharV, CharK)(scope StringBuilder_UTF!CharV value, scope String_UTF!CharK key) @trusted nothrow @nogc {
-        version (Windows) {
-            opIndexAssign(value.byUTF16.asReadOnly, key);
-        } else {
-            opIndexAssign(value.byUTF8.asReadOnly, key);
-        }
+    static void opIndexAssign(Input1, Input2)(scope Input1 value, scope Input2 key)
+            if (isUTFBuilder!Input1 && isUTFReadOnly!Input2) {
+        opIndexAssign(value.asReadOnly, key);
     }
 
     ///
-    static void opIndexAssign(CharV, CharK)(scope StringBuilder_UTF!CharV value, scope StringBuilder_UTF!CharK key) @trusted nothrow @nogc {
-        version (Windows) {
-            opIndexAssign(value.byUTF16.asReadOnly, key.byUTF16.asReadOnly);
-        } else {
-            opIndexAssign(value.byUTF8.asReadOnly, key.byUTF8.asReadOnly);
-        }
+    static void opIndexAssign(Input1, Input2)(scope Input1 value, scope Input2 key)
+            if (isUTFBuilder!Input1 && isUTFBuilder!Input2) {
+        opIndexAssign(value.asReadOnly, key.asReadOnly);
     }
 
     ///
-    static void opIndexAssign(CharV, CharK)(scope String_UTF!CharV value, scope String_UTF!CharK key) @trusted nothrow @nogc {
+    static void opIndexAssign(CharV, CharK)(scope Input1 value, scope Input2 key) @trusted
+            if (isUTFReadOnly!Input1 && isUTFReadOnly!Input2) {
         if (key.isNull)
             return;
 
@@ -440,7 +433,7 @@ unittest {
 }
 
 ///
-void currentWorkingDirectory(Char)(scope StringBuilder_UTF!Char value) @trusted {
+void currentWorkingDirectory(Input)(scope Input value) @trusted if (isUTFBuilder!Input) {
     version (Windows) {
         currentWorkingDirectory(value.byUTF16.asReadOnly);
     } else {
@@ -449,18 +442,14 @@ void currentWorkingDirectory(Char)(scope StringBuilder_UTF!Char value) @trusted 
 }
 
 ///
-void currentWorkingDirectory(Char)(scope String_UTF!Char value) @trusted {
+void currentWorkingDirectory(Input)(scope Input value) @trusted if (isUTFReadOnly!Input) {
     if (value.isNull)
         return;
 
     version (Windows) {
         import core.sys.windows.winbase : SetCurrentDirectoryW;
 
-        static if (is(Char == wchar)) {
-            String_UTF16 toUse = value;
-        } else {
-            String_UTF16 toUse = value.byUTF16;
-        }
+        String_UTF16 toUse = value.byUTF16;
 
         if (!toUse.isPtrNullTerminated || toUse.isEncodingChanged)
             toUse = toUse.dup();

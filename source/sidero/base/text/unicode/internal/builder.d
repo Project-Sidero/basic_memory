@@ -3,6 +3,7 @@ import sidero.base.text.unicode.characters.database : UnicodeLanguage;
 import sidero.base.text.internal.builder.operations;
 import sidero.base.text;
 import sidero.base.allocators.api;
+import sidero.base.traits : isUTFReadOnly, isUTFBuilder;
 
 package(sidero.base.text.unicode):
 
@@ -236,7 +237,7 @@ scope nothrow @nogc @safe:
         }
     }
 
-    void construct(Char2)(scope String_UTF!Char2 input, RCAllocator allocator = RCAllocator.init) scope @nogc @trusted {
+    void construct(Other)(scope Other input, RCAllocator allocator = RCAllocator.init) scope @nogc @trusted if (isUTFReadOnly!Other) {
         input.stripZeroTerminator;
 
         input.literalEncoding.handle(() { this.construct(cast(const(char)[])input.literal, allocator, input.language); }, () {
@@ -1868,8 +1869,6 @@ struct AnyAsTargetChar(TargetChar) {
     OtherStateAsTarget!TargetChar osat;
 
     this(Input)(scope ref Input input) @trusted {
-        import sidero.base.traits : isUTFBuilder;
-
         static if (is(Input == String_ASCII)) {
             input.stripZeroTerminator;
             scope actualInput = input.literal;
@@ -1901,7 +1900,7 @@ struct AnyAsTargetChar(TargetChar) {
                 osiu32.iterator = iterator;
                 osat = osiu32.get;
             }, () { assert(0); });
-        } else static if (is(Input == String_UTF!Char2, Char2)) {
+        } else static if (isUTFReadOnly!Input) {
             input.stripZeroTerminator;
 
             input.literalEncoding.handle(() @trusted { latc8.literal = cast(string)input.literal; osat = latc8.get(); }, () @trusted {

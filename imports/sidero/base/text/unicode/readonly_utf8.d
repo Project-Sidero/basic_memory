@@ -1,4 +1,4 @@
-module sidero.base.text.unicode.readonly;
+module sidero.base.text.unicode.readonly_utf8;
 import sidero.base.text.unicode.defs;
 import sidero.base.text.unicode.characters.database;
 import sidero.base.text;
@@ -10,7 +10,7 @@ import sidero.base.traits :isUTFReadOnly;
 export:
 
 ///
-struct String_UTF {
+struct String_UTF8 {
     package(sidero.base.text.unicode) {
         const(void)[] literal;
         UnicodeEncoding literalEncoding;
