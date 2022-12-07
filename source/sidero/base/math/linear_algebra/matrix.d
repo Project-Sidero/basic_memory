@@ -11,6 +11,13 @@ alias Mat3x3f = Matrix!(float, 3, 3);
 ///
 alias Mat3x3d = Matrix!(double, 3, 3);
 
+///
+struct AllRowColumn {
+    private int _;
+}
+///
+enum allRowColumns = AllRowColumn.init;
+
 // RxC
 struct Matrix(Type, size_t Rows, size_t Columns) {
     static assert(Rows > 0, "Rows must be above zero");
@@ -97,6 +104,78 @@ struct Matrix(Type, size_t Rows, size_t Columns) {
         Matrix mat = Matrix.one;
         mat[0, 0] *= 2;
         assert(mat[0, 0].isClose(2));
+    }
+
+    /// By row apply op
+    void opIndexOpAssign(string op, Scalar)(Scalar input, size_t x, AllRowColumn _) scope {
+        foreach(y; 0 .. Columns) {
+            static if (op == "^^") {
+                import core.stdc.math : pow;
+
+                this.data[(y * Columns) + x] = pow(this.data[(y * Columns) + x], input);
+            } else
+                mixin("this.data[(y * Columns) + x] " ~ op ~ "= input;");
+        }
+    }
+
+    ///
+    unittest {
+        Matrix ret = Matrix.one;
+        ret[0, allRowColumns] *= 1f;
+    }
+
+    /// By row apply op
+    void opIndexOpAssign(string op)(Vector!(Type, Columns) input, size_t x, AllRowColumn _) scope {
+        foreach(y; 0 .. Columns) {
+            static if (op == "^^") {
+                import core.stdc.math : pow;
+
+                this.data[(y * Columns) + x] = pow(this.data[(y * Columns) + x], input);
+            } else
+                mixin("this.data[(y * Columns) + x] " ~ op ~ "= input;");
+        }
+    }
+
+    ///
+    unittest {
+        Matrix ret = Matrix.one;
+        ret[0, allRowColumns] *= Vec!(Type, Columns).zero;
+    }
+
+    /// By column apply op
+    void opIndexOpAssign(string op, Scalar)(Scalar input, AllRowColumn _, size_t y) scope {
+        foreach(x; 0 .. Rows) {
+            static if (op == "^^") {
+                import core.stdc.math : pow;
+
+                this.data[(y * Columns) + x] = pow(this.data[(y * Columns) + x], input);
+            } else
+                mixin("this.data[(y * Columns) + x] " ~ op ~ "= input;");
+        }
+    }
+
+    ///
+    unittest {
+        Matrix ret = Matrix.one;
+        ret[allRowColumns, 0] *= Vec!(Type, Rows).zero;
+    }
+
+    /// By column apply op
+    void opIndexOpAssign(string op)(Vector!(Type, Rows) input, AllRowColumn _, size_t y) scope {
+        foreach(x; 0 .. Rows) {
+            static if (op == "^^") {
+                import core.stdc.math : pow;
+
+                this.data[(y * Columns) + x] = pow(this.data[(y * Columns) + x], input);
+            } else
+                mixin("this.data[(y * Columns) + x] " ~ op ~ "= input;");
+        }
+    }
+
+    ///
+    unittest {
+        Matrix ret = Matrix.one;
+        ret[allRowColumns, 0] *= Vec!(Type, Rows).zero;
     }
 
     /// Element wise
