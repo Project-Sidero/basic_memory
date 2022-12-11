@@ -132,14 +132,14 @@ struct Matrix(Type, size_t Rows, size_t Columns) {
 
                 this.data[(y * Columns) + x] = pow(this.data[(y * Columns) + x], input);
             } else
-                mixin("this.data[(y * Columns) + x] " ~ op ~ "= input;");
+                mixin("this.data[(y * Columns) + x] " ~ op ~ "= input[y];");
         }
     }
 
     ///
     unittest {
         Matrix ret = Matrix.one;
-        ret[0, allRowColumns] *= Vec!(Type, Columns).zero;
+        ret[0, allRowColumns] *= Vector!(Type, Columns).zero;
     }
 
     /// By column apply op
@@ -157,7 +157,7 @@ struct Matrix(Type, size_t Rows, size_t Columns) {
     ///
     unittest {
         Matrix ret = Matrix.one;
-        ret[allRowColumns, 0] *= Vec!(Type, Rows).zero;
+        ret[allRowColumns, 0] *= Vector!(Type, Rows).zero;
     }
 
     /// By column apply op
@@ -168,14 +168,14 @@ struct Matrix(Type, size_t Rows, size_t Columns) {
 
                 this.data[(y * Columns) + x] = pow(this.data[(y * Columns) + x], input);
             } else
-                mixin("this.data[(y * Columns) + x] " ~ op ~ "= input;");
+                mixin("this.data[(y * Columns) + x] " ~ op ~ "= input[x];");
         }
     }
 
     ///
     unittest {
         Matrix ret = Matrix.one;
-        ret[allRowColumns, 0] *= Vec!(Type, Rows).zero;
+        ret[allRowColumns, 0] *= Vector!(Type, Rows).zero;
     }
 
     /// Element wise
@@ -204,7 +204,7 @@ struct Matrix(Type, size_t Rows, size_t Columns) {
 
     /// Element wise
     void opOpAssign(string op)(scope const Matrix other) scope {
-        foreach (i, v; this.data) {
+        foreach (i, ref v; this.data) {
             static if (op == "^^") {
                 import core.stdc.math : pow;
 
@@ -223,13 +223,13 @@ struct Matrix(Type, size_t Rows, size_t Columns) {
 
     /// Element wise
     void opOpAssign(string op, Scalar)(Scalar input) scope if (isNumeric!Scalar) {
-        static if (op == "^^") {
-            import core.stdc.math : pow;
-
-            foreach (i, ref v; this.data)
+        foreach (ref v; this.data) {
+            static if (op == "^^") {
+                import core.stdc.math : pow;
                 v = pow(v, input);
-        } else
-            mixin("this.data[] " ~ op ~ "= input;");
+            } else
+                mixin("v " ~ op ~ "= input;");
+        }
     }
 
     ///

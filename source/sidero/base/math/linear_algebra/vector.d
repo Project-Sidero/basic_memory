@@ -143,7 +143,7 @@ struct Vector(Type, size_t Dimension) {
             foreach (i, ref v; this.data)
                 v = pow(v, other);
         } else
-            mixin("this.data[] " ~ op ~ "= other.data[];");
+            mixin("this.data[] " ~ op ~ "= other;");
     }
 
     ///
@@ -287,7 +287,7 @@ struct Vector(Type, size_t Dimension) {
 
     ///
     unittest {
-        assert(Vector([1, 2, 3]).sum == 6);
+        assert(Vector.one.sum == Dimension);
     }
 
     ///
@@ -318,11 +318,6 @@ struct Vector(Type, size_t Dimension) {
     }
 
     ///
-    unittest {
-        assert(Vector([1, 2, 3]).dotProduct(Vector([1, 5, 7])).isClose(32));
-    }
-
-    ///
     Vector crossProduct(const scope Vector other) scope const {
         Vector ret;
 
@@ -330,11 +325,6 @@ struct Vector(Type, size_t Dimension) {
         assert(got);
 
         return ret;
-    }
-
-    ///
-    unittest {
-        assert(Vector([1, 2f, 3]).crossProduct(Vector([1, 5, 7f])) == Vector([-1, -4, 3]));
     }
 
     ///

@@ -190,7 +190,7 @@ export @safe nothrow @nogc:
     }
 
     ///
-    static void opIndexAssign(CharV, CharK)(scope Input1 value, scope Input2 key) @trusted
+    static void opIndexAssign(Input1, Input2)(scope Input1 value, scope Input2 key) @trusted
             if (isUTFReadOnly!Input1 && isUTFReadOnly!Input2) {
         if (key.isNull)
             return;
@@ -199,21 +199,11 @@ export @safe nothrow @nogc:
             import core.sys.windows.winbase : SetEnvironmentVariableW;
             import core.sys.windows.winnt : LPWCH;
 
-            static if (is(CharK == wchar)) {
-                String_UTF16 toUseK = key;
-            } else {
-                String_UTF16 toUseK = key.byUTF16;
-            }
-
+            String_UTF16 toUseK = key.byUTF16;
             if (!toUseK.isPtrNullTerminated || toUseK.isEncodingChanged)
                 toUseK = toUseK.dup();
 
-            static if (is(CharV == wchar)) {
-                String_UTF16 toUseV = value;
-            } else {
-                String_UTF16 toUseV = value.byUTF16;
-            }
-
+            String_UTF16 toUseV = value.byUTF16;
             if (!toUseV.isPtrNullTerminated || toUseV.isEncodingChanged)
                 toUseV = toUseV.dup();
 
@@ -221,21 +211,11 @@ export @safe nothrow @nogc:
         } else version (Posix) {
             import core.sys.posix.stdlib : setenv, unsetenv;
 
-            static if (is(CharK == char)) {
-                String_UTF8 toUseK = key;
-            } else {
-                String_UTF8 toUseK = key.byUTF8;
-            }
-
+            String_UTF8 toUseK = key.byUTF8;
             if (!toUseK.isPtrNullTerminated || toUseK.isEncodingChanged)
                 toUseK = toUseK.dup();
 
-            static if (is(CharV == char)) {
-                String_UTF8 toUseV = value;
-            } else {
-                String_UTF8 toUseV = value.byUTF8;
-            }
-
+            String_UTF8 toUseV = value.byUTF8;
             if (!toUseK.isPtrNullTerminated || toUseK.isEncodingChanged)
                 toUseV = toUseV.dup();
 

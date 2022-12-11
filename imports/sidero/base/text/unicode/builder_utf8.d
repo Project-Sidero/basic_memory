@@ -219,19 +219,19 @@ nothrow @safe:
     }
 
     ///
-    this(scope const(char)[] input, RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.init) {
+    this(scope const(char)[] input, RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.init) scope @nogc {
         state.setup(Char.sizeof, allocator);
         state.construct(input, allocator, language);
     }
 
     ///
-    this(scope const(wchar)[] input, RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.init) {
+    this(scope const(wchar)[] input, RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.init) scope @nogc {
         state.setup(Char.sizeof, allocator);
         state.construct(input, allocator, language);
     }
 
     ///
-    this(scope const(dchar)[] input, RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.init) {
+    this(scope const(dchar)[] input, RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.init) scope @nogc {
         state.setup(Char.sizeof, allocator);
         state.construct(input, allocator, language);
     }
