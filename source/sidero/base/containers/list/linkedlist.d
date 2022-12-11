@@ -1,4 +1,4 @@
-module sidero.base.containers.list.ConcurrentLinkedList;
+module sidero.base.containers.list.linkedlist;
 import sidero.base.containers.readonlyslice;
 import sidero.base.allocators;
 import sidero.base.traits;
@@ -541,12 +541,87 @@ nothrow @nogc:
         state.popBackExternal(iterator);
     }
 
-    // TODO: startsWith
-    // TODO: endsWith
-    // TODO: indexOf
-    // TODO: lastIndexOf
-    // TODO: count
-    // TODO: contains
+    ///
+    bool startsWith(scope Type input) scope {
+        if (isNull)
+            return false;
+        return state.startsWithExternal(iterator, input);
+    }
+
+    ///
+    unittest {
+        ConcurrentLinkedList cll = [Type.init, Type.init, Type.init, Type.init];
+        assert(cll.length == 4);
+        assert(cll.startsWith(Type.init));
+    }
+
+    ///
+    bool endsWith(scope Type input) scope {
+        if (isNull)
+            return false;
+        return state.endsWithExternal(iterator, input);
+    }
+
+    ///
+    unittest {
+        ConcurrentLinkedList cll = [Type.init, Type.init, Type.init, Type.init];
+        assert(cll.length == 4);
+        assert(cll.endsWith(Type.init));
+    }
+
+    ///
+    ptrdiff_t indexOf(scope Type input) scope {
+        if (isNull)
+            return -1;
+        return state.indexOfExternal(iterator, input, true);
+    }
+
+    ///
+    unittest {
+        ConcurrentLinkedList cll = [Type.init, Type.init, Type.init, Type.init];
+        assert(cll.length == 4);
+        assert(cll.indexOf(Type.init) == 0);
+    }
+
+    ///
+    ptrdiff_t lastIndexOf(scope Type input) scope {
+        if (isNull)
+            return -1;
+        return state.indexOfExternal(iterator, input, false);
+    }
+
+    ///
+    unittest {
+        ConcurrentLinkedList cll = [Type.init, Type.init, Type.init, Type.init];
+        assert(cll.length == 4);
+        assert(cll.lastIndexOf(Type.init) == 3);
+    }
+
+    ///
+    size_t count(scope Type input) scope {
+        if (isNull)
+            return 0;
+        return state.countExternal(iterator, input);
+    }
+
+    ///
+    unittest {
+        ConcurrentLinkedList cll = [Type.init, Type.init, Type.init, Type.init];
+        assert(cll.length == 4);
+        assert(cll.count(Type.init) == 4);
+    }
+
+    ///
+    bool contains(scope Type input) scope {
+        return this.indexOf(input) >= 0;
+    }
+
+    ///
+    unittest {
+        ConcurrentLinkedList cll = [Type.init, Type.init, Type.init, Type.init];
+        assert(cll.length == 4);
+        assert(cll.contains(Type.init));
+    }
 
     ///
     void clear() scope {
@@ -1211,6 +1286,111 @@ struct ConcurrentLinkedListImpl(Type) {
         mutex.unlock;
         return ret;
     }
+
+    ptrdiff_t indexOfExternal(scope Iterator* iterator, scope Type input, bool doOne=true) scope {
+        ptrdiff_t ret = -1;
+        mutex.pureLock;
+
+        size_t offset, count = nodeList.aliveNodes, maximumOffsetFromHead = count;
+
+        if (iterator !is null) {
+            offset = iterator.minimumOffsetFromHead;
+            count = iterator.maximumOffsetFromHead - offset;
+            maximumOffsetFromHead = iterator.maximumOffsetFromHead;
+        }
+
+        Cursor cursor = iteratorList.cursorFor(nodeList, offset);
+
+        while(!cursor.isOutOfRange(offset, maximumOffsetFromHead)) {
+            if (cursor.node.value == input) {
+                ret = cursor.offsetFromHead;
+                if (doOne)
+                    break;
+            }
+
+            cursor.advanceForwards(1, maximumOffsetFromHead);
+        }
+
+        cursor.onEOL(nodeList);
+        mutex.unlock;
+        return ret;
+    }
+
+    size_t countExternal(scope Iterator* iterator, scope Type input) scope {
+        size_t ret;
+        mutex.pureLock;
+
+        size_t offset, count = nodeList.aliveNodes, maximumOffsetFromHead = count;
+
+        if (iterator !is null) {
+            offset = iterator.minimumOffsetFromHead;
+            count = iterator.maximumOffsetFromHead - offset;
+            maximumOffsetFromHead = iterator.maximumOffsetFromHead;
+        }
+
+        Cursor cursor = iteratorList.cursorFor(nodeList, offset);
+
+        while(!cursor.isOutOfRange(offset, maximumOffsetFromHead)) {
+            if (cursor.node.value == input) {
+                ret++;
+            }
+
+            cursor.advanceForwards(1, maximumOffsetFromHead);
+        }
+
+        cursor.onEOL(nodeList);
+        mutex.unlock;
+        return ret;
+    }
+
+    bool startsWithExternal(scope Iterator* iterator, scope Type input) scope {
+        bool ret;
+        mutex.pureLock;
+
+        size_t offset, count = nodeList.aliveNodes, maximumOffsetFromHead = count;
+
+        if (iterator !is null) {
+            offset = iterator.minimumOffsetFromHead;
+            count = iterator.maximumOffsetFromHead - offset;
+            maximumOffsetFromHead = iterator.maximumOffsetFromHead;
+        }
+
+        Cursor cursor = iteratorList.cursorFor(nodeList, offset);
+
+        while(!cursor.isOutOfRange(offset, maximumOffsetFromHead)) {
+            ret = cursor.node.value == input;
+            break;
+        }
+
+        cursor.onEOL(nodeList);
+        mutex.unlock;
+        return ret;
+    }
+
+    bool endsWithExternal(scope Iterator* iterator, scope Type input) scope {
+        bool ret;
+        mutex.pureLock;
+
+        size_t offset, count = nodeList.aliveNodes, maximumOffsetFromHead = count;
+
+        if (iterator !is null) {
+            offset = iterator.minimumOffsetFromHead;
+            count = iterator.maximumOffsetFromHead - offset;
+            maximumOffsetFromHead = iterator.maximumOffsetFromHead;
+        }
+
+        if (maximumOffsetFromHead > offset) {
+            Cursor cursor = iteratorList.cursorFor(nodeList, maximumOffsetFromHead - 1);
+            ret = cursor.node.value == input;
+            cursor.onEOL(nodeList);
+        }
+
+        mutex.unlock;
+        return ret;
+    }
+
+    // /\ external
+    // \/ internal
 
     bool rcInternal(bool addRef, scope Iterator* iterator) scope @trusted {
         if (addRef) {
