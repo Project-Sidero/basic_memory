@@ -451,7 +451,7 @@ nothrow @safe:
     }
 
     ///
-    typeof(this) opSlice() scope @trusted {
+    typeof(this) save() scope @trusted {
         if (isNull)
             return typeof(this)();
 
@@ -476,6 +476,9 @@ nothrow @safe:
 
         return ret;
     }
+
+    ///
+    alias opSlice = save;
 
     ///
     unittest {

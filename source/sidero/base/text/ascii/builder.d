@@ -291,7 +291,7 @@ nothrow @safe:
     }
 
     ///
-    StringBuilder_ASCII opSlice() scope @trusted {
+    StringBuilder_ASCII save() scope @trusted {
         if (isNull)
             return StringBuilder_ASCII();
 
@@ -300,6 +300,9 @@ nothrow @safe:
         ret.iterator = state.newIterator(iterator);
         return ret;
     }
+
+    ///
+    alias opSlice = save;
 
     ///
     unittest {
