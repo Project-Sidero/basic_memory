@@ -461,11 +461,11 @@ void dispose(Type, Allocator)(auto ref Allocator alloc, scope auto ref Type p) i
 void dispose(Type, Allocator)(auto ref Allocator alloc, scope auto ref Type[] array) {
     static if (!is(typeof(array[0]) == void)) {
         foreach (ref e; array) {
-            destroy(e);
+            destroy(cast()e);
         }
     }
 
-    alloc.deallocate(array);
+    alloc.deallocate(cast(void[])array);
     array = null;
 }
 
