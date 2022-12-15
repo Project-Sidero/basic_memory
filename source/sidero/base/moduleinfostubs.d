@@ -72,5 +72,7 @@ enum Stubs = [
         ModuleInfoStub("_D6sidero4base4hash5utils12__ModuleInfoZ", "sidero.base.hash.utils"),
         ModuleInfoStub("_D6sidero4base4hash3fnv12__ModuleInfoZ", "sidero.base.hash.fnv"),
         ModuleInfoStub("_D6sidero4base9algorithm12__ModuleInfoZ", "sidero.base.algorithm"),
-        ModuleInfoStub("_D6sidero4base4text12__ModuleInfoZ", "sidero.base.text")
+        ModuleInfoStub("_D6sidero4base4text12__ModuleInfoZ", "sidero.base.text"),
+        ModuleInfoStub("_D6sidero4base10containers3map17concurrenthashmap12__ModuleInfoZ",
+                "sidero.base.containers.map.concurrenthashmap"),
     ];
