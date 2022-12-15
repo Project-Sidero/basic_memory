@@ -12,4 +12,6 @@ enum {
     RangeException = ErrorMessage("RE", "Range Exception"),
     ///
     FailedToAllocateError = ErrorMessage("FTAE", "Failed To Allocate Memory"),
+    ///
+    NonMatchingStateToArgumentException = ErrorMessage("NMSTA", "Argument provided does not map into state"),
 }
