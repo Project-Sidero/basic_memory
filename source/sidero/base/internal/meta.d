@@ -1,15 +1,15 @@
 module sidero.base.internal.meta;
 
 // Generates opApply/opApplyReverse combinations and toString for opApply
-mixin template OpApplyCombos(string ValueType, string KeyType = "size_t", string[] Attributes = [
+mixin template OpApplyCombos(string ValueType__, string KeyType__ = "size_t", string[] Attributes = [
     "@safe", "nothrow", "@nogc", "pure"
 ], string Name = "opApply", string ToCall = Name ~ "Impl") {
     enum Code = () {
         string ret;
         ptrdiff_t safeOffset = -1;
 
-        static if (KeyType.length > 0) {
-            string[] attributes = KeyType ~ Attributes;
+        static if (KeyType__.length > 0) {
+            string[] attributes = KeyType__ ~ Attributes;
             ptrdiff_t withKeyOffset = 0;
         } else {
             string[] attributes = Attributes;
@@ -37,10 +37,10 @@ mixin template OpApplyCombos(string ValueType, string KeyType = "size_t", string
                 ret ~= "scope int delegate(";
 
                 if (withKeyOffset >= 0 && active[withKeyOffset])
-                    ret ~= KeyType ~ ", ";
+                    ret ~= KeyType__ ~ ", ";
 
                 ret ~= "ref ";
-                ret ~= ValueType ~ ")";
+                ret ~= ValueType__ ~ ")";
 
                 foreach (i, attribute; attributes) {
                     if (withKeyOffset == i)

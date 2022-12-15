@@ -14,7 +14,61 @@ struct ConcurrentHashMap(RealKeyType, ValueType) {
     /// If key type supports asReadOnly it is used instead of RealKeyType internally.
     alias KeyType = typeof(state).KeyType;
 
-export @safe nothrow @nogc:
+    private {
+        import sidero.base.internal.meta : OpApplyCombos;
+
+        int opApplyImpl(Del)(scope Del del) scope @trusted {
+            if (isNull)
+                return 0;
+
+            auto iterator = state.createIteratorExternal();
+            int result;
+
+            while(result == 0 && !state.iteratorEmptyExternal(iterator)) {
+                ResultReference!KeyType gotKey;
+                ResultReference!ValueType gotValue;
+
+                if (state.iteratorGetExternal(iterator, gotKey, gotValue)) {
+                    static if (__traits(compiles, del(gotKey, gotValue)))
+                        result = del(gotKey, gotValue);
+                    else
+                        result = del(gotValue);
+
+                    if (!state.iteratorAdvanceExternal(iterator))
+                        break;
+                }
+            }
+
+            state.rcExternal(false, iterator);
+            return result;
+        }
+    }
+
+export:
+
+    ///
+    mixin OpApplyCombos!("ResultReference!ValueType", "ResultReference!KeyType", ["@safe", "nothrow", "@nogc"]);
+
+    ///
+    unittest {
+        ConcurrentHashMap cll;
+        cll[KeyType.init] = ValueType.init;
+
+        int count;
+
+        foreach (k, v; cll) {
+            assert(k);
+            assert(v);
+
+            assert(k == KeyType.init);
+            assert(v == ValueType.init);
+            count++;
+        }
+
+        assert(count == 1);
+    }
+
+@safe nothrow @nogc:
 
     ///
     this(RCAllocator allocator, RCAllocator valueAllocator = RCAllocator.init) scope @trusted {
@@ -305,7 +359,8 @@ export @safe nothrow @nogc:
             return other.isNull ? 0 : -1;
         else if (other.isNull)
             return 1;
-        return (cast(ConcurrentHashMapImpl!(RealKeyType, ValueType)*)state).compareExternal((cast(ConcurrentHashMapImpl!(RealKeyType, ValueType)*)other.state));
+        return (cast(ConcurrentHashMapImpl!(RealKeyType, ValueType)*)state).compareExternal(
+                (cast(ConcurrentHashMapImpl!(RealKeyType, ValueType)*)other.state));
     }
 
     private {
@@ -325,10 +380,10 @@ export @safe nothrow @nogc:
             }
         }
 
-    void debugPosition() scope {
-        if (!isNull)
-            state.debugPosition(null);
-    }
+        void debugPosition() scope {
+            if (!isNull)
+                state.debugPosition(null);
+        }
     }
 }
 
@@ -378,11 +433,52 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
             mutex.unlock;
     }
 
-    Iterator* createIteratorExternal(scope Iterator* iterator) scope @trusted {
+    Iterator* createIteratorExternal() scope @trusted {
         mutex.pureLock;
 
         Iterator* ret = iteratorList.createIterator(nodeList);
         this.rcInternal(true, ret);
+
+        mutex.unlock;
+        return ret;
+    }
+
+    bool iteratorEmptyExternal(scope Iterator* iterator) scope {
+        mutex.pureLock;
+        bool ret = iterator.forwards.isOutOfRange();
+
+        mutex.unlock;
+        return ret;
+    }
+
+    bool iteratorGetExternal(scope Iterator* iterator, scope ref ResultReference!KeyType key, scope ref ResultReference!ValueType value) scope @trusted {
+        mutex.pureLock;
+
+        if (iterator.forwards.isOutOfRange()) {
+            mutex.unlock;
+            return false;
+        }
+
+        Node* node = iterator.forwards.node;
+
+        key = typeof(key)(&node.key, node, cast(key.RCHandle)&rcNodeExternal);
+        value = typeof(value)(&node.value, node, cast(value.RCHandle)&rcNodeExternal);
+
+        node.onIteratorIn;
+        node.onIteratorIn;
+        this.rcInternal(true, null);
+        this.rcInternal(true, null);
+
+        mutex.unlock;
+        return true;
+    }
+
+    bool iteratorAdvanceExternal(scope Iterator* iterator) scope @trusted {
+        mutex.pureLock;
+
+        Node* old = iterator.forwards.node;
+        iterator.forwards.advanceForward(nodeList);
+        bool ret = old is iterator.forwards.node;
 
         mutex.unlock;
         return ret;
@@ -409,7 +505,7 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
                 if (result != 0)
                     break;
 
-                if (!cursor.isOutOfRange) {
+                if (!cursor.isOutOfRange()) {
                     result = genericCompare(cursor.node.hash, otherNode.hash);
 
                     if (result == 0)
@@ -646,7 +742,7 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
 
         cursor.node.onIteratorIn;
 
-        while (result == 0 && !cursor.isOutOfRange) {
+        while (result == 0 && !cursor.isOutOfRange()) {
             result = del(cursor.node.key, cursor.node.value);
             cursor.advanceForward(nodeList);
         }
@@ -667,8 +763,8 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
                     if (iterator !is null && iterator.forwards.node is node)
                         debug write(">");
 
-                    debug writef!"0x%X %s=%s %s:%s"(node, node.previous.previous is null ? "" : "$",
-                            node.next.next is null ? "" : "$", node.key, node.value);
+                    debug writef!"0x%X %s=%s %s:%s"(node, node.previous.previous is null ? "" : "$", node.next.next is null ?
+                            "" : "$", node.key, node.value);
 
                     debug write(" refcount ", node.refCount);
                     if (node.previousReadyToBeDeleted !is null)
@@ -792,7 +888,9 @@ struct ConcurrentHashMapIterator(RealKeyType, ValueType) {
                 node = node.next;
             } else {
                 // okay we are at the end, gotta skip to the next buckets first item
-                size_t bucketId = nodeList.getBucketId(node.hash);
+                size_t bucketId = nodeList.getBucketId(node.hash) + 1;
+                // just in case we are already at the end.
+                node = &nodeList.buckets[$-1].tail;
 
                 while (bucketId < nodeList.buckets.length) {
                     auto bucket = &nodeList.buckets[bucketId];
@@ -800,8 +898,6 @@ struct ConcurrentHashMapIterator(RealKeyType, ValueType) {
                     if (bucket.head.next.next !is null) {
                         node = bucket.head.next;
                         break;
-                    } else {
-                        node = &bucket.tail;
                     }
 
                     bucketId++;
