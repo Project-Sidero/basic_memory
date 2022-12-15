@@ -47,6 +47,11 @@ export @safe nothrow @nogc:
     @disable this(ref return scope const ConcurrentHashMap other) scope const;
     @disable this(this) scope;
 
+    ~this() scope {
+        if (!isNull)
+            state.rcExternal(false, null);
+    }
+
     ///
     bool isNull() scope const {
         return state is null;
@@ -158,7 +163,7 @@ export @safe nothrow @nogc:
     }
 
     ///
-    bool opBinary(string op : "in")(scope RealKeyType key) scope {
+    bool opBinaryRight(string op : "in")(scope RealKeyType key) scope {
         if (isNull)
             return false;
 
@@ -167,6 +172,18 @@ export @safe nothrow @nogc:
         } else {
             return state.containsExternal(key);
         }
+    }
+
+    ///
+    unittest {
+        ConcurrentHashMap map;
+        assert(map.isNull);
+        assert(RealKeyType.init !in map);
+
+        map[RealKeyType.init] = ValueType.init;
+        assert(!map.isNull);
+        assert(map.length == 1);
+        assert(RealKeyType.init in map);
     }
 
     ///
@@ -180,6 +197,24 @@ export @safe nothrow @nogc:
         } else {
             return state.removeExternal(key);
         }
+    }
+
+    ///
+    unittest {
+        ConcurrentHashMap map;
+        assert(map.isNull);
+        assert(RealKeyType.init !in map);
+
+        map[RealKeyType.init] = ValueType.init;
+        assert(!map.isNull);
+        assert(map.length == 1);
+        assert(RealKeyType.init in map);
+
+        auto got = map[RealKeyType.init];
+
+        map.remove(RealKeyType.init);
+        assert(map.length == 0);
+        assert(RealKeyType.init !in map);
     }
 
     ///
@@ -234,7 +269,7 @@ export @safe nothrow @nogc:
         }
 
         ///
-        bool opBinary(string op : "in")(scope KeyType key) scope {
+        bool opBinaryRight(string op : "in")(scope KeyType key) scope {
             if (isNull)
                 return false;
 
@@ -289,6 +324,11 @@ export @safe nothrow @nogc:
                 this = this.dup;
             }
         }
+
+    void debugPosition() scope {
+        if (!isNull)
+            state.debugPosition(null);
+    }
     }
 }
 
@@ -621,19 +661,21 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
             import std.stdio;
 
             try {
-                debug writeln("aliveNodes: ", nodeList.aliveNodes, " allNodes: ", nodeList.allNodes);
+                debug writeln("refCount: ", nodeList.refCount, " aliveNodes: ", nodeList.aliveNodes, " allNodes: ", nodeList.allNodes);
 
                 foreach (node; nodeList) {
                     if (iterator !is null && iterator.forwards.node is node)
                         debug write(">");
 
-                    debug writef!"0x%X %s=%s %s: %s "(node, node.previous.previous is null ? "" : "$",
+                    debug writef!"0x%X %s=%s %s:%s"(node, node.previous.previous is null ? "" : "$",
                             node.next.next is null ? "" : "$", node.key, node.value);
 
-                    debug write("refcount ", node.refCount);
+                    debug write(" refcount ", node.refCount);
                     if (node.previousReadyToBeDeleted !is null)
                         debug writef!" prtbd 0x%X"(node.previousReadyToBeDeleted);
                 }
+
+                debug writeln;
 
                 debug stdout.flush;
                 debug stderr.flush;
@@ -890,13 +932,17 @@ struct ConcurrentHashMapNode(RealKeyType, ValueType) {
         if (!node.isDeleted)
             this.aliveNodes--;
 
-        static if (isAnyPointer!ValueType) {
-            if (!valueAllocator.isNull)
-                valueAllocator.dispose(node.value);
-        }
+        if (node.refCount > 0) {
+            node.isDeleted = true;
+        } else {
+            static if (isAnyPointer!ValueType) {
+                if (!valueAllocator.isNull)
+                    valueAllocator.dispose(node.value);
+            }
 
-        this.allNodes--;
-        allocator.dispose(node);
+            this.allNodes--;
+            allocator.dispose(node);
+        }
     }
 
     Node* nodeFor(ulong hash) scope @trusted {
