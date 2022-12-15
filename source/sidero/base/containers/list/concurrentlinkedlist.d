@@ -1,4 +1,4 @@
-module sidero.base.containers.list.linkedlist;
+module sidero.base.containers.list.concurrentlinkedlist;
 import sidero.base.containers.readonlyslice;
 import sidero.base.allocators;
 import sidero.base.traits;
@@ -249,7 +249,7 @@ nothrow @nogc:
     }
 
     ///
-    bool isNull() {
+    bool isNull() scope {
         return this.state is null;
     }
 
@@ -1470,44 +1470,6 @@ struct ConcurrentLinkedListImpl(Type) {
         assert(toAdd.isDeleted);
     }
 
-    void mergeDeletedListToNewParent(scope Node* oldParent, scope Node* newParent) scope @trusted {
-        assert(oldParent !is null);
-        assert(!oldParent.isDeleted);
-        assert(newParent !is null);
-        assert(!newParent.isDeleted);
-
-        Node* endOfOldList = oldParent.previousReadyToBeDeleted;
-        assert(endOfOldList !is null);
-        assert(endOfOldList.isDeleted);
-        assert(endOfOldList.previousReadyToBeDeleted is null);
-
-        Node* endOfNewList = newParent.previousReadyToBeDeleted;
-
-        if (endOfNewList !is null) {
-            assert(endOfNewList.isDeleted);
-            assert(endOfNewList.previousReadyToBeDeleted is null);
-
-            // we have a list on the new parent
-            // so we have to get the start of the old list
-            // which allows us to append it to the new list
-            Node* startOfOldList = endOfOldList;
-
-            while (startOfOldList.previous !is null)
-                startOfOldList = startOfOldList.previous;
-            assert(startOfOldList !is null);
-
-            endOfNewList.next = startOfOldList;
-            startOfOldList.previous = endOfNewList;
-        }
-
-        // patch end of old list into new parent
-        newParent.previousReadyToBeDeleted = endOfOldList;
-        endOfOldList.next = newParent;
-
-        // patch out old list from old parent
-        oldParent.previousReadyToBeDeleted = null;
-    }
-
     ErrorInfo changeIndexToOffset(scope Iterator* iterator, ref ptrdiff_t a) scope {
         size_t actualLength = iterator is null ? nodeList.aliveNodes : (iterator.maximumOffsetFromHead - iterator.minimumOffsetFromHead);
 
@@ -1585,6 +1547,7 @@ struct ConcurrentLinkedListImpl(Type) {
 
             cursor.onEOL(nodeList);
         }
+
         return result;
     }
 
@@ -1877,7 +1840,7 @@ struct ConcurrentLinkedListNodeList(Type) {
         return ret;
     }
 
-    void removeNode(scope Node* node) @trusted scope {
+    void removeNode(scope Node* node) scope @trusted {
         assert(node !is null);
         assert(node !is &head);
         assert(node !is &tail);
@@ -1904,17 +1867,6 @@ struct ConcurrentLinkedListNodeList(Type) {
 
         this.allNodes--;
         allocator.dispose(node);
-    }
-
-    Node* nodeFor(size_t offset) scope @trusted {
-        Node* ret = head.next;
-
-        while (ret.next !is null && offset > 0) {
-            ret = ret.next;
-        }
-
-        assert(offset == 0);
-        return ret;
     }
 
     void mergeDeletedListToNewParent(scope Node* oldParent, scope Node* newParent) scope @trusted {
