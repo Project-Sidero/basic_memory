@@ -1090,7 +1090,7 @@ struct ConcurrentHashMapNode(RealKeyType, ValueType) {
             Bucket* lastIntoBucket;
             Node* priorNode;
 
-            foreach (oldBucket; old) {
+            foreach (ref oldBucket; old) {
                 Node* currentNode = oldBucket.head.next;
 
                 while (currentNode.next !is null) {
@@ -1191,7 +1191,7 @@ struct ConcurrentHashMapNode(RealKeyType, ValueType) {
     int opApply(int delegate(scope Node* node) @safe nothrow @nogc del) scope @trusted {
         int result;
 
-        foreach (bucket; buckets) {
+        foreach (ref bucket; buckets) {
             Node* currentNode = bucket.head.next;
 
             while (result == 0 && currentNode.next !is null) {

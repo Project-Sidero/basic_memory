@@ -34,8 +34,8 @@ int genericCompare(Type)(scope Type first, scope Type second) {
     } else static if (is(Type == struct)) {
         int got;
 
-        static foreach(offset, ref v1; first.tupleof) {
-            got = genericCompare(v1, second.tupleof[offset]);
+        static foreach(offset; 0 .. first.tupleof.length) {
+            got = genericCompare(first.tupleof[offset], second.tupleof[offset]);
             if (got != 0)
                 return got;
         }
