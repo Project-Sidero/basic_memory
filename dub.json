@@ -41,6 +41,19 @@
             "workingDirectory": "database"
         },
         {
+            "name": "makeUnicodeTables",
+            "targetType": "sourceLibrary",
+            "sourcePaths": [],
+            "importPaths": [],
+            "extraDependencyFiles": [
+                "source/sidero/base/text/unicode/readonly.d",
+                "source/sidero/base/text/unicode/builder.d"
+            ],
+            "preBuildCommands": [
+                "$DUB_EXE run --single tools/unicode.d"
+            ]
+        },
+        {
             "name": "source",
             "targetType": "sourceLibrary",
             "importPaths": [
@@ -71,9 +84,9 @@
                 "--fvisibility=public",
                 "--linkonce-templates"
             ],
-            "preBuildCommands": [
-                "$DUB_EXE run --single tools/unicode.d"
-            ]
+            "dependencies": {
+                "sidero_base:makeUnicodeTables": "*"
+            }
         }
     ],
     "configurations": [
