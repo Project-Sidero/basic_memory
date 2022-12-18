@@ -6,41 +6,53 @@ module tools.unicode;
 
 void main() {
     import std.file : readText;
+    import std.parallelism : parallel;
 
     string readOnlyText = readText("source/sidero/base/text/unicode/readonly.d");
     string builderText = readText("source/sidero/base/text/unicode/builder.d");
 
-    readOnlyText.processFile("readonly", "String_UTF", "readonly_utf8", "String_UTF8", "char");
-    readOnlyText.processFile("readonly", "String_UTF", "readonly_utf16", "String_UTF16", "wchar");
-    readOnlyText.processFile("readonly", "String_UTF", "readonly_utf32", "String_UTF32", "dchar");
-    builderText.processFile("builder", "StringBuilder_UTF", "builder_utf8", "StringBuilder_UTF8", "char");
-    builderText.processFile("builder", "StringBuilder_UTF", "builder_utf16", "StringBuilder_UTF16", "wchar");
-    builderText.processFile("builder", "StringBuilder_UTF", "builder_utf32", "StringBuilder_UTF32", "dchar");
+    Work[] work = [
+        Work(readOnlyText, "readonly", "String_UTF", "readonly_utf8", "String_UTF8", "char"),
+        Work(readOnlyText, "readonly", "String_UTF", "readonly_utf16", "String_UTF16", "wchar"),
+        Work(readOnlyText, "readonly", "String_UTF", "readonly_utf32", "String_UTF32", "dchar"),
+        Work(builderText, "builder", "StringBuilder_UTF", "builder_utf8", "StringBuilder_UTF8", "char"),
+        Work(builderText, "builder", "StringBuilder_UTF", "builder_utf16", "StringBuilder_UTF16", "wchar"),
+        Work(builderText, "builder", "StringBuilder_UTF", "builder_utf32", "StringBuilder_UTF32", "dchar"),
+    ];
+
+    foreach(ref todo; work.parallel) {
+        todo.processFile;
+    }
 }
 
-void processFile(string originalText, string originalModuleName, string originalTypeName, string moduleName,
-        string typeName, string charName) {
+struct Work {
+    string originalText, originalModuleName, originalTypeName, moduleName,
+    typeName, charName;
+}
+
+void processFile(ref Work work) {
     import std.algorithm : countUntil, startsWith;
     import std.array : replace, appender;
     import std.file : write;
 
     string[] toFind = [
-        "sidero.base.text.unicode." ~ originalModuleName,
+        "sidero.base.text.unicode." ~ work.originalModuleName,
         "Char = char",
-        originalTypeName ~ "!char",
-        originalTypeName ~ "!wchar",
-        originalTypeName ~ "!dchar",
-        "struct " ~ originalTypeName,
+        work.originalTypeName ~ "!char",
+        work.originalTypeName ~ "!wchar",
+        work.originalTypeName ~ "!dchar",
+        "struct " ~ work.originalTypeName,
     ];
     string[] toReplace = [
-        "sidero.base.text.unicode." ~ moduleName,
-        "Char = " ~ charName,
-        originalTypeName ~ "8",
-        originalTypeName ~ "16",
-        originalTypeName ~ "32",
-        "struct " ~ typeName
+        "sidero.base.text.unicode." ~ work.moduleName,
+        "Char = " ~ work.charName,
+        work.originalTypeName ~ "8",
+        work.originalTypeName ~ "16",
+        work.originalTypeName ~ "32",
+        "struct " ~ work.typeName
     ];
 
+    string originalText = work.originalText;
     auto result = appender!string;
     result.reserve(1024 * 1024 * 8);
 
@@ -67,5 +79,5 @@ void processFile(string originalText, string originalModuleName, string original
         }
     }
 
-    write("imports/sidero/base/text/unicode/" ~ moduleName ~ ".d", result.data);
+    write("imports/sidero/base/text/unicode/" ~ work.moduleName ~ ".d", result.data);
 }
