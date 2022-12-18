@@ -6,6 +6,7 @@ import sidero.base.encoding.utf;
 import sidero.base.allocators;
 import sidero.base.errors;
 import sidero.base.traits :isUTFReadOnly;
+import sidero.base.attributes : hidden;
 
 export:
 
@@ -35,7 +36,7 @@ struct String_UTF {
 
             scope @nogc nothrow:
 
-            void rc(bool add) @trusted {
+            void rc(bool add) @trusted @hidden {
                 if (add)
                     atomicOp!"+="(refCount, 1);
                 else if (atomicOp!"-="(refCount, 1) == 0) {
@@ -46,7 +47,7 @@ struct String_UTF {
         }
     }
 
-    private {
+    private @hidden {
         import sidero.base.internal.meta : OpApplyCombos;
         import core.atomic : atomicOp;
 
@@ -2761,7 +2762,7 @@ nothrow @nogc:
         assert(value.literal.length == 6);
     }
 
-private:
+private @hidden:
     void setupIterator()() scope @trusted {
         if (isNull || haveIterator)
             return;

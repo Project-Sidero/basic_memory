@@ -6,6 +6,7 @@ Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
  */
 module sidero.base.allocators.buffers.buddylist;
+import sidero.base.attributes : hidden;
 import std.typecons : Ternary;
 
 private {
@@ -318,9 +319,9 @@ unittest {
     assert(bl.owns(got1[10 .. 20]) == Ternary.yes);
 }
 
-private:
+private @hidden:
 
-size_t[2] calculatePower2Size(size_t requested, size_t minExponent) @safe nothrow @nogc pure {
+size_t[2] calculatePower2Size()(size_t requested, size_t minExponent) @safe nothrow @nogc pure {
     size_t value = 1, power;
 
     while (value < requested || power < minExponent) {

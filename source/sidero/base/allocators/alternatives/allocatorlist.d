@@ -6,6 +6,7 @@ Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
  */
 module sidero.base.allocators.alternatives.allocatorlist;
+import sidero.base.attributes : hidden;
 import std.typecons : Ternary;
 
 private {
@@ -177,7 +178,7 @@ scope @safe @nogc pure nothrow:
         return false;
     }
 
-private:
+private @hidden:
     import std.traits : isPointer, ParameterStorageClassTuple, ParameterStorageClass;
 
     static if (isPointer!PoolAllocator || (__traits(compiles, factory!PoolAllocator) &&

@@ -5,6 +5,8 @@ import sidero.base.allocators;
 
 mixin template StringBuilderOperations() {
     import sidero.base.errors.message : ErrorInfo;
+    import sidero.base.attributes : hidden;
+
     alias BlockList = BlockListImpl!Char;
 
     BlockList blockList;
@@ -15,7 +17,7 @@ mixin template StringBuilderOperations() {
     alias Block = BlockList.Block;
     alias OpTest = sidero.base.text.internal.builder.operations.OpTest;
 
-@safe nothrow @nogc:
+@safe nothrow @nogc @hidden:
 
     void rc(bool addRef) {
         blockList.mutex.pureLock;
@@ -114,6 +116,7 @@ mixin template StringBuilderOperations() {
 
     ErrorInfo changeIndexToOffset(scope Iterator* iterator, scope ref ptrdiff_t a) {
         import sidero.base.errors.stock;
+
         size_t actualLength;
 
         if (iterator is null)
@@ -135,6 +138,7 @@ mixin template StringBuilderOperations() {
 
     ErrorInfo changeIndexToOffset(scope Iterator* iterator, scope ref ptrdiff_t a, scope ref ptrdiff_t b) {
         import sidero.base.errors.stock;
+
         size_t actualLength;
 
         if (iterator !is null) {
@@ -957,7 +961,7 @@ struct OpTest(Char) {
     alias CustomIteratorContents = void;
     mixin StringBuilderOperations;
 
-@safe nothrow @nogc:
+@safe nothrow @nogc @hidden:
 
     this(scope return RCAllocator allocator) scope @trusted {
         this.blockList = BlockList(allocator);
@@ -1065,6 +1069,8 @@ struct OpTest(Char) {
     static struct LiteralMatcher {
         const(Char)[] literal;
 
+    @safe nothrow @nogc @hidden:
+
         bool matches(scope Cursor cursor, size_t maximumOffsetFromHead) {
             auto temp = literal;
 
@@ -1114,7 +1120,7 @@ struct OpTest(Char) {
     static struct LiteralAsTarget {
         const(Char)[] literal;
 
-    @safe nothrow @nogc:
+    @safe nothrow @nogc @hidden:
 
         void mutex(bool) {
         }

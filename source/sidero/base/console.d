@@ -2,6 +2,7 @@ module sidero.base.console;
 import sidero.base.text;
 import sidero.base.allocators;
 import sidero.base.typecons : Optional;
+import sidero.base.attributes : hidden;
 
 export @safe nothrow @nogc:
 
@@ -740,7 +741,7 @@ pragma(crt_destructor) extern (C) void deinitializeConsole() @trusted {
     mutex.unlock;
 }
 
-private:
+private @hidden:
 import sidero.base.parallelism.mutualexclusion;
 import core.stdc.stdio : FILE;
 

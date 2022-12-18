@@ -1,6 +1,7 @@
 module sidero.base.text.internal.builder.blocklist;
 import sidero.base.allocators;
 import sidero.base.parallelism.mutualexclusion;
+import sidero.base.attributes : hidden;
 
 alias BLIb = BlockListImpl!ubyte;
 alias BLIc = BlockListImpl!char;
@@ -17,7 +18,7 @@ struct BlockListImpl(Char) {
     size_t numberOfItems, numberOfBlocks;
     int refCount = 1;
 
-@safe nothrow @nogc:
+@safe nothrow @nogc @hidden:
 
     this(scope return RCAllocator allocator) scope @trusted {
         this.allocator = allocator;
@@ -200,7 +201,7 @@ struct BlockListImpl(Char) {
     bool canFindEverything() @safe nothrow @nogc {
         size_t found;
 
-        foreach(Block* block; this) {
+        foreach (Block* block; this) {
             found += block.length;
         }
 
@@ -366,7 +367,7 @@ struct BlockListImpl(Char) {
         Block* previous, next;
         size_t length;
 
-    @trusted nothrow @nogc:
+    @trusted nothrow @nogc @hidden:
 
         Char* dataPtr() pure {
             return cast(Char*)((cast(void*)&this) + Block.sizeof);

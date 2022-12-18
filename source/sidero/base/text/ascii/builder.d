@@ -1,6 +1,7 @@
 module sidero.base.text.ascii.builder;
 import sidero.base.text;
 import sidero.base.allocators.api;
+import sidero.base.attributes : hidden;
 
 export:
 
@@ -15,7 +16,7 @@ export:
     private {
         import sidero.base.internal.meta : OpApplyCombos;
 
-        int opApplyImpl(Del)(scope Del del) @trusted scope {
+        int opApplyImpl(Del)(scope Del del) @trusted scope @hidden {
             if (isNull)
                 return 0;
 
@@ -42,7 +43,7 @@ export:
             return result;
         }
 
-        int opApplyReverseImpl(Del)(scope Del del) @trusted scope {
+        int opApplyReverseImpl(Del)(scope Del del) @trusted scope @hidden {
             if (isNull)
                 return 0;
 
@@ -1717,7 +1718,7 @@ package(sidero.base.text):
     ASCII_State.Iterator* iterator;
 
     int foreachContiguous(scope int delegate(ref scope Char[] data) @safe nothrow @nogc del,
-            scope void delegate(size_t length) @safe nothrow @nogc lengthDel = null) scope @nogc @trusted {
+            scope void delegate(size_t length) @safe nothrow @nogc lengthDel = null) scope @nogc @trusted @hidden {
         if (state is null)
             return 0;
 
@@ -1735,7 +1736,7 @@ package(sidero.base.text):
         return result;
     }
 
-private:
+private @hidden:
     void setupState(RCAllocator allocator = RCAllocator.init) scope @nogc @trusted {
         if (allocator.isNull)
             allocator = globalAllocator();
@@ -1971,7 +1972,7 @@ private:
     }
 }
 
-package(sidero.base.text):
+package(sidero.base.text) @hidden:
 
 struct ASCII_State {
     import sidero.base.text.internal.builder.blocklist;
@@ -1986,7 +1987,7 @@ struct ASCII_State {
 
     mixin StringBuilderOperations;
 
-@safe nothrow @nogc:
+@safe nothrow @nogc @hidden:
 
     this(scope return RCAllocator allocator) scope @trusted {
         this.blockList = BlockList(allocator);
@@ -2008,7 +2009,9 @@ struct ASCII_State {
     static struct LiteralMatcher {
         const(Char)[] literal;
 
-        bool matches(scope Cursor cursor, size_t maximumOffsetFromHead) {
+    @safe nothrow @nogc @hidden:
+
+        bool matches(scope Cursor cursor, size_t maximumOffsetFromHead) scope {
             auto temp = literal;
 
             while (!cursor.isOutOfRange(0, maximumOffsetFromHead) && temp.length > 0) {
@@ -2028,7 +2031,7 @@ struct ASCII_State {
             return temp.length == 0;
         }
 
-        int compare(scope Cursor cursor, size_t maximumOffsetFromHead) {
+        int compare(scope Cursor cursor, size_t maximumOffsetFromHead) scope {
             auto temp = literal;
 
             while (!cursor.isOutOfRange(0, maximumOffsetFromHead) && temp.length > 0) {
@@ -2057,18 +2060,18 @@ struct ASCII_State {
     struct LiteralAsTarget {
         const(Char)[] literal;
 
-    @safe nothrow @nogc:
+    @safe nothrow @nogc @hidden:
 
-        void mutex(bool) {
+        void mutex(bool) scope {
         }
 
-        int foreachContiguous(scope int delegate(scope ref  /* ignore this */ Char[] data) @safe @nogc nothrow del) @trusted @nogc nothrow {
+        int foreachContiguous(scope int delegate(scope ref  /* ignore this */ Char[] data) @safe @nogc nothrow del) scope @trusted @nogc nothrow {
             // don't mutate during testing
             Char[] temp = cast(Char[])literal;
             return del(temp);
         }
 
-        int foreachValue(scope int delegate(ref  /* ignore this */ Char) @safe @nogc nothrow del) @safe @nogc nothrow {
+        int foreachValue(scope int delegate(ref  /* ignore this */ Char) @safe @nogc nothrow del) scope @safe @nogc nothrow {
             int result;
 
             foreach (Char c; literal) {
@@ -2080,7 +2083,7 @@ struct ASCII_State {
             return result;
         }
 
-        size_t length() {
+        size_t length() scope {
             // we are not mixing types during testing so meh
             return literal.length;
         }
@@ -2094,7 +2097,9 @@ struct ASCII_State {
         ASCII_State* state;
         Iterator* iterator;
 
-        void mutex(bool lock) @safe nothrow @nogc {
+    @safe nothrow @nogc @hidden:
+
+        void mutex(bool lock) scope {
             assert(state !is null);
 
             if (lock)
@@ -2103,7 +2108,7 @@ struct ASCII_State {
                 state.blockList.mutex.unlock;
         }
 
-        int foreachContiguous(scope int delegate(scope ref  /* ignore this */ Char[] data) @safe @nogc nothrow del) @trusted @nogc nothrow {
+        int foreachContiguous(scope int delegate(scope ref  /* ignore this */ Char[] data) @safe @nogc nothrow del) scope @trusted {
             int result;
 
             if (iterator !is null) {
@@ -2125,7 +2130,7 @@ struct ASCII_State {
             return result;
         }
 
-        int foreachValue(scope int delegate(ref  /* ignore this */ Char) @safe @nogc nothrow del) @safe @nogc nothrow {
+        int foreachValue(scope int delegate(ref  /* ignore this */ Char) @safe @nogc nothrow del) scope {
             int result;
 
             if (iterator !is null) {
@@ -2151,20 +2156,20 @@ struct ASCII_State {
             return result;
         }
 
-        size_t length() @safe @nogc nothrow {
+        size_t length() scope {
             return iterator is null ? state.blockList.numberOfItems : (iterator.backwards.offsetFromHead - iterator.forwards.offsetFromHead);
         }
 
-        OtherStateAsTarget!Char get() scope return nothrow @trusted @nogc {
+        OtherStateAsTarget!Char get() scope return @trusted {
             return OtherStateAsTarget!Char(cast(void*)state, &mutex, &foreachContiguous, &foreachValue, &length);
         }
     }
 
-    void debugPosition(scope Cursor cursor) {
+    void debugPosition(scope Cursor cursor) scope {
         debugPosition(cursor.block, cursor.offsetIntoBlock);
     }
 
-    void debugPosition(scope Block* cursorBlock, size_t offsetIntoBlock) @trusted {
+    void debugPosition(scope Block* cursorBlock, size_t offsetIntoBlock) scope @trusted {
         version (D_BetterC) {
         } else {
             debug {
@@ -2205,7 +2210,7 @@ struct ASCII_State {
         }
     }
 
-    void debugPosition(scope Iterator* iterator) @trusted {
+    void debugPosition(scope Iterator* iterator) scope @trusted {
         version (D_BetterC) {
         } else {
             debug {
@@ -2249,7 +2254,7 @@ struct ASCII_State {
     // /\ internal
     // \/ external
 
-    int externalOpCmp(scope Iterator* iterator, scope ref OtherStateAsTarget!Char other, bool caseSensitive) {
+    int externalOpCmp(scope Iterator* iterator, scope ref OtherStateAsTarget!Char other, bool caseSensitive) scope @trusted {
         import sidero.base.text.ascii.characters : toLower;
 
         blockList.mutex.pureLock;
@@ -2321,7 +2326,7 @@ struct ASCII_State {
         return result;
     }
 
-    bool externalStartsWith(scope Iterator* iterator, scope ref OtherStateAsTarget!Char other, bool caseSensitive) {
+    bool externalStartsWith(scope Iterator* iterator, scope ref OtherStateAsTarget!Char other, bool caseSensitive) scope @trusted {
         import sidero.base.text.ascii.characters : toLower;
 
         blockList.mutex.pureLock;
@@ -2389,7 +2394,7 @@ struct ASCII_State {
         return result;
     }
 
-    bool externalEndsWith(scope Iterator* iterator, scope ref OtherStateAsTarget!Char other, bool caseSensitive) {
+    bool externalEndsWith(scope Iterator* iterator, scope ref OtherStateAsTarget!Char other, bool caseSensitive) scope @trusted {
         import sidero.base.text.ascii.characters : toLower;
 
         blockList.mutex.pureLock;
@@ -2470,7 +2475,7 @@ struct ASCII_State {
     }
 
     size_t externalReplace(scope Iterator* iterator, scope ref OtherStateAsTarget!Char toFind,
-            scope ref OtherStateAsTarget!Char toReplace, bool caseSensitive, bool onlyOnce) {
+            scope ref OtherStateAsTarget!Char toReplace, bool caseSensitive, bool onlyOnce) scope @trusted {
         import sidero.base.text.ascii.characters : toLower;
 
         blockList.mutex.pureLock;
@@ -2518,7 +2523,7 @@ struct ASCII_State {
         return ret;
     }
 
-    size_t externalCount(scope Iterator* iterator, scope ref OtherStateAsTarget!Char toFind, bool caseSensitive, bool onlyOnce) {
+    size_t externalCount(scope Iterator* iterator, scope ref OtherStateAsTarget!Char toFind, bool caseSensitive, bool onlyOnce) scope @trusted {
         import sidero.base.text.ascii.characters : toLower;
 
         blockList.mutex.pureLock;
@@ -2562,7 +2567,7 @@ struct ASCII_State {
         return ret;
     }
 
-    ptrdiff_t externalOffsetOf(scope Iterator* iterator, scope ref OtherStateAsTarget!Char toFind, bool caseSensitive, bool onlyOnce) {
+    ptrdiff_t externalOffsetOf(scope Iterator* iterator, scope ref OtherStateAsTarget!Char toFind, bool caseSensitive, bool onlyOnce) scope @trusted {
         import sidero.base.text.ascii.characters : toLower;
 
         blockList.mutex.pureLock;

@@ -6,6 +6,7 @@ Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
  */
 module sidero.base.allocators.alternatives.bucketizer;
+import sidero.base.attributes : hidden;
 import std.typecons : Ternary;
 
 private {
@@ -112,7 +113,7 @@ scope @trusted @nogc pure nothrow:
         }
     }
 
-private:
+private @hidden:
     ref PoolAllocator bucketFor(size_t size) {
         if (size < min)
             return poolAllocators[0];

@@ -4,6 +4,7 @@ import sidero.base.text;
 import sidero.base.errors.result;
 public import sidero.base.attributes : PrintIgnore, PrettyPrintIgnore;
 import sidero.base.traits;
+import sidero.base.attributes : hidden;
 
 export:
 
@@ -109,7 +110,7 @@ export nothrow @nogc:
         }
     }
 
-private:
+private @hidden:
     static struct Impl(Builder) {
         PrettyPrint* parent;
         Builder builder;
@@ -659,7 +660,7 @@ unittest {
     assert(builder == "\\\0\a\b\f\n\r\t\v\"");
 }
 
-//FIXME: private:
+private @hidden:
 import sidero.base.allocators;
 import std.traits : isSomeChar, isPointer, isIntegral, isFloatingPoint, Unqual, ForeachType, isBasicType, isIterable,
     isAssociativeArray, isArray, isDynamicArray, FieldNameTuple, hasUDA, KeyType, ValueType, BaseClassesTuple, isCopyable;
@@ -722,7 +723,7 @@ struct FormatValue(Builder) if (isBuilderString!Builder) {
                 value.toString(&builder.put);
             }));
 
-scope:
+scope @hidden:
 
     this(scope Builder builder) @trusted {
         this.builder = builder;
@@ -1113,7 +1114,7 @@ struct RetrieveFormatSpecifier(String) if (isReadOnlyString!String || isSomeStri
         char[] actualBuffer;
     }
 
-scope:
+scope @hidden:
 
     this(scope String source) nothrow @nogc @trusted {
         static if (is(typeof(this.source) == typeof(source))) {
@@ -1226,7 +1227,7 @@ unittest {
     }
 }
 
-bool isValidSpecifierEnd(char c, ptrdiff_t index) @safe nothrow @nogc pure {
+bool isValidSpecifierEnd()(char c, ptrdiff_t index) @safe nothrow @nogc pure {
     switch (c) {
     case 'd':
     case 'i':

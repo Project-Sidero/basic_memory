@@ -8,6 +8,7 @@ Copyright: 2022 Richard Andrew Cattermole
  */
 module sidero.base.allocators.buffers.region;
 import sidero.base.allocators.mapping : GoodAlignment;
+import sidero.base.attributes : hidden;
 import std.typecons : Ternary;
 
 private {
@@ -88,7 +89,7 @@ export:
         return allocate_(size, ti);
     }
 
-    private void[] allocate_(size_t size, TypeInfo ti = null) @system {
+    private void[] allocate_(size_t size, TypeInfo ti = null) @system @hidden {
         static if (!is(PoolAllocator == void)) {
             if (memory is null) {
                 import sidero.base.allocators.mapping.vars : PAGESIZE;
@@ -184,7 +185,7 @@ export:
         }
     }
 
-private:
+private @hidden:
     bool fitsAlignment(void[] into, size_t needed, size_t alignedTo) @trusted {
         if (alignedTo == 0)
             return into.length >= needed;

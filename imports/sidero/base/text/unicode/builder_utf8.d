@@ -3,6 +3,7 @@ import sidero.base.text.unicode.internal.builder;
 import sidero.base.text.unicode.characters.database : UnicodeLanguage;
 import sidero.base.text;
 import sidero.base.allocators.api;
+import sidero.base.attributes : hidden;
 
 export:
 
@@ -16,11 +17,11 @@ struct StringBuilder_UTF8 {
     private {
         import sidero.base.internal.meta : OpApplyCombos;
 
-        int opApplyImpl(Del)(scope Del del) scope {
+        int opApplyImpl(Del)(scope Del del) scope @hidden {
             return state.opApplyImpl!Char(del);
         }
 
-        int opApplyReverseImpl(Del)(scope Del del) scope {
+        int opApplyReverseImpl(Del)(scope Del del) scope @hidden {
             return state.opApplyReverseImpl!Char(del);
         }
     }

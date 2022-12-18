@@ -5,6 +5,7 @@ import sidero.base.text.unicode.composing;
 import sidero.base.text.unicode.database;
 import sidero.base.encoding.utf;
 import sidero.base.allocators.api;
+import sidero.base.attributes : hidden;
 
 export @safe nothrow @nogc:
 
@@ -71,7 +72,7 @@ dstring normalize(scope ForeachOverUTF32Delegate input, RCAllocator allocator, b
     return cast(dstring)ret;
 }
 
-package(sidero.base.text.unicode):
+package(sidero.base.text.unicode) @hidden:
 
 size_t compose_(scope ref dchar[] array, scope RCAllocator allocator) @trusted {
     size_t lastStarterOffset, soFarInInput;
@@ -235,7 +236,7 @@ export @safe nothrow @nogc:
             allocator.dispose(rotateBuffer);
     }
 
-    private {
+    private @hidden {
         ToRotate[64] rotateInlineBuffer;
         ToRotate[] rotateBuffer;
         RCAllocator allocator;
@@ -246,7 +247,7 @@ export @safe nothrow @nogc:
             dchar character;
             ubyte ccc;
 
-        @safe nothrow @nogc:
+        @safe nothrow @nogc @hidden:
 
             void opAssign(ubyte v) {
                 this.ccc = v;

@@ -6,6 +6,7 @@ import sidero.base.text.unicode.normalization;
 import sidero.base.text.unicode.database;
 import sidero.base.encoding.utf;
 import sidero.base.allocators.api;
+import sidero.base.attributes : hidden;
 
 export @safe nothrow @nogc:
 
@@ -244,7 +245,7 @@ export @safe nothrow @nogc:
     }
 }
 
-package(sidero.base.text.unicode):
+package(sidero.base.text.unicode) @hidden:
 
 int icmpUTF32_(scope ForeachOverUTF32Delegate input1, scope ForeachOverUTF32Delegate input2, scope RCAllocator allocator,
         bool turkic = false, bool compatibility = false, bool composition = false) {

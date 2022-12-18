@@ -9,6 +9,7 @@ module sidero.base.allocators.buffers.freelist;
 import sidero.base.allocators.mapping : GoodAlignment;
 public import sidero.base.allocators.buffers.defs : FitsStrategy;
 public import sidero.base.allocators.predefined : HouseKeepingAllocator;
+import sidero.base.attributes : hidden;
 import std.typecons : Ternary;
 
 private {
@@ -149,7 +150,7 @@ private:
         Node* next;
         size_t available;
 
-    @safe @nogc scope pure nothrow:
+    @safe @nogc scope pure nothrow @hidden:
 
         void[] recreate() @trusted {
             return (cast(void*)&this)[0 .. available];
@@ -486,12 +487,12 @@ scope @safe @nogc pure nothrow:
         }
     }
 
-private:
+private @hidden:
     static struct Node {
         Node* next;
         size_t available;
 
-    @safe @nogc scope pure nothrow:
+    @safe @nogc scope pure nothrow @hidden:
 
         void[] recreate() @trusted {
             return (cast(void*)&this)[0 .. available];
@@ -624,7 +625,7 @@ export:
             Node* next;
             void[] array;
 
-            bool matches(scope void* other) scope @trusted nothrow @nogc {
+            bool matches(scope void* other) scope @trusted nothrow @nogc @hidden {
                 return array.ptr <= other && (array.ptr + array.length) > other;
             }
         }
@@ -823,9 +824,9 @@ unittest {
     assert(got == 1);
 }
 
-private:
+private @hidden:
 
-bool shouldSplit(size_t poolSize, size_t forSize, size_t alignment) @safe @nogc nothrow pure {
+bool shouldSplit()(size_t poolSize, size_t forSize, size_t alignment) @safe @nogc nothrow pure {
     if (alignment == 0)
         alignment = (void*).sizeof * 2;
 

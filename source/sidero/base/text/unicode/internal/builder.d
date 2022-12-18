@@ -4,16 +4,9 @@ import sidero.base.text.internal.builder.operations;
 import sidero.base.text;
 import sidero.base.allocators.api;
 import sidero.base.traits : isUTFReadOnly, isUTFBuilder;
+import sidero.base.attributes : hidden;
 
-package(sidero.base.text.unicode):
-
-version (LDC) {
-    import core.attribute;
-} else {
-    enum hidden;
-}
-
-@hidden:
+package(sidero.base.text.unicode) @hidden:
 
 struct StateIterator {
     import sidero.base.text.unicode.defs;
@@ -139,7 +132,7 @@ struct StateIterator {
         return result;
     }
 
-scope nothrow @nogc @safe:
+scope nothrow @nogc @safe @hidden:
 
     ///
     auto handle(T, U, V)(scope T utf8Del, scope U utf16Del, scope V utf32Del) @trusted {
@@ -237,7 +230,8 @@ scope nothrow @nogc @safe:
         }
     }
 
-    void construct(Other)(scope Other input, RCAllocator allocator = RCAllocator.init) scope @nogc @trusted if (isUTFReadOnly!Other) {
+    void construct(Other)(scope Other input, RCAllocator allocator = RCAllocator.init) scope @nogc @trusted
+            if (isUTFReadOnly!Other) {
         input.stripZeroTerminator;
 
         input.literalEncoding.handle(() { this.construct(cast(const(char)[])input.literal, allocator, input.language); }, () {
@@ -814,7 +808,7 @@ struct UTF_State(Char) {
 
     mixin StringBuilderOperations;
 
-@safe nothrow @nogc:
+@safe nothrow @nogc @hidden:
 
     this(scope return RCAllocator allocator) scope @trusted {
         this.blockList = BlockList(allocator);
@@ -848,6 +842,8 @@ struct UTF_State(Char) {
 
     static struct LiteralMatcher {
         const(Char)[] literal;
+
+    @safe nothrow @nogc @hidden:
 
         bool matches(scope Cursor cursor, size_t maximumOffsetFromHead) {
             auto temp = literal;
@@ -901,6 +897,8 @@ struct UTF_State(Char) {
         UTF_State* state;
         Iterator* iterator;
 
+    @safe nothrow @nogc @hidden:
+
         void mutex(bool lock) {
             assert(state !is null);
 
@@ -910,7 +908,7 @@ struct UTF_State(Char) {
                 state.blockList.mutex.unlock;
         }
 
-        int foreachContiguous(scope int delegate(scope ref  /* ignore this */ TargetChar[] data) @safe @nogc nothrow del) @trusted @nogc nothrow {
+        int foreachContiguous(scope int delegate(scope ref  /* ignore this */ TargetChar[] data) @safe @nogc nothrow del) @trusted {
             int result;
 
             static if (is(Char == TargetChar)) {
@@ -982,7 +980,7 @@ struct UTF_State(Char) {
             return result;
         }
 
-        int foreachValue(scope int delegate(ref  /* ignore this */ TargetChar) @safe @nogc nothrow del) @safe @nogc nothrow {
+        int foreachValue(scope int delegate(ref  /* ignore this */ TargetChar) @safe @nogc nothrow del) {
             int result;
 
             static if (is(Char == TargetChar)) {
@@ -1057,7 +1055,7 @@ struct UTF_State(Char) {
             return result;
         }
 
-        size_t length() @safe @nogc nothrow {
+        size_t length() {
             Cursor forwards;
 
             if (iterator is null)
@@ -1215,12 +1213,14 @@ struct UTF_State(Char) {
         // when delegate == 0
         size_t lastIteratedCount0;
 
-        this(return scope Cursor cursor, size_t maximumOffsetFromHead) scope @safe nothrow @nogc {
+    @safe nothrow @nogc @hidden:
+
+        this(return scope Cursor cursor, size_t maximumOffsetFromHead) scope {
             this.cursor = cursor;
             this.maximumOffsetFromHead = maximumOffsetFromHead;
         }
 
-        this(scope ref UTF_State state, scope Iterator* iterator, size_t offset, bool fromHead) scope @safe nothrow @nogc {
+        this(scope ref UTF_State state, scope Iterator* iterator, size_t offset, bool fromHead) scope {
             if (fromHead)
                 cursor = state.cursorFor(iterator, maximumOffsetFromHead, offset);
             else {
@@ -1236,7 +1236,7 @@ struct UTF_State(Char) {
             cursor.advanceForward(0, maximumOffsetFromHead, true);
         }
 
-        int opApply(scope int delegate(ref dchar) @safe nothrow @nogc del) scope @safe nothrow @nogc {
+        int opApply(scope int delegate(ref dchar) @safe nothrow @nogc del) scope {
             int result;
 
             lastIteratedCount0 = 0;
@@ -1690,12 +1690,12 @@ struct LiteralAsTargetChar(SourceChar, TargetChar) {
 struct ASCIILiteralAsTarget(TargetChar) {
     const(ubyte)[] literal;
 
-@safe nothrow @nogc:
+@safe nothrow @nogc @hidden:
 
     void mutex(bool) {
     }
 
-    int foreachContiguous(scope int delegate(scope ref  /* ignore this */ TargetChar[] data) @safe @nogc nothrow del) @trusted @nogc nothrow {
+    int foreachContiguous(scope int delegate(scope ref  /* ignore this */ TargetChar[] data) @safe @nogc nothrow del) @trusted {
         // don't mutate during testing
         static if (is(TargetChar == char)) {
             TargetChar[] temp = cast(TargetChar[])literal;
@@ -1722,7 +1722,7 @@ struct ASCIILiteralAsTarget(TargetChar) {
         }
     }
 
-    int foreachValue(scope int delegate(ref  /* ignore this */ TargetChar) @safe @nogc nothrow del) @safe @nogc nothrow {
+    int foreachValue(scope int delegate(ref  /* ignore this */ TargetChar) @safe @nogc nothrow del) @safe {
         int result;
 
         foreach (c; literal) {
@@ -1750,6 +1750,8 @@ static struct ASCIIStateAsTarget(TargetChar) {
     ASCII_State* state;
     state.Iterator* iterator;
 
+@safe nothrow @nogc @hidden:
+
     void mutex(bool lock) {
         assert(state !is null);
 
@@ -1759,7 +1761,7 @@ static struct ASCIIStateAsTarget(TargetChar) {
             state.blockList.mutex.unlock;
     }
 
-    int foreachContiguous(scope int delegate(scope ref  /* ignore this */ TargetChar[] data) @safe @nogc nothrow del) @trusted @nogc nothrow {
+    int foreachContiguous(scope int delegate(scope ref  /* ignore this */ TargetChar[] data) @safe @nogc nothrow del) @trusted {
         int result;
 
         if (iterator !is null) {
@@ -1813,7 +1815,7 @@ static struct ASCIIStateAsTarget(TargetChar) {
         return result;
     }
 
-    int foreachValue(scope int delegate(ref  /* ignore this */ TargetChar) @safe @nogc nothrow del) @safe @nogc nothrow {
+    int foreachValue(scope int delegate(ref  /* ignore this */ TargetChar) @safe @nogc nothrow del) {
         int result;
 
         if (iterator !is null) {
@@ -1843,7 +1845,7 @@ static struct ASCIIStateAsTarget(TargetChar) {
         return result;
     }
 
-    size_t length() @safe @nogc nothrow {
+    size_t length() {
         return iterator is null ? state.blockList.numberOfItems : (iterator.backwards.offsetFromHead - iterator.forwards.offsetFromHead);
     }
 
@@ -1867,6 +1869,8 @@ struct AnyAsTargetChar(TargetChar) {
     }
 
     OtherStateAsTarget!TargetChar osat;
+
+@safe nothrow @nogc @hidden:
 
     this(Input)(scope ref Input input) @trusted {
         static if (is(Input == String_ASCII)) {

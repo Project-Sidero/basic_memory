@@ -9,6 +9,7 @@ module sidero.base.allocators.buffers.freetree;
 import sidero.base.allocators.mapping : GoodAlignment;
 public import sidero.base.allocators.buffers.defs : FitsStrategy;
 public import sidero.base.allocators.predefined : HouseKeepingAllocator;
+import sidero.base.attributes : hidden;
 import std.typecons : Ternary;
 
 private {
@@ -340,7 +341,7 @@ export:
         }
     }
 
-private:
+private @hidden:
     void insert(Node* toInsert, Node** parent) {
         assert(toInsert !is null);
         assert(toInsert.length >= Node.sizeof);
@@ -502,7 +503,7 @@ private:
         Node* left, right;
         size_t length;
 
-    @safe @nogc scope pure nothrow:
+    @safe @nogc scope pure nothrow @hidden:
 
         void[] recreate() @trusted {
             assert(length > 0);
@@ -661,7 +662,7 @@ export:
             Node* left, right;
             void[] array;
 
-            bool matches(scope void* other) scope @trusted nothrow @nogc {
+            bool matches(scope void* other) scope @trusted nothrow @nogc @hidden {
                 return array.ptr <= other && (array.ptr + array.length) > other;
             }
         }
@@ -846,7 +847,7 @@ scope @safe @nogc pure nothrow:
             return null;
     }
 
-private:
+private @hidden:
     void insert(Node* toInsert, Node** parent) {
         assert(toInsert !is null);
         void* weightOfToInsert = toInsert.array.ptr;

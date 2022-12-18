@@ -1,13 +1,15 @@
 module sidero.base.text.ascii.readonly;
 import sidero.base.text;
 import sidero.base.allocators;
+import sidero.base.attributes : hidden;
+
 export:
 
 /// Assumes that any initial string value will be null terminated
 struct String_ASCII {
     package(sidero.base.text) LiteralType literal;
 
-    private {
+    private @hidden {
         import sidero.base.internal.meta : OpApplyCombos;
         import core.atomic : atomicOp;
 
@@ -80,6 +82,7 @@ struct String_ASCII {
             return result;
         }
     }
+
 export:
 
     ///
@@ -692,6 +695,7 @@ nothrow @nogc:
     ///
     ulong toHash() scope const {
         import sidero.base.hash.utils : hashOf;
+
         return hashOf(this.literal);
     }
 
@@ -2448,7 +2452,7 @@ nothrow @nogc:
         assert(value.literal.length == 6);
     }
 
-private:
+private @hidden:
     static struct LifeTime {
         shared(ptrdiff_t) refCount;
         RCAllocator allocator;
@@ -2460,7 +2464,7 @@ private:
         RCAllocator allocator;
         LiteralType literal;
 
-    scope @nogc nothrow:
+    scope @nogc nothrow @hidden:
 
         void rc(bool add) @trusted {
             import core.atomic : atomicOp;

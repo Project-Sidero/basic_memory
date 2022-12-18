@@ -2,6 +2,7 @@ module sidero.base.system;
 import sidero.base.text;
 import sidero.base.text.unicode.characters.database : UnicodeLanguage;
 import sidero.base.traits : isUTFReadOnly, isUTFBuilder;
+import sidero.base.attributes : hidden;
 
 export @safe nothrow @nogc:
 
@@ -536,7 +537,7 @@ void unicodeLanguage(UnicodeLanguage language) @trusted {
     initMutex.unlock;
 }
 
-private:
+private @hidden:
 import sidero.base.parallelism.mutualexclusion : TestTestSetLockInline;
 
 enum {

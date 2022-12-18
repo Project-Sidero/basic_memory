@@ -1,11 +1,12 @@
 module sidero.base.text.internal.builder.iteratorlist;
 import sidero.base.text.internal.builder.blocklist;
 import sidero.base.allocators;
+import sidero.base.attributes : hidden;
 
 struct IteratorListImpl(Char, alias CustomIteratorContents) {
     Iterator* head;
 
-@safe nothrow @nogc:
+@safe nothrow @nogc @hidden:
 
     Iterator* newIterator(scope return BlockListImpl!Char* blockList, size_t minimumOffsetFromHead = 0,
             size_t maximumOffsetFromHead = size_t.max) @trusted {
@@ -131,7 +132,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
             mixin CustomIteratorContents;
         }
 
-    @safe nothrow @nogc:
+    @safe nothrow @nogc @hidden:
 
         invariant () {
             assert(minimumOffsetFromHead <= forwards.offsetFromHead);
@@ -932,7 +933,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
         Block* block;
         size_t offsetIntoBlock, offsetFromHead;
 
-    @safe nothrow @nogc:
+    @safe nothrow @nogc @hidden:
 
         Char get() scope {
             assert(inData());
@@ -1268,7 +1269,7 @@ struct IteratorListTest(Char) {
     IteratorListImpl!(Char, void) iteratorList;
     alias Iterator = iteratorList.Iterator;
 
-@safe nothrow @nogc:
+@safe nothrow @nogc @hidden:
 
     this(scope return RCAllocator allocator) scope @trusted {
         this.blockList = BlockList(allocator);
