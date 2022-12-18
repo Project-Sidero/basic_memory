@@ -20,13 +20,52 @@ void main() {
 
 void processFile(string originalText, string originalModuleName, string originalTypeName, string moduleName,
         string typeName, string charName) {
-    import std.array : replace;
+    import std.algorithm : countUntil, startsWith;
+    import std.array : replace, appender;
     import std.file : write;
 
-    string result = originalText.replace("sidero.base.text.unicode." ~ originalModuleName, "sidero.base.text.unicode." ~ moduleName)
-        .replace("Char = char", "Char = " ~ charName).replace(originalTypeName ~ "!char", originalTypeName ~ "8")
-        .replace(originalTypeName ~ "!wchar", originalTypeName ~ "16").replace(originalTypeName ~ "!dchar",
-                originalTypeName ~ "32").replace("struct " ~ originalTypeName, "struct " ~ typeName);
+    string[] toFind = [
+        "sidero.base.text.unicode." ~ originalModuleName,
+        "Char = char",
+        originalTypeName ~ "!char",
+        originalTypeName ~ "!wchar",
+        originalTypeName ~ "!dchar",
+        "struct " ~ originalTypeName,
+    ];
+    string[] toReplace = [
+        "sidero.base.text.unicode." ~ moduleName,
+        "Char = " ~ charName,
+        originalTypeName ~ "8",
+        originalTypeName ~ "16",
+        originalTypeName ~ "32",
+        "struct " ~ typeName
+    ];
 
-    write("imports/sidero/base/text/unicode/" ~ moduleName ~ ".d", result);
+    auto result = appender!string;
+    result.reserve(1024 * 1024 * 8);
+
+    while(originalText.length > 0) {
+        string temp = originalText;
+
+        ptrdiff_t index, matched = -1;
+
+        foreach(i; 0 .. toFind.length) {
+            index = temp.countUntil(toFind[i]);
+
+            if (index > 0) {
+                temp = temp[0 .. index];
+                matched = i;
+            }
+        }
+
+        result ~= temp;
+        originalText = originalText[temp.length .. $];
+
+        if (matched >= 0) {
+            result ~= toReplace[matched];
+            originalText = originalText[toFind[matched].length .. $];
+        }
+    }
+
+    write("imports/sidero/base/text/unicode/" ~ moduleName ~ ".d", result.data);
 }
