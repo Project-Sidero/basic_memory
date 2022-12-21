@@ -13,43 +13,105 @@ StringBuilder_UTF8 readLine() {
     return builder;
 }
 
-/// Includes new line terminator
-StringBuilder_ASCII readLine(scope return StringBuilder_ASCII builder) @trusted {
+/// Includes new line terminator, times out at 10s
+StringBuilder_ASCII readLine(scope return ref StringBuilder_ASCII builder) @trusted {
     import core.stdc.stdio : getc, EOF;
 
-    mutex.pureLock;
+    //mutex.pureLock;
 
     if (builder.isNull)
         builder = StringBuilder_ASCII(globalAllocator());
+    const block = false;
 
     version (Windows) {
         if (useWindows) {
             import core.sys.windows.windows : ReadConsoleA, INVALID_HANDLE_VALUE, CHAR, DWORD, GetLastError;
 
             allocateWindowsConsole();
+            const originalBuilderLength = builder.length;
 
             if (hStdin == INVALID_HANDLE_VALUE) {
                 initializeForStdioImpl(null, null, false, true);
             } else {
-                CONSOLE_READCONSOLE_CONTROL cReadControl;
-                cReadControl.nLength = CONSOLE_READCONSOLE_CONTROL.sizeof;
-
-                const originalBuilderLength = builder.length;
-                CHAR[128] buffer;
                 DWORD readLength;
 
-                for (;;) {
-                    if (ReadConsoleA(hStdin, buffer.ptr, cast(uint)buffer.length, &readLength, &cReadControl)) {
-                        bool more = readLength == buffer.length && buffer[$ - 1] != '\n';
-                        builder ~= buffer[0 .. readLength];
+                if (block) {
+                    CONSOLE_READCONSOLE_CONTROL cReadControl;
+                    cReadControl.nLength = CONSOLE_READCONSOLE_CONTROL.sizeof;
+                    cReadControl.dwCtrlWakeupMask = '\n';
 
-                        if (!more)
+                    CHAR[128] buffer;
+
+                    for (;;) {
+                        if (ReadConsoleA(hStdin, buffer.ptr, cast(uint)buffer.length, &readLength, &cReadControl)) {
+                            bool more = readLength == buffer.length && buffer[$ - 1] != '\n';
+                            builder ~= buffer[0 .. readLength];
+
+                            if (!more)
+                                break;
+                        } else if (builder.length == originalBuilderLength) {
+                            initializeForStdioImpl(null, null, false, true);
+                            goto StdIO;
+                        } else {
                             break;
-                    } else if (builder.length == originalBuilderLength) {
-                        initializeForStdioImpl(null, null, false, true);
-                        goto StdIO;
-                    } else {
-                        break;
+                        }
+                    }
+                } else {
+                    bool needEcho;
+                    {
+                        DWORD mode;
+                        GetConsoleMode(hStdin, &mode);
+                        if ((mode & ENABLE_ECHO_INPUT) == ENABLE_ECHO_INPUT) {
+                            needEcho = true;
+                        }
+                    }
+
+                    ReadLoopWindows: for (;;) {
+                        DWORD result = WSAWaitForMultipleEvents(1, &hStdin, false, 10000, true);
+                        switch (result) {
+                        case WSA_WAIT_EVENT_0:
+                            INPUT_RECORD[128] buffer;
+
+                            if (PeekConsoleInputA(hStdin, buffer.ptr, cast(uint)buffer.length, &readLength)) {
+                                size_t count;
+                                bool lastNewLine;
+
+                                foreach (ref value; buffer[0 .. readLength]) {
+                                    if (value.EventType == KEY_EVENT && value.KeyEvent.bKeyDown == 0) {
+                                        ubyte[1] temp = [cast(ubyte)value.KeyEvent.AsciiChar];
+                                        builder ~= temp[];
+
+                                        if (needEcho) {
+                                            DWORD did;
+                                            WriteConsoleA(hStdout, temp.ptr, 1, &did, null);
+                                        }
+
+                                        count++;
+                                        if (value.KeyEvent.AsciiChar == '\r') {
+                                            temp = [cast(ubyte)'\n'];
+                                            builder ~= temp[];
+
+                                            if (needEcho) {
+                                                DWORD did;
+                                                WriteConsoleA(hStdout, temp.ptr, 1, &did, null);
+                                            }
+
+                                            lastNewLine = true;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                ReadConsoleInputA(hStdin, buffer.ptr, cast(uint)readLength, &readLength);
+                                if (lastNewLine)
+                                    break ReadLoopWindows;
+                            }
+
+                            break;
+                        case WSA_WAIT_TIMEOUT:
+                        default:
+                            break ReadLoopWindows;
+                        }
                     }
                 }
 
@@ -62,6 +124,21 @@ StringBuilder_ASCII readLine(scope return StringBuilder_ASCII builder) @trusted 
 StdIO:
 
     if (useStdio && stdioIn !is null) {
+        version (Posix) {
+            import core.sys.posix.termios;
+
+            termios originalTermios;
+
+            if (!block) {
+                tcgetattr(stdioIn, &originalTermios);
+
+                termios toSetTermios;
+                toSetTermios.c_cc[VMIN] = 0;
+                toSetTermios.c_cc[VTIME] = 100;
+                tcsetattr(stdioIn, TCSANOW, &toSetTermios);
+            }
+        }
+
         for (;;) {
             int got = getc(stdioIn);
 
@@ -74,49 +151,116 @@ StdIO:
             if (got == '\n')
                 break;
         }
+
+        version (Posix) {
+            if (!block)
+                tcsetattr(stdioIn, TCSANOW, &originalTermios);
+        }
     }
 
     mutex.unlock;
     return builder;
 }
 
-/// Includes new line terminator
-StringBuilder_UTF8 readLine(scope return StringBuilder_UTF8 builder) @trusted {
+/// Includes new line terminator, times out at 10s
+StringBuilder_UTF8 readLine(scope return ref StringBuilder_UTF8 builder) @trusted {
     import core.stdc.stdio : getc, EOF;
 
     mutex.pureLock;
 
     if (builder.isNull)
         builder = StringBuilder_UTF8(globalAllocator());
+    const block = false;
 
     version (Windows) {
         if (useWindows) {
             import core.sys.windows.windows : ReadConsoleW, INVALID_HANDLE_VALUE, WCHAR, DWORD, GetLastError;
 
             allocateWindowsConsole();
+            const originalBuilderLength = builder.length;
 
             if (hStdin == INVALID_HANDLE_VALUE) {
                 initializeForStdioImpl(null, null, false, true);
             } else {
-                CONSOLE_READCONSOLE_CONTROL cReadControl;
-                cReadControl.nLength = CONSOLE_READCONSOLE_CONTROL.sizeof;
-
-                const originalBuilderLength = builder.length;
-                WCHAR[128] buffer = void;
                 DWORD readLength;
 
-                for (;;) {
-                    if (ReadConsoleW(hStdin, buffer.ptr, cast(uint)buffer.length, &readLength, &cReadControl)) {
-                        bool more = readLength == buffer.length && buffer[$ - 1] != '\n';
-                        builder ~= buffer[0 .. readLength];
+                if (block) {
+                    CONSOLE_READCONSOLE_CONTROL cReadControl;
+                    cReadControl.nLength = CONSOLE_READCONSOLE_CONTROL.sizeof;
+                    cReadControl.dwCtrlWakeupMask = '\n';
 
-                        if (!more)
+                    WCHAR[128] buffer = void;
+
+                    for (;;) {
+                        if (ReadConsoleW(hStdin, buffer.ptr, cast(uint)buffer.length, &readLength, &cReadControl)) {
+                            bool more = readLength == buffer.length && buffer[$ - 1] != '\n';
+                            builder ~= buffer[0 .. readLength];
+
+                            if (!more)
+                                break;
+                        } else if (builder.length == originalBuilderLength) {
+                            initializeForStdioImpl(null, null, false, true);
+                            goto StdIO;
+                        } else {
                             break;
-                    } else if (builder.length == originalBuilderLength) {
-                        initializeForStdioImpl(null, null, false, true);
-                        goto StdIO;
-                    } else {
-                        break;
+                        }
+                    }
+                } else {
+                    bool needEcho;
+                    {
+                        DWORD mode;
+                        GetConsoleMode(hStdin, &mode);
+                        if ((mode & ENABLE_ECHO_INPUT) == ENABLE_ECHO_INPUT) {
+                            needEcho = true;
+                        }
+                    }
+
+                    ReadLoopWindows: for (;;) {
+                        DWORD result = WSAWaitForMultipleEvents(1, &hStdin, false, 10000, true);
+                        switch (result) {
+                        case WSA_WAIT_EVENT_0:
+                            INPUT_RECORD[128] buffer;
+
+                            if (PeekConsoleInputW(hStdin, buffer.ptr, cast(uint)buffer.length, &readLength)) {
+                                size_t count;
+                                bool lastNewLine;
+
+                                foreach (ref value; buffer[0 .. readLength]) {
+                                    if (value.EventType == KEY_EVENT && value.KeyEvent.bKeyDown == 0) {
+                                        wchar[1] temp = [value.KeyEvent.UnicodeChar];
+                                        builder ~= temp[];
+
+                                        if (needEcho) {
+                                            DWORD did;
+                                            WriteConsoleW(hStdout, temp.ptr, 1, &did, null);
+                                        }
+
+                                        count++;
+                                        if (value.KeyEvent.UnicodeChar == '\r') {
+                                            temp = [cast(wchar)'\n'];
+                                            builder ~= temp[];
+
+                                            if (needEcho) {
+                                                DWORD did;
+                                                WriteConsoleW(hStdout, temp.ptr, 1, &did, null);
+                                            }
+
+                                            lastNewLine = true;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                ReadConsoleInputW(hStdin, buffer.ptr, cast(uint)readLength, &readLength);
+                                if (lastNewLine)
+                                    break ReadLoopWindows;
+                            }
+
+                            break;
+                        case WSA_WAIT_TIMEOUT:
+                        default:
+                            break ReadLoopWindows;
+                        }
                     }
                 }
 
@@ -129,6 +273,21 @@ StringBuilder_UTF8 readLine(scope return StringBuilder_UTF8 builder) @trusted {
 StdIO:
 
     if (useStdio && stdioIn !is null) {
+        version (Posix) {
+            import core.sys.posix.termios;
+
+            termios originalTermios;
+
+            if (!block) {
+                tcgetattr(stdioIn, &originalTermios);
+
+                termios toSetTermios;
+                toSetTermios.c_cc[VMIN] = 0;
+                toSetTermios.c_cc[VTIME] = 100;
+                tcsetattr(stdioIn, TCSANOW, &toSetTermios);
+            }
+        }
+
         for (;;) {
             int got = getc(stdioIn);
 
@@ -141,6 +300,11 @@ StdIO:
             if (got == '\n')
                 break;
         }
+
+        version (Posix) {
+            if (!block)
+                tcsetattr(stdioIn, TCSANOW, &originalTermios);
+        }
     }
 
     mutex.unlock;
@@ -148,20 +312,22 @@ StdIO:
 }
 
 /// Ditto
-StringBuilder_UTF16 readLine(scope return StringBuilder_UTF16 builder) {
+StringBuilder_UTF16 readLine(scope return ref StringBuilder_UTF16 builder) {
     if (builder.isNull)
         builder = StringBuilder_UTF16(globalAllocator());
 
-    readLine(builder.byUTF8());
+    auto temp = builder.byUTF8();
+    readLine(temp);
     return builder;
 }
 
 /// Ditto
-StringBuilder_UTF32 readLine(scope return StringBuilder_UTF32 builder) {
+StringBuilder_UTF32 readLine(scope return ref StringBuilder_UTF32 builder) {
     if (builder.isNull)
         builder = StringBuilder_UTF32(globalAllocator());
 
-    readLine(builder.byUTF8());
+    auto temp = builder.byUTF8();
+    readLine(temp);
     return builder;
 }
 
@@ -783,7 +949,16 @@ version (CRuntime_Microsoft) {
 }
 
 version (Windows) {
-    import core.sys.windows.windows : HANDLE, ULONG;
+    import core.sys.windows.windows : HANDLE, ULONG, BOOL, DWORD, WAIT_TIMEOUT, WAIT_OBJECT_0, INPUT_RECORD,
+        PeekConsoleInputA, ReadConsoleInputA, PeekConsoleInputW, ReadConsoleInputW, KEY_EVENT, GetConsoleMode,
+        ENABLE_ECHO_INPUT, WriteConsoleA, WriteConsoleW;
+
+    alias WSAEVENT = HANDLE;
+
+    enum {
+        WSA_WAIT_TIMEOUT = WAIT_TIMEOUT,
+        WSA_WAIT_EVENT_0 = WAIT_OBJECT_0
+    }
 
     // needed cos Unicode
     struct CONSOLE_READCONSOLE_CONTROL {
@@ -792,6 +967,8 @@ version (Windows) {
         ULONG dwCtrlWakeupMask;
         ULONG dwControlKeyState;
     }
+
+    extern (Windows) DWORD WSAWaitForMultipleEvents(DWORD, const WSAEVENT*, BOOL, DWORD, BOOL);
 }
 
 @trusted {
