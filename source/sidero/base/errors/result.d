@@ -116,6 +116,14 @@ scope nothrow @nogc @safe:
     }
 
     ///
+    bool opCast(T : bool)() @trusted const {
+        assert(!__ctfe, "Don't check for error on const in CTFE");
+
+        (cast(ErrorInfo*)&error).checked = true;
+        return error.info.message is null;
+    }
+
+    ///
     bool isNull() @trusted {
         if (!error.checked)
             assert(0, "You forgot to check if value had an error. assert(thing, thing.error.toString());");
@@ -311,9 +319,16 @@ scope nothrow @nogc @safe:
     ///
     bool opCast(T : bool)() {
         error.checked = true;
-        return error.info.message is null && _value !is null;
+        return error.info.message is null;
     }
 
+    ///
+    bool opCast(T : bool)() @trusted const {
+        assert(!__ctfe, "Don't check for error on const in CTFE");
+
+            (cast(ErrorInfo*)&error).checked = true;
+        return error.info.message is null;
+    }
     ///
     bool isNull() @trusted const {
         if (!error.checked)
@@ -368,7 +383,8 @@ scope nothrow @nogc @safe:
 
     ///
     bool opEquals(scope ResultReference!Type other) const {
-        if (error.isSet || other.error.isSet || error.info.message !is null || _value is null || other.error.info.message !is null || other._value is null)
+        if (error.isSet || other.error.isSet || error.info.message !is null || _value is null ||
+                other.error.info.message !is null || other._value is null)
             return error.isSet && other.error.isSet;
         static if (is(Type == float) || is(Type == double))
             return (*this._value).isClose(*other._value);
