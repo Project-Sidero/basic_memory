@@ -11,7 +11,7 @@ export:
     ///
     alias Char = ubyte;
     ///
-    alias LiteralType = immutable(Char)[];
+    alias LiteralType = const(Char)[];
 
     private {
         import sidero.base.internal.meta : OpApplyCombos;

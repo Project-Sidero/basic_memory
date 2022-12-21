@@ -121,7 +121,7 @@ export:
     ///
     alias Char = char;
     ///
-    alias LiteralType = immutable(Char)[];
+    alias LiteralType = const(Char)[];
 
     ///
     mixin OpApplyCombos!("Char", null, ["@safe", "nothrow", "@nogc"]);

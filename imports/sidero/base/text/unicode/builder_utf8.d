@@ -12,7 +12,7 @@ struct StringBuilder_UTF8 {
     ///
     alias Char = char;
     ///
-    alias LiteralType = immutable(Char)[];
+    alias LiteralType = const(Char)[];
 
     private {
         import sidero.base.internal.meta : OpApplyCombos;
