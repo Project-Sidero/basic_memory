@@ -586,15 +586,17 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
 
         typeof(return) ret;
 
-        if (node is null)
+        if (node is null) {
             ret = typeof(return)(NullPointerException);
-        else {
-            ret = typeof(return)(&node.value, node, cast(ret.RCHandle)&rcNodeExternal);
+            mutex.unlock;
+        } else {
             node.onIteratorIn;
             this.rcInternal(true, null);
+
+            mutex.unlock;
+            ret = typeof(return)(&node.value, node, cast(ret.RCHandle)&rcNodeExternal);
         }
 
-        mutex.unlock;
         return ret;
     }
 
