@@ -803,7 +803,7 @@ scope @hidden:
 
                 builder ~= actualBuffer[0 .. done];
 
-                static if (isPointer!ActualType && !is(ActualType == void*)) {
+                static if (isPointer!ActualType && !is(ActualType == void*) && !isFunctionPointer!ActualType) {
                     alias PointerAt = typeof(*(ActualType.init));
 
                     static if (isCopyable!PointerAt) {

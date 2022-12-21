@@ -31,7 +31,7 @@ export:
 
         static if (__traits(hasMember, Type, "opAssign")) {
             ///
-            auto opAssign(Args...)(Args args) {
+            auto opAssign(Args...)(scope return Args args) {
                 if (isNull)
                     assert(0);
                 return value.opAssign(args);
@@ -40,8 +40,8 @@ export:
 
         static if (__traits(hasMember, Type, "toHash")) {
             ///
-            auto toHash(Args...)(Args args) {
-                if (isNull)
+            auto toHash() const {
+                if (error.info.id !is null)
                     return 0;
                 return value.toHash();
             }
@@ -94,6 +94,11 @@ scope nothrow @nogc @safe:
     ///
     void opAssign(ErrorMessage errorMessage, string moduleName = __MODULE__, int line = __LINE__) {
         error = ErrorInfo(errorMessage, moduleName, line);
+    }
+
+    ///
+    void opAssign(scope return Result other) {
+        this.__ctor(other);
     }
 
     ///
@@ -260,6 +265,11 @@ scope nothrow @nogc @safe:
     }
 
     ///
+    void opAssign(scope return ResultReference other) {
+        this.__ctor(other);
+    }
+
+    ///
     void opAssign(Type value) {
         if (isNull || _value is null)
             return;
@@ -277,8 +287,8 @@ scope nothrow @nogc @safe:
 
     static if (__traits(hasMember, Type, "toHash")) {
         ///
-        auto opAssign(Args...)(Args args) {
-            if (isNull)
+        auto toHash() const {
+            if (error.info.message !is null)
                 return 0;
             return _value.toHash();
         }
