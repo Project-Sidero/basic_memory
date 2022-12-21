@@ -461,15 +461,14 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
 
         Node* node = iterator.forwards.node;
 
+        node.onIteratorIn;
+        node.onIteratorIn;
+        this.rcInternal(true, null);
+        this.rcInternal(true, null);
+        mutex.unlock;
+
         key = typeof(key)(&node.key, node, cast(key.RCHandle)&rcNodeExternal);
         value = typeof(value)(&node.value, node, cast(value.RCHandle)&rcNodeExternal);
-
-        node.onIteratorIn;
-        node.onIteratorIn;
-        this.rcInternal(true, null);
-        this.rcInternal(true, null);
-
-        mutex.unlock;
         return true;
     }
 
