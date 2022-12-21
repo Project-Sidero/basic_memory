@@ -109,6 +109,10 @@
         },
         {
             "name": "unittest"
+        },
+        {
+            "name": "executable",
+            "targetType": "executable"
         }
     ]
 }
