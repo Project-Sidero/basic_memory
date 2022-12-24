@@ -1,5 +1,7 @@
 module sidero.base.datetime.calendars.gregorian;
 import sidero.base.datetime.calendars.defs;
+import sidero.base.text;
+import sidero.base.traits;
 
 ///
 struct GregorianDate {
@@ -8,17 +10,29 @@ struct GregorianDate {
         ubyte month_, day_;
     }
 
+    ///
+    static string DefaultFormat = "j/n/Y", ISOFormat = "Ymd", ISOExtFormat = "Y-m-d", SimpleFormat = "Y-M-d";
+
 export @safe nothrow @nogc:
 
     ///
-    this(ubyte day, Month month, long year) {
+    this(const DaysSinceY2k from) scope {
+        this.year_ = 2000;
+        this.month_ = 1;
+        this.day_ = 1;
+
+        this.advanceDays(from.amount);
+    }
+
+    ///
+    this(ubyte day, Month month, long year) scope {
         this.year_ = year;
         this.month_ = cast(ubyte)month;
         this.day_ = day;
     }
 
     ///
-    this(ubyte day, ubyte month, long year) {
+    this(ubyte day, ubyte month, long year) scope {
         this.day_ = 1;
         this.month_ = 1;
         this.year_ = year;
@@ -28,27 +42,37 @@ export @safe nothrow @nogc:
     }
 
     ///
-    long year() {
+    long year() scope const {
         return this.year_;
     }
 
     ///
-    Month month() {
+    Month month() scope const {
         return cast(Month)this.month_;
     }
 
     ///
-    ubyte day() {
+    ubyte day() scope const {
         return this.day_;
     }
 
     ///
-    long century() {
+    long century() scope const {
         return this.year_ / 100;
     }
 
     ///
-    WeekDay dayInWeek() {
+    bool isAD() scope const {
+        return this.year_ < 0;
+    }
+
+    ///
+    bool isCE() scope const {
+        return this.year_ >= 0;
+    }
+
+    ///
+    WeekDay dayInWeek() scope const {
         import std.math : floor;
 
         // https://en.wikipedia.org/wiki/Determination_of_the_day_of_the_week#Disparate_variation
@@ -74,19 +98,19 @@ export @safe nothrow @nogc:
         assert(GregorianDate(15, 2, 2012).dayInWeek == WeekDay.Wednesday);
     }
 
-    ///
-    long dayInYear() {
+    /// [1 ..
+    long dayInYear() scope const {
         long soFar;
 
         foreach (m; cast(ubyte)1 .. this.month_) {
-            soFar += GregorianDate(cast(ubyte)1, m, this.year_).daysInMonth;
+            soFar += GregorianDate(cast(ubyte)1, cast(ubyte)m, cast()this.year_).daysInMonth;
         }
 
         return soFar + this.day_;
     }
 
     ///
-    bool isLeapYear() {
+    bool isLeapYear() scope const {
         return (this.year % 4 == 0) && (this.year_ % 100 != 0 || this.year_ % 400 == 0);
     }
 
@@ -99,28 +123,48 @@ export @safe nothrow @nogc:
     }
 
     ///
-    ubyte daysInMonth() {
+    ubyte daysInMonth() scope const {
         static immutable ubyte[12] Count = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
         return (isLeapYear() && this.month_ == 2) ? 29 : Count[this.month_ - 1];
     }
 
     ///
-    long daysInYear() {
+    long daysInYear() scope const {
         return isLeapYear() ? 366 : 365;
     }
 
     ///
-    GregorianDate endOfMonth() {
+    ubyte firstMondayOfYear() scope const {
+        GregorianDate temp = GregorianDate(1, 1, this.year_);
+        ubyte dow = cast(ubyte)temp.dayInWeek();
+
+        if (dow == 0)
+            return 1;
+
+        return cast(ubyte)(8 - dow);
+    }
+
+    ///
+    unittest {
+        assert(GregorianDate(1, 1, 2018).firstMondayOfYear() == 1);
+        assert(GregorianDate(1, 1, 2019).firstMondayOfYear() == 7);
+        assert(GregorianDate(1, 1, 2020).firstMondayOfYear() == 6);
+        assert(GregorianDate(1, 1, 2021).firstMondayOfYear() == 4);
+        assert(GregorianDate(1, 1, 2022).firstMondayOfYear() == 3);
+    }
+
+    ///
+    GregorianDate endOfMonth() scope const {
         return GregorianDate(daysInMonth(), this.month_, this.year_);
     }
 
     ///
-    void advanceDays(DaysInterval interval) {
+    void advanceDays(DaysInterval interval) scope {
         this.advanceDays(interval.amount);
     }
 
     ///
-    void advanceDays(long amount) {
+    void advanceDays(long amount) scope {
         while (amount < 0) {
             long canDo = this.day_ - 1;
 
@@ -175,7 +219,7 @@ export @safe nothrow @nogc:
     }
 
     ///
-    void advanceMonths(long amount, bool allowOverflow = true) {
+    void advanceMonths(long amount, bool allowOverflow = true) scope {
         auto newMonth = (this.month_ + amount) % 12;
         if (newMonth <= 0)
             newMonth += 12;
@@ -194,7 +238,7 @@ export @safe nothrow @nogc:
     }
 
     ///
-    void advanceYears(long amount, bool allowOverflow = true) {
+    void advanceYears(long amount, bool allowOverflow = true) scope {
         this.year_ += amount;
 
         if (this.month_ == 2 && this.day_ == 29 && !this.isLeapYear()) {
@@ -214,24 +258,24 @@ export @safe nothrow @nogc:
     }
 
     ///
-    DaysInterval opBinary(string op : "-")(GregorianDate other) {
+    DaysInterval opBinary(string op : "-")(const GregorianDate other) scope {
         DaysSinceY2k us = this.toDaysSinceY2k(), against = other.toDaysSinceY2k();
         return DaysInterval(us.amount - against.amount);
     }
 
     ///
-    DaysSinceY2k toDaysSinceY2k() {
+    DaysSinceY2k toDaysSinceY2k() scope const {
         DaysSinceY2k ret;
         GregorianDate temp = this;
         GregorianDate target = GregorianDate(1, 1, 2000);
 
-        while(temp < target) {
+        while (temp < target) {
             long canDo = temp.daysInYear() - (temp.dayInYear() - 1);
             temp.advanceDays(canDo);
             ret.amount -= canDo;
         }
 
-        while(temp > target) {
+        while (temp > target) {
             long canDo = temp.dayInYear();
             temp.advanceDays(-canDo);
             ret.amount += canDo;
@@ -248,12 +292,12 @@ export @safe nothrow @nogc:
     }
 
     ///
-    bool opEquals(const GregorianDate other) const {
+    bool opEquals(const GregorianDate other) scope const {
         return this.day_ == other.day_ && this.month_ == other.month_ && this.year_ == other.year_;
     }
 
     ///
-    int opCmp(const GregorianDate other) const {
+    int opCmp(const GregorianDate other) scope const {
         if (this.year_ < other.year_)
             return -1;
         else if (this.year_ > other.year_)
@@ -273,14 +317,239 @@ export @safe nothrow @nogc:
     }
 
     ///
-    static GregorianDate fromDaysSinceY2k(DaysSinceY2k from) {
-        GregorianDate ret;
-        ret.year_ = 2000;
-        ret.month_ = 1;
-        ret.day_ = 1;
+    String_UTF8 toString() scope const @trusted {
+        StringBuilder_UTF8 ret;
+        toString(ret);
+        return ret.asReadOnly;
+    }
 
-        ret.advanceDays(from.amount);
+    ///
+    void toString(Builder)(scope ref Builder sink) scope const if (isBuilderString!Builder) {
+        this.format(sink, DefaultFormat);
+    }
+
+    ///
+    StringBuilder_UTF8 format(FormatString)(scope FormatString specification) scope const if (isSomeString!FormatString) {
+        StringBuilder_UTF8 ret;
+        this.format(ret, specification);
         return ret;
+    }
+
+    ///
+    StringBuilder_UTF8 format(FormatChar)(scope String_UTF!FormatChar specification) scope const {
+        StringBuilder_UTF8 ret;
+        this.format(ret, specification);
+        return ret;
+    }
+
+    ///
+    void format(Builder, FormatString)(scope ref Builder builder, scope FormatString specification) scope const @trusted
+            if (isBuilderString!Builder && isSomeString!FormatString) {
+        format(builder, String_UTF!(Builder.Char)(specification));
+    }
+
+    /// See: https://www.php.net/manual/en/datetime.format.php
+    void format(Builder, Format)(scope ref Builder builder, scope Format specification) scope const 
+            if (isBuilderString!Builder && isReadOnlyString!Format) {
+        import sidero.base.allocators;
+
+        static immutable ThreeLettersDay = ["Mon", "Tue", "Wed", "Thr", "Fri", "Sat", "Sun"];
+        static immutable DayText = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+        static immutable OrdinalSuffix = [
+            `st`, `nd`, `rd`, `th`, `th`, `th`, `th`, `th`, `th`, `th`, `th`, `th`, `th`, `th`, `th`, `th`, `th`, `th`,
+            `th`, `th`, `st`, `nd`, `rd`, `th`, `th`, `th`, `th`, `th`, `th`, `th`, `st`, `nd`
+        ];
+        static immutable FullMonth = [
+            `January`, `February`, `March`, `April`, `May`, `June`, `July`, `August`, `September`, `October`, `November`,
+            `December`
+        ];
+        static immutable ThreeLettersMonth = [
+            `Jan`, `Feb`, `Mar`, `Apr`, `May`, `Jun`, `Jul`, `Aug`, `Sep`, `Oct`, `Nov`, `Dec`
+        ];
+
+        if (builder.isNull)
+            builder = typeof(builder)(globalAllocator());
+
+        bool isEscaped;
+
+        foreach (c; specification.byUTF32()) {
+            if (isEscaped) {
+                typeof(c)[1] str = [c];
+                builder ~= str;
+                isEscaped = false;
+                continue;
+            }
+
+            switch (c) {
+            case 'd':
+                if (this.day_ < 10)
+                    builder ~= "0"c;
+                builder.formattedWrite("%s", this.day_);
+                break;
+
+            case 'D':
+                builder ~= ThreeLettersDay[this.dayInWeek()];
+                break;
+
+            case 'j':
+                builder.formattedWrite("%s", this.day_);
+                break;
+
+            case 'l':
+                builder ~= DayText[this.dayInWeek()];
+                break;
+
+            case 'N':
+                builder.formattedWrite("%s", this.dayInWeek() + 1);
+                break;
+
+            case 'S':
+                builder ~= OrdinalSuffix[this.day_];
+                break;
+
+            case 'w':
+                auto adjusted = cast(ubyte)this.dayInWeek();
+                if (adjusted == 7)
+                    adjusted = 0;
+                else
+                    adjusted++;
+
+                builder.formattedWrite("%s", adjusted);
+                break;
+
+            case 'z':
+                builder.formattedWrite("%s", this.dayInYear() - 1);
+                break;
+
+            case 'W':
+                builder.formattedWrite("%s", (this.dayInYear() - this.firstMondayOfYear()) / 7);
+                break;
+
+            case 'F':
+                builder ~= FullMonth[this.month_];
+                break;
+
+            case 'm':
+                if (this.month_ < 10)
+                    builder ~= "0"c;
+                builder.formattedWrite("%s", this.month_);
+                break;
+
+            case 'M':
+                builder ~= ThreeLettersMonth[this.month_];
+                break;
+
+            case 'n':
+                builder.formattedWrite("%s", this.month_);
+                break;
+
+            case 't':
+                builder.formattedWrite("%s", this.daysInMonth());
+                break;
+
+            case 'L':
+                builder.formattedWrite("%d", this.isLeapYear());
+                break;
+
+            case 'o':
+                if (this.day_ < this.firstMondayOfYear()) {
+                    builder.formattedWrite("%s", this.year_ - 1);
+                } else {
+                    long temp = this.year_;
+
+                    if (temp < 0) {
+                        temp *= -1;
+                        builder ~= "-";
+                    }
+
+                    if (temp < 10)
+                        builder ~= "000";
+                    else if (temp < 100)
+                        builder ~= "00";
+                    else if (temp < 1000)
+                        builder ~= "0";
+
+                    builder.formattedWrite("%s", temp);
+                }
+                break;
+
+            case 'X':
+                long temp = this.year_;
+
+                if (temp < 0) {
+                    temp *= -1;
+                    builder ~= "-";
+                } else {
+                    builder ~= "+";
+                }
+
+                if (temp < 10)
+                    builder ~= "000";
+                else if (temp < 100)
+                    builder ~= "00";
+                else if (temp < 1000)
+                    builder ~= "0";
+
+                builder.formattedWrite("%s", temp);
+                break;
+
+            case 'x':
+                long temp = this.year_;
+
+                if (temp < 0) {
+                    temp *= -1;
+                    builder ~= "-";
+                } else if (temp >= 10000) {
+                    builder ~= "+";
+                }
+
+                if (temp < 10)
+                    builder ~= "000";
+                else if (temp < 100)
+                    builder ~= "00";
+                else if (temp < 1000)
+                    builder ~= "0";
+
+                builder.formattedWrite("%s", temp);
+                break;
+
+            case 'Y':
+                long temp = this.year_;
+
+                if (temp < 0) {
+                    temp *= -1;
+                    builder ~= "-";
+                }
+
+                if (temp < 10)
+                    builder ~= "000";
+                else if (temp < 100)
+                    builder ~= "00";
+                else if (temp < 1000)
+                    builder ~= "0";
+
+                builder.formattedWrite("%s", temp);
+                break;
+
+            case 'y':
+                long temp = this.year_;
+                temp -= (temp / 100) * 100;
+
+                if (temp < 10)
+                    builder ~= "0";
+                builder.formattedWrite("%s", temp);
+                break;
+
+            case '\\':
+                isEscaped = true;
+                break;
+
+            default:
+                typeof(c)[1] str = [c];
+                builder ~= str;
+                break;
+            }
+        }
     }
 
     ///
