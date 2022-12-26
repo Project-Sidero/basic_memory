@@ -11,7 +11,7 @@ struct GregorianDate {
     }
 
     ///
-    static string DefaultFormat = "j/n/Y", ISOFormat = "Ymd", ISOExtFormat = "Y-m-d", SimpleFormat = "Y-M-d";
+    static immutable string DefaultFormat = "j/n/Y", ISOFormat = "Ymd", ISOExtFormat = "Y-m-d", SimpleFormat = "Y-M-d";
 
 export @safe nothrow @nogc:
 
@@ -596,5 +596,131 @@ export @safe nothrow @nogc:
         November,
         ///
         December
+    }
+
+    ///
+    static struct DateWrapper {
+        private GregorianDate date_;
+
+    export @safe nothrow @nogc:
+
+        ///
+        this(const GregorianDate date) scope {
+            this.date_ = date;
+        }
+
+        ///
+        GregorianDate date() scope const {
+            return this.date_;
+        }
+
+        //
+
+        ///
+        long year() scope const {
+            return this.date_.year();
+        }
+
+        ///
+        Month month() scope const {
+            return this.date_.month();
+        }
+
+        ///
+        ubyte day() scope const {
+            return this.date_.day();
+        }
+
+        ///
+        long century() scope const {
+            return this.date_.century();
+        }
+
+        ///
+        bool isAD() scope const {
+            return this.date_.isAD();
+        }
+
+        ///
+        bool isCE() scope const {
+            return this.date_.isCE();
+        }
+
+        ///
+        WeekDay dayInWeek() scope const {
+            return this.date_.dayInWeek();
+        }
+
+        ///
+        long dayInYear() scope const {
+            return this.date_.dayInYear();
+        }
+
+        ///
+        bool isLeapYear() scope const {
+            return this.date_.isLeapYear();
+        }
+
+        ///
+        ubyte daysInMonth() scope const {
+            return this.date_.daysInMonth();
+        }
+
+        ///
+        long daysInYear() scope const {
+            return this.date_.daysInYear();
+        }
+
+        ///
+        ubyte firstMondayOfYear() scope const {
+            return this.date_.firstMondayOfYear();
+        }
+
+        ///
+        GregorianDate endOfMonth() scope const {
+            return this.date_.endOfMonth();
+        }
+
+        ///
+        void advanceDays(DayInterval interval) scope {
+            this.date_.advanceDays(interval.amount);
+        }
+
+        ///
+        void advanceDays(long amount) scope {
+            this.date_.advanceDays(amount);
+        }
+
+        ///
+        void advanceMonths(long amount, bool allowOverflow = true) scope {
+            this.date_.advanceMonths(amount, allowOverflow);
+        }
+
+        ///
+        void advanceYears(long amount, bool allowOverflow = true) scope {
+            this.date_.advanceYears(amount, allowOverflow);
+        }
+
+        ///
+        DayInterval opBinary(string op : "-")(const DateWrapper other) scope {
+            return this.date_.opBinary!op(other);
+        }
+
+        ///
+        DaysSinceY2k toDaysSinceY2k() scope const {
+            return this.date_.toDaysSinceY2k();
+        }
+
+        //
+
+        ///
+        bool opEquals(const DateWrapper other) scope const {
+            return this.date_.opEquals(other.date_);
+        }
+
+        ///
+        int opCmp(const DateWrapper other) scope const {
+            return this.date_.opCmp(other.date_);
+        }
     }
 }
