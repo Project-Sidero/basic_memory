@@ -25,14 +25,14 @@ export @safe nothrow @nogc:
     }
 
     ///
-    this(ubyte day, Month month, long year) scope {
+    this(long year, Month month, ubyte day) scope {
         this.year_ = year;
         this.month_ = cast(ubyte)month;
         this.day_ = day;
     }
 
     ///
-    this(ubyte day, ubyte month, long year) scope {
+    this(long year, ubyte month, ubyte day) scope {
         this.day_ = 1;
         this.month_ = 1;
         this.year_ = year;
@@ -93,9 +93,9 @@ export @safe nothrow @nogc:
 
     ///
     unittest {
-        assert(GregorianDate(24, 12, 2022).dayInWeek == WeekDay.Saturday);
-        assert(GregorianDate(25, 12, 2022).dayInWeek == WeekDay.Sunday);
-        assert(GregorianDate(15, 2, 2012).dayInWeek == WeekDay.Wednesday);
+        assert(GregorianDate(2022, 12, 24).dayInWeek == WeekDay.Saturday);
+        assert(GregorianDate(2022, 12, 25).dayInWeek == WeekDay.Sunday);
+        assert(GregorianDate(2012, 2, 15).dayInWeek == WeekDay.Wednesday);
     }
 
     /// [1 ..
@@ -103,7 +103,7 @@ export @safe nothrow @nogc:
         long soFar;
 
         foreach (m; cast(ubyte)1 .. this.month_) {
-            soFar += GregorianDate(cast(ubyte)1, cast(ubyte)m, cast()this.year_).daysInMonth;
+            soFar += GregorianDate(cast()this.year_, cast(ubyte)m, cast(ubyte)1).daysInMonth;
         }
 
         return soFar + this.day_;
@@ -116,10 +116,10 @@ export @safe nothrow @nogc:
 
     ///
     unittest {
-        assert(!GregorianDate(1, 1, 1700).isLeapYear);
-        assert(!GregorianDate(1, 1, 1800).isLeapYear);
-        assert(!GregorianDate(1, 1, 1900).isLeapYear);
-        assert(GregorianDate(1, 1, 2000).isLeapYear);
+        assert(!GregorianDate(1700, 1, 1).isLeapYear);
+        assert(!GregorianDate(1800, 1, 1).isLeapYear);
+        assert(!GregorianDate(1900, 1, 1).isLeapYear);
+        assert(GregorianDate(2000, 1, 1).isLeapYear);
     }
 
     ///
@@ -135,7 +135,7 @@ export @safe nothrow @nogc:
 
     ///
     ubyte firstMondayOfYear() scope const {
-        GregorianDate temp = GregorianDate(1, 1, this.year_);
+        GregorianDate temp = GregorianDate(this.year_, 1, 1);
         ubyte dow = cast(ubyte)temp.dayInWeek();
 
         if (dow == 0)
@@ -146,20 +146,20 @@ export @safe nothrow @nogc:
 
     ///
     unittest {
-        assert(GregorianDate(1, 1, 2018).firstMondayOfYear() == 1);
-        assert(GregorianDate(1, 1, 2019).firstMondayOfYear() == 7);
-        assert(GregorianDate(1, 1, 2020).firstMondayOfYear() == 6);
-        assert(GregorianDate(1, 1, 2021).firstMondayOfYear() == 4);
-        assert(GregorianDate(1, 1, 2022).firstMondayOfYear() == 3);
+        assert(GregorianDate(2018, 1, 1).firstMondayOfYear() == 1);
+        assert(GregorianDate(2019, 1, 1).firstMondayOfYear() == 7);
+        assert(GregorianDate(2020, 1, 1).firstMondayOfYear() == 6);
+        assert(GregorianDate(2021, 1, 1).firstMondayOfYear() == 4);
+        assert(GregorianDate(2022, 1, 1).firstMondayOfYear() == 3);
     }
 
     ///
     GregorianDate endOfMonth() scope const {
-        return GregorianDate(daysInMonth(), this.month_, this.year_);
+        return GregorianDate(this.year_, this.month_, daysInMonth());
     }
 
     ///
-    void advanceDays(DaysInterval interval) scope {
+    void advanceDays(DayInterval interval) scope {
         this.advanceDays(interval.amount);
     }
 
@@ -209,13 +209,13 @@ export @safe nothrow @nogc:
 
     ///
     unittest {
-        GregorianDate date = GregorianDate(5, 11, 2022);
+        GregorianDate date = GregorianDate(2022, 11, 5);
 
         date.advanceDays(59);
-        assert(date == GregorianDate(3, 1, 2023));
+        assert(date == GregorianDate(2023, 1, 3));
 
         date.advanceDays(-59);
-        assert(date == GregorianDate(5, 11, 2022));
+        assert(date == GregorianDate(2022, 11, 5));
     }
 
     ///
@@ -252,22 +252,22 @@ export @safe nothrow @nogc:
 
     ///
     unittest {
-        GregorianDate date = GregorianDate(29, 2, 2000);
+        GregorianDate date = GregorianDate(2000, 2, 29);
         date.advanceYears(-1);
-        assert(date == GregorianDate(1, 3, 1999));
+        assert(date == GregorianDate(1999, 3, 1));
     }
 
     ///
-    DaysInterval opBinary(string op : "-")(const GregorianDate other) scope {
+    DayInterval opBinary(string op : "-")(const GregorianDate other) scope {
         DaysSinceY2k us = this.toDaysSinceY2k(), against = other.toDaysSinceY2k();
-        return DaysInterval(us.amount - against.amount);
+        return DayInterval(us.amount - against.amount);
     }
 
     ///
     DaysSinceY2k toDaysSinceY2k() scope const {
         DaysSinceY2k ret;
         GregorianDate temp = this;
-        GregorianDate target = GregorianDate(1, 1, 2000);
+        GregorianDate target = GregorianDate(2000, 1, 1);
 
         while (temp < target) {
             long canDo = temp.daysInYear() - (temp.dayInYear() - 1);
@@ -286,9 +286,9 @@ export @safe nothrow @nogc:
 
     ///
     unittest {
-        assert(GregorianDate(1, 1, 2000).toDaysSinceY2k() == DaysSinceY2k(0));
-        assert(GregorianDate(24, 12, 2022).toDaysSinceY2k() == DaysSinceY2k(8394));
-        assert(GregorianDate(1, 1, 1975).toDaysSinceY2k() == DaysSinceY2k(-9131));
+        assert(GregorianDate(2000, 1, 1).toDaysSinceY2k() == DaysSinceY2k(0));
+        assert(GregorianDate(2022, 12, 24).toDaysSinceY2k() == DaysSinceY2k(8394));
+        assert(GregorianDate(1975, 1, 1).toDaysSinceY2k() == DaysSinceY2k(-9131));
     }
 
     ///
@@ -345,7 +345,7 @@ export @safe nothrow @nogc:
     ///
     void format(Builder, FormatString)(scope ref Builder builder, scope FormatString specification) scope const @trusted
             if (isBuilderString!Builder && isSomeString!FormatString) {
-        format(builder, String_UTF!(Builder.Char)(specification));
+        this.format(builder, String_UTF!(Builder.Char)(specification));
     }
 
     /// See: https://www.php.net/manual/en/datetime.format.php

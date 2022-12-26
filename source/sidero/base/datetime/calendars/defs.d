@@ -7,7 +7,7 @@ struct DaysSinceY2k {
 }
 
 ///
-struct DaysInterval {
+struct DayInterval {
     ///
     long amount;
 }
