@@ -4,11 +4,20 @@ import sidero.base.datetime.time.defs;
 import sidero.base.datetime.calendars.defs;
 import sidero.base.text;
 import sidero.base.traits;
+import sidero.base.errors;
 
 private {
     import sidero.base.datetime.calendars.gregorian;
 
     alias GDateTime = DateTime!GregorianDate;
+}
+
+///
+enum {
+    ///
+    BeforeUnixEpochException = ErrorMessage("CUEE", "Time is before Unix epoch"),
+    ///
+    MissingUnixEpochException = ErrorMessage("MUEE", "Date type doesn't implement Unix epoch, is it representable?"),
 }
 
 // TODO: TIME ZONES
@@ -125,6 +134,31 @@ export @safe nothrow @nogc:
         this.date.advanceDays(dateInterval.amount);
     }
 
+    ///
+    Result!ulong toUnixTime() scope const {
+        static if (!__traits(hasMember, DateType, "UnixEpoch")) {
+            return typeof(return)(MissingUnixEpochException);
+        } else {
+            DayInterval days = this.date - DateType.UnixEpoch;
+
+            // FIXME: REMOVE timezone!
+            long working = days.amount * 86_400;
+            working += this.time_.totalSeconds;
+
+            if (days.amount < 0 || working < 0)
+                return typeof(return)(BeforeUnixEpochException);
+
+            return typeof(return)(cast(ulong)working);
+        }
+    }
+
+    ///
+    static DateTime fromUnixTime(ulong amount) {
+        DateTime ret = DateTime(DateType.UnixEpoch);
+        ret.advanceSeconds(amount);
+        return ret;
+    }
+
     //
 
     ///
@@ -179,6 +213,31 @@ export @safe nothrow @nogc:
      */
     void format(Builder, Format)(scope ref Builder builder, scope Format specification) scope const 
             if (isBuilderString!Builder && isReadOnlyString!Format) {
-        // TODO: Format!!!!
+        import sidero.base.allocators;
+
+        if (builder.isNull)
+            builder = typeof(builder)(globalAllocator());
+
+        bool isEscaped;
+
+        foreach (c; specification.byUTF32()) {
+            if (isEscaped) {
+                typeof(c)[1] str = [c];
+                builder ~= str;
+                isEscaped = false;
+            } else if (c == '\\') {
+                isEscaped = true;
+            } else if (this.time_.formatValue(builder, c)) {
+                // TODO: } else if (c == 'B') {
+                // TODO: } else if (this.timezone_.formatValue(builder, c)) {
+                // TODO: } else if (c == 'c') {
+                // TODO: } else if (c == 'r') {
+                // TODO: } else if (c == 'U') {
+            } else if (this.date.formatValue(builder, c)) {
+            } else {
+                typeof(c)[1] str = [c];
+                builder ~= str;
+            }
+        }
     }
 }

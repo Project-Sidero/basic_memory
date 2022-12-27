@@ -12,6 +12,7 @@ struct GregorianDate {
 
     ///
     static immutable string DefaultFormat = "j/n/Y", ISOFormat = "Ymd", ISOExtFormat = "Y-m-d", SimpleFormat = "Y-M-d";
+    static const UnixEpoch = GregorianDate(1970, 1, 1);
 
 export @safe nothrow @nogc:
 
@@ -258,7 +259,7 @@ export @safe nothrow @nogc:
     }
 
     ///
-    DayInterval opBinary(string op : "-")(const GregorianDate other) scope {
+    DayInterval opBinary(string op : "-")(const GregorianDate other) scope const {
         DaysSinceY2k us = this.toDaysSinceY2k(), against = other.toDaysSinceY2k();
         return DayInterval(us.amount - against.amount);
     }
@@ -353,6 +354,28 @@ export @safe nothrow @nogc:
             if (isBuilderString!Builder && isReadOnlyString!Format) {
         import sidero.base.allocators;
 
+        if (builder.isNull)
+            builder = typeof(builder)(globalAllocator());
+
+        bool isEscaped;
+
+        foreach (c; specification.byUTF32()) {
+            if (isEscaped) {
+                typeof(c)[1] str = [c];
+                builder ~= str;
+                isEscaped = false;
+            } else if (c == '\\') {
+                isEscaped = true;
+            } else if (this.formatValue(builder, c)) {
+            } else {
+                typeof(c)[1] str = [c];
+                builder ~= str;
+            }
+        }
+    }
+
+    /// Ditto
+    bool formatValue(Builder)(scope ref Builder builder, dchar specification) scope const if (isBuilderString!Builder) {
         static immutable ThreeLettersDay = ["Mon", "Tue", "Wed", "Thr", "Fri", "Sat", "Sun"];
         static immutable DayText = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
         static immutable OrdinalSuffix = [
@@ -367,20 +390,7 @@ export @safe nothrow @nogc:
             `Jan`, `Feb`, `Mar`, `Apr`, `May`, `Jun`, `Jul`, `Aug`, `Sep`, `Oct`, `Nov`, `Dec`
         ];
 
-        if (builder.isNull)
-            builder = typeof(builder)(globalAllocator());
-
-        bool isEscaped;
-
-        foreach (c; specification.byUTF32()) {
-            if (isEscaped) {
-                typeof(c)[1] str = [c];
-                builder ~= str;
-                isEscaped = false;
-                continue;
-            }
-
-            switch (c) {
+        switch (specification) {
             case 'd':
                 if (this.day_ < 10)
                     builder ~= "0"c;
@@ -467,7 +477,7 @@ export @safe nothrow @nogc:
                     else if (temp < 100)
                         builder ~= "00";
                     else if (temp < 1000)
-                        builder ~= "0";
+                            builder ~= "0";
 
                     builder.formattedWrite("%s", temp);
                 }
@@ -488,7 +498,7 @@ export @safe nothrow @nogc:
                 else if (temp < 100)
                     builder ~= "00";
                 else if (temp < 1000)
-                    builder ~= "0";
+                        builder ~= "0";
 
                 builder.formattedWrite("%s", temp);
                 break;
@@ -508,7 +518,7 @@ export @safe nothrow @nogc:
                 else if (temp < 100)
                     builder ~= "00";
                 else if (temp < 1000)
-                    builder ~= "0";
+                        builder ~= "0";
 
                 builder.formattedWrite("%s", temp);
                 break;
@@ -526,7 +536,7 @@ export @safe nothrow @nogc:
                 else if (temp < 100)
                     builder ~= "00";
                 else if (temp < 1000)
-                    builder ~= "0";
+                        builder ~= "0";
 
                 builder.formattedWrite("%s", temp);
                 break;
@@ -540,16 +550,11 @@ export @safe nothrow @nogc:
                 builder.formattedWrite("%s", temp);
                 break;
 
-            case '\\':
-                isEscaped = true;
-                break;
-
             default:
-                typeof(c)[1] str = [c];
-                builder ~= str;
-                break;
-            }
+                return false;
         }
+
+        return true;
     }
 
     ///
@@ -702,8 +707,13 @@ export @safe nothrow @nogc:
         }
 
         ///
-        DayInterval opBinary(string op : "-")(const DateWrapper other) scope {
+        DayInterval opBinary(string op : "-")(const GregorianDate other) scope const {
             return this.date_.opBinary!op(other);
+        }
+
+        ///
+        DayInterval opBinary(string op : "-")(const DateWrapper other) scope const {
+            return this.date_.opBinary!op(other.date_);
         }
 
         ///
@@ -721,6 +731,43 @@ export @safe nothrow @nogc:
         ///
         int opCmp(const DateWrapper other) scope const {
             return this.date_.opCmp(other.date_);
+        }
+
+        ///
+        String_UTF8 toString() scope const @trusted {
+            return this.date_.toString();
+        }
+
+        ///
+        void toString(Builder)(scope ref Builder sink) scope const if (isBuilderString!Builder) {
+            this.date_.toString(sink);
+        }
+
+        ///
+        StringBuilder_UTF8 format(FormatString)(scope FormatString specification) scope const if (isSomeString!FormatString) {
+            return this.date_.format(specification);
+        }
+
+        ///
+        StringBuilder_UTF8 format(FormatChar)(scope String_UTF!FormatChar specification) scope const {
+            return this.date_.format(specification);
+        }
+
+        ///
+        void format(Builder, FormatString)(scope ref Builder builder, scope FormatString specification) scope const @trusted
+        if (isBuilderString!Builder && isSomeString!FormatString) {
+            this.date_.format(builder, specification);
+        }
+
+        /// See: https://www.php.net/manual/en/datetime.format.php
+        void format(Builder, Format)(scope ref Builder builder, scope Format specification) scope const
+        if (isBuilderString!Builder && isReadOnlyString!Format) {
+            this.date_.format(builder, specification);
+        }
+
+        /// Ditto
+        bool formatValue(Builder)(scope ref Builder builder, dchar specification) scope const if (isBuilderString!Builder) {
+            return this.date_.formatValue(builder, specification);
         }
     }
 }

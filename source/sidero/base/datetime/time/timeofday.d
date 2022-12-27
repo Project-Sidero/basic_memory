@@ -294,89 +294,93 @@ export @safe nothrow @nogc:
                 typeof(c)[1] str = [c];
                 builder ~= str;
                 isEscaped = false;
-                continue;
-            }
-
-            switch (c) {
-            case 'a':
-                builder ~= this.isAM() ? "am" : "pm";
-                break;
-
-            case 'A':
-                builder ~= this.isAM() ? "AM" : "PM";
-                break;
-
-                //case 'B':
-
-            case 'g':
-                auto actual = this.hour_ % 12;
-                builder.formattedWrite("%s", actual);
-                break;
-
-            case 'G':
-                builder.formattedWrite("%s", this.hour_);
-                break;
-
-            case 'h':
-                auto actual = this.hour_ % 12;
-                if (actual < 10)
-                    builder ~= "0"c;
-                builder.formattedWrite("%s", actual);
-                break;
-
-            case 'H':
-                if (this.hour_ < 10)
-                    builder ~= "0"c;
-                builder.formattedWrite("%s", this.hour_);
-                break;
-
-            case 'i':
-                if (this.minute_ < 10)
-                    builder ~= "0"c;
-                builder.formattedWrite("%s", this.minute_);
-                break;
-
-            case 's':
-                if (this.second_ < 10)
-                    builder ~= "0"c;
-                builder.formattedWrite("%s", this.second_);
-                break;
-
-            case 'u':
-                if (this.msec_ < 10)
-                    builder ~= "00000"c;
-                else if (this.msec_ < 100)
-                    builder ~= "0000";
-                else if (this.msec_ < 1000)
-                    builder ~= "000";
-                else if (this.msec_ < 10_000)
-                    builder ~= "00";
-                else if (this.msec_ < 100_000)
-                    builder ~= "0";
-                builder.formattedWrite("%s", this.msec_);
-                break;
-
-            case 'v':
-                const working = this.msec_ / 1000;
-
-                if (working < 10)
-                    builder ~= "00"c;
-                else if (working < 100)
-                    builder ~= "0";
-
-                builder.formattedWrite("%s", working);
-                break;
-
-            case '\\':
+            } else if (c == '\\') {
                 isEscaped = true;
-                break;
-
-            default:
+            } else if (this.formatValue(builder, c)) {
+            } else {
                 typeof(c)[1] str = [c];
                 builder ~= str;
-                break;
             }
         }
+    }
+
+    /// Ditto
+    bool formatValue(Builder)(scope ref Builder builder, dchar specification) scope const if (isBuilderString!Builder) {
+        switch (specification) {
+        case 'a':
+            builder ~= this.isAM() ? "am" : "pm";
+            break;
+
+        case 'A':
+            builder ~= this.isAM() ? "AM" : "PM";
+            break;
+
+        //case 'B':
+
+        case 'g':
+            auto actual = this.hour_ % 12;
+            builder.formattedWrite("%s", actual);
+            break;
+
+        case 'G':
+            builder.formattedWrite("%s", this.hour_);
+            break;
+
+        case 'h':
+            auto actual = this.hour_ % 12;
+            if (actual < 10)
+                builder ~= "0"c;
+            builder.formattedWrite("%s", actual);
+            break;
+
+        case 'H':
+            if (this.hour_ < 10)
+                builder ~= "0"c;
+            builder.formattedWrite("%s", this.hour_);
+            break;
+
+        case 'i':
+            if (this.minute_ < 10)
+                builder ~= "0"c;
+            builder.formattedWrite("%s", this.minute_);
+            break;
+
+        case 's':
+            if (this.second_ < 10)
+                builder ~= "0"c;
+            builder.formattedWrite("%s", this.second_);
+            break;
+
+        case 'u':
+            if (this.msec_ < 10)
+                builder ~= "00000"c;
+            else if (this.msec_ < 100)
+                builder ~= "0000";
+            else if (this.msec_ < 1000)
+                builder ~= "000";
+            else if (this.msec_ < 10_000)
+                builder ~= "00";
+            else if (this.msec_ < 100_000)
+                builder ~= "0";
+            builder.formattedWrite("%s", this.msec_);
+            break;
+
+        case 'v':
+            const working = this.msec_ / 1000;
+
+            if (working < 10)
+                builder ~= "00"c;
+            else if (working < 100)
+                builder ~= "0";
+
+            builder.formattedWrite("%s", working);
+            break;
+
+        default:
+            return false;
+        }
+
+        return true;
     }
 
     /// midnight
