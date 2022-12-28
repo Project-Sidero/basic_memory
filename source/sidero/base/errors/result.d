@@ -143,25 +143,29 @@ scope nothrow @nogc @safe:
 
     static if (HaveValue) {
         ///
-        bool opEquals(scope Type other) const {
+        bool opEquals(scope const Type other) const @trusted {
             if (error.info.message !is null)
                 return false;
 
             static if (is(Type == float) || is(Type == double))
                 return this.value.isClose(other);
-            else
+            else static if (__traits(compiles, {bool b = this.value == other; }))
                 return this.value == other;
+            else
+                return (*cast(Type*)&this.value) == (*cast(Type*)&other);
         }
 
         ///
-        bool opEquals(scope Result!Type other) const {
+        bool opEquals(scope Result!Type other) const @trusted {
             if (error.info.message !is null)
                 return other.error.info.message !is null;
 
             static if (is(Type == float) || is(Type == double))
                 return this.value.isClose(other.value);
-            else
+            else static if (__traits(compiles, {bool b = this.value == other.value; }))
                 return this.value == other.value;
+            else
+                return (*cast(Type*)&this.value) == (*cast(Type*)&other.value);
         }
     }
 }
@@ -326,7 +330,7 @@ scope nothrow @nogc @safe:
     bool opCast(T : bool)() @trusted const {
         assert(!__ctfe, "Don't check for error on const in CTFE");
 
-            (cast(ErrorInfo*)&error).checked = true;
+        (cast(ErrorInfo*)&error).checked = true;
         return error.info.message is null;
     }
     ///
@@ -361,34 +365,40 @@ scope nothrow @nogc @safe:
     }
 
     ///
-    bool opEquals(scope Type other) const {
+    bool opEquals(scope const Type other) const @trusted {
         if (error.info.message !is null || _value is null)
             return false;
 
         static if (is(Type == float) || is(Type == double))
             return (*this._value).isClose(other);
+        else static if (__traits(compiles, {bool b = this._value == other.value; }))
+            return (*this._value) == other.value;
         else
-            return (*this._value) == other;
+            return (*cast(Type*)this._value) == (*cast(Type*)&other);
     }
 
     ///
-    bool opEquals(scope Result!Type other) const {
+    bool opEquals(scope const Result!Type other) const @trusted {
         if (error.isSet || other.error.isSet || error.info.message !is null || _value is null || other.error.info.message !is null)
             return error.isSet && other.error.isSet;
         static if (is(Type == float) || is(Type == double))
             return (*this._value).isClose(other.value);
-        else
+        else static if (__traits(compiles, {bool b = this._value == other.value; }))
             return (*this._value) == other.value;
+        else
+            return (*cast(Type*)this._value) == (*cast(Type*)&other.value);
     }
 
     ///
-    bool opEquals(scope ResultReference!Type other) const {
+    bool opEquals(scope const ResultReference!Type other) const @trusted {
         if (error.isSet || other.error.isSet || error.info.message !is null || _value is null ||
                 other.error.info.message !is null || other._value is null)
             return error.isSet && other.error.isSet;
         static if (is(Type == float) || is(Type == double))
             return (*this._value).isClose(*other._value);
-        else
+        else static if (__traits(compiles, {bool b = this._value == other._value; }))
             return (*this._value) == (*other._value);
+        else
+            return (*cast(Type*)this._value) == (*cast(Type*)&other._value);
     }
 }

@@ -1262,6 +1262,7 @@ struct UTF_State(Char) {
                 static if (is(Char == dchar)) {
                     dchar decoded = frontInternal();
                     popFrontInternal();
+                    assert(advance == 1);
                 } else {
                     import sidero.base.encoding.utf : decode;
 
@@ -1474,7 +1475,6 @@ struct UTF_State(Char) {
             if (got != 0)
                 return 0;
 
-            assert(f32.lastIteratedCount0 != 0);
             return f32.lastIteratedCount0;
         }, (scope Iterator* iterator, scope ref Cursor cursor) @trusted {
             return insertOperation(iterator, cursor, toReplace);

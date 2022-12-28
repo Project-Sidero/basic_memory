@@ -222,8 +222,11 @@ mixin template StringBuilderOperations() {
         if (cursor.offsetFromHead >= maximumOffsetFromHead || amount == 0)
             return;
 
-        foreach (iterator; iteratorList) {
-            iterator.onRemoveDecreaseFromHead(cursor.offsetFromHead, amount);
+        debug {
+            foreach (iterator; iteratorList) {
+                assert(iterator.forwards.offsetIntoBlock <= iterator.forwards.block.length);
+                assert(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length);
+            }
         }
 
         if (cursor.offsetIntoBlock == 0) {
@@ -251,6 +254,13 @@ mixin template StringBuilderOperations() {
                 canDo = amount;
             onRemove(block.get()[offsetIntoBlock .. offsetIntoBlock + canDo]);
 
+            debug {
+                foreach (iterator; iteratorList) {
+                    assert(iterator.forwards.offsetIntoBlock <= iterator.forwards.block.length);
+                    assert(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length);
+                }
+            }
+
             if (canDo + offsetIntoBlock == block.length) {
                 // might have a prefix, no suffix, so this is either the first node or a middle node
                 // either way we at at the end of the block
@@ -260,13 +270,36 @@ mixin template StringBuilderOperations() {
                     // nothing is left, ok so we will deallocate here
                     Block* toFree = block, next = block.next;
 
+                    foreach (iterator; iteratorList) {
+                        iterator.onRemoveDecreaseFromHead(toFree, offsetFromHead, canDo);
+                    }
+
                     blockList.remove(toFree);
+
+                    debug {
+                        foreach (iterator; iteratorList) {
+                            assert(iterator.forwards.block !is toFree);
+                            assert(iterator.backwards.block !is toFree);
+                        }
+                    }
 
                     block = next;
                 } else {
                     // we have a prefix, this is only applicable to the first block
 
+                    foreach (iterator; iteratorList) {
+                        iterator.onRemoveDecreaseFromHead(block, offsetFromHead, canDo);
+                    }
+
                     block.length -= canDo;
+
+                    debug {
+                        foreach (iterator; iteratorList) {
+                            assert(iterator.forwards.offsetIntoBlock <= iterator.forwards.block.length);
+                            assert(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length);
+                        }
+                    }
+
                     block = block.next;
                 }
 
@@ -298,24 +331,52 @@ mixin template StringBuilderOperations() {
                     newOffset = offsetIntoBlock;
                 }
 
-                if (intoBlock is block)
+                if (intoBlock is block) {
+                    iteratorList.opApply((scope iterator) @trusted {
+                        iterator.onRemoveDecreaseFromHead(block, offsetFromHead, canDo);
+                        return 0;
+                    });
+
                     block.moveLeft(offsetIntoBlock + canDo, newOffset);
-                else
+
+                    debug {
+                        foreach (iterator; iteratorList) {
+                            assert(iterator.forwards.offsetIntoBlock <= iterator.forwards.block.length);
+                            assert(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length);
+                        }
+                    }
+                } else {
                     block.moveFromInto(offsetIntoBlock + canDo, amountBeingMoved, intoBlock, newOffset);
 
-                iteratorList.opApply((scope iterator) @trusted {
-                    iterator.moveRange(block, offsetIntoBlock, intoBlock, newOffset, amountBeingMoved);
-                    return 0;
-                });
+                    iteratorList.opApply((scope iterator) @trusted {
+                        iterator.onRemoveDecreaseFromHead(block, offsetFromHead, canDo);
+                        iterator.moveRange(block, offsetIntoBlock, intoBlock, newOffset, amountBeingMoved);
+                        return 0;
+                    });
+                }
 
                 if (block.length == 0) {
                     assert(cursor.block !is block);
+
+                    foreach (iterator; iteratorList) {
+                        if (iterator.forwards.block is block)
+                            iterator.forwards.advanceBackwards(0, iterator.minimumOffsetFromHead,
+                                    iterator.maximumOffsetFromHead, false, false);
+                        if (iterator.backwards.block is block)
+                            iterator.backwards.advanceBackwards(0, iterator.minimumOffsetFromHead,
+                                    iterator.maximumOffsetFromHead, false, false);
+                    }
+
                     // no prefix or suffix left in this block, so deallocate block
                     blockList.remove(block);
 
-                    foreach (iterator; iteratorList) {
-                        assert(iterator.forwards.block !is block);
-                        assert(iterator.backwards.block !is block);
+                    debug {
+                        foreach (iterator; iteratorList) {
+                            assert(iterator.forwards.block !is block);
+                            assert(iterator.backwards.block !is block);
+                            assert(iterator.forwards.offsetIntoBlock <= iterator.forwards.block.length);
+                            assert(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length);
+                        }
                     }
                 }
             }
@@ -323,6 +384,13 @@ mixin template StringBuilderOperations() {
 
         assert(amount == 0);
         blockList.numberOfItems -= amountRemoved;
+
+        debug {
+            foreach (iterator; iteratorList) {
+                assert(iterator.forwards.offsetIntoBlock <= iterator.forwards.block.length);
+                assert(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length);
+            }
+        }
     }
 
     unittest {
@@ -461,10 +529,8 @@ mixin template StringBuilderOperations() {
         {
             // verify & cleanup iterators
             foreach (iterator; [iterator1, iterator2, iterator3, iterator4, iterator5, iterator6]) {
-                assert(iterator.forwards.block is &opTest.blockList.head);
                 assert(iterator.forwards.offsetIntoBlock == 0);
                 assert(iterator.forwards.offsetFromHead == 0);
-                assert(iterator.backwards.block is &opTest.blockList.head);
                 assert(iterator.backwards.offsetIntoBlock == 0);
                 assert(iterator.backwards.offsetFromHead == 0);
 
@@ -487,6 +553,15 @@ mixin template StringBuilderOperations() {
     size_t insertOperation(scope ref Cursor cursor, size_t maximumOffsetFromHead,
             scope ref OtherStateAsTarget!Char toInsert, bool clobber = false) {
         size_t amountInserted = toInsert.length(), amountToInsert = amountInserted, startOffsetFromHead = cursor.offsetFromHead;
+
+        debug {
+            foreach (iterator; iteratorList) {
+                assert(iterator.forwards.offsetIntoBlock <= iterator.forwards.block.length);
+                if (!(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length)) {
+                    assert(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length);
+                }
+            }
+        }
 
         {
             // sanitize cursor locations (head/tail) to ensure we have a place to actually store stuff
@@ -528,6 +603,15 @@ mixin template StringBuilderOperations() {
             iterator.moveCursorsFromTail;
         }
 
+        debug {
+            foreach (iterator; iteratorList) {
+                assert(iterator.forwards.offsetIntoBlock <= iterator.forwards.block.length);
+                if (!(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length)) {
+                    assert(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length);
+                }
+            }
+        }
+
         void ensureNotInFullBlock() {
             if (cursor.block.length == BlockList.Count) {
                 // we are maxed out, oh noes
@@ -540,11 +624,17 @@ mixin template StringBuilderOperations() {
                     cursor.offsetIntoBlock = 0;
                 } else {
                     // split everything at and to the right
-                    Block* splitInto = blockList.insert(cursor.block);
-                    cursor.block.moveFromInto(cursor.offsetIntoBlock, cursor.block.length - cursor.offsetIntoBlock, splitInto, 0);
+                    Block* splitInto = blockList.insert(cursor.block), oldBlock = cursor.block;
+                    size_t oldOffset = cursor.offsetIntoBlock, amount = cursor.block.length - cursor.offsetIntoBlock;
+
+                    cursor.block.moveFromInto(oldOffset, amount, splitInto, 0);
 
                     assert(cursor.offsetIntoBlock == cursor.block.length);
                     assert(splitInto.length == BlockList.Count - cursor.offsetIntoBlock);
+
+                    foreach (iterator; iteratorList) {
+                        iterator.moveRange(oldBlock, oldOffset, splitInto, 0, amount);
+                    }
                 }
             }
         }
@@ -632,6 +722,15 @@ mixin template StringBuilderOperations() {
                         size_t oldOffsetFromHead = cursor.offsetFromHead;
                         cursor.advanceForward(canDo, maximumOffsetFromHead, false);
                         assert(cursor.offsetFromHead == oldOffsetFromHead + canDo);
+                    }
+
+                    debug {
+                        foreach (iterator; iteratorList) {
+                            assert(iterator.forwards.offsetIntoBlock <= iterator.forwards.block.length);
+                            if (!(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length)) {
+                                assert(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length);
+                            }
+                        }
                     }
                 }
             }
@@ -811,6 +910,13 @@ mixin template StringBuilderOperations() {
             if (matchedAmount > 0) {
                 count++;
 
+                debug {
+                    foreach (iterator; iteratorList) {
+                        assert(iterator.forwards.offsetIntoBlock <= iterator.forwards.block.length);
+                        assert(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length);
+                    }
+                }
+
                 // Do matching before removal, this is needed if you are inserting
                 //  you can end up with iterators that no longer point to the same
                 //  effective range.
@@ -820,9 +926,23 @@ mixin template StringBuilderOperations() {
                     maximumOffsetFromHead += onMatch(iterator, cursor);
                 }
 
+                foreach (iterator; iteratorList) {
+                    assert(iterator.forwards.offsetIntoBlock <= iterator.forwards.block.length);
+                    if (!(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length)) {
+                        assert(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length);
+                    }
+                }
+
                 if (doRemove) {
                     removeOperation(iterator, cursor, matchedAmount);
                     maximumOffsetFromHead -= matchedAmount;
+
+                    debug {
+                        foreach (iterator; iteratorList) {
+                            assert(iterator.forwards.offsetIntoBlock <= iterator.forwards.block.length);
+                            assert(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length);
+                        }
+                    }
                 }
 
                 if (onceOnly)

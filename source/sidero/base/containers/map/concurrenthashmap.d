@@ -59,7 +59,6 @@ export:
         foreach (k, v; cll) {
             assert(k);
             assert(v);
-
             assert(k == KeyType.init);
             assert(v == ValueType.init);
             count++;
@@ -451,7 +450,7 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
         return ret;
     }
 
-    bool iteratorGetExternal(scope Iterator* iterator, scope ref ResultReference!KeyType key, scope ref ResultReference!ValueType value) scope @trusted {
+    bool iteratorGetExternal(scope Iterator* iterator, scope out ResultReference!KeyType key, scope out ResultReference!ValueType value) scope @trusted {
         mutex.pureLock;
 
         if (iterator.forwards.isOutOfRange()) {

@@ -472,7 +472,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
         // event hooks
 
         void moveRange(scope Cursor.Block* ifThisBlock, size_t ifStartOffsetInBlock, scope Cursor.Block* movedIntoBlock,
-                size_t movedIntoOffset, size_t amount) @trusted {
+                size_t movedIntoOffset, size_t amount) scope @trusted {
             forwards.moveRange(ifThisBlock, ifStartOffsetInBlock, movedIntoBlock, movedIntoOffset, amount);
             backwards.moveRange(ifThisBlock, ifStartOffsetInBlock, movedIntoBlock, movedIntoOffset, amount);
         }
@@ -720,7 +720,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
             ilt.iteratorList.rcIteratorInternal(false, iterator3);
         }
 
-        void onRemoveDecreaseFromHead(size_t ifFromOffsetFromHead, size_t amount) {
+        void onRemoveDecreaseFromHead(scope Cursor.Block* forBlock, size_t ifFromOffsetFromHead, size_t amount) {
             if (this.maximumOffsetFromHead < ifFromOffsetFromHead)
                 return;
 
@@ -744,9 +744,8 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
                 newMaximumOffsetFromHead -= amountToGoBackwards;
             }
 
-            forwards.onRemoveDecreaseFromHead(ifFromOffsetFromHead, amount, this.maximumOffsetFromHead);
-            backwards.onRemoveDecreaseFromHead(ifFromOffsetFromHead, amount, this.maximumOffsetFromHead);
-
+            forwards.onRemoveDecreaseFromHead(forBlock, ifFromOffsetFromHead, amount, this.maximumOffsetFromHead, false);
+            backwards.onRemoveDecreaseFromHead(forBlock, ifFromOffsetFromHead, amount, this.maximumOffsetFromHead, true);
             this.maximumOffsetFromHead = newMaximumOffsetFromHead;
         }
 
@@ -813,9 +812,9 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
                 a.moveLeft(OffsetStart + Text2.length, OffsetStart);
                 assert(a.get() == Text3);
 
-                iterator1.onRemoveDecreaseFromHead(OffsetStart, Text2.length);
-                iterator2.onRemoveDecreaseFromHead(OffsetStart, Text2.length);
-                iterator3.onRemoveDecreaseFromHead(OffsetStart, Text2.length);
+                iterator1.onRemoveDecreaseFromHead(a, OffsetStart, Text2.length);
+                iterator2.onRemoveDecreaseFromHead(a, OffsetStart, Text2.length);
+                iterator3.onRemoveDecreaseFromHead(a, OffsetStart, Text2.length);
 
                 assert(iterator1.forwards.offsetIntoBlock == 0);
                 assert(iterator2.forwards.offsetIntoBlock == OffsetStart);
@@ -1107,17 +1106,13 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
                 size_t movedIntoOffset, size_t amount) scope @trusted {
 
             if (this.block is ifThisBlock) {
-                if (this.offsetIntoBlock >= ifStartOffsetInBlock && this.offsetIntoBlock < ifStartOffsetInBlock + amount) {
-                    this.block = movedIntoBlock;
-                    this.offsetIntoBlock = (this.offsetIntoBlock - ifStartOffsetInBlock) + movedIntoOffset;
-                } else if (this.offsetIntoBlock >= ifStartOffsetInBlock + amount) {
-                    if (movedIntoBlock is ifThisBlock) {
-                        if (ifStartOffsetInBlock > movedIntoOffset)
-                            this.offsetIntoBlock -= ifStartOffsetInBlock - movedIntoOffset;
-                        else
-                            this.offsetIntoBlock -= movedIntoOffset - ifStartOffsetInBlock;
-                    } else
+                if (this.offsetIntoBlock >= ifStartOffsetInBlock) {
+                    if (this.offsetIntoBlock < ifStartOffsetInBlock + amount) {
+                        this.block = movedIntoBlock;
+                        this.offsetIntoBlock = (this.offsetIntoBlock - ifStartOffsetInBlock) + movedIntoOffset;
+                    } else {
                         this.offsetIntoBlock -= amount;
+                    }
                 } else
                     assert(this.offsetIntoBlock < ifStartOffsetInBlock);
             }
@@ -1129,21 +1124,23 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
             }
         }
 
-        void onRemoveDecreaseFromHead(size_t ifFromOffsetFromHead, size_t amount, size_t maximumOffsetFromHead) scope {
-            if (this.offsetFromHead > ifFromOffsetFromHead) {
+        void onRemoveDecreaseFromHead(scope Block* forBlock, size_t ifFromOffsetFromHead, size_t amount,
+                size_t maximumOffsetFromHead, bool backwardsIterator) scope {
+            if (this.offsetFromHead >= ifFromOffsetFromHead && this.block is forBlock) {
                 size_t canDo = this.offsetFromHead - ifFromOffsetFromHead;
                 if (canDo < amount)
                     amount = canDo;
+
                 advanceBackwards(amount, ifFromOffsetFromHead, maximumOffsetFromHead,
-                        offsetFromHead + amount < maximumOffsetFromHead, false);
+                        offsetFromHead + amount < maximumOffsetFromHead, backwardsIterator);
+
+                if (this.offsetFromHead == ifFromOffsetFromHead && this.offsetIntoBlock == 0)
+                    advanceBackwards(0, ifFromOffsetFromHead, maximumOffsetFromHead, false, backwardsIterator);
+            } else if (this.offsetFromHead >= ifFromOffsetFromHead + amount) {
+                this.offsetFromHead -= amount;
             }
 
-            if (this.offsetFromHead == ifFromOffsetFromHead && this.offsetIntoBlock == 0)
-                advanceBackwards(0, ifFromOffsetFromHead, maximumOffsetFromHead, false, false);
-
             assert(this.offsetFromHead <= maximumOffsetFromHead);
-            if (this.offsetFromHead == ifFromOffsetFromHead && this.offsetIntoBlock == 0)
-                assert(this.offsetIntoBlock > 0 || this.block.previous is null);
         }
 
         unittest {
@@ -1165,7 +1162,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
             assert(cursor.offsetIntoBlock == 10);
             assert(cursor.block is b);
 
-            cursor.onRemoveDecreaseFromHead(10, 10, 20);
+            cursor.onRemoveDecreaseFromHead(b, 10, 10, 20, false);
             assert(cursor.block is a);
             assert(cursor.offsetFromHead == 10);
             assert(cursor.offsetIntoBlock == 10);
