@@ -192,6 +192,9 @@ private @hidden:
 
                 if (useQuotes)
                     builder ~= "\"";
+            } else static if (isStaticArray!Type && (isSomeString!(typeof(Type.init[])))) {
+                auto temp = input[];
+                this.handle(temp, true);
             } else static if (isPointer!ActualType) {
                 alias SubType = typeof(input[0]);
 
@@ -765,6 +768,8 @@ scope @hidden:
 
             if (needQuotes)
                 builder ~= "\"";
+        } else static if (isStaticArray!ActualType && (isSomeString!(typeof(ActualType.init[])))) {
+            this.write(format, input[], true);
         } else static if (isBasicType!ActualType || isPointer!ActualType) {
             static if (isSomeChar!ActualType) {
                 if (needQuotes)
