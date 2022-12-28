@@ -1,6 +1,7 @@
 module sidero.base.datetime.defs;
-import sidero.base.datetime.time.timeofday;
 import sidero.base.datetime.time.defs;
+import sidero.base.datetime.time.timeofday;
+import sidero.base.datetime.time.timezone;
 import sidero.base.datetime.calendars.defs;
 import sidero.base.text;
 import sidero.base.traits;
@@ -20,15 +21,22 @@ enum {
     MissingUnixEpochException = ErrorMessage("MUEE", "Date type doesn't implement Unix epoch, is it representable?"),
 }
 
-// TODO: TIME ZONES
-
 ///
 struct DateTime(DateType) {
     private {
         TimeOfDay time_;
+        TimeZone timezone_;
     }
 
-    static string DefaultFormat = DateType.DefaultFormat ~ " " ~ TimeOfDay.DefaultFormat;
+    ///
+    static string DefaultFormat = DateType.DefaultFormat ~ " " ~ TimeOfDay.DefaultFormat, ATOMFormat = "Y-m-d\\TH:i:sP",
+        COOKIEFormat = "l, d-M-Y H:i:s T",
+        ISO8601Format = "Y-m-d\\TH:i:sO",
+        ISO8601_EXPANDEDFormat = "X-m-d\\TH:i:sP", RFC822Format = "D, d M y H:i:s O", RFC850Format = "l, d-M-y H:i:s T",
+        RFC1036Format = "D, d M y H:i:s O", RFC1123Format = "D, d M Y H:i:s O",
+        RFC7231Format = "D, d M Y H:i:s \\G\\M\\T", RFC2822Format = "D, d M Y H:i:s O",
+        RFC3339Format = "Y-m-d\\TH:i:sP", RFC3339ExtendedFormat = "Y-m-d\\TH:i:s.vP", RSSFormat = "D, d M Y H:i:s O",
+        W3CFormat = "Y-m-d\\TH:i:sP";
 
     ///
     DateType.DateWrapper date;
@@ -38,19 +46,32 @@ struct DateTime(DateType) {
 export @safe nothrow @nogc:
 
     ///
-    this(DateType date) scope {
+    this(scope ref DateTime other) scope {
+        this.tupleof = other.tupleof;
+    }
+
+    ///
+    this(scope DateType date) scope {
         this.date = typeof(this.date)(date);
     }
 
     ///
-    this(TimeOfDay time) scope {
+    this(scope TimeOfDay time) scope {
         this.time_ = time;
     }
 
     ///
-    this(DateType date, TimeOfDay time) scope {
+    this(scope DateType date, scope TimeOfDay time, scope TimeZone timezone = TimeZone.init) scope {
         this.date = typeof(this.date)(date);
         this.time_ = time;
+        this.timezone_ = timezone;
+    }
+
+    /// Does not adjust date/time into timezone!
+    this(scope DateTime datetime, scope TimeZone timezone) scope {
+        this.date = datetime.date;
+        this.time_ = datetime.time_;
+        this.timezone_ = timezone;
     }
 
     //
@@ -58,6 +79,11 @@ export @safe nothrow @nogc:
     ///
     TimeOfDay time() scope const {
         return this.time_;
+    }
+
+    ///
+    TimeZone time() scope @trusted {
+        return this.timezone_;
     }
 
     ///
@@ -134,6 +160,12 @@ export @safe nothrow @nogc:
         this.date.advanceDays(dateInterval.amount);
     }
 
+    /// If current time zone not set, it'll just add it without adjustment.
+    DateTime asTimeZone(scope TimeZone timezone) scope const {
+        // FIXME
+        assert(0);
+    }
+
     ///
     Result!ulong toUnixTime() scope const {
         static if (!__traits(hasMember, DateType, "UnixEpoch")) {
@@ -153,21 +185,24 @@ export @safe nothrow @nogc:
     }
 
     ///
-    static DateTime fromUnixTime(ulong amount) {
+    static DateTime fromUnixTime(ulong amount, TimeZone asTimeZone = TimeZone.init) {
         DateTime ret = DateTime(DateType.UnixEpoch);
         ret.advanceSeconds(amount);
+
+        // FIXME: timezone!
+
         return ret;
     }
 
     //
 
     ///
-    bool opEquals(const DateTime other) scope const {
+    bool opEquals(scope const DateTime other) scope const {
         return this.time_ == other.time_ && this.date == other.date;
     }
 
     ///
-    int opCmp(const DateTime other) scope const {
+    int opCmp(scope const DateTime other) scope const {
         const ret = this.date.opCmp(other.date);
 
         if (ret != 0)
@@ -210,6 +245,8 @@ export @safe nothrow @nogc:
 
     /**
      See: https://www.php.net/manual/en/datetime.format.php
+
+     Note: Implements I, O, P, p, T, Z, c, r, U. Defers everything else to respective type
      */
     void format(Builder, Format)(scope ref Builder builder, scope Format specification) scope const 
             if (isBuilderString!Builder && isReadOnlyString!Format) {
@@ -228,11 +265,31 @@ export @safe nothrow @nogc:
             } else if (c == '\\') {
                 isEscaped = true;
             } else if (this.time_.formatValue(builder, c)) {
-                // TODO: } else if (c == 'B') {
-                // TODO: } else if (this.timezone_.formatValue(builder, c)) {
-                // TODO: } else if (c == 'c') {
-                // TODO: } else if (c == 'r') {
-                // TODO: } else if (c == 'U') {
+            } else if (c == 'B') {
+                // TODO: swatch time
+                // calculated from UTC+1
+                // ((3600 * h) + (60 * m)) / 86.4
+            } else if (this.timezone_.formatValue(builder, c)) {
+            } else if (c == 'I') {
+                // TODO: is in daylight savings time
+            } else if (c == 'O') {
+                // TODO: +0200
+            } else if (c == 'P') {
+                // TODO: +02:00
+            } else if (c == 'p') {
+                // TODO: P but return Z for 0
+            } else if (c == 'T') {
+                // TODO: timezone offset like P
+                // like O except can elide minutes if zero
+            } else if (c == 'Z') {
+                // TODO: timezone bias in seconds
+                // 5 digit without + only -
+            } else if (c == 'c') {
+                // TODO: ISO8601 date
+            } else if (c == 'r') {
+                // TODO: ISO2822 date
+            } else if (c == 'U') {
+                // TODO: unix time
             } else if (this.date.formatValue(builder, c)) {
             } else {
                 typeof(c)[1] str = [c];
