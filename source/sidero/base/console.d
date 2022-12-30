@@ -85,7 +85,7 @@ Result!dchar readChar() @trusted {
                     return typeof(return)(output);
                 } else {
                     mutex.unlock;
-                    return typeof(return )(MalformedInputException("No input to read"));
+                    return typeof(return)(MalformedInputException("No input to read"));
                 }
             }
         }
@@ -131,7 +131,7 @@ Result!dchar readChar() @trusted {
                 return typeof(return)(output);
             } else {
                 mutex.unlock;
-                return typeof(return )(MalformedInputException("No input to read"));
+                return typeof(return)(MalformedInputException("No input to read"));
             }
         }
     }
@@ -1084,9 +1084,9 @@ version (CRuntime_Microsoft) {
 }
 
 version (Windows) {
-    import core.sys.windows.windows : HANDLE, ULONG, BOOL, DWORD, WAIT_TIMEOUT, WAIT_OBJECT_0, INPUT_RECORD,
-        PeekConsoleInputA, ReadConsoleInputA, PeekConsoleInputW, ReadConsoleInputW, KEY_EVENT, GetConsoleMode,
-        ENABLE_ECHO_INPUT, WriteConsoleA, WriteConsoleW;
+    import core.sys.windows.windows : HANDLE, CHAR, WCHAR, ULONG, BOOL, DWORD, WORD, UINT, COORD, WAIT_TIMEOUT,
+        WAIT_OBJECT_0, PeekConsoleInputA, ReadConsoleInputA, PeekConsoleInputW, ReadConsoleInputW, KEY_EVENT,
+        GetConsoleMode, ENABLE_ECHO_INPUT, WriteConsoleA, WriteConsoleW;
 
     alias WSAEVENT = HANDLE;
 
@@ -1103,7 +1103,55 @@ version (Windows) {
         ULONG dwControlKeyState;
     }
 
+    struct INPUT_RECORD {
+        WORD EventType;
+
+        union {
+            KEY_EVENT_RECORD KeyEvent;
+            MOUSE_EVENT_RECORD MouseEvent;
+            WINDOW_BUFFER_SIZE_RECORD WindowBufferSizeEvent;
+            MENU_EVENT_RECORD MenuEvent;
+            FOCUS_EVENT_RECORD FocusEvent;
+        }
+    }
+
+    struct FOCUS_EVENT_RECORD {
+        BOOL bSetFocus;
+    }
+
+    struct MENU_EVENT_RECORD {
+        UINT dwCommandId;
+    }
+
+    struct MOUSE_EVENT_RECORD {
+        COORD dwMousePosition;
+        DWORD dwButtonState;
+        DWORD dwControlKeyState;
+        DWORD dwEventFlags;
+    }
+
+    struct WINDOW_BUFFER_SIZE_RECORD {
+        COORD dwSize;
+    }
+
+    struct KEY_EVENT_RECORD {
+        BOOL bKeyDown;
+        WORD wRepeatCount;
+        WORD wVirtualKeyCode;
+        WORD wVirtualScanCode;
+        union {
+            WCHAR UnicodeChar;
+            CHAR AsciiChar;
+        }
+
+        DWORD dwControlKeyState;
+    }
+
     extern (Windows) DWORD WSAWaitForMultipleEvents(DWORD, const WSAEVENT*, BOOL, DWORD, BOOL);
+    extern (Windows) BOOL PeekConsoleInputA(HANDLE, INPUT_RECORD*, DWORD, DWORD*);
+    extern (Windows) BOOL PeekConsoleInputW(HANDLE, INPUT_RECORD*, DWORD, DWORD*);
+    extern (Windows) BOOL ReadConsoleInputA(HANDLE, INPUT_RECORD*, DWORD, DWORD*);
+    extern (Windows) BOOL ReadConsoleInputW(HANDLE, INPUT_RECORD*, DWORD, DWORD*);
 }
 
 @trusted {
