@@ -21,13 +21,23 @@ struct TimeZone {
     private {
         Bias standardOffset_, daylightSavingsOffset_;
         String_UTF8 standardName_, daylightSavingsName_, ianaName_;
-        bool haveDaylightSavings_;
+        bool haveDaylightSavings_, isSet_;
     }
 
     ///
     static string DefaultFormat = "e";
 
 export @safe nothrow @nogc:
+
+    ///
+    bool isNull() scope const {
+        return !this.isSet_;
+    }
+
+    ///
+    void opAssign(scope return TimeZone other) scope {
+        this.tupleof = other.tupleof;
+    }
 
     ///
     this(scope return ref TimeZone other) scope return {
@@ -55,21 +65,30 @@ export @safe nothrow @nogc:
     }
 
     ///
-    bool isInDaylightSavings(scope DateTime!GregorianDate date) scope {
+    bool isInDaylightSavings(scope DateTime!GregorianDate date) scope const @trusted {
         if (!this.haveDaylightSavings || this.daylightSavingsOffset_.appliesOn < date)
             return false;
         else if (this.standardOffset_.appliesOn > this.daylightSavingsOffset_.appliesOn)
             return this.standardOffset_.appliesOn > date;
         else {
-            auto next = TimeZone.from(this.standardName_, standardOffset_.appliesOn.year + 1);
+            auto next = TimeZone.from((cast(TimeZone)this).standardName_, standardOffset_.appliesOn.year + 1);
             assert(next);
             return date < next.standardOffset_.appliesOn;
         }
     }
 
     ///
-    long currentMinutesBias(scope DateTime!GregorianDate date) scope {
+    long currentMinutesBias(scope DateTime!GregorianDate date) scope const {
         return isInDaylightSavings(date) ? this.daylightSavingsOffset_.minutes : this.standardOffset_.minutes;
+    }
+
+    /// Get a version of this time zone for a given year, if available otherwise return this.
+    TimeZone forYear(scope return TimeZone timeZone, long year) scope @trusted {
+        TimeZone attempt = TimeZone.from(this.ianaName_, year);
+
+        if (!attempt.isNull)
+            return attempt;
+        return this;
     }
 
     ///
@@ -184,7 +203,9 @@ export @safe nothrow @nogc:
     /// Supports Windows and IANA names
     static Result!TimeZone from(scope String_UTF8 wantedName, long year) @trusted {
         mutex.pureLock;
+
         auto ret = getTimeZone(wantedName, year);
+        ret.isSet_ = true;
 
         mutex.unlock;
         return ret;
@@ -203,6 +224,32 @@ export @safe nothrow @nogc:
     /// Ditto
     static Result!TimeZone from(String)(scope String wantedName, long year) @trusted if (isSomeString!String) {
         return TimeZone.from(String_UTF8(wantedName), year);
+    }
+
+    /// Minutes bias (UTC-1:30 would be -90).
+    static TimeZone from(long minutes) @trusted {
+        TimeZone ret;
+        ret.standardOffset_.minutes = cast(short)minutes;
+
+        {
+            StringBuilder_UTF8 builder;
+            builder ~= "UTC";
+            builder ~= minutes < 0 ? "-"c : "+"c;
+
+            TimeOfDay tod = TimeOfDay(0, 0, 0);
+            tod.advanceMinutes(minutes < 0 ? -minutes : minutes);
+
+            builder.formattedWrite("%s", tod.hour);
+
+            if (tod.minute > 0) {
+                builder.formattedWrite(":%s", tod.minute);
+            }
+
+            ret.ianaName_ = builder.asReadOnly;
+        }
+
+        ret.isSet_ = true;
+        return ret;
     }
 
     ///
@@ -432,7 +479,7 @@ Result!TimeZone getTimeZone(scope String_UTF8 wantedName, long year) @trusted no
     }
 
     if (useTZ) {
-
+        // TODO
         return typeof(return)(ret);
     }
 

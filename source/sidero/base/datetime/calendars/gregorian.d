@@ -391,139 +391,80 @@ export @safe nothrow @nogc:
         ];
 
         switch (specification) {
-            case 'd':
-                if (this.day_ < 10)
-                    builder ~= "0"c;
-                builder.formattedWrite("%s", this.day_);
-                break;
+        case 'd':
+            if (this.day_ < 10)
+                builder ~= "0"c;
+            builder.formattedWrite("%s", this.day_);
+            break;
 
-            case 'D':
-                builder ~= ThreeLettersDay[this.dayInWeek()];
-                break;
+        case 'D':
+            builder ~= ThreeLettersDay[this.dayInWeek()];
+            break;
 
-            case 'j':
-                builder.formattedWrite("%s", this.day_);
-                break;
+        case 'j':
+            builder.formattedWrite("%s", this.day_);
+            break;
 
-            case 'l':
-                builder ~= DayText[this.dayInWeek()];
-                break;
+        case 'l':
+            builder ~= DayText[this.dayInWeek()];
+            break;
 
-            case 'N':
-                builder.formattedWrite("%s", this.dayInWeek() + 1);
-                break;
+        case 'N':
+            builder.formattedWrite("%s", this.dayInWeek() + 1);
+            break;
 
-            case 'S':
-                builder ~= OrdinalSuffix[this.day_];
-                break;
+        case 'S':
+            builder ~= OrdinalSuffix[this.day_];
+            break;
 
-            case 'w':
-                auto adjusted = cast(ubyte)this.dayInWeek();
-                if (adjusted == 7)
-                    adjusted = 0;
-                else
-                    adjusted++;
+        case 'w':
+            auto adjusted = cast(ubyte)this.dayInWeek();
+            if (adjusted == 7)
+                adjusted = 0;
+            else
+                adjusted++;
 
-                builder.formattedWrite("%s", adjusted);
-                break;
+            builder.formattedWrite("%s", adjusted);
+            break;
 
-            case 'z':
-                builder.formattedWrite("%s", this.dayInYear() - 1);
-                break;
+        case 'z':
+            builder.formattedWrite("%s", this.dayInYear() - 1);
+            break;
 
-            case 'W':
-                builder.formattedWrite("%s", (this.dayInYear() - this.firstMondayOfYear()) / 7);
-                break;
+        case 'W':
+            builder.formattedWrite("%s", (this.dayInYear() - this.firstMondayOfYear()) / 7);
+            break;
 
-            case 'F':
-                builder ~= FullMonth[this.month_];
-                break;
+        case 'F':
+            builder ~= FullMonth[this.month_];
+            break;
 
-            case 'm':
-                if (this.month_ < 10)
-                    builder ~= "0"c;
-                builder.formattedWrite("%s", this.month_);
-                break;
+        case 'm':
+            if (this.month_ < 10)
+                builder ~= "0"c;
+            builder.formattedWrite("%s", this.month_);
+            break;
 
-            case 'M':
-                builder ~= ThreeLettersMonth[this.month_];
-                break;
+        case 'M':
+            builder ~= ThreeLettersMonth[this.month_];
+            break;
 
-            case 'n':
-                builder.formattedWrite("%s", this.month_);
-                break;
+        case 'n':
+            builder.formattedWrite("%s", this.month_);
+            break;
 
-            case 't':
-                builder.formattedWrite("%s", this.daysInMonth());
-                break;
+        case 't':
+            builder.formattedWrite("%s", this.daysInMonth());
+            break;
 
-            case 'L':
-                builder.formattedWrite("%d", this.isLeapYear());
-                break;
+        case 'L':
+            builder.formattedWrite("%d", this.isLeapYear());
+            break;
 
-            case 'o':
-                if (this.day_ < this.firstMondayOfYear()) {
-                    builder.formattedWrite("%s", this.year_ - 1);
-                } else {
-                    long temp = this.year_;
-
-                    if (temp < 0) {
-                        temp *= -1;
-                        builder ~= "-";
-                    }
-
-                    if (temp < 10)
-                        builder ~= "000";
-                    else if (temp < 100)
-                        builder ~= "00";
-                    else if (temp < 1000)
-                            builder ~= "0";
-
-                    builder.formattedWrite("%s", temp);
-                }
-                break;
-
-            case 'X':
-                long temp = this.year_;
-
-                if (temp < 0) {
-                    temp *= -1;
-                    builder ~= "-";
-                } else {
-                    builder ~= "+";
-                }
-
-                if (temp < 10)
-                    builder ~= "000";
-                else if (temp < 100)
-                    builder ~= "00";
-                else if (temp < 1000)
-                        builder ~= "0";
-
-                builder.formattedWrite("%s", temp);
-                break;
-
-            case 'x':
-                long temp = this.year_;
-
-                if (temp < 0) {
-                    temp *= -1;
-                    builder ~= "-";
-                } else if (temp >= 10000) {
-                    builder ~= "+";
-                }
-
-                if (temp < 10)
-                    builder ~= "000";
-                else if (temp < 100)
-                    builder ~= "00";
-                else if (temp < 1000)
-                        builder ~= "0";
-
-                builder.formattedWrite("%s", temp);
-                break;
-
-            case 'Y':
+        case 'o':
+            if (this.day_ < this.firstMondayOfYear()) {
+                builder.formattedWrite("%s", this.year_ - 1);
+            } else {
                 long temp = this.year_;
 
                 if (temp < 0) {
@@ -536,22 +477,81 @@ export @safe nothrow @nogc:
                 else if (temp < 100)
                     builder ~= "00";
                 else if (temp < 1000)
-                        builder ~= "0";
-
-                builder.formattedWrite("%s", temp);
-                break;
-
-            case 'y':
-                long temp = this.year_;
-                temp -= (temp / 100) * 100;
-
-                if (temp < 10)
                     builder ~= "0";
-                builder.formattedWrite("%s", temp);
-                break;
 
-            default:
-                return false;
+                builder.formattedWrite("%s", temp);
+            }
+            break;
+
+        case 'X':
+            long temp = this.year_;
+
+            if (temp < 0) {
+                temp *= -1;
+                builder ~= "-";
+            } else {
+                builder ~= "+";
+            }
+
+            if (temp < 10)
+                builder ~= "000";
+            else if (temp < 100)
+                builder ~= "00";
+            else if (temp < 1000)
+                builder ~= "0";
+
+            builder.formattedWrite("%s", temp);
+            break;
+
+        case 'x':
+            long temp = this.year_;
+
+            if (temp < 0) {
+                temp *= -1;
+                builder ~= "-";
+            } else if (temp >= 10000) {
+                builder ~= "+";
+            }
+
+            if (temp < 10)
+                builder ~= "000";
+            else if (temp < 100)
+                builder ~= "00";
+            else if (temp < 1000)
+                builder ~= "0";
+
+            builder.formattedWrite("%s", temp);
+            break;
+
+        case 'Y':
+            long temp = this.year_;
+
+            if (temp < 0) {
+                temp *= -1;
+                builder ~= "-";
+            }
+
+            if (temp < 10)
+                builder ~= "000";
+            else if (temp < 100)
+                builder ~= "00";
+            else if (temp < 1000)
+                builder ~= "0";
+
+            builder.formattedWrite("%s", temp);
+            break;
+
+        case 'y':
+            long temp = this.year_;
+            temp -= (temp / 100) * 100;
+
+            if (temp < 10)
+                builder ~= "0";
+            builder.formattedWrite("%s", temp);
+            break;
+
+        default:
+            return false;
         }
 
         return true;
@@ -604,22 +604,13 @@ export @safe nothrow @nogc:
     }
 
     ///
-    static struct DateWrapper {
-        private GregorianDate date_;
+    mixin template DateWrapper() {
+        ///
+        alias Month = GregorianDate.Month;
+        ///
+        alias WeekDay = GregorianDate.WeekDay;
 
     export @safe nothrow @nogc:
-
-        ///
-        this(const GregorianDate date) scope {
-            this.date_ = date;
-        }
-
-        ///
-        GregorianDate date() scope const {
-            return this.date_;
-        }
-
-        //
 
         ///
         long year() scope const {
@@ -693,81 +684,22 @@ export @safe nothrow @nogc:
 
         ///
         void advanceDays(long amount) scope {
-            this.date_.advanceDays(amount);
+            timezoneCheck(() { this.date_.advanceDays(amount); });
         }
 
         ///
         void advanceMonths(long amount, bool allowOverflow = true) scope {
-            this.date_.advanceMonths(amount, allowOverflow);
+            timezoneCheck(() { this.date_.advanceMonths(amount, allowOverflow); });
         }
 
         ///
         void advanceYears(long amount, bool allowOverflow = true) scope {
-            this.date_.advanceYears(amount, allowOverflow);
-        }
-
-        ///
-        DayInterval opBinary(string op : "-")(const GregorianDate other) scope const {
-            return this.date_.opBinary!op(other);
-        }
-
-        ///
-        DayInterval opBinary(string op : "-")(const DateWrapper other) scope const {
-            return this.date_.opBinary!op(other.date_);
+            timezoneCheck(() { this.date_.advanceYears(amount, allowOverflow); });
         }
 
         ///
         DaysSinceY2k toDaysSinceY2k() scope const {
             return this.date_.toDaysSinceY2k();
-        }
-
-        //
-
-        ///
-        bool opEquals(const DateWrapper other) scope const {
-            return this.date_.opEquals(other.date_);
-        }
-
-        ///
-        int opCmp(const DateWrapper other) scope const {
-            return this.date_.opCmp(other.date_);
-        }
-
-        ///
-        String_UTF8 toString() scope const @trusted {
-            return this.date_.toString();
-        }
-
-        ///
-        void toString(Builder)(scope ref Builder sink) scope const if (isBuilderString!Builder) {
-            this.date_.toString(sink);
-        }
-
-        ///
-        StringBuilder_UTF8 format(FormatString)(scope FormatString specification) scope const if (isSomeString!FormatString) {
-            return this.date_.format(specification);
-        }
-
-        ///
-        StringBuilder_UTF8 format(FormatChar)(scope String_UTF!FormatChar specification) scope const {
-            return this.date_.format(specification);
-        }
-
-        ///
-        void format(Builder, FormatString)(scope ref Builder builder, scope FormatString specification) scope const @trusted
-        if (isBuilderString!Builder && isSomeString!FormatString) {
-            this.date_.format(builder, specification);
-        }
-
-        /// See: https://www.php.net/manual/en/datetime.format.php
-        void format(Builder, Format)(scope ref Builder builder, scope Format specification) scope const
-        if (isBuilderString!Builder && isReadOnlyString!Format) {
-            this.date_.format(builder, specification);
-        }
-
-        /// Ditto
-        bool formatValue(Builder)(scope ref Builder builder, dchar specification) scope const if (isBuilderString!Builder) {
-            return this.date_.formatValue(builder, specification);
         }
     }
 }

@@ -64,6 +64,7 @@
                 "database/generated"
             ],
             "sourceFiles": [
+                "imports/sidero/base/datetime/cldr.d",
                 "imports/sidero/base/text/unicode/database.d",
                 "imports/sidero/base/text/unicode/readonly_utf8.d",
                 "imports/sidero/base/text/unicode/readonly_utf16.d",
@@ -85,6 +86,7 @@
                 "--linkonce-templates"
             ],
             "dependencies": {
+            "libs-windows": ["Ws2_32"],
                 "sidero_base:makeUnicodeTables": "*"
             }
         }

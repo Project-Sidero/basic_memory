@@ -6,6 +6,7 @@ import sidero.base.datetime.calendars.defs;
 import sidero.base.text;
 import sidero.base.traits;
 import sidero.base.errors;
+import sidero.base.attributes;
 
 private {
     import sidero.base.datetime.calendars.gregorian;
@@ -26,6 +27,7 @@ struct DateTime(DateType) {
     private {
         TimeOfDay time_;
         TimeZone timezone_;
+        DateType date_;
     }
 
     ///
@@ -38,40 +40,40 @@ struct DateTime(DateType) {
         RFC3339Format = "Y-m-d\\TH:i:sP", RFC3339ExtendedFormat = "Y-m-d\\TH:i:s.vP", RSSFormat = "D, d M Y H:i:s O",
         W3CFormat = "Y-m-d\\TH:i:sP";
 
-    ///
-    DateType.DateWrapper date;
-    ///
-    alias date this;
-
 export @safe nothrow @nogc:
 
     ///
-    this(scope ref DateTime other) scope {
+    this(scope return ref DateTime other) scope {
         this.tupleof = other.tupleof;
     }
 
     ///
-    this(scope DateType date) scope {
-        this.date = typeof(this.date)(date);
+    this(scope return DateType date) scope {
+        this.date_ = date;
     }
 
     ///
-    this(scope TimeOfDay time) scope {
+    this(scope return TimeOfDay time) scope {
         this.time_ = time;
     }
 
     ///
-    this(scope DateType date, scope TimeOfDay time, scope TimeZone timezone = TimeZone.init) scope {
-        this.date = typeof(this.date)(date);
+    this(scope return DateType date, scope return TimeOfDay time, scope return TimeZone timezone = TimeZone.init) scope {
+        this.date_ = date;
         this.time_ = time;
         this.timezone_ = timezone;
     }
 
     /// Does not adjust date/time into timezone!
-    this(scope DateTime datetime, scope TimeZone timezone) scope {
-        this.date = datetime.date;
+    this(scope return DateTime datetime, scope return TimeZone timezone) scope {
+        this.date_ = datetime.date_;
         this.time_ = datetime.time_;
         this.timezone_ = timezone;
+    }
+
+    ///
+    void opAssign(scope return DateTime other) scope @trusted {
+        this.tupleof = other.tupleof;
     }
 
     //
@@ -82,9 +84,17 @@ export @safe nothrow @nogc:
     }
 
     ///
-    TimeZone time() scope @trusted {
-        return this.timezone_;
+    TimeZone timezone() scope const @trusted {
+        return (cast(DateTime)this).timezone_;
     }
+
+    ///
+    DateType date() scope const {
+        return this.date_;
+    }
+
+    ///
+    mixin DateType.DateWrapper!();
 
     ///
     uint microSecond() scope const {
@@ -138,32 +148,55 @@ export @safe nothrow @nogc:
 
     ///
     void advanceMicroSeconds(long amount) scope {
-        auto dateInterval = this.time_.advanceMicroSeconds(amount, true);
-        this.date.advanceDays(dateInterval.amount);
+        timezoneCheck(() {
+            auto dateInterval = this.time_.advanceMicroSeconds(amount, true);
+            this.date_.advanceDays(dateInterval.amount);
+        });
     }
 
     ///
     void advanceSeconds(long amount) scope {
-        auto dateInterval = this.time_.advanceSeconds(amount, true);
-        this.date.advanceDays(dateInterval.amount);
+        timezoneCheck(() {
+            auto dateInterval = this.time_.advanceSeconds(amount, true);
+            this.date_.advanceDays(dateInterval.amount);
+        });
     }
 
     ///
     void advanceMinutes(long amount) scope {
-        auto dateInterval = this.time_.advanceMinutes(amount, true);
-        this.date.advanceDays(dateInterval.amount);
+        timezoneCheck(() {
+            auto dateInterval = this.time_.advanceMinutes(amount, true);
+            this.date_.advanceDays(dateInterval.amount);
+        });
     }
 
     ///
     void advanceHours(long amount) scope {
-        auto dateInterval = this.time_.advanceHours(amount, true);
-        this.date.advanceDays(dateInterval.amount);
+        timezoneCheck(() {
+            auto dateInterval = this.time_.advanceHours(amount, true);
+            this.date_.advanceDays(dateInterval.amount);
+        });
     }
 
     /// If current time zone not set, it'll just add it without adjustment.
-    DateTime asTimeZone(scope TimeZone timezone) scope const {
-        // FIXME
-        assert(0);
+    DateTime asTimeZone(scope return TimeZone timezone) scope return @trusted {
+        if (this.timezone_.isNull) {
+            return DateTime(this, timezone);
+        }
+
+        auto gDateTime = this.asGregorian();
+        auto oldBias = this.timezone_.currentMinutesBias(gDateTime);
+        auto newBias = timezone.currentMinutesBias(gDateTime);
+
+        DateTime ret = DateTime(this.date_, this.time_, timezone);
+        ret.advanceMinutes(newBias - oldBias);
+
+        return ret;
+    }
+
+    ///
+    DateTime!(GregorianDate) asGregorian() scope const return @trusted {
+        return typeof(return)(GregorianDate(this.date_.toDaysSinceY2k), cast(TimeOfDay)this.time_, cast(TimeZone)this.timezone_);
     }
 
     ///
@@ -171,10 +204,13 @@ export @safe nothrow @nogc:
         static if (!__traits(hasMember, DateType, "UnixEpoch")) {
             return typeof(return)(MissingUnixEpochException);
         } else {
-            DayInterval days = this.date - DateType.UnixEpoch;
+            auto gDateTime = this.asGregorian();
+            auto oldBias = this.timezone_.currentMinutesBias(gDateTime);
 
-            // FIXME: REMOVE timezone!
+            DayInterval days = this.date_ - DateType.UnixEpoch;
+
             long working = days.amount * 86_400;
+            working -= oldBias * 60;
             working += this.time_.totalSeconds;
 
             if (days.amount < 0 || working < 0)
@@ -185,12 +221,11 @@ export @safe nothrow @nogc:
     }
 
     ///
-    static DateTime fromUnixTime(ulong amount, TimeZone asTimeZone = TimeZone.init) {
+    static DateTime fromUnixTime(ulong amount, scope return TimeZone timeZone = TimeZone.init) @trusted {
         DateTime ret = DateTime(DateType.UnixEpoch);
+        ret = ret.asTimeZone(timeZone);
+
         ret.advanceSeconds(amount);
-
-        // FIXME: timezone!
-
         return ret;
     }
 
@@ -198,12 +233,12 @@ export @safe nothrow @nogc:
 
     ///
     bool opEquals(scope const DateTime other) scope const {
-        return this.time_ == other.time_ && this.date == other.date;
+        return this.time_ == other.time_ && this.date_ == other.date_;
     }
 
     ///
     int opCmp(scope const DateTime other) scope const {
-        const ret = this.date.opCmp(other.date);
+        const ret = this.date_.opCmp(other.date_);
 
         if (ret != 0)
             return ret;
@@ -248,7 +283,7 @@ export @safe nothrow @nogc:
 
      Note: Implements I, O, P, p, T, Z, c, r, U. Defers everything else to respective type
      */
-    void format(Builder, Format)(scope ref Builder builder, scope Format specification) scope const 
+    void format(Builder, Format)(scope ref Builder builder, scope Format specification) scope const @trusted
             if (isBuilderString!Builder && isReadOnlyString!Format) {
         import sidero.base.allocators;
 
@@ -266,35 +301,196 @@ export @safe nothrow @nogc:
                 isEscaped = true;
             } else if (this.time_.formatValue(builder, c)) {
             } else if (c == 'B') {
-                // TODO: swatch time
-                // calculated from UTC+1
-                // ((3600 * h) + (60 * m)) / 86.4
+                DateTime temp;
+
+                if (this.timezone_.isNull)
+                    temp = DateTime(cast(DateTime)this, TimeZone.from(0));
+                else
+                    temp = cast(DateTime)this;
+
+                // UTC+1
+                TimeZone newTimeZone = TimeZone.from(60);
+                temp = temp.asTimeZone(newTimeZone);
+
+                auto working = cast(uint)(((3600 * temp.hour) + (60 * temp.minute)) / 86.4);
+
+                if (working < 10)
+                    builder ~= "0"c;
+                else if (working < 100)
+                    builder ~= "00"c;
+
+                builder.formattedWrite("%s", working);
             } else if (this.timezone_.formatValue(builder, c)) {
             } else if (c == 'I') {
-                // TODO: is in daylight savings time
+                if (this.timezone_.isNull || !this.timezone_.haveDaylightSavings) {
+                    builder ~= "0"c;
+                } else {
+                    auto gDateTime = this.asGregorian();
+                    bool inDaylight = this.timezone_.isInDaylightSavings(gDateTime);
+
+                    builder ~= inDaylight ? "1"c : "0"c;
+                }
             } else if (c == 'O') {
-                // TODO: +0200
+                if (this.timezone_.isNull) {
+                    builder ~= "+0000";
+                } else {
+                    auto gDateTime = this.asGregorian();
+                    auto bias = this.timezone_.currentMinutesBias(gDateTime);
+
+                    TimeOfDay tod = TimeOfDay(0, 0, 0);
+                    tod.advanceMinutes(bias < 0 ? -bias : bias);
+
+                    if (bias < 0)
+                        builder ~= "-";
+                    else
+                        builder ~= "+";
+
+                    auto hour = tod.hour;
+                    if (hour < 10)
+                        builder ~= "0";
+                    builder.formattedWrite("%s", hour);
+
+                    auto minutes = tod.minute;
+                    if (minutes < 10)
+                        builder ~= "0";
+                    builder.formattedWrite("%s", minutes);
+                }
             } else if (c == 'P') {
-                // TODO: +02:00
+                if (this.timezone_.isNull) {
+                    builder ~= "+0000";
+                } else {
+                    auto gDateTime = this.asGregorian();
+                    auto bias = this.timezone_.currentMinutesBias(gDateTime);
+
+                    TimeOfDay tod = TimeOfDay(0, 0, 0);
+                    tod.advanceMinutes(bias < 0 ? -bias : bias);
+
+                    if (bias < 0)
+                        builder ~= "-";
+                    else
+                        builder ~= "+";
+
+                    auto hour = tod.hour;
+                    if (hour < 10)
+                        builder ~= "0";
+                    builder.formattedWrite("%s:", hour);
+
+                    auto minutes = tod.minute;
+                    if (minutes < 10)
+                        builder ~= "0";
+                    builder.formattedWrite("%s", minutes);
+                }
             } else if (c == 'p') {
-                // TODO: P but return Z for 0
+                if (this.timezone_.isNull) {
+                    builder ~= "+0000";
+                } else {
+                    auto gDateTime = this.asGregorian();
+                    auto bias = this.timezone_.currentMinutesBias(gDateTime);
+
+                    if (bias == 0) {
+                        builder ~= "Z";
+                    } else {
+                        TimeOfDay tod = TimeOfDay(0, 0, 0);
+                        tod.advanceMinutes(bias < 0 ? -bias : bias);
+
+                        if (bias < 0)
+                            builder ~= "-";
+                        else
+                            builder ~= "+";
+
+                        auto hour = tod.hour;
+                        if (hour < 10)
+                            builder ~= "0";
+                        builder.formattedWrite("%s:", hour);
+
+                        auto minutes = tod.minute;
+                        if (minutes < 10)
+                            builder ~= "0";
+                        builder.formattedWrite("%s", minutes);
+                    }
+                }
             } else if (c == 'T') {
-                // TODO: timezone offset like P
-                // like O except can elide minutes if zero
+                if (this.timezone_.isNull) {
+                    builder ~= "Z";
+                } else {
+                    auto gDateTime = this.asGregorian();
+                    auto bias = this.timezone_.currentMinutesBias(gDateTime);
+
+                    if (bias == 0) {
+                        builder ~= "Z";
+                    } else {
+                        TimeOfDay tod = TimeOfDay(0, 0, 0);
+                        tod.advanceMinutes(bias < 0 ? -bias : bias);
+
+                        if (bias < 0)
+                            builder ~= "-";
+                        else
+                            builder ~= "+";
+
+                        auto hour = tod.hour;
+                        if (hour < 10)
+                            builder ~= "0";
+                        builder.formattedWrite("%s:", hour);
+
+                        auto minutes = tod.minute;
+                        if (minutes > 0) {
+                            if (minutes < 10)
+                                builder ~= "0";
+                            builder.formattedWrite("%s", minutes);
+                        }
+                    }
+                }
             } else if (c == 'Z') {
-                // TODO: timezone bias in seconds
-                // 5 digit without + only -
+                if (this.timezone_.isNull) {
+                    builder ~= "0";
+                } else {
+                    auto gDateTime = this.asGregorian();
+                    auto bias = this.timezone_.currentMinutesBias(gDateTime);
+
+                    TimeOfDay tod = TimeOfDay(0, 0, 0);
+                    tod.advanceMinutes(bias < 0 ? -bias : bias);
+
+                    if (bias < 0)
+                        builder ~= "-";
+
+                    auto seconds = tod.totalSeconds;
+                    builder.formattedWrite("%s", seconds);
+                }
             } else if (c == 'c') {
-                // TODO: ISO8601 date
+                this.format(builder, ISO8601Format);
             } else if (c == 'r') {
-                // TODO: ISO2822 date
+                this.format(builder, RFC2822Format);
             } else if (c == 'U') {
-                // TODO: unix time
-            } else if (this.date.formatValue(builder, c)) {
+                auto unixTime = this.toUnixTime;
+
+                if (unixTime) {
+                    builder.formattedWrite("%s", unixTime);
+                }
+            } else if (this.date_.formatValue(builder, c)) {
             } else {
                 typeof(c)[1] str = [c];
                 builder ~= str;
             }
+        }
+    }
+
+private @hidden:
+    void timezoneCheck(Delegate)(scope Delegate callback) scope @trusted {
+        auto temp = this.asGregorian();
+        const oldYear = temp.year;
+        const oldBias = this.timezone_.currentMinutesBias(temp);
+
+        callback();
+
+        temp = this.asGregorian();
+
+        if (temp.year != oldYear)
+            this.timezone_ = this.timezone_.forYear(this.timezone_, temp.year);
+        const newBias = this.timezone_.currentMinutesBias(temp);
+
+        if (oldBias != newBias) {
+            auto dateInterval = this.time_.advanceMinutes(newBias - oldBias, true);
+            this.date_.advanceDays(dateInterval.amount);
         }
     }
 }
