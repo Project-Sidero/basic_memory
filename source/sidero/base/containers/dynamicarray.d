@@ -362,8 +362,8 @@ scope nothrow @nogc:
             return typeof(return)(errorInfo);
 
         DynamicArray ret = this;
-        ret.minimumOffset = startIndex;
-        ret.maximumOffset = endIndex;
+        ret.minimumOffset = startIndex + minimumOffset;
+        ret.maximumOffset = endIndex + minimumOffset;
         return Result!DynamicArray(ret);
     }
 

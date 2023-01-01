@@ -239,6 +239,15 @@ scope nothrow @nogc @safe:
     }
 
     ///
+    this(scope return RCResultValue!Type wrapped) @trusted {
+        assert(!wrapped.isNull);
+
+        this._value = wrapped.get;
+        this._user = wrapped.getUser();
+        this._rcHandle = &wrapped.rc;
+    }
+
+    ///
     this(ErrorInfo errorInfo, string moduleName = __MODULE__, int line = __LINE__) {
         error = errorInfo;
         error.moduleName = moduleName;
@@ -252,10 +261,8 @@ scope nothrow @nogc @safe:
     }
 
     ///
-    this(ref ResultReference other) @trusted {
-        static foreach (i; 0 .. this.tupleof.length)
-            this.tupleof[i] = other.tupleof[i];
-
+    this(scope return ref ResultReference other) @trusted {
+        this.tupleof = other.tupleof;
         this.error.checked = false;
 
         if (this._rcHandle !is null)
@@ -274,12 +281,16 @@ scope nothrow @nogc @safe:
 
     ///
     void opAssign(scope return ResultReference other) {
-        this.__ctor(other);
+        this.tupleof = other.tupleof;
+        this.error.checked = false;
+
+        if (this._rcHandle !is null)
+            this._rcHandle(true, this._user);
     }
 
     ///
     void opAssign(Type value) {
-        if (isNull || _value is null)
+        if (!this || isNull || _value is null)
             return;
         *_value = value;
     }
@@ -287,7 +298,7 @@ scope nothrow @nogc @safe:
     static if (__traits(hasMember, Type, "opAssign")) {
         ///
         auto opAssign(Args...)(Args args) {
-            if (isNull)
+            if (!this || isNull || _value is null)
                 assert(0);
             return _value.opAssign(args);
         }
@@ -296,7 +307,7 @@ scope nothrow @nogc @safe:
     static if (__traits(hasMember, Type, "toHash")) {
         ///
         auto toHash() const {
-            if (error.info.message !is null)
+            if (!this)
                 return 0;
             return _value.toHash();
         }
@@ -329,6 +340,7 @@ scope nothrow @nogc @safe:
         (cast(ErrorInfo*)&error).checked = true;
         return error.info.message is null;
     }
+
     ///
     bool isNull() @trusted const {
         if (!error.checked)
@@ -390,5 +402,65 @@ scope nothrow @nogc @safe:
             return (*this._value).isClose(*other._value);
         else
             return (*cast(Type*)this._value) == (*cast(Type*)&other._value);
+    }
+}
+
+/// Compatible with ResultReference, should not be copied around, only passed directly to ResultReference!
+struct RCResultValue(Type) {
+    private {
+        import sidero.base.allocators;
+        State* state;
+
+        static struct State {
+            shared(ptrdiff_t) refCount;
+            Type value;
+            RCAllocator allocator;
+        }
+    }
+
+export @safe nothrow @nogc:
+
+    ///
+    this(Type value, scope return RCAllocator allocator = RCAllocator.init) scope @trusted {
+        if (allocator.isNull)
+            allocator = globalAllocator();
+
+        state = allocator.make!State;
+        assert(this.state !is null);
+
+        state.allocator = allocator;
+        state.refCount = 1;
+        state.value = value;
+    }
+
+    ///
+    bool isNull() scope const {
+        return state is null;
+    }
+
+    ///
+    void rc(bool addRef, scope void* user) scope @trusted {
+        import core.atomic : atomicOp, atomicLoad;
+
+        State* state = cast(State*)user;
+        assert(state !is null);
+
+        if (addRef)
+            atomicOp!"+="(state.refCount, cast(ptrdiff_t)1);
+        else if (atomicOp!"-="(state.refCount, cast(ptrdiff_t)1) == 0) {
+            RCAllocator alloc = state.allocator;
+            alloc.dispose(state);
+        }
+    }
+
+    /// Unsafe
+    void* getUser() scope return @system {
+        return state;
+    }
+
+    /// Unsafe
+    Type* get() scope return @system {
+        assert(state !is null);
+        return &state.value;
     }
 }

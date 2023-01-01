@@ -176,7 +176,7 @@ export:
             ret = state.getValueExternal(key);
         }
 
-        if (!ret)
+        if (!ret || ret.isNull)
             ret = typeof(return)(NonMatchingStateToArgumentException);
 
         return ret;
@@ -209,8 +209,9 @@ export:
             ret = state.getValueExternal(key);
         }
 
-        if (ret.isNull)
-            ret = fallback;
+        if (!ret || ret.isNull) {
+            ret = typeof(return)(RCResultValue!ValueType(fallback));
+        }
 
         return ret;
     }
@@ -302,7 +303,7 @@ export:
 
             ResultReference!ValueType ret = state.getValueExternal(key);
 
-            if (ret.isNull)
+            if (!ret || ret.isNull)
                 ret = typeof(return)(NonMatchingStateToArgumentException);
 
             return ret;
@@ -315,7 +316,7 @@ export:
 
             ResultReference!ValueType ret = state.getValueExternal(key);
 
-            if (ret.isNull)
+            if (!ret || ret.isNull)
                 ret = fallback;
 
             return ret;
