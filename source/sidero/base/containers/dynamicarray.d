@@ -196,7 +196,6 @@ scope nothrow @nogc:
     }
 
     void opAssign(scope DynamicArray other) {
-        this.__xdtor;
         this.tupleof = other.tupleof;
         other.state = null;
     }

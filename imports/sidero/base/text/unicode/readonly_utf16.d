@@ -476,7 +476,7 @@ nothrow @nogc:
     }
 
     ///
-    bool isNull() scope {
+    bool isNull() scope const {
         return this.literal is null || this.literal.length == 0;
     }
 
@@ -795,32 +795,32 @@ nothrow @nogc:
     alias equals = opEquals;
 
     ///
-    bool opEquals(scope const(char)[] other) scope {
+    bool opEquals(scope const(char)[] other) scope const {
         return opCmp(other) == 0;
     }
 
     ///
-    bool opEquals(scope const(wchar)[] other) scope {
+    bool opEquals(scope const(wchar)[] other) scope const {
         return opCmp(other) == 0;
     }
 
     ///
-    bool opEquals(scope const(dchar)[] other) scope {
+    bool opEquals(scope const(dchar)[] other) scope const {
         return opCmp(other) == 0;
     }
 
     ///
-    bool opEquals(scope String_UTF8 other) scope {
+    bool opEquals(scope String_UTF8 other) scope const {
         return opCmp(other) == 0;
     }
 
     ///
-    bool opEquals(scope String_UTF16 other) scope {
+    bool opEquals(scope String_UTF16 other) scope const {
         return opCmp(other) == 0;
     }
 
     ///
-    bool opEquals(scope String_UTF32 other) scope {
+    bool opEquals(scope String_UTF32 other) scope const {
         return opCmp(other) == 0;
     }
 
@@ -835,7 +835,7 @@ nothrow @nogc:
     }
 
     ///
-    bool opEquals(scope String_ASCII other) scope {
+    bool opEquals(scope String_ASCII other) scope const {
         return opCmp(other) == 0;
     }
 
@@ -850,86 +850,86 @@ nothrow @nogc:
     }
 
     ///
-    bool opEquals(scope StringBuilder_UTF8 other) scope {
-        return other.opEquals(this);
+    bool opEquals(scope StringBuilder_UTF8 other) scope const @trusted {
+        return other.opEquals(*cast(String_UTF16*)&this);
     }
 
     ///
-    bool opEquals(scope StringBuilder_UTF16 other) scope {
-        return other.opEquals(this);
+    bool opEquals(scope StringBuilder_UTF16 other) scope const @trusted {
+        return other.opEquals(*cast(String_UTF16*)&this);
     }
 
     ///
-    bool opEquals(scope StringBuilder_UTF32 other) scope {
-        return other.opEquals(this);
+    bool opEquals(scope StringBuilder_UTF32 other) scope const @trusted {
+        return other.opEquals(*cast(String_UTF16*)&this);
     }
 
     ///
     bool ignoreCaseEquals(scope const(char)[] other, scope RCAllocator allocator = RCAllocator.init,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-        return ignoreCaseCompareImplSlice(other, allocator, language) == 0;
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope const @trusted {
+        return (*cast(String_UTF16*)&this).ignoreCaseCompareImplSlice(other, allocator, language) == 0;
     }
 
     ///
     bool ignoreCaseEquals(scope const(wchar)[] other, scope RCAllocator allocator = RCAllocator.init,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-        return ignoreCaseCompareImplSlice(other, allocator, language) == 0;
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope const @trusted {
+        return (*cast(String_UTF16*)&this).ignoreCaseCompareImplSlice(other, allocator, language) == 0;
     }
 
     ///
     bool ignoreCaseEquals(scope const(dchar)[] other, scope RCAllocator allocator = RCAllocator.init,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-        return ignoreCaseCompareImplSlice(other, allocator, language) == 0;
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope const @trusted {
+        return (*cast(String_UTF16*)&this).ignoreCaseCompareImplSlice(other, allocator, language) == 0;
     }
 
     ///
     bool ignoreCaseEquals(scope String_ASCII other, scope RCAllocator allocator = RCAllocator.init,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-        return ignoreCaseEqualsImplReadOnly(other, allocator, language);
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope const @trusted {
+        return (*cast(String_UTF16*)&this).ignoreCaseEqualsImplReadOnly(other, allocator, language);
     }
 
     ///
     bool ignoreCaseEquals(scope String_UTF8 other, scope RCAllocator allocator = RCAllocator.init,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-        return ignoreCaseEqualsImplReadOnly(other, allocator, language);
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope const @trusted {
+        return (*cast(String_UTF16*)&this).ignoreCaseEqualsImplReadOnly(other, allocator, language);
     }
 
     ///
     bool ignoreCaseEquals(scope String_UTF16 other, scope RCAllocator allocator = RCAllocator.init,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-        return ignoreCaseEqualsImplReadOnly(other, allocator, language);
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope const @trusted {
+        return (*cast(String_UTF16*)&this).ignoreCaseEqualsImplReadOnly(other, allocator, language);
     }
 
     ///
     bool ignoreCaseEquals(scope String_UTF32 other, scope RCAllocator allocator = RCAllocator.init,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-        return ignoreCaseEqualsImplReadOnly(other, allocator, language);
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope const @trusted {
+        return (*cast(String_UTF16*)&this).ignoreCaseEqualsImplReadOnly(other, allocator, language);
     }
 
     ///
-    bool ignoreCaseEquals(scope StringBuilder_UTF8 other, UnicodeLanguage language = UnicodeLanguage.Unknown) {
+    bool ignoreCaseEquals(scope StringBuilder_UTF8 other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope const @trusted {
         language = pickLanguage(language);
-        return other.ignoreCaseEquals(this, language);
+        return other.ignoreCaseEquals(*cast(String_UTF16*)&this, language);
     }
 
     ///
-    bool ignoreCaseEquals(scope StringBuilder_UTF16 other, UnicodeLanguage language = UnicodeLanguage.Unknown) {
+    bool ignoreCaseEquals(scope StringBuilder_UTF16 other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope const @trusted {
         language = pickLanguage(language);
-        return other.ignoreCaseEquals(this, language);
+        return other.ignoreCaseEquals(*cast(String_UTF16*)&this, language);
     }
 
     ///
-    bool ignoreCaseEquals(scope StringBuilder_UTF32 other, UnicodeLanguage language = UnicodeLanguage.Unknown) {
+    bool ignoreCaseEquals(scope StringBuilder_UTF32 other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope const @trusted {
         language = pickLanguage(language);
-        return other.ignoreCaseEquals(this, language);
+        return other.ignoreCaseEquals(*cast(String_UTF16*)&this, language);
     }
 
     ///
     alias compare = opCmp;
 
     ///
-    int opCmp(scope const(char)[] other) scope {
-        return opCmpImplSlice(other);
+    int opCmp(scope const(char)[] other) scope const @trusted {
+        return (*cast(String_UTF16*)&this).opCmpImplSlice(other);
     }
 
     ///
@@ -939,8 +939,8 @@ nothrow @nogc:
     }
 
     ///
-    int opCmp(scope const(wchar)[] other) scope {
-        return opCmpImplSlice(other);
+    int opCmp(scope const(wchar)[] other) scope const @trusted {
+        return (*cast(String_UTF16*)&this).opCmpImplSlice(other);
     }
 
     ///
@@ -950,8 +950,8 @@ nothrow @nogc:
     }
 
     ///
-    int opCmp(scope const(dchar)[] other) scope {
-        return opCmpImplSlice(other);
+    int opCmp(scope const(dchar)[] other) scope const @trusted {
+        return (*cast(String_UTF16*)&this).opCmpImplSlice(other);
     }
 
     ///
@@ -961,8 +961,8 @@ nothrow @nogc:
     }
 
     ///
-    int opCmp(scope String_ASCII other) scope {
-        return opCmpImplReadOnly(other);
+    int opCmp(scope String_ASCII other) scope const @trusted {
+        return (*cast(String_UTF16*)&this).opCmpImplReadOnly(other);
     }
 
     ///
@@ -972,8 +972,8 @@ nothrow @nogc:
     }
 
     ///
-    int opCmp(scope String_UTF8 other) scope {
-        return opCmpImplReadOnly(other);
+    int opCmp(scope String_UTF8 other) scope const @trusted {
+        return (*cast(String_UTF16*)&this).opCmpImplReadOnly(other);
     }
 
     ///
@@ -983,8 +983,8 @@ nothrow @nogc:
     }
 
     ///
-    int opCmp(scope String_UTF16 other) scope {
-        return opCmpImplReadOnly(other);
+    int opCmp(scope String_UTF16 other) scope const @trusted {
+        return (*cast(String_UTF16*)&this).opCmpImplReadOnly(other);
     }
 
     ///
@@ -994,8 +994,8 @@ nothrow @nogc:
     }
 
     ///
-    int opCmp(scope String_UTF32 other) scope {
-        return opCmpImplReadOnly(other);
+    int opCmp(scope String_UTF32 other) scope const @trusted {
+        return (*cast(String_UTF16*)&this).opCmpImplReadOnly(other);
     }
 
     ///
@@ -1005,24 +1005,24 @@ nothrow @nogc:
     }
 
     ///
-    int opCmp(scope StringBuilder_UTF8 other) scope {
-        return -other.opCmp(this);
+    int opCmp(scope StringBuilder_UTF8 other) scope const @trusted {
+        return -other.opCmp(*cast(String_UTF16*)&this);
     }
 
     ///
-    int opCmp(scope StringBuilder_UTF16 other) scope {
-        return -other.opCmp(this);
+    int opCmp(scope StringBuilder_UTF16 other) scope const @trusted {
+        return -other.opCmp(*cast(String_UTF16*)&this);
     }
 
     ///
-    int opCmp(scope StringBuilder_UTF32 other) scope {
-        return -other.opCmp(this);
+    int opCmp(scope StringBuilder_UTF32 other) scope const @trusted {
+        return -other.opCmp(*cast(String_UTF16*)&this);
     }
 
     ///
     int ignoreCaseCompare(scope const(char)[] other, scope RCAllocator allocator = RCAllocator.init,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-        return ignoreCaseCompareImplSlice(other, allocator, language);
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope const @trusted {
+        return (*cast(String_UTF16*)&this).ignoreCaseCompareImplSlice(other, allocator, language);
     }
 
     ///
@@ -1033,8 +1033,8 @@ nothrow @nogc:
 
     ///
     int ignoreCaseCompare(scope const(wchar)[] other, scope RCAllocator allocator = RCAllocator.init,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-        return ignoreCaseCompareImplSlice(other, allocator, language);
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope const @trusted {
+        return (*cast(String_UTF16*)&this).ignoreCaseCompareImplSlice(other, allocator, language);
     }
 
     ///
@@ -1045,8 +1045,8 @@ nothrow @nogc:
 
     ///
     int ignoreCaseCompare(scope const(dchar)[] other, scope RCAllocator allocator = RCAllocator.init,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-        return ignoreCaseCompareImplSlice(other, allocator, language);
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope const @trusted {
+        return (*cast(String_UTF16*)&this).ignoreCaseCompareImplSlice(other, allocator, language);
     }
 
     ///
@@ -1057,20 +1057,20 @@ nothrow @nogc:
 
     ///
     int ignoreCaseCompare(scope String_UTF8 other, scope RCAllocator allocator = RCAllocator.init,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-        return ignoreCaseCompareImplReadOnly(other, allocator, language);
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope const @trusted {
+        return (*cast(String_UTF16*)&this).ignoreCaseCompareImplReadOnly(other, allocator, language);
     }
 
     ///
     int ignoreCaseCompare(scope String_UTF16 other, scope RCAllocator allocator = RCAllocator.init,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-        return ignoreCaseCompareImplReadOnly(other, allocator, language);
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope const @trusted {
+        return (*cast(String_UTF16*)&this).ignoreCaseCompareImplReadOnly(other, allocator, language);
     }
 
     ///
     int ignoreCaseCompare(scope String_UTF32 other, scope RCAllocator allocator = RCAllocator.init,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-        return ignoreCaseCompareImplReadOnly(other, allocator, language);
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope const @trusted {
+        return (*cast(String_UTF16*)&this).ignoreCaseCompareImplReadOnly(other, allocator, language);
     }
 
     ///
@@ -1081,8 +1081,8 @@ nothrow @nogc:
 
     ///
     int ignoreCaseCompare(scope String_ASCII other, scope RCAllocator allocator = RCAllocator.init,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
-        return ignoreCaseCompareImplReadOnly(other, allocator, language);
+            UnicodeLanguage language = UnicodeLanguage.Unknown) scope const @trusted {
+        return (*cast(String_UTF16*)&this).ignoreCaseCompareImplReadOnly(other, allocator, language);
     }
 
     ///
@@ -1092,21 +1092,21 @@ nothrow @nogc:
     }
 
     ///
-    int ignoreCaseCompare(scope StringBuilder_UTF8 other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+    int ignoreCaseCompare(scope StringBuilder_UTF8 other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope const @trusted {
         language = pickLanguage(language);
-        return -other.ignoreCaseCompare(this, language);
+        return -other.ignoreCaseCompare(*cast(String_UTF16*)&this, language);
     }
 
     ///
-    int ignoreCaseCompare(scope StringBuilder_UTF16 other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+    int ignoreCaseCompare(scope StringBuilder_UTF16 other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope const @trusted {
         language = pickLanguage(language);
-        return -other.ignoreCaseCompare(this, language);
+        return -other.ignoreCaseCompare(*cast(String_UTF16*)&this, language);
     }
 
     ///
-    int ignoreCaseCompare(scope StringBuilder_UTF32 other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+    int ignoreCaseCompare(scope StringBuilder_UTF32 other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope const @trusted {
         language = pickLanguage(language);
-        return -other.ignoreCaseCompare(this, language);
+        return -other.ignoreCaseCompare(*cast(String_UTF16*)&this, language);
     }
 
     ///

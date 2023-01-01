@@ -149,8 +149,6 @@ scope nothrow @nogc @safe:
 
             static if (is(Type == float) || is(Type == double))
                 return this.value.isClose(other);
-            else static if (__traits(compiles, {bool b = this.value == other; }))
-                return this.value == other;
             else
                 return (*cast(Type*)&this.value) == (*cast(Type*)&other);
         }
@@ -162,8 +160,6 @@ scope nothrow @nogc @safe:
 
             static if (is(Type == float) || is(Type == double))
                 return this.value.isClose(other.value);
-            else static if (__traits(compiles, {bool b = this.value == other.value; }))
-                return this.value == other.value;
             else
                 return (*cast(Type*)&this.value) == (*cast(Type*)&other.value);
         }
@@ -371,8 +367,6 @@ scope nothrow @nogc @safe:
 
         static if (is(Type == float) || is(Type == double))
             return (*this._value).isClose(other);
-        else static if (__traits(compiles, {bool b = this._value == other.value; }))
-            return (*this._value) == other.value;
         else
             return (*cast(Type*)this._value) == (*cast(Type*)&other);
     }
@@ -383,8 +377,6 @@ scope nothrow @nogc @safe:
             return error.isSet && other.error.isSet;
         static if (is(Type == float) || is(Type == double))
             return (*this._value).isClose(other.value);
-        else static if (__traits(compiles, {bool b = this._value == other.value; }))
-            return (*this._value) == other.value;
         else
             return (*cast(Type*)this._value) == (*cast(Type*)&other.value);
     }
@@ -396,8 +388,6 @@ scope nothrow @nogc @safe:
             return error.isSet && other.error.isSet;
         static if (is(Type == float) || is(Type == double))
             return (*this._value).isClose(*other._value);
-        else static if (__traits(compiles, {bool b = this._value == other._value; }))
-            return (*this._value) == (*other._value);
         else
             return (*cast(Type*)this._value) == (*cast(Type*)&other._value);
     }

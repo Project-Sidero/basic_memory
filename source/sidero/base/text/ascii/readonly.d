@@ -337,7 +337,7 @@ nothrow @nogc:
     }
 
     ///
-    bool isNull() scope {
+    bool isNull() scope const {
         return this.literal is null || this.literal.length == 0;
     }
 
@@ -486,7 +486,7 @@ nothrow @nogc:
     alias equals = opEquals;
 
     ///
-    bool opEquals(scope const(char)[] other) scope {
+    bool opEquals(scope const(char)[] other) scope const {
         return opCmp(cast(LiteralType)other) == 0;
     }
 
@@ -499,7 +499,7 @@ nothrow @nogc:
     }
 
     ///
-    bool opEquals(scope LiteralType other) scope {
+    bool opEquals(scope LiteralType other) scope const {
         return opCmp(other) == 0;
     }
 
@@ -512,7 +512,7 @@ nothrow @nogc:
     }
 
     ///
-    bool opEquals(scope String_ASCII other) scope {
+    bool opEquals(scope String_ASCII other) scope const {
         return opCmp(other.literal) == 0;
     }
 
@@ -527,12 +527,12 @@ nothrow @nogc:
     }
 
     ///
-    bool opEquals(scope StringBuilder_ASCII other) scope {
-        return other.opEquals(this);
+    bool opEquals(scope StringBuilder_ASCII other) scope const @trusted {
+        return other.opEquals(*cast(String_ASCII*)&this);
     }
 
     ///
-    bool ignoreCaseEquals(scope const(char)[] other) scope {
+    bool ignoreCaseEquals(scope const(char)[] other) scope const {
         return ignoreCaseCompare(cast(LiteralType)other) == 0;
     }
 
@@ -545,7 +545,7 @@ nothrow @nogc:
     }
 
     ///
-    bool ignoreCaseEquals(scope LiteralType other) scope {
+    bool ignoreCaseEquals(scope LiteralType other) scope const {
         return ignoreCaseCompare(other) == 0;
     }
 
@@ -558,7 +558,7 @@ nothrow @nogc:
     }
 
     ///
-    bool ignoreCaseEquals(scope String_ASCII other) scope {
+    bool ignoreCaseEquals(scope String_ASCII other) scope const {
         return ignoreCaseCompare(other.literal) == 0;
     }
 
@@ -573,15 +573,15 @@ nothrow @nogc:
     }
 
     ///
-    bool ignoreCaseEquals(scope StringBuilder_ASCII other) scope {
-        return other.ignoreCaseEquals(this);
+    bool ignoreCaseEquals(scope StringBuilder_ASCII other) scope const @trusted {
+        return other.ignoreCaseEquals(*cast(String_ASCII*)&this);
     }
 
     ///
     alias compare = opCmp;
 
     ///
-    int opCmp(scope const(char)[] other) scope {
+    int opCmp(scope const(char)[] other) scope const {
         return opCmp(cast(LiteralType)other);
     }
 
@@ -592,7 +592,7 @@ nothrow @nogc:
     }
 
     ///
-    int opCmp(scope LiteralType other) scope {
+    int opCmp(scope LiteralType other) scope const {
         LiteralType us = this.literal;
         if (us.length > 0 && us[$ - 1] == '\0')
             us = us[0 .. $ - 1];
@@ -616,7 +616,7 @@ nothrow @nogc:
     }
 
     ///
-    int opCmp(scope String_ASCII other) scope {
+    int opCmp(scope String_ASCII other) scope const {
         return opCmp(other.literal);
     }
 
@@ -627,12 +627,12 @@ nothrow @nogc:
     }
 
     ///
-    int opCmp(scope StringBuilder_ASCII other) scope {
-        return -other.opCmp(this);
+    int opCmp(scope StringBuilder_ASCII other) scope const @trusted {
+        return -other.opCmp(*cast(String_ASCII*)&this);
     }
 
     ///
-    int ignoreCaseCompare(scope const(char)[] other) scope {
+    int ignoreCaseCompare(scope const(char)[] other) scope const {
         return ignoreCaseCompare(cast(LiteralType)other);
     }
 
@@ -643,7 +643,7 @@ nothrow @nogc:
     }
 
     ///
-    int ignoreCaseCompare(scope LiteralType other) scope {
+    int ignoreCaseCompare(scope LiteralType other) scope const {
         import sidero.base.text.ascii.characters : toLower;
 
         LiteralType us = this.literal;
@@ -677,7 +677,7 @@ nothrow @nogc:
     }
 
     ///
-    int ignoreCaseCompare(scope String_ASCII other) scope {
+    int ignoreCaseCompare(scope String_ASCII other) scope const {
         return ignoreCaseCompare(other.literal);
     }
 
@@ -688,8 +688,8 @@ nothrow @nogc:
     }
 
     ///
-    int ignoreCaseCompare(scope StringBuilder_ASCII other) scope {
-        return -other.ignoreCaseCompare(this);
+    int ignoreCaseCompare(scope StringBuilder_ASCII other) scope const @trusted {
+        return -other.ignoreCaseCompare(*cast(String_ASCII*)&this);
     }
 
     ///
