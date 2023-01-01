@@ -1556,6 +1556,186 @@ nothrow @nogc:
         assert(text.length == text.byUTF32().length);
     }
 
+    //
+
+    ///
+    StringBuilder_UTF!Char opBinary(string op : "~")(scope const(char)[] other) scope @trusted {
+        StringBuilder_UTF!Char ret;
+
+        ret ~= this;
+        ret ~= other;
+
+        return ret;
+    }
+
+    ///
+    unittest {
+        StringBuilder_UTF!Char got = String_UTF32("abc") ~ " def"c;
+        assert(got == "abc def");
+    }
+
+    ///
+    StringBuilder_UTF!Char opBinary(string op : "~")(scope const(wchar)[] other) scope @trusted {
+        StringBuilder_UTF!Char ret;
+
+        ret ~= this;
+        ret ~= other;
+
+        return ret;
+    }
+
+    ///
+    unittest {
+        StringBuilder_UTF!Char got = String_UTF32("abc") ~ " def"w;
+        assert(got == "abc def");
+    }
+
+    ///
+    StringBuilder_UTF!Char opBinary(string op : "~")(scope const(dchar)[] other) scope @trusted {
+        StringBuilder_UTF!Char ret;
+
+        ret ~= this;
+        ret ~= other;
+
+        return ret;
+    }
+
+    ///
+    unittest {
+        StringBuilder_UTF!Char got = String_UTF32("abc") ~ " def"d;
+        assert(got == "abc def");
+    }
+
+    ///
+    StringBuilder_UTF!Char opBinary(string op : "~")(scope String_UTF8 other) scope @trusted {
+        StringBuilder_UTF!Char ret;
+
+        ret ~= this;
+        ret ~= other;
+
+        return ret;
+    }
+
+    ///
+    unittest {
+        StringBuilder_UTF!Char got = String_UTF32("abc") ~ String_UTF8(" def");
+        assert(got == "abc def");
+    }
+
+    ///
+    StringBuilder_UTF!Char opBinary(string op : "~")(scope String_UTF16 other) scope @trusted {
+        StringBuilder_UTF!Char ret;
+
+        ret ~= this;
+        ret ~= other;
+
+        return ret;
+    }
+
+    ///
+    unittest {
+        StringBuilder_UTF!Char got = String_UTF32("abc") ~ String_UTF16(" def"w);
+        assert(got == "abc def");
+    }
+
+    ///
+    StringBuilder_UTF!Char opBinary(string op : "~")(scope String_UTF32 other) scope @trusted {
+        StringBuilder_UTF!Char ret;
+
+        ret ~= this;
+        ret ~= other;
+
+        return ret;
+    }
+
+    ///
+    unittest {
+        StringBuilder_UTF!Char got = String_UTF32("abc") ~ String_UTF32(" def"d);
+        assert(got == "abc def");
+    }
+
+    ///
+    StringBuilder_UTF!Char opBinary(string op : "~")(scope String_ASCII other) scope @trusted {
+        StringBuilder_UTF!Char ret;
+
+        ret ~= this;
+        ret ~= other;
+
+        return ret;
+    }
+
+    ///
+    unittest {
+        StringBuilder_UTF!Char got = String_UTF32("abc") ~ String_ASCII(" def");
+        assert(got == "abc def");
+    }
+
+    ///
+    StringBuilder_UTF!Char opBinary(string op : "~")(scope StringBuilder_UTF8 other) scope @trusted {
+        StringBuilder_UTF!Char ret;
+
+        ret ~= this;
+        ret ~= other;
+
+        return ret;
+    }
+
+    ///
+    unittest {
+        StringBuilder_UTF!Char got = String_UTF32("abc") ~ StringBuilder_UTF8(" def");
+        assert(got == "abc def");
+    }
+
+    ///
+    StringBuilder_UTF!Char opBinary(string op : "~")(scope StringBuilder_UTF16 other) scope @trusted {
+        StringBuilder_UTF!Char ret;
+
+        ret ~= this;
+        ret ~= other;
+
+        return ret;
+    }
+
+    ///
+    unittest {
+        StringBuilder_UTF!Char got = String_UTF32("abc") ~ StringBuilder_UTF16(" def"w);
+        assert(got == "abc def");
+    }
+
+    ///
+    StringBuilder_UTF!Char opBinary(string op : "~")(scope StringBuilder_UTF32 other) scope @trusted {
+        StringBuilder_UTF!Char ret;
+
+        ret ~= this;
+        ret ~= other;
+
+        return ret;
+    }
+
+    ///
+    unittest {
+        StringBuilder_UTF!Char got = String_UTF32("abc") ~ StringBuilder_UTF32(" def"d);
+        assert(got == "abc def");
+    }
+
+    ///
+    StringBuilder_UTF!Char opBinary(string op : "~")(scope StringBuilder_ASCII other) scope @trusted {
+        StringBuilder_UTF!Char ret;
+
+        ret ~= this;
+        ret ~= other;
+
+        return ret;
+    }
+
+    ///
+    unittest {
+        StringBuilder_UTF!Char got = String_UTF32("abc") ~ StringBuilder_ASCII(" def");
+        assert(got == "abc def");
+    }
+
+    //
+
     ///
     bool startsWith(scope const(char)[] input, scope RCAllocator allocator = RCAllocator.init) scope {
         return startsWithImplSlice(input, allocator, true);

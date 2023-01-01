@@ -779,83 +779,71 @@ nothrow @nogc:
 
     //
 
+    ///
+    StringBuilder_ASCII opBinary(string op : "~")(scope const(char)[] other) scope @trusted {
+        StringBuilder_ASCII ret;
+
+        ret ~= this;
+        ret ~= other;
+
+        return ret;
+    }
+
+    ///
+    unittest {
+        StringBuilder_ASCII got = String_ASCII("abc") ~ " def";
+        assert(got == "abc def");
+    }
+
+    ///
+    StringBuilder_ASCII opBinary(string op : "~")(scope LiteralType other) scope @trusted {
+        StringBuilder_ASCII ret;
+
+        ret ~= this;
+        ret ~= other;
+
+        return ret;
+    }
+
+    ///
+    unittest {
+        StringBuilder_ASCII got = String_ASCII("abc") ~ cast(LiteralType)[' ', 'd', 'e', 'f'];
+        assert(got == "abc def");
+    }
+
+    ///
+    StringBuilder_ASCII opBinary(string op : "~")(scope String_ASCII other) scope @trusted {
+        StringBuilder_ASCII ret;
+
+        ret ~= this;
+        ret ~= other;
+
+        return ret;
+    }
+
+    ///
+    unittest {
+        StringBuilder_ASCII got = String_ASCII("abc") ~ String_ASCII(" def");
+        assert(got == "abc def");
+    }
+
+    ///
+    StringBuilder_ASCII opBinary(string op : "~")(scope StringBuilder_ASCII other) scope @trusted {
+        StringBuilder_ASCII ret;
+
+        ret ~= this;
+        ret ~= other;
+
+        return ret;
+    }
+
+    ///
+    unittest {
+        StringBuilder_ASCII got = String_ASCII("abc") ~ StringBuilder_ASCII(" def");
+        assert(got == "abc def");
+    }
+
     version (none) {
-        ///
-        StringBuilder_ASCII opBinary(string op : "~")(scope const(char)[] other...) scope @trusted {
-            StringBuilder_ASCII ret;
-
-            if (this.lifeTime !is null)
-                ret = StringBuilder_ASCII(this.lifeTime.allocator);
-
-            ret ~= this;
-            ret ~= other;
-
-            return ret;
-        }
-
-        ///
-        unittest {
-            StringBuilder_ASCII got = String_ASCII("abc") ~ " def";
-            assert(got == "abc def");
-        }
-
-        ///
-        StringBuilder_ASCII opBinary(string op : "~")(scope String_ASCII other) scope @trusted {
-            StringBuilder_ASCII ret;
-
-            if (this.lifeTime !is null)
-                ret = StringBuilder_ASCII(this.lifeTime.allocator);
-
-            ret ~= this;
-            ret ~= other;
-
-            return ret;
-        }
-
-        ///
-        unittest {
-            StringBuilder_ASCII got = String_ASCII("abc") ~ String_ASCII(" def");
-            assert(got == "abc def");
-        }
-
-        ///
-        StringBuilder_ASCII opBinary(string op : "~")(scope LiteralType other...) scope @trusted {
-            StringBuilder_ASCII ret;
-
-            if (this.lifeTime !is null)
-                ret = StringBuilder_ASCII(this.lifeTime.allocator);
-
-            ret ~= this;
-            ret ~= other;
-
-            return ret;
-        }
-
-        ///
-        unittest {
-            StringBuilder_ASCII got = String_ASCII("abc") ~ cast(LiteralType)[' ', 'd', 'e', 'f'];
-            assert(got == "abc def");
-        }
-
-        ///
-        StringBuilder_ASCII opBinary(string op : "~")(scope StringBuilder_ASCII other) scope @trusted {
-            StringBuilder_ASCII ret;
-
-            if (this.lifeTime !is null)
-                ret = StringBuilder_ASCII(this.lifeTime.allocator);
-
-            ret ~= this;
-            ret ~= other;
-
-            return ret;
-        }
-
-        ///
-        unittest {
-            StringBuilder_ASCII got = String_ASCII("abc") ~ StringBuilder_ASCII(" def");
-            assert(got == "abc def");
-        }
-
         //
 
         ///

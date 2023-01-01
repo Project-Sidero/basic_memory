@@ -38,6 +38,7 @@ void processFile(ref Work work) {
     string[] toFind = [
         "sidero.base.text.unicode." ~ work.originalModuleName,
         "Char = char",
+        work.originalTypeName ~ "!Char",
         work.originalTypeName ~ "!char",
         work.originalTypeName ~ "!wchar",
         work.originalTypeName ~ "!dchar",
@@ -46,6 +47,7 @@ void processFile(ref Work work) {
     string[] toReplace = [
         "sidero.base.text.unicode." ~ work.moduleName,
         "Char = " ~ work.charName,
+        work.typeName,
         work.originalTypeName ~ "8",
         work.originalTypeName ~ "16",
         work.originalTypeName ~ "32",
