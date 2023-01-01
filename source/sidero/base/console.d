@@ -479,13 +479,12 @@ void write(Args...)(scope Args args) @trusted {
         import sidero.base.allocators;
 
         static if (isAnyString!Type) {
-            if (deliminateArguments)
+            if (deliminateArguments) {
                 rawWrite(`"`);
-
-            rawWrite(arg);
-
-            if (deliminateArguments)
+                rawWrite(format(String_ASCII.init, arg));
                 rawWrite(`"`);
+            } else
+                rawWrite(arg);
         } else static if (is(Type == InBandInfo)) {
             if (!arg.prettyPrintActive.isNull)
                 prettyPrintActive = arg.prettyPrintActive.get;
