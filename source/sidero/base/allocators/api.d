@@ -121,7 +121,7 @@ scope:
     }
 
     ///
-    this(return scope ref RCAllocator other) @trusted {
+    this(scope return ref RCAllocator other) @trusted {
         this.tupleof = other.tupleof;
 
         if (refAdd_ !is null)
@@ -132,16 +132,7 @@ scope:
     @disable this(this);
 
     ///
-    void opAssign(scope ref RCAllocator other) @trusted {
-        opAssign_(&other);
-    }
-
-    ///
     void opAssign(scope RCAllocator other) @trusted {
-        opAssign_(&other);
-    }
-
-    private void opAssign_(scope RCAllocator* other) @system {
         this.tupleof = other.tupleof;
 
         if (refAdd_ !is null)

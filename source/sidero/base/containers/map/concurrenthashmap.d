@@ -34,8 +34,9 @@ struct ConcurrentHashMap(RealKeyType, ValueType) {
                     else
                         result = del(gotValue);
 
-                    if (!state.iteratorAdvanceExternal(iterator))
+                    if (state.iteratorAdvanceExternal(iterator)) {
                         break;
+                    }
                 }
             }
 
@@ -84,7 +85,7 @@ export:
     }
 
     ///
-    this(ref return scope ConcurrentHashMap other) @trusted scope {
+    this(scope ref return ConcurrentHashMap other) scope @trusted {
         this.tupleof = other.tupleof;
 
         if (!isNull)
@@ -176,7 +177,7 @@ export:
             ret = state.getValueExternal(key);
         }
 
-        if (!ret || ret.isNull)
+        if (!ret)
             ret = typeof(return)(NonMatchingStateToArgumentException);
 
         return ret;
@@ -951,7 +952,9 @@ struct ConcurrentHashMapNode(RealKeyType, ValueType) {
         assert(buckets.length > 0);
     }
 
-    size_t getBucketId(ulong hash) scope {
+    size_t getBucketId(ulong hash, scope Bucket[] buckets = null) scope {
+        if (buckets.length == 0)
+            buckets = this.buckets;
         assert(buckets.length > 0);
 
         // modulas may be attractive, but it won't allow for contiguous iteration
@@ -1001,7 +1004,7 @@ struct ConcurrentHashMapNode(RealKeyType, ValueType) {
 
         ret.previous = prior;
         ret.next = prior.next;
-        prior.next.previous = ret;
+        ret.next.previous = ret;
         prior.next = ret;
 
         this.allNodes++;
@@ -1096,7 +1099,7 @@ struct ConcurrentHashMapNode(RealKeyType, ValueType) {
 
                 while (currentNode.next !is null) {
                     Node* nextNode = currentNode.next;
-                    Bucket* intoBucket = &into[currentNode.hash / into.length];
+                    Bucket* intoBucket = &into[getBucketId(currentNode.hash, into)];
 
                     if (intoBucket is lastIntoBucket) {
                         intoBucket.tail.previous = currentNode;
@@ -1144,7 +1147,7 @@ struct ConcurrentHashMapNode(RealKeyType, ValueType) {
             if (oldBuckets.length > 0) {
                 copyOldIntoNew(oldBuckets, newBuckets);
 
-                if (buckets.ptr !is smallBucketOptimization.ptr) {
+                if (oldBuckets.ptr !is smallBucketOptimization.ptr) {
                     allocator.dispose(oldBuckets);
                 }
             }
