@@ -2798,7 +2798,7 @@ nothrow @nogc:
                 dchar c;
                 size_t got = decode(actual[amount .. $], c);
 
-                if (!isWhiteSpace(c))
+                if (!(isWhiteSpace(c) || isControl(c)))
                     break;
                 amount += got;
             }
@@ -2812,7 +2812,7 @@ nothrow @nogc:
                 dchar c;
                 size_t got = decode(actual[amount .. $], c);
 
-                if (!isWhiteSpace(c))
+                if (!(isWhiteSpace(c) || isControl(c)))
                     break;
                 amount += got;
             }
@@ -2823,7 +2823,7 @@ nothrow @nogc:
             size_t amount;
 
             foreach (c; actual) {
-                if (!c.isWhiteSpace)
+                if (!(isWhiteSpace(c) || isControl(c)))
                     break;
 
                 amount++;
@@ -2854,7 +2854,7 @@ nothrow @nogc:
                 dchar c;
                 size_t got = decodeFromEnd(actual[0 .. $ - soFar], c);
 
-                if (isWhiteSpace(c))
+                if (isWhiteSpace(c) || isControl(c))
                     amount += got;
                 else
                     break;
@@ -2872,7 +2872,7 @@ nothrow @nogc:
                 dchar c;
                 size_t got = decodeFromEnd(actual[0 .. $ - soFar], c);
 
-                if (isWhiteSpace(c))
+                if (isWhiteSpace(c) || isControl(c))
                     amount += got;
                 else
                     break;
@@ -2887,7 +2887,7 @@ nothrow @nogc:
             size_t amount;
 
             foreach_reverse (c; actual) {
-                if (!c.isWhiteSpace) {
+                if (!(isWhiteSpace(c) || isControl(c))) {
                     break;
                 }
 
