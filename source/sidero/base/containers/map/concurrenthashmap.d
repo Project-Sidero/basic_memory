@@ -199,9 +199,7 @@ export:
 
     ///
     ResultReference!ValueType get(scope RealKeyType key, scope return ValueType fallback) scope @trusted {
-        if (isNull)
-            return typeof(return)(NullPointerException);
-
+        setupState;
         typeof(return) ret;
 
         static if (!is(KeyType == RealKeyType)) {
@@ -312,9 +310,7 @@ export:
 
         ///
         ResultReference!ValueType get(scope KeyType key, scope return ValueType fallback) scope @trusted {
-            if (isNull)
-                return typeof(return)(NullPointerException);
-
+            setupState;
             ResultReference!ValueType ret = state.getValueExternal(key);
 
             if (!ret || ret.isNull)
