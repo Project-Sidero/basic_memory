@@ -78,8 +78,8 @@ export @safe nothrow @nogc:
     }
 
     ///
-    long currentMinutesBias(scope DateTime!GregorianDate date) scope const {
-        return isInDaylightSavings(date) ? this.daylightSavingsOffset_.minutes : this.standardOffset_.minutes;
+    long currentSecondsBias(scope DateTime!GregorianDate date) scope const {
+        return isInDaylightSavings(date) ? this.daylightSavingsOffset_.seconds : this.standardOffset_.seconds;
     }
 
     /// Get a version of this time zone for a given year, if available otherwise return this.
@@ -226,18 +226,18 @@ export @safe nothrow @nogc:
         return TimeZone.from(String_UTF8(wantedName), year);
     }
 
-    /// Minutes bias (UTC-1:30 would be -90).
-    static TimeZone from(long minutes) @trusted {
+    /// Seconds bias (UTC-1:30 would be -5400).
+    static TimeZone from(long seconds) @trusted {
         TimeZone ret;
-        ret.standardOffset_.minutes = cast(short)minutes;
+        ret.standardOffset_.seconds = cast(short)seconds;
 
         {
             StringBuilder_UTF8 builder;
             builder ~= "UTC";
-            builder ~= minutes < 0 ? "-"c : "+"c;
+            builder ~= seconds < 0 ? "-"c : "+"c;
 
             TimeOfDay tod = TimeOfDay(0, 0, 0);
-            tod.advanceMinutes(minutes < 0 ? -minutes : minutes);
+            tod.advanceSeconds(seconds < 0 ? -seconds : seconds);
 
             builder.formattedWrite("%s", tod.hour);
 
@@ -255,7 +255,7 @@ export @safe nothrow @nogc:
     ///
     static struct Bias {
         ///
-        short minutes;
+        long seconds;
         /// If there is no daylight savings time, this shouldn't be populated!
         GregorianDate appliesOnDate;
         /// Ditto
@@ -270,9 +270,9 @@ export @safe nothrow @nogc:
 
         ///
         int opCmp(const Bias other) scope const @trusted {
-            if (this.minutes < other.minutes)
+            if (this.seconds < other.seconds)
                 return -1;
-            else if (this.minutes > other.minutes)
+            else if (this.seconds > other.seconds)
                 return 1;
 
             if (this.appliesOnDate < other.appliesOnDate)
@@ -351,7 +351,7 @@ Result!TimeZone localTimeZone() @trusted nothrow @nogc {
                 ret.ianaName_ = String_UTF8(windowsToIANA(cast(string)windowsName.unsafeGetLiteral));
             }
 
-            ret.standardOffset_.minutes = cast(short)tzi.StandardBias;
+            ret.standardOffset_.seconds = tzi.StandardBias * 60;
             ret.standardOffset_.appliesOnDate = GregorianDate(year, cast(ubyte)tzi.StandardDate.wMonth, cast(ubyte)tzi.StandardDate.wDay);
             ret.standardOffset_.appliesOnTime = TimeOfDay(cast(ubyte)tzi.StandardDate.wHour,
                     cast(ubyte)tzi.StandardDate.wMinute, cast(ubyte)tzi.StandardDate.wSecond,
@@ -359,7 +359,7 @@ Result!TimeZone localTimeZone() @trusted nothrow @nogc {
             ret.haveDaylightSavings_ = tzi.StandardDate.wMonth != 0;
 
             if (ret.haveDaylightSavings_) {
-                ret.daylightSavingsOffset_.minutes = cast(short)tzi.DaylightBias;
+                ret.daylightSavingsOffset_.seconds = tzi.DaylightBias * 60;
                 ret.daylightSavingsOffset_.appliesOnDate = GregorianDate(year, cast(ubyte)tzi.DaylightDate.wMonth,
                         cast(ubyte)tzi.DaylightDate.wDay);
                 ret.daylightSavingsOffset_.appliesOnTime = TimeOfDay(cast(ubyte)tzi.DaylightDate.wHour,
@@ -435,7 +435,7 @@ Result!TimeZone getTimeZone(scope String_UTF8 wantedName, long year) @trusted no
 
                         if ((year >= 0 || year <= ushort.max) && GetTimeZoneInformationForYear(cast(ushort)year,
                                 &dynamicTimeZone, &tzi) != 0) {
-                            ret.standardOffset_.minutes = cast(short)tzi.StandardBias;
+                            ret.standardOffset_.seconds = tzi.StandardBias * 60;
                             ret.standardOffset_.appliesOnDate = GregorianDate(year, cast(ubyte)tzi.StandardDate.wMonth,
                                     cast(ubyte)tzi.StandardDate.wDay);
                             ret.standardOffset_.appliesOnTime = TimeOfDay(cast(ubyte)tzi.StandardDate.wHour,
@@ -444,7 +444,7 @@ Result!TimeZone getTimeZone(scope String_UTF8 wantedName, long year) @trusted no
                             ret.haveDaylightSavings_ = tzi.StandardDate.wMonth != 0;
 
                             if (ret.haveDaylightSavings_) {
-                                ret.daylightSavingsOffset_.minutes = cast(short)tzi.DaylightBias;
+                                ret.daylightSavingsOffset_.seconds = tzi.DaylightBias * 60;
                                 ret.daylightSavingsOffset_.appliesOnDate = GregorianDate(year,
                                         cast(ubyte)tzi.DaylightDate.wMonth, cast(ubyte)tzi.DaylightDate.wDay);
                                 ret.daylightSavingsOffset_.appliesOnTime = TimeOfDay(cast(ubyte)tzi.DaylightDate.wHour,
@@ -452,7 +452,7 @@ Result!TimeZone getTimeZone(scope String_UTF8 wantedName, long year) @trusted no
                                         cast(uint)(tzi.DaylightDate.wMilliseconds * 1000));
                             }
                         } else {
-                            ret.standardOffset_.minutes = cast(short)dynamicTimeZone.StandardBias;
+                            ret.standardOffset_.seconds = dynamicTimeZone.StandardBias * 60;
                             ret.standardOffset_.appliesOnDate = GregorianDate(year,
                                     cast(ubyte)dynamicTimeZone.StandardDate.wMonth, cast(ubyte)dynamicTimeZone.StandardDate.wDay);
                             ret.standardOffset_.appliesOnTime = TimeOfDay(cast(ubyte)dynamicTimeZone.StandardDate.wHour,
@@ -461,7 +461,7 @@ Result!TimeZone getTimeZone(scope String_UTF8 wantedName, long year) @trusted no
                             ret.haveDaylightSavings_ = dynamicTimeZone.StandardDate.wMonth != 0;
 
                             if (ret.haveDaylightSavings_) {
-                                ret.daylightSavingsOffset_.minutes = cast(short)dynamicTimeZone.DaylightBias;
+                                ret.daylightSavingsOffset_.seconds = dynamicTimeZone.DaylightBias * 60;
                                 ret.daylightSavingsOffset_.appliesOnDate = GregorianDate(year,
                                         cast(ubyte)dynamicTimeZone.DaylightDate.wMonth, cast(ubyte)dynamicTimeZone.DaylightDate.wDay);
                                 ret.daylightSavingsOffset_.appliesOnTime = TimeOfDay(cast(ubyte)dynamicTimeZone.DaylightDate.wHour,

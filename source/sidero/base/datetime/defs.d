@@ -3,16 +3,11 @@ import sidero.base.datetime.time.defs;
 import sidero.base.datetime.time.timeofday;
 import sidero.base.datetime.time.timezone;
 import sidero.base.datetime.calendars.defs;
+import sidero.base.datetime.calendars.gregorian;
 import sidero.base.text;
 import sidero.base.traits;
 import sidero.base.errors;
 import sidero.base.attributes;
-
-private {
-    import sidero.base.datetime.calendars.gregorian;
-
-    alias GDateTime = DateTime!GregorianDate;
-}
 
 ///
 enum {
@@ -185,11 +180,11 @@ export @safe nothrow @nogc:
         }
 
         auto gDateTime = this.asGregorian();
-        auto oldBias = this.timezone_.currentMinutesBias(gDateTime);
-        auto newBias = timezone.currentMinutesBias(gDateTime);
+        auto oldBias = this.timezone_.currentSecondsBias(gDateTime);
+        auto newBias = timezone.currentSecondsBias(gDateTime);
 
         DateTime ret = DateTime(this.date_, this.time_, timezone);
-        ret.advanceMinutes(newBias - oldBias);
+        ret.advanceSeconds(newBias - oldBias);
 
         return ret;
     }
@@ -205,12 +200,12 @@ export @safe nothrow @nogc:
             return typeof(return)(MissingUnixEpochException);
         } else {
             auto gDateTime = this.asGregorian();
-            auto oldBias = this.timezone_.currentMinutesBias(gDateTime);
+            auto oldBias = this.timezone_.currentSecondsBias(gDateTime);
 
             DayInterval days = this.date_ - DateType.UnixEpoch;
 
             long working = days.amount * 86_400;
-            working -= oldBias * 60;
+            working -= oldBias;
             working += this.time_.totalSeconds;
 
             if (days.amount < 0 || working < 0)
@@ -335,10 +330,10 @@ export @safe nothrow @nogc:
                     builder ~= "+0000";
                 } else {
                     auto gDateTime = this.asGregorian();
-                    auto bias = this.timezone_.currentMinutesBias(gDateTime);
+                    auto bias = this.timezone_.currentSecondsBias(gDateTime);
 
                     TimeOfDay tod = TimeOfDay(0, 0, 0);
-                    tod.advanceMinutes(bias < 0 ? -bias : bias);
+                    tod.advanceSeconds(bias < 0 ? -bias : bias);
 
                     if (bias < 0)
                         builder ~= "-";
@@ -360,10 +355,10 @@ export @safe nothrow @nogc:
                     builder ~= "+0000";
                 } else {
                     auto gDateTime = this.asGregorian();
-                    auto bias = this.timezone_.currentMinutesBias(gDateTime);
+                    auto bias = this.timezone_.currentSecondsBias(gDateTime);
 
                     TimeOfDay tod = TimeOfDay(0, 0, 0);
-                    tod.advanceMinutes(bias < 0 ? -bias : bias);
+                    tod.advanceSeconds(bias < 0 ? -bias : bias);
 
                     if (bias < 0)
                         builder ~= "-";
@@ -385,13 +380,13 @@ export @safe nothrow @nogc:
                     builder ~= "+0000";
                 } else {
                     auto gDateTime = this.asGregorian();
-                    auto bias = this.timezone_.currentMinutesBias(gDateTime);
+                    auto bias = this.timezone_.currentSecondsBias(gDateTime);
 
                     if (bias == 0) {
                         builder ~= "Z";
                     } else {
                         TimeOfDay tod = TimeOfDay(0, 0, 0);
-                        tod.advanceMinutes(bias < 0 ? -bias : bias);
+                        tod.advanceSeconds(bias < 0 ? -bias : bias);
 
                         if (bias < 0)
                             builder ~= "-";
@@ -414,13 +409,13 @@ export @safe nothrow @nogc:
                     builder ~= "Z";
                 } else {
                     auto gDateTime = this.asGregorian();
-                    auto bias = this.timezone_.currentMinutesBias(gDateTime);
+                    auto bias = this.timezone_.currentSecondsBias(gDateTime);
 
                     if (bias == 0) {
                         builder ~= "Z";
                     } else {
                         TimeOfDay tod = TimeOfDay(0, 0, 0);
-                        tod.advanceMinutes(bias < 0 ? -bias : bias);
+                        tod.advanceSeconds(bias < 0 ? -bias : bias);
 
                         if (bias < 0)
                             builder ~= "-";
@@ -445,10 +440,10 @@ export @safe nothrow @nogc:
                     builder ~= "0";
                 } else {
                     auto gDateTime = this.asGregorian();
-                    auto bias = this.timezone_.currentMinutesBias(gDateTime);
+                    auto bias = this.timezone_.currentSecondsBias(gDateTime);
 
                     TimeOfDay tod = TimeOfDay(0, 0, 0);
-                    tod.advanceMinutes(bias < 0 ? -bias : bias);
+                    tod.advanceSeconds(bias < 0 ? -bias : bias);
 
                     if (bias < 0)
                         builder ~= "-";
@@ -476,9 +471,11 @@ export @safe nothrow @nogc:
 
 private @hidden:
     void timezoneCheck(Delegate)(scope Delegate callback) scope @trusted {
+        // TODO: leap seconds! applies at end of month
+
         auto temp = this.asGregorian();
         const oldYear = temp.year;
-        const oldBias = this.timezone_.currentMinutesBias(temp);
+        const oldBias = this.timezone_.currentSecondsBias(temp);
 
         callback();
 
@@ -486,10 +483,10 @@ private @hidden:
 
         if (temp.year != oldYear)
             this.timezone_ = this.timezone_.forYear(this.timezone_, temp.year);
-        const newBias = this.timezone_.currentMinutesBias(temp);
+        const newBias = this.timezone_.currentSecondsBias(temp);
 
         if (oldBias != newBias) {
-            auto dateInterval = this.time_.advanceMinutes(newBias - oldBias, true);
+            auto dateInterval = this.time_.advanceSeconds(newBias - oldBias, true);
             this.date_.advanceDays(dateInterval.amount);
         }
     }
