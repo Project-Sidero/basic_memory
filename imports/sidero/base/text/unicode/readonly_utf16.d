@@ -409,7 +409,6 @@ nothrow @nogc:
     }
 
     @disable this(ref return scope const typeof(this) other) scope const;
-    @disable this(this) scope;
 
     @trusted scope {
         ///

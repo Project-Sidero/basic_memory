@@ -85,7 +85,7 @@ export:
     }
 
     ///
-    this(scope ref return ConcurrentHashMap other) scope @trusted {
+    this(scope return ref ConcurrentHashMap other) scope @trusted {
         this.tupleof = other.tupleof;
 
         if (!isNull)
@@ -99,7 +99,6 @@ export:
     }
 
     @disable this(ref return scope const ConcurrentHashMap other) scope const;
-    @disable this(this) scope;
 
     ~this() scope {
         if (!isNull)

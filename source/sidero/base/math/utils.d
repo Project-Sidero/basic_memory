@@ -39,3 +39,15 @@ unittest {
     assert(isClose(1.001f, 1.002f));
     assert(!isClose(1.0001f, 1.1f));
 }
+
+///
+float floor(float input) {
+    import core.stdc.math : floorl;
+    return cast(float)floorl(input);
+}
+
+///
+double floor(double input) {
+    import core.stdc.math : floorl;
+    return floorl(input);
+}

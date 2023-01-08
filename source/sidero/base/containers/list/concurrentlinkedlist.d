@@ -200,7 +200,7 @@ nothrow @nogc:
     }
 
     ///
-    this(ref return scope ConcurrentLinkedList other) @trusted scope {
+    this(scope return ref ConcurrentLinkedList other) scope @trusted {
         this.tupleof = other.tupleof;
 
         if (!isNull)
@@ -214,7 +214,6 @@ nothrow @nogc:
     }
 
     @disable this(ref return scope const ConcurrentLinkedList other) scope const;
-    @disable this(this) scope;
 
     @trusted {
         ///
@@ -387,7 +386,7 @@ nothrow @nogc:
     alias compare = opCmp;
 
     ///
-    int opCmp(Input)(scope Input other) scope if (HaveOpApply!(Input, Type)) {
+    int opCmp(Input)(scope Input other) scope @trusted if (HaveOpApply!(Input, Type)) {
         return this.opCmp(GetOpApply!Type(other));
     }
 
@@ -645,7 +644,7 @@ nothrow @nogc:
     }
 
     ///
-    void insert(Input)(ptrdiff_t index, scope Input input) scope if (HaveOpApply!(Input, Type)) {
+    void insert(Input)(ptrdiff_t index, scope Input input) scope @trusted if (HaveOpApply!(Input, Type)) {
         this.insert(index, GetOpApply!Type(input));
     }
 

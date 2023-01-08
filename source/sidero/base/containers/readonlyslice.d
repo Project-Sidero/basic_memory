@@ -236,7 +236,7 @@ nothrow @nogc:
     @disable void opAssign(scope LiteralType other) scope const;
 
     ///
-    this(ref return scope Slice other) @trusted scope {
+    this(scope return ref Slice other) scope @trusted {
         this.tupleof = other.tupleof;
 
         if (haveIterator)
@@ -253,7 +253,6 @@ nothrow @nogc:
     }
 
     @disable this(ref return scope const Slice other) scope const;
-    @disable this(this) scope;
 
     @trusted {
         ///

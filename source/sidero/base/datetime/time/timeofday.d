@@ -280,7 +280,7 @@ export @safe nothrow @nogc:
 
      Note: B aka Swatch Internet time requires a timezone, so cannot be computed here.
      */
-    void format(Builder, Format)(scope ref Builder builder, scope Format specification) scope const 
+    void format(Builder, Format)(scope ref Builder builder, scope Format specification) scope const @trusted
             if (isBuilderString!Builder && isReadOnlyString!Format) {
         import sidero.base.allocators;
 
@@ -315,7 +315,7 @@ export @safe nothrow @nogc:
             builder ~= this.isAM() ? "AM" : "PM";
             break;
 
-        //case 'B':
+            //case 'B':
 
         case 'g':
             auto actual = this.hour_ % 12;

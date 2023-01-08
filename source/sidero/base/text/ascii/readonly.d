@@ -267,7 +267,7 @@ nothrow @nogc:
     @disable void opAssign(scope return typeof(this) other) scope const;
 
     ///
-    this(ref return scope String_ASCII other) @trusted scope {
+    this(scope return ref String_ASCII other) scope @trusted {
         import core.atomic : atomicOp;
 
         this.tupleof = other.tupleof;
@@ -285,7 +285,6 @@ nothrow @nogc:
     }
 
     @disable this(ref return scope const String_ASCII other) scope const;
-    @disable this(this) scope;
 
     @trusted {
         ///

@@ -16,14 +16,14 @@ Result!dchar readChar() @trusted {
     const block = false;
 
     size_t outputBufferCount;
-    char[4] outputBuffer;
+    char[4] outputBuffer = void;
 
     {
         version (Windows) {
             if (useWindows) {
                 allocateWindowsConsole();
 
-                wchar[2] outputBuffer16;
+                wchar[2] outputBuffer16 = void;
                 DWORD readLength;
 
                 if (block) {
@@ -43,7 +43,7 @@ Result!dchar readChar() @trusted {
 
                         switch (result) {
                         case WSA_WAIT_EVENT_0:
-                            INPUT_RECORD[1] buffer;
+                            INPUT_RECORD[1] buffer = void;
 
                             if (PeekConsoleInputW(hStdin, buffer.ptr, cast(uint)buffer.length, &readLength)) {
                                 foreach (ref value; buffer[0 .. readLength]) {
@@ -173,7 +173,7 @@ StringBuilder_ASCII readLine(scope return ref StringBuilder_ASCII builder) @trus
                     cReadControl.nLength = CONSOLE_READCONSOLE_CONTROL.sizeof;
                     cReadControl.dwCtrlWakeupMask = '\n';
 
-                    CHAR[128] buffer;
+                    CHAR[128] buffer = void;
 
                     for (;;) {
                         if (ReadConsoleA(hStdin, buffer.ptr, cast(uint)buffer.length, &readLength, &cReadControl)) {
@@ -204,7 +204,7 @@ StringBuilder_ASCII readLine(scope return ref StringBuilder_ASCII builder) @trus
 
                         switch (result) {
                         case WSA_WAIT_EVENT_0:
-                            INPUT_RECORD[128] buffer;
+                            INPUT_RECORD[128] buffer = void;
 
                             if (PeekConsoleInputA(hStdin, buffer.ptr, cast(uint)buffer.length, &readLength)) {
                                 size_t count;
@@ -354,7 +354,7 @@ StringBuilder_UTF8 readLine(scope return ref StringBuilder_UTF8 builder) @truste
 
                         switch (result) {
                         case WSA_WAIT_EVENT_0:
-                            INPUT_RECORD[128] buffer;
+                            INPUT_RECORD[128] buffer = void;
 
                             if (PeekConsoleInputW(hStdin, buffer.ptr, cast(uint)buffer.length, &readLength)) {
                                 size_t count;

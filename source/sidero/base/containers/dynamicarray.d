@@ -348,7 +348,7 @@ scope nothrow @nogc:
     }
 
     ///
-    DynamicArray opSlice() return {
+    DynamicArray opSlice() return @trusted {
         return this;
     }
 

@@ -74,7 +74,7 @@ export @safe nothrow @nogc:
 
     ///
     WeekDay dayInWeek() scope const {
-        import std.math : floor;
+        import sidero.base.math.utils : floor;
 
         // https://en.wikipedia.org/wiki/Determination_of_the_day_of_the_week#Disparate_variation
         long c = this.century();
@@ -350,7 +350,7 @@ export @safe nothrow @nogc:
     }
 
     /// See: https://www.php.net/manual/en/datetime.format.php
-    void format(Builder, Format)(scope ref Builder builder, scope Format specification) scope const 
+    void format(Builder, Format)(scope ref Builder builder, scope Format specification) scope const @trusted
             if (isBuilderString!Builder && isReadOnlyString!Format) {
         import sidero.base.allocators;
 

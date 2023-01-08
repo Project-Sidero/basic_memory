@@ -195,7 +195,7 @@ export @safe nothrow @nogc:
     }
 
     ///
-    Result!ulong toUnixTime() scope const {
+    Result!ulong toUnixTime() scope const @trusted {
         static if (!__traits(hasMember, DateType, "UnixEpoch")) {
             return typeof(return)(MissingUnixEpochException);
         } else {

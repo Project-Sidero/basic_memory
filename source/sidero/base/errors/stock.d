@@ -13,7 +13,8 @@ enum {
     ///
     FailedToAllocateError = ErrorMessage("FTAE", "Failed To Allocate Memory"),
     ///
-    NonMatchingStateToArgumentException = ErrorMessage("NMSTA", "Argument provided does not map into state"),
+    NonMatchingStateToArgumentException = ErrorMessage("NMSTA",
+            "Argument provided does not map into state"),
     ///
     TimeOutException = ErrorMessage("TOE", "Timeout exception"),
 }

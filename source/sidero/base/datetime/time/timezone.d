@@ -153,7 +153,7 @@ export @safe nothrow @nogc:
 
      Note: Only e aka IANA identifier is implemented here. T aka abbreviations are not included, so cannot be provided here.
      */
-    void format(Builder, Format)(scope ref Builder builder, scope Format specification) scope const 
+    void format(Builder, Format)(scope ref Builder builder, scope Format specification) scope const @trusted
             if (isBuilderString!Builder && isReadOnlyString!Format) {
         import sidero.base.allocators;
 
@@ -178,7 +178,8 @@ export @safe nothrow @nogc:
     }
 
     /// Ditto
-    bool formatValue(Builder)(scope ref Builder builder, dchar specification) scope const if (isBuilderString!Builder) {
+    bool formatValue(Builder)(scope ref Builder builder, dchar specification) scope const @trusted
+            if (isBuilderString!Builder) {
         switch (specification) {
         case 'e':
             builder ~= this.ianaName();
