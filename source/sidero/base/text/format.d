@@ -265,38 +265,183 @@ private @hidden:
                 builder ~= "(";
                 parent.depth++;
 
-                static foreach (name; FieldNameTuple!ActualType) {
-                    static if (__traits(compiles, __traits(getMember, input, name)) && !hasUDA!(__traits(getMember,
-                            input, name), PrettyPrintIgnore) && __traits(getVisibility, __traits(getMember, input, name)) != "private") {
-                        builder ~= "\n";
+                {
+                    bool isFirst = true;
 
-                        handlePrefix(false, true, false);
-                        builder ~= name;
-                        builder ~= ": ";
-                        handle(__traits(getMember, input, name), true);
-                        builder ~= ",";
-                    }
-                }
+                    static foreach (name; FieldNameTuple!ActualType) {
+                        {
+                            alias member = __traits(getMember, input, name);
+                            bool ignore = __traits(getVisibility, member) == "private";
 
-                static if (is(ActualType == class)) {
-                    static foreach (i, Base; BaseClassesTuple!ActualType) {
-                        static foreach (name; FieldNameTuple!Base) {
-                            static if (!hasUDA!(__traits(getMember, input, name), PrettyPrintIgnore) &&
-                                    __traits(getVisibility, __traits(getMember, input, name)) != "private") {
+                            foreach (attr; __traits(getAttributes, member)) {
+                                ignore = ignore || is(attr == PrettyPrintIgnore);
+                            }
+
+                            static foreach (name2; FieldNameTuple!ActualType) {
+                                {
+                                    alias member2 = __traits(getMember, input, name2);
+
+                                    if (name != name2) {
+                                        ignore = ignore || member.offsetof == member2.offsetof;
+                                    }
+                                }
+                            }
+
+                            if (!ignore) {
+                                if (!isFirst)
+                                    builder ~= ", ";
+                                else
+                                    isFirst = false;
+
                                 builder ~= "\n";
 
                                 handlePrefix(false, true, false);
-                                builder ~= "---- ";
-                                builder ~= fullyQualifiedName!Base;
-                                builder ~= " ----";
+                                builder ~= name;
+                                builder ~= ": ";
+                                handle(__traits(getMember, input, name), true);
+                            }
+                        }
+                    }
 
-                                static if (__traits(compiles, __traits(getMember, input, name))) {
+                    static if (is(ActualType == class)) {
+                        static foreach (i, Base; BaseClassesTuple!ActualType) {
+                            handlePrefix(false, true, false);
+                            builder ~= "---- ";
+                            builder ~= fullyQualifiedName!Base;
+                            builder ~= " ----\n";
+                            isFirst = true;
+
+                            static foreach (name; FieldNameTuple!Base) {
+                                {
+                                    alias member = __traits(getMember, input, name);
+                                    bool ignore = __traits(getVisibility, member) == "private";
+
+                                    foreach (attr; __traits(getAttributes, member)) {
+                                        ignore = ignore || is(attr == PrettyPrintIgnore);
+                                    }
+
+                                    static foreach (name2; FieldNameTuple!ActualType) {
+                                        {
+                                            alias member2 = __traits(getMember, input, name2);
+
+                                            if (name != name2) {
+                                                ignore = ignore || member.offsetof == member2.offsetof;
+                                            }
+                                        }
+                                    }
+
+                                    if (!ignore) {
+                                        if (!isFirst)
+                                            builder ~= ", ";
+                                        else
+                                            isFirst = false;
+
+                                        builder ~= "\n";
+                                        handlePrefix(false, true, false);
+                                        builder ~= name;
+                                        builder ~= ": ";
+                                        handle(__traits(getMember, input, name), true);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                {
+                    bool isFirst = true;
+
+                    static foreach (name; FieldNameTuple!ActualType) {
+                        {
+                            alias member = __traits(getMember, input, name);
+                            bool accessible = __traits(getVisibility, member) == "private", ignore = accessible, overload;
+
+                            foreach (attr; __traits(getAttributes, member)) {
+                                ignore = ignore || is(attr == PrettyPrintIgnore);
+                            }
+
+                            static foreach (name2; FieldNameTuple!ActualType) {
+                                {
+                                    alias member2 = __traits(getMember, input, name2);
+
+                                    if (name != name2) {
+                                        ignore = ignore || member.offsetof == member2.offsetof;
+                                        overload = overload || member.offsetof == member2.offsetof;
+                                    }
+                                }
+                            }
+
+                            if (ignore) {
+                                if (isFirst) {
+                                    isFirst = false;
                                     builder ~= "\n";
+
                                     handlePrefix(false, true, false);
-                                    builder ~= name;
-                                    builder ~= ": ";
-                                    handle(__traits(getMember, input, name), true);
+                                    builder ~= "---- ignoring ----";
+                                } else
                                     builder ~= ",";
+
+                                builder ~= "\n";
+                                handlePrefix(false, true, false);
+
+                                if (accessible)
+                                    builder ~= "private ";
+                                if (overload)
+                                    builder ~= "union ";
+
+                                builder ~= name;
+                            }
+                        }
+                    }
+
+                    static if (is(ActualType == class)) {
+                        static foreach (i, Base; BaseClassesTuple!ActualType) {
+                            handlePrefix(false, true, false);
+                            builder ~= "---- ";
+                            builder ~= fullyQualifiedName!Base;
+                            builder ~= " ----\n";
+                            isFirst = true;
+
+                            static foreach (name; FieldNameTuple!Base) {
+                                {
+                                    alias member = __traits(getMember, input, name);
+                                    bool accessible = __traits(getVisibility, member) == "private", ignore = accessible, overload;
+
+                                    foreach (attr; __traits(getAttributes, member)) {
+                                        ignore = ignore || is(attr == PrettyPrintIgnore);
+                                    }
+
+                                    static foreach (name2; FieldNameTuple!ActualType) {
+                                        {
+                                            alias member2 = __traits(getMember, input, name2);
+
+                                            if (name != name2) {
+                                                ignore = ignore || member.offsetof == member2.offsetof;
+                                                overload = overload || member.offsetof == member2.offsetof;
+                                            }
+                                        }
+                                    }
+
+                                    if (ignore) {
+                                        if (isFirst) {
+                                            isFirst = false;
+                                            builder ~= "\n";
+
+                                            handlePrefix(false, true, false);
+                                            builder ~= "---- ignoring ----";
+                                        } else
+                                            builder ~= ",";
+
+                                        builder ~= "\n";
+                                        handlePrefix(false, true, false);
+
+                                        if (accessible)
+                                            builder ~= "private ";
+                                        if (overload)
+                                            builder ~= "union ";
+
+                                        builder ~= name;
+                                    }
                                 }
                             }
                         }
@@ -925,6 +1070,36 @@ scope @hidden:
             builder ~= "(";
             bool isFirst = true;
 
+            static foreach (name; FieldNameTuple!ActualType) {
+                {
+                    alias member = __traits(getMember, input, name);
+                    bool ignore;
+
+                    foreach (attr; __traits(getAttributes, member)) {
+                        ignore = ignore || is(attr == PrintIgnore) || is(attr == PrettyPrintIgnore);
+                    }
+
+                    static foreach (name2; FieldNameTuple!ActualType) {
+                        {
+                            alias member2 = __traits(getMember, input, name2);
+
+                            if (name != name2) {
+                                ignore = ignore || member.offsetof == member2.offsetof;
+                            }
+                        }
+                    }
+
+                    if (!ignore) {
+                        if (!isFirst)
+                            builder ~= ", ";
+                        else
+                            isFirst = false;
+
+                        this.write(String_ASCII.init, __traits(getMember, input, name), true);
+                    }
+                }
+            }
+
             static if (is(ActualType == class)) {
                 static foreach_reverse (i, Base; BaseClassesTuple!ActualType) {
                     static foreach (name; FieldNameTuple!Base) {
@@ -936,6 +1111,16 @@ scope @hidden:
                                 ignore = ignore || is(attr == PrintIgnore) || is(attr == PrettyPrintIgnore);
                             }
 
+                            static foreach (name2; FieldNameTuple!Base) {
+                                {
+                                    alias member2 = __traits(getMember, cast(Base)input, name2);
+
+                                    if (name != name2) {
+                                        ignore = ignore || member.offsetof == member2.offsetof;
+                                    }
+                                }
+                            }
+
                             if (!ignore) {
                                 if (!isFirst)
                                     builder ~= ", ";
@@ -945,26 +1130,6 @@ scope @hidden:
                                 this.write(String_ASCII.init, __traits(getMember, cast(Base)input, name), true);
                             }
                         }
-                    }
-                }
-            }
-
-            static foreach (name; FieldNameTuple!ActualType) {
-                {
-                    alias member = __traits(getMember, input, name);
-                    bool ignore;
-
-                    foreach (attr; __traits(getAttributes, member)) {
-                        ignore = ignore || is(attr == PrintIgnore) || is(attr == PrettyPrintIgnore);
-                    }
-
-                    if (!ignore) {
-                        if (!isFirst)
-                            builder ~= ", ";
-                        else
-                            isFirst = false;
-
-                        this.write(String_ASCII.init, __traits(getMember, input, name), true);
                     }
                 }
             }
