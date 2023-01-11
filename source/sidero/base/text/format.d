@@ -522,6 +522,24 @@ private @hidden:
 
                 parent.depth--;
                 builder ~= "]";
+            } else static if (is(ActualType == enum)) {
+                import std.traits : OriginalType;
+
+                enum FQN = fullyQualifiedName!ActualType;
+                builder ~= FQN;
+
+                static foreach (m; __traits(allMembers, ActualType)) {
+                    if (__traits(getMember, ActualType, m) == input) {
+                        builder ~= "."c;
+                        builder ~= m;
+                        goto Done;
+                    }
+                }
+
+                builder ~= "("c;
+                handle(cast(OriginalType!ActualType)input, useQuotes, useName, forcePrint);
+                builder ~= ")"c;
+            Done:
             } else {
                 builder.formattedWrite(String_ASCII.init, input);
             }
@@ -770,6 +788,23 @@ scope @hidden:
                 builder ~= "\"";
         } else static if (isStaticArray!ActualType && (isSomeString!(typeof(ActualType.init[])))) {
             this.write(format, input[], true);
+        } else static if (is(ActualType == enum)) {
+            import std.traits : OriginalType;
+
+            builder ~= __traits(identifier, ActualType);
+
+            static foreach (m; __traits(allMembers, ActualType)) {
+                if (__traits(getMember, ActualType, m) == input) {
+                    builder ~= "."c;
+                    builder ~= m;
+                    goto Done;
+                }
+            }
+
+            builder ~= "("c;
+            write(format, cast(OriginalType!ActualType)input, needQuotes);
+            builder ~= ")"c;
+        Done:
         } else static if (isBasicType!ActualType || isPointer!ActualType) {
             static if (isSomeChar!ActualType) {
                 if (needQuotes)
