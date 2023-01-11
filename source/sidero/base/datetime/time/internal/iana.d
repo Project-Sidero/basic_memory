@@ -1,15 +1,13 @@
+// unsupported Android < 2018e
 module sidero.base.datetime.time.iana;
 import sidero.base.containers.map.concurrenthashmap;
 import sidero.base.containers.dynamicarray;
 import sidero.base.text;
 import sidero.base.errors;
-import sidero.base.parallelism.mutualexclusion : TestTestSetLockInline;
 
-@safe nothrow @nogc:
+package(sidero.base.datetime) @safe nothrow @nogc:
 
 void reloadTZ() @trusted {
-    mutex.pureLock;
-
     version (Android) {
         const wasAndroid = androidFileSize > 0 || tzDatabase.length == 0;
     } else {
@@ -21,7 +19,6 @@ void reloadTZ() @trusted {
     androidFileSize = 0;
 
     String_UTF8 path = loadedPath;
-    mutex.unlock;
 
     if (wasAndroid)
         loadForAndroid(path);
@@ -29,25 +26,13 @@ void reloadTZ() @trusted {
         loadStandard(path);
 }
 
-void loadTZ() {
-    version (Android) {
-        loadForAndroid;
-    } else {
-        loadStandard;
-    }
-}
-
 void loadForAndroid(scope String_UTF8 path = String_UTF8.init) @trusted {
     import sidero.base.internal.filesystem;
     import sidero.base.allocators;
     import std.bitmanip : bigEndianToNative;
 
-    mutex.pureLock;
-    scope (exit)
-        mutex.unlock;
-
     if (path.length == 0)
-        path = String_UTF8(DefaultTZDirectory);
+        path = getDefaultTZDirectory();
 
     // The Android file format for tzdata is documented in ZoneCompactor.java
     // available here: https://android.googlesource.com/platform/system/timezone/+/master/input_tools/android/zone_compactor/main/java/ZoneCompactor.java
@@ -169,12 +154,8 @@ void loadForAndroid(scope String_UTF8 path = String_UTF8.init) @trusted {
 void loadStandard(scope String_UTF8 path = String_UTF8.init) @trusted {
     import sidero.base.internal.filesystem;
 
-    mutex.pureLock;
-    scope (exit)
-        mutex.unlock;
-
     if (path.length == 0)
-        path = String_UTF8(DefaultTZDirectory);
+        path = getDefaultTZDirectory();
     loadedPath = path.dup;
 
     void readRegions(scope ref size_t length, scope string zoneFile) {
@@ -256,13 +237,11 @@ void loadStandard(scope String_UTF8 path = String_UTF8.init) @trusted {
 }
 
 ResultReference!TZFile lookupTZ(scope String_UTF8 zone) @trusted {
-    mutex.pureLock;
     reloadTZ;
 
     auto name = posixTZToIANA.get(zone, zone);
     auto ret = tzDatabase[name];
 
-    mutex.unlock;
     return ret;
 }
 
@@ -278,7 +257,7 @@ struct TZFile {
     DynamicArray!bool dstTransitionLocalTimeAreUTCOrLocal;
     String_UTF8 tzString;
 
-    @safe nothrow @nogc:
+@safe nothrow @nogc:
 
     this(scope return ref TZFile other) scope {
         this.tupleof = other.tupleof;
@@ -306,22 +285,39 @@ struct TZFile {
 private:
 
 __gshared {
-    TestTestSetLockInline mutex;
     size_t androidFileSize, zoneTabLength, zone1970TabLength;
-    String_UTF8 loadedPath;
+    String_UTF8 loadedPath, defaultTZDirectory;
     ConcurrentHashMap!(String_UTF8, TZFile) tzDatabase;
     ConcurrentHashMap!(String_UTF8, String_UTF8) posixTZToIANA;
 }
 
-// default directories are copied straight from Phobos
-version (Android) {
-    enum DefaultTZDirectory = "/system/usr/share/zoneinfo/";
-} else version (Solaris) {
-    enum DefaultTZDirectory = "/usr/share/lib/zoneinfo/";
-} else version (Posix) {
-    enum DefaultTZDirectory = "/usr/share/zoneinfo/";
-} else {
-    enum DefaultTZDirectory = "";
+String_UTF8 getDefaultTZDirectory() @trusted {
+    import sidero.base.system : EnvironmentVariables;
+
+    // default directories are copied straight from Phobos
+    version (Android) {
+        enum DefaultTZDirectory = "/system/usr/share/zoneinfo/";
+    } else version (Solaris) {
+        enum DefaultTZDirectory = "/usr/share/lib/zoneinfo/";
+    } else version (Posix) {
+        enum DefaultTZDirectory = "/usr/share/zoneinfo/";
+    } else {
+        enum DefaultTZDirectory = "";
+    }
+
+    // env var $TZDIR
+
+    if (defaultTZDirectory.isNull) {
+        String_UTF8 tzdir = EnvironmentVariables[String_UTF8("TZDIR\0")];
+
+        if (tzdir.length > 0) {
+            defaultTZDirectory = tzdir;
+        } else {
+            defaultTZDirectory = DefaultTZDirectory;
+        }
+    }
+
+    return defaultTZDirectory;
 }
 
 TZFile loadTZ(scope DynamicArray!ubyte rawFileRead, scope return String_UTF8 region) @trusted {
