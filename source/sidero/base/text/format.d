@@ -1181,6 +1181,11 @@ scope @hidden:
             } else {
                 this.write(String_ASCII("0x%X\0"), cast(void*)input, true);
             }
+        } else static if (is(ActualType == delegate)) {
+            builder ~= ActualType.stringof ~ "@(";
+            this.write(String_ASCII("context: 0x%X\0, "), cast(void*)input.ptr, true);
+            this.write(String_ASCII("function pointer: 0x%X\0"), cast(void*)input.funcptr, true);
+            builder ~= ")";
         } else
             pragma(msg, "Attempting to formatWrite " ~ Input.stringof ~ " but it is currently unimplemented in " ~ __MODULE__);
     }
