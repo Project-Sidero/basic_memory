@@ -471,8 +471,6 @@ export @safe nothrow @nogc:
 
 private @hidden:
     void timezoneCheck(Delegate)(scope Delegate callback) scope @trusted {
-        // TODO: leap seconds! applies at end of month
-
         auto temp = this.asGregorian();
         const oldYear = temp.year;
         const oldBias = this.timezone_.currentSecondsBias(temp);
@@ -482,7 +480,7 @@ private @hidden:
         temp = this.asGregorian();
 
         if (temp.year != oldYear)
-            this.timezone_ = this.timezone_.forYear(this.timezone_, temp.year);
+            this.timezone_ = this.timezone_.forYear(temp.year);
         const newBias = this.timezone_.currentSecondsBias(temp);
 
         if (oldBias != newBias) {

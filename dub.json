@@ -85,8 +85,9 @@
                 "--fvisibility=public",
                 "--linkonce-templates"
             ],
+            "libs-windows": ["Ws2_32", "advapi32"],
+            "versions": ["Windows7"],
             "dependencies": {
-            "libs-windows": ["Ws2_32"],
                 "sidero_base:makeUnicodeTables": "*"
             }
         }

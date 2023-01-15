@@ -1,5 +1,6 @@
 // unsupported Android < 2018e
-module sidero.base.datetime.time.iana;
+module sidero.base.datetime.time.internal.iana;
+import sidero.base.datetime.time.timezone;
 import sidero.base.containers.map.concurrenthashmap;
 import sidero.base.containers.dynamicarray;
 import sidero.base.text;
@@ -7,16 +8,21 @@ import sidero.base.errors;
 
 package(sidero.base.datetime) @safe nothrow @nogc:
 
-void reloadTZ() @trusted {
+void reloadTZ(bool forceReload = true) @trusted {
     version (Android) {
         const wasAndroid = androidFileSize > 0 || tzDatabase.length == 0;
     } else {
         const wasAndroid = androidFileSize > 0;
     }
 
-    tzDatabase.clear;
-    posixTZToIANA.clear;
-    androidFileSize = 0;
+    // if we have a database and not forced to reload,
+    //  the load functions won't load if it can avoid it
+    //  so just not clearing state is enough to do it lazily
+    if (forceReload || tzDatabase.length == 0) {
+        tzDatabase.clear;
+        posixTZToIANA.clear;
+        androidFileSize = 0;
+    }
 
     String_UTF8 path = loadedPath;
 
@@ -143,7 +149,9 @@ void loadForAndroid(scope String_UTF8 path = String_UTF8.init) @trusted {
             auto sliced = rawFileRead[offsetTo .. offsetTo + lengthOfZone];
             assert(sliced);
 
-            tzDatabase[region] = loadTZ(sliced, region);
+            TZFile ret;
+            loadTZ(sliced, region, ret);
+            tzDatabase[region] = ret;
         }
     }
 
@@ -232,53 +240,41 @@ void loadStandard(scope String_UTF8 path = String_UTF8.init) @trusted {
 
         String_UTF8 filename = (path ~ region.get).asReadOnly;
         auto rawFileRead = readFile!ubyte(filename, value.fileSize);
-        value = loadTZ(rawFileRead, region.get);
+
+        TZFile loaded;
+        loadTZ(rawFileRead, region.get, loaded);
+        value = loaded;
     }
 }
 
-ResultReference!TZFile lookupTZ(scope String_UTF8 zone) @trusted {
-    reloadTZ;
+Result!IanaTZBase findIANATimeZone(scope String_UTF8 zone) @trusted {
+    reloadTZ(false);
 
     auto name = posixTZToIANA.get(zone, zone);
     auto ret = tzDatabase[name];
 
-    return ret;
+    if (!ret)
+        return typeof(return)(ret.error);
+
+    IanaTZBase temp;
+    temp.tzFile = ret;
+
+    return typeof(return)(temp);
 }
 
-struct TZFile {
-    size_t fileSize;
-    ubyte version_;
-
-    DynamicArray!DaylightTransition transitionIntoDaylight;
-    DynamicArray!Ttinfo ttinfo;
-    String_UTF8 designators;
-    DynamicArray!LeapSecond leapSecond;
-    DynamicArray!bool dstTransitionInStandardOrWallClock;
-    DynamicArray!bool dstTransitionLocalTimeAreUTCOrLocal;
-    String_UTF8 tzString;
+struct IanaTZBase {
+    ResultReference!TZFile tzFile;
 
 @safe nothrow @nogc:
 
-    this(scope return ref TZFile other) scope {
+    this(scope return ref IanaTZBase other) scope @trusted {
         this.tupleof = other.tupleof;
     }
 
-    static struct DaylightTransition {
-        // Seconds since Unix Epoch
-        long appliesOn;
-        ubyte indexInto_ttinfo;
-    }
+package(sidero.base.datetime):
 
-    static struct Ttinfo {
-        int tt_utoff;
-        bool tt_isdst;
-        // See_Also: designators
-        ubyte tt_desigidx;
-    }
-
-    static struct LeapSecond {
-        long appliesOn;
-        int amount;
+    Result!TimeZone forYear(long year) @trusted {
+        assert(0);
     }
 }
 
@@ -320,13 +316,16 @@ String_UTF8 getDefaultTZDirectory() @trusted {
     return defaultTZDirectory;
 }
 
-TZFile loadTZ(scope DynamicArray!ubyte rawFileRead, scope return String_UTF8 region) @trusted {
+void loadTZ(scope DynamicArray!ubyte rawFileRead, scope return String_UTF8 region, ref TZFile tzFile) @trusted {
     import sidero.base.internal.filesystem;
     import sidero.base.allocators;
     import std.bitmanip : bigEndianToNative;
 
-    auto tzFile = tzDatabase.get(region, TZFile.init);
-    assert(tzFile);
+    {
+        auto acquired = tzDatabase.get(region, TZFile.init);
+        assert(acquired);
+        tzFile = acquired.get;
+    }
 
     void skipBytes(size_t amount) {
         auto temp = rawFileRead[amount .. $];
@@ -410,28 +409,112 @@ TZFile loadTZ(scope DynamicArray!ubyte rawFileRead, scope return String_UTF8 reg
             tzh_timecnt = readValue!uint, tzh_typecnt = readValue!uint, tzh_charcnt = readValue!uint;
 
         {
-            tzFile.transitionIntoDaylight.reserve(tzh_timecnt);
+            tzFile.transitions.reserve(tzh_timecnt);
             foreach (i; 0 .. tzh_timecnt) {
-                tzFile.transitionIntoDaylight ~= TZFile.DaylightTransition(readValue!SizeOfTime);
+                tzFile.transitions ~= TZFile.Transition(readValue!SizeOfTime);
             }
 
             foreach (i; 0 .. tzh_timecnt) {
-                auto got = tzFile.transitionIntoDaylight[i];
+                auto got = tzFile.transitions[i];
                 assert(got);
 
-                got.indexInto_ttinfo = readValue!ubyte;
-                tzFile.transitionIntoDaylight[i] = got;
+                got.postTransitionInfoOffset = readValue!ubyte;
+                tzFile.transitions[i] = got;
             }
         }
 
         {
-            tzFile.ttinfo.reserve(tzh_typecnt);
+            tzFile.postTransitionInfo.reserve(tzh_typecnt);
             foreach (i; 0 .. tzh_typecnt) {
-                tzFile.ttinfo ~= TZFile.Ttinfo(readValue!int, readValue!bool, readValue!ubyte);
+                tzFile.postTransitionInfo ~= TZFile.PostTransitionInfo(readValue!int, readValue!bool, readValue!ubyte);
             }
         }
 
-        tzFile.designators = readUTF8(tzh_charcnt);
+        {
+            String_UTF8 designators = readUTF8(tzh_charcnt);
+
+            version (none) {
+                DynamicArray!String_UTF8 allDesignatorsBuffer;
+
+                while (designators.length > 0) {
+                    ptrdiff_t indexOfZero = designators.indexOf("\0\0"c);
+                    String_UTF8 designator;
+
+                    if (indexOfZero < 0) {
+                        designator = designators;
+                        designators = String_UTF8.init;
+                    } else {
+                        designator = designators[0 .. indexOfZero + 1];
+                        designators = designators[indexOfZero + 1 .. $];
+                    }
+
+                    allDesignatorsBuffer ~= designator;
+                }
+
+                foreach (offset, pti; tzFile.postTransitionInfo) {
+                    if (allDesignatorsBuffer.length > pti.designatorOffset) {
+                        auto got = allDesignatorsBuffer[pti.designatorOffset];
+                        assert(got);
+                        pti.designator = got;
+
+                        if (got.length > 0)
+                            tzFile.postTransitionInfo[offset] = pti;
+                    }
+                }
+            }
+
+            // this is the fastest approach :(
+            version (all) {
+                foreach (offset, pti; tzFile.postTransitionInfo) {
+                    String_UTF8 designator = designators;
+                    size_t wanted = pti.designatorOffset;
+                    ptrdiff_t index;
+
+                    while (wanted > 0 && designator.length > 0) {
+                        index = designator.indexOf("\0");
+                        if (index >= 0)
+                            designator = designator[index + 1 .. $];
+                        wanted--;
+                    }
+
+                    if (wanted == 0 && designator.length > 0) {
+                        index = designator.indexOf("\0");
+                        if (index >= 0)
+                            designator = designator[0 .. index + 1];
+                        pti.designator = designator;
+
+                        if (designator.length > 0)
+                            tzFile.postTransitionInfo[offset] = pti;
+                    }
+                }
+            }
+
+            version (none) {
+                ubyte designatorIndex;
+
+                while (designators.length > 0) {
+                    ptrdiff_t indexOfZero = designators.indexOf("\0\0"c);
+                    String_UTF8 designator;
+
+                    if (indexOfZero < 0) {
+                        designator = designators;
+                        designators = String_UTF8.init;
+                    } else {
+                        designator = designators[0 .. indexOfZero + 1];
+                        designators = designators[indexOfZero + 1 .. $];
+                    }
+
+                    foreach (offset, pti; tzFile.postTransitionInfo) {
+                        if (pti.designatorOffset == designatorIndex) {
+                            pti.designator = designator;
+                            tzFile.postTransitionInfo[offset] = pti;
+                        }
+                    }
+
+                    designatorIndex++;
+                }
+            }
+        }
 
         {
             tzFile.leapSecond.reserve(tzh_leapcnt);
@@ -486,5 +569,49 @@ TZFile loadTZ(scope DynamicArray!ubyte rawFileRead, scope return String_UTF8 reg
     }
 
 End:
-    return tzFile;
+}
+
+struct TZFile {
+    size_t fileSize;
+    ubyte version_;
+
+    DynamicArray!Transition transitions;
+    DynamicArray!PostTransitionInfo postTransitionInfo;
+    DynamicArray!LeapSecond leapSecond;
+    DynamicArray!bool dstTransitionInStandardOrWallClock;
+    DynamicArray!bool dstTransitionLocalTimeAreUTCOrLocal;
+    String_UTF8 tzString;
+
+@safe nothrow @nogc:
+
+    this(scope return ref TZFile other) scope {
+        this.tupleof = other.tupleof;
+    }
+
+    static struct Transition {
+        // Seconds since Unix Epoch
+        long appliesOn;
+        ubyte postTransitionInfoOffset;
+    }
+
+    static struct PostTransitionInfo {
+        int utcOffset;
+        bool isDstActive;
+
+        // ignore this, its just a temporary, prefer designator field instead
+        ubyte designatorOffset;
+
+        String_UTF8 designator;
+
+    @safe nothrow @nogc:
+
+        this(scope return ref PostTransitionInfo other) scope {
+            this.tupleof = other.tupleof;
+        }
+    }
+
+    static struct LeapSecond {
+        long appliesOn;
+        int amount;
+    }
 }

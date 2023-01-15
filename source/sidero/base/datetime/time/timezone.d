@@ -1,3 +1,8 @@
+/**
+
+Does not support leap seconds!
+
+*/
 module sidero.base.datetime.time.timezone;
 import sidero.base.datetime.calendars.gregorian;
 import sidero.base.datetime.time.timeofday;
@@ -18,10 +23,27 @@ export @safe nothrow @nogc:
 
 ///
 struct TimeZone {
-    private {
+    package(sidero.base.datetime) {
+        // FIXME: heap allocate all of this state!
+        import sidero.base.datetime.time.internal.iana;
+        import sidero.base.datetime.time.internal.posix;
+        import sidero.base.datetime.time.internal.windows;
+
         Bias standardOffset_, daylightSavingsOffset_;
         String_UTF8 standardName_, daylightSavingsName_, ianaName_;
-        bool haveDaylightSavings_, isSet_;
+        bool haveDaylightSavings_;
+
+        Source source;
+        WindowsTimeZoneBase windowsBase;
+        IanaTZBase ianaTZBase;
+
+        enum Source {
+            NotSet,
+            Fixed,
+            Windows,
+            IANA,
+            PosixRule
+        }
     }
 
     ///
@@ -31,11 +53,11 @@ export @safe nothrow @nogc:
 
     ///
     bool isNull() scope const {
-        return !this.isSet_;
+        return this.source == Source.NotSet;
     }
 
     ///
-    void opAssign(scope return TimeZone other) scope {
+    void opAssign(scope return TimeZone other) scope @trusted {
         this.tupleof = other.tupleof;
     }
 
@@ -71,8 +93,7 @@ export @safe nothrow @nogc:
         else if (this.standardOffset_.appliesOn > this.daylightSavingsOffset_.appliesOn)
             return this.standardOffset_.appliesOn > date;
         else {
-            auto next = TimeZone.from((cast(TimeZone)this).standardName_, standardOffset_.appliesOn.year + 1);
-            assert(next);
+            auto next = (cast(TimeZone)this).forYear(standardOffset_.appliesOn.year + 1);
             return date < next.standardOffset_.appliesOn;
         }
     }
@@ -83,12 +104,14 @@ export @safe nothrow @nogc:
     }
 
     /// Get a version of this time zone for a given year, if available otherwise return this.
-    TimeZone forYear(scope return TimeZone timeZone, long year) scope @trusted {
-        TimeZone attempt = TimeZone.from(this.ianaName_, year);
+    TimeZone forYear(long year) scope @trusted {
+        // TODO
+        /+TimeZone attempt = TimeZone.from(this.ianaName_, year);
 
         if (!attempt.isNull)
             return attempt;
-        return this;
+        return this;+/
+        assert(0);
     }
 
     ///
@@ -192,39 +215,41 @@ export @safe nothrow @nogc:
         return true;
     }
 
-    ///
-    static Result!TimeZone local() @trusted {
-        mutex.pureLock;
-        auto ret = localTimeZone;
+    version (none) {
+        ///
+        static Result!TimeZone local() @trusted {
+            mutex.pureLock;
+            auto ret = localTimeZone;
 
-        mutex.unlock;
-        return ret;
-    }
+            mutex.unlock;
+            return ret;
+        }
 
-    /// Supports Windows and IANA names
-    static Result!TimeZone from(scope String_UTF8 wantedName, long year) @trusted {
-        mutex.pureLock;
+        /// Supports Windows and IANA names
+        static Result!TimeZone from(scope String_UTF8 wantedName, long year) @trusted {
+            mutex.pureLock;
 
-        auto ret = getTimeZone(wantedName, year);
-        ret.isSet_ = true;
+            auto ret = getTimeZone(wantedName, year);
+            ret.isSet_ = true;
 
-        mutex.unlock;
-        return ret;
-    }
+            mutex.unlock;
+            return ret;
+        }
 
-    /// Ditto
-    static Result!TimeZone from(scope String_UTF16 wantedName, long year) @trusted {
-        return TimeZone.from(wantedName.byUTF8, year);
-    }
+        /// Ditto
+        static Result!TimeZone from(scope String_UTF16 wantedName, long year) @trusted {
+            return TimeZone.from(wantedName.byUTF8, year);
+        }
 
-    /// Ditto
-    static Result!TimeZone from(scope String_UTF32 wantedName, long year) @trusted {
-        return TimeZone.from(wantedName.byUTF8, year);
-    }
+        /// Ditto
+        static Result!TimeZone from(scope String_UTF32 wantedName, long year) @trusted {
+            return TimeZone.from(wantedName.byUTF8, year);
+        }
 
-    /// Ditto
-    static Result!TimeZone from(String)(scope String wantedName, long year) @trusted if (isSomeString!String) {
-        return TimeZone.from(String_UTF8(wantedName), year);
+        /// Ditto
+        static Result!TimeZone from(String)(scope String wantedName, long year) @trusted if (isSomeString!String) {
+            return TimeZone.from(String_UTF8(wantedName), year);
+        }
     }
 
     /// Seconds bias (UTC-1:30 would be -5400).
@@ -247,9 +272,9 @@ export @safe nothrow @nogc:
             }
 
             ret.ianaName_ = builder.asReadOnly;
+            ret.source = Source.Fixed;
         }
 
-        ret.isSet_ = true;
         return ret;
     }
 
@@ -301,188 +326,5 @@ import sidero.base.parallelism.mutualexclusion : TestTestSetLockInline;
 
 __gshared {
     TestTestSetLockInline mutex;
-    bool useWindows, useTZ;
-}
-
-version (Windows) {
-    import core.sys.windows.windows : DWORD, LONG, WCHAR, SYSTEMTIME, BOOLEAN, BOOL, USHORT, ERROR_NO_MORE_ITEMS,
-        ERROR_SUCCESS, TIME_ZONE_INFORMATION, GetTimeZoneInformation, GetSystemTime;
-
-    struct DYNAMIC_TIME_ZONE_INFORMATION {
-        LONG Bias;
-        WCHAR[32] StandardName;
-        SYSTEMTIME StandardDate;
-        LONG StandardBias;
-        WCHAR[32] DaylightName;
-        SYSTEMTIME DaylightDate;
-        LONG DaylightBias;
-        WCHAR[128] TimeZoneKeyName;
-        BOOLEAN DynamicDaylightTimeDisabled;
-    }
-
-    extern (Windows) DWORD EnumDynamicTimeZoneInformation(const DWORD, DYNAMIC_TIME_ZONE_INFORMATION*) nothrow @nogc;
-    extern (Windows) BOOL GetTimeZoneInformationForYear(USHORT, DYNAMIC_TIME_ZONE_INFORMATION*, TIME_ZONE_INFORMATION*) nothrow @nogc;
-}
-
-Result!TimeZone localTimeZone() @trusted nothrow @nogc {
-    TimeZone ret;
-
-    version (Windows) {
-        if (useWindows) {
-            import core.stdc.wchar_ : wcslen;
-
-            TIME_ZONE_INFORMATION tzi;
-            GetTimeZoneInformation(&tzi);
-
-            SYSTEMTIME systime;
-            GetSystemTime(&systime);
-            long year = systime.wYear;
-
-            wchar[] name16Standard = tzi.StandardName[0 .. wcslen(tzi.StandardName.ptr)],
-                name16Daylight = tzi.DaylightName[0 .. wcslen(tzi.DaylightName.ptr)];
-            ret.standardName_ = String_UTF8(name16Standard).dup;
-            ret.daylightSavingsName_ = String_UTF8(name16Daylight).dup;
-
-            {
-                import sidero.base.datetime.cldr;
-
-                auto windowsName = ret.standardName_;
-                windowsName.stripZeroTerminator;
-
-                ret.ianaName_ = String_UTF8(windowsToIANA(cast(string)windowsName.unsafeGetLiteral));
-            }
-
-            ret.standardOffset_.seconds = tzi.StandardBias * 60;
-            ret.standardOffset_.appliesOnDate = GregorianDate(year, cast(ubyte)tzi.StandardDate.wMonth, cast(ubyte)tzi.StandardDate.wDay);
-            ret.standardOffset_.appliesOnTime = TimeOfDay(cast(ubyte)tzi.StandardDate.wHour,
-                    cast(ubyte)tzi.StandardDate.wMinute, cast(ubyte)tzi.StandardDate.wSecond,
-                    cast(uint)(tzi.StandardDate.wMilliseconds * 1000));
-            ret.haveDaylightSavings_ = tzi.StandardDate.wMonth != 0;
-
-            if (ret.haveDaylightSavings_) {
-                ret.daylightSavingsOffset_.seconds = tzi.DaylightBias * 60;
-                ret.daylightSavingsOffset_.appliesOnDate = GregorianDate(year, cast(ubyte)tzi.DaylightDate.wMonth,
-                        cast(ubyte)tzi.DaylightDate.wDay);
-                ret.daylightSavingsOffset_.appliesOnTime = TimeOfDay(cast(ubyte)tzi.DaylightDate.wHour,
-                        cast(ubyte)tzi.DaylightDate.wMinute, cast(ubyte)tzi.DaylightDate.wSecond,
-                        cast(uint)(tzi.DaylightDate.wMilliseconds * 1000));
-            }
-
-            return typeof(return)(ret);
-        }
-    }
-
-    if (useTZ) {
-
-        return typeof(return)(ret);
-    }
-
-    return typeof(return)(NoTimeZoneDatabaseException);
-}
-
-Result!TimeZone getTimeZone(scope String_UTF8 wantedName, long year) @trusted nothrow @nogc {
-    import sidero.base.datetime.cldr;
-
-    TimeZone ret;
-
-    if (wantedName.isNull)
-        return typeof(return)(NullPointerException("Name of timezone must not be null"));
-
-    String_UTF8 windowsName, ianaName;
-
-    {
-        if (wantedName.isEncodingChanged)
-            wantedName = wantedName.dup;
-        wantedName.stripZeroTerminator();
-
-        String_UTF8 temp = String_UTF8(ianaToWindows(cast(string)wantedName.unsafeGetLiteral()));
-
-        if (temp.isNull)
-            windowsName = wantedName;
-        else
-            windowsName = temp;
-        windowsName.stripZeroTerminator();
-
-        temp = String_UTF8(windowsToIANA(cast(string)wantedName.unsafeGetLiteral()));
-
-        if (temp.isNull)
-            ianaName = wantedName;
-        else
-            ianaName = temp;
-        ianaName.stripZeroTerminator();
-    }
-
-    version (Windows) {
-        if (useWindows) {
-            import core.stdc.wchar_ : wcslen;
-
-            DWORD dwResult, offset;
-            DYNAMIC_TIME_ZONE_INFORMATION dynamicTimeZone;
-
-            do {
-                dwResult = EnumDynamicTimeZoneInformation(offset++, &dynamicTimeZone);
-
-                if (dwResult == ERROR_SUCCESS) {
-                    wchar[] name16Standard = dynamicTimeZone.StandardName[0 .. wcslen(dynamicTimeZone.StandardName.ptr)],
-                        name16Daylight = dynamicTimeZone.DaylightName[0 .. wcslen(dynamicTimeZone.DaylightName.ptr)];
-
-                    if (ianaName == name16Standard || ianaName == name16Daylight || windowsName == name16Standard ||
-                            windowsName == name16Daylight) {
-                        ret.standardName_ = String_UTF8(name16Standard).dup;
-                        ret.daylightSavingsName_ = String_UTF8(name16Daylight).dup;
-                        ret.ianaName_ = ianaName;
-
-                        TIME_ZONE_INFORMATION tzi;
-
-                        if ((year >= 0 || year <= ushort.max) && GetTimeZoneInformationForYear(cast(ushort)year,
-                                &dynamicTimeZone, &tzi) != 0) {
-                            ret.standardOffset_.seconds = tzi.StandardBias * 60;
-                            ret.standardOffset_.appliesOnDate = GregorianDate(year, cast(ubyte)tzi.StandardDate.wMonth,
-                                    cast(ubyte)tzi.StandardDate.wDay);
-                            ret.standardOffset_.appliesOnTime = TimeOfDay(cast(ubyte)tzi.StandardDate.wHour,
-                                    cast(ubyte)tzi.StandardDate.wMinute, cast(ubyte)tzi.StandardDate.wSecond,
-                                    cast(uint)(tzi.StandardDate.wMilliseconds * 1000));
-                            ret.haveDaylightSavings_ = tzi.StandardDate.wMonth != 0;
-
-                            if (ret.haveDaylightSavings_) {
-                                ret.daylightSavingsOffset_.seconds = tzi.DaylightBias * 60;
-                                ret.daylightSavingsOffset_.appliesOnDate = GregorianDate(year,
-                                        cast(ubyte)tzi.DaylightDate.wMonth, cast(ubyte)tzi.DaylightDate.wDay);
-                                ret.daylightSavingsOffset_.appliesOnTime = TimeOfDay(cast(ubyte)tzi.DaylightDate.wHour,
-                                        cast(ubyte)tzi.DaylightDate.wMinute, cast(ubyte)tzi.DaylightDate.wSecond,
-                                        cast(uint)(tzi.DaylightDate.wMilliseconds * 1000));
-                            }
-                        } else {
-                            ret.standardOffset_.seconds = dynamicTimeZone.StandardBias * 60;
-                            ret.standardOffset_.appliesOnDate = GregorianDate(year,
-                                    cast(ubyte)dynamicTimeZone.StandardDate.wMonth, cast(ubyte)dynamicTimeZone.StandardDate.wDay);
-                            ret.standardOffset_.appliesOnTime = TimeOfDay(cast(ubyte)dynamicTimeZone.StandardDate.wHour,
-                                    cast(ubyte)dynamicTimeZone.StandardDate.wMinute, cast(ubyte)dynamicTimeZone.StandardDate.wSecond,
-                                    cast(uint)(dynamicTimeZone.StandardDate.wMilliseconds * 1000));
-                            ret.haveDaylightSavings_ = dynamicTimeZone.StandardDate.wMonth != 0;
-
-                            if (ret.haveDaylightSavings_) {
-                                ret.daylightSavingsOffset_.seconds = dynamicTimeZone.DaylightBias * 60;
-                                ret.daylightSavingsOffset_.appliesOnDate = GregorianDate(year,
-                                        cast(ubyte)dynamicTimeZone.DaylightDate.wMonth, cast(ubyte)dynamicTimeZone.DaylightDate.wDay);
-                                ret.daylightSavingsOffset_.appliesOnTime = TimeOfDay(cast(ubyte)dynamicTimeZone.DaylightDate.wHour,
-                                        cast(ubyte)dynamicTimeZone.DaylightDate.wMinute, cast(ubyte)dynamicTimeZone.DaylightDate.wSecond,
-                                        cast(uint)(dynamicTimeZone.DaylightDate.wMilliseconds * 1000));
-                            }
-                        }
-
-                        return typeof(return)(ret);
-                    }
-                }
-            }
-            while (dwResult != ERROR_NO_MORE_ITEMS);
-        }
-    }
-
-    if (useTZ) {
-        // TODO
-        return typeof(return)(ret);
-    }
-
-    return typeof(return)(NoTimeZoneDatabaseException);
+    bool useWindows, useIANA, usePosix;
 }

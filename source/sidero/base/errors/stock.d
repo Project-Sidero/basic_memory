@@ -17,4 +17,6 @@ enum {
             "Argument provided does not map into state"),
     ///
     TimeOutException = ErrorMessage("TOE", "Timeout exception"),
+    ///
+    PlatformNotImplementedException = ErrorMessage("PNIE", "Platform is not implemented"),
 }
