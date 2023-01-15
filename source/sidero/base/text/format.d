@@ -211,9 +211,9 @@ private @hidden:
                             builder ~= "@null";
                         } else {
                             static if (is(SubType == class) || isAssociativeArray!SubType) {
-                                builder.formattedWrite!"@%X"(cast(size_t)cast(void*)*input);
+                                builder.formattedWrite("@" ~ DefaultFormatForPointer, cast(size_t)cast(void*)*input);
                             } else static if (isArray!SubType) {
-                                builder.formattedWrite!"@%X"(cast(size_t)(*input).ptr);
+                                builder.formattedWrite("@" ~ DefaultFormatForPointer, cast(size_t)(*input).ptr);
                             }
                         }
                     }
@@ -225,7 +225,7 @@ private @hidden:
                 if (input is null)
                     builder ~= "@null";
                 else {
-                    builder.formattedWrite!"@%X"(cast(size_t)input);
+                    builder.formattedWrite("@" ~ DefaultFormatForPointer, cast(size_t)input);
 
                     static if (!is(SubType == void)) {
                         handle(*input, true, false);
@@ -253,7 +253,7 @@ private @hidden:
                         if (input is null)
                             builder ~= "@null";
                         else
-                            builder.formattedWrite("@%X", cast(size_t)cast(void*)input);
+                            builder.formattedWrite("@" ~ DefaultFormatForPointer, cast(size_t)cast(void*)input);
                     }
                 }
 
@@ -561,7 +561,7 @@ private @hidden:
                                 if (input is null)
                                     builder ~= "@null";
                                 else
-                                    builder.formattedWrite("@%X", cast(size_t)input.ptr);
+                                    builder.formattedWrite("@" ~ DefaultFormatForPointer, cast(size_t)input.ptr);
                             }
                         }
 
@@ -599,7 +599,7 @@ private @hidden:
                             if (input is null)
                                 builder ~= "@null";
                             else
-                                builder.formattedWrite("@%X", cast(size_t)input.ptr);
+                                builder.formattedWrite("@" ~ DefaultFormatForPointer, cast(size_t)input.ptr);
                         }
                     }
 
@@ -644,7 +644,7 @@ private @hidden:
 
                 if (useName) {
                     builder ~= EntryName;
-                    builder.formattedWrite("@%X", cast(void*)input);
+                    builder.formattedWrite("@" ~ DefaultFormatForPointer, cast(void*)input);
                 }
 
                 builder ~= "[\n";
@@ -1063,7 +1063,7 @@ scope @hidden:
                 if (input is null) {
                     builder ~= "null";
                 } else {
-                    this.write(String_ASCII("0x%X\0"), cast(void*)input, true);
+                    this.write(String_ASCII("0x" ~ DefaultFormatForPointer), cast(void*)input, true);
                 }
             }
 
@@ -1166,7 +1166,7 @@ scope @hidden:
             builder ~= "0x";
 
             while (leftToGo > 0) {
-                this.write(String_ASCII("%X\0"), *ptr, true);
+                this.write(String_ASCII(DefaultFormatForPointer), *ptr, true);
 
                 ptr++;
                 leftToGo--;
@@ -1179,12 +1179,12 @@ scope @hidden:
             if (input is null) {
                 builder ~= "null";
             } else {
-                this.write(String_ASCII("0x%X\0"), cast(void*)input, true);
+                this.write(String_ASCII("0x" ~ DefaultFormatForPointer), cast(void*)input, true);
             }
         } else static if (is(ActualType == delegate)) {
             builder ~= ActualType.stringof ~ "@(";
-            this.write(String_ASCII("context: 0x%X\0, "), cast(void*)input.ptr, true);
-            this.write(String_ASCII("function pointer: 0x%X\0"), cast(void*)input.funcptr, true);
+            this.write(String_ASCII("context: 0x" ~ DefaultFormatForPointer ~ ", "), cast(void*)input.ptr, true);
+            this.write(String_ASCII("function pointer: 0x" ~ DefaultFormatForPointer), cast(void*)input.funcptr, true);
             builder ~= ")";
         } else
             pragma(msg, "Attempting to formatWrite " ~ Input.stringof ~ " but it is currently unimplemented in " ~ __MODULE__);
@@ -1271,6 +1271,8 @@ unittest {
     Result!int iResult = 3;
     fv(String_UTF8(""), iResult);
 }
+
+enum DefaultFormatForPointer = "%zX\0";
 
 enum DefaultFormatForType(Type) = () {
     static if (is(Type == real) || is(Type == float) || is(Type == double))
