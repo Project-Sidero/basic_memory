@@ -102,7 +102,7 @@ scope nothrow @nogc @safe:
     }
 
     ///
-    this(ref Result other) @trusted {
+    this(scope return ref Result other) scope @trusted {
         static foreach (i; 0 .. this.tupleof.length)
             this.tupleof[i] = other.tupleof[i];
 
@@ -384,6 +384,16 @@ scope nothrow @nogc @safe:
     }
 
     ///
+    bool opEquals(scope Result!Type other) const @trusted {
+        if (error.isSet || other.error.isSet || error.info.message !is null || _value is null || other.error.info.message !is null)
+            return error.isSet && other.error.isSet;
+        static if (is(Type == float) || is(Type == double))
+            return (*this._value).isClose(other.value);
+        else
+            return (*cast(Type*)this._value) == other.value;
+    }
+
+    ///
     bool opEquals(scope const Result!Type other) const @trusted {
         if (error.isSet || other.error.isSet || error.info.message !is null || _value is null || other.error.info.message !is null)
             return error.isSet && other.error.isSet;
@@ -394,6 +404,17 @@ scope nothrow @nogc @safe:
     }
 
     ///
+    bool opEquals(scope ResultReference!Type other) const @trusted {
+        if (error.isSet || other.error.isSet || error.info.message !is null || _value is null ||
+        other.error.info.message !is null || other._value is null)
+            return error.isSet && other.error.isSet;
+        static if (is(Type == float) || is(Type == double))
+            return (*this._value).isClose(*other._value);
+        else
+            return (*cast(Type*)this._value) == *other._value;
+    }
+
+    ///
     bool opEquals(scope const ResultReference!Type other) const @trusted {
         if (error.isSet || other.error.isSet || error.info.message !is null || _value is null ||
                 other.error.info.message !is null || other._value is null)
@@ -401,7 +422,7 @@ scope nothrow @nogc @safe:
         static if (is(Type == float) || is(Type == double))
             return (*this._value).isClose(*other._value);
         else
-            return (*cast(Type*)this._value) == (*cast(Type*)&other._value);
+            return (*cast(Type*)this._value) == (*cast(Type*)other._value);
     }
 }
 

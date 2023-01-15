@@ -17,10 +17,10 @@ struct DynamicArray(Type) {
         import core.atomic : atomicOp;
 
         struct State {
+            shared(ptrdiff_t) refCount;
             ElementType[] slice;
             size_t amountUsed;
             RCAllocator allocator;
-            shared(ptrdiff_t) refCount;
             bool copyOnWrite;
 
             invariant {
@@ -38,8 +38,10 @@ struct DynamicArray(Type) {
             size_t offset;
             int result;
 
-            while (!empty) {
-                Result!ElementType temp = front();
+            DynamicArray self = this;
+
+            while (!self.empty) {
+                Result!ElementType temp = self.front();
                 if (!temp)
                     return result;
 
@@ -56,7 +58,7 @@ struct DynamicArray(Type) {
                     return result;
 
                 offset++;
-                popFront();
+                self.popFront();
             }
 
             return result;
@@ -69,8 +71,10 @@ struct DynamicArray(Type) {
             size_t offset = this.length - 1;
             int result;
 
-            while (!empty) {
-                Result!ElementType temp = back();
+            DynamicArray self = this;
+
+            while (!self.empty) {
+                Result!ElementType temp = self.back();
                 if (!temp)
                     return result;
 
@@ -87,7 +91,7 @@ struct DynamicArray(Type) {
                     return result;
 
                 offset--;
-                popBack();
+                self.popBack();
             }
 
             return result;
@@ -153,7 +157,7 @@ scope nothrow @nogc:
                 allocator = globalAllocator();
 
             ElementType[] slice = initialSize > 0 ? allocator.makeArray!ElementType(initialSize) : null;
-            this.state = allocator.make!State(slice, initialSize, allocator, 1);
+            this.state = allocator.make!State(1, slice, initialSize, allocator);
 
             assert(this.state !is null);
             assert(!this.state.allocator.isNull);
@@ -162,12 +166,13 @@ scope nothrow @nogc:
 
         @disable this(size_t initialSize, RCAllocator allocator) const;
 
-        this(ref DynamicArray other) {
-            assert(other.state is null || !other.state.allocator.isNull);
-
+        this(scope return ref DynamicArray other) {
             this.tupleof = other.tupleof;
-            if (this.state !is null)
-                atomicOp!"+="(state.refCount, 1);
+
+            if (this.state !is null) {
+                assert(!this.state.allocator.isNull);
+                atomicOp!"+="(this.state.refCount, 1);
+            }
         }
 
         @disable this(scope return ref const DynamicArray other) const;
@@ -207,7 +212,7 @@ scope nothrow @nogc:
     }
 
     ///
-    void opAssign(scope const(ElementType)[] input...) @trusted {
+    void opAssign(scope ElementType[] input...) @trusted {
         checkInit;
 
         if (this.length < input.length)
@@ -218,6 +223,20 @@ scope nothrow @nogc:
 
         foreach (i, ref v; slice[])
             v = input[i];
+    }
+
+    ///
+    void opAssign(scope const(ElementType)[] input...) @trusted {
+        checkInit;
+
+        if (this.length < input.length)
+            length = input.length;
+
+        auto original = this.unsafeGetLiteral();
+        auto slice = original[0 .. input.length];
+
+        foreach (i, ref v; slice[])
+            v = *cast(ElementType*)&input[i];
     }
 
     //@disable void opAssign(ref DynamicArray other) const;
@@ -242,7 +261,7 @@ scope nothrow @nogc:
         size_t newLength = maximumOffset != size_t.max ? maximumOffset + amount : state.amountUsed + amount;
 
         if (state.slice.length == 0) {
-            this.state = allocator.make!State(allocator.makeArray!ElementType(newLength), 0, allocator, 1);
+            this.state = allocator.make!State(1, allocator.makeArray!ElementType(newLength), 0, allocator);
             assert(this.state !is null);
             assert(this.state.slice.length == newLength);
 
@@ -260,7 +279,7 @@ scope nothrow @nogc:
                 else
                     newLength = 0;
 
-                this.state = allocator.make!State(allocator.makeArray!ElementType(newLength + amount), newLength, allocator, 1);
+                this.state = allocator.make!State(1, allocator.makeArray!ElementType(newLength + amount), newLength, allocator);
                 assert(this.state !is null);
                 assert(this.state.slice.length == newLength + amount);
 
@@ -296,7 +315,7 @@ scope nothrow @nogc:
         if (this.length == newLength)
             return;
         else if (state.slice.length == 0) {
-            this.state = allocator.make!State(allocator.makeArray!ElementType(newLength), newLength, allocator, 1);
+            this.state = allocator.make!State(1, allocator.makeArray!ElementType(newLength), newLength, allocator);
             assert(this.state !is null);
             assert(this.state.slice.length == newLength);
 
@@ -316,7 +335,7 @@ scope nothrow @nogc:
             } else {
                 DynamicArray old = this;
 
-                this.state = allocator.make!State(allocator.makeArray!ElementType(newLength), newLength, allocator, 1);
+                this.state = allocator.make!State(1, allocator.makeArray!ElementType(newLength), newLength, allocator);
                 assert(this.state !is null);
                 assert(this.state.slice.length == newLength);
 
@@ -454,7 +473,7 @@ scope nothrow @nogc:
     }
 
     ///
-    void opOpAssign(string op : "~")(scope const(ElementType)[] values) {
+    void opOpAssign(string op : "~")(scope const(ElementType)[] values) @trusted {
         if (values.length == 0)
             return;
 
@@ -472,7 +491,7 @@ scope nothrow @nogc:
 
         assert(state.amountUsed + values.length <= state.slice.length);
         foreach (i, ref v; this.state.slice[state.amountUsed .. state.amountUsed + values.length])
-            v = values[i];
+            v = *cast(ElementType*)&values[i];
         state.amountUsed += values.length;
 
         if (this.maximumOffset != size_t.max)
@@ -606,10 +625,10 @@ scope nothrow @nogc:
     }
 
     ///
-    ulong toHash() @trusted scope const {
+    ulong toHash() scope const @trusted {
         import sidero.base.hash.utils : hashOf;
 
-        scope temp = this.unsafeGetLiteral();
+        scope temp = cast(ElementType[])this.unsafeGetLiteral();
         return hashOf(temp);
     }
 
@@ -629,7 +648,7 @@ scope nothrow @nogc:
 
         if (other.length == 0 || other.length == 0 || other.length > us.length)
             return false;
-        return us[0 .. other.length] == other;
+        return cast(ElementType[])us[0 .. other.length] == cast(ElementType[])other;
     }
 
     ///
@@ -648,7 +667,7 @@ scope nothrow @nogc:
 
         if (us.length == 0 || other.length == 0 || us.length < other.length)
             return false;
-        return us[$ - other.length .. $] == other;
+        return cast(ElementType[])us[$ - other.length .. $] == cast(ElementType[])other;
     }
 
     ///
@@ -669,7 +688,7 @@ scope nothrow @nogc:
             return -1;
 
         foreach (i; 0 .. (us.length + 1) - other.length) {
-            if (us[i .. i + other.length] == other)
+            if (cast(ElementType[])us[i .. i + other.length] == cast(ElementType[])other)
                 return i;
         }
 
@@ -694,7 +713,7 @@ scope nothrow @nogc:
             return -1;
 
         foreach_reverse (i; 0 .. (us.length + 1) - other.length) {
-            if (us[i .. i + other.length] == other)
+            if (cast(ElementType[])us[i .. i + other.length] == cast(ElementType[])other)
                 return i;
         }
 
@@ -721,7 +740,7 @@ scope nothrow @nogc:
         size_t got;
 
         while (us.length >= other.length) {
-            if (us[0 .. other.length] == other) {
+            if (cast(ElementType[])us[0 .. other.length] == cast(ElementType[])other) {
                 got++;
                 us = us[other.length .. $];
             } else
@@ -768,7 +787,7 @@ private:
 
         RCAllocator allocator = globalAllocator();
 
-        this.state = allocator.make!State(null, 0, allocator, 1);
+        this.state = allocator.make!State(1, null, 0, allocator);
         assert(this.state !is null);
     }
 

@@ -364,7 +364,7 @@ T[] makeArray(T, Allocator)(auto ref Allocator alloc, const(T)[] initValues) @tr
         return null;
     } else {
         foreach (i, ref v; initValues)
-            ret[i] = v;
+            ret[i] = *cast(T*)&v;
         return ret;
     }
 }

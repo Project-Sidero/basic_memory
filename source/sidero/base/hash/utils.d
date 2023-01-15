@@ -24,7 +24,7 @@ ulong hashOf(Type)(scope ref Type value, ulong previousHash) @trusted {
     // probably not the best of algorith, but hey... it'll work (hopefully)
     void handle(Type2)(scope ref Type2 input) {
         static if (__traits(hasMember, Type2, "toHash")) {
-            auto got = value.toHash();
+            auto got = input.toHash();
             handle(got);
         } else {
             import std.traits : isArray, isBasicType;

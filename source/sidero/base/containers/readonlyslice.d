@@ -217,7 +217,7 @@ nothrow @nogc:
     unittest {
         static Literal = [ElementType.init];
         Slice stuff = Slice(Literal);
-        assert(stuff.tupleof == stuff.withoutIterator.tupleof);
+        assert(stuff == stuff.withoutIterator);
     }
 
 @safe:
@@ -377,12 +377,12 @@ nothrow @nogc:
     }
 
     ///
-    Result!Type opIndex(ptrdiff_t index) scope {
+    Result!Type opIndex(ptrdiff_t index) scope @trusted {
         ErrorInfo errorInfo = changeIndexToOffset(index);
         if (errorInfo.isSet)
             return typeof(return)(errorInfo);
 
-        return Result!Type(this.literal[index]);
+        return Result!Type(*cast(Type*)&this.literal[index]);
     }
 
     @disable auto opCast(Type)();
@@ -419,7 +419,7 @@ nothrow @nogc:
     }
 
     ///
-    int opCmp(scope LiteralType other) scope const {
+    int opCmp(scope LiteralType other) scope const @trusted {
         LiteralType us = this.literal;
 
         if (us < other)
@@ -427,7 +427,8 @@ nothrow @nogc:
         else if (us > other)
             return 1;
         else {
-            assert(us == other);
+            assert(cast(Type[])us == cast(Type[])other);
+
             return 0;
         }
     }
@@ -452,25 +453,25 @@ nothrow @nogc:
         }
 
         ///
-        Result!ElementType front() scope {
+        Result!ElementType front() scope @trusted {
             assert(!isNull);
             setupIterator;
 
             if (empty)
                 return typeof(return)(RangeException);
 
-            return typeof(return)(this.iterator.literal[0]);
+            return typeof(return)(*cast(ElementType*)&this.iterator.literal[0]);
         }
 
         ///
-        Result!ElementType back() scope {
+        Result!ElementType back() scope @trusted {
             assert(!isNull);
             setupIterator;
 
             if (empty)
                 return typeof(return)(RangeException);
 
-            return typeof(return)(this.iterator.literal[$ - 1]);
+            return typeof(return)(*cast(ElementType*)&this.iterator.literal[$ - 1]);
         }
     }
 
@@ -501,12 +502,12 @@ nothrow @nogc:
     }
 
     ///
-    bool startsWith(scope LiteralType other...) scope {
+    bool startsWith(scope LiteralType other...) scope @trusted {
         LiteralType us = this.literal;
 
         if (other.length == 0 || other.length == 0 || other.length > us.length)
             return false;
-        return us[0 .. other.length] == other;
+        return cast(Type[])us[0 .. other.length] == cast(Type[])other;
     }
 
     ///
@@ -520,12 +521,12 @@ nothrow @nogc:
     }
 
     ///
-    bool endsWith(scope LiteralType other...) scope {
+    bool endsWith(scope LiteralType other...) scope @trusted {
         LiteralType us = this.literal;
 
         if (us.length == 0 || other.length == 0 || us.length < other.length)
             return false;
-        return us[$ - other.length .. $] == other;
+        return cast(Type[])us[$ - other.length .. $] == cast(Type[])other;
     }
 
     ///
@@ -539,14 +540,14 @@ nothrow @nogc:
     }
 
     ///
-    ptrdiff_t indexOf(scope LiteralType other...) scope {
+    ptrdiff_t indexOf(scope LiteralType other...) scope @trusted {
         LiteralType us = this.literal;
 
         if (other.length > us.length)
             return -1;
 
         foreach (i; 0 .. (us.length + 1) - other.length) {
-            if (us[i .. i + other.length] == other)
+            if (cast(Type[])us[i .. i + other.length] == cast(Type[])other)
                 return i;
         }
 
@@ -564,14 +565,14 @@ nothrow @nogc:
     }
 
     ///
-    ptrdiff_t lastIndexOf(scope LiteralType other...) scope {
+    ptrdiff_t lastIndexOf(scope LiteralType other...) scope @trusted {
         LiteralType us = this.literal;
 
         if (other.length > us.length)
             return -1;
 
         foreach_reverse (i; 0 .. (us.length + 1) - other.length) {
-            if (us[i .. i + other.length] == other)
+            if (cast(Type[])us[i .. i + other.length] == cast(Type[])other)
                 return i;
         }
 
@@ -589,7 +590,7 @@ nothrow @nogc:
     }
 
     ///
-    size_t count(scope LiteralType other...) scope {
+    size_t count(scope LiteralType other...) scope @trusted {
         LiteralType us = this.literal;
 
         if (other.length > us.length)
@@ -598,7 +599,7 @@ nothrow @nogc:
         size_t got;
 
         while (us.length >= other.length) {
-            if (us[0 .. other.length] == other) {
+            if (cast(Type[])us[0 .. other.length] == cast(Type[])other) {
                 got++;
                 us = us[other.length .. $];
             } else
@@ -639,7 +640,7 @@ nothrow @nogc:
 
         ///
         void toString(Sink)(scope ref Sink sink) {
-            sink.formattedWrite(String_ASCII.init, this);
+            sink.formattedWrite(String_ASCII.init, cast(Slice)this);
         }
 
         ///
@@ -652,7 +653,7 @@ nothrow @nogc:
         ///
         void toStringPretty(Sink)(scope ref Sink sink) {
             PrettyPrint!String_ASCII prettyPrint;
-            prettyPrint(sink, this);
+            prettyPrint(sink, cast(Slice)this);
         }
     }
 

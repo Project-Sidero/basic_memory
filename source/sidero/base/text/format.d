@@ -187,7 +187,7 @@ private @hidden:
                     builder ~= "\"";
 
                 size_t oldOffset = builder.length;
-                builder ~= input;
+                builder ~= cast()input;
                 builder[oldOffset .. $].escape(useQuotes ? '"' : 0);
 
                 if (useQuotes)
