@@ -29,11 +29,11 @@ struct TimeZone {
         import sidero.base.datetime.time.internal.posix;
         import sidero.base.datetime.time.internal.windows;
 
-        Bias standardOffset_, daylightSavingsOffset_;
-        String_UTF8 standardName_, daylightSavingsName_, ianaName_;
+        String_UTF8 ianaName_;
         bool haveDaylightSavings_;
 
         Source source;
+        short fixedBias;
         WindowsTimeZoneBase windowsBase;
         IanaTZBase ianaTZBase;
 
@@ -67,18 +67,8 @@ export @safe nothrow @nogc:
     }
 
     ///
-    String_UTF8 standardName() scope const return @trusted {
-        return (cast(TimeZone)this).standardName_;
-    }
-
-    ///
-    String_UTF8 daylightSavingsName() scope const return @trusted {
-        return (cast(TimeZone)this).daylightSavingsName_;
-    }
-
-    ///
     String_UTF8 ianaName() scope const return @trusted {
-        return (cast(TimeZone)this).ianaName();
+        return (cast(TimeZone)this).ianaName_;
     }
 
     ///
@@ -88,52 +78,147 @@ export @safe nothrow @nogc:
 
     ///
     bool isInDaylightSavings(scope DateTime!GregorianDate date) scope const @trusted {
-        if (!this.haveDaylightSavings || this.daylightSavingsOffset_.appliesOn < date)
+        mutex.pureLock;
+        scope (exit)
+            mutex.unlock;
+
+        final switch (source) {
+        case Source.NotSet:
             return false;
-        else if (this.standardOffset_.appliesOn > this.daylightSavingsOffset_.appliesOn)
-            return this.standardOffset_.appliesOn > date;
-        else {
-            auto next = (cast(TimeZone)this).forYear(standardOffset_.appliesOn.year + 1);
-            return date < next.standardOffset_.appliesOn;
+        case Source.Fixed:
+            return false;
+        case Source.Windows:
+            return (cast(TimeZone)this).windowsBase.isInDaylightSavings(date);
+        case Source.IANA:
+            assert(0); // TODO
+        case Source.PosixRule:
+            assert(0); // TODO
+        }
+    }
+
+    /// Get the name/abbreviation for a date/time
+    String_UTF8 nameFor(scope DateTime!GregorianDate date) scope const @trusted {
+        final switch (source) {
+        case Source.NotSet:
+            return String_UTF8("not-set");
+        case Source.Fixed:
+            return (cast(TimeZone)this).ianaName_;
+        case Source.Windows:
+            return this.isInDaylightSavings(date) ? (cast(TimeZone)this).windowsBase.dstName
+                : (cast(TimeZone)this).windowsBase.stdName;
+        case Source.IANA:
+            assert(0); // TODO
+        case Source.PosixRule:
+            assert(0); // TODO
         }
     }
 
     ///
-    long currentSecondsBias(scope DateTime!GregorianDate date) scope const {
-        return isInDaylightSavings(date) ? this.daylightSavingsOffset_.seconds : this.standardOffset_.seconds;
+    long currentSecondsBias(scope DateTime!GregorianDate date) scope const @trusted {
+        final switch (source) {
+        case Source.NotSet:
+        case Source.Fixed:
+            return this.fixedBias;
+        case Source.Windows:
+            return this.isInDaylightSavings(date) ? (cast(TimeZone)this)
+                .windowsBase.daylightSavingsOffset.seconds : (cast(TimeZone)this).windowsBase.standardOffset.seconds;
+        case Source.IANA:
+            assert(0); // TODO
+        case Source.PosixRule:
+            assert(0); // TODO
+        }
     }
 
     /// Get a version of this time zone for a given year, if available otherwise return this.
     TimeZone forYear(long year) scope @trusted {
-        // TODO
-        /+TimeZone attempt = TimeZone.from(this.ianaName_, year);
+        mutex.pureLock;
+        scope (exit)
+            mutex.unlock;
 
-        if (!attempt.isNull)
-            return attempt;
-        return this;+/
-        assert(0);
+        final switch (source) {
+        case Source.NotSet:
+            return this;
+        case Source.Fixed:
+            return this;
+        case Source.Windows:
+            auto got = this.windowsBase.forYear(year);
+            if (got)
+                return got;
+            else
+                return this;
+        case Source.IANA:
+            assert(0); // TODO
+        case Source.PosixRule:
+            assert(0); // TODO
+        }
     }
 
     ///
     bool opEquals(const TimeZone other) scope const @trusted {
-        if (standardOffset_ != other.standardOffset_ || (haveDaylightSavings_ && daylightSavingsOffset_ != other.daylightSavingsOffset_))
+        if (this.source != other.source)
             return false;
+
+        final switch (source) {
+        case Source.NotSet:
+        case Source.Fixed:
+            if (this.fixedBias != other.fixedBias)
+                return false;
+            break;
+        case Source.Windows:
+            if (this.windowsBase.standardOffset != other.windowsBase.standardOffset ||
+                    this.haveDaylightSavings_ != other.haveDaylightSavings_)
+                return false;
+            else if (this.haveDaylightSavings_ && this.windowsBase.daylightSavingsOffset != other.windowsBase.daylightSavingsOffset)
+                return false;
+            else
+                break;
+        case Source.IANA:
+            assert(0); // TODO
+        case Source.PosixRule:
+            assert(0); // TODO
+        }
 
         return (cast(TimeZone)this).ianaName_.opEquals((cast(TimeZone)other).ianaName_);
     }
 
     ///
     int opCmp(const TimeZone other) scope const @trusted {
-        if (standardOffset_ < other.standardOffset_)
+        if (this.source < other.source)
             return -1;
-        else if (standardOffset_ > other.standardOffset_)
+        else if (this.source > other.source)
             return 1;
 
-        if (haveDaylightSavings_) {
-            if (daylightSavingsOffset_ < other.daylightSavingsOffset_)
+        final switch (source) {
+        case Source.NotSet:
+        case Source.Fixed:
+            if (this.fixedBias < other.fixedBias)
                 return -1;
-            else if (daylightSavingsOffset_ > other.daylightSavingsOffset_)
+            else if (this.fixedBias > other.fixedBias)
                 return 1;
+            break;
+        case Source.Windows:
+            if (this.haveDaylightSavings_ && !other.haveDaylightSavings_)
+                return 1;
+            else if (!this.haveDaylightSavings_ && other.haveDaylightSavings_)
+                return -1;
+
+            if (this.windowsBase.standardOffset < other.windowsBase.standardOffset)
+                return -1;
+            else if (this.windowsBase.standardOffset > other.windowsBase.standardOffset)
+                return 1;
+
+            if (this.haveDaylightSavings_) {
+                if (this.windowsBase.daylightSavingsOffset < other.windowsBase.daylightSavingsOffset)
+                    return -1;
+                else if (this.windowsBase.daylightSavingsOffset > other.windowsBase.daylightSavingsOffset)
+                    return 1;
+            }
+
+            break;
+        case Source.IANA:
+            assert(0); // TODO
+        case Source.PosixRule:
+            assert(0); // TODO
         }
 
         return (cast(TimeZone)this).ianaName_.opCmp((cast(TimeZone)other).ianaName_);
@@ -255,7 +340,7 @@ export @safe nothrow @nogc:
     /// Seconds bias (UTC-1:30 would be -5400).
     static TimeZone from(long seconds) @trusted {
         TimeZone ret;
-        ret.standardOffset_.seconds = cast(short)seconds;
+        ret.fixedBias = cast(short)seconds;
 
         {
             StringBuilder_UTF8 builder;
@@ -277,48 +362,6 @@ export @safe nothrow @nogc:
 
         return ret;
     }
-
-    ///
-    static struct Bias {
-        ///
-        long seconds;
-        /// If there is no daylight savings time, this shouldn't be populated!
-        GregorianDate appliesOnDate;
-        /// Ditto
-        TimeOfDay appliesOnTime;
-
-    export @safe nothrow @nogc:
-
-        ///
-        bool opEquals(const Bias other) scope const {
-            return this.tupleof == other.tupleof;
-        }
-
-        ///
-        int opCmp(const Bias other) scope const @trusted {
-            if (this.seconds < other.seconds)
-                return -1;
-            else if (this.seconds > other.seconds)
-                return 1;
-
-            if (this.appliesOnDate < other.appliesOnDate)
-                return -1;
-            else if (this.appliesOnDate > other.appliesOnDate)
-                return 1;
-
-            if (this.appliesOnTime < other.appliesOnTime)
-                return -1;
-            else if (this.appliesOnTime > other.appliesOnTime)
-                return 1;
-
-            return 0;
-        }
-    }
-}
-
-/// Unfortunately this can't be in Bias due to forward referencing issues.
-DateTime!GregorianDate appliesOn(scope const TimeZone.Bias bias) {
-    return typeof(return)(bias.appliesOnDate, bias.appliesOnTime);
 }
 
 private:

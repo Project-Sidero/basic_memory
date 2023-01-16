@@ -12,8 +12,6 @@ import sidero.base.attributes;
 ///
 enum {
     ///
-    BeforeUnixEpochException = ErrorMessage("CUEE", "Time is before Unix epoch"),
-    ///
     MissingUnixEpochException = ErrorMessage("MUEE", "Date type doesn't implement Unix epoch, is it representable?"),
 }
 
@@ -195,7 +193,7 @@ export @safe nothrow @nogc:
     }
 
     ///
-    Result!ulong toUnixTime() scope const @trusted {
+    Result!long toUnixTime() scope const @trusted {
         static if (!__traits(hasMember, DateType, "UnixEpoch")) {
             return typeof(return)(MissingUnixEpochException);
         } else {
@@ -206,17 +204,18 @@ export @safe nothrow @nogc:
 
             long working = days.amount * 86_400;
             working -= oldBias;
-            working += this.time_.totalSeconds;
 
-            if (days.amount < 0 || working < 0)
-                return typeof(return)(BeforeUnixEpochException);
+            if (days.amount >= 0)
+                working += this.time_.totalSeconds;
+            else
+                working -= this.time_.totalSeconds;
 
-            return typeof(return)(cast(ulong)working);
+            return typeof(return)(cast(long)working);
         }
     }
 
     ///
-    static DateTime fromUnixTime(ulong amount, scope return TimeZone timeZone = TimeZone.init) @trusted {
+    static DateTime fromUnixTime(long amount, scope return TimeZone timeZone = TimeZone.init) @trusted {
         DateTime ret = DateTime(DateType.UnixEpoch);
         ret = ret.asTimeZone(timeZone);
 
@@ -315,6 +314,10 @@ export @safe nothrow @nogc:
                     builder ~= "00"c;
 
                 builder.formattedWrite("%s", working);
+            } else if (c == 'e') {
+                // we are overriding the timezone behavior, because we have the date/time,
+                //  which also means we have access to the unix time which we can use for IANA TZ.
+                builder ~= this.timezone_.nameFor(this.asGregorian());
             } else if (this.timezone_.formatValue(builder, c)) {
             } else if (c == 'I') {
                 if (this.timezone_.isNull || !this.timezone_.haveDaylightSavings) {

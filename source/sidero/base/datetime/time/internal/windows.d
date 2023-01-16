@@ -1,4 +1,7 @@
 module sidero.base.datetime.time.internal.windows;
+import sidero.base.datetime.defs;
+import sidero.base.datetime.calendars.gregorian;
+import sidero.base.datetime.time.timeofday;
 import sidero.base.datetime.time.timezone;
 import sidero.base.errors;
 import sidero.base.attributes;
@@ -8,6 +11,7 @@ package(sidero.base.datetime) @safe nothrow @nogc:
 
 void reloadWindowsTimeZones(bool forceReload = true) @trusted {
     version (Windows) {
+        import sidero.base.datetime.cldr;
         import core.sys.windows.winreg;
         import core.stdc.wchar_ : wcslen;
 
@@ -87,11 +91,24 @@ struct WindowsTimeZoneBase {
         int _;
     }
 
-package(sidero.base.datetime) @safe nothrow @nogc:
+    String_UTF8 stdName, dstName;
+    Bias standardOffset, daylightSavingsOffset;
 
-    Result!TimeZone forYear(long year) @trusted {
-        import sidero.base.datetime.calendars.gregorian;
-        import sidero.base.datetime.time.timeofday;
+@safe nothrow @nogc:
+
+    this(scope return ref WindowsTimeZoneBase other) scope {
+        this.tupleof = other.tupleof;
+    }
+
+package(sidero.base.datetime):
+
+    bool haveDaylightSavings() scope {
+        return daylightSavingsOffset.seconds != 0;
+    }
+
+    Result!TimeZone forYear(long year) scope @trusted {
+        import sidero.base.datetime.cldr;
+        import core.stdc.wchar_ : wcslen;
 
         version (Windows) {
             if (year < 0 || year > ushort.max)
@@ -102,20 +119,37 @@ package(sidero.base.datetime) @safe nothrow @nogc:
 
             if (got) {
                 TimeZone ret;
-
-                ret.standardOffset_.seconds = tzi.StandardBias * 60;
-                ret.standardOffset_.appliesOnDate = GregorianDate(year, cast(ubyte)tzi.StandardDate.wMonth,
-                        cast(ubyte)tzi.StandardDate.wDay);
-                ret.standardOffset_.appliesOnTime = TimeOfDay(cast(ubyte)tzi.StandardDate.wHour,
-                        cast(ubyte)tzi.StandardDate.wMinute, cast(ubyte)tzi.StandardDate.wSecond,
-                        cast(uint)(tzi.StandardDate.wMilliseconds * 1000));
+                ret.windowsBase.dtzi = this.dtzi;
                 ret.haveDaylightSavings_ = tzi.StandardDate.wMonth != 0;
 
+                {
+                    // we have to store named seaparately due to possibilities of it changing per year
+                    String_UTF8 standardName = String_UTF8(tzi.StandardName[0 .. wcslen(tzi.StandardName.ptr)]).dup;
+                    ret.windowsBase.stdName = standardName;
+
+                    if (ret.haveDaylightSavings_)
+                        ret.windowsBase.dstName = String_UTF8(tzi.DaylightName[0 .. wcslen(tzi.DaylightName.ptr)]).dup;
+
+                    standardName.stripZeroTerminator;
+                    ret.ianaName_ = String_UTF8(windowsToIANA(cast(string)standardName.unsafeGetLiteral));
+                    if (ret.ianaName_.length == 0) {
+                        // stuff it, just pick the standard name
+                        ret.ianaName_ = ret.windowsBase.stdName;
+                    }
+                }
+
+                ret.windowsBase.standardOffset.seconds = tzi.StandardBias * 60;
+                ret.windowsBase.standardOffset.appliesOnDate = GregorianDate(year, cast(ubyte)tzi.StandardDate.wMonth,
+                        cast(ubyte)tzi.StandardDate.wDay);
+                ret.windowsBase.standardOffset.appliesOnTime = TimeOfDay(cast(ubyte)tzi.StandardDate.wHour,
+                        cast(ubyte)tzi.StandardDate.wMinute, cast(ubyte)tzi.StandardDate.wSecond,
+                        cast(uint)(tzi.StandardDate.wMilliseconds * 1000));
+
                 if (ret.haveDaylightSavings_) {
-                    ret.daylightSavingsOffset_.seconds = tzi.DaylightBias * 60;
-                    ret.daylightSavingsOffset_.appliesOnDate = GregorianDate(year, cast(ubyte)tzi.DaylightDate.wMonth,
+                    ret.windowsBase.daylightSavingsOffset.seconds = tzi.DaylightBias * 60;
+                    ret.windowsBase.daylightSavingsOffset.appliesOnDate = GregorianDate(year, cast(ubyte)tzi.DaylightDate.wMonth,
                             cast(ubyte)tzi.DaylightDate.wDay);
-                    ret.daylightSavingsOffset_.appliesOnTime = TimeOfDay(cast(ubyte)tzi.DaylightDate.wHour,
+                    ret.windowsBase.daylightSavingsOffset.appliesOnTime = TimeOfDay(cast(ubyte)tzi.DaylightDate.wHour,
                             cast(ubyte)tzi.DaylightDate.wMinute, cast(ubyte)tzi.DaylightDate.wSecond,
                             cast(uint)(tzi.DaylightDate.wMilliseconds * 1000));
                 }
@@ -126,6 +160,48 @@ package(sidero.base.datetime) @safe nothrow @nogc:
                 return typeof(return)(NonMatchingStateToArgumentException("Could not get timezone for year"));
         } else
             return typeof(return)(PlatformNotImplementedException("Only Windows is supported for Windows timezone for year function"));
+    }
+
+    static struct Bias {
+        long seconds;
+        GregorianDate appliesOnDate;
+        TimeOfDay appliesOnTime;
+
+        @safe nothrow @nogc:
+
+        bool opEquals(const Bias other) scope const {
+            return this.tupleof == other.tupleof;
+        }
+
+        int opCmp(const Bias other) scope const @trusted {
+            if (this.seconds < other.seconds)
+                return -1;
+            else if (this.seconds > other.seconds)
+                return 1;
+
+            if (this.appliesOnDate < other.appliesOnDate)
+                return -1;
+            else if (this.appliesOnDate > other.appliesOnDate)
+                return 1;
+
+            if (this.appliesOnTime < other.appliesOnTime)
+                return -1;
+            else if (this.appliesOnTime > other.appliesOnTime)
+                return 1;
+
+            return 0;
+        }
+    }
+}
+
+bool isInDaylightSavings(scope ref WindowsTimeZoneBase self, scope DateTime!GregorianDate date) {
+    if (!self.haveDaylightSavings || self.daylightSavingsOffset.appliesOn < date)
+        return false;
+    else if (self.standardOffset.appliesOn > self.daylightSavingsOffset.appliesOn)
+        return self.standardOffset.appliesOn > date;
+    else {
+        auto next = self.forYear(self.standardOffset.appliesOn.year + 1);
+        return date < next.windowsBase.standardOffset.appliesOn;
     }
 }
 
@@ -156,4 +232,9 @@ version (Windows) {
     extern (Windows) DWORD EnumDynamicTimeZoneInformation(const DWORD, DYNAMIC_TIME_ZONE_INFORMATION*) nothrow @nogc;
     extern (Windows) DWORD GetDynamicTimeZoneInformation(DYNAMIC_TIME_ZONE_INFORMATION*) nothrow @nogc;
     extern (Windows) BOOL GetTimeZoneInformationForYear(USHORT, DYNAMIC_TIME_ZONE_INFORMATION*, TIME_ZONE_INFORMATION*) nothrow @nogc;
+}
+
+// Unfortunately this can't be in Bias due to forward referencing issues.
+DateTime!GregorianDate appliesOn(scope const ref WindowsTimeZoneBase.Bias bias) {
+    return typeof(return)(bias.appliesOnDate, bias.appliesOnTime);
 }

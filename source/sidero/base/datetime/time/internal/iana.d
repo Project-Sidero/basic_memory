@@ -274,7 +274,33 @@ struct IanaTZBase {
 package(sidero.base.datetime):
 
     Result!TimeZone forYear(long year) @trusted {
+        import sidero.base.datetime.calendars.gregorian;
+        import sidero.base.datetime.time.timeofday;
+        import sidero.base.datetime.defs;
+
+        if (!tzFile || tzFile.isNull)
+            return typeof(return)(NullPointerException("No IANA TZ information"));
+
+        ulong startUnixTime, endUnixTime;
+
+        {
+            // assuming UTC0, what is the unix time of the start and end of this year?
+            DateTime!GregorianDate startGD = DateTime!GregorianDate(GregorianDate(year, 1, 1), TimeOfDay(0, 0, 0)),
+                endGD = DateTime!GregorianDate(GregorianDate(year + 1, 1, 1), TimeOfDay(0, 0, 0));
+
+            auto startUnix = startGD.toUnixTime, endUnix = endGD.toUnixTime;
+
+            if (!startUnix)
+                return typeof(return)(startUnix.error);
+            else if (!endUnix)
+                return typeof(return)(endUnix.error);
+
+            startUnixTime = startUnix.get;
+            endUnixTime = endUnix.get;
+        }
+
         assert(0);
+
     }
 }
 
@@ -379,6 +405,7 @@ void loadTZ(scope DynamicArray!ubyte rawFileRead, scope return String_UTF8 regio
     }
 
     const originalFileSize = rawFileRead.length;
+    const isGMT = region.contains("GMT");
 
     void handle(SizeOfTime)() {
         //"TZif"
@@ -410,8 +437,15 @@ void loadTZ(scope DynamicArray!ubyte rawFileRead, scope return String_UTF8 regio
 
         {
             tzFile.transitions.reserve(tzh_timecnt);
+            long lastApplied = long.min;
             foreach (i; 0 .. tzh_timecnt) {
-                tzFile.transitions ~= TZFile.Transition(readValue!SizeOfTime);
+                auto appliesOn = readValue!SizeOfTime;
+
+                // if it is not contiguous, error (we could sort if we need to)
+                assert(appliesOn > lastApplied, "Non-contiguous IANA TZ database entries for transitions");
+                lastApplied = appliesOn;
+
+                tzFile.transitions ~= TZFile.Transition(appliesOn);
             }
 
             foreach (i; 0 .. tzh_timecnt) {
@@ -426,7 +460,12 @@ void loadTZ(scope DynamicArray!ubyte rawFileRead, scope return String_UTF8 regio
         {
             tzFile.postTransitionInfo.reserve(tzh_typecnt);
             foreach (i; 0 .. tzh_typecnt) {
-                tzFile.postTransitionInfo ~= TZFile.PostTransitionInfo(readValue!int, readValue!bool, readValue!ubyte);
+                auto delta = readValue!int;
+
+                if (isGMT)
+                    delta *= -1;
+
+                tzFile.postTransitionInfo ~= TZFile.PostTransitionInfo(delta, readValue!bool, readValue!ubyte);
             }
         }
 
@@ -578,8 +617,11 @@ struct TZFile {
     DynamicArray!Transition transitions;
     DynamicArray!PostTransitionInfo postTransitionInfo;
     DynamicArray!LeapSecond leapSecond;
+
+    // FIXME: remove these two variables!
     DynamicArray!bool dstTransitionInStandardOrWallClock;
     DynamicArray!bool dstTransitionLocalTimeAreUTCOrLocal;
+
     String_UTF8 tzString;
 
 @safe nothrow @nogc:
@@ -595,7 +637,7 @@ struct TZFile {
     }
 
     static struct PostTransitionInfo {
-        int utcOffset;
+        int delta;
         bool isDstActive;
 
         // ignore this, its just a temporary, prefer designator field instead

@@ -5,6 +5,6 @@ public import sidero.base.datetime.calendars.gregorian;
 public import sidero.base.datetime.time;
 
 ///
-alias GDate = DateTime!GregorianDate;
+alias GDate = GregorianDate;
 ///
 alias GDateTime = DateTime!GregorianDate;

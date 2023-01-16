@@ -68,11 +68,7 @@ uint fnv_32_1a(scope const(ubyte)[] data, uint start = FNV_Offset_Basis_32) @saf
         internal ~= "}\n";
 
         api ~= "/// Converts a Windows name for timezone to IANA timezone name.\n";
-        api ~= "export extern(C) string windowsToIANA(scope string windows, scope string territory) @safe nothrow @nogc pure;\n";
-        api ~= "/// Ditto\n";
-        api ~= "export string windowsToIANA(scope string windows) @safe nothrow @nogc pure {\n";
-        api ~= "    return windowsToIANA(windows, \"001\");\n";
-        api ~= "}\n";
+        api ~= "export extern(C) string windowsToIANA(scope string windows, scope string territory = \"001\") @safe nothrow @nogc pure;\n";
     }
 
     {
