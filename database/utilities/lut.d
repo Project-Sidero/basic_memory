@@ -154,7 +154,7 @@ private:
     }
 
     void emitSignature() {
-        sigAppender.formattedWrite!"extern(C) immutable(%s) %s(%s input) @trusted nothrow @nogc pure;\n"(externType.length > 0
+        sigAppender.formattedWrite!"export extern(C) immutable(%s) %s(%s input) @trusted nothrow @nogc pure;\n"(externType.length > 0
                 ? externType : lutType, name, KeyType.stringof);
     }
 
