@@ -5,6 +5,7 @@ import sidero.base.containers.map.concurrenthashmap;
 import sidero.base.containers.dynamicarray;
 import sidero.base.text;
 import sidero.base.errors;
+import sidero.base.allocators;
 
 package(sidero.base.datetime) @safe nothrow @nogc:
 
@@ -264,6 +265,7 @@ Result!IanaTZBase findIANATimeZone(scope String_UTF8 zone) @trusted {
 
 struct IanaTZBase {
     ResultReference!TZFile tzFile;
+    long startUnixTime, endUnixTime;
 
 @safe nothrow @nogc:
 
@@ -273,7 +275,7 @@ struct IanaTZBase {
 
 package(sidero.base.datetime):
 
-    Result!TimeZone forYear(long year) @trusted {
+    Result!TimeZone forYear(long year, scope return RCAllocator allocator = RCAllocator.init) scope @trusted {
         import sidero.base.datetime.calendars.gregorian;
         import sidero.base.datetime.time.timeofday;
         import sidero.base.datetime.defs;
@@ -281,7 +283,12 @@ package(sidero.base.datetime):
         if (!tzFile || tzFile.isNull)
             return typeof(return)(NullPointerException("No IANA TZ information"));
 
-        ulong startUnixTime, endUnixTime;
+        TimeZone ret;
+        ret.initialize(allocator);
+        ret.state.source = TimeZone.Source.IANA;
+        ret.state.name = tzFile.region;
+
+        long startUnixTime, endUnixTime;
 
         {
             // assuming UTC0, what is the unix time of the start and end of this year?
@@ -297,10 +304,17 @@ package(sidero.base.datetime):
 
             startUnixTime = startUnix.get;
             endUnixTime = endUnix.get;
+            ret.state.ianaTZBase.startUnixTime = startUnixTime;
+            ret.state.ianaTZBase.endUnixTime = endUnixTime;
         }
 
-        assert(0);
+        {
+            // TODO: get two slices of transitions
+            //  before+during, during
+            // is there DST during (including at start of year)?
+        }
 
+        return typeof(return)(ret);
     }
 }
 
@@ -581,6 +595,7 @@ void loadTZ(scope DynamicArray!ubyte rawFileRead, scope return String_UTF8 regio
     }
 
     if (rawFileRead.length > 0) {
+        tzFile.region = region;
         handle!int;
 
         if (tzFile.version_ > 0) {
@@ -612,6 +627,8 @@ End:
 
 struct TZFile {
     size_t fileSize;
+    String_UTF8 region;
+
     ubyte version_;
 
     DynamicArray!Transition transitions;

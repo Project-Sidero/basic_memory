@@ -10,6 +10,7 @@ import sidero.base.datetime.defs;
 import sidero.base.errors;
 import sidero.base.text;
 import sidero.base.traits;
+import sidero.base.allocators;
 
 ///
 enum {
@@ -24,25 +25,36 @@ export @safe nothrow @nogc:
 ///
 struct TimeZone {
     package(sidero.base.datetime) {
-        // FIXME: heap allocate all of this state!
-        import sidero.base.datetime.time.internal.iana;
-        import sidero.base.datetime.time.internal.posix;
-        import sidero.base.datetime.time.internal.windows;
+        State* state;
 
-        String_UTF8 ianaName_;
-        bool haveDaylightSavings_;
+        static struct State {
+            shared(ptrdiff_t) refCount;
+            RCAllocator allocator;
 
-        Source source;
-        short fixedBias;
-        WindowsTimeZoneBase windowsBase;
-        IanaTZBase ianaTZBase;
+            String_UTF8 name;
+            bool haveDaylightSavings;
+
+            TimeZone.Source source;
+
+            short fixedBias;
+            WindowsTimeZoneBase windowsBase;
+            IanaTZBase ianaTZBase;
+        }
 
         enum Source {
-            NotSet,
             Fixed,
             Windows,
             IANA,
             PosixRule
+        }
+
+        void initialize(scope return RCAllocator allocator) scope @trusted nothrow @nogc {
+            assert(this.state is null);
+
+            if (allocator.isNull)
+                allocator = globalAllocator();
+
+            this.state = allocator.make!State(1, allocator);
         }
     }
 
@@ -52,8 +64,27 @@ struct TimeZone {
 export @safe nothrow @nogc:
 
     ///
+    this(scope return ref TimeZone other) scope @trusted {
+        import core.atomic : atomicOp;
+        this.tupleof = other.tupleof;
+
+        if (this.state !is null) {
+            atomicOp!"+="(this.state.refCount, 1);
+        }
+    }
+
+    ///
+    ~this() scope @trusted {
+        import core.atomic : atomicOp;
+        if (this.state !is null && atomicOp!"-="(state.refCount, 1) == 0) {
+            RCAllocator allocator = state.allocator;
+            allocator.dispose(state);
+        }
+    }
+
+    ///
     bool isNull() scope const {
-        return this.source == Source.NotSet;
+        return this.state is null;
     }
 
     ///
@@ -61,19 +92,35 @@ export @safe nothrow @nogc:
         this.tupleof = other.tupleof;
     }
 
-    ///
-    this(scope return ref TimeZone other) scope return {
-        this.tupleof = other.tupleof;
+    /// Either a Olson (IANA TZ) or platform specific name.
+    String_UTF8 name() scope const return @trusted {
+        if (isNull)
+            return typeof(return).init;
+        else
+            return (cast(State*)state).name;
     }
 
-    ///
-    String_UTF8 ianaName() scope const return @trusted {
-        return (cast(TimeZone)this).ianaName_;
+    /// Get the name/abbreviation for a date/time, date aware
+    String_UTF8 nameFor(scope DateTime!GregorianDate date) scope const @trusted {
+        if (isNull)
+            return String_UTF8("null");
+
+        final switch (state.source) {
+            case Source.Fixed:
+                return (cast(State*)state).name;
+            case Source.Windows:
+                return this.isInDaylightSavings(date) ? (cast(State*)state).windowsBase.dstName
+                : (cast(State*)state).windowsBase.stdName;
+            case Source.IANA:
+                assert(0); // TODO
+            case Source.PosixRule:
+                assert(0); // TODO
+        }
     }
 
     ///
     bool haveDaylightSavings() scope const {
-        return haveDaylightSavings_;
+        return isNull ? false : state.haveDaylightSavings;
     }
 
     ///
@@ -82,30 +129,14 @@ export @safe nothrow @nogc:
         scope (exit)
             mutex.unlock;
 
-        final switch (source) {
-        case Source.NotSet:
+        if (isNull)
             return false;
-        case Source.Fixed:
-            return false;
-        case Source.Windows:
-            return (cast(TimeZone)this).windowsBase.isInDaylightSavings(date);
-        case Source.IANA:
-            assert(0); // TODO
-        case Source.PosixRule:
-            assert(0); // TODO
-        }
-    }
 
-    /// Get the name/abbreviation for a date/time
-    String_UTF8 nameFor(scope DateTime!GregorianDate date) scope const @trusted {
-        final switch (source) {
-        case Source.NotSet:
-            return String_UTF8("not-set");
+        final switch (state.source) {
         case Source.Fixed:
-            return (cast(TimeZone)this).ianaName_;
+            return false;
         case Source.Windows:
-            return this.isInDaylightSavings(date) ? (cast(TimeZone)this).windowsBase.dstName
-                : (cast(TimeZone)this).windowsBase.stdName;
+            return (cast(State*)state).windowsBase.isInDaylightSavings(date);
         case Source.IANA:
             assert(0); // TODO
         case Source.PosixRule:
@@ -115,13 +146,15 @@ export @safe nothrow @nogc:
 
     ///
     long currentSecondsBias(scope DateTime!GregorianDate date) scope const @trusted {
-        final switch (source) {
-        case Source.NotSet:
+        if (isNull)
+            return 0;
+
+        final switch (state.source) {
         case Source.Fixed:
-            return this.fixedBias;
+            return state.fixedBias;
         case Source.Windows:
-            return this.isInDaylightSavings(date) ? (cast(TimeZone)this)
-                .windowsBase.daylightSavingsOffset.seconds : (cast(TimeZone)this).windowsBase.standardOffset.seconds;
+            return this.isInDaylightSavings(date) ? (cast(State*)state)
+                .windowsBase.daylightSavingsOffset.seconds : (cast(State*)state).windowsBase.standardOffset.seconds;
         case Source.IANA:
             assert(0); // TODO
         case Source.PosixRule:
@@ -135,13 +168,14 @@ export @safe nothrow @nogc:
         scope (exit)
             mutex.unlock;
 
-        final switch (source) {
-        case Source.NotSet:
+        if (isNull)
             return this;
+
+        final switch (state.source) {
         case Source.Fixed:
             return this;
         case Source.Windows:
-            auto got = this.windowsBase.forYear(year);
+            auto got = state.windowsBase.forYear(year);
             if (got)
                 return got;
             else
@@ -155,20 +189,24 @@ export @safe nothrow @nogc:
 
     ///
     bool opEquals(const TimeZone other) scope const @trusted {
-        if (this.source != other.source)
+        if (isNull)
+            return other.isNull;
+        else if (other.isNull)
             return false;
 
-        final switch (source) {
-        case Source.NotSet:
+        if (state.source != other.state.source)
+            return false;
+
+        final switch (state.source) {
         case Source.Fixed:
-            if (this.fixedBias != other.fixedBias)
+            if (state.fixedBias != other.state.fixedBias)
                 return false;
             break;
         case Source.Windows:
-            if (this.windowsBase.standardOffset != other.windowsBase.standardOffset ||
-                    this.haveDaylightSavings_ != other.haveDaylightSavings_)
+            if (state.windowsBase.standardOffset != other.state.windowsBase.standardOffset ||
+                    state.haveDaylightSavings != other.state.haveDaylightSavings)
                 return false;
-            else if (this.haveDaylightSavings_ && this.windowsBase.daylightSavingsOffset != other.windowsBase.daylightSavingsOffset)
+            else if (state.haveDaylightSavings && state.windowsBase.daylightSavingsOffset != other.state.windowsBase.daylightSavingsOffset)
                 return false;
             else
                 break;
@@ -178,39 +216,43 @@ export @safe nothrow @nogc:
             assert(0); // TODO
         }
 
-        return (cast(TimeZone)this).ianaName_.opEquals((cast(TimeZone)other).ianaName_);
+        return (cast(State*)state).name.opEquals((cast(State*)other.state).name);
     }
 
     ///
     int opCmp(const TimeZone other) scope const @trusted {
-        if (this.source < other.source)
-            return -1;
-        else if (this.source > other.source)
+        if (isNull)
+            return other.isNull ? 0 : -1;
+        else if (other.isNull)
             return 1;
 
-        final switch (source) {
-        case Source.NotSet:
+        if (state.source < other.state.source)
+            return -1;
+        else if (state.source > other.state.source)
+            return 1;
+
+        final switch (state.source) {
         case Source.Fixed:
-            if (this.fixedBias < other.fixedBias)
+            if (state.fixedBias < other.state.fixedBias)
                 return -1;
-            else if (this.fixedBias > other.fixedBias)
+            else if (state.fixedBias > other.state.fixedBias)
                 return 1;
             break;
         case Source.Windows:
-            if (this.haveDaylightSavings_ && !other.haveDaylightSavings_)
+            if (state.haveDaylightSavings && !other.state.haveDaylightSavings)
                 return 1;
-            else if (!this.haveDaylightSavings_ && other.haveDaylightSavings_)
+            else if (!state.haveDaylightSavings && other.state.haveDaylightSavings)
                 return -1;
 
-            if (this.windowsBase.standardOffset < other.windowsBase.standardOffset)
+            if (state.windowsBase.standardOffset < other.state.windowsBase.standardOffset)
                 return -1;
-            else if (this.windowsBase.standardOffset > other.windowsBase.standardOffset)
+            else if (state.windowsBase.standardOffset > other.state.windowsBase.standardOffset)
                 return 1;
 
-            if (this.haveDaylightSavings_) {
-                if (this.windowsBase.daylightSavingsOffset < other.windowsBase.daylightSavingsOffset)
+            if (state.haveDaylightSavings) {
+                if (state.windowsBase.daylightSavingsOffset < other.state.windowsBase.daylightSavingsOffset)
                     return -1;
-                else if (this.windowsBase.daylightSavingsOffset > other.windowsBase.daylightSavingsOffset)
+                else if (state.windowsBase.daylightSavingsOffset > other.state.windowsBase.daylightSavingsOffset)
                     return 1;
             }
 
@@ -221,7 +263,7 @@ export @safe nothrow @nogc:
             assert(0); // TODO
         }
 
-        return (cast(TimeZone)this).ianaName_.opCmp((cast(TimeZone)other).ianaName_);
+        return (cast(State*)state).name.opCmp((cast(State*)other.state).name);
     }
 
     ///
@@ -259,7 +301,7 @@ export @safe nothrow @nogc:
     /**
      See: https://www.php.net/manual/en/datetime.format.php
 
-     Note: Only e aka IANA identifier is implemented here. T aka abbreviations are not included, so cannot be provided here.
+     Note: Only e aka Olson aka IANA TZ identifier is implemented here. T aka abbreviations are not included, so cannot be provided here.
      */
     void format(Builder, Format)(scope ref Builder builder, scope Format specification) scope const @trusted
             if (isBuilderString!Builder && isReadOnlyString!Format) {
@@ -290,7 +332,7 @@ export @safe nothrow @nogc:
             if (isBuilderString!Builder) {
         switch (specification) {
         case 'e':
-            builder ~= this.ianaName();
+            builder ~= this.name();
             break;
 
         default:
@@ -338,9 +380,10 @@ export @safe nothrow @nogc:
     }
 
     /// Seconds bias (UTC-1:30 would be -5400).
-    static TimeZone from(long seconds) @trusted {
+    static TimeZone from(long seconds, scope return RCAllocator allocator = RCAllocator.init) @trusted {
         TimeZone ret;
-        ret.fixedBias = cast(short)seconds;
+        ret.initialize(allocator);
+        ret.state.fixedBias = cast(short)seconds;
 
         {
             StringBuilder_UTF8 builder;
@@ -356,8 +399,8 @@ export @safe nothrow @nogc:
                 builder.formattedWrite(":%s", tod.minute);
             }
 
-            ret.ianaName_ = builder.asReadOnly;
-            ret.source = Source.Fixed;
+            ret.state.name = builder.asReadOnly;
+            ret.state.source = Source.Fixed;
         }
 
         return ret;
@@ -366,6 +409,9 @@ export @safe nothrow @nogc:
 
 private:
 import sidero.base.parallelism.mutualexclusion : TestTestSetLockInline;
+import sidero.base.datetime.time.internal.iana;
+import sidero.base.datetime.time.internal.posix;
+import sidero.base.datetime.time.internal.windows;
 
 __gshared {
     TestTestSetLockInline mutex;

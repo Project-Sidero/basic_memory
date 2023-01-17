@@ -6,6 +6,7 @@ import sidero.base.datetime.time.timezone;
 import sidero.base.errors;
 import sidero.base.attributes;
 import sidero.base.text;
+import sidero.base.allocators;
 
 package(sidero.base.datetime) @safe nothrow @nogc:
 
@@ -106,7 +107,7 @@ package(sidero.base.datetime):
         return daylightSavingsOffset.seconds != 0;
     }
 
-    Result!TimeZone forYear(long year) scope @trusted {
+    Result!TimeZone forYear(long year, scope return RCAllocator allocator = RCAllocator.init) scope @trusted {
         import sidero.base.datetime.cldr;
         import core.stdc.wchar_ : wcslen;
 
@@ -119,42 +120,43 @@ package(sidero.base.datetime):
 
             if (got) {
                 TimeZone ret;
-                ret.windowsBase.dtzi = this.dtzi;
-                ret.haveDaylightSavings_ = tzi.StandardDate.wMonth != 0;
+                ret.initialize(allocator);
+                ret.state.windowsBase.dtzi = this.dtzi;
+                ret.state.haveDaylightSavings = tzi.StandardDate.wMonth != 0;
 
                 {
                     // we have to store named seaparately due to possibilities of it changing per year
                     String_UTF8 standardName = String_UTF8(tzi.StandardName[0 .. wcslen(tzi.StandardName.ptr)]).dup;
-                    ret.windowsBase.stdName = standardName;
+                    ret.state.windowsBase.stdName = standardName;
 
-                    if (ret.haveDaylightSavings_)
-                        ret.windowsBase.dstName = String_UTF8(tzi.DaylightName[0 .. wcslen(tzi.DaylightName.ptr)]).dup;
+                    if (ret.state.haveDaylightSavings)
+                        ret.state.windowsBase.dstName = String_UTF8(tzi.DaylightName[0 .. wcslen(tzi.DaylightName.ptr)]).dup;
 
                     standardName.stripZeroTerminator;
-                    ret.ianaName_ = String_UTF8(windowsToIANA(cast(string)standardName.unsafeGetLiteral));
-                    if (ret.ianaName_.length == 0) {
+                    ret.state.name = String_UTF8(windowsToIANA(cast(string)standardName.unsafeGetLiteral));
+                    if (ret.state.name.length == 0) {
                         // stuff it, just pick the standard name
-                        ret.ianaName_ = ret.windowsBase.stdName;
+                        ret.state.name = ret.state.windowsBase.stdName;
                     }
                 }
 
-                ret.windowsBase.standardOffset.seconds = tzi.StandardBias * 60;
-                ret.windowsBase.standardOffset.appliesOnDate = GregorianDate(year, cast(ubyte)tzi.StandardDate.wMonth,
+                ret.state.windowsBase.standardOffset.seconds = tzi.StandardBias * 60;
+                ret.state.windowsBase.standardOffset.appliesOnDate = GregorianDate(year, cast(ubyte)tzi.StandardDate.wMonth,
                         cast(ubyte)tzi.StandardDate.wDay);
-                ret.windowsBase.standardOffset.appliesOnTime = TimeOfDay(cast(ubyte)tzi.StandardDate.wHour,
+                ret.state.windowsBase.standardOffset.appliesOnTime = TimeOfDay(cast(ubyte)tzi.StandardDate.wHour,
                         cast(ubyte)tzi.StandardDate.wMinute, cast(ubyte)tzi.StandardDate.wSecond,
                         cast(uint)(tzi.StandardDate.wMilliseconds * 1000));
 
-                if (ret.haveDaylightSavings_) {
-                    ret.windowsBase.daylightSavingsOffset.seconds = tzi.DaylightBias * 60;
-                    ret.windowsBase.daylightSavingsOffset.appliesOnDate = GregorianDate(year, cast(ubyte)tzi.DaylightDate.wMonth,
+                if (ret.state.haveDaylightSavings) {
+                    ret.state.windowsBase.daylightSavingsOffset.seconds = tzi.DaylightBias * 60;
+                    ret.state.windowsBase.daylightSavingsOffset.appliesOnDate = GregorianDate(year, cast(ubyte)tzi.DaylightDate.wMonth,
                             cast(ubyte)tzi.DaylightDate.wDay);
-                    ret.windowsBase.daylightSavingsOffset.appliesOnTime = TimeOfDay(cast(ubyte)tzi.DaylightDate.wHour,
+                    ret.state.windowsBase.daylightSavingsOffset.appliesOnTime = TimeOfDay(cast(ubyte)tzi.DaylightDate.wHour,
                             cast(ubyte)tzi.DaylightDate.wMinute, cast(ubyte)tzi.DaylightDate.wSecond,
                             cast(uint)(tzi.DaylightDate.wMilliseconds * 1000));
                 }
 
-                ret.source = TimeZone.Source.Windows;
+                ret.state.source = TimeZone.Source.Windows;
                 return typeof(return)(ret);
             } else
                 return typeof(return)(NonMatchingStateToArgumentException("Could not get timezone for year"));
@@ -201,7 +203,7 @@ bool isInDaylightSavings(scope ref WindowsTimeZoneBase self, scope DateTime!Greg
         return self.standardOffset.appliesOn > date;
     else {
         auto next = self.forYear(self.standardOffset.appliesOn.year + 1);
-        return date < next.windowsBase.standardOffset.appliesOn;
+        return date < next.state.windowsBase.standardOffset.appliesOn;
     }
 }
 
