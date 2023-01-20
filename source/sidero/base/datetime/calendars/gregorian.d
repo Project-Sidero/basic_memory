@@ -135,6 +135,54 @@ export @safe nothrow @nogc:
     }
 
     ///
+    ubyte firstDayOfWeekOfMonth(WeekDay startingDay = WeekDay.Monday) scope const {
+        import sidero.base.math.utils : floor;
+
+        // https://en.wikipedia.org/wiki/Determination_of_the_day_of_the_week#Disparate_variation
+        long c = this.century();
+        long m = this.month_ < 3 ? (this.month_ + 10) : (this.month_ - 2);
+        long Y = this.month_ < 3 ? (this.year_ - 1) : this.year_;
+        long y = Y - (100 * c);
+
+        long W = cast(long)((1 + floor((2.6 * m) - 0.2) - (2 * c) + y + floor(y / 4f) + floor(c / 4f)) % 7);
+
+        if (W == 0)
+            W = 6;
+        else
+            W--;
+
+        // so first day of month is now W, Monday .. Sunday
+        // we can work with this of course, but what we want to do is
+        //  find which day of month will be the given startingDay
+
+        // W==0,
+        // startingDay==6
+
+        // (6-0) + 1==7
+        // abs(0-6) + 1==7
+
+        long temp = W - startingDay;
+        if (temp < 0)
+            temp *= -1;
+
+        temp++;
+        return cast(ubyte)temp;
+    }
+
+    /// Week of month, zero is last week of previous month.
+    ubyte weekOfMonth(WeekDay startingDay = WeekDay.Monday) scope const {
+        ubyte firstDayOfWeek = firstDayOfWeekOfMonth(startingDay);
+
+        if (this.day_ < firstDayOfWeek)
+            return 0;
+
+        uint temp = this.day_;
+        temp -= firstDayOfWeek;
+        temp /= 7;
+        return cast(ubyte)temp;
+    }
+
+    ///
     ubyte firstMondayOfYear() scope const {
         GregorianDate temp = GregorianDate(this.year_, 1, 1);
         ubyte dow = cast(ubyte)temp.dayInWeek();
@@ -665,6 +713,16 @@ export @safe nothrow @nogc:
         ///
         long daysInYear() scope const {
             return this.date_.daysInYear();
+        }
+
+        ///
+        ubyte firstDayOfWeekOfMonth(WeekDay startingDay = WeekDay.Monday) scope const {
+            return this.date_.firstDayOfWeekOfMonth(startingDay);
+        }
+
+        ///
+        ubyte weekOfMonth(WeekDay startingDay = WeekDay.Monday) scope const {
+            return this.date_.weekOfMonth(startingDay);
         }
 
         ///

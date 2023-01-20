@@ -85,6 +85,9 @@
                 "--fvisibility=public",
                 "--linkonce-templates"
             ],
+            "lflags-windows": [
+                "/IGNORE:4217"
+            ],
             "libs-windows": ["Ws2_32", "advapi32"],
             "versions": ["Windows7"],
             "dependencies": {

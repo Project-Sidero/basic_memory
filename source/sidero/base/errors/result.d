@@ -346,7 +346,10 @@ scope nothrow @nogc @safe:
         if (!error.checked)
             assert(0, "You forgot to check if value had an error. assert(thing, thing.error.toString());");
 
-        assert(error.info.message is null && _value !is null, error.toString().unsafeGetLiteral);
+        assert(error.info.message is null, error.toString().unsafeGetLiteral);
+
+        if (_value is null)
+            return true;
 
         static if (__traits(hasMember, Type, "isNull")) {
             return _value.isNull;

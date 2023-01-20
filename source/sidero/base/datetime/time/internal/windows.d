@@ -56,7 +56,7 @@ void reloadWindowsTimeZones(bool forceReload = true) @trusted {
     }
 }
 
-WindowsTimeZoneBase localTimeZone() @trusted {
+WindowsTimeZoneBase localWindowsTimeZone() @trusted {
     version (Windows) {
         WindowsTimeZoneBase ret;
         DWORD got = GetDynamicTimeZoneInformation(&ret.dtzi);

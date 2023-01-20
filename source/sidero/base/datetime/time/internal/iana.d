@@ -1,6 +1,8 @@
 // unsupported Android < 2018e
 module sidero.base.datetime.time.internal.iana;
 import sidero.base.datetime.time.timezone;
+import sidero.base.datetime.defs;
+import sidero.base.datetime.calendars.gregorian;
 import sidero.base.containers.map.concurrenthashmap;
 import sidero.base.containers.dynamicarray;
 import sidero.base.text;
@@ -8,6 +10,29 @@ import sidero.base.errors;
 import sidero.base.allocators;
 
 package(sidero.base.datetime) @safe nothrow @nogc:
+
+bool loadAutoIANA(scope String_UTF8 path = String_UTF8.init) @trusted {
+    import sidero.base.internal.filesystem;
+    if (path.length == 0)
+        path = getDefaultTZDirectory();
+
+    version (Android) {
+        const wasAndroid = androidFileSize > 0 || tzDatabase.length == 0;
+    } else {
+        const wasAndroid = androidFileSize > 0 || getFileSize((path ~ "tzdata").asReadOnly) > 0;
+    }
+
+    tzDatabase.clear;
+    posixTZToIANA.clear;
+    androidFileSize = 0;
+
+    if (wasAndroid)
+        loadForAndroid(path);
+    else
+        loadStandard(path);
+
+    return tzDatabase.length > 0;
+}
 
 void reloadTZ(bool forceReload = true) @trusted {
     version (Android) {
@@ -19,7 +44,7 @@ void reloadTZ(bool forceReload = true) @trusted {
     // if we have a database and not forced to reload,
     //  the load functions won't load if it can avoid it
     //  so just not clearing state is enough to do it lazily
-    if (forceReload || tzDatabase.length == 0) {
+    if (forceReload) {
         tzDatabase.clear;
         posixTZToIANA.clear;
         androidFileSize = 0;
@@ -267,6 +292,8 @@ struct IanaTZBase {
     ResultReference!TZFile tzFile;
     long startUnixTime, endUnixTime;
 
+    DynamicArray!(TZFile.Transition) transitionsForRange;
+
 @safe nothrow @nogc:
 
     this(scope return ref IanaTZBase other) scope @trusted {
@@ -309,12 +336,96 @@ package(sidero.base.datetime):
         }
 
         {
-            // TODO: get two slices of transitions
-            //  before+during, during
-            // is there DST during (including at start of year)?
+            ptrdiff_t index = -1;
+
+            foreach (offset, transition; tzFile.transitions) {
+                if (transition.appliesOn > startUnixTime)
+                    break;
+                index = offset;
+            }
+
+            if (index >= 0) {
+                auto temp = tzFile.transitions[index .. $];
+                assert(temp);
+                size_t count;
+
+                foreach (transition; temp) {
+                    if (transition.appliesOn >= endUnixTime)
+                        break;
+                    count++;
+                }
+
+                transitionsForRange = tzFile.transitions[index .. index + count];
+            }
         }
 
         return typeof(return)(ret);
+    }
+
+    String_UTF8 nameFor(long unixTime) scope @trusted {
+        ptrdiff_t index = -1;
+
+        foreach_reverse (offset, transition; this.transitionsForRange) {
+            if (transition.appliesOn < unixTime)
+                break;
+            index = offset;
+        }
+
+        if (index >= 0) {
+            auto temp = this.transitionsForRange[index];
+            assert(temp);
+
+            auto got = this.tzFile.postTransitionInfo[temp.postTransitionInfoOffset];
+            assert(got);
+
+            return got.designator;
+        }
+
+        return tzFile.region;
+    }
+
+    bool isInDST(long unixTime) scope @trusted {
+        ptrdiff_t index = -1;
+
+        foreach_reverse (offset, transition; this.transitionsForRange) {
+            if (transition.appliesOn < unixTime)
+                break;
+            index = offset;
+        }
+
+        if (index >= 0) {
+            auto temp = this.transitionsForRange[index];
+            assert(temp);
+
+            auto got = this.tzFile.postTransitionInfo[temp.postTransitionInfoOffset];
+            assert(got);
+
+            return got.isDstActive;
+        }
+
+        return false;
+    }
+
+    long secondsBias(long unixTime) scope @trusted {
+        ptrdiff_t index = -1;
+
+        foreach_reverse (offset, transition; this.transitionsForRange) {
+            if (transition.appliesOn < unixTime)
+                break;
+            index = offset;
+        }
+
+        if (index >= 0) {
+            auto temp = this.transitionsForRange[index];
+            assert(temp);
+
+            auto got = this.tzFile.postTransitionInfo[temp.postTransitionInfoOffset];
+            assert(got);
+
+            return got.secondsSinceUTC0;
+        }
+
+        return 0;
     }
 }
 
@@ -635,7 +746,7 @@ struct TZFile {
     DynamicArray!PostTransitionInfo postTransitionInfo;
     DynamicArray!LeapSecond leapSecond;
 
-    // FIXME: remove these two variables!
+    // TODO: remove these two variables!
     DynamicArray!bool dstTransitionInStandardOrWallClock;
     DynamicArray!bool dstTransitionLocalTimeAreUTCOrLocal;
 
@@ -654,7 +765,7 @@ struct TZFile {
     }
 
     static struct PostTransitionInfo {
-        int delta;
+        int secondsSinceUTC0;
         bool isDstActive;
 
         // ignore this, its just a temporary, prefer designator field instead

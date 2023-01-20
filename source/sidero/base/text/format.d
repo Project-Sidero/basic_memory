@@ -232,7 +232,7 @@ private @hidden:
                     }
                 }
             } else static if (is(ActualType : Result!WrappedType, WrappedType) || is(ActualType : ResultReference!WrappedType, WrappedType)) {
-                if (input) {
+                if (input && !input.isNull) {
                     // ok print the thing
 
                     static if (!is(WrappedType == void)) {
@@ -1003,7 +1003,9 @@ scope @hidden:
             if (input) {
                 // ok print the thing
 
-                static if (is(WrappedType == void)) {
+                if (input.isNull) {
+                    builder ~= "no-error but null";
+                } else static if (is(WrappedType == void)) {
                     builder ~= "no-error";
                 } else {
                     scope temp = input.assumeOkay;

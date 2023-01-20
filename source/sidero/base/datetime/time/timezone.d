@@ -17,7 +17,11 @@ enum {
     ///
     NoTimeZoneDatabaseException = ErrorMessage("NTZDE", "Timezone database is missing, cannot lookup timezone"),
     ///
-    NoTimeZoneException = ErrorMessage("NTZE", "Timezone requested does not exist, cannot look it up"),
+    NoTimeZoneException = ErrorMessage("NTZE",
+            "Timezone requested does not exist, cannot look it up"),
+    ///
+    NoLocalYearException = ErrorMessage("NLYE",
+            "Cannot lookup current year"),
 }
 
 export @safe nothrow @nogc:
@@ -39,6 +43,7 @@ struct TimeZone {
             short fixedBias;
             WindowsTimeZoneBase windowsBase;
             IanaTZBase ianaTZBase;
+            PosixTZBase posixTZBase;
         }
 
         enum Source {
@@ -66,6 +71,7 @@ export @safe nothrow @nogc:
     ///
     this(scope return ref TimeZone other) scope @trusted {
         import core.atomic : atomicOp;
+
         this.tupleof = other.tupleof;
 
         if (this.state !is null) {
@@ -76,6 +82,7 @@ export @safe nothrow @nogc:
     ///
     ~this() scope @trusted {
         import core.atomic : atomicOp;
+
         if (this.state !is null && atomicOp!"-="(state.refCount, 1) == 0) {
             RCAllocator allocator = state.allocator;
             allocator.dispose(state);
@@ -106,15 +113,17 @@ export @safe nothrow @nogc:
             return String_UTF8("null");
 
         final switch (state.source) {
-            case Source.Fixed:
-                return (cast(State*)state).name;
-            case Source.Windows:
-                return this.isInDaylightSavings(date) ? (cast(State*)state).windowsBase.dstName
-                : (cast(State*)state).windowsBase.stdName;
-            case Source.IANA:
-                assert(0); // TODO
-            case Source.PosixRule:
-                assert(0); // TODO
+        case Source.Fixed:
+            return (cast(State*)state).name;
+        case Source.Windows:
+            return this.isInDaylightSavings(date) ? (cast(State*)state).windowsBase.dstName : (cast(State*)state).windowsBase.stdName;
+        case Source.IANA:
+            auto unixTime = date.toUnixTime();
+            assert(unixTime);
+
+            return (cast(State*)state).ianaTZBase.nameFor(unixTime.get);
+        case Source.PosixRule:
+            return this.isInDaylightSavings(date) ? (cast(State*)state).posixTZBase.dstName : (cast(State*)state).posixTZBase.stdName;
         }
     }
 
@@ -125,10 +134,6 @@ export @safe nothrow @nogc:
 
     ///
     bool isInDaylightSavings(scope DateTime!GregorianDate date) scope const @trusted {
-        mutex.pureLock;
-        scope (exit)
-            mutex.unlock;
-
         if (isNull)
             return false;
 
@@ -138,9 +143,15 @@ export @safe nothrow @nogc:
         case Source.Windows:
             return (cast(State*)state).windowsBase.isInDaylightSavings(date);
         case Source.IANA:
-            assert(0); // TODO
+            auto unixTime = date.toUnixTime();
+            assert(unixTime);
+
+            return (cast(State*)state).ianaTZBase.isInDST(unixTime.get);
         case Source.PosixRule:
-            assert(0); // TODO
+            if (state.posixTZBase.dstName.isNull)
+                return false;
+            else
+                return state.posixTZBase.isInDaylightSavings(date);
         }
     }
 
@@ -156,9 +167,12 @@ export @safe nothrow @nogc:
             return this.isInDaylightSavings(date) ? (cast(State*)state)
                 .windowsBase.daylightSavingsOffset.seconds : (cast(State*)state).windowsBase.standardOffset.seconds;
         case Source.IANA:
-            assert(0); // TODO
+            auto unixTime = date.toUnixTime();
+            assert(unixTime);
+
+            return (cast(State*)state).ianaTZBase.secondsBias(unixTime);
         case Source.PosixRule:
-            assert(0); // TODO
+            return this.isInDaylightSavings(date) ? (cast(State*)state).posixTZBase.dstOffset : (cast(State*)state).posixTZBase.stdOffset;
         }
     }
 
@@ -181,9 +195,13 @@ export @safe nothrow @nogc:
             else
                 return this;
         case Source.IANA:
-            assert(0); // TODO
+            auto got = (cast(State*)state).ianaTZBase.forYear(year);
+            if (got)
+                return got.get;
+            else
+                return this;
         case Source.PosixRule:
-            assert(0); // TODO
+            return this;
         }
     }
 
@@ -211,9 +229,20 @@ export @safe nothrow @nogc:
             else
                 break;
         case Source.IANA:
-            assert(0); // TODO
+            if (state.ianaTZBase.startUnixTime != other.state.ianaTZBase.startUnixTime ||
+                    state.ianaTZBase.endUnixTime != other.state.ianaTZBase.endUnixTime)
+                return false;
+            else if ((cast(State*)state).ianaTZBase.tzFile.region != (cast(State*)other.state).ianaTZBase.tzFile.region)
+                return false;
+            else
+                break;
         case Source.PosixRule:
-            assert(0); // TODO
+            return state.posixTZBase.stdOffset == other.state.posixTZBase.stdOffset &&
+                state.posixTZBase.dstOffset == other.state.posixTZBase.dstOffset &&
+                state.posixTZBase.transitionToStd == other.state.posixTZBase.transitionToStd &&
+                state.posixTZBase.transitionToDST == other.state.posixTZBase.transitionToDST && (cast(State*)state)
+                    .posixTZBase.stdName == (cast(State*)other.state).posixTZBase.stdName && (cast(State*)state)
+                    .posixTZBase.dstName == (cast(State*)other.state).posixTZBase.dstName;
         }
 
         return (cast(State*)state).name.opEquals((cast(State*)other.state).name);
@@ -258,9 +287,34 @@ export @safe nothrow @nogc:
 
             break;
         case Source.IANA:
-            assert(0); // TODO
+            if (state.ianaTZBase.startUnixTime < other.state.ianaTZBase.startUnixTime ||
+                    state.ianaTZBase.endUnixTime < other.state.ianaTZBase.endUnixTime)
+                return -1;
+            else if (state.ianaTZBase.startUnixTime > other.state.ianaTZBase.startUnixTime ||
+                    state.ianaTZBase.endUnixTime > other.state.ianaTZBase.endUnixTime)
+                return 1;
+            int temp = (cast(State*)state).ianaTZBase.tzFile.region.opCmp((cast(State*)other.state).ianaTZBase.tzFile.region);
+            if (temp != 0)
+                return temp;
+            else
+                break;
         case Source.PosixRule:
-            assert(0); // TODO
+            if (state.posixTZBase.stdOffset < other.state.posixTZBase.stdOffset ||
+                    state.posixTZBase.dstOffset < other.state.posixTZBase.dstOffset ||
+                    state.posixTZBase.transitionToStd < other.state.posixTZBase.transitionToStd ||
+                    state.posixTZBase.transitionToDST < other.state.posixTZBase.transitionToDST || (cast(State*)state)
+                        .posixTZBase.stdName < (cast(State*)other.state).posixTZBase.stdName || (cast(State*)state)
+                        .posixTZBase.dstName < (cast(State*)other.state).posixTZBase.dstName)
+                return -1;
+            else if (state.posixTZBase.stdOffset > other.state.posixTZBase.stdOffset ||
+                    state.posixTZBase.dstOffset > other.state.posixTZBase.dstOffset ||
+                    state.posixTZBase.transitionToStd > other.state.posixTZBase.transitionToStd ||
+                    state.posixTZBase.transitionToDST > other.state.posixTZBase.transitionToDST || (cast(State*)state)
+                        .posixTZBase.stdName > (cast(State*)other.state).posixTZBase.stdName || (cast(State*)state)
+                        .posixTZBase.dstName > (cast(State*)other.state).posixTZBase.dstName)
+                return 1;
+            else
+                break;
         }
 
         return (cast(State*)state).name.opCmp((cast(State*)other.state).name);
@@ -342,41 +396,146 @@ export @safe nothrow @nogc:
         return true;
     }
 
-    version (none) {
-        ///
-        static Result!TimeZone local() @trusted {
-            mutex.pureLock;
-            auto ret = localTimeZone;
+    ///
+    static Result!TimeZone local() @trusted {
+        import sidero.base.datetime.cldr;
+        import sidero.base.system : EnvironmentVariables;
+        import core.stdc.time;
 
+        mutex.pureLock;
+        scope (exit)
             mutex.unlock;
-            return ret;
+
+        long currentYear;
+
+        {
+            const yearAsCTime = time(null);
+
+            const got = gmtime(&yearAsCTime);
+            if (got is null)
+                return typeof(return)(NoLocalYearException);
+
+            currentYear = got.tm_year + 1900;
         }
 
-        /// Supports Windows and IANA names
-        static Result!TimeZone from(scope String_UTF8 wantedName, long year) @trusted {
-            mutex.pureLock;
+        {
+            auto tzVar = EnvironmentVariables[String_UTF8("TZ\0")];
 
-            auto ret = getTimeZone(wantedName, year);
-            ret.isSet_ = true;
+            if (tzVar.length > 0) {
+                auto got = parsePosixTZ(tzVar);
 
+                if (got) {
+                    if (got.loadFromFile) {
+                        // well... this is at least in theory easy
+                        // we don't actually support loading from a specific file
+                        //  since internally we need the Olson name, and guess what a TZif doesn't include?
+                        //  yup, a Olson name.
+                    } else {
+                        TimeZone ret;
+                        ret.initialize(RCAllocator.init);
+                        ret.state.source = Source.PosixRule;
+                        ret.state.posixTZBase = got.get;
+                        return ret;
+                    }
+                } else {
+                    // try to load via IANA tz or Windows
+
+                    auto got2 = TimeZone.from(tzVar, currentYear);
+                    if (got2)
+                        return got2;
+                }
+            }
+        }
+
+        version (Windows) {
+            auto got = localWindowsTimeZone();
+
+            // if we are prefering IANA TZ database over Windows internal one,
+            //  attempt to use it first.
+            if (useIANA) {
+                auto stdName = got.stdName;
+                stdName.stripZeroTerminator;
+
+                auto ianaName = windowsToIANA(cast(string)stdName.unsafeGetLiteral);
+
+                if (ianaName.length > 0) {
+                    auto got2 = findIANATimeZone(String_UTF8(ianaName));
+                    if (got2)
+                        return got2.forYear(currentYear);
+                }
+            }
+
+            return got.forYear(currentYear);
+        } else version (Posix) {
+            auto got = findIANATimeZone(getPosixLocalTimeZone());
+            if (!got)
+                return typeof(return)(got.error);
+            return got.forYear(currentYear);
+        } else
+            static assert(0, "Getting local timezone unimplemented for platform");
+
+        assert(0);
+    }
+
+    /// Supports Windows and IANA names
+    static Result!TimeZone from(scope String_UTF8 wantedName, long year) @trusted {
+        import sidero.base.datetime.cldr;
+
+        mutex.pureLock;
+
+        scope (exit)
             mutex.unlock;
-            return ret;
+
+        {
+            String_UTF8 ianaName = wantedName;
+
+            version (Windows) {
+                // if we are prefering IANA TZ database over Windows internal one,
+                //  attempt to use it first.
+                if (useIANA) {
+                    String_UTF8 stdName = wantedName;
+                    if (!stdName.isPtrNullTerminated)
+                        stdName = stdName.dup;
+
+                    stdName.stripZeroTerminator;
+                    auto ianaName2 = windowsToIANA(cast(string)stdName.unsafeGetLiteral);
+
+                    if (ianaName2.length > 0)
+                        ianaName = String_UTF8(ianaName);
+                }
+            }
+
+            auto got = findIANATimeZone(ianaName);
+            if (got)
+                return got.forYear(year);
+            else version (Posix) {
+                return typeof(return)(got.error);
+            }
         }
 
-        /// Ditto
-        static Result!TimeZone from(scope String_UTF16 wantedName, long year) @trusted {
-            return TimeZone.from(wantedName.byUTF8, year);
-        }
+        version (Windows) {
+            auto got = findWindowsTimeZone(wantedName);
+            if (!got)
+                return typeof(return)(got.error);
+            return got.forYear(year);
+        } else version (Posix) {
+        } else
+            static assert(0, "Getting local timezone unimplemented for platform");
+    }
 
-        /// Ditto
-        static Result!TimeZone from(scope String_UTF32 wantedName, long year) @trusted {
-            return TimeZone.from(wantedName.byUTF8, year);
-        }
+    /// Ditto
+    static Result!TimeZone from(scope String_UTF16 wantedName, long year) @trusted {
+        return TimeZone.from(wantedName.byUTF8, year);
+    }
 
-        /// Ditto
-        static Result!TimeZone from(String)(scope String wantedName, long year) @trusted if (isSomeString!String) {
-            return TimeZone.from(String_UTF8(wantedName), year);
-        }
+    /// Ditto
+    static Result!TimeZone from(scope String_UTF32 wantedName, long year) @trusted {
+        return TimeZone.from(wantedName.byUTF8, year);
+    }
+
+    /// Ditto
+    static Result!TimeZone from(String)(scope String wantedName, long year) @trusted if (isSomeString!String) {
+        return TimeZone.from(String_UTF8(wantedName), year);
     }
 
     /// Seconds bias (UTC-1:30 would be -5400).
@@ -405,6 +564,18 @@ export @safe nothrow @nogc:
 
         return ret;
     }
+
+    /// Load the IANA database for a given path, will detect Android zone file
+    static void loadIANADatabase(scope String_UTF8 path = String_UTF8.init) @trusted {
+        mutex.pureLock;
+
+        if (path.length > 0 && !path.endsWith("/")) {
+            path = (path ~ "/").asReadOnly;
+        }
+
+        useIANA = loadAutoIANA(path);
+        mutex.unlock;
+    }
 }
 
 private:
@@ -415,5 +586,7 @@ import sidero.base.datetime.time.internal.windows;
 
 __gshared {
     TestTestSetLockInline mutex;
-    bool useWindows, useIANA, usePosix;
+    // on Windows this will force new loads to use the IANA TZ database for entries instead.
+    bool useIANA;
+}
 }

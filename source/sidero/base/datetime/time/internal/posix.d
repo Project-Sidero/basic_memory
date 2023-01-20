@@ -1,4 +1,7 @@
 module sidero.base.datetime.time.internal.posix;
+import sidero.base.datetime.defs;
+import sidero.base.datetime.calendars.gregorian;
+import sidero.base.datetime.time.timeofday;
 import sidero.base.text;
 import sidero.base.errors;
 
@@ -13,7 +16,7 @@ String_UTF8 getPosixLocalTimeZone() @trusted {
     // only available on *nix obviously
     version (Posix) {
         String_UTF8 findField(scope DynamicArray!char input, scope string field) {
-            while(input.length > 0) {
+            while (input.length > 0) {
                 ptrdiff_t index = input.indexOf(field);
 
                 if (index < 0)
@@ -32,7 +35,7 @@ String_UTF8 getPosixLocalTimeZone() @trusted {
                 index = input.indexOf("\n");
 
                 if (index >= 0)
-                     input = input[0 .. index];
+                    input = input[0 .. index];
 
                 String_UTF8 value = String_UTF8(input.unsafeGetLiteral);
                 value.strip;
@@ -101,7 +104,7 @@ String_UTF8 getPosixLocalTimeZone() @trusted {
     return typeof(return).init;
 }
 
-Result!PosixTZ parsePosixTZ(scope String_UTF8 spec) @trusted {
+Result!PosixTZBase parsePosixTZ(scope String_UTF8 spec) @trusted {
     import sidero.base.text.unicode.characters.database;
 
     // https://github.com/eggert/tz/blob/main/localtime.c#L1123
@@ -114,11 +117,11 @@ Result!PosixTZ parsePosixTZ(scope String_UTF8 spec) @trusted {
 
     if (spec.startsWith("/")) {
         // use a specific TZif file
-        return typeof(return)(PosixTZ(spec));
+        return typeof(return)(PosixTZBase(spec));
     } else {
         String_UTF8 stdName, dstName;
         long stdOffset, dstOffset;
-        PosixTZRule stdTransition, dstTransition;
+        PosixTZBaseRule stdTransition, dstTransition;
 
         String_UTF8 zname() @safe nothrow @nogc {
             //  ([a-zA-Z]![,-+])*\0?
@@ -240,7 +243,7 @@ Result!PosixTZ parsePosixTZ(scope String_UTF8 spec) @trusted {
             return ret;
         }
 
-        String_UTF8 rule(scope ref PosixTZRule output) @trusted {
+        String_UTF8 rule(scope ref PosixTZBaseRule output) @trusted {
             import core.stdc.stdlib : strtoll;
 
             String_UTF8 original = spec;
@@ -252,7 +255,7 @@ Result!PosixTZ parsePosixTZ(scope String_UTF8 spec) @trusted {
                 spec = spec[1 .. $];
                 matched = 1;
 
-                output.type = PosixTZRule.Type.JulianDay;
+                output.type = PosixTZBaseRule.Type.JulianDay;
 
                 auto literal = spec.unsafeGetLiteral;
                 const(char)* end = literal.ptr;
@@ -266,7 +269,7 @@ Result!PosixTZ parsePosixTZ(scope String_UTF8 spec) @trusted {
                 //  M[1-12].[1-5].[0-6] ruleTime?
                 spec = spec[1 .. $];
                 matched = 1;
-                output.type = PosixTZRule.Type.DayInWeekOfMonth;
+                output.type = PosixTZBaseRule.Type.DayInWeekOfMonth;
 
                 {
                     auto literal = spec.unsafeGetLiteral;
@@ -309,7 +312,7 @@ Result!PosixTZ parsePosixTZ(scope String_UTF8 spec) @trusted {
             } else {
                 //  [0-365] ruleTime?, supports leap years, process via Julian calendar to gregorian
 
-                output.type = PosixTZRule.Type.DayOfYear;
+                output.type = PosixTZBaseRule.Type.DayOfYear;
 
                 auto literal = spec.unsafeGetLiteral;
                 const(char)* end = literal.ptr;
@@ -395,17 +398,17 @@ Result!PosixTZ parsePosixTZ(scope String_UTF8 spec) @trusted {
                 // start, rule
                 rule(dstTransition);
 
-                if (dstTransition.type == PosixTZRule.Type.DayInWeekOfMonth) {
+                if (dstTransition.type == PosixTZBaseRule.Type.DayInWeekOfMonth) {
                     if (dstTransition.monthOfYear < 1 || dstTransition.monthOfYear > 12)
                         return typeof(return)(MalformedInputException("DST Month must be between 1 and 12 inclusive"));
                     else if (dstTransition.weekOfMonth < 1 || dstTransition.weekOfMonth > 5)
                         return typeof(return)(MalformedInputException("DST Week of month must be between 1 and 5 inclusive"));
                     else if (dstTransition.dayOfWeek > 6)
                         return typeof(return)(MalformedInputException("DST Day of week must be between 0 and 6 inclusive"));
-                } else if (dstTransition.type == PosixTZRule.Type.JulianDay) {
+                } else if (dstTransition.type == PosixTZBaseRule.Type.JulianDay) {
                     if (dstTransition.julianDay < 1 || dstTransition.julianDay > 365)
                         return typeof(return)(MalformedInputException("DST Julian day must be between 1 and 365 inclusive"));
-                } else if (dstTransition.type == PosixTZRule.Type.DayOfYear) {
+                } else if (dstTransition.type == PosixTZBaseRule.Type.DayOfYear) {
                     if (dstTransition.dayOfYear > 365)
                         return typeof(return)(MalformedInputException("DST day in year must be between 0 and 365 inclusive"));
                 }
@@ -420,46 +423,101 @@ Result!PosixTZ parsePosixTZ(scope String_UTF8 spec) @trusted {
                 // end, rule
                 rule(stdTransition);
 
-                if (stdTransition.type == PosixTZRule.Type.DayInWeekOfMonth) {
+                if (stdTransition.type == PosixTZBaseRule.Type.DayInWeekOfMonth) {
                     if (stdTransition.monthOfYear < 1 || stdTransition.monthOfYear > 12)
                         return typeof(return)(MalformedInputException("STD Month must be between 1 and 12 inclusive"));
                     else if (stdTransition.weekOfMonth < 1 || stdTransition.weekOfMonth > 5)
                         return typeof(return)(MalformedInputException("STD Week of month must be between 1 and 5 inclusive"));
                     else if (stdTransition.dayOfWeek > 6)
                         return typeof(return)(MalformedInputException("STD Day of week must be between 0 and 6 inclusive"));
-                } else if (stdTransition.type == PosixTZRule.Type.JulianDay) {
+                } else if (stdTransition.type == PosixTZBaseRule.Type.JulianDay) {
                     if (stdTransition.julianDay < 1 || stdTransition.julianDay > 365)
                         return typeof(return)(MalformedInputException("STD Julian day must be between 1 and 365 inclusive"));
-                } else if (stdTransition.type == PosixTZRule.Type.DayOfYear) {
+                } else if (stdTransition.type == PosixTZBaseRule.Type.DayOfYear) {
                     if (stdTransition.dayOfYear > 365)
                         return typeof(return)(MalformedInputException("STD day in year must be between 0 and 365 inclusive"));
                 }
             }
         }
 
-        return typeof(return)(PosixTZ(String_UTF8.init, stdName, dstName, stdOffset, dstOffset, stdTransition, dstTransition));
+        return typeof(return)(PosixTZBase(String_UTF8.init, stdName, dstName, stdOffset, dstOffset, stdTransition, dstTransition));
     }
 }
 
-struct PosixTZ {
+struct PosixTZBase {
     String_UTF8 loadFromTZifFile;
 
     String_UTF8 stdName, dstName;
-    long stdOffset, dstOffset; // seconds
-    PosixTZRule transitionToStd, transitionToDST;
+    long stdOffset, dstOffset; // bias offset in seconds from UTC0
+    PosixTZBaseRule transitionToStd, transitionToDST;
 
 @safe nothrow @nogc:
 
-    this(scope return ref PosixTZ other) scope {
+    this(scope return ref PosixTZBase other) scope {
         this.tupleof = other.tupleof;
     }
 
-    bool loadFromFile() {
+    bool loadFromFile() scope const {
         return !loadFromTZifFile.isNull;
     }
 }
 
-struct PosixTZRule {
+bool isInDaylightSavings(scope const ref PosixTZBase self, scope DateTime!GregorianDate date) {
+    if (self.transitionToStd.type == PosixTZBaseRule.Type.NoDST || self.transitionToDST.type == PosixTZBaseRule.Type.NoDST)
+        return false;
+
+    long calculateDayOfYear(scope const ref PosixTZBaseRule rule) {
+        long ret;
+
+        if (rule.type == PosixTZBaseRule.Type.JulianDay) {
+            ret = rule.dayOfYear;
+
+            // add leap day if we're after it in the specification
+            if (date.isLeapYear && ret > 31 + 28)
+                ret++;
+        } else if (rule.type == PosixTZBaseRule.Type.DayOfYear) {
+            ret = rule.dayOfYear;
+
+            // remove leap day if we're after it in the specification
+            if (!date.isLeapYear && ret > 31 + 28)
+                ret--;
+        } else if (rule.type == PosixTZBaseRule.Type.DayInWeekOfMonth) {
+            ubyte weekDay = cast(ubyte)date.dayInWeek;
+            auto firstDayOfMonth = date.firstDayOfWeekOfMonth(GregorianDate.WeekDay.Sunday);
+
+            if (weekDay == 6)
+                weekDay = 0;
+            else
+                weekDay++;
+
+            if (self.transitionToDST.weekOfMonth == 5) {
+                ret = GregorianDate(date.year, date.month, cast(ubyte)(firstDayOfMonth + (7 * 3) + weekDay)).dayInYear;
+            } else {
+                auto weekOfMonth = date.weekOfMonth(GregorianDate.WeekDay.Sunday);
+
+                if (weekOfMonth > 0)
+                    weekOfMonth--;
+
+                ret = GregorianDate(date.year, date.month, cast(ubyte)(firstDayOfMonth + (7 * weekOfMonth) + weekDay)).dayInYear;
+            }
+        }
+
+        return ret;
+    }
+
+    const dayOfYear = date.dayInYear, startOfStandard = calculateDayOfYear(self.transitionToStd),
+        startOfDaylight = calculateDayOfYear(self.transitionToDST);
+    const isDayOf = startOfDaylight == dayOfYear;
+
+    if (dayOfYear < startOfDaylight || (startOfDaylight < startOfStandard && dayOfYear >= startOfStandard))
+        return false;
+    else if (isDayOf && date.time.totalSeconds < self.transitionToDST.secondsBias)
+        return false;
+
+    return true;
+}
+
+struct PosixTZBaseRule {
     Type type;
 
     union {
@@ -481,8 +539,51 @@ struct PosixTZRule {
 
 @safe nothrow @nogc:
 
-    this(scope return ref PosixTZRule other) scope {
+    this(scope return ref PosixTZBaseRule other) scope {
         this.tupleof = other.tupleof;
+    }
+
+    int opCmp(scope const ref PosixTZBaseRule other) scope const {
+        if (this.type < other.type)
+            return -1;
+        else if (this.type > other.type)
+            return 1;
+
+        final switch (this.type) {
+        case Type.NoDST:
+            break;
+        case Type.JulianDay:
+            if (this.julianDay < other.julianDay)
+                return -1;
+            else if (this.julianDay > other.julianDay)
+                return 1;
+            else
+                break;
+
+        case Type.DayOfYear:
+            if (this.dayOfYear < other.dayOfYear)
+                return -1;
+            else if (this.dayOfYear > other.dayOfYear)
+                return 1;
+            else
+                break;
+
+        case Type.DayInWeekOfMonth:
+            if (this.monthOfYear < other.monthOfYear || this.weekOfMonth < other.weekOfMonth ||
+                    this.dayOfWeek < other.dayOfWeek)
+                return -1;
+            else if (this.monthOfYear > other.monthOfYear || this.weekOfMonth > other.weekOfMonth || this.dayOfWeek > other.dayOfWeek)
+                return 1;
+            else
+                break;
+        }
+
+        if (this.secondsBias < other.secondsBias)
+            return -1;
+        else if (this.secondsBias > other.secondsBias)
+            return 1;
+
+        return 0;
     }
 
     enum Type {
@@ -511,13 +612,13 @@ unittest {
         assert(got.stdOffset == 10800);
         assert(got.dstOffset == 0);
 
-        assert(got.transitionToDST.type == PosixTZRule.Type.DayInWeekOfMonth);
+        assert(got.transitionToDST.type == PosixTZBaseRule.Type.DayInWeekOfMonth);
         assert(got.transitionToDST.monthOfYear == 3);
         assert(got.transitionToDST.weekOfMonth == 5);
         assert(got.transitionToDST.dayOfWeek == 0);
         assert(got.transitionToDST.secondsBias == -7200);
 
-        assert(got.transitionToStd.type == PosixTZRule.Type.DayInWeekOfMonth);
+        assert(got.transitionToStd.type == PosixTZBaseRule.Type.DayInWeekOfMonth);
         assert(got.transitionToStd.monthOfYear == 10);
         assert(got.transitionToStd.weekOfMonth == 5);
         assert(got.transitionToStd.dayOfWeek == 0);
@@ -533,11 +634,11 @@ unittest {
         assert(got.stdOffset == 14400);
         assert(got.dstOffset == 0);
 
-        assert(got.transitionToDST.type == PosixTZRule.Type.JulianDay);
+        assert(got.transitionToDST.type == PosixTZBaseRule.Type.JulianDay);
         assert(got.transitionToDST.julianDay == 1);
         assert(got.transitionToDST.secondsBias == 7200);
 
-        assert(got.transitionToStd.type == PosixTZRule.Type.JulianDay);
+        assert(got.transitionToStd.type == PosixTZBaseRule.Type.JulianDay);
         assert(got.transitionToStd.julianDay == 365);
         assert(got.transitionToStd.secondsBias == 90000);
     }
