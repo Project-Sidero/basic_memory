@@ -691,17 +691,23 @@ void loadTZ(scope DynamicArray!ubyte rawFileRead, scope return String_UTF8 regio
         }
 
         {
-            tzFile.dstTransitionInStandardOrWallClock.reserve(tzh_ttisstdcnt);
+            foreach (i; 0 .. tzh_ttisstdcnt) {
+                auto got = tzFile.transitions[i];
+                assert(got);
 
-            foreach (i; 0 .. tzh_ttisstdcnt)
-                tzFile.dstTransitionInStandardOrWallClock ~= readValue!bool;
+                got.standardOrWallClockTime = readValue!bool;
+                tzFile.transitions[i] = got;
+            }
         }
 
         {
-            tzFile.dstTransitionLocalTimeAreUTCOrLocal.reserve(tzh_ttisutcnt);
+            foreach (i; 0 .. tzh_ttisstdcnt) {
+                auto got = tzFile.transitions[i];
+                assert(got);
 
-            foreach (i; 0 .. tzh_ttisutcnt)
-                tzFile.dstTransitionLocalTimeAreUTCOrLocal ~= readValue!bool;
+                got.localTimeInUTCOrLocal = readValue!bool;
+                tzFile.transitions[i] = got;
+            }
         }
     }
 
@@ -746,10 +752,6 @@ struct TZFile {
     DynamicArray!PostTransitionInfo postTransitionInfo;
     DynamicArray!LeapSecond leapSecond;
 
-    // TODO: remove these two variables!
-    DynamicArray!bool dstTransitionInStandardOrWallClock;
-    DynamicArray!bool dstTransitionLocalTimeAreUTCOrLocal;
-
     String_UTF8 tzString;
 
 @safe nothrow @nogc:
@@ -762,6 +764,9 @@ struct TZFile {
         // Seconds since Unix Epoch
         long appliesOn;
         ubyte postTransitionInfoOffset;
+
+        bool standardOrWallClockTime;
+        bool localTimeInUTCOrLocal;
     }
 
     static struct PostTransitionInfo {
