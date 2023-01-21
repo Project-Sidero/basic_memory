@@ -1068,6 +1068,61 @@ void enableANSI(bool value = true) @trusted {
     useANSI = value;
 }
 
+/// Enter raw mode, suitable for TUI. Note disables Ctrl+C signal.
+bool enableRawMode() @trusted {
+    mutex.pureLock;
+    bool ret;
+
+    // no echo
+    // turn off canonical mode so reading byte by byte
+    // turn off signals ctrl+c, ctrl+z, ctrl+s, ctrl+q, ctrl+v, ctrl+m
+    // turn off output processing of \n to \r\n
+    // clean up UTF-8 handling stuff
+
+    version (Windows) {
+        import core.sys.windows.windows;
+
+        if (useWindows) {
+            allocateWindowsConsole();
+
+            if (hStdin == INVALID_HANDLE_VALUE || hStdout == INVALID_HANDLE_VALUE) {
+                initializeForStdioImpl(null, null, false, true);
+            } else {
+                DWORD inputMode = originalConsoleInputMode, outputMode = originalConsoleOutputMode;
+                inputMode &= ~(ENABLE_LINE_INPUT | ENABLE_PROCESSED_INPUT | ENABLE_ECHO_INPUT);
+                outputMode &= ~(ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT | DISABLE_NEWLINE_AUTO_RETURN | ENABLE_LVB_GRID_WORLDWIDE);
+                outputMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+
+                ret = SetConsoleMode(hStdin, inputMode) != 0 && SetConsoleMode(hStdout, outputMode) != 0;
+                if (!ret) {
+                    SetConsoleMode(hStdin, originalConsoleInputMode);
+                    SetConsoleMode(hStdout, originalConsoleOutputMode);
+                }
+            }
+        }
+    }
+
+    if (useStdio && stdioIn !is null) {
+        version (Posix) {
+            import core.sys.posix.termios;
+
+            termios settings;
+            tcgetattr(stdioIn, &settings);
+
+            // ISTRIP is 8th bit stripped so turns it off, for UTF-8 support
+            settings.c_iflag &= ~(BRKINT | ICRNL | ISTRIP | IXON);
+            settings.c_oflag &= ~(OPOST);
+            settings.c_cflag |= (CS8); // 8bits, UTF-8
+            settings.c_lflag &= ~(ECHO | ICANON | IEXTEN | ISIG);
+
+            ret = tcsetattr(stdioIn, TCSAFLUSH, &settings) == 0;
+        }
+    }
+
+    mutex.unlock;
+    return ret;
+}
+
 ///
 pragma(crt_destructor) extern (C) void deinitializeConsole() @trusted {
     mutex.pureLock;
@@ -1087,8 +1142,13 @@ __gshared {
 
     version (Windows) {
         HANDLE hStdin, hStdout;
+        DWORD originalConsoleInputMode, originalConsoleOutputMode;
         uint originalConsoleOutputCP, originalConsoleCP;
         bool createdConsole;
+    } else version(Posix) {
+        import core.sys.posix.termios : termios;
+        termios originalTermiosSettings;
+        bool resetOriginalTermios;
     }
 }
 
@@ -1198,9 +1258,9 @@ version (Windows) {
             hStdin = GetStdHandle(STD_INPUT_HANDLE);
             hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
 
-            DWORD mode;
-            GetConsoleMode(hStdout, &mode);
-            SetConsoleMode(hStdout, mode | ENABLE_VIRTUAL_TERMINAL_PROCESSING | ENABLE_PROCESSED_OUTPUT);
+            GetConsoleMode(hStdin, &originalConsoleInputMode);
+            GetConsoleMode(hStdin, &originalConsoleOutputMode);
+            SetConsoleMode(hStdout, originalConsoleOutputMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING | ENABLE_PROCESSED_OUTPUT);
 
             originalConsoleOutputCP = GetConsoleOutputCP();
             if (!SetConsoleOutputCP(65001))
@@ -1275,6 +1335,13 @@ version (Windows) {
 
         if (useIn !is null || useOut !is null)
             autoCloseStdio = autoClose;
+
+        version(Posix) {
+            import core.sys.posix.termios;
+            if (useIn is null) {
+                resetOriginalTermios = tcgetattr(stdioIn, &originalTermiosSettings) == 0;
+            }
+        }
     }
 
     void deinitializeConsoleImpl() {
@@ -1295,16 +1362,24 @@ version (Windows) {
         }
 
         version (Windows) {
-            import core.sys.windows.windows : FreeConsole, SetConsoleCP, SetConsoleOutputCP;
+            import core.sys.windows.windows : FreeConsole, SetConsoleCP, SetConsoleOutputCP, SetConsoleMode;
 
             if (originalConsoleCP > 0)
                 SetConsoleCP(originalConsoleCP);
             if (originalConsoleOutputCP > 0)
                 SetConsoleOutputCP(originalConsoleOutputCP);
 
+            SetConsoleMode(hStdin, originalConsoleInputMode);
+            SetConsoleMode(hStdout, originalConsoleOutputMode);
+
             if (createdConsole) {
                 FreeConsole();
                 createdConsole = false;
+            }
+        } else version(Posix) {
+            import core.sys.posix.termios;
+            if (resetOriginalTermios) {
+                tcsetattr(stdioIn, TCSAFLUSH, &originalTermiosSettings);
             }
         }
     }
