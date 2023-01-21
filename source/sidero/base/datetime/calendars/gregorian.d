@@ -209,7 +209,7 @@ export @safe nothrow @nogc:
     }
 
     ///
-    void advanceDays(Duration interval) scope {
+    void advance(Duration interval) scope {
         this.advanceDays(interval.days);
     }
 
