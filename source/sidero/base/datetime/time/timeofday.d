@@ -1,6 +1,6 @@
 module sidero.base.datetime.time.timeofday;
-import sidero.base.datetime.time.defs;
 import sidero.base.datetime.calendars.defs;
+import sidero.base.datetime.duration;
 import sidero.base.text;
 import sidero.base.traits;
 
@@ -94,12 +94,12 @@ export @safe nothrow @nogc:
     }
 
     ///
-    DayInterval advanceMicroSeconds(const MicroSecondInterval interval, bool allowOverflow = true) scope {
-        return advanceMicroSeconds(interval.amount);
+    Duration advanceMicroSeconds(const Duration interval, bool allowOverflow = true) scope {
+        return advanceMicroSeconds(interval.totalMicroSeconds);
     }
 
     ///
-    DayInterval advanceMicroSeconds(long amount, bool allowOverflow = true) scope {
+    Duration advanceMicroSeconds(long amount, bool allowOverflow = true) scope {
         amount += this.msec_;
         long rollDays, rollHours, rollMinutes, rollSeconds;
 
@@ -130,15 +130,9 @@ export @safe nothrow @nogc:
         this.msec_ = cast(uint)amount;
 
         if (allowOverflow) {
-            DayInterval ret = DayInterval(rollDays);
-
-            ret.amount += this.advanceHours(rollHours).amount;
-            ret.amount += this.advanceMinutes(rollMinutes).amount;
-            ret.amount += this.advanceSeconds(rollSeconds).amount;
-
-            return ret;
+            return rollDays.days + this.advanceHours(rollHours)  + this.advanceMinutes(rollMinutes) + this.advanceSeconds(rollSeconds);
         } else
-            return DayInterval(0);
+            return Duration.zero;
     }
 
     ///
@@ -148,7 +142,7 @@ export @safe nothrow @nogc:
     }
 
     ///
-    DayInterval advanceSeconds(long amount, bool allowOverflow = true) scope {
+    Duration advanceSeconds(long amount, bool allowOverflow = true) scope {
         amount += this.second_;
         long rollMinutes;
 
@@ -167,11 +161,11 @@ export @safe nothrow @nogc:
         if (allowOverflow)
             return this.advanceMinutes(rollMinutes, allowOverflow);
         else
-            return DayInterval(0);
+            return Duration.zero;
     }
 
     ///
-    DayInterval advanceMinutes(long amount, bool allowOverflow = true) scope {
+    Duration advanceMinutes(long amount, bool allowOverflow = true) scope {
         amount += this.minute_;
         long rollHours;
 
@@ -190,11 +184,11 @@ export @safe nothrow @nogc:
         if (allowOverflow)
             return this.advanceHours(rollHours, allowOverflow);
         else
-            return DayInterval(0);
+            return Duration.zero;
     }
 
     ///
-    DayInterval advanceHours(long amount, bool allowOverflow = true) scope {
+    Duration advanceHours(long amount, bool allowOverflow = true) scope {
         amount += this.hour_;
         long rollDays;
 
@@ -209,13 +203,13 @@ export @safe nothrow @nogc:
             amount += 24;
 
         this.hour_ = cast(ubyte)amount;
-        return DayInterval(rollDays);
+        return rollDays.days;
     }
 
     ///
-    MicroSecondInterval opBinary(string op : "-")(const TimeOfDay other) scope const {
+    Duration opBinary(string op : "-")(const TimeOfDay other) scope const {
         long a = this.totalMicroSeconds(), b = other.totalMicroSeconds();
-        return MicroSecondInterval(a - b);
+        return (a - b).microSeconds;
     }
 
     ///

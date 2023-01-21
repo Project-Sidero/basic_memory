@@ -1,5 +1,6 @@
 module sidero.base.datetime.calendars.gregorian;
 import sidero.base.datetime.calendars.defs;
+import sidero.base.datetime.duration;
 import sidero.base.text;
 import sidero.base.traits;
 
@@ -208,8 +209,8 @@ export @safe nothrow @nogc:
     }
 
     ///
-    void advanceDays(DayInterval interval) scope {
-        this.advanceDays(interval.amount);
+    void advanceDays(Duration interval) scope {
+        this.advanceDays(interval.days);
     }
 
     ///
@@ -307,9 +308,9 @@ export @safe nothrow @nogc:
     }
 
     ///
-    DayInterval opBinary(string op : "-")(const GregorianDate other) scope const {
+    Duration opBinary(string op : "-")(const GregorianDate other) scope const {
         DaysSinceY2k us = this.toDaysSinceY2k(), against = other.toDaysSinceY2k();
-        return DayInterval(us.amount - against.amount);
+        return (us.amount - against.amount).days;
     }
 
     ///
@@ -736,8 +737,8 @@ export @safe nothrow @nogc:
         }
 
         ///
-        void advanceDays(DayInterval interval) scope {
-            this.date_.advanceDays(interval.amount);
+        void advanceDays(Duration interval) scope {
+            this.date_.advanceDays(interval.days);
         }
 
         ///

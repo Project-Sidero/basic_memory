@@ -1,5 +1,5 @@
 module sidero.base.datetime.defs;
-import sidero.base.datetime.time.defs;
+import sidero.base.datetime.duration;
 import sidero.base.datetime.time.timeofday;
 import sidero.base.datetime.time.timezone;
 import sidero.base.datetime.calendars.defs;
@@ -135,15 +135,15 @@ export @safe nothrow @nogc:
     }
 
     ///
-    void advanceMicroSeconds(const MicroSecondInterval interval) scope {
-        this.advanceMicroSeconds(interval.amount);
+    void advance(const Duration interval) scope {
+        this.advanceMicroSeconds(interval.totalMicroSeconds);
     }
 
     ///
     void advanceMicroSeconds(long amount) scope {
         timezoneCheck(() {
             auto dateInterval = this.time_.advanceMicroSeconds(amount, true);
-            this.date_.advanceDays(dateInterval.amount);
+            this.date_.advanceDays(dateInterval.days);
         });
     }
 
@@ -151,7 +151,7 @@ export @safe nothrow @nogc:
     void advanceSeconds(long amount) scope {
         timezoneCheck(() {
             auto dateInterval = this.time_.advanceSeconds(amount, true);
-            this.date_.advanceDays(dateInterval.amount);
+            this.date_.advanceDays(dateInterval.days);
         });
     }
 
@@ -159,7 +159,7 @@ export @safe nothrow @nogc:
     void advanceMinutes(long amount) scope {
         timezoneCheck(() {
             auto dateInterval = this.time_.advanceMinutes(amount, true);
-            this.date_.advanceDays(dateInterval.amount);
+            this.date_.advanceDays(dateInterval.days);
         });
     }
 
@@ -167,7 +167,7 @@ export @safe nothrow @nogc:
     void advanceHours(long amount) scope {
         timezoneCheck(() {
             auto dateInterval = this.time_.advanceHours(amount, true);
-            this.date_.advanceDays(dateInterval.amount);
+            this.date_.advanceDays(dateInterval.days);
         });
     }
 
@@ -200,12 +200,12 @@ export @safe nothrow @nogc:
             auto gDateTime = this.asGregorian();
             auto oldBias = this.timezone_.currentSecondsBias(gDateTime);
 
-            DayInterval days = this.date_ - DateType.UnixEpoch;
+            Duration interval = this.date_ - DateType.UnixEpoch;
 
-            long working = days.amount * 86_400;
+            long working = interval.days * 86_400;
             working -= oldBias;
 
-            if (days.amount >= 0)
+            if (interval.days >= 0)
                 working += this.time_.totalSeconds;
             else
                 working -= this.time_.totalSeconds;
@@ -488,7 +488,7 @@ private @hidden:
 
         if (oldBias != newBias) {
             auto dateInterval = this.time_.advanceSeconds(newBias - oldBias, true);
-            this.date_.advanceDays(dateInterval.amount);
+            this.date_.advanceDays(dateInterval.days);
         }
     }
 }
