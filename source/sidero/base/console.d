@@ -4,16 +4,17 @@ import sidero.base.allocators;
 import sidero.base.typecons : Optional;
 import sidero.base.attributes : hidden;
 import sidero.base.errors;
+import sidero.base.datetime.duration;
 
 export @safe nothrow @nogc:
 
-/// Read's a single character, times out at 100ms
-Result!dchar readChar() @trusted {
+/// Read's a single character, default is blocking.
+Result!dchar readChar(Duration timeout = Duration.min) @trusted {
     import sidero.base.encoding.utf;
     import core.stdc.stdio : getc, EOF;
 
     mutex.pureLock;
-    const block = false;
+    const block = timeout < Duration.zero;
 
     size_t outputBufferCount;
     char[4] outputBuffer = void;
@@ -27,7 +28,16 @@ Result!dchar readChar() @trusted {
                 DWORD readLength;
 
                 if (block) {
-                    assert(0);
+                    for (;;) {
+                        if (ReadConsoleW(hStdin, &outputBuffer16[outputBufferCount], 1, &readLength, null)) {
+                            outputBufferCount++;
+
+                            if (outputBufferCount == 2 || decodeLength(outputBuffer16[0 .. 1]) == 1)
+                                break;
+                        } else {
+                            break;
+                        }
+                    }
                 } else {
                     bool needEcho;
                     {
@@ -38,8 +48,12 @@ Result!dchar readChar() @trusted {
                         }
                     }
 
+                    DWORD dwTimeout = cast(DWORD)timeout.totalMilliSeconds;
+                    if (dwTimeout == 0)
+                        dwTimeout = 1_000;
+
                     ReadLoopWindows: for (;;) {
-                        DWORD result = WSAWaitForMultipleEvents(1, &hStdin, false, 100, true);
+                        DWORD result = WSAWaitForMultipleEvents(1, &hStdin, false, dwTimeout, true);
 
                         switch (result) {
                         case WSA_WAIT_EVENT_0:
@@ -101,7 +115,11 @@ Result!dchar readChar() @trusted {
 
                     termios toSetTermios;
                     toSetTermios.c_cc[VMIN] = 0;
-                    toSetTermios.c_cc[VTIME] = 1;
+                    toSetTermios.c_cc[VTIME] = cast(ubyte)(timeout.totalMilliSeconds / 100);
+
+                    if (toSetTermios.c_cc[VTIME] == 0)
+                        toSetTermios.c_cc[VTIME] = 10;
+
                     tcsetattr(stdioIn, TCSANOW, &toSetTermios);
                 }
             }
@@ -139,22 +157,22 @@ Result!dchar readChar() @trusted {
     assert(0);
 }
 
-///
-StringBuilder_UTF8 readLine() {
+/// Read one line in, default is blocking.
+StringBuilder_UTF8 readLine(Duration timeout = Duration.min) {
     StringBuilder_UTF8 builder;
-    readLine(builder);
+    readLine(builder, timeout);
     return builder;
 }
 
-/// Includes new line terminator, times out at 100ms
-StringBuilder_ASCII readLine(scope return ref StringBuilder_ASCII builder) @trusted {
+/// Includes new line terminator, default is blocking.
+StringBuilder_ASCII readLine(scope return ref StringBuilder_ASCII builder, Duration timeout = Duration.min) @trusted {
     import core.stdc.stdio : getc, EOF;
 
     mutex.pureLock;
 
     if (builder.isNull)
         builder = StringBuilder_ASCII(globalAllocator());
-    const block = false;
+    const block = timeout < Duration.zero;
 
     version (Windows) {
         if (useWindows) {
@@ -199,8 +217,12 @@ StringBuilder_ASCII readLine(scope return ref StringBuilder_ASCII builder) @trus
                         }
                     }
 
+                    DWORD dwTimeout = cast(DWORD)timeout.totalMilliSeconds;
+                    if (dwTimeout == 0)
+                        dwTimeout = 1_000;
+
                     ReadLoopWindows: for (;;) {
-                        DWORD result = WSAWaitForMultipleEvents(1, &hStdin, false, 100, true);
+                        DWORD result = WSAWaitForMultipleEvents(1, &hStdin, false, dwTimeout, true);
 
                         switch (result) {
                         case WSA_WAIT_EVENT_0:
@@ -268,7 +290,11 @@ StdIO:
 
                 termios toSetTermios;
                 toSetTermios.c_cc[VMIN] = 0;
-                toSetTermios.c_cc[VTIME] = 1;
+                toSetTermios.c_cc[VTIME] = cast(ubyte)(timeout.totalMilliSeconds / 100);
+
+                if (toSetTermios.c_cc[VTIME] == 0)
+                    toSetTermios.c_cc[VTIME] = 10;
+
                 tcsetattr(stdioIn, TCSANOW, &toSetTermios);
             }
         }
@@ -296,15 +322,15 @@ StdIO:
     return builder;
 }
 
-/// Includes new line terminator, times out at 100ms
-StringBuilder_UTF8 readLine(scope return ref StringBuilder_UTF8 builder) @trusted {
+/// Includes new line terminator, default is blocking.
+StringBuilder_UTF8 readLine(scope return ref StringBuilder_UTF8 builder, Duration timeout = Duration.min) @trusted {
     import core.stdc.stdio : getc, EOF;
 
     mutex.pureLock;
 
     if (builder.isNull)
         builder = StringBuilder_UTF8(globalAllocator());
-    const block = false;
+    const block = timeout < Duration.zero;
 
     version (Windows) {
         if (useWindows) {
@@ -349,8 +375,12 @@ StringBuilder_UTF8 readLine(scope return ref StringBuilder_UTF8 builder) @truste
                         }
                     }
 
+                    DWORD dwTimeout = cast(DWORD)timeout.totalMilliSeconds;
+                    if (dwTimeout == 0)
+                        dwTimeout = 1_000;
+
                     ReadLoopWindows: for (;;) {
-                        DWORD result = WSAWaitForMultipleEvents(1, &hStdin, false, 100, true);
+                        DWORD result = WSAWaitForMultipleEvents(1, &hStdin, false, dwTimeout, true);
 
                         switch (result) {
                         case WSA_WAIT_EVENT_0:
@@ -418,7 +448,11 @@ StdIO:
 
                 termios toSetTermios;
                 toSetTermios.c_cc[VMIN] = 0;
-                toSetTermios.c_cc[VTIME] = 1;
+                toSetTermios.c_cc[VTIME] = cast(ubyte)(timeout.totalMilliSeconds / 100);
+
+                if (toSetTermios.c_cc[VTIME] == 0)
+                    toSetTermios.c_cc[VTIME] = 10;
+
                 tcsetattr(stdioIn, TCSANOW, &toSetTermios);
             }
         }
@@ -447,22 +481,22 @@ StdIO:
 }
 
 /// Ditto
-StringBuilder_UTF16 readLine(scope return ref StringBuilder_UTF16 builder) {
+StringBuilder_UTF16 readLine(scope return ref StringBuilder_UTF16 builder, Duration timeout = Duration.min) {
     if (builder.isNull)
         builder = StringBuilder_UTF16(globalAllocator());
 
     auto temp = builder.byUTF8();
-    readLine(temp);
+    readLine(temp, timeout);
     return builder;
 }
 
 /// Ditto
-StringBuilder_UTF32 readLine(scope return ref StringBuilder_UTF32 builder) {
+StringBuilder_UTF32 readLine(scope return ref StringBuilder_UTF32 builder, Duration timeout = Duration.min) {
     if (builder.isNull)
         builder = StringBuilder_UTF32(globalAllocator());
 
     auto temp = builder.byUTF8();
-    readLine(temp);
+    readLine(temp, timeout);
     return builder;
 }
 
@@ -1085,7 +1119,7 @@ version (CRuntime_Microsoft) {
 version (Windows) {
     import core.sys.windows.windows : HANDLE, CHAR, WCHAR, ULONG, BOOL, DWORD, WORD, UINT, COORD, WAIT_TIMEOUT,
         WAIT_OBJECT_0, PeekConsoleInputA, ReadConsoleInputA, PeekConsoleInputW, ReadConsoleInputW, KEY_EVENT,
-        GetConsoleMode, ENABLE_ECHO_INPUT, WriteConsoleA, WriteConsoleW;
+        GetConsoleMode, ENABLE_ECHO_INPUT, WriteConsoleA, WriteConsoleW, ReadConsoleW;
 
     alias WSAEVENT = HANDLE;
 
