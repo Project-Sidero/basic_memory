@@ -14,7 +14,7 @@ struct TimeOfDay {
 export @safe nothrow @nogc:
 
     ///
-    static immutable string DefaultFormat = "H:i:s.u.V", ISOFormat = "His", ISOExtFormat = "H:i:s";
+    static immutable string DefaultFormat = "H:i:s.V", ISOFormat = "His", ISOExtFormat = "H:i:s";
 
     ///
     this(long nanoSeconds) scope {

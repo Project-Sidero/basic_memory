@@ -18,6 +18,13 @@ struct Duration {
 export @safe nothrow @nogc:
 
     ///
+    this(long day, long nanoSecond) {
+        Duration temp = day.days + nanoSecond.nanoSeconds;
+        days_ = temp.days_;
+        nanoSeconds_ = temp.nanoSeconds_;
+    }
+
+    ///
     long days() scope const {
         return this.days_;
     }

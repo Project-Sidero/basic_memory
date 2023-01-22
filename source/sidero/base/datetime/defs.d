@@ -226,6 +226,29 @@ export @safe nothrow @nogc:
     //
 
     ///
+    Result!Duration opBinary(string op : "-")(scope DateTime other) scope const {
+        auto ourUnixTime = this.toUnixTime, otherUnixTime = other.toUnixTime;
+
+        if (!ourUnixTime)
+            return typeof(return)(ourUnixTime.error);
+        else if (!otherUnixTime)
+            return typeof(return)(otherUnixTime.error);
+
+        long ourNanoSeconds = this.time.nanoSecond, otherNanoSeconds = other.time.nanoSecond;
+        ourNanoSeconds -= (ourNanoSeconds / 1_000_000_000) * 1_000_000_000;
+        otherNanoSeconds -= (otherNanoSeconds / 1_000_000_000) * 1_000_000_000;
+
+        if (ourUnixTime < 0)
+            ourNanoSeconds *= -1;
+        if (otherUnixTime < 0)
+            otherNanoSeconds *= -1;
+
+        ourNanoSeconds += ourUnixTime * 1_000_000_000;
+        otherNanoSeconds += otherUnixTime * 1_000_000_000;
+        return typeof(return)((ourNanoSeconds - otherNanoSeconds).nanoSeconds);
+    }
+
+    ///
     bool opEquals(scope const DateTime other) scope const {
         return this.time_ == other.time_ && this.date_ == other.date_;
     }
