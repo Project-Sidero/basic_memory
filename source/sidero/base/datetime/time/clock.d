@@ -22,7 +22,7 @@ DateTime!GregorianDate accurateDateTime() @trusted {
             // welp that was easy...
             return typeof(return)(GregorianDate(systemTime.wYear, cast(ubyte)systemTime.wMonth,
                     cast(ubyte)systemTime.wDay), TimeOfDay(cast(ubyte)systemTime.wHour, cast(ubyte)systemTime.wMinute,
-                    cast(ubyte)systemTime.wSecond, systemTime.wMilliseconds * 1000), TimeZone.from(0)); // FIXME: to nano seconds
+                    cast(ubyte)systemTime.wSecond, systemTime.wMilliseconds * 1000), TimeZone.from(0));
         }
     } else version (Posix) {
         import core.sys.posix.time;
@@ -31,7 +31,7 @@ DateTime!GregorianDate accurateDateTime() @trusted {
 
         if (clock_gettime(CLOCK_REALTIME, &ts) == 0) {
             typeof(return) ret;
-            ret.advanceMicroSeconds(ts.tv_nsec / 1000); // FIXME: to nano seconds
+            ret.advanceNanoSeconds(ts.tv_nsec);
             return ret.asTimeZone(TimeZone.from(0));
         }
     }

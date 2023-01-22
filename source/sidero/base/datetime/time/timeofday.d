@@ -8,16 +8,21 @@ import sidero.base.traits;
 struct TimeOfDay {
     private {
         ubyte hour_, minute_, second_;
-        uint msec_;
+        uint nanoSeconds_;
     }
 
 export @safe nothrow @nogc:
 
     ///
-    static immutable string DefaultFormat = "H:i:s.u", ISOFormat = "His", ISOExtFormat = "H:i:s";
+    static immutable string DefaultFormat = "H:i:s.u.V", ISOFormat = "His", ISOExtFormat = "H:i:s";
 
     ///
-    this(ubyte hour, ubyte minute, ubyte second = 0, long msec = 0) scope {
+    this(long nanoSeconds) scope {
+        this.advanceMicroSeconds(nanoSeconds / 1_000);
+    }
+
+    ///
+    this(ubyte hour, ubyte minute, ubyte second, long msec = 0) scope {
         this.advanceMicroSeconds(msec);
         this.advanceSeconds(second);
         this.advanceMinutes(minute);
@@ -25,8 +30,18 @@ export @safe nothrow @nogc:
     }
 
     ///
+    uint nanoSecond() scope const {
+        return this.nanoSeconds_;
+    }
+
+    ///
     uint microSecond() scope const {
-        return this.msec_;
+        return this.nanoSeconds_ / 1_000;
+    }
+
+    ///
+    uint milliSecond() scope const {
+        return this.nanoSeconds_ / 1_000_000;
     }
 
     ///
@@ -55,6 +70,22 @@ export @safe nothrow @nogc:
     }
 
     ///
+    long totalNanoSeconds() scope const {
+        long working = this.hour_;
+
+        working *= 60;
+        working += this.minute_;
+
+        working *= 60;
+        working += this.second_;
+
+        working *= 1_000_000_000;
+        working += this.nanoSeconds_;
+
+        return working;
+    }
+
+    ///
     long totalMicroSeconds() scope const {
         long working = this.hour_;
 
@@ -65,7 +96,23 @@ export @safe nothrow @nogc:
         working += this.second_;
 
         working *= 1_000_000;
-        working += this.msec_;
+        working += this.nanoSeconds_ / 1_000;
+
+        return working;
+    }
+
+    ///
+    long totalMilliSeconds() scope const {
+        long working = this.hour_;
+
+        working *= 60;
+        working += this.minute_;
+
+        working *= 60;
+        working += this.second_;
+
+        working *= 1_000;
+        working += this.nanoSeconds_ / 1_000_000;
 
         return working;
     }
@@ -94,45 +141,50 @@ export @safe nothrow @nogc:
     }
 
     ///
-    Duration advanceMicroSeconds(const Duration interval, bool allowOverflow = true) scope {
-        return advanceMicroSeconds(interval.totalMicroSeconds);
+    Duration advance(const Duration interval, bool allowOverflow = true) scope {
+        return advanceNanoSeconds(interval.totalNanoSeconds) + interval.days.days;
     }
 
     ///
-    Duration advanceMicroSeconds(long amount, bool allowOverflow = true) scope {
-        amount += this.msec_;
+    Duration advanceNanoSeconds(long amount, bool allowOverflow = true) scope {
+        amount += this.nanoSeconds_;
         long rollDays, rollHours, rollMinutes, rollSeconds;
 
         if (allowOverflow) {
-            enum DayToMicro = 86_400_000_000;
-            enum HourToMicro = 3_600_000_000;
-            enum MinuteToMicro = 60_000_000;
-            enum SecondToMicro = 100_00_00;
+            enum DayToNano = 86_400_000_000_000;
+            enum HourToNano = 3_600_000_000_000;
+            enum MinuteToNano = 60_000_000_000;
+            enum SecondToNano = 1_000_000_000;
 
-            rollDays = amount / DayToMicro;
-            amount -= rollDays * DayToMicro;
+            rollDays = amount / DayToNano;
+            amount -= rollDays * DayToNano;
 
-            rollHours = amount / HourToMicro;
-            amount -= rollHours * HourToMicro;
+            rollHours = amount / HourToNano;
+            amount -= rollHours * HourToNano;
 
-            rollMinutes = amount / MinuteToMicro;
-            amount -= rollMinutes * MinuteToMicro;
+            rollMinutes = amount / MinuteToNano;
+            amount -= rollMinutes * MinuteToNano;
 
-            rollSeconds = amount / SecondToMicro;
-            amount -= rollSeconds * SecondToMicro;
+            rollSeconds = amount / SecondToNano;
+            amount -= rollSeconds * SecondToNano;
         } else {
-            amount %= 1_000_000;
+            amount %= 1_000_000_000;
         }
 
         if (amount < 0)
-            amount += 1_000_000;
+            amount += 1_000_000_000;
 
-        this.msec_ = cast(uint)amount;
+        this.nanoSeconds_ += amount;
 
         if (allowOverflow) {
             return rollDays.days + this.advanceHours(rollHours)  + this.advanceMinutes(rollMinutes) + this.advanceSeconds(rollSeconds);
         } else
             return Duration.zero;
+    }
+
+    ///
+    Duration advanceMicroSeconds(long amount, bool allowOverflow = true) scope {
+        return this.advanceNanoSeconds(amount * 1_000, allowOverflow);
     }
 
     ///
@@ -273,6 +325,8 @@ export @safe nothrow @nogc:
      See: https://www.php.net/manual/en/datetime.format.php
 
      Note: B aka Swatch Internet time requires a timezone, so cannot be computed here.
+
+     Supports V for nano seconds, unlike PHP's DateTime class.
      */
     void format(Builder, Format)(scope ref Builder builder, scope Format specification) scope const @trusted
             if (isBuilderString!Builder && isReadOnlyString!Format) {
@@ -346,21 +400,23 @@ export @safe nothrow @nogc:
             break;
 
         case 'u':
-            if (this.msec_ < 10)
+            auto msec = this.nanoSeconds_ / 1_000;
+
+            if (msec < 10)
                 builder ~= "00000"c;
-            else if (this.msec_ < 100)
+            else if (msec < 100)
                 builder ~= "0000";
-            else if (this.msec_ < 1000)
+            else if (msec < 1000)
                 builder ~= "000";
-            else if (this.msec_ < 10_000)
+            else if (msec < 10_000)
                 builder ~= "00";
-            else if (this.msec_ < 100_000)
+            else if (msec < 100_000)
                 builder ~= "0";
-            builder.formattedWrite("%s", this.msec_);
+            builder.formattedWrite("%s", msec);
             break;
 
         case 'v':
-            const working = this.msec_ / 1000;
+            const working = this.nanoSeconds_ / 1_000_000;
 
             if (working < 10)
                 builder ~= "00"c;
@@ -368,6 +424,10 @@ export @safe nothrow @nogc:
                 builder ~= "0";
 
             builder.formattedWrite("%s", working);
+            break;
+
+        case 'V':
+            builder.formattedWrite("%s", this.nanoSeconds_);
             break;
 
         default:
