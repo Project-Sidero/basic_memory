@@ -314,10 +314,10 @@ private @hidden:
                             static foreach (name; FieldNameTuple!Base) {
                                 {
                                     alias member = __traits(getMember, input, name);
-                                    bool ignore = __traits(getVisibility, member) == "private";
+                                    bool ignore = __traits(getVisibility, member) == "private", explicitIgnore;
 
                                     foreach (attr; __traits(getAttributes, member)) {
-                                        ignore = ignore || is(attr == PrettyPrintIgnore);
+                                        explicitIgnore = explicitIgnore || is(attr == PrettyPrintIgnore);
                                     }
 
                                     static foreach (name2; FieldNameTuple!ActualType) {
@@ -330,7 +330,7 @@ private @hidden:
                                         }
                                     }
 
-                                    if (!ignore) {
+                                    if (!ignore && !explicitIgnore) {
                                         if (!isFirst)
                                             builder ~= ", ";
                                         else
@@ -354,10 +354,10 @@ private @hidden:
                     static foreach (name; FieldNameTuple!ActualType) {
                         {
                             alias member = __traits(getMember, input, name);
-                            bool accessible = __traits(getVisibility, member) == "private", ignore = accessible, overload;
+                            bool accessible = __traits(getVisibility, member) == "private", explicitIgnore, ignore = accessible, overload;
 
                             foreach (attr; __traits(getAttributes, member)) {
-                                ignore = ignore || is(attr == PrettyPrintIgnore);
+                                explicitIgnore = explicitIgnore || is(attr == PrettyPrintIgnore);
                             }
 
                             static foreach (name2; FieldNameTuple!ActualType) {
@@ -371,7 +371,7 @@ private @hidden:
                                 }
                             }
 
-                            if (ignore) {
+                            if (ignore && !explicitIgnore) {
                                 if (isFirst) {
                                     isFirst = false;
                                     builder ~= "\n";
@@ -405,10 +405,10 @@ private @hidden:
                             static foreach (name; FieldNameTuple!Base) {
                                 {
                                     alias member = __traits(getMember, input, name);
-                                    bool accessible = __traits(getVisibility, member) == "private", ignore = accessible, overload;
+                                    bool accessible = __traits(getVisibility, member) == "private", explicitIgnore, ignore = accessible, overload;
 
                                     foreach (attr; __traits(getAttributes, member)) {
-                                        ignore = ignore || is(attr == PrettyPrintIgnore);
+                                        explicitIgnore = explicitIgnore || is(attr == PrettyPrintIgnore);
                                     }
 
                                     static foreach (name2; FieldNameTuple!ActualType) {
@@ -422,7 +422,7 @@ private @hidden:
                                         }
                                     }
 
-                                    if (ignore) {
+                                    if (ignore && !explicitIgnore) {
                                         if (isFirst) {
                                             isFirst = false;
                                             builder ~= "\n";

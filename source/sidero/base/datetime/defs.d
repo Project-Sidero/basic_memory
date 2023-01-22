@@ -17,7 +17,7 @@ enum {
 
 ///
 struct DateTime(DateType) {
-    private {
+    private @PrettyPrintIgnore {
         TimeOfDay time_;
         TimeZone timezone_;
         DateType date_;

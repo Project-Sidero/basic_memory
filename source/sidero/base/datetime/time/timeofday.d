@@ -3,10 +3,11 @@ import sidero.base.datetime.calendars.defs;
 import sidero.base.datetime.duration;
 import sidero.base.text;
 import sidero.base.traits;
+import sidero.base.attributes;
 
 /// Time of day has a lot more concensus on how to represent it. So we'll go with that.
 struct TimeOfDay {
-    private {
+    private @PrettyPrintIgnore {
         ubyte hour_, minute_, second_;
         uint nanoSeconds_;
     }

@@ -1,12 +1,13 @@
 module sidero.base.datetime.duration;
 import sidero.base.text;
 import sidero.base.traits;
+import sidero.base.attributes;
 
 export @safe nothrow @nogc:
 
 ///
 struct Duration {
-    private {
+    private @PrettyPrintIgnore {
         enum NanoSecondsInDay = 24 * 60 * 60 * 1_000_000_000L;
         long days_;
         long nanoSeconds_;

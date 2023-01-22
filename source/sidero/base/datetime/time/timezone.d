@@ -11,6 +11,7 @@ import sidero.base.errors;
 import sidero.base.text;
 import sidero.base.traits;
 import sidero.base.allocators;
+import sidero.base.attributes;
 
 ///
 enum {
@@ -28,7 +29,7 @@ export @safe nothrow @nogc:
 
 ///
 struct TimeZone {
-    package(sidero.base.datetime) {
+    package(sidero.base.datetime) @PrettyPrintIgnore {
         State* state;
 
         static struct State {
