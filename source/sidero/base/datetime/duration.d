@@ -7,7 +7,7 @@ export @safe nothrow @nogc:
 
 ///
 struct Duration {
-    private @PrintIgnore {
+    private @PrettyPrintIgnore {
         enum NanoSecondsInDay = 24 * 60 * 60 * 1_000_000_000L;
         long days_;
         long nanoSeconds_;
