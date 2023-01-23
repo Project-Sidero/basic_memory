@@ -8,10 +8,10 @@ version (LDC) {
     enum hidden;
 }
 
-/// Disables printing of field
+/// Disables printing of field except for pretty printing.
 struct PrintIgnore {
 }
 
-/// Disables pretty printing of field
+/// Disables printing of field for formattedWrite only.
 struct PrettyPrintIgnore {
 }

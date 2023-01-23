@@ -8,7 +8,7 @@ import sidero.base.attributes : hidden;
 
 export:
 
-///
+/// See_Also: formattedWrite
 StringBuilder_UTF8 format(Format, Args...)(scope Format format, scope Args args) {
     StringBuilder_UTF8 builder = StringBuilder_UTF8(globalAllocator());
     builder.formattedWrite(format, args);
@@ -20,7 +20,7 @@ unittest {
     assert(format("hello %s", "world!").length == "hello world!".length);
 }
 
-///
+/// See_Also: formattedWrite
 StringBuilder_UTF8 format(alias Format, Args...)(scope Args args) {
     StringBuilder_UTF8 builder = StringBuilder_UTF8(globalAllocator());
     builder.formattedWrite!Format(args);
@@ -32,14 +32,14 @@ unittest {
     assert(format!"hello %s"("world!").length == "hello world!".length);
 }
 
-///
+/// Formats argument based upon format, ignores fields with PrintIgnore or PrettyPrintIgnore UDA.
 void formattedWrite(alias Format, Builder, Args...)(scope Builder builder, scope Args args)
         if (isBuilderString!Builder && isSomeString!(typeof(Format))) {
     static assert(CheckParameters!(Format, Args));
     formattedWrite(builder, Format, args);
 }
 
-///
+/// Ditto
 void formattedWrite(Builder, Format, Args...)(scope Builder builder, scope Format format, scope Args args) @trusted
         if (isBuilderString!Builder && (isReadOnlyString!Format || isSomeString!Format)) {
     import sidero.base.algorithm : startsWith;
@@ -73,7 +73,7 @@ void formattedWrite(Builder, Format, Args...)(scope Builder builder, scope Forma
     }
 }
 
-///
+/// Formats arguments based upon format and configuration, ignores fields with PrettyPrintIgnore UDA.
 struct PrettyPrint(ConstantsType)
         if (isReadOnlyString!ConstantsType || isBuilderString!ConstantsType || isSomeString!ConstantsType) {
     /// For each line emit: prefix? prefixToRepeat{depth} prefixSuffix?
