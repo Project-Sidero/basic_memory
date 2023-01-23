@@ -7,7 +7,7 @@ import sidero.base.attributes;
 
 /// Time of day has a lot more concensus on how to represent it. So we'll go with that.
 struct TimeOfDay {
-    private @PrettyPrintIgnore {
+    private @PrintIgnore {
         ubyte hour_, minute_, second_;
         uint nanoSeconds_;
     }

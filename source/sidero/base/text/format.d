@@ -274,7 +274,7 @@ private @hidden:
                             bool ignore = __traits(getVisibility, member) == "private";
 
                             foreach (attr; __traits(getAttributes, member)) {
-                                ignore = ignore || is(attr == PrettyPrintIgnore);
+                                ignore = ignore || is(attr == PrintIgnore) || is(attr == PrettyPrintIgnore);
                             }
 
                             static foreach (name2; FieldNameTuple!ActualType) {
@@ -317,7 +317,7 @@ private @hidden:
                                     bool ignore = __traits(getVisibility, member) == "private", explicitIgnore;
 
                                     foreach (attr; __traits(getAttributes, member)) {
-                                        explicitIgnore = explicitIgnore || is(attr == PrettyPrintIgnore);
+                                        explicitIgnore = explicitIgnore || is(attr == PrintIgnore) || is(attr == PrettyPrintIgnore);
                                     }
 
                                     static foreach (name2; FieldNameTuple!ActualType) {
@@ -357,7 +357,7 @@ private @hidden:
                             bool accessible = __traits(getVisibility, member) == "private", explicitIgnore, ignore = accessible, overload;
 
                             foreach (attr; __traits(getAttributes, member)) {
-                                explicitIgnore = explicitIgnore || is(attr == PrettyPrintIgnore);
+                                explicitIgnore = explicitIgnore || is(attr == PrintIgnore) || is(attr == PrettyPrintIgnore);
                             }
 
                             static foreach (name2; FieldNameTuple!ActualType) {
@@ -408,7 +408,7 @@ private @hidden:
                                     bool accessible = __traits(getVisibility, member) == "private", explicitIgnore, ignore = accessible, overload;
 
                                     foreach (attr; __traits(getAttributes, member)) {
-                                        explicitIgnore = explicitIgnore || is(attr == PrettyPrintIgnore);
+                                        explicitIgnore = explicitIgnore || is(attr == PrintIgnore) || is(attr == PrettyPrintIgnore);
                                     }
 
                                     static foreach (name2; FieldNameTuple!ActualType) {
@@ -483,7 +483,7 @@ private @hidden:
                         builder ~= "]";
                 }
 
-                static if (haveToStringPretty!ActualType && !hasUDA!(__traits(getMember, input, "toStringPretty"), PrettyPrintIgnore)) {
+                static if (haveToStringPretty!ActualType && !hasUDA!(__traits(getMember, input, "toStringPretty"), PrintIgnore) && !hasUDA!(__traits(getMember, input, "toStringPretty"), PrettyPrintIgnore)) {
                     size_t offsetForToString = builder.length;
 
                     static if (__traits(compiles, builder.toStringPretty(output))) {
@@ -510,7 +510,7 @@ private @hidden:
                             builder.insert(offsetForToString, " ->\n"c);
                         }
                     }
-                } else static if (haveToString!ActualType && !hasUDA!(__traits(getMember, input, "toString"), PrettyPrintIgnore)) {
+                } else static if (haveToString!ActualType && !hasUDA!(__traits(getMember, input, "toString"), PrintIgnore) && !hasUDA!(__traits(getMember, input, "toString"), PrettyPrintIgnore)) {
                     size_t offsetForToString = builder.length;
 
                     static if (__traits(compiles, input.toString(builder))) {
@@ -1078,7 +1078,7 @@ scope @hidden:
                     bool ignore;
 
                     foreach (attr; __traits(getAttributes, member)) {
-                        ignore = ignore || is(attr == PrintIgnore) || is(attr == PrettyPrintIgnore);
+                        ignore = ignore || is(attr == PrintIgnore);
                     }
 
                     static foreach (name2; FieldNameTuple!ActualType) {
@@ -1110,7 +1110,7 @@ scope @hidden:
                             bool ignore;
 
                             foreach (attr; __traits(getAttributes, member)) {
-                                ignore = ignore || is(attr == PrintIgnore) || is(attr == PrettyPrintIgnore);
+                                ignore = ignore || is(attr == PrintIgnore);
                             }
 
                             static foreach (name2; FieldNameTuple!Base) {
@@ -1136,7 +1136,7 @@ scope @hidden:
                 }
             }
 
-            static if (haveToString!ActualType) {
+            static if (haveToString!ActualType && !hasUDA!(__traits(getMember, input, "toString"), PrintIgnore)) {
                 size_t offsetForToString = builder.length;
 
                 static if (__traits(compiles, { input.toString(builder); })) {

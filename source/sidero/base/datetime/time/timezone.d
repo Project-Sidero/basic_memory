@@ -29,7 +29,7 @@ export @safe nothrow @nogc:
 
 ///
 struct TimeZone {
-    package(sidero.base.datetime) @PrettyPrintIgnore {
+    package(sidero.base.datetime) @PrintIgnore {
         State* state;
 
         static struct State {
