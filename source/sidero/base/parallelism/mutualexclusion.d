@@ -6,22 +6,24 @@ Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
 */
 module sidero.base.parallelism.mutualexclusion;
+import sidero.base.attributes;
+
 export:
 
-version(D_BetterC) {
+version (D_BetterC) {
 } else {
     import core.thread : Thread;
 }
 
 ///
 struct TestTestSetLockInline {
-    private shared(bool) state;
+    private @PrettyPrintIgnore shared(bool) state;
 
     @disable this(this);
 
 export @safe @nogc nothrow:
 
-    version(D_BetterC) {
+    version (D_BetterC) {
     } else {
         ///
         void lock() @trusted {
@@ -37,7 +39,7 @@ export @safe @nogc nothrow:
                 }
 
                 if (cas(&state, false, true))
-                    return ;
+                    return;
             }
         }
     }

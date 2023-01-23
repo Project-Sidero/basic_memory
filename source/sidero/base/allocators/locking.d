@@ -6,7 +6,9 @@ Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
  */
 module sidero.base.allocators.locking;
+import sidero.base.attributes;
 import std.typecons : Ternary;
+
 export:
 
 /**
@@ -19,7 +21,7 @@ struct AllocatorLocking(PoolAllocator) {
     ///
     enum NeedsLocking = false;
 
-    private {
+    private @PrettyPrintIgnore {
         import sidero.base.parallelism.mutualexclusion : TestTestSetLockInline;
 
         TestTestSetLockInline mutex;

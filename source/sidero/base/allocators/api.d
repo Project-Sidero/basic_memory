@@ -6,6 +6,7 @@ Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
  */
 module sidero.base.allocators.api;
+import sidero.base.attributes;
 import std.typecons : Ternary;
 
 ///
@@ -58,7 +59,7 @@ void globalAllocator(RCAllocator allocator) @system nothrow @nogc {
 
 /// Reference counted memory allocator interface.
 struct RCAllocator {
-    private {
+    private @PrettyPrintIgnore {
         void delegate() @safe @nogc pure nothrow refAdd_;
         void delegate() @safe @nogc pure nothrow refSub_;
 
@@ -198,6 +199,11 @@ scope:
             return false;
         return empty_();
     }
+
+    ///
+    string toString() const {
+        return isNull ? "null" : "non-null";
+    }
 }
 
 ///
@@ -258,6 +264,7 @@ unittest {
 /// A subset of the std.experimental.allocator one, as that one can use exceptions.
 auto make(T, Allocator, Args...)(scope auto ref Allocator alloc, scope return auto ref Args args) @trusted {
     import core.lifetime : emplace;
+
     size_t sizeToAllocate = T.sizeof;
 
     static if (is(T == class)) {
@@ -343,6 +350,7 @@ T[] makeArray(T, Allocator)(auto ref Allocator alloc, size_t length) @trusted {
     static if (is(T == struct) || is(T == class) || is(T == union)) {
         foreach (i; 0 .. length) {
             import core.lifetime : emplace;
+
             emplace(&ret[i]);
         }
     } else static if (!is(T == void)) {
@@ -383,7 +391,7 @@ bool expandArray(T, Allocator)(scope auto ref Allocator alloc, scope ref T[] arr
         return false;
     }
 
-    foreach(ref v; array[originalLength .. $])
+    foreach (ref v; array[originalLength .. $])
         v = T.init;
 
     array = cast(T[])temp;

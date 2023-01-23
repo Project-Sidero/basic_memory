@@ -3,6 +3,7 @@ import sidero.base.containers.readonlyslice;
 import sidero.base.allocators;
 import sidero.base.errors;
 import sidero.base.text;
+import sidero.base.attributes;
 
 export:
 
@@ -12,7 +13,7 @@ private {
 
 /// Not thread safe dynamic array ElementType
 struct DynamicArray(Type) {
-    private {
+    private @PrettyPrintIgnore {
         import sidero.base.internal.meta : OpApplyCombos;
         import core.atomic : atomicOp;
 
@@ -597,6 +598,7 @@ scope nothrow @nogc:
     ///
     int opCmp(scope const(ElementType)[] other) @trusted scope const {
         import sidero.base.containers.utils : genericCompare;
+
         auto us = unsafeGetLiteral();
         return genericCompare(us, other);
     }

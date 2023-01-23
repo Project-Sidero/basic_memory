@@ -6,6 +6,7 @@ Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
  */
 module sidero.base.allocators.stats;
+import sidero.base.attributes;
 import std.typecons : Ternary;
 
 private {
@@ -43,7 +44,7 @@ struct StatsAllocator(PoolAllocator) {
         size_t bytesAllocated, maximumBytesAllocatedOverTime;
     }
 
-    private {
+    private @PrettyPrintIgnore {
         shared(Info) info;
     }
 

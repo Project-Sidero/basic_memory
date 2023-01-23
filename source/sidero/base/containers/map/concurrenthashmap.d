@@ -2,6 +2,7 @@ module sidero.base.containers.map.concurrenthashmap;
 import sidero.base.allocators;
 import sidero.base.traits;
 import sidero.base.errors;
+import sidero.base.attributes;
 
 export:
 
@@ -14,7 +15,7 @@ struct ConcurrentHashMap(RealKeyType, ValueType) {
     /// If key type supports asReadOnly it is used instead of RealKeyType internally.
     alias KeyType = typeof(state).KeyType;
 
-    private {
+    private @PrettyPrintIgnore {
         import sidero.base.internal.meta : OpApplyCombos;
 
         int opApplyImpl(Del)(scope Del del) scope @trusted {
@@ -360,7 +361,7 @@ export:
     }
 
     private {
-        ConcurrentHashMapImpl!(RealKeyType, ValueType)* state;
+        @PrettyPrintIgnore ConcurrentHashMapImpl!(RealKeyType, ValueType)* state;
 
         void setupState() scope @trusted {
             if (!isNull)

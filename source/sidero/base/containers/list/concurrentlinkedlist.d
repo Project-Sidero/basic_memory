@@ -3,6 +3,7 @@ import sidero.base.containers.readonlyslice;
 import sidero.base.allocators;
 import sidero.base.traits;
 import sidero.base.errors;
+import sidero.base.attributes;
 
 export:
 
@@ -12,7 +13,7 @@ private {
 
 ///
 struct ConcurrentLinkedList(Type) {
-    private {
+    private @PrettyPrintIgnore {
         import sidero.base.internal.meta : OpApplyCombos;
 
         ConcurrentLinkedListImpl!(Type)* state;

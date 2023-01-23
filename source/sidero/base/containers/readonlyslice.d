@@ -5,6 +5,7 @@ import sidero.base.allocators;
 import sidero.base.text;
 import sidero.base.text.format;
 import sidero.base.errors;
+import sidero.base.attributes;
 
 export:
 
@@ -12,9 +13,9 @@ private alias SliceI = Slice!int;
 
 ///
 struct Slice(Type) {
-    package(sidero.base.containers) LiteralType literal;
+    package(sidero.base.containers) @PrettyPrintIgnore LiteralType literal;
 
-    private {
+    private @PrettyPrintIgnore {
         import sidero.base.internal.meta : OpApplyCombos;
         import core.atomic : atomicOp;
 

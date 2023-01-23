@@ -6,13 +6,15 @@ Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
 */
 module sidero.base.parallelism.rwmutex;
+import sidero.base.attributes;
 import core.atomic : cas, atomicLoad, atomicFence;
+
 export:
 
 ///
 struct ReaderWriterLockInline {
-    private {
-        version(D_BetterC) {
+    private @PrettyPrintIgnore {
+        version (D_BetterC) {
         } else {
             import core.thread : Thread;
         }
@@ -23,7 +25,7 @@ struct ReaderWriterLockInline {
 
 export @safe nothrow @nogc:
 
-    version(D_BetterC) {
+    version (D_BetterC) {
     } else {
         ///
         void writeLock() @trusted {
@@ -32,12 +34,12 @@ export @safe nothrow @nogc:
             }
 
             if (cas(&state, cast(size_t)0, TopBit + 1))
-                return ;
+                return;
 
             size_t temp = atomicLoad(state);
             if (temp >= TopBit) {
                 if (cas(&state, TopBit, TopBit + 1))
-                    return ;
+                    return;
             } else
                 cas(&state, temp, temp | TopBit);
 
@@ -45,12 +47,12 @@ export @safe nothrow @nogc:
 
             for (;;) {
                 if (cas(&state, cast(size_t)0, TopBit + 1))
-                    return ;
+                    return;
 
                 temp = atomicLoad(state);
                 if (temp >= TopBit) {
                     if (cas(&state, TopBit, TopBit + 1))
-                        return ;
+                        return;
                 } else
                     cas(&state, temp, temp | TopBit);
 
@@ -63,7 +65,7 @@ export @safe nothrow @nogc:
             size_t temp = atomicLoad(state);
 
             if (temp < TopBit && cas(&state, temp, temp + 1))
-                return ;
+                return;
 
             atomicFence();
 
@@ -71,7 +73,7 @@ export @safe nothrow @nogc:
                 temp = atomicLoad(state);
 
                 if (temp < TopBit && cas(&state, temp, temp + 1))
-                    return ;
+                    return;
 
                 Thread.yield;
             }
@@ -84,7 +86,7 @@ export @safe nothrow @nogc:
             size_t temp = atomicLoad(state);
             if (temp < TopBit) {
                 if (cas(&state, temp, temp - 1))
-                    return ;
+                    return;
             } else
                 assert(0);
 
@@ -94,7 +96,7 @@ export @safe nothrow @nogc:
                 temp = atomicLoad(state);
                 if (temp < TopBit) {
                     if (cas(&state, temp, temp - 1))
-                        return ;
+                        return;
                 } else
                     assert(0);
 
@@ -105,12 +107,12 @@ export @safe nothrow @nogc:
         ///
         void convertReadToWrite() @trusted {
             if (cas(&state, cast(size_t)1, TopBit + 1))
-                return ;
+                return;
 
             size_t temp = atomicLoad(state);
             if (temp >= TopBit) {
                 if (temp == TopBit + 1)
-                    return ;
+                    return;
             } else
                 cas(&state, temp, temp | TopBit);
 
@@ -118,12 +120,12 @@ export @safe nothrow @nogc:
 
             for (;;) {
                 if (cas(&state, cast(size_t)1, TopBit + 1))
-                    return ;
+                    return;
 
                 temp = atomicLoad(state);
                 if (temp >= TopBit) {
                     if (temp == TopBit + 1)
-                        return ;
+                        return;
                 } else
                     cas(&state, temp, temp | TopBit);
 

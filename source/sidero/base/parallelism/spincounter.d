@@ -6,11 +6,13 @@ Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
 */
 module sidero.base.parallelism.spincounter;
+import sidero.base.attributes;
+
 export:
 
 ///
 struct SpinCounter {
-    private shared(int) current;
+    private @PrettyPrintIgnore shared(int) current;
 
     @disable this(this);
 
@@ -48,7 +50,7 @@ unittest {
 
 ///
 struct SpinCounterValue {
-    private int value;
+    private @PrettyPrintIgnore int value;
 
 export @safe nothrow @nogc:
 
