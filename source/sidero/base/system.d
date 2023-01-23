@@ -1,4 +1,5 @@
 module sidero.base.system;
+import sidero.base.containers.readonlyslice;
 import sidero.base.text;
 import sidero.base.text.unicode.characters.database : UnicodeLanguage;
 import sidero.base.traits : isUTFReadOnly, isUTFBuilder;
@@ -460,7 +461,10 @@ unittest {
     currentWorkingDirectory = String_UTF8();
 }
 
-// TODO: commandLineArguments
+///
+Slice!String_UTF8 commandLineArguments() @trusted {
+    return _commandLineArguments;
+}
 
 ///
 struct Locale {
@@ -537,6 +541,110 @@ void unicodeLanguage(UnicodeLanguage language) @trusted {
     initMutex.unlock;
 }
 
+/// Initializes system info
+pragma(crt_constructor) extern (C) void initializeSystemInfo() @trusted {
+    import sidero.base.containers.dynamicarray;
+    import core.stdc.string : strlen;
+    import core.stdc.wchar_ : wcslen;
+
+    initMutex.lock;
+    DynamicArray!String_UTF8 ret = DynamicArray!String_UTF8(0);
+
+    scope (exit) {
+        _commandLineArguments = ret.asReadOnly;
+        initMutex.unlock;
+    }
+
+    void handle(String_UTF8 arg) {
+        if (!arg.isPtrNullTerminated)
+            arg = arg.dup;
+
+        ret ~= arg;
+    }
+
+    version (Posix) {
+        import core.stdc.stdio : FILE, fopen, fclose, fread;
+
+        enum FilePath = "/proc/self/cmdline";
+        FILE* file = fopen(FilePath, "rb");
+
+        if (file !is null) {
+            StringBuilder_UTF8 temp = StringBuilder_UTF8(globalAllocator());
+
+            size_t length, length2;
+            char[100] buffer;
+
+            while ((length = fread(buffer.ptr, 1, buffer.length, file)) > 0) {
+                char[] wasRead = buffer[length];
+
+                while ((length2 = strlen(wasRead.ptr)) > 0) {
+                    char[] current = wasRead[0 .. length2];
+
+                    temp ~= current;
+
+                    if (length2 == wasRead.length) {
+                        // we didn't max out
+                    } else {
+                        // we maxed out so we're done for this one.
+                        handle(temp.asReadOnly);
+                        temp.clear;
+                    }
+
+                    wasRead = wasRead[length2 .. $];
+                }
+            }
+
+            if (temp.length > 0)
+                handle(temp.asReadOnly);
+
+            fclose(file);
+        }
+    } else version (Windows) {
+        import core.sys.windows.winbase : GetCommandLineW;
+
+        wchar* got = GetCommandLineW();
+        wchar[] temp = got[0 .. wcslen(got)];
+
+        while (temp.length > 0) {
+            size_t length;
+            char delim = ' ';
+
+            foreach (wchar c; temp) {
+                if (c == ' ' || c == '\t')
+                    length++;
+                else
+                    break;
+            }
+
+            temp = temp[length .. $];
+
+            if (temp.length > 0) {
+                if (temp[0] == '"')
+                    delim = '"';
+
+                length = 0;
+                foreach (wchar c; temp) {
+                    length++;
+                    if (c == delim)
+                        break;
+                }
+
+                wchar[] current = temp[0 .. length];
+                temp = temp[length .. $];
+
+                if (delim == '"' && length >= 2) {
+                    current = current[1 .. $];
+                    if (current[$ - 1] == '"')
+                        current = current[0 .. $ - 1];
+                }
+
+                handle(String_UTF8(cast(wstring)current));
+            }
+        }
+    } else
+        static assert(0, "Unimplemented getting command line arguments");
+}
+
 private @hidden:
 import sidero.base.parallelism.mutualexclusion : TestTestSetLockInline;
 
@@ -558,6 +666,8 @@ __gshared {
 
     UnicodeLanguage _unicodeLanguage;
     bool isUnicodeLanguageOverridden;
+
+    Slice!String_UTF8 _commandLineArguments;
 }
 
 Locale getLocaleImpl(ref bool refresh) @trusted {
