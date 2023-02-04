@@ -28,7 +28,7 @@ DynamicArray!Type readFile(Type)(scope String_UTF8 filename, size_t ifNotSize = 
         if (got == 0) {
             if (toReserve == ifNotSize) {
                 fclose(toRead);
-                return typeof(return ).init;
+                return typeof(return).init;
             }
 
             ret = typeof(return)(globalAllocator());
@@ -76,4 +76,104 @@ ptrdiff_t getFileSize(scope String_UTF8 filename) @trusted {
         return -3;
 
     return cast(ptrdiff_t)ret;
+}
+
+bool directoryExists(String_UTF8 directory) @trusted {
+    version (Posix) {
+        import core.sys.posix.sys.stat : lstat, stat_t, S_ISDIR;
+
+        if (!directory.isPtrNullTerminated)
+            directory = directory.dup;
+
+        stat_t buffer;
+        return lstat(cast(char*)directory.ptr, &buffer) > 0 && S_ISDIR(buffer.st_mode);
+    } else version (Windows) {
+        import core.sys.windows.winbase : GetFileAttributesW;
+        import core.sys.windows.winnt : INVALID_FILE_ATTRIBUTES, FILE_ATTRIBUTE_DIRECTORY;
+
+        String_UTF16 directory16 = directory.byUTF16;
+        if (!directory16.isPtrNullTerminated)
+            directory16 = directory16.dup;
+
+        auto got = GetFileAttributesW(cast(wchar*)directory16.ptr);
+        return got != INVALID_FILE_ATTRIBUTES && got & FILE_ATTRIBUTE_DIRECTORY;
+    } else
+        static assert(0, "Unimplemented");
+}
+
+struct FileAppender {
+    private {
+        import core.stdc.stdio : FILE, fflush, fclose, fopen, fwrite;
+
+        FILE* descriptor;
+        String_UTF8 filename;
+    }
+
+@safe nothrow @nogc:
+
+    this(String_UTF8 filename) scope @trusted {
+        if (filename.isPtrNullTerminated)
+            this.filename = filename;
+        else
+            this.filename = filename.dup;
+
+        descriptor = fopen(cast(char*)this.filename.ptr, "w+");
+    }
+
+    @disable this(this);
+
+    ~this() scope @trusted {
+        if (descriptor !is null) {
+            fflush(descriptor);
+            fclose(descriptor);
+        }
+    }
+
+    bool isNull() scope {
+        return descriptor is null;
+    }
+
+    void append(scope StringBuilder_UTF8 input) scope {
+        this.append(input.asReadOnly);
+    }
+
+    void append(scope StringBuilder_UTF16 input) scope {
+        this.append(input.byUTF8.asReadOnly);
+    }
+
+    void append(scope StringBuilder_UTF32 input) scope {
+        this.append(input.byUTF8.asReadOnly);
+    }
+
+    void append(scope String_UTF16 input) scope @trusted {
+        this.append(input.byUTF8);
+    }
+
+    void append(scope String_UTF32 input) scope @trusted {
+        this.append(input.byUTF8);
+    }
+
+    void append(scope String_UTF8 input) scope @trusted {
+        if (isNull)
+            return;
+
+        if (!input.isPtrNullTerminated)
+            input = input.dup;
+
+        fwrite(input.ptr, 1, input.length, descriptor);
+    }
+
+    void append(scope StringBuilder_ASCII input) scope {
+        this.append(input.asReadOnly);
+    }
+
+    void append(scope String_ASCII input) scope @trusted {
+        if (isNull)
+            return;
+
+        if (!input.isPtrNullTerminated)
+            input = input.dup;
+
+        fwrite(input.ptr, 1, input.length, descriptor);
+    }
 }
