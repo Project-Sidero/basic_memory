@@ -9,6 +9,10 @@ export @safe nothrow @nogc:
 alias Vec3f = Vector!(float, 3);
 ///
 alias Vec3d = Vector!(double, 3);
+///
+alias Vec4f = Vector!(float, 4);
+///
+alias Vec4d = Vector!(double, 4);
 
 ///
 struct Vector(Type, size_t Dimension) {

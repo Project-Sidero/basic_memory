@@ -195,8 +195,15 @@ private @hidden:
             } else static if (isStaticArray!Type && (isSomeString!(typeof(Type.init[])))) {
                 auto temp = input[];
                 this.handle(temp, true);
-            } else static if (isPointer!ActualType) {
-                alias SubType = typeof(input[0]);
+            } else static if (isFunctionPointer!ActualType) {
+                builder ~= ActualType.stringof;
+
+                if (input is null)
+                    builder ~= "@null";
+                else
+                    builder.formattedWrite("@" ~ DefaultFormatForPointer, cast(size_t)input);
+            } else static if (isPointer!ActualType && __traits(compiles, typeof(*input))) {
+                alias SubType = typeof(*input);
 
                 static if (__traits(compiles, fullyQualifiedName!SubType))
                     enum EntryName = fullyQualifiedName!SubType;
@@ -405,7 +412,8 @@ private @hidden:
                             static foreach (name; FieldNameTuple!Base) {
                                 {
                                     alias member = __traits(getMember, input, name);
-                                    bool accessible = __traits(getVisibility, member) == "private", explicitIgnore, ignore = accessible, overload;
+                                    bool accessible = __traits(getVisibility, member) == "private", explicitIgnore,
+                                        ignore = accessible, overload;
 
                                     foreach (attr; __traits(getAttributes, member)) {
                                         explicitIgnore = explicitIgnore || is(attr == PrettyPrintIgnore);
@@ -468,14 +476,18 @@ private @hidden:
                             handle(v);
                             builder ~= ",";
                         }
-                    } else {
+                    } else static if (__traits(compiles, {
+                            foreach (value; input) {
+                            }
+                        })) {
                         foreach (v; input) {
                             builder ~= "\n";
                             handlePrefix();
                             handle(v);
                             builder ~= ",";
                         }
-                    }
+                    } else
+                        builder ~= "...";
 
                     if (builder.endsWith(","))
                         builder.clobberInsert(builder.length - 1, cast(string)"]");
@@ -577,7 +589,7 @@ private @hidden:
                             builder ~= "]";
                         } else {
                             builder ~= "=0x[";
-                            auto temp = input;
+                            auto temp = cast()input;
 
                             while (temp.length > 0) {
                                 builder.formattedWrite("%.2X", *cast(const(ubyte)*)&temp[0]);
@@ -617,7 +629,7 @@ private @hidden:
                         builder ~= "]";
                     } else {
                         builder ~= "=0x";
-                        auto temp = input;
+                        auto temp = cast()input;
 
                         while (temp.length > 0) {
                             builder.formattedWrite("%.2X", *cast(const(ubyte)*)&temp[0]);
@@ -988,7 +1000,7 @@ scope @hidden:
 
                 builder ~= actualBuffer[0 .. done];
 
-                static if (isPointer!ActualType && !is(ActualType == void*) && !isFunctionPointer!ActualType) {
+                static if (isPointer!ActualType && __traits(compiles, typeof(*(ActualType.init))) && !isFunctionPointer!ActualType) {
                     alias PointerAt = typeof(*(ActualType.init));
 
                     static if (isCopyable!PointerAt) {
@@ -1058,6 +1070,14 @@ scope @hidden:
             }
 
             builder ~= "]";
+        } else static if (isArray!ActualType) {
+            builder ~= ActualType.stringof;
+
+            if (input is null) {
+                builder ~= "@null";
+            } else {
+                this.write(String_ASCII("@0x" ~ DefaultFormatForPointer), cast(void*)input, true);
+            }
         } else static if (is(ActualType == struct) || is(ActualType == class)) {
             builder ~= __traits(identifier, ActualType);
 

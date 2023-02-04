@@ -547,7 +547,7 @@ pragma(crt_constructor) extern (C) void initializeSystemInfo() @trusted {
     import core.stdc.string : strlen;
     import core.stdc.wchar_ : wcslen;
 
-    initMutex.lock;
+    initMutex.pureLock;
     DynamicArray!String_UTF8 ret = DynamicArray!String_UTF8(0);
 
     scope (exit) {
