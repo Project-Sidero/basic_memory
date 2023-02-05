@@ -3,7 +3,7 @@ module sidero.base.internal.meta;
 // Generates opApply/opApplyReverse combinations and toString for opApply
 mixin template OpApplyCombos(string ValueType__, string KeyType__ = "size_t", string[] Attributes = [
     "@safe", "nothrow", "@nogc", "pure"
-], string Name = "opApply", string ToCall = Name ~ "Impl") {
+], string Name = "opApply", string ToCall = Name ~ "Impl", bool isStatic = false) {
     enum Code = () {
         string ret;
         ptrdiff_t safeOffset = -1;
@@ -37,7 +37,7 @@ mixin template OpApplyCombos(string ValueType__, string KeyType__ = "size_t", st
                 ret ~= "scope int delegate(";
 
                 if (withKeyOffset >= 0 && active[withKeyOffset])
-                    ret ~= KeyType__ ~ ", ";
+                    ret ~= "ref " ~ KeyType__ ~ ", ";
 
                 ret ~= "ref ";
                 ret ~= ValueType__ ~ ")";
@@ -51,7 +51,10 @@ mixin template OpApplyCombos(string ValueType__, string KeyType__ = "size_t", st
                         ret ~= " @system";
                 }
 
-                ret ~= " del) scope";
+                ret ~= " del)";
+
+                if (!isStatic)
+                    ret ~= " scope";
 
                 foreach (i, attribute; attributes) {
                     if (withKeyOffset == i)
@@ -82,7 +85,7 @@ mixin template OpApplyCombos(string ValueType__, string KeyType__ = "size_t", st
 // Ditto except without any bodies
 mixin template OpApplyComboInterfaces(string ValueType, string KeyType = "size_t", string[] Attributes = [
     "@safe", "nothrow", "@nogc", "pure"
-], string Name = "opApply", string ToCall = Name ~ "Impl") {
+], string Name = "opApply", string ToCall = Name ~ "Impl", bool isStatic = false) {
     enum Code = () {
         string ret;
         ptrdiff_t safeOffset = -1;
@@ -116,7 +119,7 @@ mixin template OpApplyComboInterfaces(string ValueType, string KeyType = "size_t
                 ret ~= "scope int delegate(";
 
                 if (withKeyOffset >= 0 && active[withKeyOffset])
-                    ret ~= KeyType ~ ", ";
+                    ret ~= "ref " ~ KeyType ~ ", ";
 
                 ret ~= "ref ";
                 ret ~= ValueType ~ ")";
@@ -130,7 +133,10 @@ mixin template OpApplyComboInterfaces(string ValueType, string KeyType = "size_t
                         ret ~= " @system";
                 }
 
-                ret ~= " del) scope";
+                ret ~= " del)";
+
+                if (!isStatic)
+                    ret ~= " scope";
 
                 foreach (i, attribute; attributes) {
                     if (withKeyOffset == i)

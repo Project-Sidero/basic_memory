@@ -456,7 +456,7 @@ private @hidden:
                     }
                 }
 
-                static if (isIterable!ActualType) {
+                static if (isIterable!ActualType && (HaveNonStaticOpApply!ActualType || !__traits(hasMember, ActualType, "opApply"))) {
                     if (builder.endsWith("("))
                         builder ~= "[";
                     else
@@ -918,9 +918,12 @@ scope @hidden:
         }
     }
 
-    alias opCall = write;
+    void opCall(Format, Input)(scope Format format, scope Input input, bool needQuotes = false) @trusted
+            if (isReadOnlyString!Format) {
+        this.write(format, input, needQuotes);
+    }
 
-    void write(Format, Input)(scope Format format, scope Input input, bool needQuotes = false) @trusted
+    void write(Format, Input)(scope Format format, ref scope Input input, bool needQuotes = false) @trusted
             if (isReadOnlyString!Format) {
 
         static if (is(Builder == StringBuilder_ASCII) && isUTF!Format) {
@@ -1020,8 +1023,8 @@ scope @hidden:
                 } else static if (is(WrappedType == void)) {
                     builder ~= "no-error";
                 } else {
-                    scope temp = input.assumeOkay;
-                    this.write(format, temp, true);
+                    WrappedType* wrapped = &input.assumeOkay();
+                    this.write!(Format, WrappedType)(format, *wrapped, true);
                 }
             } else {
                 builder ~= "error: ";
@@ -1058,10 +1061,33 @@ scope @hidden:
             }
 
             builder ~= "]";
-        } else static if (isIterable!ActualType) {
+        } else static if (isArray!ActualType) {
+            builder ~= ActualType.stringof;
+
+            if (input is null) {
+                builder ~= "@null";
+            } else {
+                auto tempPtr = cast(size_t)input.ptr;
+                this.write(String_ASCII("@0x" ~ DefaultFormatForPointer), tempPtr, true);
+
+                builder ~= "[";
+
+                size_t i;
+
+                foreach (v; input) {
+                    if (i++ > 0)
+                        builder ~= ", ";
+
+                    this.write(String_ASCII.init, v, true);
+                }
+
+                builder ~= "]";
+            }
+        } else static if (isIterable!ActualType && (HaveNonStaticOpApply!ActualType || !__traits(hasMember, ActualType, "opApply"))) {
             builder ~= "[";
 
             size_t i;
+
             foreach (v; input) {
                 if (i++ > 0)
                     builder ~= ", ";
@@ -1070,14 +1096,6 @@ scope @hidden:
             }
 
             builder ~= "]";
-        } else static if (isArray!ActualType) {
-            builder ~= ActualType.stringof;
-
-            if (input is null) {
-                builder ~= "@null";
-            } else {
-                this.write(String_ASCII("@0x" ~ DefaultFormatForPointer), cast(void*)input, true);
-            }
         } else static if (is(ActualType == struct) || is(ActualType == class)) {
             builder ~= __traits(identifier, ActualType);
 
@@ -1085,7 +1103,8 @@ scope @hidden:
                 if (input is null) {
                     builder ~= "null";
                 } else {
-                    this.write(String_ASCII("0x" ~ DefaultFormatForPointer), cast(void*)input, true);
+                    auto tempPtr = cast(void*)input;
+                    this.write(String_ASCII("0x" ~ DefaultFormatForPointer), tempPtr, true);
                 }
             }
 
@@ -1201,12 +1220,14 @@ scope @hidden:
             if (input is null) {
                 builder ~= "null";
             } else {
-                this.write(String_ASCII("0x" ~ DefaultFormatForPointer), cast(void*)input, true);
+                auto tempPtr = cast(void*)input;
+                this.write(String_ASCII("0x" ~ DefaultFormatForPointer), tempPtr, true);
             }
         } else static if (is(ActualType == delegate)) {
             builder ~= ActualType.stringof ~ "@(";
-            this.write(String_ASCII("context: 0x" ~ DefaultFormatForPointer ~ ", "), cast(void*)input.ptr, true);
-            this.write(String_ASCII("function pointer: 0x" ~ DefaultFormatForPointer), cast(void*)input.funcptr, true);
+            this.write(String_ASCII("context: 0x" ~ DefaultFormatForPointer ~ ", "), input.ptr, true);
+            auto tempFuncPtr = cast(void*)input.funcptr;
+            this.write(String_ASCII("function pointer: 0x" ~ DefaultFormatForPointer), tempFuncPtr, true);
             builder ~= ")";
         } else
             pragma(msg, "Attempting to formatWrite " ~ Input.stringof ~ " but it is currently unimplemented in " ~ __MODULE__);

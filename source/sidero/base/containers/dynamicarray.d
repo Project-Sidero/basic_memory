@@ -849,7 +849,7 @@ unittest {
 
         da1 = [1, 2, 3, 4, 5];
         assert(da1 == [1, 2, 3, 4, 5]);
-        assert(da1.toString() == "[1, 2, 3, 4, 5]");
+        assert(da1.toString().endsWith("[1, 2, 3, 4, 5]"));
 
         da1.reserve(64);
         assert(da1.capacity == 64 + 5);

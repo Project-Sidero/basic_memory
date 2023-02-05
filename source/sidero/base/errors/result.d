@@ -72,7 +72,7 @@ scope nothrow @nogc @safe:
         alias get this;
 
         /// Will check and only error if there is an error.
-        Type assumeOkay() @system {
+        ref Type assumeOkay() return @system {
             assert(opCast!bool(), error.toString().unsafeGetLiteral);
             return value;
         }
@@ -321,7 +321,7 @@ scope nothrow @nogc @safe:
     @disable void opAssign(Type value) const;
 
     /// Will check and only error if there is an error.
-    ref Type assumeOkay() @system {
+    ref Type assumeOkay() return @system {
         assert(opCast!bool(), error.toString().unsafeGetLiteral);
         assert(this._value !is null);
         return *_value;
@@ -409,7 +409,7 @@ scope nothrow @nogc @safe:
     ///
     bool opEquals(scope ResultReference!Type other) const @trusted {
         if (error.isSet || other.error.isSet || error.info.message !is null || _value is null ||
-        other.error.info.message !is null || other._value is null)
+                other.error.info.message !is null || other._value is null)
             return error.isSet && other.error.isSet;
         static if (is(Type == float) || is(Type == double))
             return (*this._value).isClose(*other._value);
@@ -433,6 +433,7 @@ scope nothrow @nogc @safe:
 struct RCResultValue(Type) {
     private {
         import sidero.base.allocators;
+
         State* state;
 
         static struct State {

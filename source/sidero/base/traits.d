@@ -30,7 +30,7 @@ enum isAnyPointer(Type) = (isPointer!Type && !(isFunctionPointer!Type || isDeleg
 enum HaveOpApply(InType, ArgType) = __traits(hasMember, InType, "opApply") && __traits(compiles, GetOpApply!(ArgType, InType));
 
 // Looks for ref ArgType for opApply parameter
-auto GetOpApply(ArgType, InType)(return scope ref InType input) @trusted nothrow @nogc {
+auto GetOpApply(ArgType, InType)(scope return ref InType input) @trusted nothrow @nogc {
     int handle(ref ArgType) @safe nothrow @nogc {
         return 0;
     }
@@ -45,6 +45,21 @@ auto GetOpApply(ArgType, InType)(return scope ref InType input) @trusted nothrow
 
     assert(0);
 }
+
+enum HaveNonStaticOpApply(InType) = (){
+    InType inType;
+    alias Overloads = __traits(getOverloads, inType, "opApply");
+
+    bool result;
+
+    static foreach (i; 0 .. Overloads.length) {
+        if (!__traits(isStaticFunction, Overloads[i])) {
+            result = true;
+        }
+    }
+
+    return result;
+}();
 
 /// Originally from std.traits. License: Boost
 enum fullyQualifiedName(T) = fqnType!(T, false, false, false, false);
