@@ -90,7 +90,7 @@ export:
 @trusted:
 
     ///
-    this(scope return ref FreeTree other) {
+    this(return scope ref FreeTree other) {
         this.tupleof = other.tupleof;
 
         other.anchor = null;
@@ -688,7 +688,7 @@ scope @safe @nogc pure nothrow:
 @trusted:
 
     ///
-    this(scope return ref AllocatedTree other) {
+    this(return scope ref AllocatedTree other) {
         this.tupleof = other.tupleof;
         other.anchor = null;
         other = AllocatedTree.init;

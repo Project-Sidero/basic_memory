@@ -58,7 +58,7 @@ struct StatsAllocator(PoolAllocator) {
 @trusted:
 
     ///
-    this(scope return ref StatsAllocator other) {
+    this(return scope ref StatsAllocator other) {
         this.tupleof = other.tupleof;
         other = StatsAllocator.init;
     }

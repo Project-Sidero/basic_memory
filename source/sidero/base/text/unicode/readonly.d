@@ -382,17 +382,17 @@ nothrow @nogc:
     }
 
     ///
-    void opAssign(scope return typeof(this) other) scope @trusted {
+    void opAssign(return scope typeof(this) other) scope @trusted {
         this.__ctor(other);
     }
 
     @disable void opAssign(scope const(char)[] other) scope const;
     @disable void opAssign(scope const(wchar)[] other) scope const;
     @disable void opAssign(scope const(dchar)[] other) scope const;
-    @disable void opAssign(scope return typeof(this) other) scope const;
+    @disable void opAssign(return scope typeof(this) other) scope const;
 
     ///
-    this(scope return ref typeof(this) other) @trusted scope {
+    this(return scope ref typeof(this) other) @trusted scope {
         this.tupleof = other.tupleof;
 
         if (haveIterator)
@@ -412,24 +412,24 @@ nothrow @nogc:
 
     @trusted scope {
         ///
-        this(scope return const(char)[] literal, scope return RCAllocator allocator = RCAllocator.init,
-                scope return const(char)[] toDeallocate = null, UnicodeLanguage language = UnicodeLanguage.Unknown) {
+        this(return scope const(char)[] literal, return scope RCAllocator allocator = RCAllocator.init,
+                return scope const(char)[] toDeallocate = null, UnicodeLanguage language = UnicodeLanguage.Unknown) {
             initForLiteral(literal, allocator, toDeallocate, language);
         }
 
         ///
-        this(scope return const(wchar)[] literal, scope return RCAllocator allocator = RCAllocator.init,
-                scope return const(wchar)[] toDeallocate = null, UnicodeLanguage language = UnicodeLanguage.Unknown) {
+        this(return scope const(wchar)[] literal, return scope RCAllocator allocator = RCAllocator.init,
+                return scope const(wchar)[] toDeallocate = null, UnicodeLanguage language = UnicodeLanguage.Unknown) {
             initForLiteral(literal, allocator, toDeallocate, language);
         }
 
         ///
-        this(scope return const(dchar)[] literal, scope return RCAllocator allocator = RCAllocator.init,
-                scope return const(dchar)[] toDeallocate = null, UnicodeLanguage language = UnicodeLanguage.Unknown) {
+        this(return scope const(dchar)[] literal, return scope RCAllocator allocator = RCAllocator.init,
+                return scope const(dchar)[] toDeallocate = null, UnicodeLanguage language = UnicodeLanguage.Unknown) {
             initForLiteral(literal, allocator, toDeallocate, language);
         }
 
-        private void initForLiteral(T, U)(scope return T input, scope return RCAllocator allocator, scope return U toDeallocate,
+        private void initForLiteral(T, U)(return scope T input, return scope RCAllocator allocator, return scope U toDeallocate,
                 UnicodeLanguage language) {
             if (input.length > 0 || (toDeallocate.length > 0 && !allocator.isNull)) {
                 version (D_BetterC) {
@@ -2980,7 +2980,7 @@ private @hidden:
         });
     }
 
-    RCAllocator pickAllocator(scope return RCAllocator given) scope const @trusted {
+    RCAllocator pickAllocator(return scope RCAllocator given) scope const @trusted {
         if (!given.isNull)
             return given;
         if (this.lifeTime !is null)

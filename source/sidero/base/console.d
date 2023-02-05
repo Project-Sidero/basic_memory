@@ -165,7 +165,7 @@ StringBuilder_UTF8 readLine(Duration timeout = Duration.min) {
 }
 
 /// Includes new line terminator, default is blocking.
-StringBuilder_ASCII readLine(scope return ref StringBuilder_ASCII builder, Duration timeout = Duration.min) @trusted {
+StringBuilder_ASCII readLine(return scope ref StringBuilder_ASCII builder, Duration timeout = Duration.min) @trusted {
     import core.stdc.stdio : getc, EOF;
 
     mutex.pureLock;
@@ -323,7 +323,7 @@ StdIO:
 }
 
 /// Includes new line terminator, default is blocking.
-StringBuilder_UTF8 readLine(scope return ref StringBuilder_UTF8 builder, Duration timeout = Duration.min) @trusted {
+StringBuilder_UTF8 readLine(return scope ref StringBuilder_UTF8 builder, Duration timeout = Duration.min) @trusted {
     import core.stdc.stdio : getc, EOF;
 
     mutex.pureLock;
@@ -481,7 +481,7 @@ StdIO:
 }
 
 /// Ditto
-StringBuilder_UTF16 readLine(scope return ref StringBuilder_UTF16 builder, Duration timeout = Duration.min) {
+StringBuilder_UTF16 readLine(return scope ref StringBuilder_UTF16 builder, Duration timeout = Duration.min) {
     if (builder.isNull)
         builder = StringBuilder_UTF16(globalAllocator());
 
@@ -491,7 +491,7 @@ StringBuilder_UTF16 readLine(scope return ref StringBuilder_UTF16 builder, Durat
 }
 
 /// Ditto
-StringBuilder_UTF32 readLine(scope return ref StringBuilder_UTF32 builder, Duration timeout = Duration.min) {
+StringBuilder_UTF32 readLine(return scope ref StringBuilder_UTF32 builder, Duration timeout = Duration.min) {
     if (builder.isNull)
         builder = StringBuilder_UTF32(globalAllocator());
 
@@ -635,7 +635,7 @@ struct InBandInfo {
 
 export @trusted nothrow @nogc scope:
 
-    this(scope return ref InBandInfo other) {
+    this(return scope ref InBandInfo other) {
         this.tupleof = other.tupleof;
     }
 

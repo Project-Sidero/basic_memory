@@ -52,7 +52,7 @@ scope @safe @nogc pure nothrow:
 @trusted:
 
     ///
-    this(scope return ref AllocatorList other) {
+    this(return scope ref AllocatorList other) {
         this.tupleof = other.tupleof;
         other.head = null;
         other = AllocatorList.init;

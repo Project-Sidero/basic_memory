@@ -296,13 +296,13 @@ struct IanaTZBase {
 
 @safe nothrow @nogc:
 
-    this(scope return ref IanaTZBase other) scope @trusted {
+    this(return scope ref IanaTZBase other) scope @trusted {
         this.tupleof = other.tupleof;
     }
 
 package(sidero.base.datetime):
 
-    Result!TimeZone forYear(long year, scope return RCAllocator allocator = RCAllocator.init) scope @trusted {
+    Result!TimeZone forYear(long year, return scope RCAllocator allocator = RCAllocator.init) scope @trusted {
         import sidero.base.datetime.calendars.gregorian;
         import sidero.base.datetime.time.timeofday;
         import sidero.base.datetime.defs;
@@ -467,7 +467,7 @@ String_UTF8 getDefaultTZDirectory() @trusted {
     return defaultTZDirectory;
 }
 
-void loadTZ(scope DynamicArray!ubyte rawFileRead, scope return String_UTF8 region, ref TZFile tzFile) @trusted {
+void loadTZ(scope DynamicArray!ubyte rawFileRead, return scope String_UTF8 region, ref TZFile tzFile) @trusted {
     import sidero.base.internal.filesystem;
     import sidero.base.allocators;
     import std.bitmanip : bigEndianToNative;
@@ -756,7 +756,7 @@ struct TZFile {
 
 @safe nothrow @nogc:
 
-    this(scope return ref TZFile other) scope {
+    this(return scope ref TZFile other) scope {
         this.tupleof = other.tupleof;
     }
 
@@ -780,7 +780,7 @@ struct TZFile {
 
     @safe nothrow @nogc:
 
-        this(scope return ref PostTransitionInfo other) scope {
+        this(return scope ref PostTransitionInfo other) scope {
             this.tupleof = other.tupleof;
         }
     }

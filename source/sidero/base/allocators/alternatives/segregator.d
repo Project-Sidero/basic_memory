@@ -42,7 +42,7 @@ export:
 
 scope @safe @nogc pure nothrow:
 
-    this(scope return ref Segregator other) @trusted {
+    this(return scope ref Segregator other) @trusted {
         this.tupleof = other.tupleof;
         other = Segregator.init;
     }

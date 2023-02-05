@@ -73,7 +73,7 @@ export:
     }
 
     ///
-    this(scope return ref Region other) {
+    this(return scope ref Region other) {
         this.tupleof = other.tupleof;
         this.allocated = other.allocated;
         other.memory = null;

@@ -31,7 +31,7 @@ export:
 
         static if (__traits(hasMember, Type, "opAssign")) {
             ///
-            auto opAssign(Args...)(scope return Args args) {
+            auto opAssign(Args...)(return scope Args args) {
                 if (isNull)
                     assert(0);
                 return value.opAssign(args);
@@ -55,7 +55,7 @@ scope nothrow @nogc @safe:
 
     static if (HaveValue) {
         ///
-        this(scope return Type value) @trusted {
+        this(return scope Type value) @trusted {
             this.value = value;
         }
 
@@ -97,12 +97,12 @@ scope nothrow @nogc @safe:
     }
 
     ///
-    void opAssign(scope return Result other) {
+    void opAssign(return scope Result other) {
         this.__ctor(other);
     }
 
     ///
-    this(scope return ref Result other) scope @trusted {
+    this(return scope ref Result other) scope @trusted {
         static foreach (i; 0 .. this.tupleof.length)
             this.tupleof[i] = other.tupleof[i];
 
@@ -229,7 +229,7 @@ export:
 scope nothrow @nogc @safe:
 
     ///
-    this(scope return Type* value, scope return void* user, scope return RCHandle rcHandle) @trusted {
+    this(return scope Type* value, return scope void* user, return scope RCHandle rcHandle) @trusted {
         assert(value !is null);
         assert(rcHandle !is null);
 
@@ -239,7 +239,7 @@ scope nothrow @nogc @safe:
     }
 
     ///
-    this(scope return RCResultValue!Type wrapped) @trusted {
+    this(return scope RCResultValue!Type wrapped) @trusted {
         assert(!wrapped.isNull);
 
         this._value = wrapped.get;
@@ -261,7 +261,7 @@ scope nothrow @nogc @safe:
     }
 
     ///
-    this(scope return ref ResultReference other) @trusted {
+    this(return scope ref ResultReference other) @trusted {
         this.tupleof = other.tupleof;
         this.error.checked = false;
 
@@ -280,7 +280,7 @@ scope nothrow @nogc @safe:
     }
 
     ///
-    void opAssign(scope return ResultReference other) {
+    void opAssign(return scope ResultReference other) {
         this.tupleof = other.tupleof;
         this.error.checked = false;
 
@@ -445,7 +445,7 @@ struct RCResultValue(Type) {
 export @safe nothrow @nogc:
 
     ///
-    this(Type value, scope return RCAllocator allocator = RCAllocator.init) scope @trusted {
+    this(Type value, return scope RCAllocator allocator = RCAllocator.init) scope @trusted {
         if (allocator.isNull)
             allocator = globalAllocator();
 

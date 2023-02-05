@@ -201,7 +201,7 @@ nothrow @nogc:
     }
 
     ///
-    this(scope return ref ConcurrentLinkedList other) scope @trusted {
+    this(return scope ref ConcurrentLinkedList other) scope @trusted {
         this.tupleof = other.tupleof;
 
         if (!isNull)
@@ -1605,7 +1605,7 @@ struct ConcurrentLinkedListIteratorList(Type) {
 
     @disable this(this);
 
-    Iterator* createIterator(scope return ref NodeList nodeList, size_t minimumOffsetFromHead = 0, size_t maximumOffsetFromHead = size_t
+    Iterator* createIterator(return scope ref NodeList nodeList, size_t minimumOffsetFromHead = 0, size_t maximumOffsetFromHead = size_t
             .max) scope @trusted {
 
         Iterator* ret = nodeList.allocator.make!Iterator;

@@ -42,7 +42,7 @@ export:
 
 scope @safe @nogc pure nothrow:
 
-    this(scope return ref FallbackAllocator other) @trusted {
+    this(return scope ref FallbackAllocator other) @trusted {
         this.tupleof = other.tupleof;
         other = FallbackAllocator.init;
     }

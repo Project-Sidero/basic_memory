@@ -167,7 +167,7 @@ scope nothrow @nogc:
 
         @disable this(size_t initialSize, RCAllocator allocator) const;
 
-        this(scope return ref DynamicArray other) {
+        this(return scope ref DynamicArray other) {
             this.tupleof = other.tupleof;
 
             if (this.state !is null) {
@@ -176,7 +176,7 @@ scope nothrow @nogc:
             }
         }
 
-        @disable this(scope return ref const DynamicArray other) const;
+        @disable this(return scope ref const DynamicArray other) const;
 
         ~this() {
             if (state !is null && atomicOp!"-="(state.refCount, 1) == 0) {

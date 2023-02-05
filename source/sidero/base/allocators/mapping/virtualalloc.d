@@ -81,7 +81,7 @@ version (Windows) {
         }
 
         ///
-        this(scope return ref HeapAllocMapper other) {
+        this(return scope ref HeapAllocMapper other) {
             import std.algorithm.mutation : move;
 
             move(other, this);

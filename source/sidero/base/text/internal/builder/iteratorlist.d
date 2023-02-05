@@ -8,7 +8,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
 
 @safe nothrow @nogc @hidden:
 
-    Iterator* newIterator(scope return BlockListImpl!Char* blockList, size_t minimumOffsetFromHead = 0,
+    Iterator* newIterator(return scope BlockListImpl!Char* blockList, size_t minimumOffsetFromHead = 0,
             size_t maximumOffsetFromHead = size_t.max) @trusted {
         assert(blockList !is null);
 
@@ -1268,7 +1268,7 @@ struct IteratorListTest(Char) {
 
 @safe nothrow @nogc @hidden:
 
-    this(scope return RCAllocator allocator) scope @trusted {
+    this(return scope RCAllocator allocator) scope @trusted {
         this.blockList = BlockList(allocator);
     }
 

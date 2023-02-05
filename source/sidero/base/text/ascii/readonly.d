@@ -258,16 +258,16 @@ nothrow @nogc:
     }
 
     ///
-    void opAssign(scope return typeof(this) other) scope @trusted {
+    void opAssign(return scope typeof(this) other) scope @trusted {
         this.__ctor(other);
     }
 
     @disable void opAssign(scope const(char)[] other) scope const;
     @disable void opAssign(scope LiteralType other) scope const;
-    @disable void opAssign(scope return typeof(this) other) scope const;
+    @disable void opAssign(return scope typeof(this) other) scope const;
 
     ///
-    this(scope return ref String_ASCII other) scope @trusted {
+    this(return scope ref String_ASCII other) scope @trusted {
         import core.atomic : atomicOp;
 
         this.tupleof = other.tupleof;
@@ -288,7 +288,7 @@ nothrow @nogc:
 
     @trusted {
         ///
-        this(scope return string literal, scope return RCAllocator allocator = RCAllocator.init, scope return string toDeallocate = null) scope {
+        this(return scope string literal, return scope RCAllocator allocator = RCAllocator.init, return scope string toDeallocate = null) scope {
             this(cast(LiteralType)literal, allocator, cast(LiteralType)toDeallocate);
         }
 
@@ -298,8 +298,8 @@ nothrow @nogc:
         }
 
         ///
-        this(scope return LiteralType literal, scope return RCAllocator allocator = RCAllocator.init,
-                scope return LiteralType toDeallocate = null) scope {
+        this(return scope LiteralType literal, return scope RCAllocator allocator = RCAllocator.init,
+                return scope LiteralType toDeallocate = null) scope {
             if (literal.length > 0 || (toDeallocate.length > 0 && !allocator.isNull)) {
                 this.literal = literal;
 
@@ -318,10 +318,10 @@ nothrow @nogc:
             String_ASCII foobar = String_ASCII(cast(LiteralType)"Fds");
         }
 
-        @disable this(scope return string literal, scope return RCAllocator allocator = RCAllocator.init,
-                scope return string toDeallocate = null) scope const;
-        @disable this(scope return LiteralType literal, scope return RCAllocator allocator = RCAllocator.init,
-                scope return LiteralType toDeallocate = null) scope const;
+        @disable this(return scope string literal, return scope RCAllocator allocator = RCAllocator.init,
+                return scope string toDeallocate = null) scope const;
+        @disable this(return scope LiteralType literal, return scope RCAllocator allocator = RCAllocator.init,
+                return scope LiteralType toDeallocate = null) scope const;
     }
 
     ~this() scope @trusted {

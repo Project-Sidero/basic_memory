@@ -97,7 +97,7 @@ struct WindowsTimeZoneBase {
 
 @safe nothrow @nogc:
 
-    this(scope return ref WindowsTimeZoneBase other) scope {
+    this(return scope ref WindowsTimeZoneBase other) scope {
         this.tupleof = other.tupleof;
     }
 
@@ -107,7 +107,7 @@ package(sidero.base.datetime):
         return daylightSavingsOffset.seconds != 0;
     }
 
-    Result!TimeZone forYear(long year, scope return RCAllocator allocator = RCAllocator.init) scope @trusted {
+    Result!TimeZone forYear(long year, return scope RCAllocator allocator = RCAllocator.init) scope @trusted {
         import sidero.base.datetime.cldr;
         import core.stdc.wchar_ : wcslen;
 

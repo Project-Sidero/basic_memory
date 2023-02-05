@@ -122,7 +122,7 @@ scope:
     }
 
     ///
-    this(scope return ref RCAllocator other) @trusted {
+    this(return scope ref RCAllocator other) @trusted {
         this.tupleof = other.tupleof;
 
         if (refAdd_ !is null)
@@ -262,7 +262,7 @@ unittest {
 }
 
 /// A subset of the std.experimental.allocator one, as that one can use exceptions.
-auto make(T, Allocator, Args...)(scope auto ref Allocator alloc, scope return auto ref Args args) @trusted {
+auto make(T, Allocator, Args...)(scope auto ref Allocator alloc, return scope auto ref Args args) @trusted {
     import core.lifetime : emplace;
 
     size_t sizeToAllocate = T.sizeof;

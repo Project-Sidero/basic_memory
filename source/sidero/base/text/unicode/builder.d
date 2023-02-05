@@ -64,16 +64,16 @@ export:
 
 nothrow @safe:
 
-    void opAssign(scope return ref typeof(this) other) scope @nogc {
+    void opAssign(return scope ref typeof(this) other) scope @nogc {
         __ctor(other);
     }
 
-    void opAssign(scope return typeof(this) other) scope @nogc {
+    void opAssign(return scope typeof(this) other) scope @nogc {
         __ctor(other);
     }
 
-    @disable void opAssign(scope return ref typeof(this) other) scope const;
-    @disable void opAssign(scope return typeof(this) other) scope const;
+    @disable void opAssign(return scope ref typeof(this) other) scope const;
+    @disable void opAssign(return scope typeof(this) other) scope const;
 
     @disable auto opCast(T)();
 

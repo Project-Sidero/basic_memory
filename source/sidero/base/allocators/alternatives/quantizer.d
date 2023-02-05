@@ -34,7 +34,7 @@ export:
 
 scope @safe @nogc pure nothrow:
 
-    this(scope return ref Quantizer other) @trusted {
+    this(return scope ref Quantizer other) @trusted {
         this.tupleof = other.tupleof;
         other = Quantizer.init;
     }

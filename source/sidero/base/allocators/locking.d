@@ -30,7 +30,7 @@ struct AllocatorLocking(PoolAllocator) {
 scope @safe @nogc pure nothrow:
 
     ///
-    this(scope return ref AllocatorLocking other) @trusted {
+    this(return scope ref AllocatorLocking other) @trusted {
         other.mutex.pureLock;
         scope (exit)
             other.mutex.unlock;
@@ -123,7 +123,7 @@ struct GCAllocatorLock(PoolAllocator) {
 scope @safe @nogc pure nothrow:
 
     ///
-    this(scope return ref GCAllocatorLock other) @trusted {
+    this(return scope ref GCAllocatorLock other) @trusted {
         readLockImpl;
         scope (exit)
             readUnlockImpl;

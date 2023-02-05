@@ -34,7 +34,7 @@ export:
 
 scope @trusted @nogc pure nothrow:
 
-    this(scope return ref Bucketizer other) @trusted {
+    this(return scope ref Bucketizer other) @trusted {
         foreach (i, ref v; this.poolAllocators)
             v = other.poolAllocators[i];
         other = Bucketizer.init;

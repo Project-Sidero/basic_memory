@@ -83,7 +83,7 @@ scope @safe @nogc pure nothrow:
 @trusted:
 
     ///
-    this(scope return ref BuddyList other) {
+    this(return scope ref BuddyList other) {
         this.tupleof = other.tupleof;
         other.blocks = typeof(blocks).init;
         other = BuddyList.init;

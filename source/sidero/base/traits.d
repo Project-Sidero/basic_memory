@@ -30,7 +30,7 @@ enum isAnyPointer(Type) = (isPointer!Type && !(isFunctionPointer!Type || isDeleg
 enum HaveOpApply(InType, ArgType) = __traits(hasMember, InType, "opApply") && __traits(compiles, GetOpApply!(ArgType, InType));
 
 // Looks for ref ArgType for opApply parameter
-auto GetOpApply(ArgType, InType)(scope return ref InType input) @trusted nothrow @nogc {
+auto GetOpApply(ArgType, InType)(return scope ref InType input) @trusted nothrow @nogc {
     int handle(ref ArgType) @safe nothrow @nogc {
         return 0;
     }

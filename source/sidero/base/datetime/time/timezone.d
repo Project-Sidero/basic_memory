@@ -54,7 +54,7 @@ struct TimeZone {
             PosixRule
         }
 
-        void initialize(scope return RCAllocator allocator) scope @trusted nothrow @nogc {
+        void initialize(return scope RCAllocator allocator) scope @trusted nothrow @nogc {
             assert(this.state is null);
 
             if (allocator.isNull)
@@ -70,7 +70,7 @@ struct TimeZone {
 export @safe nothrow @nogc:
 
     ///
-    this(scope return ref TimeZone other) scope @trusted {
+    this(return scope ref TimeZone other) scope @trusted {
         import core.atomic : atomicOp;
 
         this.tupleof = other.tupleof;
@@ -96,7 +96,7 @@ export @safe nothrow @nogc:
     }
 
     ///
-    void opAssign(scope return TimeZone other) scope @trusted {
+    void opAssign(return scope TimeZone other) scope @trusted {
         this.tupleof = other.tupleof;
     }
 
@@ -540,7 +540,7 @@ export @safe nothrow @nogc:
     }
 
     /// Seconds bias (UTC-1:30 would be -5400).
-    static TimeZone from(long seconds, scope return RCAllocator allocator = RCAllocator.init) @trusted {
+    static TimeZone from(long seconds, return scope RCAllocator allocator = RCAllocator.init) @trusted {
         TimeZone ret;
         ret.initialize(allocator);
         ret.state.fixedBias = cast(short)seconds;

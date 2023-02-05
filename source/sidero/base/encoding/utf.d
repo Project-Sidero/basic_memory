@@ -17,20 +17,20 @@ alias ForeachOverUTF32PeekDelegate = void delegate(size_t amountRead, size_t las
 
 @safe nothrow @nogc {
     ///
-    ForeachOverAnyUTF foreachOverAnyUTF(scope return const(char)[] arg, size_t limitCharacters = size_t.max,
-            scope return ForeachOverUTF32PeekDelegate peekDel = null) {
+    ForeachOverAnyUTF foreachOverAnyUTF(return scope const(char)[] arg, size_t limitCharacters = size_t.max,
+            return scope ForeachOverUTF32PeekDelegate peekDel = null) {
         return ForeachOverAnyUTF(arg, limitCharacters, peekDel);
     }
 
     ///
-    ForeachOverAnyUTF foreachOverAnyUTF(scope return const(wchar)[] arg, size_t limitCharacters = size_t.max,
-            scope return ForeachOverUTF32PeekDelegate peekDel = null) {
+    ForeachOverAnyUTF foreachOverAnyUTF(return scope const(wchar)[] arg, size_t limitCharacters = size_t.max,
+            return scope ForeachOverUTF32PeekDelegate peekDel = null) {
         return ForeachOverAnyUTF(arg, limitCharacters, peekDel);
     }
 
     ///
-    ForeachOverAnyUTF foreachOverAnyUTF(scope return const(dchar)[] arg, size_t limitCharacters = size_t.max,
-            scope return ForeachOverUTF32PeekDelegate peekDel = null) {
+    ForeachOverAnyUTF foreachOverAnyUTF(return scope const(dchar)[] arg, size_t limitCharacters = size_t.max,
+            return scope ForeachOverUTF32PeekDelegate peekDel = null) {
         return ForeachOverAnyUTF(arg, limitCharacters, peekDel);
     }
 }
@@ -52,7 +52,7 @@ struct ForeachOverAnyUTF {
 export @safe nothrow @nogc scope:
 
     ///
-    this(scope return const(char)[] input, size_t limitCharacters = size_t.max, scope return ForeachOverUTF32PeekDelegate peekDel = null) @trusted {
+    this(return scope const(char)[] input, size_t limitCharacters = size_t.max, return scope ForeachOverUTF32PeekDelegate peekDel = null) @trusted {
         utf8.value = input;
         utf8.peekAtReadAmountDelegate = peekDel;
         utf8.limitCharacters = limitCharacters;
@@ -60,7 +60,7 @@ export @safe nothrow @nogc scope:
     }
 
     ///
-    this(scope return const(wchar)[] input, size_t limitCharacters = size_t.max, scope return ForeachOverUTF32PeekDelegate peekDel = null) @trusted {
+    this(return scope const(wchar)[] input, size_t limitCharacters = size_t.max, return scope ForeachOverUTF32PeekDelegate peekDel = null) @trusted {
         utf16.value = input;
         utf16.peekAtReadAmountDelegate = peekDel;
         utf16.limitCharacters = limitCharacters;
@@ -68,7 +68,7 @@ export @safe nothrow @nogc scope:
     }
 
     ///
-    this(scope return const(dchar)[] input, size_t limitCharacters = size_t.max, scope return ForeachOverUTF32PeekDelegate peekDel = null) @trusted {
+    this(return scope const(dchar)[] input, size_t limitCharacters = size_t.max, return scope ForeachOverUTF32PeekDelegate peekDel = null) @trusted {
         utf32.value = input;
         utf32.peekAtReadAmountDelegate = peekDel;
         utf32.limitCharacters = limitCharacters;
@@ -89,7 +89,7 @@ export @safe nothrow @nogc scope:
 }
 
 ///
-ForeachOverUTF!Type foreachOverUTF(Type)(scope return Type arg) {
+ForeachOverUTF!Type foreachOverUTF(Type)(return scope Type arg) {
     return typeof(return)(arg);
 }
 

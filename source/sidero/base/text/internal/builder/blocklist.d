@@ -20,7 +20,7 @@ struct BlockListImpl(Char) {
 
 @safe nothrow @nogc @hidden:
 
-    this(scope return RCAllocator allocator) scope @trusted {
+    this(return scope RCAllocator allocator) scope @trusted {
         this.allocator = allocator;
 
         head.next = &tail;

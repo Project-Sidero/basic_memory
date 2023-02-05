@@ -78,7 +78,7 @@ scope @safe @nogc pure nothrow:
 @trusted:
 
     ///
-    this(scope return ref HouseKeepingFreeList other) {
+    this(return scope ref HouseKeepingFreeList other) {
         this.tupleof = other.tupleof;
         other.head.next = null;
         other = HouseKeepingFreeList.init;
@@ -246,7 +246,7 @@ scope @safe @nogc pure nothrow:
 @trusted:
 
     ///
-    this(scope return ref FreeList other) {
+    this(return scope ref FreeList other) {
         this.tupleof = other.tupleof;
         other.head = Node.init;
         static if (Strategy == FitsStrategy.NextFit)
@@ -651,7 +651,7 @@ scope @safe @nogc pure nothrow:
 @trusted:
 
     ///
-    this(scope return ref AllocatedList other) {
+    this(return scope ref AllocatedList other) {
         this.tupleof = other.tupleof;
         other.head.next = null;
         other = AllocatedList.init;

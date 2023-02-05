@@ -86,7 +86,7 @@ export:
     }
 
     ///
-    this(scope return ref ConcurrentHashMap other) scope @trusted {
+    this(return scope ref ConcurrentHashMap other) scope @trusted {
         this.tupleof = other.tupleof;
 
         if (!isNull)
@@ -198,7 +198,7 @@ export:
     }
 
     ///
-    ResultReference!ValueType get(scope RealKeyType key, scope return ValueType fallback) scope @trusted {
+    ResultReference!ValueType get(scope RealKeyType key, return scope ValueType fallback) scope @trusted {
         setupState;
         typeof(return) ret;
 
@@ -309,7 +309,7 @@ export:
         }
 
         ///
-        ResultReference!ValueType get(scope KeyType key, scope return ValueType fallback) scope @trusted {
+        ResultReference!ValueType get(scope KeyType key, return scope ValueType fallback) scope @trusted {
             setupState;
             ResultReference!ValueType ret = state.getValueExternal(key);
 
@@ -402,7 +402,7 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
 
 @safe nothrow @nogc:
 
-    this(scope return RCAllocator allocator, scope return RCAllocator valueAllocator) scope @trusted {
+    this(return scope RCAllocator allocator, return scope RCAllocator valueAllocator) scope @trusted {
         nodeList = typeof(nodeList)(allocator, valueAllocator);
     }
 
@@ -789,7 +789,7 @@ struct ConcurrentHashMapIterator(RealKeyType, ValueType) {
 
     @disable this(this);
 
-    Iterator* createIterator(scope return ref NodeList nodeList) scope @trusted {
+    Iterator* createIterator(return scope ref NodeList nodeList) scope @trusted {
         Iterator* ret = nodeList.allocator.make!Iterator;
 
         ret.next = head;
@@ -939,7 +939,7 @@ struct ConcurrentHashMapNode(RealKeyType, ValueType) {
 
     @disable this(this);
 
-    this(scope return RCAllocator allocator, scope return RCAllocator valueAllocator) scope @trusted {
+    this(return scope RCAllocator allocator, return scope RCAllocator valueAllocator) scope @trusted {
         this.allocator = allocator;
         this.valueAllocator = valueAllocator;
         this.refCount = 1;

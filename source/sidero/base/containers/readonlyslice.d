@@ -237,7 +237,7 @@ nothrow @nogc:
     @disable void opAssign(scope LiteralType other) scope const;
 
     ///
-    this(scope return ref Slice other) scope @trusted {
+    this(return scope ref Slice other) scope @trusted {
         this.tupleof = other.tupleof;
 
         if (haveIterator)
@@ -257,8 +257,8 @@ nothrow @nogc:
 
     @trusted {
         ///
-        this(scope return LiteralType literal, scope return RCAllocator allocator = RCAllocator.init,
-                scope return LiteralType toDeallocate = null) scope {
+        this(return scope LiteralType literal, return scope RCAllocator allocator = RCAllocator.init,
+                return scope LiteralType toDeallocate = null) scope {
             if (literal.length > 0 || (toDeallocate.length > 0 && !allocator.isNull)) {
                 this.literal = literal;
 
@@ -278,8 +278,8 @@ nothrow @nogc:
             Slice foobar = Slice(Literal);
         }
 
-        @disable this(scope return LiteralType literal, scope return RCAllocator allocator = RCAllocator.init,
-                scope return LiteralType toDeallocate = null) scope const;
+        @disable this(return scope LiteralType literal, return scope RCAllocator allocator = RCAllocator.init,
+                return scope LiteralType toDeallocate = null) scope const;
     }
 
     ~this() scope @trusted {

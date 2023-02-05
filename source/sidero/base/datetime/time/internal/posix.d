@@ -453,7 +453,7 @@ struct PosixTZBase {
 
 @safe nothrow @nogc:
 
-    this(scope return ref PosixTZBase other) scope {
+    this(return scope ref PosixTZBase other) scope {
         this.tupleof = other.tupleof;
     }
 
@@ -539,7 +539,7 @@ struct PosixTZBaseRule {
 
 @safe nothrow @nogc:
 
-    this(scope return ref PosixTZBaseRule other) scope {
+    this(return scope ref PosixTZBaseRule other) scope {
         this.tupleof = other.tupleof;
     }
 

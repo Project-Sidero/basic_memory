@@ -36,36 +36,36 @@ struct DateTime(DateType) {
 export @safe nothrow @nogc:
 
     ///
-    this(scope return ref DateTime other) scope {
+    this(return scope ref DateTime other) scope {
         this.tupleof = other.tupleof;
     }
 
     ///
-    this(scope return DateType date) scope {
+    this(return scope DateType date) scope {
         this.date_ = date;
     }
 
     ///
-    this(scope return TimeOfDay time) scope {
+    this(return scope TimeOfDay time) scope {
         this.time_ = time;
     }
 
     ///
-    this(scope return DateType date, scope return TimeOfDay time, scope return TimeZone timezone = TimeZone.init) scope {
+    this(return scope DateType date, return scope TimeOfDay time, return scope TimeZone timezone = TimeZone.init) scope {
         this.date_ = date;
         this.time_ = time;
         this.timezone_ = timezone;
     }
 
     /// Does not adjust date/time into timezone!
-    this(scope return DateTime datetime, scope return TimeZone timezone) scope {
+    this(return scope DateTime datetime, return scope TimeZone timezone) scope {
         this.date_ = datetime.date_;
         this.time_ = datetime.time_;
         this.timezone_ = timezone;
     }
 
     ///
-    void opAssign(scope return DateTime other) scope @trusted {
+    void opAssign(return scope DateTime other) scope @trusted {
         this.tupleof = other.tupleof;
     }
 
@@ -172,7 +172,7 @@ export @safe nothrow @nogc:
     }
 
     /// If current time zone not set, it'll just add it without adjustment.
-    DateTime asTimeZone(scope return TimeZone timezone) scope return @trusted {
+    DateTime asTimeZone(return scope TimeZone timezone) scope return @trusted {
         if (this.timezone_.isNull) {
             return DateTime(this, timezone);
         }
@@ -215,7 +215,7 @@ export @safe nothrow @nogc:
     }
 
     ///
-    static DateTime fromUnixTime(long amount, scope return TimeZone timeZone = TimeZone.init) @trusted {
+    static DateTime fromUnixTime(long amount, return scope TimeZone timeZone = TimeZone.init) @trusted {
         DateTime ret = DateTime(DateType.UnixEpoch);
         ret = ret.asTimeZone(timeZone);
 
