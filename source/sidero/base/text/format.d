@@ -243,8 +243,8 @@ private @hidden:
                     // ok print the thing
 
                     static if (!is(WrappedType == void)) {
-                        scope temp = input.assumeOkay;
-                        handle(temp, useQuotes, useName, forcePrint);
+                        scope temp = &input.assumeOkay();
+                        handle(*temp, useQuotes, useName, forcePrint);
                         return;
                     }
                 }
