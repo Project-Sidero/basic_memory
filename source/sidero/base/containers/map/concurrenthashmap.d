@@ -152,6 +152,12 @@ export:
     }
 
     ///
+    void cleanupUnreferencedNodes() {
+        if (!isNull)
+            state.keepNoExternalReferences = false;
+    }
+
+    ///
     void opIndexAssign(scope ValueType value, scope RealKeyType key) scope {
         setupState;
         willModify;
@@ -393,7 +399,7 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
     ConcurrentHashMapIterator!(RealKeyType, ValueType) iteratorList;
 
     TestTestSetLockInline mutex;
-    bool copyOnWrite;
+    bool copyOnWrite, keepNoExternalReferences;
 
     alias Node = typeof(nodeList).Node;
     alias KeyType = typeof(nodeList).KeyType;
@@ -404,6 +410,7 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
 
     this(return scope RCAllocator allocator, return scope RCAllocator valueAllocator) scope @trusted {
         nodeList = typeof(nodeList)(allocator, valueAllocator);
+        keepNoExternalReferences = true;
     }
 
     void rcExternal(bool addRef, scope Iterator* iterator) scope {
@@ -422,7 +429,7 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
             else
                 node.onIteratorOut;
 
-            if (node.refCount == 0 && node.isDeleted)
+            if (node.refCount == 0 && (node.isDeleted || !this.keepNoExternalReferences))
                 nodeList.removeNode(node);
         }
 
