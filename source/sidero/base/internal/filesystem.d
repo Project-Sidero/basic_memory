@@ -111,6 +111,11 @@ struct FileAppender {
 
 @safe nothrow @nogc:
 
+    this(return scope ref FileAppender other) scope {
+        this.tupleof = other.tupleof;
+        other.tupleof = FileAppender.init.tupleof;
+    }
+
     this(String_UTF8 filename) scope @trusted {
         if (filename.isPtrNullTerminated)
             this.filename = filename;
@@ -131,6 +136,12 @@ struct FileAppender {
 
     bool isNull() scope {
         return descriptor is null;
+    }
+
+    private void reopen() scope @trusted {
+        fflush(descriptor);
+        fclose(descriptor);
+        descriptor = fopen(cast(char*)this.filename.ptr, "w+");
     }
 
     void append(scope StringBuilder_UTF8 input) scope {
@@ -154,13 +165,25 @@ struct FileAppender {
     }
 
     void append(scope String_UTF8 input) scope @trusted {
-        if (isNull)
+        if (isNull || input.length == 0)
             return;
 
         if (!input.isPtrNullTerminated)
             input = input.dup;
 
-        fwrite(input.ptr, 1, input.length, descriptor);
+        size_t writtenSoFar, written, failedAttempt;
+
+        while (!isNull && written < input.length && failedAttempt < 2) {
+            written = fwrite(input.ptr + writtenSoFar, 1, input.length, descriptor);
+
+            if (written == 0) {
+                failedAttempt = 0;
+                writtenSoFar += written;
+            } else {
+                failedAttempt++;
+                reopen;
+            }
+        }
     }
 
     void append(scope StringBuilder_ASCII input) scope {
@@ -174,6 +197,18 @@ struct FileAppender {
         if (!input.isPtrNullTerminated)
             input = input.dup;
 
-        fwrite(input.ptr, 1, input.length, descriptor);
+        size_t writtenSoFar, written, failedAttempt;
+
+        while (!isNull && written < input.length && failedAttempt < 2) {
+            written = fwrite(input.ptr + writtenSoFar, 1, input.length, descriptor);
+
+            if (written == 0) {
+                failedAttempt = 0;
+                writtenSoFar += written;
+            } else {
+                failedAttempt++;
+                reopen;
+            }
+        }
     }
 }
