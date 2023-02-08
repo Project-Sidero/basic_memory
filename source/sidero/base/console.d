@@ -182,7 +182,7 @@ StringBuilder_ASCII readLine(return scope ref StringBuilder_ASCII builder, Durat
             const originalBuilderLength = builder.length;
 
             if (hStdin == INVALID_HANDLE_VALUE) {
-                initializeForStdioImpl(null, null, false, true);
+                initializeForStdioImpl(null, null, null, false, true);
             } else {
                 DWORD readLength;
 
@@ -201,7 +201,7 @@ StringBuilder_ASCII readLine(return scope ref StringBuilder_ASCII builder, Durat
                             if (!more)
                                 break;
                         } else if (builder.length == originalBuilderLength) {
-                            initializeForStdioImpl(null, null, false, true);
+                            initializeForStdioImpl(null, null, null, false, true);
                             goto StdIO;
                         } else {
                             break;
@@ -340,7 +340,7 @@ StringBuilder_UTF8 readLine(return scope ref StringBuilder_UTF8 builder, Duratio
             const originalBuilderLength = builder.length;
 
             if (hStdin == INVALID_HANDLE_VALUE) {
-                initializeForStdioImpl(null, null, false, true);
+                initializeForStdioImpl(null, null, null, false, true);
             } else {
                 DWORD readLength;
 
@@ -359,7 +359,7 @@ StringBuilder_UTF8 readLine(return scope ref StringBuilder_UTF8 builder, Duratio
                             if (!more)
                                 break;
                         } else if (builder.length == originalBuilderLength) {
-                            initializeForStdioImpl(null, null, false, true);
+                            initializeForStdioImpl(null, null, null, false, true);
                             goto StdIO;
                         } else {
                             break;
@@ -508,17 +508,18 @@ void write(Args...)(scope Args args) @trusted {
     uint prettyPrintDepth;
     bool prettyPrintActive = false, deliminateArguments = false, setPrettyDelim;
     bool isFirstPrettyPrint = true;
+    bool useErrorStream;
 
     void doOneWrapper(Type)(scope Type arg) {
         import sidero.base.allocators;
 
         static if (isAnyString!Type) {
             if (deliminateArguments) {
-                rawWrite(`"`);
-                rawWrite(format(String_ASCII.init, arg));
-                rawWrite(`"`);
+                rawWrite(`"`, useErrorStream);
+                rawWrite(format(String_ASCII.init, arg), useErrorStream);
+                rawWrite(`"`, useErrorStream);
             } else
-                rawWrite(arg);
+                rawWrite(arg, useErrorStream);
         } else static if (is(Type == InBandInfo)) {
             if (!arg.prettyPrintActive.isNull)
                 prettyPrintActive = arg.prettyPrintActive.get;
@@ -528,6 +529,8 @@ void write(Args...)(scope Args args) @trusted {
                 deliminateArguments = arg.prettyPrintActive.get;
                 setPrettyDelim = true;
             }
+            if (!arg.useError.isNull)
+                useErrorStream = arg.useError.get;
 
             rawWrite(arg);
         } else {
@@ -547,7 +550,7 @@ void write(Args...)(scope Args args) @trusted {
                 builder.formattedWrite("", arg);
             }
 
-            rawWrite(builder);
+            rawWrite(builder, useErrorStream);
         }
     }
 
@@ -564,14 +567,14 @@ void write(Args...)(scope Args args) @trusted {
 
             if (deliminateArguments && !is(ArgType == InBandInfo)) {
                 if (gotPrintable > 0)
-                    rawWrite(", ");
+                    rawWrite(", ", useErrorStream);
                 gotPrintable++;
                 wasDeliminted = true;
             } else if (wasDeliminted && !is(ArgType == InBandInfo)) {
                 static if (!(isAnyString!ArgType))
-                    rawWrite(", ");
+                    rawWrite(", ", useErrorStream);
                 else if (arg != "\n")
-                    rawWrite(", ");
+                    rawWrite(", ", useErrorStream);
 
                 wasDeliminted = false;
             }
@@ -632,6 +635,8 @@ struct InBandInfo {
     ConsoleColor backgroundColor, foregroundColor;
     ///
     Optional!bool prettyPrintActive;
+    ///
+    Optional!bool useError;
 
 export @trusted nothrow @nogc scope:
 
@@ -673,6 +678,13 @@ export @trusted nothrow @nogc scope:
         ret.prettyPrintActive = active;
         return ret;
     }
+
+    ///
+    InBandInfo useErrorStream(bool useError) {
+        InBandInfo ret = this;
+        ret.useError = useError;
+        return ret;
+    }
 }
 
 ///
@@ -700,8 +712,13 @@ InBandInfo prettyPrintingActive(bool active) {
     return InBandInfo().prettyPrintingActive(active);
 }
 
+///
+InBandInfo useErrorStream(bool useError) {
+    return InBandInfo().useErrorStream(useError);
+}
+
 /// Writes string data to console (ASCII/Unicode aware) and immediately flushes.
-void rawWrite(scope String_ASCII input) @trusted {
+void rawWrite(scope String_ASCII input, bool useError = false) @trusted {
     import core.stdc.stdio : fwrite, fflush;
 
     mutex.pureLock;
@@ -721,41 +738,41 @@ void rawWrite(scope String_ASCII input) @trusted {
             import core.sys.windows.windows : WriteConsoleA;
 
             allocateWindowsConsole();
-            if (WriteConsoleA(hStdout, cast(void*)input.ptr, useLength, null, null))
+            if (WriteConsoleA(useError ? hStdError : hStdout, cast(void*)input.ptr, useLength, null, null))
                 return;
 
-            initializeForStdioImpl(null, null, false, true);
+            initializeForStdioImpl(null, null, null, false, true);
         }
     }
 
     if (useStdio) {
-        fwrite(input.ptr, char.sizeof, useLength, stdioOut);
-        fflush(stdioOut);
+        fwrite(input.ptr, char.sizeof, useLength, useError ? stdioError : stdioOut);
+        fflush(useError ? stdioError : stdioOut);
     }
 }
 
 /// Ditto
-void rawWrite(scope StringBuilder_ASCII input) {
-    rawWrite(input.asReadOnly());
+void rawWrite(scope StringBuilder_ASCII input, bool useError = false) {
+    rawWrite(input.asReadOnly(), useError);
 }
 
 /// Ditto
-void rawWrite(scope const(char)[] input...) @trusted {
-    rawWrite(String_UTF8(input));
+void rawWrite(scope const(char)[] input, bool useError = false) @trusted {
+    rawWrite(String_UTF8(input), useError);
 }
 
 /// Ditto
-void rawWrite(scope const(wchar)[] input...) @trusted {
-    rawWrite(String_UTF16(input));
+void rawWrite(scope const(wchar)[] input, bool useError = false) @trusted {
+    rawWrite(String_UTF16(input), useError);
 }
 
 /// Ditto
-void rawWrite(scope const(dchar)[] input...) @trusted {
-    rawWrite(String_UTF32(input));
+void rawWrite(scope const(dchar)[] input, bool useError = false) @trusted {
+    rawWrite(String_UTF32(input), useError);
 }
 
 /// Ditto
-void rawWrite(scope String_UTF8 input) @trusted {
+void rawWrite(scope String_UTF8 input, bool useError = false) @trusted {
     import core.stdc.stdio : fwrite, fflush;
 
     mutex.pureLock;
@@ -782,10 +799,10 @@ void rawWrite(scope String_UTF8 input) @trusted {
             }
 
             allocateWindowsConsole();
-            if (WriteConsoleW(hStdout, cast(void*)input16.ptr, useLength, null, null))
+            if (WriteConsoleW(useError ? hStdError : hStdout, cast(void*)input16.ptr, useLength, null, null))
                 return;
 
-            initializeForStdioImpl(null, null, false, true);
+            initializeForStdioImpl(null, null, null, false, true);
         }
     }
 
@@ -801,23 +818,23 @@ void rawWrite(scope String_UTF8 input) @trusted {
                 return;
         }
 
-        fwrite(input.ptr, char.sizeof, useLength, stdioOut);
-        fflush(stdioOut);
+        fwrite(input.ptr, char.sizeof, useLength, useError ? stdioError : stdioOut);
+        fflush(useError ? stdioError : stdioOut);
     }
 }
 
 /// Ditto
-void rawWrite(scope String_UTF16 input) @trusted {
-    rawWrite(input.byUTF8());
+void rawWrite(scope String_UTF16 input, bool useError = false) @trusted {
+    rawWrite(input.byUTF8(), useError);
 }
 
 /// Ditto
-void rawWrite(scope String_UTF32 input) @trusted {
-    rawWrite(input.byUTF8());
+void rawWrite(scope String_UTF32 input, bool useError = false) @trusted {
+    rawWrite(input.byUTF8(), useError);
 }
 
 /// Ditto
-void rawWrite(scope StringBuilder_UTF8 input) @trusted {
+void rawWrite(scope StringBuilder_UTF8 input, bool useError = false) @trusted {
     import core.stdc.stdio : fwrite, fflush;
 
     mutex.pureLock;
@@ -841,10 +858,10 @@ void rawWrite(scope StringBuilder_UTF8 input) @trusted {
             }
 
             allocateWindowsConsole();
-            if (WriteConsoleW(hStdout, cast(void*)input16.ptr, useLength, null, null))
+            if (WriteConsoleW(useError ? hStdError : hStdout, cast(void*)input16.ptr, useLength, null, null))
                 return;
 
-            initializeForStdioImpl(null, null, false, true);
+            initializeForStdioImpl(null, null, null, false, true);
         }
     }
 
@@ -859,23 +876,23 @@ void rawWrite(scope StringBuilder_UTF8 input) @trusted {
                 return;
         }
 
-        fwrite(input8.ptr, char.sizeof, useLength, stdioOut);
-        fflush(stdioOut);
+        fwrite(input8.ptr, char.sizeof, useLength, useError ? stdioError : stdioOut);
+        fflush(useError ? stdioError : stdioOut);
     }
 }
 
 /// Ditto
-void rawWrite(scope StringBuilder_UTF16 input) {
-    rawWrite(input.byUTF8());
+void rawWrite(scope StringBuilder_UTF16 input, bool useError = false) {
+    rawWrite(input.byUTF8(), useError);
 }
 
 /// Ditto
-void rawWrite(scope StringBuilder_UTF32 input) {
-    rawWrite(input.byUTF8());
+void rawWrite(scope StringBuilder_UTF32 input, bool useError = false) {
+    rawWrite(input.byUTF8(), useError);
 }
 
 /// Modifies the console settings (colors)
-void rawWrite(scope InBandInfo input) @trusted {
+void rawWrite(scope InBandInfo input, bool useError = false) @trusted {
     version (Windows) {
         import core.sys.windows.windows;
 
@@ -883,8 +900,10 @@ void rawWrite(scope InBandInfo input) @trusted {
             mutex.pureLock;
             allocateWindowsConsole();
 
+            HANDLE hOut = useError ? hStdError : hStdout;
+
             CONSOLE_SCREEN_BUFFER_INFO currentInfo;
-            GetConsoleScreenBufferInfo(hStdout, &currentInfo);
+            GetConsoleScreenBufferInfo(hOut, &currentInfo);
 
             WORD attributes;
 
@@ -963,7 +982,7 @@ void rawWrite(scope InBandInfo input) @trusted {
                 break;
             }
 
-            SetConsoleTextAttribute(hStdout, attributes);
+            SetConsoleTextAttribute(hOut, attributes);
             mutex.unlock;
             return;
         }
@@ -971,7 +990,7 @@ void rawWrite(scope InBandInfo input) @trusted {
 
     if (useANSI) {
         if (input.resetDefaults)
-            rawWrite(ANSI_Reset);
+            rawWrite(String_UTF8(ANSI_Reset), useError);
 
         string fg, bg;
 
@@ -1034,9 +1053,9 @@ void rawWrite(scope InBandInfo input) @trusted {
         }
 
         if (fg !is null)
-            rawWrite(fg);
+            rawWrite(String_UTF8(fg), useError);
         if (bg !is null)
-            rawWrite(bg);
+            rawWrite(String_UTF8(bg), useError);
     }
 }
 
@@ -1057,9 +1076,9 @@ version (Windows) {
 }
 
 ///
-void initializeForStdio(FILE* useIn = null, FILE* useOut = null, bool autoClose = false, bool keepState = false) @trusted {
+void initializeForStdio(FILE* useIn = null, FILE* useOut = null, FILE* useError = null, bool autoClose = false, bool keepState = false) @trusted {
     mutex.pureLock;
-    initializeForStdioImpl(useIn, useOut, autoClose, keepState);
+    initializeForStdioImpl(useIn, useOut, useError, autoClose, keepState);
     mutex.unlock;
 }
 
@@ -1086,11 +1105,12 @@ bool enableRawMode() @trusted {
             allocateWindowsConsole();
 
             if (hStdin == INVALID_HANDLE_VALUE || hStdout == INVALID_HANDLE_VALUE) {
-                initializeForStdioImpl(null, null, false, true);
+                initializeForStdioImpl(null, null, null, false, true);
             } else {
                 DWORD inputMode = originalConsoleInputMode, outputMode = originalConsoleOutputMode;
                 inputMode &= ~(ENABLE_LINE_INPUT | ENABLE_PROCESSED_INPUT | ENABLE_ECHO_INPUT);
-                outputMode &= ~(ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT | DISABLE_NEWLINE_AUTO_RETURN | ENABLE_LVB_GRID_WORLDWIDE);
+                outputMode &= ~(ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT | DISABLE_NEWLINE_AUTO_RETURN |
+                        ENABLE_LVB_GRID_WORLDWIDE);
                 outputMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
 
                 ret = SetConsoleMode(hStdin, inputMode) != 0 && SetConsoleMode(hStdout, outputMode) != 0;
@@ -1138,15 +1158,16 @@ __gshared {
     TestTestSetLockInline mutex;
     bool useANSI, useWindows, useStdio, autoCloseStdio;
 
-    FILE* stdioIn, stdioOut;
+    FILE* stdioIn, stdioOut, stdioError;
 
     version (Windows) {
-        HANDLE hStdin, hStdout;
+        HANDLE hStdin, hStdout, hStdError;
         DWORD originalConsoleInputMode, originalConsoleOutputMode;
         uint originalConsoleOutputCP, originalConsoleCP;
         bool createdConsole;
-    } else version(Posix) {
+    } else version (Posix) {
         import core.sys.posix.termios : termios;
+
         termios originalTermiosSettings;
         bool resetOriginalTermios;
     }
@@ -1173,7 +1194,7 @@ version (CRuntime_Microsoft) {
         return __acrt_iob_func(2);
     }
 } else {
-    import core.stdc.stdio : stdin, stdout;
+    import core.stdc.stdio : stdin, stdout, stderr;
 }
 
 version (Windows) {
@@ -1257,6 +1278,7 @@ version (Windows) {
 
             hStdin = GetStdHandle(STD_INPUT_HANDLE);
             hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
+            hStdError = GetStdHandle(STD_ERROR_HANDLE);
 
             GetConsoleMode(hStdin, &originalConsoleInputMode);
             GetConsoleMode(hStdin, &originalConsoleOutputMode);
@@ -1294,7 +1316,7 @@ version (Windows) {
         }
 
         if (config.startsWith("stdio")) {
-            initializeForStdioImpl(null, null, false, false);
+            initializeForStdioImpl(null, null, null, false, false);
 
             if (!config.endsWith("ansi"))
                 enableANSI = false;
@@ -1305,12 +1327,12 @@ version (Windows) {
         version (Windows)
             initializeForWindowsImpl;
         else version (Posix)
-            initializeForStdioImpl(null, null, false, false);
+            initializeForStdioImpl(null, null, null, false, false);
         else
             static assert(0, "Unimplemented");
     }
 
-    void initializeForStdioImpl(FILE* useIn, FILE* useOut, bool autoClose, bool keepState) {
+    void initializeForStdioImpl(FILE* useIn, FILE* useOut, FILE* useError, bool autoClose, bool keepState) {
         import sidero.base.system : EnvironmentVariables;
 
         useStdio = true;
@@ -1332,12 +1354,17 @@ version (Windows) {
             stdioOut = useOut;
         else
             stdioOut = stdout;
+        if (useError !is null)
+            stdioError = useError;
+        else
+            stdioError = stderr;
 
         if (useIn !is null || useOut !is null)
             autoCloseStdio = autoClose;
 
-        version(Posix) {
+        version (Posix) {
             import core.sys.posix.termios;
+
             if (useIn is null) {
                 resetOriginalTermios = tcgetattr(stdioIn, &originalTermiosSettings) == 0;
             }
@@ -1347,7 +1374,8 @@ version (Windows) {
     void deinitializeConsoleImpl() {
         import core.stdc.stdio : fflush, fclose;
 
-        if (useStdio && autoCloseStdio && (stdioIn !is null || stdioOut !is null) && (stdioIn !is stdin || stdioOut !is stdout)) {
+        if (useStdio && autoCloseStdio && (stdioIn !is null || stdioOut !is null || stdioError !is null) && (stdioIn !is stdin ||
+                stdioOut !is stdout || stdioError !is stderr)) {
             if (stdioIn !is null) {
                 fflush(stdioIn);
                 if (stdioIn !is stdin)
@@ -1358,6 +1386,12 @@ version (Windows) {
                 fflush(stdioOut);
                 if (stdioOut !is stdout)
                     fclose(stdioOut);
+            }
+
+            if (stdioError !is null) {
+                fflush(stdioError);
+                if (stdioError !is stdout)
+                    fclose(stdioError);
             }
         }
 
@@ -1376,8 +1410,9 @@ version (Windows) {
                 FreeConsole();
                 createdConsole = false;
             }
-        } else version(Posix) {
+        } else version (Posix) {
             import core.sys.posix.termios;
+
             if (resetOriginalTermios) {
                 tcsetattr(stdioIn, TCSAFLUSH, &originalTermiosSettings);
             }
