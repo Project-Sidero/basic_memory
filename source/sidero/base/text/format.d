@@ -1061,7 +1061,7 @@ scope @hidden:
             }
 
             builder ~= "]";
-        } else static if (isArray!ActualType) {
+        } else static if (isDynamicArray!ActualType) {
             builder ~= ActualType.stringof;
 
             if (input is null) {

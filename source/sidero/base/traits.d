@@ -46,7 +46,7 @@ auto GetOpApply(ArgType, InType)(scope return ref InType input) @trusted nothrow
     assert(0);
 }
 
-enum HaveNonStaticOpApply(InType) = (){
+enum HaveNonStaticOpApply(InType) = __traits(hasMember, InType, "opApply") && (){
     InType inType;
     alias Overloads = __traits(getOverloads, inType, "opApply");
 

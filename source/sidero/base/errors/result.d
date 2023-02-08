@@ -97,12 +97,12 @@ scope nothrow @nogc @safe:
     }
 
     ///
-    void opAssign(return scope Result other) {
+    void opAssign(scope Result other) {
         this.__ctor(other);
     }
 
     ///
-    this(return scope ref Result other) scope @trusted {
+    this(return scope ref Result other) @trusted {
         static foreach (i; 0 .. this.tupleof.length)
             this.tupleof[i] = other.tupleof[i];
 
