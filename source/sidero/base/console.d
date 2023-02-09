@@ -1162,7 +1162,7 @@ __gshared {
 
     version (Windows) {
         HANDLE hStdin, hStdout, hStdError;
-        DWORD originalConsoleInputMode, originalConsoleOutputMode;
+        DWORD originalConsoleInputMode, originalConsoleOutputMode, originalConsoleErrorMode;
         uint originalConsoleOutputCP, originalConsoleCP;
         bool createdConsole;
     } else version (Posix) {
@@ -1281,8 +1281,10 @@ version (Windows) {
             hStdError = GetStdHandle(STD_ERROR_HANDLE);
 
             GetConsoleMode(hStdin, &originalConsoleInputMode);
-            GetConsoleMode(hStdin, &originalConsoleOutputMode);
+            GetConsoleMode(hStdout, &originalConsoleOutputMode);
+            GetConsoleMode(hStdError, &originalConsoleErrorMode);
             SetConsoleMode(hStdout, originalConsoleOutputMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING | ENABLE_PROCESSED_OUTPUT);
+            SetConsoleMode(hStdError, originalConsoleErrorMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING | ENABLE_PROCESSED_OUTPUT);
 
             originalConsoleOutputCP = GetConsoleOutputCP();
             if (!SetConsoleOutputCP(65001))
@@ -1405,6 +1407,7 @@ version (Windows) {
 
             SetConsoleMode(hStdin, originalConsoleInputMode);
             SetConsoleMode(hStdout, originalConsoleOutputMode);
+            SetConsoleMode(hStdError, originalConsoleErrorMode);
 
             if (createdConsole) {
                 FreeConsole();
