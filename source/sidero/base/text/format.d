@@ -1029,14 +1029,14 @@ scope @hidden:
             } else {
                 builder ~= "error: ";
 
-                builder ~= input.error.info.id;
+                builder ~= input.getError.info.id;
                 builder ~= ":";
-                builder ~= input.error.info.message;
+                builder ~= input.getError.info.message;
 
                 builder ~= "`";
-                builder ~= input.error.moduleName;
+                builder ~= input.getError.moduleName;
                 builder ~= ":";
-                this.write(String_ASCII.init, input.error.line);
+                this.write(String_ASCII.init, input.getError.line);
                 builder ~= "`";
             }
         } else static if (isAssociativeArray!ActualType) {

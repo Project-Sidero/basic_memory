@@ -410,8 +410,6 @@ export @safe nothrow @nogc:
         import core.stdc.time;
 
         mutex.pureLock;
-        scope (exit)
-            mutex.unlock;
 
         long currentYear;
 
@@ -419,8 +417,11 @@ export @safe nothrow @nogc:
             const yearAsCTime = time(null);
 
             const got = gmtime(&yearAsCTime);
-            if (got is null)
+
+            if (got is null) {
+                mutex.unlock;
                 return typeof(return)(NoLocalYearException);
+            }
 
             currentYear = got.tm_year + 1900;
         }
@@ -442,14 +443,19 @@ export @safe nothrow @nogc:
                         ret.initialize(RCAllocator.init);
                         ret.state.source = Source.PosixRule;
                         ret.state.posixTZBase = got.get;
+
+                        mutex.unlock;
                         return ret;
                     }
                 } else {
                     // try to load via IANA tz or Windows
+                    mutex.unlock;
 
                     auto got2 = TimeZone.from(tzVar, currentYear);
                     if (got2)
                         return got2;
+                    else
+                        mutex.pureLock;
                 }
             }
         }
@@ -467,17 +473,29 @@ export @safe nothrow @nogc:
 
                 if (ianaName.length > 0) {
                     auto got2 = findIANATimeZone(String_UTF8(ianaName));
-                    if (got2)
-                        return got2.forYear(currentYear);
+
+                    if (got2) {
+                        auto got3 = got2.forYear(currentYear);
+                        mutex.unlock;
+                        return got3;
+                    }
                 }
             }
 
-            return got.forYear(currentYear);
+            auto got2 = got.forYear(currentYear);
+            mutex.unlock;
+            return got2;
         } else version (Posix) {
             auto got = findIANATimeZone(getPosixLocalTimeZone());
-            if (!got)
-                return typeof(return)(got.error);
-            return got.forYear(currentYear);
+
+            if (!got) {
+                mutex.unlock;
+                return typeof(return)(got.getError);
+            }
+
+            auto got2 = got.forYear(currentYear);
+            mutex.unlock;
+            return got2;
         } else
             static assert(0, "Getting local timezone unimplemented for platform");
 
@@ -516,14 +534,14 @@ export @safe nothrow @nogc:
             if (got)
                 return got.forYear(year);
             else version (Posix) {
-                return typeof(return)(got.error);
+                return typeof(return)(got.getError);
             }
         }
 
         version (Windows) {
             auto got = findWindowsTimeZone(wantedName);
             if (!got)
-                return typeof(return)(got.error);
+                return typeof(return)(got.getError);
             return got.forYear(year);
         } else version (Posix) {
         } else

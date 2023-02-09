@@ -41,15 +41,14 @@ export:
         static if (__traits(hasMember, Type, "toHash")) {
             ///
             auto toHash() const {
-                if (error.info.id !is null)
+                if (error__.info.id !is null)
                     return 0;
                 return value.toHash();
             }
         }
     }
 
-    ///
-    ErrorInfo error;
+    package(sidero.base) ErrorInfo error__;
 
 scope nothrow @nogc @safe:
 
@@ -61,10 +60,10 @@ scope nothrow @nogc @safe:
 
         /// Will verify that you checked
         ref Type get() return @trusted {
-            if (!error.checked)
+            if (!error__.checked)
                 assert(0, "You forgot to check if value had an error. assert(thing, thing.error.toString());");
 
-            assert(opCast!bool(), error.toString().unsafeGetLiteral);
+            assert(opCast!bool(), error__.toString().unsafeGetLiteral);
             return value;
         }
 
@@ -73,27 +72,27 @@ scope nothrow @nogc @safe:
 
         /// Will check and only error if there is an error.
         ref Type assumeOkay() return @system {
-            assert(opCast!bool(), error.toString().unsafeGetLiteral);
+            assert(opCast!bool(), error__.toString().unsafeGetLiteral);
             return value;
         }
     }
 
     ///
     this(ErrorInfo errorInfo, string moduleName = __MODULE__, int line = __LINE__) {
-        error = errorInfo;
-        error.moduleName = moduleName;
-        error.line = line;
-        error.checked = false;
+        error__ = errorInfo;
+        error__.moduleName = moduleName;
+        error__.line = line;
+        error__.checked = false;
     }
 
     ///
     this(ErrorMessage errorMessage, string moduleName = __MODULE__, int line = __LINE__) {
-        error = ErrorInfo(errorMessage, moduleName, line);
+        error__ = ErrorInfo(errorMessage, moduleName, line);
     }
 
     ///
     void opAssign(ErrorMessage errorMessage, string moduleName = __MODULE__, int line = __LINE__) {
-        error = ErrorInfo(errorMessage, moduleName, line);
+        error__ = ErrorInfo(errorMessage, moduleName, line);
     }
 
     ///
@@ -106,29 +105,34 @@ scope nothrow @nogc @safe:
         static foreach (i; 0 .. this.tupleof.length)
             this.tupleof[i] = other.tupleof[i];
 
-        this.error.checked = false;
+        this.error__.checked = false;
+    }
+
+    ///
+    ErrorInfo getError() {
+        return this.error__;
     }
 
     ///
     bool opCast(T : bool)() {
-        error.checked = true;
-        return error.info.message is null;
+        error__.checked = true;
+        return error__.info.message is null;
     }
 
     ///
     bool opCast(T : bool)() @trusted const {
         assert(!__ctfe, "Don't check for error on const in CTFE");
 
-        (cast(ErrorInfo*)&error).checked = true;
-        return error.info.message is null;
+        (cast(ErrorInfo*)&error__).checked = true;
+        return error__.info.message is null;
     }
 
     ///
     bool isNull() @trusted {
-        if (!error.checked)
+        if (!error__.checked)
             assert(0, "You forgot to check if value had an error. assert(thing, thing.error.toString());");
 
-        assert(opCast!bool(), error.toString().unsafeGetLiteral);
+        assert(opCast!bool(), error__.toString().unsafeGetLiteral);
 
         static if (__traits(hasMember, Type, "isNull")) {
             return value.isNull;
@@ -138,13 +142,13 @@ scope nothrow @nogc @safe:
 
     ///
     bool opEquals(scope const ErrorMessage other) const {
-        return error.info.id !is null && error.info.id == other.id;
+        return error__.info.id !is null && error__.info.id == other.id;
     }
 
     static if (HaveValue) {
         ///
         bool opEquals(scope const Type other) const @trusted {
-            if (error.info.message !is null)
+            if (error__.info.message !is null)
                 return false;
 
             static if (is(Type == float) || is(Type == double))
@@ -155,8 +159,8 @@ scope nothrow @nogc @safe:
 
         ///
         bool opEquals(scope Result!Type other) const @trusted {
-            if (error.info.message !is null)
-                return other.error.info.message !is null;
+            if (error__.info.message !is null)
+                return other.error__.info.message !is null;
 
             static if (is(Type == float) || is(Type == double))
                 return this.value.isClose(other.value);
@@ -223,8 +227,7 @@ export:
         RCHandle _rcHandle;
     }
 
-    ///
-    ErrorInfo error;
+    package(sidero.base) ErrorInfo error__;
 
 scope nothrow @nogc @safe:
 
@@ -249,21 +252,21 @@ scope nothrow @nogc @safe:
 
     ///
     this(ErrorInfo errorInfo, string moduleName = __MODULE__, int line = __LINE__) {
-        error = errorInfo;
-        error.moduleName = moduleName;
-        error.line = line;
-        error.checked = false;
+        error__ = errorInfo;
+        error__.moduleName = moduleName;
+        error__.line = line;
+        error__.checked = false;
     }
 
     ///
     this(ErrorMessage errorMessage, string moduleName = __MODULE__, int line = __LINE__) {
-        error = ErrorInfo(errorMessage, moduleName, line);
+        error__ = ErrorInfo(errorMessage, moduleName, line);
     }
 
     ///
     this(return scope ref ResultReference other) @trusted {
         this.tupleof = other.tupleof;
-        this.error.checked = false;
+        this.error__.checked = false;
 
         if (this._rcHandle !is null)
             this._rcHandle(true, this._user);
@@ -276,13 +279,13 @@ scope nothrow @nogc @safe:
 
     ///
     void opAssign(ErrorMessage errorMessage, string moduleName = __MODULE__, int line = __LINE__) {
-        error = ErrorInfo(errorMessage, moduleName, line);
+        error__ = ErrorInfo(errorMessage, moduleName, line);
     }
 
     ///
     void opAssign(return scope ResultReference other) {
         this.tupleof = other.tupleof;
-        this.error.checked = false;
+        this.error__.checked = false;
 
         if (this._rcHandle !is null)
             this._rcHandle(true, this._user);
@@ -322,31 +325,36 @@ scope nothrow @nogc @safe:
 
     /// Will check and only error if there is an error.
     ref Type assumeOkay() return @system {
-        assert(opCast!bool(), error.toString().unsafeGetLiteral);
+        assert(opCast!bool(), error__.toString().unsafeGetLiteral);
         assert(this._value !is null);
         return *_value;
     }
 
     ///
+    ErrorInfo getError() {
+        return this.error__;
+    }
+
+    ///
     bool opCast(T : bool)() {
-        error.checked = true;
-        return error.info.message is null;
+        error__.checked = true;
+        return error__.info.message is null;
     }
 
     ///
     bool opCast(T : bool)() @trusted const {
         assert(!__ctfe, "Don't check for error on const in CTFE");
 
-        (cast(ErrorInfo*)&error).checked = true;
-        return error.info.message is null;
+        (cast(ErrorInfo*)&error__).checked = true;
+        return error__.info.message is null;
     }
 
     ///
     bool isNull() @trusted const {
-        if (!error.checked)
+        if (!error__.checked)
             assert(0, "You forgot to check if value had an error. assert(thing, thing.error.toString());");
 
-        assert(error.info.message is null, error.toString().unsafeGetLiteral);
+        assert(error__.info.message is null, error__.toString().unsafeGetLiteral);
 
         if (_value is null)
             return true;
@@ -359,10 +367,10 @@ scope nothrow @nogc @safe:
 
     /// Will verify that you checked
     ref Type get() return @trusted {
-        if (!error.checked)
+        if (!error__.checked)
             assert(0, "You forgot to check if value had an error. assert(thing, thing.error.toString());");
 
-        assert(opCast!bool(), error.toString().unsafeGetLiteral);
+        assert(opCast!bool(), error__.toString().unsafeGetLiteral);
         assert(_value !is null);
         return *_value;
     }
@@ -372,12 +380,12 @@ scope nothrow @nogc @safe:
 
     ///
     bool opEquals(scope const ErrorMessage other) const {
-        return error.info.id !is null && error.info.id == other.id;
+        return error__.info.id !is null && error__.info.id == other.id;
     }
 
     ///
     bool opEquals(scope const Type other) const @trusted {
-        if (error.info.message !is null || _value is null)
+        if (error__.info.message !is null || _value is null)
             return false;
 
         static if (is(Type == float) || is(Type == double))
@@ -388,8 +396,8 @@ scope nothrow @nogc @safe:
 
     ///
     bool opEquals(scope Result!Type other) const @trusted {
-        if (error.isSet || other.error.isSet || error.info.message !is null || _value is null || other.error.info.message !is null)
-            return error.isSet && other.error.isSet;
+        if (error__.isSet || other.error__.isSet || error__.info.message !is null || _value is null || other.error__.info.message !is null)
+            return error__.isSet && other.error__.isSet;
         static if (is(Type == float) || is(Type == double))
             return (*this._value).isClose(other.value);
         else
@@ -398,8 +406,8 @@ scope nothrow @nogc @safe:
 
     ///
     bool opEquals(scope const Result!Type other) const @trusted {
-        if (error.isSet || other.error.isSet || error.info.message !is null || _value is null || other.error.info.message !is null)
-            return error.isSet && other.error.isSet;
+        if (error__.isSet || other.error__.isSet || error__.info.message !is null || _value is null || other.error__.info.message !is null)
+            return error__.isSet && other.error__.isSet;
         static if (is(Type == float) || is(Type == double))
             return (*this._value).isClose(other.value);
         else
@@ -408,9 +416,9 @@ scope nothrow @nogc @safe:
 
     ///
     bool opEquals(scope ResultReference!Type other) const @trusted {
-        if (error.isSet || other.error.isSet || error.info.message !is null || _value is null ||
-                other.error.info.message !is null || other._value is null)
-            return error.isSet && other.error.isSet;
+        if (error__.isSet || other.error__.isSet || error__.info.message !is null || _value is null ||
+                other.error__.info.message !is null || other._value is null)
+            return error__.isSet && other.error__.isSet;
         static if (is(Type == float) || is(Type == double))
             return (*this._value).isClose(*other._value);
         else
@@ -419,9 +427,9 @@ scope nothrow @nogc @safe:
 
     ///
     bool opEquals(scope const ResultReference!Type other) const @trusted {
-        if (error.isSet || other.error.isSet || error.info.message !is null || _value is null ||
-                other.error.info.message !is null || other._value is null)
-            return error.isSet && other.error.isSet;
+        if (error__.isSet || other.error__.isSet || error__.info.message !is null || _value is null ||
+                other.error__.info.message !is null || other._value is null)
+            return error__.isSet && other.error__.isSet;
         static if (is(Type == float) || is(Type == double))
             return (*this._value).isClose(*other._value);
         else

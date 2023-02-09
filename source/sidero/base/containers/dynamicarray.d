@@ -873,28 +873,28 @@ unittest {
         assert(da2 == [2, 6, 9, 1]);
 
         Result!int aValue = da2[1];
-        assert(aValue, aValue.error.toString().unsafeGetLiteral);
+        assert(aValue, aValue.getError.toString().unsafeGetLiteral);
         assert(aValue == 6);
         aValue = da2[-2];
-        assert(aValue, aValue.error.toString().unsafeGetLiteral);
+        assert(aValue, aValue.getError.toString().unsafeGetLiteral);
         assert(aValue == 9);
         aValue = da2[$ - 2];
-        assert(aValue, aValue.error.toString().unsafeGetLiteral);
+        assert(aValue, aValue.getError.toString().unsafeGetLiteral);
         assert(aValue == 9);
 
         Result!DA da2slice = da2[1 .. -1];
-        assert(da2slice, da2slice.error.toString().unsafeGetLiteral);
+        assert(da2slice, da2slice.getError.toString().unsafeGetLiteral);
         assert(da2slice.length == 2);
         assert(da2slice.assumeOkay == [6, 9]);
 
         aValue = da2slice[0];
-        assert(aValue, aValue.error.toString().unsafeGetLiteral);
+        assert(aValue, aValue.getError.toString().unsafeGetLiteral);
         assert(aValue == 6);
         aValue = da2slice[-1];
-        assert(aValue, aValue.error.toString().unsafeGetLiteral);
+        assert(aValue, aValue.getError.toString().unsafeGetLiteral);
         assert(aValue == 9);
         aValue = da2slice[$ - 1];
-        assert(aValue, aValue.error.toString().unsafeGetLiteral);
+        assert(aValue, aValue.getError.toString().unsafeGetLiteral);
         assert(aValue == 9);
 
         ErrorResult didAssign = da2[2] = 6270;
@@ -920,7 +920,7 @@ unittest {
         assert(da3.capacity == 5);
 
         Result!DAint da3slice = da3[0 .. 3];
-        assert(da3slice, da3slice.error.toString().unsafeGetLiteral);
+        assert(da3slice, da3slice.getError.toString().unsafeGetLiteral);
         assert(da3slice.length == 3);
 
         da3slice.length = 8;

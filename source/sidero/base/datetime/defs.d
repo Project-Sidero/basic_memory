@@ -240,9 +240,9 @@ export @safe nothrow @nogc:
         auto ourUnixTime = this.toUnixTime, otherUnixTime = other.toUnixTime;
 
         if (!ourUnixTime)
-            return typeof(return)(ourUnixTime.error);
+            return typeof(return)(ourUnixTime.getError);
         else if (!otherUnixTime)
-            return typeof(return)(otherUnixTime.error);
+            return typeof(return)(otherUnixTime.getError);
 
         long ourNanoSeconds = this.time.nanoSecond, otherNanoSeconds = other.time.nanoSecond;
         ourNanoSeconds -= (ourNanoSeconds / 1_000_000_000) * 1_000_000_000;

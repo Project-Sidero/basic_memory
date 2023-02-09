@@ -750,7 +750,7 @@ Result!bool isInverseOf(Type)(scope Type[] buffer, scope const Type[] input1, sc
 
     auto result = dotProduct(buffer, input1, columns, input2, columns);
     if (!result)
-        return typeof(return)(result.error);
+        return typeof(return)(result.getError);
 
     size_t y;
 
@@ -1067,7 +1067,7 @@ unittest {
 Result!bool isRowEchelonFormReducible(Type)(scope Type[] buffer, scope const Type[] input, size_t columns) {
     auto got = reduceViaRowEchelonForm(buffer, input, columns, true, true);
     if (!got)
-        return typeof(return)(got.error);
+        return typeof(return)(got.getError);
 
     return isReducedRowEchelonForm(buffer, columns);
 }
@@ -1117,7 +1117,7 @@ unittest {
 Result!size_t rank(Type)(scope Type[] buffer, scope const Type[] input, size_t columns) {
     auto got = reduceViaRowEchelonForm(buffer, input, columns, true, true);
     if (!got)
-        return typeof(return)(got.error);
+        return typeof(return)(got.getError);
 
     size_t ret;
 
@@ -1226,7 +1226,7 @@ Result!Type determinant(Type)(scope Type[] buffer, scope const Type[] input, siz
     });
 
     if (!got)
-        return typeof(return)(got.error);
+        return typeof(return)(got.getError);
 
     size_t row;
 

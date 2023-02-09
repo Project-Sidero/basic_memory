@@ -126,8 +126,8 @@ export:
     }
 
     ///
-    String_UTF8 name() scope @trusted {
-        return this.name_;
+    String_UTF8 name() scope const @trusted {
+        return (cast(Logger)this).name_;
     }
 
     ///
@@ -139,14 +139,14 @@ export:
 
     /// See_Also: LoggingTargets
     void setTargets(uint targets = LoggingTargets.None) scope {
-        mutex.lock;
+        mutex.pureLock;
         this.targets = targets;
         mutex.unlock;
     }
 
     ///
     void setTags(scope return String_UTF8 tags) scope {
-        mutex.lock;
+        mutex.pureLock;
         this.tags = tags;
         mutex.unlock;
     }
@@ -161,8 +161,37 @@ export:
         this.setTags(tags.byUTF8);
     }
 
+    /// Set console stream back to the default
+    void setToDefaultConsoleStream() scope {
+        mutex.pureLock;
+        this.consoleTarget.useErrorStream = ConsoleTarget.DefaultErrorStream;
+        mutex.unlock;
+    }
+
+    /// Will console stream be stderr instead of stdout?
+    void setConsoleStream(bool useError) scope {
+        mutex.pureLock;
+        foreach (ref v; this.consoleTarget.useErrorStream)
+            v = useError;
+        mutex.unlock;
+    }
+
     ///
-    String_UTF8 toString() scope {
+    void setToDefaultConsoleColors() scope {
+        mutex.pureLock;
+        consoleTarget.colors = ConsoleTarget.DefaultConsoleColors;
+        mutex.unlock;
+    }
+
+    ///
+    void setConsoleColor(LogLevel level, ConsoleColor foreground = ConsoleColor.Unknown, ConsoleColor background = ConsoleColor.Unknown) {
+        mutex.pureLock;
+        consoleTarget.colors[level] = [foreground, background];
+        mutex.unlock;
+    }
+
+    ///
+    String_UTF8 toString() scope const {
         return this.name;
     }
 
@@ -272,7 +301,7 @@ private:
         void handleConsole() {
             import sidero.base.console;
 
-            auto fg = consoleTarget.consoleColors[level][0], bg = consoleTarget.consoleColors[level][1];
+            auto fg = consoleTarget.colors[level][0], bg = consoleTarget.colors[level][1];
 
             writeln(resetDefaultBeforeApplying().deliminateArgs(false).prettyPrintingActive(true).foreground(fg)
                     .background(bg).useErrorStream(consoleTarget.useErrorStream[level]), dateTimeText, ModuleLine,
@@ -315,12 +344,15 @@ __gshared {
 }
 
 struct ConsoleTarget {
-    ConsoleColor[2][6] consoleColors = [
-        [ConsoleColor.Yellow, ConsoleColor.Unknown], [ConsoleColor.Green, ConsoleColor.Unknown],
-        [ConsoleColor.Magenta, ConsoleColor.Unknown], [ConsoleColor.Red, ConsoleColor.Yellow],
-        [ConsoleColor.Red, ConsoleColor.Cyan], [ConsoleColor.Red, ConsoleColor.Blue],
+    static immutable DefaultErrorStream = [false, false, false, true, true, true];
+    static immutable ConsoleColor[2][6] DefaultConsoleColors = [
+            [ConsoleColor.Yellow, ConsoleColor.Unknown], [ConsoleColor.Green, ConsoleColor.Unknown],
+            [ConsoleColor.Magenta, ConsoleColor.Unknown], [ConsoleColor.Red, ConsoleColor.Yellow],
+            [ConsoleColor.Red, ConsoleColor.Cyan], [ConsoleColor.Red, ConsoleColor.Blue],
     ];
-    bool[6] useErrorStream = [false, false, false, true, true, true];
+
+    ConsoleColor[2][6] colors = DefaultConsoleColors;
+    bool[6] useErrorStream = DefaultErrorStream;
 }
 
 struct FileTarget {

@@ -277,10 +277,12 @@ Result!IanaTZBase findIANATimeZone(scope String_UTF8 zone) @trusted {
     reloadTZ(false);
 
     auto name = posixTZToIANA.get(zone, zone);
-    auto ret = tzDatabase[name];
+    if (!name)
+        return typeof(return)(name.getError);
 
+    auto ret = tzDatabase[name];
     if (!ret)
-        return typeof(return)(ret.error);
+        return typeof(return)(ret.getError);
 
     IanaTZBase temp;
     temp.tzFile = ret;
@@ -325,9 +327,9 @@ package(sidero.base.datetime):
             auto startUnix = startGD.toUnixTime, endUnix = endGD.toUnixTime;
 
             if (!startUnix)
-                return typeof(return)(startUnix.error);
+                return typeof(return)(startUnix.getError);
             else if (!endUnix)
-                return typeof(return)(endUnix.error);
+                return typeof(return)(endUnix.getError);
 
             startUnixTime = startUnix.get;
             endUnixTime = endUnix.get;

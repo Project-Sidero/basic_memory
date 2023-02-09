@@ -363,7 +363,8 @@ Result!PosixTZBase parsePosixTZ(scope String_UTF8 spec) @trusted {
 
         {
             // stdoffset, timeDelta
-            timeDelta(stdOffset);
+            if (spec.startsWith("/") || timeDelta(stdOffset).length == 0)
+                return typeof(return)(MalformedInputException("Standard name must be followed by an offset"));
         }
 
         {
