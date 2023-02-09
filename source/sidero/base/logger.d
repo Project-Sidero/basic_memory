@@ -10,6 +10,8 @@ export @safe nothrow @nogc:
 ///
 enum LoggingTargets : uint {
     /// Default
+    None = 0,
+    ///
     Console = 1,
     ///
     File = 1 << 1,
@@ -74,6 +76,9 @@ struct Logger {
         LogLevel logLevel;
         uint targets;
 
+        String_UTF8 dateTimeFormat;
+        String_UTF8 tags;
+
         ConsoleTarget consoleTarget;
         FileTarget fileTarget;
         DynamicArray!CustomTarget customTargets;
@@ -121,12 +126,43 @@ export:
     }
 
     ///
-    String_UTF8 name() {
+    String_UTF8 name() scope @trusted {
         return this.name_;
     }
 
     ///
-    String_UTF8 toString() {
+    void setLevel(LogLevel level) scope {
+        mutex.pureLock;
+        logLevel = level;
+        mutex.unlock;
+    }
+
+    /// See_Also: LoggingTargets
+    void setTargets(uint targets = LoggingTargets.None) scope {
+        mutex.lock;
+        this.targets = targets;
+        mutex.unlock;
+    }
+
+    ///
+    void setTags(scope return String_UTF8 tags) scope {
+        mutex.lock;
+        this.tags = tags;
+        mutex.unlock;
+    }
+
+    ///
+    void setTags(scope return String_UTF16 tags) scope {
+        this.setTags(tags.byUTF8);
+    }
+
+    ///
+    void setTags(scope return String_UTF32 tags) scope {
+        this.setTags(tags.byUTF8);
+    }
+
+    ///
+    String_UTF8 toString() scope {
         return this.name;
     }
 
@@ -156,9 +192,96 @@ export:
         assert(ret);
         ret.allocator = allocator;
         ret.name_ = name;
+        ret.dateTimeFormat = GDateTime.ISO8601Format;
+        ret.logLevel = LogLevel.Info;
 
         mutexForCreation.unlock;
         return ret;
+    }
+
+    ///
+    void trace(string moduleName = __MODULE__, int line = __LINE__, Args...)(Args args) scope {
+        if (logLevel > LogLevel.Trace)
+            return;
+
+        mutex.pureLock;
+        message!(moduleName, line)(LogLevel.Trace, args);
+        mutex.unlock;
+    }
+
+    ///
+    void info(string moduleName = __MODULE__, int line = __LINE__, Args...)(Args args) scope {
+        if (logLevel > LogLevel.Warning)
+            return;
+
+        mutex.pureLock;
+        message!(moduleName, line)(LogLevel.Info, args);
+        mutex.unlock;
+    }
+
+    ///
+    void warning(string moduleName = __MODULE__, int line = __LINE__, Args...)(Args args) scope {
+        if (logLevel > LogLevel.Warning)
+            return;
+
+        mutex.pureLock;
+        message!(moduleName, line)(LogLevel.Warning, args);
+        mutex.unlock;
+    }
+
+    ///
+    void error(string moduleName = __MODULE__, int line = __LINE__, Args...)(Args args) scope {
+        if (logLevel > LogLevel.Error)
+            return;
+
+        mutex.pureLock;
+        message!(moduleName, line)(LogLevel.Error, args);
+        mutex.unlock;
+    }
+
+    ///
+    void critical(string moduleName = __MODULE__, int line = __LINE__, Args...)(Args args) scope {
+        if (logLevel > LogLevel.Critical)
+            return;
+
+        mutex.pureLock;
+        message!(moduleName, line)(LogLevel.Critical, args);
+        mutex.unlock;
+    }
+
+    ///
+    void fatal(string moduleName = __MODULE__, int line = __LINE__, Args...)(Args args) scope {
+        mutex.pureLock;
+        message!(moduleName, line)(LogLevel.Fatal, args);
+        mutex.unlock;
+    }
+
+private:
+    void message(string moduleName, int line, Args...)(LogLevel level, Args args) scope {
+        import sidero.base.datetime.time.clock;
+        import std.conv : text;
+
+        StringBuilder_UTF8 dateTimeText = accurateDateTime().format(this.dateTimeFormat);
+        enum ModuleLine = " `" ~ moduleName ~ ":" ~ line.text ~ "` ";
+
+        static immutable LevelTag = [
+            "TRACE", "INFO", "WARNING", "ERROR", "CRITICAL", "FATAL", " TRACE", " INFO", " WARNING", " ERROR", " CRITICAL",
+            " FATAL"
+        ];
+
+        void handleConsole() {
+            import sidero.base.console;
+
+            auto fg = consoleTarget.consoleColors[level][0], bg = consoleTarget.consoleColors[level][1];
+
+            writeln(resetDefaultBeforeApplying().deliminateArgs(false).prettyPrintingActive(true).foreground(fg)
+                    .background(bg).useErrorStream(consoleTarget.useErrorStream[level]), dateTimeText, ModuleLine,
+                    tags, LevelTag[level + (tags.isNull ? 0 : 6)], resetDefaultBeforeApplying(), ": ", args, resetDefaultBeforeApplying());
+        }
+
+        if (targets & LoggingTargets.Console)
+            handleConsole;
+
     }
 }
 
@@ -178,14 +301,6 @@ pragma(crt_destructor) extern (C) void deinitializeLogging() @trusted {
             windowsEventHandle = null;
         }
     }
-}
-
-unittest {
-    LoggerReference globalLogger = Logger.forName(String_UTF8("global"));
-    assert(globalLogger);
-    import sidero.base.console;
-
-    debugWriteln(globalLogger, globalLogger.name);
 }
 
 private:
