@@ -61,6 +61,7 @@ struct TimeZone {
                 allocator = globalAllocator();
 
             this.state = allocator.make!State(1, allocator);
+            assert(!state.allocator.isNull);
         }
     }
 
@@ -77,6 +78,7 @@ export @safe nothrow @nogc:
 
         if (this.state !is null) {
             atomicOp!"+="(this.state.refCount, 1);
+            assert(!state.allocator.isNull);
         }
     }
 
@@ -84,9 +86,13 @@ export @safe nothrow @nogc:
     ~this() scope @trusted {
         import core.atomic : atomicOp;
 
-        if (this.state !is null && atomicOp!"-="(state.refCount, 1) == 0) {
-            RCAllocator allocator = state.allocator;
-            allocator.dispose(state);
+        if (this.state !is null) {
+            assert(!state.allocator.isNull);
+
+            if (atomicOp!"-="(state.refCount, 1) == 0) {
+                RCAllocator allocator = state.allocator;
+                allocator.dispose(state);
+            }
         }
     }
 
@@ -97,7 +103,7 @@ export @safe nothrow @nogc:
 
     ///
     void opAssign(return scope TimeZone other) scope @trusted {
-        this.tupleof = other.tupleof;
+        this.__ctor(other);
     }
 
     /// Either a Olson (IANA TZ) or platform specific name.

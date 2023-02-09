@@ -124,6 +124,8 @@ package(sidero.base.datetime):
                 ret.state.windowsBase.dtzi = this.dtzi;
                 ret.state.haveDaylightSavings = tzi.StandardDate.wMonth != 0;
 
+                long baseLineBias = -dtzi.Bias * 60;
+
                 {
                     // we have to store named seaparately due to possibilities of it changing per year
                     String_UTF8 standardName = String_UTF8(tzi.StandardName[0 .. wcslen(tzi.StandardName.ptr)]).dup;
@@ -140,7 +142,7 @@ package(sidero.base.datetime):
                     }
                 }
 
-                ret.state.windowsBase.standardOffset.seconds = tzi.StandardBias * 60;
+                ret.state.windowsBase.standardOffset.seconds = (-tzi.StandardBias * 60) + baseLineBias;
                 ret.state.windowsBase.standardOffset.appliesOnDate = GregorianDate(year, cast(ubyte)tzi.StandardDate.wMonth,
                         cast(ubyte)tzi.StandardDate.wDay);
                 ret.state.windowsBase.standardOffset.appliesOnTime = TimeOfDay(cast(ubyte)tzi.StandardDate.wHour,
@@ -148,7 +150,7 @@ package(sidero.base.datetime):
                         cast(uint)(tzi.StandardDate.wMilliseconds * 1000));
 
                 if (ret.state.haveDaylightSavings) {
-                    ret.state.windowsBase.daylightSavingsOffset.seconds = tzi.DaylightBias * 60;
+                    ret.state.windowsBase.daylightSavingsOffset.seconds = (-tzi.DaylightBias * 60) + baseLineBias;
                     ret.state.windowsBase.daylightSavingsOffset.appliesOnDate = GregorianDate(year, cast(ubyte)tzi.DaylightDate.wMonth,
                             cast(ubyte)tzi.DaylightDate.wDay);
                     ret.state.windowsBase.daylightSavingsOffset.appliesOnTime = TimeOfDay(cast(ubyte)tzi.DaylightDate.wHour,
@@ -203,7 +205,7 @@ bool isInDaylightSavings(scope ref WindowsTimeZoneBase self, scope DateTime!Greg
         return self.standardOffset.appliesOn > date;
     else {
         auto next = self.forYear(self.standardOffset.appliesOn.year + 1);
-        return date < next.state.windowsBase.standardOffset.appliesOn;
+        return next && date < next.state.windowsBase.standardOffset.appliesOn;
     }
 }
 

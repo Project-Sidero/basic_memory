@@ -379,14 +379,8 @@ export @safe nothrow @nogc:
     }
 
     ///
-    StringBuilder_UTF8 format(FormatString)(scope FormatString specification) scope const if (isSomeString!FormatString) {
-        StringBuilder_UTF8 ret;
-        this.format(ret, specification);
-        return ret;
-    }
-
-    ///
-    StringBuilder_UTF8 format(FormatChar)(scope String_UTF!FormatChar specification) scope const {
+    StringBuilder_UTF8 format(FormatString)(scope FormatString specification) scope const 
+            if (isSomeString!FormatString || isReadOnlyString!FormatString) {
         StringBuilder_UTF8 ret;
         this.format(ret, specification);
         return ret;

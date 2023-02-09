@@ -17,7 +17,7 @@ enum {
 
 ///
 struct DateTime(DateType) {
-    private @PrettyPrintIgnore {
+    package(sidero.base.datetime) @PrettyPrintIgnore {
         TimeOfDay time_;
         TimeZone timezone_;
         DateType date_;
@@ -51,7 +51,13 @@ export @safe nothrow @nogc:
     }
 
     ///
-    this(return scope DateType date, return scope TimeOfDay time, return scope TimeZone timezone = TimeZone.init) scope {
+    this(return scope DateType date, return scope TimeOfDay time) scope {
+        this.date_ = date;
+        this.time_ = time;
+    }
+
+    ///
+    this(return scope DateType date, return scope TimeOfDay time, return scope TimeZone timezone) scope {
         this.date_ = date;
         this.time_ = time;
         this.timezone_ = timezone;
@@ -66,7 +72,7 @@ export @safe nothrow @nogc:
 
     ///
     void opAssign(return scope DateTime other) scope @trusted {
-        this.tupleof = other.tupleof;
+        this.__ctor(other);
     }
 
     //
@@ -78,7 +84,7 @@ export @safe nothrow @nogc:
 
     ///
     TimeZone timezone() scope const @trusted {
-        return (cast(DateTime)this).timezone_;
+        return (*cast(DateTime*)&this).timezone_;
     }
 
     ///
@@ -173,23 +179,27 @@ export @safe nothrow @nogc:
 
     /// If current time zone not set, it'll just add it without adjustment.
     DateTime asTimeZone(return scope TimeZone timezone) scope return @trusted {
-        if (this.timezone_.isNull) {
-            return DateTime(this, timezone);
+        long delta;
+
+        if (!this.timezone_.isNull) {
+            auto gDateTime = this.asGregorian();
+            auto oldBias = this.timezone_.currentSecondsBias(gDateTime);
+            auto newBias = timezone.currentSecondsBias(gDateTime);
+            delta = newBias - oldBias;
         }
 
-        auto gDateTime = this.asGregorian();
-        auto oldBias = this.timezone_.currentSecondsBias(gDateTime);
-        auto newBias = timezone.currentSecondsBias(gDateTime);
+        DateTime ret = this;
+        ret.timezone_ = timezone;
 
-        DateTime ret = DateTime(this.date_, this.time_, timezone);
-        ret.advanceSeconds(newBias - oldBias);
+        if (delta != 0)
+            ret.advanceSeconds(delta);
 
         return ret;
     }
 
     ///
     DateTime!(GregorianDate) asGregorian() scope const return @trusted {
-        return typeof(return)(GregorianDate(this.date_.toDaysSinceY2k), cast(TimeOfDay)this.time_, cast(TimeZone)this.timezone_);
+        return typeof(return)(GregorianDate(this.date_.toDaysSinceY2k), cast(TimeOfDay)this.time_, this.timezone);
     }
 
     ///
@@ -276,14 +286,8 @@ export @safe nothrow @nogc:
     }
 
     ///
-    StringBuilder_UTF8 format(FormatString)(scope FormatString specification) scope const if (isSomeString!FormatString) {
-        StringBuilder_UTF8 ret;
-        this.format(ret, specification);
-        return ret;
-    }
-
-    ///
-    StringBuilder_UTF8 format(FormatChar)(scope String_UTF!FormatChar specification) scope const {
+    StringBuilder_UTF8 format(FormatString)(scope FormatString specification) scope const 
+            if (isSomeString!FormatString || isReadOnlyString!FormatString) {
         StringBuilder_UTF8 ret;
         this.format(ret, specification);
         return ret;
