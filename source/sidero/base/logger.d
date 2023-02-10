@@ -224,8 +224,16 @@ export:
         ret.dateTimeFormat = GDateTime.ISO8601Format;
         ret.logLevel = LogLevel.Info;
 
+        if (name == "global")
+            globalLogger = ret;
+
         mutexForCreation.unlock;
         return ret;
+    }
+
+    /// Global logger "global"
+    static LoggerReference global() {
+        return Logger.forName(String_UTF8("global"));
     }
 
     ///
@@ -288,10 +296,14 @@ export:
 private:
     void message(string moduleName, int line, Args...)(LogLevel level, Args args) scope {
         import sidero.base.datetime.time.clock;
-        import std.conv : text;
+        import std.conv : text, wtext;
+
+        enum ModuleLine2 = moduleName.wtext ~ ":"w ~ line.wtext;
+        enum ModuleLine = " `" ~ moduleName ~ ":" ~ line.text ~ "` ";
 
         StringBuilder_UTF8 dateTimeText = accurateDateTime().format(this.dateTimeFormat);
-        enum ModuleLine = " `" ~ moduleName ~ ":" ~ line.text ~ "` ";
+        StringBuilder_UTF8 contentBuilder;
+        String_UTF8 contentUTF8;
 
         static immutable LevelTag = [
             "TRACE", "INFO", "WARNING", "ERROR", "CRITICAL", "FATAL", " TRACE", " INFO", " WARNING", " ERROR", " CRITICAL",
@@ -308,10 +320,143 @@ private:
                     tags, LevelTag[level + (tags.isNull ? 0 : 6)], resetDefaultBeforeApplying(), ": ", args, resetDefaultBeforeApplying());
         }
 
+        void syslog() @trusted {
+            version (Posix) {
+                import core.sys.posix.syslog : syslog, openlog, closelog, LOG_PID, LOG_CONS, LOG_USER;
+
+                mutexForCreation.pureLock;
+                if (!haveSysLog) {
+                    openlog("ProjectSidero dependent program".ptr, LOG_PID | LOG_CONS, LOG_USER);
+                    haveSysLog = true;
+                }
+
+                syslog(PrioritySyslogForLevels[level], contentUTF8.ptr);
+                mutexForCreation.unlock;
+            }
+        }
+
+        void windowsEvents() @trusted {
+            version (Windows) {
+                import core.sys.windows.windows : ReportEventW, RegisterEventSourceW, WORD, DWORD, EVENTLOG_INFORMATION_TYPE,
+                    EVENTLOG_WARNING_TYPE, EVENTLOG_ERROR_TYPE;
+
+                mutexForCreation.pureLock;
+                if (windowsEventHandle is null) {
+                    windowsEventHandle = RegisterEventSourceW(null, cast(wchar*)"ProjectSidero dependent program"w.ptr);
+                }
+
+                static WORD[] WTypes = [
+                    EVENTLOG_INFORMATION_TYPE, EVENTLOG_INFORMATION_TYPE, EVENTLOG_WARNING_TYPE, EVENTLOG_ERROR_TYPE,
+                    EVENTLOG_ERROR_TYPE, EVENTLOG_ERROR_TYPE
+                ];
+
+                String_UTF16 text = contentBuilder[dateTimeText.length + ModuleLine.length .. $].byUTF16.asReadOnly;
+
+                static WORD[] dwEventID = [0, 1, 2, 3, 4, 5];
+                const(wchar)*[2] messages = [ModuleLine2.ptr, text.ptr];
+
+                ReportEventW(windowsEventHandle, WTypes[level], dwEventID[level], 0, cast(void*)null, 2, 0,
+                        &messages[0], cast(void*)null);
+                mutexForCreation.unlock;
+            }
+        }
+
         if (targets & LoggingTargets.Console)
             handleConsole;
+        if (targets & LoggingTargets.File || targets & LoggingTargets.Syslog || targets & LoggingTargets.Windows) {
+            {
+                contentBuilder ~= dateTimeText;
+                contentBuilder ~= ModuleLine;
+                contentBuilder ~= tags;
+                contentBuilder ~= LevelTag[level + (tags.isNull ? 0 : 6)];
+                contentBuilder ~= ": ";
 
+                PrettyPrint!String_UTF8 prettyPrinter;
+                prettyPrinter(contentBuilder, args);
+            }
+
+            if (targets & LoggingTargets.Windows)
+                windowsEvents;
+            if (targets & LoggingTargets.File || targets & LoggingTargets.Syslog)
+                contentUTF8 = contentBuilder.asReadOnly;
+            if (targets & LoggingTargets.Syslog)
+                syslog;
+        }
     }
+}
+
+///
+void setLogProcessName(String_UTF8 name) @trusted {
+    if (name.length == 0) {
+        mutexForCreation.pureLock;
+
+        processName = String_UTF8.init;
+
+        mutexForCreation.unlock;
+        return;
+    }
+
+    if (name.isPtrNullTerminated)
+        processName = name;
+    else
+        processName = name.dup;
+
+    version (Posix) {
+        import core.sys.posix.syslog : openlog, closelog, LOG_PID, LOG_CONS, LOG_USER;
+
+        mutexForCreation.pureLock;
+
+        if (haveSysLog)
+            closelog();
+        haveSysLog = true;
+
+        openlog(processName.ptr, LOG_PID | LOG_CONS, LOG_USER);
+
+        mutexForCreation.unlock;
+    } else version (Windows) {
+        import core.sys.windows.windows : RegisterEventSourceW, DeregisterEventSource;
+
+        mutexForCreation.pureLock;
+
+        if (windowsEventHandle !is null) {
+            DeregisterEventSource(windowsEventHandle);
+        }
+
+        String_UTF16 processName16 = name.byUTF16.dup;
+        windowsEventHandle = RegisterEventSourceW(null, cast(wchar*)processName16.ptr);
+
+        mutexForCreation.unlock;
+    }
+}
+
+///
+void trace(string moduleName = __MODULE__, int line = __LINE__, Args...)(Args args) @trusted {
+    Logger.global.assumeOkay.trace!(moduleName, line)(args);
+}
+
+///
+void info(string moduleName = __MODULE__, int line = __LINE__, Args...)(Args args) @trusted {
+    Logger.global.assumeOkay.info!(moduleName, line)(args);
+}
+
+///
+void warning(string moduleName = __MODULE__, int line = __LINE__, Args...)(Args args) @trusted {
+    Logger.global.assumeOkay.warning!(moduleName, line)(args);
+}
+
+///
+void error(string moduleName = __MODULE__, int line = __LINE__, Args...)(Args args) @trusted {
+    Logger.global.assumeOkay.error!(moduleName, line)(args);
+}
+
+///
+void critical(string moduleName = __MODULE__, int line = __LINE__, Args...)(Args args) @trusted {
+    Logger.global.assumeOkay.critical!(moduleName, line)(args);
+}
+
+///
+void fatal(string moduleName = __MODULE__, int line = __LINE__, Args...)(Args args) @trusted {
+    Logger.global.assumeOkay.fatal!(moduleName, line)(args);
 }
 
 pragma(crt_destructor) extern (C) void deinitializeLogging() @trusted {
@@ -341,14 +486,17 @@ import sidero.base.datetime;
 __gshared {
     TestTestSetLockInline mutexForCreation;
     ConcurrentHashMap!(String_UTF8, Logger) loggers;
+    LoggerReference globalLogger;
+    String_UTF8 processName;
+    bool haveSysLog;
 }
 
 struct ConsoleTarget {
     static immutable DefaultErrorStream = [false, false, false, true, true, true];
     static immutable ConsoleColor[2][6] DefaultConsoleColors = [
-            [ConsoleColor.Yellow, ConsoleColor.Unknown], [ConsoleColor.Green, ConsoleColor.Unknown],
-            [ConsoleColor.Magenta, ConsoleColor.Unknown], [ConsoleColor.Red, ConsoleColor.Yellow],
-            [ConsoleColor.Red, ConsoleColor.Cyan], [ConsoleColor.Red, ConsoleColor.Blue],
+        [ConsoleColor.Yellow, ConsoleColor.Unknown], [ConsoleColor.Green, ConsoleColor.Unknown],
+        [ConsoleColor.Magenta, ConsoleColor.Unknown], [ConsoleColor.Red, ConsoleColor.Yellow],
+        [ConsoleColor.Red, ConsoleColor.Cyan], [ConsoleColor.Red, ConsoleColor.Blue],
     ];
 
     ConsoleColor[2][6] colors = DefaultConsoleColors;
@@ -379,11 +527,6 @@ struct CustomTarget {
         if (onRemoveDel !is null)
             onRemoveDel();
     }
-}
-
-__gshared {
-    String_UTF8 processName;
-    bool haveSysLog;
 }
 
 version (Windows) {
