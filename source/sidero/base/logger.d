@@ -55,7 +55,7 @@ enum LogRotateFrequency {
 }
 
 ///
-alias CustomTargetMessage = void delegate(LogLevel level, String_UTF8 dateTime, String_UTF8[2] moduleLine,
+alias CustomTargetMessage = void delegate(LogLevel level, GDateTime dateTime, String_UTF8[2] moduleLine,
         String_UTF8 tags, String_UTF8 levelText, String_UTF8 composite) @safe nothrow @nogc;
 ///
 alias CustomTargetOnRemove = void delegate() @safe nothrow @nogc;
@@ -199,6 +199,24 @@ export:
         fileTarget.filePrefixSeparator = filePrefixSeparator;
         fileTarget.fileExtension = fileExtension;
         fileTarget.logRotateFrequency = rotateFrequency;
+        mutex.unlock;
+    }
+
+    ///
+    void addCustomTarget(CustomTargetMessage messageDel, CustomTargetOnRemove onRemoveDel = null) @trusted {
+        if (messageDel is null && onRemoveDel is null)
+            return;
+
+        mutex.pureLock;
+        customTargets ~= CustomTarget();
+        customTargets.unsafeGetLiteral[$ - 1] = CustomTarget(messageDel, onRemoveDel);
+        mutex.unlock;
+    }
+
+    ///
+    void clearCustomTargets() {
+        mutex.pureLock;
+        customTargets = typeof(customTargets)();
         mutex.unlock;
     }
 
@@ -426,9 +444,17 @@ private:
             fileTarget.logStream.append(String_UTF8("\n"));
         }
 
+        void custom() @trusted {
+            foreach (ref ct; customTargets.unsafeGetLiteral()) {
+                ct.message(level, currentDateTime, [String_ASCII(ModuleLine), String_ASCII(ModuleLine2)], tags,
+                        Text[level + (tags.isNull ? 0 : 6)], contentUTF8);
+            }
+        }
+
         if (targets & LoggingTargets.Console)
             handleConsole;
-        if (targets & LoggingTargets.File || targets & LoggingTargets.Syslog || targets & LoggingTargets.Windows) {
+        if (targets & LoggingTargets.File || targets & LoggingTargets.Syslog || targets & LoggingTargets.Windows ||
+                targets & LoggingTargets.Custom) {
             {
                 contentBuilder ~= dateTimeText;
                 contentBuilder ~= ModuleLine;
@@ -442,12 +468,14 @@ private:
 
             if (targets & LoggingTargets.Windows)
                 windowsEvents;
-            if (targets & LoggingTargets.File || targets & LoggingTargets.Syslog)
+            if (targets & LoggingTargets.Syslog || targets & LoggingTargets.Custom)
                 contentUTF8 = contentBuilder.asReadOnly;
             if (targets & LoggingTargets.File)
                 file;
             if (targets & LoggingTargets.Syslog)
                 syslog;
+            if (targets & LoggingTargets.Custom)
+                custom;
         }
     }
 }
