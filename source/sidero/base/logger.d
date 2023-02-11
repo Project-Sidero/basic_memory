@@ -55,8 +55,8 @@ enum LogRotateFrequency {
 }
 
 ///
-alias CustomTargetMessage = void delegate(LogLevel level, GDateTime dateTime, String_UTF8[2] moduleLine,
-        String_UTF8 tags, String_UTF8 levelText, String_UTF8 composite) @safe nothrow @nogc;
+alias CustomTargetMessage = void delegate(LogLevel level, GDateTime dateTime, String_UTF8[2] moduleLine, String_UTF8 tags,
+        String_UTF8 levelText, String_UTF8 composite) @safe nothrow @nogc;
 ///
 alias CustomTargetOnRemove = void delegate() @safe nothrow @nogc;
 
@@ -356,44 +356,40 @@ private:
                     tags, LevelTag[level + (tags.isNull ? 0 : 6)], resetDefaultBeforeApplying(), ": ", args, resetDefaultBeforeApplying());
         }
 
-        void syslog() @trusted {
+        void syslog() {
             version (Posix) {
                 import core.sys.posix.syslog : syslog, openlog, closelog, LOG_PID, LOG_CONS, LOG_USER;
 
-                mutexForCreation.pureLock;
-                if (!haveSysLog) {
-                    openlog("ProjectSidero dependent program".ptr, LOG_PID | LOG_CONS, LOG_USER);
-                    haveSysLog = true;
-                }
+                guardForCreation(() @trusted {
+                    if (!haveSysLog) {
+                        openlog("ProjectSidero dependent program".ptr, LOG_PID | LOG_CONS, LOG_USER);
+                        haveSysLog = true;
+                    }
 
-                syslog(PrioritySyslogForLevels[level], contentUTF8.ptr);
-                mutexForCreation.unlock;
+                    syslog(PrioritySyslogForLevels[level], contentUTF8.ptr);
+                });
             }
         }
 
         void windowsEvents() @trusted {
             version (Windows) {
-                import core.sys.windows.windows : ReportEventW, RegisterEventSourceW, WORD, DWORD,
+                import core.sys.windows.windows : ReportEventW, WORD, DWORD,
                     EVENTLOG_INFORMATION_TYPE, EVENTLOG_WARNING_TYPE, EVENTLOG_ERROR_TYPE;
 
-                mutexForCreation.pureLock;
-                if (windowsEventHandle is null) {
-                    windowsEventHandle = RegisterEventSourceW(null, cast(wchar*)"ProjectSidero dependent program"w.ptr);
-                }
+                guardForCreation(() @trusted {
+                    static WORD[] WTypes = [
+                        EVENTLOG_INFORMATION_TYPE, EVENTLOG_INFORMATION_TYPE, EVENTLOG_WARNING_TYPE,
+                        EVENTLOG_ERROR_TYPE, EVENTLOG_ERROR_TYPE, EVENTLOG_ERROR_TYPE
+                    ];
 
-                static WORD[] WTypes = [
-                    EVENTLOG_INFORMATION_TYPE, EVENTLOG_INFORMATION_TYPE, EVENTLOG_WARNING_TYPE, EVENTLOG_ERROR_TYPE,
-                    EVENTLOG_ERROR_TYPE, EVENTLOG_ERROR_TYPE
-                ];
+                    String_UTF16 text = contentBuilder[dateTimeText.length + ModuleLine.length .. $].byUTF16.asReadOnly;
 
-                String_UTF16 text = contentBuilder[dateTimeText.length + ModuleLine.length .. $].byUTF16.asReadOnly;
+                    static WORD[] dwEventID = [0, 1, 2, 3, 4, 5];
+                    const(wchar)*[2] messages = [ModuleLine2.ptr, text.ptr];
 
-                static WORD[] dwEventID = [0, 1, 2, 3, 4, 5];
-                const(wchar)*[2] messages = [ModuleLine2.ptr, text.ptr];
-
-                ReportEventW(windowsEventHandle, WTypes[level], dwEventID[level], 0, cast(void*)null, 2, 0,
+                    ReportEventW(needWindowsEventHandle(), WTypes[level], dwEventID[level], 0, cast(void*)null, 2, 0,
                         &messages[0], cast(void*)null);
-                mutexForCreation.unlock;
+                });
             }
         }
 
@@ -569,6 +565,22 @@ pragma(crt_destructor) extern (C) void deinitializeLogging() @trusted {
             DeregisterEventSource(windowsEventHandle);
             windowsEventHandle = null;
         }
+    }
+}
+
+export void guardForCreation(scope void delegate() @safe nothrow @nogc del) @trusted {
+    mutexForCreation.pureLock;
+    del();
+    mutexForCreation.unlock;
+}
+
+version (Windows) {
+    export HANDLE needWindowsEventHandle() @trusted {
+        import core.sys.windows.windows : RegisterEventSourceW;
+        if (windowsEventHandle is null)
+            windowsEventHandle = RegisterEventSourceW(null, cast(wchar*)"ProjectSidero dependent program"w.ptr);
+
+        return windowsEventHandle;
     }
 }
 
