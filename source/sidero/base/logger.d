@@ -164,7 +164,8 @@ export:
     /// Set console stream back to the default
     void setToDefaultConsoleStream() scope {
         mutex.pureLock;
-        this.consoleTarget.useErrorStream = ConsoleTarget.DefaultErrorStream;
+        foreach (i, ref v; this.consoleTarget.useErrorStream)
+            v = ConsoleTarget.DefaultErrorStream[i];
         mutex.unlock;
     }
 
@@ -373,8 +374,8 @@ private:
 
         void windowsEvents() @trusted {
             version (Windows) {
-                import core.sys.windows.windows : ReportEventW, WORD, DWORD,
-                    EVENTLOG_INFORMATION_TYPE, EVENTLOG_WARNING_TYPE, EVENTLOG_ERROR_TYPE;
+                import core.sys.windows.windows : ReportEventW, WORD, DWORD, EVENTLOG_INFORMATION_TYPE,
+                    EVENTLOG_WARNING_TYPE, EVENTLOG_ERROR_TYPE;
 
                 guardForCreation(() @trusted {
                     static WORD[] WTypes = [
@@ -387,8 +388,8 @@ private:
                     static WORD[] dwEventID = [0, 1, 2, 3, 4, 5];
                     const(wchar)*[2] messages = [ModuleLine2.ptr, text.ptr];
 
-                    ReportEventW(needWindowsEventHandle(), WTypes[level], dwEventID[level], 0, cast(void*)null, 2, 0,
-                        &messages[0], cast(void*)null);
+                    ReportEventW(needWindowsEventHandle(), WTypes[level], dwEventID[level], 0, cast(void*)null, 2,
+                        0, &messages[0], cast(void*)null);
                 });
             }
         }
@@ -577,6 +578,7 @@ export void guardForCreation(scope void delegate() @safe nothrow @nogc del) @tru
 version (Windows) {
     export HANDLE needWindowsEventHandle() @trusted {
         import core.sys.windows.windows : RegisterEventSourceW;
+
         if (windowsEventHandle is null)
             windowsEventHandle = RegisterEventSourceW(null, cast(wchar*)"ProjectSidero dependent program"w.ptr);
 

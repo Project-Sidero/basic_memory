@@ -1063,6 +1063,7 @@ scope @hidden:
             builder ~= "]";
         } else static if (isDynamicArray!ActualType) {
             builder ~= ActualType.stringof;
+            alias SubType = typeof(ActualType.init[0]);
 
             if (input is null) {
                 builder ~= "@null";
@@ -1070,18 +1071,20 @@ scope @hidden:
                 auto tempPtr = cast(size_t)input.ptr;
                 this.write(String_ASCII("@0x" ~ DefaultFormatForPointer), tempPtr, true);
 
-                builder ~= "[";
+                static if (!is(SubType == void)) {
+                    builder ~= "[";
 
-                size_t i;
+                    size_t i;
 
-                foreach (v; input) {
-                    if (i++ > 0)
-                        builder ~= ", ";
+                    foreach (v; input) {
+                        if (i++ > 0)
+                            builder ~= ", ";
 
-                    this.write(String_ASCII.init, v, true);
+                        this.write(String_ASCII.init, v, true);
+                    }
+
+                    builder ~= "]";
                 }
-
-                builder ~= "]";
             }
         } else static if (isIterable!ActualType && (HaveNonStaticOpApply!ActualType || !__traits(hasMember, ActualType, "opApply"))) {
             builder ~= "[";
