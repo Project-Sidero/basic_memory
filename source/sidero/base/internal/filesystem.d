@@ -103,7 +103,7 @@ bool directoryExists(String_UTF8 directory) @trusted {
 
 struct FileAppender {
     private {
-        import core.stdc.stdio : FILE, fflush, fclose, fopen, fwrite;
+        import core.stdc.stdio : FILE, fflush, fclose, fopen, fwrite, ftell, fseek, SEEK_END;
 
         FILE* descriptor;
         String_UTF8 filename;
@@ -122,7 +122,7 @@ struct FileAppender {
         else
             this.filename = filename.dup;
 
-        descriptor = fopen(cast(char*)this.filename.ptr, "w+");
+        descriptor = fopen(cast(char*)this.filename.ptr, "a");
     }
 
     @disable this(this);
@@ -134,14 +134,14 @@ struct FileAppender {
         }
     }
 
-    bool isNull() scope {
-        return descriptor is null;
+    bool isNull() scope @trusted {
+        return descriptor is null || ftell(descriptor) < 0;
     }
 
     private void reopen() scope @trusted {
         fflush(descriptor);
         fclose(descriptor);
-        descriptor = fopen(cast(char*)this.filename.ptr, "w+");
+        descriptor = fopen(cast(char*)this.filename.ptr, "a");
     }
 
     void append(scope StringBuilder_UTF8 input) scope {
@@ -177,6 +177,7 @@ struct FileAppender {
             written = fwrite(input.ptr + writtenSoFar, 1, input.length, descriptor);
 
             if (written == 0) {
+                fflush(descriptor);
                 failedAttempt = 0;
                 writtenSoFar += written;
             } else {
@@ -203,6 +204,7 @@ struct FileAppender {
             written = fwrite(input.ptr + writtenSoFar, 1, input.length, descriptor);
 
             if (written == 0) {
+                fflush(descriptor);
                 failedAttempt = 0;
                 writtenSoFar += written;
             } else {

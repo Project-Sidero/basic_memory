@@ -190,6 +190,18 @@ export:
         mutex.unlock;
     }
 
+    /// Prefix (Separator DateTime)? . Extension
+    void setLogFile(String_UTF8 rootLogDirectory, String_UTF8 filePrefix, String_UTF8 filePrefixSeparator,
+            String_UTF8 fileExtension, LogRotateFrequency rotateFrequency = LogRotateFrequency.OnStart) {
+        mutex.pureLock;
+        fileTarget.rootLogDirectory = rootLogDirectory;
+        fileTarget.filePrefix = filePrefix;
+        fileTarget.filePrefixSeparator = filePrefixSeparator;
+        fileTarget.fileExtension = fileExtension;
+        fileTarget.logRotateFrequency = rotateFrequency;
+        mutex.unlock;
+    }
+
     ///
     String_UTF8 toString() scope const {
         return this.name;
@@ -223,6 +235,11 @@ export:
         ret.name_ = name;
         ret.dateTimeFormat = GDateTime.ISO8601Format;
         ret.logLevel = LogLevel.Info;
+
+        ret.fileTarget.filePrefix = String_UTF8("log");
+        ret.fileTarget.filePrefixSeparator = String_UTF8("_");
+        ret.fileTarget.fileExtension = String_UTF8("log");
+        ret.fileTarget.logRotateFrequency = LogRotateFrequency.OnStart;
 
         if (name == "global")
             globalLogger = ret;
@@ -301,7 +318,8 @@ private:
         enum ModuleLine2 = moduleName.wtext ~ ":"w ~ line.wtext;
         enum ModuleLine = " `" ~ moduleName ~ ":" ~ line.text ~ "` ";
 
-        StringBuilder_UTF8 dateTimeText = accurateDateTime().format(this.dateTimeFormat);
+        GDateTime currentDateTime = accurateDateTime();
+        StringBuilder_UTF8 dateTimeText = currentDateTime.format(this.dateTimeFormat);
         StringBuilder_UTF8 contentBuilder;
         String_UTF8 contentUTF8;
 
@@ -337,8 +355,8 @@ private:
 
         void windowsEvents() @trusted {
             version (Windows) {
-                import core.sys.windows.windows : ReportEventW, RegisterEventSourceW, WORD, DWORD, EVENTLOG_INFORMATION_TYPE,
-                    EVENTLOG_WARNING_TYPE, EVENTLOG_ERROR_TYPE;
+                import core.sys.windows.windows : ReportEventW, RegisterEventSourceW, WORD, DWORD,
+                    EVENTLOG_INFORMATION_TYPE, EVENTLOG_WARNING_TYPE, EVENTLOG_ERROR_TYPE;
 
                 mutexForCreation.pureLock;
                 if (windowsEventHandle is null) {
@@ -361,6 +379,53 @@ private:
             }
         }
 
+        void file() @trusted {
+            bool triggered = fileTarget.logStream.isNull;
+
+            if (!triggered) {
+                // check based upon last date/time
+
+                final switch (fileTarget.logRotateFrequency) {
+                case LogRotateFrequency.None:
+                case LogRotateFrequency.OnStart:
+                    break;
+                case LogRotateFrequency.Hourly:
+                    triggered = currentDateTime.hour != fileTarget.logRotateLastDateTime.hour;
+                    break;
+                case LogRotateFrequency.Daily:
+                    triggered = currentDateTime.day != fileTarget.logRotateLastDateTime.day;
+                    break;
+                }
+            }
+
+            if (triggered) {
+                // recreate!
+
+                StringBuilder_UTF8 filename;
+                filename ~= fileTarget.rootLogDirectory;
+
+                if (filename.length > 0 && !(filename.endsWith("/") || filename.endsWith("\\")))
+                    filename ~= "/"c;
+
+                filename ~= fileTarget.filePrefix;
+
+                if (fileTarget.logRotateFrequency == LogRotateFrequency.None) {
+                    // does not include date/time
+                } else {
+                    filename ~= fileTarget.filePrefixSeparator;
+                    filename ~= currentDateTime.format(GDateTime.LogFileName);
+                }
+
+                if (fileTarget.fileExtension.length > 0 && !fileTarget.fileExtension.startsWith("."))
+                    filename ~= "."c;
+                filename ~= fileTarget.fileExtension;
+                fileTarget.logStream = FileAppender(filename.asReadOnly);
+            }
+
+            fileTarget.logStream.append(contentBuilder);
+            fileTarget.logStream.append(String_UTF8("\n"));
+        }
+
         if (targets & LoggingTargets.Console)
             handleConsole;
         if (targets & LoggingTargets.File || targets & LoggingTargets.Syslog || targets & LoggingTargets.Windows) {
@@ -379,6 +444,8 @@ private:
                 windowsEvents;
             if (targets & LoggingTargets.File || targets & LoggingTargets.Syslog)
                 contentUTF8 = contentBuilder.asReadOnly;
+            if (targets & LoggingTargets.File)
+                file;
             if (targets & LoggingTargets.Syslog)
                 syslog;
         }
@@ -504,9 +571,9 @@ struct ConsoleTarget {
 }
 
 struct FileTarget {
-    String_UTF8 rootLogDirectory;
+    String_UTF8 rootLogDirectory, filePrefix, filePrefixSeparator, fileExtension;
 
-    GDate logRotateLastDate;
+    GDateTime logRotateLastDateTime;
     LogRotateFrequency logRotateFrequency;
 
     FileAppender logStream;

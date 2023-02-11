@@ -31,7 +31,7 @@ struct DateTime(DateType) {
         RFC1036Format = "D, d M y H:i:s O", RFC1123Format = "D, d M Y H:i:s O",
         RFC7231Format = "D, d M Y H:i:s \\G\\M\\T", RFC2822Format = "D, d M Y H:i:s O",
         RFC3339Format = "Y-m-d\\TH:i:sP", RFC3339ExtendedFormat = "Y-m-d\\TH:i:s.vP", RSSFormat = "D, d M Y H:i:s O",
-        W3CFormat = "Y-m-d\\TH:i:sP";
+        W3CFormat = "Y-m-d\\TH:i:sP", LogFileName = "Y-m-d-H";
 
 export @safe nothrow @nogc:
 
