@@ -539,6 +539,7 @@ void write(Args...)(scope Args args) @trusted {
             if (prettyPrintActive) {
                 PrettyPrint!String_UTF8 prettyPrint;
                 prettyPrint.useQuotes = deliminateArguments;
+                prettyPrint.startWithoutPrefix = true;
 
                 if (!isFirstPrettyPrint)
                     builder ~= "\n";

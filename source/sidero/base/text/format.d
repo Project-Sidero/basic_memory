@@ -87,6 +87,9 @@ struct PrettyPrint(ConstantsType)
     uint depth;
     ///
     bool useQuotes;
+    ///
+    bool startWithoutPrefix;
+
 export nothrow @nogc:
 
     ///
@@ -136,6 +139,9 @@ private @hidden:
                 }));
 
         void handlePrefix(bool onlyRepeat = false, bool usePrefix = true, bool useSuffix = true) @safe nothrow @nogc {
+            if (builder.length == 0 && parent.startWithoutPrefix)
+                return;
+
             if (!onlyRepeat && usePrefix)
                 builder ~= parent.prefix;
 
