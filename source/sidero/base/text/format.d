@@ -684,6 +684,7 @@ private @hidden:
 
                 enum FQN = fullyQualifiedName!ActualType;
                 builder ~= FQN;
+                auto actualValue = cast(OriginalType!ActualType)input;
 
                 static foreach (m; __traits(allMembers, ActualType)) {
                     if (__traits(getMember, ActualType, m) == input) {
@@ -694,7 +695,7 @@ private @hidden:
                 }
 
                 builder ~= "("c;
-                handle(cast(OriginalType!ActualType)input, useQuotes, useName, forcePrint);
+                handle(actualValue, useQuotes, useName, forcePrint);
                 builder ~= ")"c;
             Done:
             } else {
