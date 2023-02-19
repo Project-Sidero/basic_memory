@@ -539,7 +539,7 @@ void write(Args...)(scope Args args) @trusted {
             if (prettyPrintActive) {
                 PrettyPrint!String_UTF8 prettyPrint;
                 prettyPrint.useQuotes = deliminateArguments;
-                prettyPrint.startWithoutPrefix = argumentId > 0;
+                prettyPrint.startWithoutPrefix = argumentId == 0 || !deliminateArguments;
 
                 if (!isFirstPrettyPrint)
                     builder ~= "\n";
@@ -558,9 +558,9 @@ void write(Args...)(scope Args args) @trusted {
     static if (Args.length == 1) {
         alias ArgType = typeof(args[0]);
         scope doOneWrapper2 = &doOneWrapper!ArgType;
-        (cast(void delegate(scope ArgType)@nogc nothrow @safe pure)doOneWrapper2)(0, args[0]);
+        (cast(void delegate(size_t, scope ArgType)@nogc nothrow @safe pure)doOneWrapper2)(0, args[0]);
     } else {
-        size_t gotPrintable;
+        size_t gotPrintable, printing;
         bool wasDeliminted;
 
         foreach (i, ref arg; args) {
@@ -581,7 +581,10 @@ void write(Args...)(scope Args args) @trusted {
             }
 
             scope doOneWrapper2 = &doOneWrapper!ArgType;
-            (cast(void delegate(scope ArgType)@nogc nothrow @safe pure)doOneWrapper2)(i, arg);
+            (cast(void delegate(size_t, scope ArgType)@nogc nothrow @safe pure)doOneWrapper2)(printing, arg);
+
+            static if (!is(ArgType == InBandInfo))
+                printing++;
 
             if (!deliminateArguments && is(ArgType == InBandInfo))
                 gotPrintable = 0;

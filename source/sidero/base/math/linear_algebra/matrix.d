@@ -7,6 +7,10 @@ import std.traits : isNumeric;
 export @safe nothrow @nogc:
 
 ///
+alias Mat2x2f = Matrix!(float, 2, 2);
+///
+alias Mat2x2d = Matrix!(double, 2, 2);
+///
 alias Mat3x3f = Matrix!(float, 3, 3);
 ///
 alias Mat3x3d = Matrix!(double, 3, 3);

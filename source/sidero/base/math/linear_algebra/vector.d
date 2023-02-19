@@ -6,6 +6,10 @@ import std.traits : isNumeric, isSigned;
 export @safe nothrow @nogc:
 
 ///
+alias Vec2f = Vector!(float, 2);
+///
+alias Vec2d = Vector!(double, 2);
+///
 alias Vec3f = Vector!(float, 3);
 ///
 alias Vec3d = Vector!(double, 3);
@@ -92,6 +96,22 @@ struct Vector(Type, size_t Dimension) {
 
         foreach (v; vec.data)
             assert(v.isClose(1));
+    }
+
+    ///
+    Vector!(NewType, Dimension) opCast(As : Vector!(NewType, Dimension), NewType)() scope const {
+        typeof(return) ret;
+
+        foreach(i, v; this.data)
+            ret.data[i] = cast(NewType)v;
+
+        return ret;
+    }
+
+    ///
+    unittest {
+        auto v1 = cast(Vector!(size_t, Dimension))Vector.one;
+        auto v2 = cast(Vector!(float, Dimension))Vector.one;
     }
 
     static if (isSigned!Type) {
@@ -357,6 +377,21 @@ struct Vector(Type, size_t Dimension) {
     }
 
     ///
+    Vector abs() scope const {
+        Vector ret;
+
+        foreach(i, ref v; ret.data)
+            v = this.data[i] < 0 ? -this.data[i] : this.data[i];
+
+        return ret;
+    }
+
+    ///
+    unittest {
+        assert((-Vector.one).abs == Vector.one);
+    }
+
+    ///
     ulong toHash() scope const {
         return hashOf(this.data[]);
     }
@@ -401,6 +436,43 @@ struct Vector(Type, size_t Dimension) {
 }
 
 ///
+Vector!(Type, Dimension) min(Type, size_t Dimension)(scope Vector!(Type, Dimension) inputs...) {
+    typeof(return) ret;
+
+    foreach(i, ref v; ret.data) {
+        v = Type.max;
+
+        foreach(ref input; inputs) {
+            if (input.data[i] < v)
+                v = input.data[i];
+        }
+    }
+
+    return ret;
+}
+
+///
+Vector!(Type, Dimension) max(Type, size_t Dimension)(scope Vector!(Type, Dimension)[] inputs...) {
+    import std.traits : isFloatingPoint;
+    typeof(return) ret;
+
+    foreach(i, ref v; ret.data) {
+        static if (isFloatingPoint!Type) {
+            v = Type.min_exp;
+        } else {
+            v = Type.min;
+        }
+
+        foreach(ref input; inputs) {
+            if (input.data[i] > v)
+                v = input.data[i];
+        }
+    }
+
+    return ret;
+}
+
+///
 Type magnitude(Type)(scope const Type[] values) if (isNumeric!Type) {
     import std.algorithm.iteration : sum;
     import core.math : sqrt;
@@ -424,7 +496,7 @@ Type magnitude(Type)(scope const Type[] values) if (isNumeric!Type) {
     Handler handler;
     handler.values = values;
 
-    return cast(Type)sqrt(handler.sum);
+    return cast(Type)sqrt(cast(double)handler.sum);
 }
 
 ///
@@ -491,7 +563,7 @@ Result!CommonType distance(A, B, CommonType = typeof(A.init + B.init))(scope con
     handler.input1 = input1;
     handler.input2 = input2;
 
-    return typeof(return)(sqrt(handler.sum));
+    return typeof(return)(cast(CommonType)sqrt(cast(double)handler.sum));
 }
 
 ///
