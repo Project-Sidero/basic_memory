@@ -1554,42 +1554,44 @@ struct ConcurrentLinkedListImpl(Type) {
     void debugPosition(scope Iterator* iterator = null) scope @trusted {
         version (D_BetterC) {
         } else {
-            import std.stdio;
+            version(unittest) debug {
+                import std.stdio;
 
-            Node* current = &nodeList.head;
+                Node* current = &nodeList.head;
 
-            try {
-                debug writeln("aliveNodes: ", nodeList.aliveNodes, " allNodes: ", nodeList.allNodes);
-                if (iterator !is null)
-                    debug writeln("min: ", iterator.minimumOffsetFromHead, " forwards: ", iterator.forwards.offsetFromHead,
-                            " backwards: ", iterator.backwards.offsetFromHead, " max: ", iterator.maximumOffsetFromHead);
+                try {
+                    debug writeln("aliveNodes: ", nodeList.aliveNodes, " allNodes: ", nodeList.allNodes);
+                    if (iterator !is null)
+                        debug writeln("min: ", iterator.minimumOffsetFromHead, " forwards: ", iterator.forwards.offsetFromHead,
+                        " backwards: ", iterator.backwards.offsetFromHead, " max: ", iterator.maximumOffsetFromHead);
 
-                while (current !is null) {
-                    if (iterator !is null && iterator.forwards.node is current)
-                        debug write(">");
+                    while (current !is null) {
+                        if (iterator !is null && iterator.forwards.node is current)
+                            debug write(">");
 
-                    if (current is &nodeList.head) {
-                        debug writef!"0x%X HEAD "(current);
-                    } else if (current is &nodeList.tail) {
-                        debug writef!"0x%X TAIL "(current);
-                    } else {
-                        debug writef!"0x%X = %s "(current, current.value);
+                        if (current is &nodeList.head) {
+                            debug writef!"0x%X HEAD "(current);
+                        } else if (current is &nodeList.tail) {
+                            debug writef!"0x%X TAIL "(current);
+                        } else {
+                            debug writef!"0x%X = %s "(current, current.value);
+                        }
+
+                        debug write("refcount ", current.refCount);
+                        if (current.previousReadyToBeDeleted !is null)
+                            debug writef!" prtbd 0x%X"(current.previousReadyToBeDeleted);
+
+                        if (iterator !is null && iterator.backwards.node is current)
+                            debug write("<");
+
+                        debug writeln;
+                        current = current.next;
                     }
 
-                    debug write("refcount ", current.refCount);
-                    if (current.previousReadyToBeDeleted !is null)
-                        debug writef!" prtbd 0x%X"(current.previousReadyToBeDeleted);
-
-                    if (iterator !is null && iterator.backwards.node is current)
-                        debug write("<");
-
-                    debug writeln;
-                    current = current.next;
+                    debug stdout.flush;
+                    debug stderr.flush;
+                } catch (Exception) {
                 }
-
-                debug stdout.flush;
-                debug stderr.flush;
-            } catch (Exception) {
             }
         }
     }

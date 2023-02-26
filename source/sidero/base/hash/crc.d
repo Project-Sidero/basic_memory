@@ -143,13 +143,34 @@ const @safe nothrow @nogc pure:
 
     ///
     this(CRCSpec!WorkingType specification) {
+        import sidero.base.bitmanip : bitMaskForNumberOfBits, reverseBitsLSB;
         this.specification = specification;
 
-        WorkingType[256] tempTable;
-        foreach (i, ref v; tempTable)
-            v = calculateLookupTableEntry(specification, cast(ubyte)i);
+        {
+            const topBitMask = WorkingType(1) << (specification.width - 1);
+            WorkingType[256] tempTable;
 
-        this.table = tempTable;
+            foreach (i, ref v; tempTable) {
+                const inputWT = specification.reverseBitsIn ? WorkingType(reverseBitsLSB!ubyte(cast(ubyte)i, 8)) : WorkingType(cast(ubyte)i);
+                WorkingType intermediateValue = inputWT << (specification.width - 8);
+
+                foreach (_; 0 .. 8) {
+                    const isTopBitSet = (intermediateValue & topBitMask) != 0;
+                    intermediateValue <<= 1;
+
+                    if (isTopBitSet)
+                        intermediateValue ^= specification.polynomial;
+                }
+
+                if (specification.reverseBitsIn)
+                    intermediateValue = reverseBitsLSB(intermediateValue, cast(uint)specification.width);
+
+                v = intermediateValue & bitMaskForNumberOfBits!WorkingType(cast(uint)specification.width);
+            }
+
+            this.table = tempTable;
+        }
+
         haveTable = true;
     }
 
@@ -262,27 +283,6 @@ private {
     import std.traits : isIntegral, isUnsigned;
 
     enum isValidWorkingTypeCRC(T) = (isIntegral!T && isUnsigned!T) || is(T == FixedUNum!ByteCount, size_t ByteCount);
-
-    Return calculateLookupTableEntry(Return)(in CRCSpec!Return specification, ubyte offsetIntoTable) {
-        import sidero.base.bitmanip : bitMaskForNumberOfBits, reverseBitsLSB;
-
-        const topBitMask = Return(1) << (specification.width - 1);
-        const inputWT = specification.reverseBitsIn ? Return(reverseBitsLSB!ubyte(offsetIntoTable, 8)) : Return(offsetIntoTable);
-        Return intermediateValue = inputWT << (specification.width - 8);
-
-        foreach (i; 0 .. 8) {
-            const isTopBitSet = (intermediateValue & topBitMask) != 0;
-            intermediateValue <<= 1;
-
-            if (isTopBitSet)
-                intermediateValue ^= specification.polynomial;
-        }
-
-        if (specification.reverseBitsIn)
-            intermediateValue = reverseBitsLSB(intermediateValue, cast(uint)specification.width);
-
-        return intermediateValue & bitMaskForNumberOfBits!Return(cast(uint)specification.width);
-    }
 }
 
 /// Compatible to CRC32/crc32Of in phobos.

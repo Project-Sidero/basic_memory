@@ -388,7 +388,9 @@ struct Vector(Type, size_t Dimension) {
 
     ///
     unittest {
-        assert((-Vector.one).abs == Vector.one);
+        static if (isSigned!Type) {
+            assert((-Vector.one).abs == Vector.one);
+        }
     }
 
     ///

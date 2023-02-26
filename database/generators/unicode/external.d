@@ -141,7 +141,7 @@ enum BidiClass {
 }
 
 ///
-enum CompatibilityFormattingTag {
+enum CompatibilityFormattingTag : uint {
     None, ///
     Font, ///
     NoBreak, ///

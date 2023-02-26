@@ -1101,7 +1101,7 @@ struct OpTest(Char) {
     void debugPosition(scope Block* cursorBlock, size_t offsetIntoBlock) @trusted {
         version (D_BetterC) {
         } else {
-            debug {
+            version(unittest) debug {
                 try {
                     import std.stdio;
 
@@ -1142,7 +1142,7 @@ struct OpTest(Char) {
     void debugPosition(scope Iterator* iterator) @trusted {
         version (D_BetterC) {
         } else {
-            debug {
+            version(unittest) debug {
                 try {
                     import std.stdio;
 

@@ -105,11 +105,10 @@ export immutable(SpecialCasing) sidero_utf_lut_getSpecialCasing(dchar input, Lan
             break;
     }
 
-    if (got is null)
-        got = cast(void*)sidero_utf_lut_getSimplifiedCasing2(input);
-
-    if (got is null) return typeof(return).init;
-    return *cast(immutable(SpecialCasing*)) got;
+    if (got !is null)
+        return *cast(immutable(SpecialCasing*))got;
+    else
+        return sidero_utf_lut_getSimplifiedCasing(input);
 }
 
 /// Get casing for character in regards to turkic or simplified mapping.
@@ -120,11 +119,11 @@ export immutable(SpecialCasing) sidero_utf_lut_getSpecialCasingTurkic(dchar inpu
         got = cast(void*)sidero_utf_lut_getSpecialCasing2Azeri(input);
     if (got is null)
         got = cast(void*)sidero_utf_lut_getSpecialCasing2None(input);
-    if (got is null)
-        got = cast(void*)sidero_utf_lut_getSimplifiedCasing2(input);
 
-    if (got is null) return typeof(return).init;
-    return *cast(immutable(SpecialCasing*)) got;
+    if (got !is null)
+        return *cast(immutable(SpecialCasing*))got;
+    else
+        return sidero_utf_lut_getSimplifiedCasing(input);
 }
 };
     }

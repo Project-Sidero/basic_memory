@@ -132,7 +132,7 @@ enum BidiClass {
 }
 
 ///
-enum CompatibilityFormattingTag {
+enum CompatibilityFormattingTag : uint {
     None, ///
     Font, ///
     NoBreak, ///
@@ -553,6 +553,9 @@ export extern(C) immutable(dstring) sidero_utf_lut_getDecompositionMappingFracti
 /// Lookup decomposition mapping for character if in compatibility formatting tag Compat.
 export extern(C) immutable(dstring) sidero_utf_lut_getDecompositionMappingCompat(dchar input) @trusted nothrow @nogc pure;
 
+/// Lookup decomposition mapping for character if compatibility.
+export extern(C) immutable(dstring) sidero_utf_lut_getDecompositionMappingCompatibility(dchar input) @trusted nothrow @nogc pure;
+
 /// Lookup length of decomposition mapping for character if in compatibility formatting tag None.
 export extern(C) immutable(ubyte) sidero_utf_lut_lengthOfDecompositionMappingNone(dchar input) @trusted nothrow @nogc pure;
 
@@ -604,23 +607,21 @@ export extern(C) immutable(ubyte) sidero_utf_lut_lengthOfDecompositionMappingFra
 /// Lookup length of decomposition mapping for character if in compatibility formatting tag Compat.
 export extern(C) immutable(ubyte) sidero_utf_lut_lengthOfDecompositionMappingCompat(dchar input) @trusted nothrow @nogc pure;
 
-/// Lookup decomposition mapping for character if compatibility.
-export extern(C) immutable(dstring) sidero_utf_lut_getDecompositionMappingCompatibility(dchar input) @trusted nothrow @nogc pure;
-
 /// Lookup length of decomposition mapping for character if compatibility.
 export extern(C) immutable(ubyte) sidero_utf_lut_lengthOfDecompositionMappingCompatibility(dchar input) @trusted nothrow @nogc pure;
 
 /// Get decomposition map for character.
-/// Returns: null if unchanged.
+/// Returns: None for tag if unchanged.
 export immutable(DecompositionMapping) sidero_utf_lut_getDecompositionMap(dchar input) @trusted nothrow @nogc pure {
-    auto got = sidero_utf_lut_getDecompositionMap2(input);
-    if (got is null) return typeof(return).init;
-    return *cast(immutable(DecompositionMapping*)) got;
+    DecompositionMapping ret;
+    sidero_utf_lut_getDecompositionMap2(input, &ret);
+    return cast(immutable)ret;
 }
-export extern(C) immutable(void*) sidero_utf_lut_getDecompositionMap2(dchar input) @trusted nothrow @nogc pure;
+export extern(C) void sidero_utf_lut_getDecompositionMap2(dchar input, void*) @trusted nothrow @nogc pure;
 
-/// Get length of fully decomposed for character.
-export extern(C) immutable(size_t) sidero_utf_lut_lengthOfFullyDecomposed(dchar input) @trusted nothrow @nogc pure;
+/// Lookup CCC for character.
+/// Returns: 0 if not set.
+export extern(C) immutable(ubyte) sidero_utf_lut_getCCC(dchar input) @trusted nothrow @nogc pure;
 
 /// Get composition for character pair.
 /// Returns: dchar.init if not set.
@@ -641,6 +642,18 @@ export dchar sidero_utf_lut_getCompositionCompatibility(dchar L, dchar C) @trust
     return sidero_utf_lut_getCompositionCompatibility2(temp);
 }
 export extern(C) immutable(dchar) sidero_utf_lut_getCompositionCompatibility2(ulong input) @trusted nothrow @nogc pure;
+
+/// Get simplified casing for character.
+/// Returns: non-null for a given entry if changed from input character.
+export immutable(SpecialCasing) sidero_utf_lut_getSimplifiedCasing(dchar input) @trusted nothrow @nogc pure {
+    SpecialCasing ret;
+    sidero_utf_lut_getSimplifiedCasing2(input, &ret);
+    return cast(immutable)ret;
+}
+export extern(C) void sidero_utf_lut_getSimplifiedCasing2(dchar input, void*) @trusted nothrow @nogc pure;
+
+/// Get length of fully decomposed for character.
+export extern(C) immutable(size_t) sidero_utf_lut_lengthOfFullyDecomposed(dchar input) @trusted nothrow @nogc pure;
 
 /// Lookup decomposition mapping for character if canonical.
 alias sidero_utf_lut_getDecompositionMappingCanonical = sidero_utf_lut_getDecompositionMappingNone;
@@ -728,22 +741,9 @@ export ubyte sidero_utf_lut_lengthOfDecompositionMapping(dchar input, Compatibil
     }
 }
 
-/// Lookup CCC for character.
-/// Returns: 0 if not set.
-export extern(C) immutable(ubyte) sidero_utf_lut_getCCC(dchar input) @trusted nothrow @nogc pure;
-
 /// Lookup numeric numerator/denominator for character.
 /// Returns: null if not set.
 export extern(C) immutable(long[]) sidero_utf_lut_getNumeric(dchar input) @trusted nothrow @nogc pure;
-
-/// Get simplified casing for character.
-/// Returns: non-null for a given entry if changed from input character.
-export immutable(SpecialCasing) sidero_utf_lut_getSimplifiedCasing(dchar input) @trusted nothrow @nogc pure {
-    auto got = sidero_utf_lut_getSimplifiedCasing2(input);
-    if (got is null) return typeof(return).init;
-    return *cast(immutable(SpecialCasing*)) got;
-}
-export extern(C) immutable(void*) sidero_utf_lut_getSimplifiedCasing2(dchar input) @trusted nothrow @nogc pure;
 
 /// Lookup general category for character.
 export extern(C) immutable(GeneralCategory) sidero_utf_lut_getGeneralCategory(dchar input) @trusted nothrow @nogc pure;
@@ -1034,11 +1034,10 @@ export immutable(SpecialCasing) sidero_utf_lut_getSpecialCasing(dchar input, Lan
             break;
     }
 
-    if (got is null)
-        got = cast(void*)sidero_utf_lut_getSimplifiedCasing2(input);
-
-    if (got is null) return typeof(return).init;
-    return *cast(immutable(SpecialCasing*)) got;
+    if (got !is null)
+        return *cast(immutable(SpecialCasing*))got;
+    else
+        return sidero_utf_lut_getSimplifiedCasing(input);
 }
 
 /// Get casing for character in regards to turkic or simplified mapping.
@@ -1049,11 +1048,11 @@ export immutable(SpecialCasing) sidero_utf_lut_getSpecialCasingTurkic(dchar inpu
         got = cast(void*)sidero_utf_lut_getSpecialCasing2Azeri(input);
     if (got is null)
         got = cast(void*)sidero_utf_lut_getSpecialCasing2None(input);
-    if (got is null)
-        got = cast(void*)sidero_utf_lut_getSimplifiedCasing2(input);
 
-    if (got is null) return typeof(return).init;
-    return *cast(immutable(SpecialCasing*)) got;
+    if (got !is null)
+        return *cast(immutable(SpecialCasing*))got;
+    else
+        return sidero_utf_lut_getSimplifiedCasing(input);
 }
 
 /// Get the Line break class

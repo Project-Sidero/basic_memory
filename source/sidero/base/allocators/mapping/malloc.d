@@ -14,8 +14,6 @@ export:
     Warning: Deallocating using this without keeping track of roots will fail.
  */
 struct Mallocator {
-    import core.memory : pureMalloc, pureFree, pureRealloc;
-
 export:
 
     ///
@@ -70,4 +68,14 @@ export:
         } else
             return false;
     }
+}
+
+private:
+// copied from druntime
+extern (C) pure @system @nogc nothrow
+{
+    pragma(mangle, "malloc") void* pureMalloc(size_t);
+    pragma(mangle, "calloc") void* pureCalloc(size_t nmemb, size_t size);
+    pragma(mangle, "realloc") void* pureRealloc(void* ptr, size_t size);
+    pragma(mangle, "free") void pureFree(void* ptr);
 }

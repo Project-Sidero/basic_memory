@@ -759,28 +759,30 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
     void debugPosition(scope Iterator* iterator = null) scope @trusted {
         version (D_BetterC) {
         } else {
-            import std.stdio;
+            version(unittest) debug {
+                import std.stdio;
 
-            try {
-                debug writeln("refCount: ", nodeList.refCount, " aliveNodes: ", nodeList.aliveNodes, " allNodes: ", nodeList.allNodes);
+                try {
+                    debug writeln("refCount: ", nodeList.refCount, " aliveNodes: ", nodeList.aliveNodes, " allNodes: ", nodeList.allNodes);
 
-                foreach (node; nodeList) {
-                    if (iterator !is null && iterator.forwards.node is node)
-                        debug write(">");
+                    foreach (node; nodeList) {
+                        if (iterator !is null && iterator.forwards.node is node)
+                            debug write(">");
 
-                    debug writef!"0x%X %s=%s %s:%s"(node, node.previous.previous is null ? "" : "$", node.next.next is null ?
-                            "" : "$", node.key, node.value);
+                        debug writef!"0x%X %s=%s %s:%s"(node, node.previous.previous is null ? "" : "$", node.next.next is null ?
+                        "" : "$", node.key, node.value);
 
-                    debug write(" refcount ", node.refCount);
-                    if (node.previousReadyToBeDeleted !is null)
-                        debug writef!" prtbd 0x%X"(node.previousReadyToBeDeleted);
+                        debug write(" refcount ", node.refCount);
+                        if (node.previousReadyToBeDeleted !is null)
+                            debug writef!" prtbd 0x%X"(node.previousReadyToBeDeleted);
+                    }
+
+                    debug writeln;
+
+                    debug stdout.flush;
+                    debug stderr.flush;
+                } catch (Exception) {
                 }
-
-                debug writeln;
-
-                debug stdout.flush;
-                debug stderr.flush;
-            } catch (Exception) {
             }
         }
     }
