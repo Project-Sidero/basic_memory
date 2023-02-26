@@ -134,7 +134,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
 
     @safe nothrow @nogc @hidden:
 
-        invariant () {
+        export invariant () {
             assert(minimumOffsetFromHead <= forwards.offsetFromHead);
             assert(forwards.offsetFromHead <= backwards.offsetFromHead);
             assert(backwards.offsetFromHead <= maximumOffsetFromHead);

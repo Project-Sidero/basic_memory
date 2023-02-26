@@ -81,9 +81,13 @@
                 "-preview=dip1000",
                 "-preview=dip25"
             ],
+            "sourceFiles-windows-dmd": [
+                "msvc_exports.def"
+            ],
             "dflags-windows-ldc": [
                 "--fvisibility=public",
-                "--linkonce-templates"
+                "--linkonce-templates",
+                "--link-internally"
             ],
             "lflags-windows": [
                 "/IGNORE:4217"

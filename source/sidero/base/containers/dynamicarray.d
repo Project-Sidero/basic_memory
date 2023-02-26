@@ -195,12 +195,6 @@ scope nothrow @nogc:
 
 @safe:
 
-    invariant {
-        if (this.state !is null) {
-            assert(!this.state.allocator.isNull);
-        }
-    }
-
     void opAssign(scope DynamicArray other) {
         this.tupleof = other.tupleof;
         other.state = null;

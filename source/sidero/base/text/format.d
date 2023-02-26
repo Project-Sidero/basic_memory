@@ -501,55 +501,95 @@ private @hidden:
                         builder ~= "]";
                 }
 
-                static if (haveToStringPretty!ActualType && !hasUDA!(__traits(getMember, input, "toStringPretty"), PrettyPrintIgnore)) {
-                    size_t offsetForToString = builder.length;
+                bool hadToString;
 
-                    static if (__traits(compiles, builder.toStringPretty(output))) {
-                        input.toStringPretty(builder);
-                    } else static if (__traits(compiles, input.toStringPretty(&builder.put))) {
-                        input.toStringPretty(&builder.put);
-                    } else static if (__traits(compiles, builder ~= input.toStringPretty())) {
-                        builder ~= input.toStringPretty();
-                    }
+                static if (haveToStringPretty!ActualType) {
+                    {
+                        alias Symbols = __traits(getOverloads, ActualType, "toStringPretty");
 
-                    if (builder.length > offsetForToString) {
-                        Builder prior = builder[0 .. offsetForToString], subset = builder[offsetForToString .. $];
+                        static foreach (SymbolId; 0 .. Symbols.length) {
+                            {
+                                alias gotUDAs = Filter!(isDesiredUDA!PrettyPrintIgnore, __traits(getAttributes, Symbols[SymbolId]));
 
-                        if (subset == FQN)
-                            builder.remove(offsetForToString, size_t.max);
-                        else if (subset.startsWith(", ")) {
-                            builder.remove(offsetForToString, 1);
-                            builder.insert(offsetForToString + 1, "->\n"c);
-                        } else if (subset.contains("\n") || subset.length > 40) {
-                            // forty was chosen mostly at random,
-                            // but its half a lot of max line lengths (80) so can't be too bad
-                            builder.insert(offsetForToString, "->\n"c);
-                        } else if (!prior.endsWith("(")) {
-                            builder.insert(offsetForToString, " ->\n"c);
+                                if (!hadToString) {
+                                    static if (gotUDAs.length == 0) {
+                                        size_t offsetForToString = builder.length;
+                                        alias symbol = __traits(child, input, Symbols[SymbolId]);
+
+                                        static if (__traits(compiles, symbol(builder))) {
+                                            symbol(builder);
+                                            hadToString = true;
+                                        } else static if (__traits(compiles, symbol(&builder.put))) {
+                                            symbol(&builder.put);
+                                            hadToString = true;
+                                        } else static if (__traits(compiles, builder ~= symbol())) {
+                                            builder ~= symbol();
+                                            hadToString = true;
+                                        }
+
+                                        if (hadToString && builder.length > offsetForToString) {
+                                            Builder prior = builder[0 .. offsetForToString], subset = builder[offsetForToString .. $];
+
+                                            if (subset == FQN)
+                                                builder.remove(offsetForToString, size_t.max);
+                                            else if (subset.startsWith(", ")) {
+                                                builder.remove(offsetForToString, 1);
+                                                builder.insert(offsetForToString + 1, "->\n"c);
+                                            } else if (subset.contains("\n") || subset.length > 40) {
+                                                // forty was chosen mostly at random,
+                                                // but its half a lot of max line lengths (80) so can't be too bad
+                                                builder.insert(offsetForToString, "->\n"c);
+                                            } else if (!prior.endsWith("(")) {
+                                                builder.insert(offsetForToString, " ->\n"c);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
-                } else static if (haveToString!ActualType && !hasUDA!(__traits(getMember, input, "toString"), PrettyPrintIgnore)) {
-                    size_t offsetForToString = builder.length;
+                }
 
-                    static if (__traits(compiles, input.toString(builder))) {
-                        input.toString(builder);
-                    } else static if (__traits(compiles, input.toString(&builder.put))) {
-                        input.toString(&builder.put);
-                    } else static if (__traits(compiles, builder ~= input.toString())) {
-                        builder ~= input.toString();
-                    }
+                static if (haveToString!ActualType) {
+                    {
+                        alias Symbols = __traits(getOverloads, ActualType, "toString");
 
-                    if (builder.length > offsetForToString) {
-                        Builder prior = builder[0 .. offsetForToString], subset = builder[offsetForToString .. $];
+                        static foreach (SymbolId; 0 .. Symbols.length) {
+                            {
+                                alias gotUDAs = Filter!(isDesiredUDA!PrettyPrintIgnore, __traits(getAttributes, Symbols[SymbolId]));
 
-                        if (subset == FQN) {
-                            builder.remove(offsetForToString, size_t.max);
-                        } else if (subset.contains("\n") || subset.length > 40) {
-                            // forty was chosen mostly at random,
-                            // but its half a lot of max line lengths (80) so can't be too bad
-                            builder.insert(offsetForToString, "->\n"c);
-                        } else if (!prior.endsWith("(")) {
-                            builder.insert(offsetForToString, " ->\n"c);
+                                if (!hadToString) {
+                                    static if (gotUDAs.length == 0) {
+                                        size_t offsetForToString = builder.length;
+                                        alias symbol = __traits(child, input, Symbols[SymbolId]);
+
+                                        static if (__traits(compiles, symbol(builder))) {
+                                            symbol(builder);
+                                            hadToString = true;
+                                        } else static if (__traits(compiles, symbol(&builder.put))) {
+                                            symbol(&builder.put);
+                                            hadToString = true;
+                                        } else static if (__traits(compiles, builder ~= symbol())) {
+                                            builder ~= symbol();
+                                            hadToString = true;
+                                        }
+
+                                        if (hadToString && builder.length > offsetForToString) {
+                                            Builder prior = builder[0 .. offsetForToString], subset = builder[offsetForToString .. $];
+
+                                            if (subset == FQN) {
+                                                builder.remove(offsetForToString, size_t.max);
+                                            } else if (subset.contains("\n") || subset.length > 40) {
+                                                // forty was chosen mostly at random,
+                                                // but its half a lot of max line lengths (80) so can't be too bad
+                                                builder.insert(offsetForToString, "->\n"c);
+                                            } else if (!prior.endsWith("(")) {
+                                                builder.insert(offsetForToString, " ->\n"c);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -849,6 +889,7 @@ private @hidden:
 import sidero.base.allocators;
 import std.traits : isSomeChar, isPointer, isIntegral, isFloatingPoint, Unqual, ForeachType, isBasicType, isIterable,
     isAssociativeArray, isArray, isDynamicArray, FieldNameTuple, hasUDA, KeyType, ValueType, BaseClassesTuple, isCopyable;
+import std.meta : Filter;
 
 Builder escapeImpl(Builder, Char)(return scope Builder builder, Char quote) @trusted nothrow @nogc
         if (isBuilderString!Builder) {
@@ -1632,4 +1673,24 @@ ptrdiff_t indexOf(Char)(const(Char)[] input, Char toFind) if (isSomeChar!Char) {
     }
 
     return -1;
+}
+
+/// originally from std.traits
+template isDesiredUDA(alias attribute) {
+    template isDesiredUDA(alias toCheck) {
+        static if (is(typeof(attribute)) && !__traits(isTemplate, attribute)) {
+            static if (__traits(compiles, toCheck == attribute))
+                enum isDesiredUDA = toCheck == attribute;
+            else
+                enum isDesiredUDA = false;
+        } else static if (is(typeof(toCheck))) {
+            static if (__traits(isTemplate, attribute))
+                enum isDesiredUDA = isInstanceOf!(attribute, typeof(toCheck));
+            else
+                enum isDesiredUDA = is(typeof(toCheck) == attribute);
+        } else static if (__traits(isTemplate, attribute))
+            enum isDesiredUDA = isInstanceOf!(attribute, toCheck);
+        else
+            enum isDesiredUDA = is(toCheck == attribute);
+    }
 }

@@ -5,7 +5,7 @@ import sidero.base.text;
 import sidero.base.encoding.utf;
 import sidero.base.allocators;
 import sidero.base.errors;
-import sidero.base.traits :isUTFReadOnly;
+import sidero.base.traits : isUTFReadOnly;
 import sidero.base.attributes : hidden;
 
 export:
@@ -34,7 +34,7 @@ struct String_UTF32 {
             void[4] forwardBuffer, backwardBuffer;
             void[] forwardItems, backwardItems;
 
-            scope @nogc nothrow:
+        scope @nogc nothrow:
 
             void rc(bool add) @trusted @hidden {
                 if (add)
@@ -43,6 +43,20 @@ struct String_UTF32 {
                     RCAllocator allocator2 = this.allocator;
                     allocator2.dispose(&this);
                 }
+            }
+
+        export:
+
+            ulong toHash() const {
+                assert(0);
+            }
+
+            bool opEquals(scope const Iterator other) const {
+                assert(0);
+            }
+
+            int opCmp(scope const Iterator other) const {
+                assert(0);
             }
         }
     }
@@ -3046,8 +3060,8 @@ private @hidden:
             return ignoreCaseCompareImplSlice(cast(const(char)[])other.literal, allocator, language) == 0;
         }
 
-        bool ignoreCaseEqualsImplReadOnly(Other)(scope Other other,
-                scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.Unknown) if (isUTFReadOnly!Other) {
+        bool ignoreCaseEqualsImplReadOnly(Other)(scope Other other, scope RCAllocator allocator = RCAllocator.init,
+                UnicodeLanguage language = UnicodeLanguage.Unknown) if (isUTFReadOnly!Other) {
             return other.literalEncoding.handle(() {
                 auto actual = cast(const(char)[])other.literal;
                 return ignoreCaseCompareImplSlice(actual, allocator, language);
@@ -3159,8 +3173,8 @@ private @hidden:
             return ignoreCaseCompareImplSlice(cast(const(char)[])other.literal, allocator, language);
         }
 
-        int ignoreCaseCompareImplReadOnly(Other)(scope Other other,
-                scope RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.Unknown) if (isUTFReadOnly!Other) {
+        int ignoreCaseCompareImplReadOnly(Other)(scope Other other, scope RCAllocator allocator = RCAllocator.init,
+                UnicodeLanguage language = UnicodeLanguage.Unknown) if (isUTFReadOnly!Other) {
             return other.literalEncoding.handle(() {
                 auto actual = cast(const(char)[])other.literal;
                 return ignoreCaseCompareImplSlice(actual, allocator, language);

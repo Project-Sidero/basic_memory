@@ -2444,6 +2444,20 @@ private @hidden:
         shared(ptrdiff_t) refCount;
         RCAllocator allocator;
         LiteralType original;
+
+    export @safe nothrow @nogc:
+
+        ulong toHash() scope const {
+            assert(0);
+        }
+
+        bool opEquals(scope const LifeTime other) scope const {
+            assert(0);
+        }
+
+        int opCmp(scope const LifeTime other) scope const {
+            assert(0);
+        }
     }
 
     static struct Iterator {

@@ -670,7 +670,7 @@ private:
         RCAllocator allocator;
         LiteralType literal;
 
-    scope @nogc nothrow:
+    export scope @nogc nothrow:
 
         void rc(bool add) @trusted {
             if (add)

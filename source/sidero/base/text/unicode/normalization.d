@@ -247,13 +247,13 @@ export @safe nothrow @nogc:
             dchar character;
             ubyte ccc;
 
-        @safe nothrow @nogc @hidden:
+        export @safe nothrow @nogc:
 
-            void opAssign(ubyte v) {
+            void opAssign(ubyte v) @hidden {
                 this.ccc = v;
             }
 
-            int opCmp(const ToRotate other) const {
+            int opCmp(scope const ref ToRotate other) scope const {
                 if (this.ccc < other.ccc)
                     return -1;
                 else if (this.ccc > other.ccc)
