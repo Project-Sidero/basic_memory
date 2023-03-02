@@ -34,9 +34,9 @@ struct Matrix(Type, size_t Rows, size_t Columns) {
 
     static {
         ///
-        enum width = Rows;
+        enum width = Columns;
         ///
-        enum height = Columns;
+        enum height = Rows;
 
         ///
         Matrix zero() {
