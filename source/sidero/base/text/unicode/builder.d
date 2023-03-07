@@ -370,7 +370,7 @@ nothrow @safe:
         assert(!stuff.isNull);
 
         stuff = stuff[1 .. 1];
-        assert(stuff.isNull);
+        assert(!stuff.isNull && stuff.length == 0);
     }
 
     ///

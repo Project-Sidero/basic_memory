@@ -253,16 +253,11 @@ scope nothrow @nogc @safe @hidden:
     }
 
     bool isNull() scope @nogc {
-        return this.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
-            assert(state !is null);
-            return state.externalLength(iterator) == 0 || (iterator !is null && iterator.empty);
-        }, (StateIterator.S16 state, StateIterator.I16 iterator) {
-            assert(state !is null);
-            return state.externalLength(iterator) == 0 || (iterator !is null && iterator.empty);
-        }, (StateIterator.S32 state, StateIterator.I32 iterator) {
-            assert(state !is null);
-            return state.externalLength(iterator) == 0 || (iterator !is null && iterator.empty);
-        }, () { return true; });
+        return this.handle((StateIterator.S8 state, StateIterator.I8 iterator) { assert(state !is null); return false; },
+                (StateIterator.S16 state, StateIterator.I16 iterator) { assert(state !is null); return false; },
+                (StateIterator.S32 state, StateIterator.I32 iterator) { assert(state !is null); return false; }, () {
+            return true;
+        });
     }
 
     size_t length() scope @nogc {
