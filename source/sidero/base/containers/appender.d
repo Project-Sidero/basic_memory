@@ -171,7 +171,7 @@ export @safe nothrow @nogc:
     }
 
     ///
-    void opOpAssign(string op : "~")(const(Type) input) scope {
+    void opOpAssign(string op : "~")(scope const(Type)[] input...) scope {
         this.append(input);
     }
 

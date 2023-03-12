@@ -109,8 +109,8 @@ scope nothrow @nogc @safe:
     }
 
     ///
-    ErrorInfo getError() {
-        return this.error__;
+    ErrorInfo getError() const {
+        return cast(ErrorInfo)this.error__;
     }
 
     ///
@@ -331,8 +331,8 @@ scope nothrow @nogc @safe:
     }
 
     ///
-    ErrorInfo getError() {
-        return this.error__;
+    ErrorInfo getError() const {
+        return cast(ErrorInfo)this.error__;
     }
 
     ///
