@@ -77,7 +77,10 @@ Result!size_t decompressDeflate(scope ref BitReader source, scope out Slice!ubyt
             break;
 
         case BTYPE.DynamicHuffmanCodes:
-            readDynamicHuffmanTrees(source, treeState);
+            ErrorInfo error = readDynamicHuffmanTrees(source, treeState);
+            if (error.isSet)
+                return error;
+
             treeState.literalLengthTree = &treeState.dynamicLiteralLengthTree;
             treeState.distanceTree = &treeState.dynamicDistanceTree;
             break;
@@ -261,12 +264,12 @@ void initGlobalTrees() @trusted {
     initTreeLock.unlock;
 }
 
-void getDeflateHuffmanBits(scope const(ubyte)[] lengths, scope void delegate(ushort, size_t, size_t) @safe nothrow @nogc gotValue) {
+ErrorInfo getDeflateHuffmanBits(scope const(ubyte)[] lengths, scope void delegate(ushort, size_t, size_t) @safe nothrow @nogc gotValue) {
     size_t[16] bl_count;
 
     foreach (v; lengths[0 .. lengths.length]) {
         if (v > 15)
-            assert(0);
+            return ErrorInfo(MalformedInputException("Invalid huffman length"));
         bl_count[v]++;
     }
 
@@ -290,6 +293,8 @@ void getDeflateHuffmanBits(scope const(ubyte)[] lengths, scope void delegate(ush
 
         gotValue(cast(ushort)(next_code[length]++), length, offset);
     }
+
+    return ErrorInfo.init;
 }
 
 ErrorInfo readDynamicHuffmanTrees(scope ref BitReader bitReader, scope ref TreeState treeState) @trusted {
@@ -332,7 +337,11 @@ ErrorInfo readDynamicHuffmanTrees(scope ref BitReader bitReader, scope ref TreeS
         bdtcl[offset] = codeLength.get;
     }
 
-    getDeflateHuffmanBits(bdtcl[], &treeState.dynamicLiteralLengthTree.addLeafMSB);
+    {
+        ErrorInfo error = getDeflateHuffmanBits(bdtcl[], &treeState.dynamicLiteralLengthTree.addLeafMSB);
+        if (error.isSet)
+            return error;
+    }
 
     ubyte[288] treeBuffer = void;
     size_t treeBufferOffset;
