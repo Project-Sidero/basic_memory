@@ -3,6 +3,8 @@ import sidero.base.errors;
 
 private alias HMT = HuffManTree!300;
 
+export @safe nothrow @nogc:
+
 ///
 struct HuffManTree(size_t NumberOfLeafs) {
 @safe nothrow @nogc:
@@ -15,6 +17,12 @@ struct HuffManTree(size_t NumberOfLeafs) {
             Node* left, right;
             size_t value, numberOfBits;
             ushort path;
+
+            // only for when building from data
+
+            float cost;
+            Node* nextUnresolved;
+            size_t lowestValue, highestValue;
         }
 
         Node* allocateNode() scope return @trusted {
@@ -45,10 +53,131 @@ export:
 
     @disable this(this);
 
+    /// Given data create a huffman tree, returns the depth for a given leaf value
+    size_t[NumberOfLeafs] buildFromData(scope const(ubyte)[] input) @trusted {
+        clear;
+
+        float[256] frequencies = void;
+        const consumedFromInput = frequencyOfBytes(input, size_t.max, frequencies);
+        if (consumedFromInput == 0)
+            return typeof(return).init;
+
+        size_t numberUnresolved;
+        Node* firstUnresolved;
+
+        foreach (i, frequency; frequencies) {
+            if (frequency < 0)
+                continue;
+            Node* node = &buffer[nextNodeOffset++];
+
+            node.cost = frequency;
+            node.value = i;
+            node.lowestValue = i;
+            node.highestValue = i;
+
+            node.nextUnresolved = firstUnresolved;
+            firstUnresolved = node;
+            numberUnresolved++;
+        }
+
+        const originalNumberUnresolved = numberUnresolved;
+
+        while (numberUnresolved > 1) {
+            Node** currentPointer = &firstUnresolved;
+            Node* lowest1, lowest2;
+
+            while (currentPointer !is null && *currentPointer !is null) {
+                Node* self = *currentPointer, replaces;
+
+                if (lowest1 is null) {
+                    replaces = lowest1;
+                    lowest1 = self;
+                    goto Consumed;
+                } else if (lowest2 is null) {
+                    replaces = lowest2;
+                    lowest2 = self;
+                    goto Consumed;
+                }
+
+                if (lowest2.cost > lowest1.cost && lowest2.cost > self.cost) {
+                    replaces = lowest2;
+                    lowest2 = self;
+                    goto Consumed;
+                } else if (lowest1.cost > self.cost) {
+                    replaces = lowest1;
+                    lowest1 = self;
+                    goto Consumed;
+                }
+
+            NotConsumed:
+                currentPointer = &self.nextUnresolved;
+                continue;
+
+            Consumed:
+                if (replaces !is null) {
+                    replaces.nextUnresolved = self.nextUnresolved;
+                    *currentPointer = replaces;
+                } else
+                    *currentPointer = self.nextUnresolved;
+
+                self.nextUnresolved = null;
+                continue;
+            }
+
+            assert(lowest1 !is null);
+            assert(lowest2 !is null);
+            assert(lowest1 !is lowest2);
+
+            numberUnresolved--;
+            Node* parent = allocateNode();
+            parent.cost = lowest1.cost + lowest2.cost;
+
+            if (lowest1.lowestValue < lowest2.lowestValue) {
+                parent.left = lowest1;
+                parent.right = lowest2;
+                parent.lowestValue = lowest1.lowestValue;
+                parent.highestValue = lowest2.highestValue;
+            } else {
+                parent.left = lowest2;
+                parent.right = lowest1;
+                parent.lowestValue = lowest2.lowestValue;
+                parent.highestValue = lowest1.highestValue;
+            }
+
+            parent.nextUnresolved = firstUnresolved;
+            firstUnresolved = parent;
+        }
+
+        assert(nextNodeOffset > 0);
+        root = firstUnresolved;
+
+        void resolvePath(scope Node* parent, size_t numberOfBits, ushort path) {
+            if (parent is null)
+                return;
+
+            if ((cast(size_t)parent.left | cast(size_t)parent.right) == 0) {
+                parent.path = path;
+                parent.numberOfBits = numberOfBits;
+            } else {
+                path >>= 1;
+                resolvePath(parent.left, numberOfBits + 1, path | 0);
+                resolvePath(parent.right, numberOfBits + 1, path | 1);
+            }
+        }
+
+        resolvePath(root, 0, 0);
+
+        size_t[NumberOfLeafs] ret;
+        foreach(ref node; buffer[0 .. originalNumberUnresolved]) {
+            ret[node.value] = node.numberOfBits;
+        }
+        return ret;
+    }
+
     /// Put your last bit at LSB@0 [0 .. 16] MSB@15
     void addLeafMSB(ushort path, size_t numberOfBits, size_t value) scope @trusted {
-        const shiftLeftToMax = 16 - numberOfBits;
-        uint tempPath = path << shiftLeftToMax;
+        const shiftMSBLeftToMax = 16 - numberOfBits;
+        uint tempPath = path << shiftMSBLeftToMax;
 
         if (root is null)
             root = allocateNode();
@@ -73,7 +202,7 @@ export:
 
     ///
     bool pathForValue(size_t value, out ushort path, out size_t numberOfBits) scope const {
-        foreach(i; 0 .. nextNodeOffset) {
+        foreach (i; 0 .. nextNodeOffset) {
             if (buffer[i].value == value) {
                 path = buffer[i].path;
                 numberOfBits = buffer[i].numberOfBits;
@@ -85,8 +214,8 @@ export:
     }
 
     ///
-    Result!bool lookupValue(scope Result!bool delegate() @safe nothrow @nogc nextBit, scope bool delegate() @safe nothrow @nogc haveMoreBits,
-            out size_t value) scope const @trusted {
+    Result!bool lookupValue(scope Result!bool delegate() @safe nothrow @nogc nextBit,
+            scope bool delegate() @safe nothrow @nogc haveMoreBits, out size_t value) scope const @trusted {
         if (root is null)
             return typeof(return)(false);
 
@@ -131,10 +260,12 @@ export:
                 foreach (i, ref node; buffer[0 .. nextNodeOffset]) {
                     if ((cast(size_t)node.left | cast(size_t)node.right) == 0)
                         ret.formattedWrite!"    N%X[label=\"%s\"];\n"(cast(size_t)&node, node.value);
-                    else if (node.left !is null)
-                        ret.formattedWrite!"    N%X -> N%X[label=0];\n"(cast(size_t)&node, cast(size_t)&node.left);
-                    else if (node.right !is null)
-                        ret.formattedWrite!"    N%X -> N%X[label=1];\n"(cast(size_t)&node, cast(size_t)&node.right);
+                    else {
+                        if (node.left !is null)
+                            ret.formattedWrite!"    N%X -> N%X[label=0];\n"(cast(size_t)&node, cast(size_t)node.left);
+                        if (node.right !is null)
+                            ret.formattedWrite!"    N%X -> N%X[label=1];\n"(cast(size_t)&node, cast(size_t)node.right);
+                    }
                 }
 
                 ret ~= "}\n";
@@ -143,4 +274,49 @@ export:
                 return null;
         }
     }
+}
+
+///
+unittest {
+    HuffManTree!4 tree;
+    auto depths = tree.buildFromData([0, 0, 1, 2, 3, 3, 3]);
+    assert(depths == [2, 3, 3, 1]);
+}
+
+private:
+
+size_t frequencyOfBytes(scope const(ubyte)[] input, size_t limitUniques, out float[256] frequencies) {
+    import sidero.base.math.utils : isClose;
+
+    size_t currentUniques, consumed;
+
+    foreach (ref v; frequencies)
+        v = 0;
+
+    foreach (v; input) {
+        if (frequencies[v] == 0) {
+            if (limitUniques == currentUniques)
+                break;
+            else
+                currentUniques++;
+        }
+
+        frequencies[v] += 1;
+        consumed++;
+    }
+
+    {
+        float minimum = cast(float)size_t.max;
+
+        foreach (ref v; frequencies) {
+            if (isClose(v, 0))
+                v = -1;
+            else if (v < minimum)
+                minimum = v;
+        }
+
+        frequencies[] /= minimum;
+    }
+
+    return consumed;
 }
