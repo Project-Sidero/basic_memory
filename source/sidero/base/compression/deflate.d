@@ -11,6 +11,19 @@ import sidero.base.errors;
 
 export @safe nothrow @nogc:
 
+enum DeflateCompressionRate {
+    None,
+    FixedHuffManTree,
+    DynamicHuffManTree,
+    HashWithFixedHuffManTree,
+    DeepHashWithFixedHuffManTree,
+
+    Fastest = None,
+    Fast = DynamicHuffManTree,
+    Slow = HashWithFixedHuffManTree,
+    Slowest = DeepHashWithFixedHuffManTree,
+}
+
 ///
 Result!size_t decompressDeflate(scope Slice!ubyte source, scope out Slice!ubyte output, RCAllocator allocator = RCAllocator.init) @trusted {
     BitReader bitReader = BitReader(source.unsafeGetLiteral());
@@ -29,9 +42,30 @@ Result!size_t decompressDeflate(scope const(ubyte)[] source, scope out Slice!uby
     return decompressDeflate(bitReader, output, allocator);
 }
 
+///
+Slice!ubyte compressDeflate(scope Slice!ubyte source, DeflateCompressionRate rate, RCAllocator allocator = RCAllocator.init) @trusted {
+    BitReader bitReader = BitReader(source.unsafeGetLiteral());
+    return compressDeflate(bitReader, rate, allocator);
+}
+
+///
+Slice!ubyte compressDeflate(scope DynamicArray!ubyte source, DeflateCompressionRate rate, RCAllocator allocator = RCAllocator.init) @trusted {
+    BitReader bitReader = BitReader(source.unsafeGetLiteral());
+    return compressDeflate(bitReader, rate, allocator);
+}
+
+///
+Slice!ubyte compressDeflate(scope const(ubyte)[] source, DeflateCompressionRate rate, RCAllocator allocator = RCAllocator.init) {
+    BitReader bitReader = BitReader(source);
+    return compressDeflate(bitReader, rate, allocator);
+}
+
 package(sidero.base.compression):
 
 Result!size_t decompressDeflate(scope ref BitReader source, scope out Slice!ubyte output, RCAllocator allocator = RCAllocator.init) @trusted {
+    if (source.lengthOfSource == 0)
+        return typeof(return)(0);
+
     const originallyConsumed = source.consumed;
     initGlobalTrees;
     Appender!ubyte result = Appender!ubyte(allocator);
@@ -40,12 +74,10 @@ Result!size_t decompressDeflate(scope ref BitReader source, scope out Slice!ubyt
     BlockState blockState;
 
     ErrorInfo startNewBlock() @trusted {
-        if (!source.haveMoreBits) {
-            if (!blockState.isLast)
-                return ErrorInfo(MalformedInputException("No final block"));
-            else
-                return ErrorInfo.init;
-        }
+        if (blockState.isLast)
+            return ErrorInfo.init;
+        else if (!source.haveMoreBits)
+            return ErrorInfo(MalformedInputException("No final block"));
 
         {
             auto isLast = source.nextBits(1), btype = source.nextBits(2);
@@ -61,9 +93,7 @@ Result!size_t decompressDeflate(scope ref BitReader source, scope out Slice!ubyt
         final switch (blockState.type) {
         case BTYPE.NoCompression:
             source.ignoreBits;
-
-            auto len = source.nextShort(), nlen = source.nextShort;
-            source.ignoreBits;
+            auto len = source.nextShort, nlen = source.nextShort;
 
             if (!len)
                 return len.getError();
@@ -81,12 +111,12 @@ Result!size_t decompressDeflate(scope ref BitReader source, scope out Slice!ubyt
             if (error.isSet)
                 return error;
 
-            treeState.literalLengthTree = &treeState.dynamicLiteralLengthTree;
+            treeState.literalSymbolTree = &treeState.dynamicLiteralSymbolTree;
             treeState.distanceTree = &treeState.dynamicDistanceTree;
             break;
 
         case BTYPE.FixedHuffmanCodes:
-            treeState.literalLengthTree = &fixedLiteralLengthTree;
+            treeState.literalSymbolTree = &fixedLiteralSymbolTree;
             treeState.distanceTree = &fixedDistanceTree;
             break;
 
@@ -125,7 +155,7 @@ Result!size_t decompressDeflate(scope ref BitReader source, scope out Slice!ubyt
         case BTYPE.FixedHuffmanCodes:
             while (source.haveMoreBits()) {
                 size_t symbol;
-                auto symbolBits = treeState.literalLengthTree.lookupValue(&source.nextBit, &source.haveMoreBits, symbol);
+                auto symbolBits = treeState.literalSymbolTree.lookupValue(&source.nextBit, &source.haveMoreBits, symbol);
                 if (!symbolBits || !symbolBits.get)
                     return typeof(return)(MalformedInputException("Incomplete huffman tree"));
 
@@ -181,15 +211,103 @@ Result!size_t decompressDeflate(scope ref BitReader source, scope out Slice!ubyt
     }
 }
 
+Slice!ubyte compressDeflate(scope ref BitReader source, DeflateCompressionRate compressionRate, RCAllocator allocator = RCAllocator.init) @trusted {
+    import sidero.base.compression.internal.bitwriter;
+
+    enum BlockSizeToWalk = 16 * 1024;
+
+    initGlobalTrees;
+    BitWriter result = BitWriter(Appender!ubyte(allocator));
+
+    void emitBlockHeader(bool isLast, BTYPE type) {
+        ubyte b = cast(ubyte)type;
+
+        result.writeBit(isLast);
+
+        result.writeBit((b & 1) == 1);
+        result.writeBit((b & 2) == 2);
+    }
+
+    void emitSymbol(ushort[2] symbol) {
+        const shiftMSBLeftToMax = 16 - symbol[1];
+        uint tempPath = symbol[0] << shiftMSBLeftToMax;
+
+        foreach (i; 0 .. symbol[1]) {
+            const bit = (tempPath & 0x8000) > 0;
+            tempPath <<= 1;
+            result.writeBit(bit);
+        }
+    }
+
+    for (;;) {
+        const startSourceLength = source.lengthOfSource;
+        if (startSourceLength == 0)
+            break;
+
+        const lengthForBlock = cast(ushort)(startSourceLength > BlockSizeToWalk ? BlockSizeToWalk : startSourceLength);
+        const isLast = lengthForBlock == startSourceLength;
+
+        final switch (compressionRate) {
+        case DeflateCompressionRate.None:
+            // no compression is pretty easy to implement
+
+            emitBlockHeader(isLast, BTYPE.NoCompression);
+            result.flushBits;
+
+            result.writeShorts(lengthForBlock, cast(ushort)~lengthForBlock);
+
+            auto data = source.consumeExact(lengthForBlock);
+            result.writeBytes(data);
+            break;
+
+        case DeflateCompressionRate.FixedHuffManTree:
+            // the goal of this one is to use the fixed huffman trees
+            // probably isn't worth it if lengthOfBlock <= 32
+
+            if (lengthForBlock <= 32)
+                goto case DeflateCompressionRate.None;
+
+            emitBlockHeader(isLast, BTYPE.FixedHuffmanCodes);
+
+            foreach (i; 0 .. lengthForBlock) {
+                auto b = source.nextByte();
+                assert(b);
+                emitSymbol(fixedLiteralSymbolValuePaths[b.get]);
+            }
+
+            // EMIT 256 aka end
+            emitSymbol(fixedLiteralSymbolValuePaths[256]);
+            break;
+
+        case DeflateCompressionRate.DynamicHuffManTree:
+            // build huffman tree, write it out
+            // probably isn't worth it if lengthOfBlock <= 64
+            goto case DeflateCompressionRate.None;
+        case DeflateCompressionRate.HashWithFixedHuffManTree:
+            // build hash chain, but only look for first match
+            // probably isn't worth it if lengthOfBlock <= 32
+            // write out using fixed huffman tree
+            goto case DeflateCompressionRate.None;
+        case DeflateCompressionRate.DeepHashWithFixedHuffManTree:
+            // build hash chain, look for longest match
+            // create a dynamic huffman tree and write that out
+            // probably isn't worth it if lengthOfBlock <= 64
+            goto case DeflateCompressionRate.None;
+        }
+    }
+
+    return result.asReadOnly(allocator);
+}
+
 private:
 import sidero.base.compression.internal.bitreader;
 import sidero.base.parallelism.mutualexclusion;
 
 struct TreeState {
-    HuffManTree!288* literalLengthTree;
+    HuffManTree!288* literalSymbolTree;
     HuffManTree!30* distanceTree;
 
-    HuffManTree!288 dynamicLiteralLengthTree;
+    HuffManTree!288 dynamicLiteralSymbolTree;
     HuffManTree!30 dynamicDistanceTree;
 }
 
@@ -233,8 +351,9 @@ static immutable distanceBase = [
 __gshared {
     TestTestSetLockInline initTreeLock;
     bool isGlobalTreesSetup;
-    HuffManTree!288 fixedLiteralLengthTree;
+    HuffManTree!288 fixedLiteralSymbolTree;
     HuffManTree!30 fixedDistanceTree;
+    ushort[2][288] fixedLiteralSymbolValuePaths;
 }
 
 void initGlobalTrees() @trusted {
@@ -250,7 +369,8 @@ void initGlobalTrees() @trusted {
         literalLength[256 .. 280] = 7;
         literalLength[280 .. 288] = 8;
 
-        getDeflateHuffmanBits(literalLength[], &fixedLiteralLengthTree.addLeafMSB);
+        getDeflateHuffmanBits(literalLength[], &fixedLiteralSymbolTree.addLeafMSB);
+        fixedLiteralSymbolValuePaths = fixedLiteralSymbolTree.pathForValues();
     }
 
     {
@@ -300,7 +420,7 @@ ErrorInfo getDeflateHuffmanBits(scope const(ubyte)[] lengths, scope void delegat
 ErrorInfo readDynamicHuffmanTrees(scope ref BitReader bitReader, scope ref TreeState treeState) @trusted {
     static immutable codeLengthAlphabet = [16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15];
 
-    treeState.dynamicLiteralLengthTree.clear;
+    treeState.dynamicLiteralSymbolTree.clear;
 
     // literal/length alphabet 257 .. 286]
     // distance codes 1 .. 32]
@@ -338,7 +458,7 @@ ErrorInfo readDynamicHuffmanTrees(scope ref BitReader bitReader, scope ref TreeS
     }
 
     {
-        ErrorInfo error = getDeflateHuffmanBits(bdtcl[], &treeState.dynamicLiteralLengthTree.addLeafMSB);
+        ErrorInfo error = getDeflateHuffmanBits(bdtcl[], &treeState.dynamicLiteralSymbolTree.addLeafMSB);
         if (error.isSet)
             return error;
     }
@@ -349,7 +469,7 @@ ErrorInfo readDynamicHuffmanTrees(scope ref BitReader bitReader, scope ref TreeS
     while (treeBufferOffset < hdist + hlit) {
         size_t symbol;
 
-        auto check = treeState.dynamicLiteralLengthTree.lookupValue(&bitReader.nextBit, &bitReader.haveMoreBits, symbol);
+        auto check = treeState.dynamicLiteralSymbolTree.lookupValue(&bitReader.nextBit, &bitReader.haveMoreBits, symbol);
         if (!check || !check.get)
             return ErrorInfo(MalformedInputException("Incorrect huffman tree"));
 
@@ -391,10 +511,10 @@ ErrorInfo readDynamicHuffmanTrees(scope ref BitReader bitReader, scope ref TreeS
         }
     }
 
-    treeState.dynamicLiteralLengthTree.clear;
+    treeState.dynamicLiteralSymbolTree.clear;
     treeState.dynamicDistanceTree.clear;
 
-    getDeflateHuffmanBits(treeBuffer[0 .. hlit], &treeState.dynamicLiteralLengthTree.addLeafMSB);
+    getDeflateHuffmanBits(treeBuffer[0 .. hlit], &treeState.dynamicLiteralSymbolTree.addLeafMSB);
     getDeflateHuffmanBits(treeBuffer[hlit .. hlit + hdist], &treeState.dynamicDistanceTree.addLeafMSB);
     return typeof(return).init;
 }
@@ -456,4 +576,32 @@ ErrorInfo readDynamicHuffmanTrees(scope ref BitReader bitReader, scope ref TreeS
     assert(!test([13, 192, 1, 9, 0, 0, 0, 128, 32, 250, 127, 218, 108, 0], null)); // dynamic huffman
     assert(!test([13, 192, 1, 9, 0, 0, 0, 128, 32, 250, 127, 218, 236, 0], null)); // dynamic huffman
     assert(!test([13, 192, 1, 9, 0, 0, 0, 128, 160, 254, 175, 54, 26, 0, 0], null)); // dynamic huffman
+}
+
+@trusted unittest {
+    bool test(ubyte[] toCompress, DeflateCompressionRate rate) @trusted {
+        Slice!ubyte compressed, decompressed;
+
+        compressed = compressDeflate(toCompress, rate);
+        if (compressed.length == 0)
+            return false;
+
+        auto consumed = decompressDeflate(compressed, decompressed);
+        if (!consumed || consumed.get != compressed.length || decompressed.length != toCompress.length)
+            return false;
+
+        size_t offset;
+
+        foreach (ubyte v; decompressed) {
+            if (offset >= toCompress.length || toCompress[offset++] != v)
+                return false;
+        }
+
+        return true;
+    }
+
+    static BigText = cast(ubyte[])"Lorem Ipsum is simply dummy text of the printing and typesetting industry.";
+
+    assert(test(BigText, DeflateCompressionRate.None));
+    assert(test(BigText, DeflateCompressionRate.FixedHuffManTree));
 }

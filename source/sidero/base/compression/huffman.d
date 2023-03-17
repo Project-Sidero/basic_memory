@@ -168,7 +168,7 @@ export:
         resolvePath(root, 0, 0);
 
         size_t[NumberOfLeafs] ret;
-        foreach(ref node; buffer[0 .. originalNumberUnresolved]) {
+        foreach (ref node; buffer[0 .. originalNumberUnresolved]) {
             ret[node.value] = node.numberOfBits;
         }
         return ret;
@@ -184,7 +184,7 @@ export:
         Node* parent = root;
 
         foreach (i; 0 .. numberOfBits) {
-            immutable bool bit = (tempPath & 0x8000) > 0;
+            const bit = (tempPath & 0x8000) > 0;
             tempPath <<= 1;
             parent = transverseAddNode(parent, bit);
         }
@@ -211,6 +211,21 @@ export:
         }
 
         return false;
+    }
+
+    /// Get all paths & number of bits for each leaf
+    ushort[2][NumberOfLeafs] pathForValues() scope const @trusted {
+        ushort[2][NumberOfLeafs] ret = void;
+
+        foreach (ref v; ret)
+            v[1] = 0;
+
+        foreach (ref node; buffer[0 .. nextNodeOffset]) {
+            if ((cast(size_t)node.left | cast(size_t)node.right) == 0 && ret[node.value][1] == 0)
+                ret[node.value] = [cast(ushort)node.path, cast(ushort)node.numberOfBits];
+        }
+
+        return ret;
     }
 
     ///

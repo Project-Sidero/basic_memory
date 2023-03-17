@@ -20,6 +20,10 @@ export:
 
     @disable this(this);
 
+    size_t lengthOfSource() scope const {
+        return source.length + nextSource.length;
+    }
+
     const(ubyte)[] consumeExact(size_t amount) scope @trusted {
         checkIfEmpty;
         if (source.length < amount)

@@ -1,3 +1,4 @@
+///
 module sidero.base.compression.zlib;
 import sidero.base.containers.readonlyslice;
 import sidero.base.containers.dynamicarray;
