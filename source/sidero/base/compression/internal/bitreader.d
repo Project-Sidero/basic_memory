@@ -24,6 +24,10 @@ export:
         return source.length + nextSource.length;
     }
 
+    size_t bitsRead() scope const {
+        return (consumed * 8) - bufferByteBitsLeft;
+    }
+
     const(ubyte)[] consumeExact(size_t amount) scope @trusted {
         checkIfEmpty;
         if (source.length < amount)

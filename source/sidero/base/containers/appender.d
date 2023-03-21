@@ -160,8 +160,7 @@ export @safe nothrow @nogc:
             return typeof(return)(error);
 
         Block* current = cast(Block*)head;
-
-        while (current !is null && index > current.used) {
+        while (current !is null && index >= current.used) {
             index -= current.used;
             current = current.next;
         }

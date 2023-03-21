@@ -111,12 +111,12 @@ Result!size_t decompressDeflate(scope ref BitReader source, scope out Slice!ubyt
             if (error.isSet)
                 return error;
 
-            treeState.literalSymbolTree = &treeState.dynamicLiteralSymbolTree;
+            treeState.symbolTree = &treeState.dynamicSymbolTree;
             treeState.distanceTree = &treeState.dynamicDistanceTree;
             break;
 
         case BTYPE.FixedHuffmanCodes:
-            treeState.literalSymbolTree = &fixedLiteralSymbolTree;
+            treeState.symbolTree = &fixedLiteralSymbolTree;
             treeState.distanceTree = &fixedDistanceTree;
             break;
 
@@ -155,7 +155,7 @@ Result!size_t decompressDeflate(scope ref BitReader source, scope out Slice!ubyt
         case BTYPE.FixedHuffmanCodes:
             while (source.haveMoreBits()) {
                 size_t symbol;
-                auto symbolBits = treeState.literalSymbolTree.lookupValue(&source.nextBit, &source.haveMoreBits, symbol);
+                auto symbolBits = treeState.symbolTree.lookupValue(&source.nextBit, &source.haveMoreBits, symbol);
                 if (!symbolBits || !symbolBits.get)
                     return typeof(return)(MalformedInputException("Incomplete huffman tree"));
 
@@ -164,7 +164,7 @@ Result!size_t decompressDeflate(scope ref BitReader source, scope out Slice!ubyt
                 } else if (symbol == 256) {
                     blockState.complete = true;
                     break;
-                } else if (symbol < 285) {
+                } else if (symbol < 286) {
                     symbol -= 257;
 
                     auto lengthBits = source.nextBits(lengthExtraBits[symbol]);
@@ -185,6 +185,9 @@ Result!size_t decompressDeflate(scope ref BitReader source, scope out Slice!ubyt
                     assert(distance > 0);
 
                     foreach (offset; 0 .. length) {
+                        if (result.length < distance)
+                            return typeof(return)(MalformedInputException("Not enough decompressed data given distance lookup value"));
+
                         auto temp = result[-cast(ptrdiff_t)distance];
                         if (!temp)
                             return typeof(return)(temp.getError());
@@ -203,12 +206,13 @@ Result!size_t decompressDeflate(scope ref BitReader source, scope out Slice!ubyt
 
     if (source.consumed == originallyConsumed)
         return typeof(return)(0);
-    else if (blockState.complete && blockState.isLast) {
+    else if (!blockState.isLast)
+        return typeof(return)(MalformedInputException("Incomplete block stream, no final block"));
+    else if (blockState.complete) {
         output = result.asReadOnly(allocator);
         return typeof(return)(source.consumed - originallyConsumed);
-    } else {
-        return typeof(return)(MalformedInputException("Incomplete block stream, no final block"));
-    }
+    } else
+        return typeof(return)(MalformedInputException("Incomplete block stream"));
 }
 
 Slice!ubyte compressDeflate(scope ref BitReader source, DeflateCompressionRate compressionRate, RCAllocator allocator = RCAllocator.init) @trusted {
@@ -223,19 +227,96 @@ Slice!ubyte compressDeflate(scope ref BitReader source, DeflateCompressionRate c
         ubyte b = cast(ubyte)type;
 
         result.writeBit(isLast);
-
         result.writeBit((b & 1) == 1);
         result.writeBit((b & 2) == 2);
     }
 
     void emitSymbol(ushort[2] symbol) {
+        assert(symbol[1] > 0);
+
+        uint tempPath = symbol[0];
+        foreach (i; 0 .. symbol[1]) {
+            const bit = (tempPath & 1) == 1;
+            tempPath >>= 1;
+            result.writeBit(bit);
+        }
+    }
+
+    void emitSymbolMSB(ushort[2] symbol) {
         const shiftMSBLeftToMax = 16 - symbol[1];
         uint tempPath = symbol[0] << shiftMSBLeftToMax;
+        assert(symbol[1] > 0);
 
         foreach (i; 0 .. symbol[1]) {
             const bit = (tempPath & 0x8000) > 0;
             tempPath <<= 1;
             result.writeBit(bit);
+        }
+    }
+
+    void emitHuffManTree(ushort[288] symbolDepths, scope ushort[] distanceDepths) {
+        static immutable codeLengthAlphabet = [16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15];
+
+        ushort hlit = 29, hdist, hclen;
+
+        {
+            // HLIT - 257 as 5 bits, number of non-zero in depths
+            // its ok for HLIT to be zero here.
+
+            foreach_reverse (depth; symbolDepths[$ - 31 .. $ - 2]) {
+                if (depth != 0)
+                    break;
+                hlit--;
+            }
+
+            emitSymbol([hlit, 5]);
+        }
+
+        {
+            // HDIST - 1 as 5 bits
+            if (distanceDepths.length > 0)
+                hdist = cast(ushort)(distanceDepths.length - 1);
+            emitSymbol([cast(ushort)hdist, 5]);
+        }
+
+        ushort[2][19] symbolsForDepths;
+
+        {
+            ushort[1] tempZero = [0];
+            HuffManTree!19 tree;
+
+            auto depthsOfAnySymbol = tree.buildFromData(symbolDepths[], distanceDepths.length > 0 ? distanceDepths : tempZero[]);
+
+            // The huffman tree won't be setup in the right order for DEFLATE,
+            //  so we need to recreate it but with our guarantees.
+            tree.clear;
+            ErrorInfo error = getDeflateHuffmanBits(depthsOfAnySymbol, &tree.addLeafMSB);
+            assert(!error.isSet);
+            symbolsForDepths = tree.pathForValues();
+
+            //HCLEN - 4 as 4 bits
+            hclen = 19 - 4; // stuff it, we are not compressing this
+            emitSymbol([hclen, 4]);
+
+            foreach (alphabet; codeLengthAlphabet) {
+                emitSymbol([depthsOfAnySymbol[alphabet], 3]);
+            }
+        }
+
+        {
+            // symbol + distance
+            foreach (depth; symbolDepths[0 .. hlit + 257]) {
+                emitSymbolMSB(symbolsForDepths[depth]);
+            }
+
+            if (distanceDepths.length == 0) {
+                // emit as length 1, for value 0
+                emitSymbolMSB(symbolsForDepths[0]);
+            } else {
+                foreach (depth; distanceDepths) {
+                    emitSymbolMSB(symbolsForDepths[depth]);
+                }
+            }
         }
     }
 
@@ -268,21 +349,53 @@ Slice!ubyte compressDeflate(scope ref BitReader source, DeflateCompressionRate c
                 goto case DeflateCompressionRate.None;
 
             emitBlockHeader(isLast, BTYPE.FixedHuffmanCodes);
+            auto toCompress = source.consumeExact(lengthForBlock);
+            assert(toCompress.length == lengthForBlock);
 
             foreach (i; 0 .. lengthForBlock) {
-                auto b = source.nextByte();
-                assert(b);
-                emitSymbol(fixedLiteralSymbolValuePaths[b.get]);
+                emitSymbolMSB(fixedLiteralSymbolValuePaths[toCompress[i]]);
             }
 
             // EMIT 256 aka end
-            emitSymbol(fixedLiteralSymbolValuePaths[256]);
+            emitSymbolMSB(fixedLiteralSymbolValuePaths[256]);
             break;
 
         case DeflateCompressionRate.DynamicHuffManTree:
             // build huffman tree, write it out
             // probably isn't worth it if lengthOfBlock <= 64
-            goto case DeflateCompressionRate.None;
+            // so we'll swap over to fixed huffman tree
+
+            if (lengthForBlock <= 64)
+                goto case DeflateCompressionRate.FixedHuffManTree;
+
+            emitBlockHeader(isLast, BTYPE.DynamicHuffmanCodes);
+            auto toCompress = source.consumeExact(lengthForBlock);
+            assert(toCompress.length == lengthForBlock);
+
+            HuffManTree!288 symbolTree;
+            ushort[2][288] symbolValuePaths = void;
+
+            {
+                auto symbolDepths = symbolTree.buildFromData(toCompress, 256);
+
+                // The huffman tree won't be setup in the right order for DEFLATE,
+                //  so we need to recreate it but with our guarantees.
+                symbolTree.clear;
+                ErrorInfo error = getDeflateHuffmanBits(symbolDepths, &symbolTree.addLeafMSB);
+                assert(!error.isSet);
+
+                emitHuffManTree(symbolDepths, null);
+                symbolValuePaths = symbolTree.pathForValues();
+            }
+
+            foreach (i; 0 .. lengthForBlock) {
+                emitSymbolMSB(symbolValuePaths[toCompress[i]]);
+            }
+
+            // EMIT 256 aka end
+            emitSymbolMSB(symbolValuePaths[256]);
+            break;
+
         case DeflateCompressionRate.HashWithFixedHuffManTree:
             // build hash chain, but only look for first match
             // probably isn't worth it if lengthOfBlock <= 32
@@ -304,10 +417,10 @@ import sidero.base.compression.internal.bitreader;
 import sidero.base.parallelism.mutualexclusion;
 
 struct TreeState {
-    HuffManTree!288* literalSymbolTree;
+    HuffManTree!288* symbolTree;
     HuffManTree!30* distanceTree;
 
-    HuffManTree!288 dynamicLiteralSymbolTree;
+    HuffManTree!288 dynamicSymbolTree;
     HuffManTree!30 dynamicDistanceTree;
 }
 
@@ -384,7 +497,8 @@ void initGlobalTrees() @trusted {
     initTreeLock.unlock;
 }
 
-ErrorInfo getDeflateHuffmanBits(scope const(ubyte)[] lengths, scope void delegate(ushort, size_t, size_t) @safe nothrow @nogc gotValue) {
+ErrorInfo getDeflateHuffmanBits(DepthType)(scope const(DepthType)[] lengths, scope void delegate(ushort, size_t,
+        size_t) @safe nothrow @nogc gotValue) {
     size_t[16] bl_count;
 
     foreach (v; lengths[0 .. lengths.length]) {
@@ -417,16 +531,29 @@ ErrorInfo getDeflateHuffmanBits(scope const(ubyte)[] lengths, scope void delegat
     return ErrorInfo.init;
 }
 
+unittest {
+    int counter;
+
+    ushort[8] expectedCodes = [2, 3, 4, 5, 6, 0, 14, 15];
+
+    void handle(ushort code, size_t length, size_t offset) {
+        assert(expectedCodes[offset] == code);
+    }
+
+    auto error = getDeflateHuffmanBits([3, 3, 3, 3, 3, 2, 4, 4], &handle);
+}
+
 ErrorInfo readDynamicHuffmanTrees(scope ref BitReader bitReader, scope ref TreeState treeState) @trusted {
     static immutable codeLengthAlphabet = [16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15];
 
-    treeState.dynamicLiteralSymbolTree.clear;
+    treeState.dynamicSymbolTree.clear;
 
     // literal/length alphabet 257 .. 286]
     // distance codes 1 .. 32]
     // code lengths 4 .. 19]
     int hlit, hdist, hclen;
     ubyte[19] bdtcl = void;
+    HuffManTree!19 codeLengthTree;
 
     {
         Result!ubyte error;
@@ -447,18 +574,18 @@ ErrorInfo readDynamicHuffmanTrees(scope ref BitReader bitReader, scope ref TreeS
         hclen = error.get + 4;
     }
 
-    foreach (i; 0 .. hclen) {
-        // 0 .. 7]
-        Result!ubyte codeLength = bitReader.nextBits(3);
-        if (!codeLength)
-            return codeLength.getError();
-
-        const offset = codeLengthAlphabet[i];
-        bdtcl[offset] = codeLength.get;
-    }
-
     {
-        ErrorInfo error = getDeflateHuffmanBits(bdtcl[], &treeState.dynamicLiteralSymbolTree.addLeafMSB);
+        foreach (i; 0 .. hclen) {
+            // 0 .. 7]
+            Result!ubyte codeLength = bitReader.nextBits(3);
+            if (!codeLength)
+                return codeLength.getError();
+
+            const offset = codeLengthAlphabet[i];
+            bdtcl[offset] = codeLength.get;
+        }
+
+        ErrorInfo error = getDeflateHuffmanBits(bdtcl[], &codeLengthTree.addLeafMSB);
         if (error.isSet)
             return error;
     }
@@ -466,10 +593,10 @@ ErrorInfo readDynamicHuffmanTrees(scope ref BitReader bitReader, scope ref TreeS
     ubyte[288] treeBuffer = void;
     size_t treeBufferOffset;
 
-    while (treeBufferOffset < hdist + hlit) {
+    while (treeBufferOffset < hlit + hdist) {
         size_t symbol;
 
-        auto check = treeState.dynamicLiteralSymbolTree.lookupValue(&bitReader.nextBit, &bitReader.haveMoreBits, symbol);
+        auto check = codeLengthTree.lookupValue(&bitReader.nextBit, &bitReader.haveMoreBits, symbol);
         if (!check || !check.get)
             return ErrorInfo(MalformedInputException("Incorrect huffman tree"));
 
@@ -507,14 +634,14 @@ ErrorInfo readDynamicHuffmanTrees(scope ref BitReader bitReader, scope ref TreeS
             break;
 
         default:
-            return ErrorInfo(MalformedInputException("Incorrect huffman tree"));
+            return ErrorInfo(MalformedInputException("Incorrect huffman tree, OOB"));
         }
     }
 
-    treeState.dynamicLiteralSymbolTree.clear;
+    treeState.dynamicSymbolTree.clear;
     treeState.dynamicDistanceTree.clear;
 
-    getDeflateHuffmanBits(treeBuffer[0 .. hlit], &treeState.dynamicLiteralSymbolTree.addLeafMSB);
+    getDeflateHuffmanBits(treeBuffer[0 .. hlit], &treeState.dynamicSymbolTree.addLeafMSB);
     getDeflateHuffmanBits(treeBuffer[hlit .. hlit + hdist], &treeState.dynamicDistanceTree.addLeafMSB);
     return typeof(return).init;
 }
@@ -604,4 +731,5 @@ ErrorInfo readDynamicHuffmanTrees(scope ref BitReader bitReader, scope ref TreeS
 
     assert(test(BigText, DeflateCompressionRate.None));
     assert(test(BigText, DeflateCompressionRate.FixedHuffManTree));
+    assert(test(BigText, DeflateCompressionRate.DynamicHuffManTree));
 }

@@ -13,9 +13,12 @@ struct BitWriter {
 
 export:
 
+    size_t bitsWritten() scope const {
+        return bufferByteBits + (output.length * 8);
+    }
+
     void flushBits() scope {
         if (bufferByteBits > 0) {
-            bufferByte >>= 8 - bufferByteBits;
             output ~= bufferByte;
 
             bufferByteBits = 0;
@@ -24,8 +27,7 @@ export:
     }
 
     void writeBit(bool bit) scope {
-        bufferByte >>= 1;
-        bufferByte |= bit << 7;
+        bufferByte |= bit << bufferByteBits;
 
         if (bufferByteBits++ == 7)
             flushBits;
