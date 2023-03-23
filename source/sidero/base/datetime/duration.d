@@ -14,7 +14,7 @@ struct Duration {
     }
 
     ///
-    static immutable string DefaultFormat = "a";
+    static immutable string DefaultFormat = "a", HumanDeltaFormat = "D";
 
 export @safe nothrow @nogc:
 
@@ -160,27 +160,27 @@ export @safe nothrow @nogc:
         this.format(sink, DefaultFormat);
     }
 
-    ///
+    /// Supports R(sign +/-), r(sign +), d(ays), h(ours), m(inutes), s(econds), i(milliseconds), u(microseconds), n(anoseconds), a(daptive), Human D(elta)
     StringBuilder_UTF8 format(FormatString)(scope FormatString specification) scope const if (isSomeString!FormatString) {
         StringBuilder_UTF8 ret;
         this.format(ret, specification);
         return ret;
     }
 
-    ///
+    /// Ditto
     StringBuilder_UTF8 format(FormatChar)(scope String_UTF!FormatChar specification) scope const {
         StringBuilder_UTF8 ret;
         this.format(ret, specification);
         return ret;
     }
 
-    ///
+    /// Ditto
     void format(Builder, FormatString)(scope ref Builder builder, scope FormatString specification) scope const @trusted
             if (isBuilderString!Builder && isSomeString!FormatString) {
         this.format(builder, String_UTF!(Builder.Char)(specification));
     }
 
-    /// Supports R(sign +/-), r(sign +), d(ays), h(ours), m(inutes), s(econds), i(milliseconds), u(microseconds), n(anoseconds), a(daptive)
+    /// Ditto
     void format(Builder, Format)(scope ref Builder builder, scope Format specification) scope const @trusted
             if (isBuilderString!Builder && isReadOnlyString!Format) {
         import sidero.base.allocators;
@@ -324,11 +324,60 @@ export @safe nothrow @nogc:
             builder.formattedWrite("%s", nanoSecs < 0 ? -nanoSecs : nanoSecs);
             break;
 
+        case 'D':
+            const years = cast(long)(this.days_ / 365.25);
+
+            if (years != 0) {
+                if (this.days_ < 0)
+                    builder.formattedWrite("%s years ago", -years);
+                else
+                    builder.formattedWrite("in %s years", years);
+            } else if (this.days_ != 0) {
+                if (this.days_ < 0)
+                    builder.formattedWrite("%s days ago", -this.days_);
+                else
+                    builder.formattedWrite("in %s days", this.days_);
+            } else {
+                auto hours = this.hours;
+                auto minutes = this.minutes;
+
+                if (hours != 0) {
+                    if (this.nanoSeconds_ < 0)
+                        builder.formattedWrite("%s hours ago", -hours);
+                    else
+                        builder.formattedWrite("in %s hours", hours);
+                } else if (minutes != 0) {
+                    if (this.nanoSeconds_ < 0)
+                        builder.formattedWrite("%s minutes ago", -minutes);
+                    else
+                        builder.formattedWrite("in %s minutes", minutes);
+                } else if (this.nanoSeconds_ < 0) {
+                    builder ~= "less than a minute ago";
+                } else {
+                    builder ~= "in less than a minute";
+                }
+            }
+            break;
+
         default:
             return false;
         }
 
         return true;
+    }
+
+    ///
+    unittest {
+        assert(.days(2922).format(HumanDeltaFormat) == "in 8 years");
+        assert(.days(-1461).format(HumanDeltaFormat) == "4 years ago");
+        assert(.days(8L).format(HumanDeltaFormat) == "in 8 days");
+        assert(.days(-5L).format(HumanDeltaFormat) == "5 days ago");
+        assert(.hours(3).format(HumanDeltaFormat) == "in 3 hours");
+        assert(.hours(-2).format(HumanDeltaFormat) == "2 hours ago");
+        assert(.minutes(5).format(HumanDeltaFormat) == "in 5 minutes");
+        assert(.minutes(-6).format(HumanDeltaFormat) == "6 minutes ago");
+        assert(.seconds(32).format(HumanDeltaFormat) == "in less than a minute");
+        assert(.seconds(-21).format(HumanDeltaFormat) == "less than a minute ago");
     }
 
     ///
