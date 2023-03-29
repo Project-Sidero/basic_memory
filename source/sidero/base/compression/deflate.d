@@ -58,19 +58,22 @@ Result!size_t decompressDeflate(scope const(ubyte)[] source, scope out Slice!uby
 }
 
 ///
-Slice!ubyte compressDeflate(scope Slice!ubyte source, DeflateCompressionRate rate, RCAllocator allocator = RCAllocator.init) @trusted {
+Slice!ubyte compressDeflate(scope Slice!ubyte source, DeflateCompressionRate rate = DeflateCompressionRate.Default,
+        RCAllocator allocator = RCAllocator.init) @trusted {
     BitReader bitReader = BitReader(source.unsafeGetLiteral());
     return compressDeflate(bitReader, rate, allocator);
 }
 
 ///
-Slice!ubyte compressDeflate(scope DynamicArray!ubyte source, DeflateCompressionRate rate, RCAllocator allocator = RCAllocator.init) @trusted {
+Slice!ubyte compressDeflate(scope DynamicArray!ubyte source, DeflateCompressionRate rate = DeflateCompressionRate.Default,
+        RCAllocator allocator = RCAllocator.init) @trusted {
     BitReader bitReader = BitReader(source.unsafeGetLiteral());
     return compressDeflate(bitReader, rate, allocator);
 }
 
 ///
-Slice!ubyte compressDeflate(scope const(ubyte)[] source, DeflateCompressionRate rate, RCAllocator allocator = RCAllocator.init) {
+Slice!ubyte compressDeflate(scope const(ubyte)[] source, DeflateCompressionRate rate = DeflateCompressionRate.Default,
+        RCAllocator allocator = RCAllocator.init) {
     BitReader bitReader = BitReader(source);
     return compressDeflate(bitReader, rate, allocator);
 }
