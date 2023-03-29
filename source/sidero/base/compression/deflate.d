@@ -42,19 +42,22 @@ enum DeflateCompressionRate {
 ///
 Result!size_t decompressDeflate(scope Slice!ubyte source, scope out Slice!ubyte output, RCAllocator allocator = RCAllocator.init) @trusted {
     BitReader bitReader = BitReader(source.unsafeGetLiteral());
-    return decompressDeflate(bitReader, output, allocator);
+    size_t amountInSecondBuffer;
+    return decompressDeflate(bitReader, output, amountInSecondBuffer, allocator);
 }
 
 ///
 Result!size_t decompressDeflate(scope DynamicArray!ubyte source, scope out Slice!ubyte output, RCAllocator allocator = RCAllocator.init) @trusted {
     BitReader bitReader = BitReader(source.unsafeGetLiteral());
-    return decompressDeflate(bitReader, output, allocator);
+    size_t amountInSecondBuffer;
+    return decompressDeflate(bitReader, output, amountInSecondBuffer, allocator);
 }
 
 ///
 Result!size_t decompressDeflate(scope const(ubyte)[] source, scope out Slice!ubyte output, RCAllocator allocator = RCAllocator.init) {
     BitReader bitReader = BitReader(source);
-    return decompressDeflate(bitReader, output, allocator);
+    size_t amountInSecondBuffer;
+    return decompressDeflate(bitReader, output, amountInSecondBuffer, allocator);
 }
 
 ///
@@ -80,7 +83,7 @@ Slice!ubyte compressDeflate(scope const(ubyte)[] source, DeflateCompressionRate 
 
 package(sidero.base.compression):
 
-Result!size_t decompressDeflate(scope ref BitReader source, scope out Slice!ubyte output, RCAllocator allocator = RCAllocator.init) @trusted {
+Result!size_t decompressDeflate(scope ref BitReader source, scope out Slice!ubyte output, out size_t amountInSecondBuffer, RCAllocator allocator = RCAllocator.init) @trusted {
     if (source.lengthOfSource == 0)
         return typeof(return)(0);
 
@@ -145,6 +148,18 @@ Result!size_t decompressDeflate(scope ref BitReader source, scope out Slice!ubyt
         return ErrorInfo.init;
     }
 
+    void emitByte(ubyte value) {
+        result ~= value;
+        if (source.hadNextSource())
+            amountInSecondBuffer++;
+    }
+
+    void emitBytes(scope const(ubyte)[] values) {
+        result ~= values;
+        if (source.hadNextSource())
+            amountInSecondBuffer += values.length;
+    }
+
     while (source.haveMoreBits && !(blockState.complete && blockState.isLast)) {
         if (blockState.complete) {
             auto error = startNewBlock;
@@ -163,7 +178,7 @@ Result!size_t decompressDeflate(scope ref BitReader source, scope out Slice!ubyt
 
             if (got.length != toProcess)
                 return typeof(return)(MalformedInputException("Not enough input for no compression block"));
-            result ~= got;
+            emitBytes(got);
 
             blockState.noCompression.amountToGo = 0;
             blockState.complete = true;
@@ -178,7 +193,7 @@ Result!size_t decompressDeflate(scope ref BitReader source, scope out Slice!ubyt
                     return typeof(return)(MalformedInputException("Incomplete huffman tree"));
 
                 if (symbol < 256) {
-                    result ~= cast(ubyte)symbol;
+                    emitByte(cast(ubyte)symbol);
                 } else if (symbol == 256) {
                     blockState.complete = true;
                     break;
@@ -210,7 +225,7 @@ Result!size_t decompressDeflate(scope ref BitReader source, scope out Slice!ubyt
                         if (!temp)
                             return typeof(return)(temp.getError());
 
-                        result ~= temp.get;
+                        emitByte(temp.get);
                     }
                 } else
                     return typeof(return)(MalformedInputException("Incorrect huffman tree"));

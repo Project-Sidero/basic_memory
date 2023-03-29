@@ -7,6 +7,7 @@ struct BitReader {
 
     uint bufferByteBitsLeft;
     ubyte bufferByte;
+    bool hadNextSourceBits;
 
 @safe nothrow @nogc:
     private void checkIfEmpty() scope {
@@ -26,6 +27,10 @@ export:
 
     size_t bitsRead() scope const {
         return (consumed * 8) - bufferByteBitsLeft;
+    }
+
+    bool hadNextSource() {
+        return nextSource.length > 0 || this.hadNextSourceBits;
     }
 
     const(ubyte)[] consumeExact(size_t amount) scope @trusted {
@@ -73,6 +78,7 @@ export:
 
                 source = source[1 .. $];
                 consumed++;
+                hadNextSourceBits = nextSource.length > 0;
             }
 
             const bitsToTake = bufferByteBitsLeft > numberOfBitsToGo ? numberOfBitsToGo : bufferByteBitsLeft;

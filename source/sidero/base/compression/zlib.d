@@ -111,9 +111,11 @@ Result!size_t decompressZlib(scope ref BitReader source, scope out Slice!ubyte o
 
     {
         Slice!ubyte decompressed;
-        auto didDecompress = decompressDeflate(source, decompressed, allocator);
+        size_t amountInSecondBuffer;
+        auto didDecompress = decompressDeflate(source, decompressed, amountInSecondBuffer, allocator);
         if (!didDecompress)
             return typeof(return)(didDecompress.getError());
+        decompressed = decompressed[amountInSecondBuffer .. $].assumeOkay; // dictionary
 
         if (didDecompress.get > 0) {
             header.runningAdler32 = adler32Checksum(decompressed.unsafeGetLiteral(), header.runningAdler32);
