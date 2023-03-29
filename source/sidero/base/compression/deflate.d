@@ -64,26 +64,30 @@ Result!size_t decompressDeflate(scope const(ubyte)[] source, scope out Slice!uby
 Slice!ubyte compressDeflate(scope Slice!ubyte source, DeflateCompressionRate rate = DeflateCompressionRate.Default,
         RCAllocator allocator = RCAllocator.init) @trusted {
     BitReader bitReader = BitReader(source.unsafeGetLiteral());
-    return compressDeflate(bitReader, rate, allocator);
+    size_t amountInFirstBatch;
+    return compressDeflate(bitReader, rate, 0, amountInFirstBatch, allocator);
 }
 
 ///
 Slice!ubyte compressDeflate(scope DynamicArray!ubyte source, DeflateCompressionRate rate = DeflateCompressionRate.Default,
         RCAllocator allocator = RCAllocator.init) @trusted {
     BitReader bitReader = BitReader(source.unsafeGetLiteral());
-    return compressDeflate(bitReader, rate, allocator);
+    size_t amountInFirstBatch;
+    return compressDeflate(bitReader, rate, 0, amountInFirstBatch, allocator);
 }
 
 ///
 Slice!ubyte compressDeflate(scope const(ubyte)[] source, DeflateCompressionRate rate = DeflateCompressionRate.Default,
         RCAllocator allocator = RCAllocator.init) {
     BitReader bitReader = BitReader(source);
-    return compressDeflate(bitReader, rate, allocator);
+    size_t amountInFirstBatch;
+    return compressDeflate(bitReader, rate, 0, amountInFirstBatch, allocator);
 }
 
 package(sidero.base.compression):
 
-Result!size_t decompressDeflate(scope ref BitReader source, scope out Slice!ubyte output, out size_t amountInSecondBuffer, RCAllocator allocator = RCAllocator.init) @trusted {
+Result!size_t decompressDeflate(scope ref BitReader source, scope out Slice!ubyte output, out size_t amountInSecondBuffer,
+        RCAllocator allocator = RCAllocator.init) @trusted {
     if (source.lengthOfSource == 0)
         return typeof(return)(0);
 
@@ -248,9 +252,11 @@ Result!size_t decompressDeflate(scope ref BitReader source, scope out Slice!ubyt
         return typeof(return)(MalformedInputException("Incomplete block stream"));
 }
 
-Slice!ubyte compressDeflate(scope ref BitReader source, DeflateCompressionRate compressionRate, RCAllocator allocator = RCAllocator.init) @trusted {
+Slice!ubyte compressDeflate(scope ref BitReader source, DeflateCompressionRate compressionRate,
+        size_t amountNeededInFirstBatch, out size_t amountInFirstBatch, RCAllocator allocator = RCAllocator.init) @trusted {
     import sidero.base.compression.internal.bitwriter;
     import sidero.base.compression.internal.hashchain;
+    import std.algorithm : min;
 
     enum BlockSizeToWalk = 16 * 1024;
 
@@ -576,7 +582,8 @@ Slice!ubyte compressDeflate(scope ref BitReader source, DeflateCompressionRate c
         if (startSourceLength == 0)
             break;
 
-        const lengthForBlock = cast(ushort)(startSourceLength > BlockSizeToWalk ? BlockSizeToWalk : startSourceLength);
+        const lengthForBlock = cast(ushort)(amountNeededInFirstBatch > 0 ? (amountNeededInFirstBatch > startSourceLength ?
+    startSourceLength : amountNeededInFirstBatch) : (startSourceLength > BlockSizeToWalk ? BlockSizeToWalk : startSourceLength));
         const isLast = lengthForBlock == startSourceLength;
 
         final switch (compressionRate) {
@@ -689,6 +696,11 @@ Slice!ubyte compressDeflate(scope ref BitReader source, DeflateCompressionRate c
 
             hashChainImplementation(isFirst, startSourceLength - initialConsumed, toCompress, true, 8, 8, 4 * 1024);
             break;
+        }
+
+        if (amountNeededInFirstBatch > 0) {
+            amountNeededInFirstBatch -= lengthForBlock;
+            amountInFirstBatch += result.output.length;
         }
 
         isFirst = false;
