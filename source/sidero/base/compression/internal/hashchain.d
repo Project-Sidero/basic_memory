@@ -3,7 +3,7 @@ import sidero.base.allocators;
 import sidero.base.allocators.predefined;
 
 struct HashChain {
-    size_t modulas, maxLayers, maxInLayer;
+    size_t modulas, maxLayers, maxInLayer, minMatchSize, maxMatchSize;
     Layer* headLayer;
     size_t numberOfLayers;
 
@@ -24,7 +24,7 @@ struct HashChain {
 
 @safe nothrow @nogc scope:
 
-    this(size_t modulas, size_t maxLayers, size_t maxInLayer, RCAllocator allocator) {
+    this(size_t modulas, size_t maxLayers, size_t maxInLayer, size_t minMatchSize, size_t maxMatchSize, RCAllocator allocator) {
         if (modulas == 0)
             modulas = 64;
         if (maxLayers == 0)
@@ -35,6 +35,8 @@ struct HashChain {
         this.modulas = modulas;
         this.maxLayers = maxLayers;
         this.maxInLayer = maxInLayer;
+        this.minMatchSize = minMatchSize;
+        this.maxMatchSize = maxMatchSize;
     }
 
     ~this() {
@@ -58,9 +60,12 @@ struct HashChain {
     }
 
     void addMatch(size_t offset, return scope const(ubyte)[] data) @trusted {
-        assert(data.length > 2);
+        if (data.length < this.minMatchSize)
+            return;
         if (headLayer is null || headLayer.numberOfNodes == maxInLayer)
             addLayer;
+        if (data.length > this.maxMatchSize)
+            data = data[0 .. this.maxMatchSize];
 
         const keyHash = hashOf(cast(ubyte[3])data[0 .. 3]);
         Node** chain = &headLayer.chains[keyHash];
@@ -75,8 +80,13 @@ struct HashChain {
     }
 
     bool findLongestMatch(scope const(ubyte)[] data, out size_t offset, out size_t length) @trusted {
-        assert(data.length > 2);
+        if (data.length < this.minMatchSize)
+            return false;
+
         const keyHash = hashOf(cast(ubyte[3])data[0 .. 3]);
+
+        if (data.length > this.maxMatchSize)
+            data = data[0 .. this.maxMatchSize];
 
         ptrdiff_t longestOffset = -1;
         size_t longestMatch;
@@ -110,7 +120,7 @@ struct HashChain {
 
         offset = longestOffset;
         length = longestMatch;
-        return longestOffset >= 0;
+        return longestOffset >= 0 && longestMatch >= this.minMatchSize;
     }
 
 private:
@@ -140,11 +150,13 @@ private:
 
         while(*current !is null) {
             if (layerId++ >= this.maxLayers) {
-                *current = (*current).next;
+                Layer* next = (*current).next;
 
                 auto allocator = (*current).allocator;
                 allocator.deallocateAll;
                 numberOfLayers--;
+
+                *current = next;
             } else {
                 current = &(*current).next;
             }

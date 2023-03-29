@@ -341,16 +341,17 @@ Slice!ubyte compressDeflate(scope ref BitReader source, DeflateCompressionRate c
 
     HashChain hashChain;
 
-    void hashChainImplementation(size_t offsetOfBlock, scope const(ubyte)[] toCompress, bool useDynamicHuffMan,
-            int lookForBetter, size_t maxLayers, size_t maxInLayer) {
+    void hashChainImplementation(bool isFirst, size_t offsetOfBlock, scope const(ubyte)[] toCompress,
+            bool useDynamicHuffMan, int lookForBetter, size_t maxLayers, size_t maxInLayer) {
         import std.math : sqrt;
 
-        if (offsetOfBlock == 0)
-            hashChain = HashChain(cast(size_t)sqrt(cast(float)toCompress.length), maxLayers, maxInLayer, allocator);
+        if (isFirst)
+            hashChain = HashChain(cast(size_t)sqrt(cast(float)toCompress.length), maxLayers, 3, maxInLayer, 258, allocator);
         hashChain.addLayer;
 
         size_t offset = offsetOfBlock;
-        Appender!ushort dynamicHuffManSymbols = Appender!ushort(allocator), dynamicHuffManDistances = Appender!ushort(allocator);
+        Appender!ushort dynamicHuffManSymbols = Appender!ushort(allocator),
+            dynamicHuffManDistances = Appender!ushort(allocator), onlyDynamicHuffManDistances = Appender!ushort(allocator);
         Appender!(ushort[2]) symbolExtras = Appender!(ushort[2])(allocator), distanceExtras = Appender!(ushort[2])(allocator);
 
         ushort[2][3] calculateDistanceSymbol(size_t matchOffset, size_t matchLength) {
@@ -358,12 +359,13 @@ Slice!ubyte compressDeflate(scope ref BitReader source, DeflateCompressionRate c
 
             {
                 size_t offsetForLength;
-                while (lengthBase[offset++] < matchLength) {
+                while (lengthBase[offsetForLength++] < matchLength) {
                     assert(offsetForLength <= lengthBase.length);
                 }
                 offsetForLength--;
                 const lengthExtra = cast(ushort)(matchLength - lengthBase[offsetForLength]);
-                assert(lengthExtra <= (1 << lengthExtraBits[offsetForLength]) - 1);
+
+                assert(lengthExtra < 1 << lengthExtraBits[offsetForLength]);
                 const symbol = cast(ushort)(257 + offsetForLength);
 
                 ret[0][0] = symbol;
@@ -395,6 +397,8 @@ Slice!ubyte compressDeflate(scope ref BitReader source, DeflateCompressionRate c
 
             dynamicHuffManDistances ~= got[0][1];
             distanceExtras ~= got[2];
+
+            onlyDynamicHuffManDistances ~= got[0][1];
         }
 
         void emitFixedDistance(size_t offset, size_t matchLength) {
@@ -416,6 +420,7 @@ Slice!ubyte compressDeflate(scope ref BitReader source, DeflateCompressionRate c
 
         while (toCompress.length > 0) {
             size_t initialMatchOffset, initialMatchLength;
+
             if (!hashChain.findLongestMatch(toCompress, initialMatchOffset, initialMatchLength)) {
                 // if we didn't find a match, we need to emit first byte, add to chain and continue
 
@@ -438,9 +443,7 @@ Slice!ubyte compressDeflate(scope ref BitReader source, DeflateCompressionRate c
                     size_t proposedMatchOffset, proposedMatchLength;
 
                     foreach (i; 1 .. howFarToLookForward + 1) {
-                        const offset2 = offset + i;
                         const toCompress2 = toCompress[i .. $];
-
                         size_t tempMatchOffset, tempMatchLength;
 
                         if (hashChain.findLongestMatch(toCompress2, tempMatchOffset, tempMatchLength) &&
@@ -451,32 +454,104 @@ Slice!ubyte compressDeflate(scope ref BitReader source, DeflateCompressionRate c
                     }
 
                     if (proposedMatchLength > initialMatchLength) {
-                        // TODO: redo initial
-                        // while leading up to proposed offset not handled
-                        //  if found match, store distance symbol into dynamicHuffManSymbols
-                        //  else emit as a literal byte
+                        while (offset < proposedMatchOffset) {
+                            scope const(ubyte)[] matchable = toCompress[0 .. proposedMatchOffset - offset];
+                            size_t tempMatchOffset, tempMatchLength;
 
-                        // TODO: store distance symbol into dynamicHuffManSymbols of proposed
+                            if (hashChain.findLongestMatch(matchable, tempMatchOffset, tempMatchLength)) {
+                                emitDynamicDistance(tempMatchOffset, tempMatchLength);
+                                hashChain.addMatch(offset, toCompress);
+
+                                toCompress = toCompress[tempMatchLength .. $];
+                                offset += tempMatchLength;
+                            } else {
+                                emitDynamicSymbol(toCompress[0]);
+                                hashChain.addMatch(offset, toCompress);
+
+                                toCompress = toCompress[1 .. $];
+                                offset++;
+                            }
+                        }
+
+                        emitDynamicDistance(proposedMatchOffset, proposedMatchLength);
+                        hashChain.addMatch(offset, toCompress);
+
+                        toCompress = toCompress[proposedMatchLength .. $];
+                        offset += proposedMatchLength;
+                    } else {
+                        emitDynamicDistance(initialMatchOffset, initialMatchLength);
+                        hashChain.addMatch(offset, toCompress);
+
+                        toCompress = toCompress[initialMatchLength .. $];
+                        offset += initialMatchLength;
                     }
                 } else {
                     emitDynamicDistance(initialMatchOffset, initialMatchLength);
+                    hashChain.addMatch(offset, toCompress);
+
+                    toCompress = toCompress[initialMatchLength .. $];
+                    offset += initialMatchLength;
                 }
             } else {
                 emitFixedDistance(initialMatchOffset, initialMatchLength);
+                hashChain.addMatch(offset, toCompress);
+
+                toCompress = toCompress[initialMatchLength .. $];
+                offset += initialMatchLength;
             }
         }
 
         if (useDynamicHuffMan) {
-            dynamicHuffManSymbols ~= cast(ushort)256;
+            HuffManTree!288 symbolTree;
+            HuffManTree!30 distanceTree;
+            ushort[2][288] symbolValuePaths = void;
+            ushort[2][30] distanceValuePaths = void;
 
-            // TODO: construct huffman tree given symbols
+            {
+                auto data = dynamicHuffManSymbols.asReadOnly(allocator);
+                auto symbolDepths = symbolTree.buildFromData(data.unsafeGetLiteral(), 256);
+                data = onlyDynamicHuffManDistances.asReadOnly(allocator);
+                auto distanceDepths = distanceTree.buildFromData(data.unsafeGetLiteral());
 
-            // TODO: emit symbols
+                // The huffman tree won't be setup in the right order for DEFLATE,
+                //  so we need to recreate it but with our guarantees.
+                symbolTree.clear;
+                distanceTree.clear;
+                ErrorInfo error = getDeflateHuffmanBits(symbolDepths, &symbolTree.addLeafMSB);
+                assert(!error.isSet);
+                error = getDeflateHuffmanBits(distanceDepths, &distanceTree.addLeafMSB);
+                assert(!error.isSet);
+
+                emitHuffManTree(symbolDepths, distanceDepths);
+                symbolValuePaths = symbolTree.pathForValues();
+                distanceValuePaths = distanceTree.pathForValues();
+            }
+
+            foreach (i; 0 .. dynamicHuffManSymbols.length) {
+                ushort symbol = dynamicHuffManSymbols[i].assumeOkay;
+
+                emitSymbolMSB(symbolValuePaths[symbol]);
+                if (symbolExtras[i].assumeOkay[1] > 0)
+                    emitSymbol(symbolExtras[i].assumeOkay);
+
+                if (symbol > 256) {
+                    ushort distance = dynamicHuffManDistances[i].assumeOkay;
+
+                    emitSymbolMSB(distanceValuePaths[distance]);
+                    if (distanceExtras[i].assumeOkay[1] > 0)
+                        emitSymbol(distanceExtras[i].assumeOkay);
+                }
+            }
+
+            // EMIT 256 aka end
+            emitSymbolMSB(symbolValuePaths[256]);
         } else {
             // EMIT 256 aka end
             emitFixedSymbol(256);
         }
     }
+
+    bool isFirst = true;
 
     for (;;) {
         const startSourceLength = source.lengthOfSource;
@@ -566,7 +641,7 @@ Slice!ubyte compressDeflate(scope ref BitReader source, DeflateCompressionRate c
             auto toCompress = source.consumeExact(lengthForBlock);
             assert(toCompress.length == lengthForBlock);
 
-            hashChainImplementation(startSourceLength - initialConsumed, toCompress, false, 0, 4, 4 * 1024);
+            hashChainImplementation(isFirst, startSourceLength - initialConsumed, toCompress, false, 0, 4, 4 * 1024);
             break;
         case DeflateCompressionRate.HashWithDynamicHuffManTree:
             // build hash chain, look for longest match
@@ -579,7 +654,7 @@ Slice!ubyte compressDeflate(scope ref BitReader source, DeflateCompressionRate c
             auto toCompress = source.consumeExact(lengthForBlock);
             assert(toCompress.length == lengthForBlock);
 
-            hashChainImplementation(startSourceLength - initialConsumed, toCompress, true, 0, 6, 4 * 1024);
+            hashChainImplementation(isFirst, startSourceLength - initialConsumed, toCompress, true, 0, 6, 4 * 1024);
             break;
         case DeflateCompressionRate.DeepHashWithDynamicHuffManTree:
             // build hash chain, look for longest match, do it sqrt(found match) times
@@ -594,9 +669,11 @@ Slice!ubyte compressDeflate(scope ref BitReader source, DeflateCompressionRate c
             auto toCompress = source.consumeExact(lengthForBlock);
             assert(toCompress.length == lengthForBlock);
 
-            hashChainImplementation(startSourceLength - initialConsumed, toCompress, true, 8, 8, 4 * 1024);
+            hashChainImplementation(isFirst, startSourceLength - initialConsumed, toCompress, true, 8, 8, 4 * 1024);
             break;
         }
+
+        isFirst = false;
     }
 
     return result.asReadOnly(allocator);
@@ -782,7 +859,7 @@ ErrorInfo readDynamicHuffmanTrees(scope ref BitReader bitReader, scope ref TreeS
             return error;
     }
 
-    ubyte[288] treeBuffer = void;
+    ubyte[320] treeBuffer = void;
     size_t treeBufferOffset;
 
     while (treeBufferOffset < hlit + hdist) {
@@ -924,4 +1001,7 @@ ErrorInfo readDynamicHuffmanTrees(scope ref BitReader bitReader, scope ref TreeS
     assert(test(BigText, DeflateCompressionRate.None));
     assert(test(BigText, DeflateCompressionRate.FixedHuffManTree));
     assert(test(BigText, DeflateCompressionRate.DynamicHuffManTree));
+    assert(test(BigText, DeflateCompressionRate.HashWithFixedHuffManTree));
+    assert(test(BigText, DeflateCompressionRate.HashWithDynamicHuffManTree));
+    assert(test(BigText, DeflateCompressionRate.DeepHashWithDynamicHuffManTree));
 }

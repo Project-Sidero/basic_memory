@@ -56,6 +56,11 @@ export:
     @disable this(this);
 
     /// Given data create a huffman tree, returns the depth for a given leaf value
+    ushort[NumberOfLeafs] buildFromData(MainType)(scope const(MainType)[] input) @trusted {
+        return buildFromData!(MainType, MainType)(input);
+    }
+
+    /// Ditto
     ushort[NumberOfLeafs] buildFromData(MainType, SecondaryType)(scope const(MainType)[] input, scope const(SecondaryType)[] secondaryInput...) @trusted {
         clear;
 
