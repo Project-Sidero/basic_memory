@@ -8,6 +8,7 @@ import sidero.base.allocators;
 
 export @safe nothrow @nogc:
 
+/// Gets a ZLIB dictionary for an identifier, will be uncompressed.
 alias ZlibPresetDictionaryDelegate = const(ubyte)[]delegate(ubyte[4]) @safe nothrow @nogc;
 
 ///
@@ -49,16 +50,78 @@ Result!size_t decompressZlib(scope const(ubyte)[] source, scope out Slice!ubyte 
     return decompressZlib(bitReader, output, presetDictionaryDel, allocator);
 }
 
-private:
+///
+Slice!ubyte compressZlib(scope Slice!ubyte source, ubyte[4] dictionaryId, scope ZlibPresetDictionaryDelegate presetDictionaryDel,
+        DeflateCompressionRate rate = DeflateCompressionRate.Default, RCAllocator allocator = RCAllocator.init) @trusted {
+    BitReader bitReader = BitReader(source.unsafeGetLiteral());
+    BitWriter result = BitWriter(Appender!ubyte(allocator));
+
+    compressZlib(bitReader, result, rate, dictionaryId, presetDictionaryDel, allocator);
+    return result.asReadOnly(allocator);
+}
+
+///
+Slice!ubyte compressZlib(scope DynamicArray!ubyte source, ubyte[4] dictionaryId, scope ZlibPresetDictionaryDelegate presetDictionaryDel,
+        DeflateCompressionRate rate = DeflateCompressionRate.Default, RCAllocator allocator = RCAllocator.init) @trusted {
+    BitReader bitReader = BitReader(source.unsafeGetLiteral());
+    BitWriter result = BitWriter(Appender!ubyte(allocator));
+
+    compressZlib(bitReader, result, rate, dictionaryId, presetDictionaryDel, allocator);
+    return result.asReadOnly(allocator);
+}
+
+///
+Slice!ubyte compressZlib(scope const(ubyte)[] source, ubyte[4] dictionaryId, scope ZlibPresetDictionaryDelegate presetDictionaryDel,
+        DeflateCompressionRate rate = DeflateCompressionRate.Default, RCAllocator allocator = RCAllocator.init) {
+    BitReader bitReader = BitReader(source);
+    BitWriter result = BitWriter(Appender!ubyte(allocator));
+
+    compressZlib(bitReader, result, rate, dictionaryId, presetDictionaryDel, allocator);
+    return result.asReadOnly(allocator);
+}
+
+///
+Slice!ubyte compressZlib(scope Slice!ubyte source, DeflateCompressionRate rate = DeflateCompressionRate.Default,
+        RCAllocator allocator = RCAllocator.init) @trusted {
+    BitReader bitReader = BitReader(source.unsafeGetLiteral());
+    BitWriter result = BitWriter(Appender!ubyte(allocator));
+
+    compressZlib(bitReader, result, rate, [0, 0, 0, 0], null, allocator);
+    return result.asReadOnly(allocator);
+}
+
+///
+Slice!ubyte compressZlib(scope DynamicArray!ubyte source, DeflateCompressionRate rate = DeflateCompressionRate.Default,
+        RCAllocator allocator = RCAllocator.init) @trusted {
+    BitReader bitReader = BitReader(source.unsafeGetLiteral());
+    BitWriter result = BitWriter(Appender!ubyte(allocator));
+
+    compressZlib(bitReader, result, rate, [0, 0, 0, 0], null, allocator);
+    return result.asReadOnly(allocator);
+}
+
+///
+Slice!ubyte compressZlib(scope const(ubyte)[] source, DeflateCompressionRate rate = DeflateCompressionRate.Default,
+        RCAllocator allocator = RCAllocator.init) {
+    BitReader bitReader = BitReader(source);
+    BitWriter result = BitWriter(Appender!ubyte(allocator));
+
+    compressZlib(bitReader, result, rate, [0, 0, 0, 0], null, allocator);
+    return result.asReadOnly(allocator);
+}
+
+package(sidero.base.compression):
 import sidero.base.compression.internal.bitreader;
+import sidero.base.compression.internal.bitwriter;
 import sidero.base.hash.adler32;
+import sidero.base.compression.deflate;
 
 Result!size_t decompressZlib(scope ref BitReader source, scope out Slice!ubyte output,
         scope ZlibPresetDictionaryDelegate presetDictionaryDel, RCAllocator allocator = RCAllocator.init) @trusted {
-    import sidero.base.compression.deflate;
-
     const originallyConsumed = source.consumed;
     ZlibHeader header;
+
+    const(ubyte)[] presetDictionary;
 
     ErrorInfo readHeader() @trusted {
         {
@@ -87,12 +150,9 @@ Result!size_t decompressZlib(scope ref BitReader source, scope out Slice!ubyte o
             if (presetDictionaryDel is null)
                 return ErrorInfo(MalformedInputException("Preset dictionary is required, no callback"));
 
-            auto presetDictionary = presetDictionaryDel(header.DICTID);
+            presetDictionary = presetDictionaryDel(header.DICTID);
             if (presetDictionary is null)
                 return ErrorInfo(MalformedInputException("Unknown preset dictionary"));
-
-            source.nextSource = source.source;
-            source.source = presetDictionary;
         }
 
         header.runningAdler32 = adler32Checksum(null);
@@ -110,12 +170,15 @@ Result!size_t decompressZlib(scope ref BitReader source, scope out Slice!ubyte o
     }
 
     {
-        Slice!ubyte decompressed;
-        size_t amountInSecondBuffer;
-        auto didDecompress = decompressDeflate(source, decompressed, amountInSecondBuffer, allocator);
+        Appender!ubyte result = Appender!ubyte(allocator);
+        if (presetDictionary.length > 0)
+            result ~= presetDictionary;
+
+        auto didDecompress = decompressDeflate(source, result, allocator);
         if (!didDecompress)
             return typeof(return)(didDecompress.getError());
-        decompressed = decompressed[amountInSecondBuffer .. $].assumeOkay; // dictionary
+
+        Slice!ubyte decompressed = result.asReadOnly(presetDictionary.length, size_t.max, allocator);
 
         if (didDecompress.get > 0) {
             header.runningAdler32 = adler32Checksum(decompressed.unsafeGetLiteral(), header.runningAdler32);
@@ -128,6 +191,52 @@ Result!size_t decompressZlib(scope ref BitReader source, scope out Slice!ubyte o
 
         output = decompressed;
         return typeof(return)(source.consumed - originallyConsumed);
+    }
+}
+
+void compressZlib(scope ref BitReader source, scope ref BitWriter output, DeflateCompressionRate compressionRate,
+        ubyte[4] dictionary, scope ZlibPresetDictionaryDelegate presetDictionaryDel, RCAllocator allocator = RCAllocator.init) @trusted {
+
+    const(ubyte)[] presetDictionary;
+    if (presetDictionaryDel !is null)
+        presetDictionary = presetDictionaryDel(dictionary);
+
+    {
+        // DEFLATE, windows size 32kb
+        const CMF = cast(ubyte)((7 << 4) | 8);
+
+        // FLG
+        ubyte FLG = (presetDictionary.length > 0 ? 0x20 : 0);
+        if (compressionRate <= DeflateCompressionRate.Fastest) {
+        } else if (compressionRate <= DeflateCompressionRate.Fast)
+            FLG |= 0x40;
+        else if (compressionRate <= DeflateCompressionRate.Default)
+            FLG |= 0x80;
+        else
+            FLG |= 0xC0;
+
+        // 5 bits for FCHECK
+        const FCHECK = ((256 * CMF) + FLG) % 31;
+        if (FCHECK > 0)
+            FLG |= cast(ubyte)(31 - FCHECK);
+
+        output.writeBytes(CMF, FLG);
+    }
+
+    if (presetDictionary.length > 0) {
+        output.writeBytes(dictionary[]);
+    }
+
+    {
+        const hash = adler32Checksum(source.nextSource, adler32Checksum(source.source));
+
+        BitWriter deflateResult;
+        size_t amountInFirstBatch;
+        compressDeflate(source, deflateResult, compressionRate, presetDictionary.length, amountInFirstBatch, allocator);
+
+        deflateResult.flushBits;
+        output.writeAppender(deflateResult.output, amountInFirstBatch, size_t.max);
+        output.writeIntBE(hash);
     }
 }
 
@@ -199,4 +308,36 @@ struct ZlibHeader {
 
     assert(test([120, 1, 1, 7, 0, 248, 255, 72, 101, 108, 108, 111, 32, 68, 9, 250, 2, 89], cast(ubyte[])"Hello D"));
     assert(!test([120, 1, 1, 7, 0, 248, 255, 72, 101, 108, 108, 111, 32, 68, 9, 250, 3, 89], cast(ubyte[])"Hello D"));
+}
+
+@trusted unittest {
+    bool test(ubyte[] toCompress, DeflateCompressionRate rate) @trusted {
+        Slice!ubyte compressed, decompressed;
+
+        compressed = compressZlib(toCompress, rate);
+        if (compressed.length == 0)
+            return false;
+
+        auto consumed = decompressZlib(compressed, decompressed);
+        if (!consumed || consumed.get != compressed.length || decompressed.length != toCompress.length)
+            return false;
+
+        size_t offset;
+
+        foreach (ubyte v; decompressed) {
+            if (offset >= toCompress.length || toCompress[offset++] != v)
+                return false;
+        }
+
+        return true;
+    }
+
+    static BigText = cast(ubyte[])"Lorem Ipsum is simply dummy text of the printing and typesetting industry.";
+
+    assert(test(BigText, DeflateCompressionRate.None));
+    assert(test(BigText, DeflateCompressionRate.FixedHuffManTree));
+    assert(test(BigText, DeflateCompressionRate.DynamicHuffManTree));
+    assert(test(BigText, DeflateCompressionRate.HashWithFixedHuffManTree));
+    assert(test(BigText, DeflateCompressionRate.HashWithDynamicHuffManTree));
+    assert(test(BigText, DeflateCompressionRate.DeepHashWithDynamicHuffManTree));
 }

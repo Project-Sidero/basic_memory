@@ -170,12 +170,48 @@ export @safe nothrow @nogc:
     }
 
     ///
-    void opOpAssign(string op : "~")(scope const(Type)[] input...) scope {
-        this.append(input);
+    alias put = append;
+
+    ///
+    void opOpAssign(string op : "~")(scope ref Appender other) scope {
+        this.append(other);
     }
 
     ///
-    alias put = append;
+    void append(scope ref Appender other, size_t offset = 0, size_t length = size_t.max) @trusted {
+        const canDoLength = length > other.count ? other.count : length;
+        if (canDoLength <= offset)
+            return;
+        length = canDoLength;
+
+        Block* current = cast(Block*)other.head;
+        size_t soFar;
+
+        while (current !is null && current.used <= offset) {
+            offset -= current.used;
+            soFar += current.used;
+            current = current.next;
+        }
+
+        while (current !is null && length > 0) {
+            const canDo = length < current.used ? length : current.used;
+            this.append(current.data.ptr[offset .. canDo]);
+
+            if (offset > current.used)
+                offset -= current.used;
+            else
+                offset = 0;
+
+            if (length > 0)
+                length -= canDo;
+            current = current.next;
+        }
+    }
+
+    ///
+    void opOpAssign(string op : "~")(scope const(Type)[] input...) scope {
+        this.append(input);
+    }
 
     ///
     void append(scope const(Type)[] input...) scope @trusted {
@@ -567,18 +603,41 @@ export @safe nothrow @nogc:
 
     ///
     ReadOnlyType asReadOnly(RCAllocator allocator = RCAllocator.init) scope @trusted const {
+        return this.asReadOnly(0, size_t.max, allocator);
+    }
+
+    ///
+    ReadOnlyType asReadOnly(size_t offset, size_t length, RCAllocator allocator = RCAllocator.init) scope @trusted const {
         if (allocator.isNull)
             allocator = globalAllocator();
 
-        Type[] ret = allocator.makeArray!Type(count);
+        const canDoLength = length > this.count ? this.count : length;
+        if (canDoLength <= offset)
+            return typeof(return).init;
 
+        Type[] ret = allocator.makeArray!Type(canDoLength - offset);
         Block* current = cast(Block*)head;
         size_t soFar;
 
-        while (current !is null) {
-            foreach (i; 0 .. current.used)
+        while (current !is null && current.used <= offset) {
+            offset -= current.used;
+            soFar += current.used;
+            current = current.next;
+        }
+
+        while (current !is null && length > 0) {
+            const canDo = (length > 0 && length < current.used) ? length : current.used;
+
+            foreach (i; offset .. canDo)
                 ret[soFar++] = current.data.ptr[i];
 
+            if (offset > current.used)
+                offset -= current.used;
+            else
+                offset = 0;
+
+            if (length > 0)
+                length -= canDo;
             current = current.next;
         }
 

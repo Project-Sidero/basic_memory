@@ -49,6 +49,17 @@ export:
         }
     }
 
+    void writeIntBE(uint value) {
+        import std.bitmanip : nativeToBigEndian;
+        auto bytes = nativeToBigEndian(value);
+        this.writeBytes(bytes[]);
+    }
+
+    void writeAppender(scope ref Appender!ubyte other, size_t offset = 0, size_t length = size_t.max) {
+        flushBits;
+        this.output.append(other, offset, length);
+    }
+
     auto asReadOnly(RCAllocator allocator = RCAllocator.init) scope {
         flushBits;
         return output.asReadOnly(allocator);

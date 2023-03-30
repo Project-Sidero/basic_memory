@@ -42,58 +42,77 @@ enum DeflateCompressionRate {
 ///
 Result!size_t decompressDeflate(scope Slice!ubyte source, scope out Slice!ubyte output, RCAllocator allocator = RCAllocator.init) @trusted {
     BitReader bitReader = BitReader(source.unsafeGetLiteral());
-    size_t amountInSecondBuffer;
-    return decompressDeflate(bitReader, output, amountInSecondBuffer, allocator);
+    Appender!ubyte result = Appender!ubyte(allocator);
+
+    auto ret = decompressDeflate(bitReader, result, allocator);
+    if (ret)
+        output = result.asReadOnly(allocator);
+    return ret;
 }
 
 ///
 Result!size_t decompressDeflate(scope DynamicArray!ubyte source, scope out Slice!ubyte output, RCAllocator allocator = RCAllocator.init) @trusted {
     BitReader bitReader = BitReader(source.unsafeGetLiteral());
-    size_t amountInSecondBuffer;
-    return decompressDeflate(bitReader, output, amountInSecondBuffer, allocator);
+    Appender!ubyte result = Appender!ubyte(allocator);
+
+    auto ret = decompressDeflate(bitReader, result, allocator);
+    if (ret)
+        output = result.asReadOnly(allocator);
+    return ret;
 }
 
 ///
 Result!size_t decompressDeflate(scope const(ubyte)[] source, scope out Slice!ubyte output, RCAllocator allocator = RCAllocator.init) {
     BitReader bitReader = BitReader(source);
-    size_t amountInSecondBuffer;
-    return decompressDeflate(bitReader, output, amountInSecondBuffer, allocator);
+    Appender!ubyte result = Appender!ubyte(allocator);
+
+    auto ret = decompressDeflate(bitReader, result, allocator);
+    if (ret)
+        output = result.asReadOnly(allocator);
+    return ret;
 }
 
 ///
 Slice!ubyte compressDeflate(scope Slice!ubyte source, DeflateCompressionRate rate = DeflateCompressionRate.Default,
         RCAllocator allocator = RCAllocator.init) @trusted {
     BitReader bitReader = BitReader(source.unsafeGetLiteral());
+    BitWriter result = BitWriter(Appender!ubyte(allocator));
+
     size_t amountInFirstBatch;
-    return compressDeflate(bitReader, rate, 0, amountInFirstBatch, allocator);
+    compressDeflate(bitReader, result, rate, 0, amountInFirstBatch, allocator);
+    return result.asReadOnly(allocator);
 }
 
 ///
 Slice!ubyte compressDeflate(scope DynamicArray!ubyte source, DeflateCompressionRate rate = DeflateCompressionRate.Default,
         RCAllocator allocator = RCAllocator.init) @trusted {
     BitReader bitReader = BitReader(source.unsafeGetLiteral());
+    BitWriter result = BitWriter(Appender!ubyte(allocator));
+
     size_t amountInFirstBatch;
-    return compressDeflate(bitReader, rate, 0, amountInFirstBatch, allocator);
+    compressDeflate(bitReader, result, rate, 0, amountInFirstBatch, allocator);
+    return result.asReadOnly(allocator);
 }
 
 ///
 Slice!ubyte compressDeflate(scope const(ubyte)[] source, DeflateCompressionRate rate = DeflateCompressionRate.Default,
         RCAllocator allocator = RCAllocator.init) {
     BitReader bitReader = BitReader(source);
+    BitWriter result = BitWriter(Appender!ubyte(allocator));
+
     size_t amountInFirstBatch;
-    return compressDeflate(bitReader, rate, 0, amountInFirstBatch, allocator);
+    compressDeflate(bitReader, result, rate, 0, amountInFirstBatch, allocator);
+    return result.asReadOnly(allocator);
 }
 
 package(sidero.base.compression):
 
-Result!size_t decompressDeflate(scope ref BitReader source, scope out Slice!ubyte output, out size_t amountInSecondBuffer,
-        RCAllocator allocator = RCAllocator.init) @trusted {
+Result!size_t decompressDeflate(scope ref BitReader source, scope ref Appender!ubyte result, RCAllocator allocator = RCAllocator.init) @trusted {
     if (source.lengthOfSource == 0)
         return typeof(return)(0);
 
     const originallyConsumed = source.consumed;
     initGlobalTrees;
-    Appender!ubyte result = Appender!ubyte(allocator);
 
     TreeState treeState;
     BlockState blockState;
@@ -154,14 +173,10 @@ Result!size_t decompressDeflate(scope ref BitReader source, scope out Slice!ubyt
 
     void emitByte(ubyte value) {
         result ~= value;
-        if (source.hadNextSource())
-            amountInSecondBuffer++;
     }
 
     void emitBytes(scope const(ubyte)[] values) {
         result ~= values;
-        if (source.hadNextSource())
-            amountInSecondBuffer += values.length;
     }
 
     while (source.haveMoreBits && !(blockState.complete && blockState.isLast)) {
@@ -245,23 +260,20 @@ Result!size_t decompressDeflate(scope ref BitReader source, scope out Slice!ubyt
         return typeof(return)(0);
     else if (!blockState.isLast)
         return typeof(return)(MalformedInputException("Incomplete block stream, no final block"));
-    else if (blockState.complete) {
-        output = result.asReadOnly(allocator);
+    else if (blockState.complete)
         return typeof(return)(source.consumed - originallyConsumed);
-    } else
+    else
         return typeof(return)(MalformedInputException("Incomplete block stream"));
 }
 
-Slice!ubyte compressDeflate(scope ref BitReader source, DeflateCompressionRate compressionRate,
+void compressDeflate(scope ref BitReader source, scope ref BitWriter result, DeflateCompressionRate compressionRate,
         size_t amountNeededInFirstBatch, out size_t amountInFirstBatch, RCAllocator allocator = RCAllocator.init) @trusted {
-    import sidero.base.compression.internal.bitwriter;
     import sidero.base.compression.internal.hashchain;
     import std.algorithm : min;
 
     enum BlockSizeToWalk = 16 * 1024;
 
     initGlobalTrees;
-    BitWriter result = BitWriter(Appender!ubyte(allocator));
     const initialConsumed = source.consumed;
 
     void emitBlockHeader(bool isLast, BTYPE type) {
@@ -705,12 +717,11 @@ Slice!ubyte compressDeflate(scope ref BitReader source, DeflateCompressionRate c
 
         isFirst = false;
     }
-
-    return result.asReadOnly(allocator);
 }
 
 private:
 import sidero.base.compression.internal.bitreader;
+import sidero.base.compression.internal.bitwriter;
 import sidero.base.parallelism.mutualexclusion;
 
 struct TreeState {
