@@ -46,7 +46,7 @@ auto GetOpApply(ArgType, InType)(scope return ref InType input) @trusted nothrow
     assert(0);
 }
 
-enum HaveNonStaticOpApply(InType) = __traits(hasMember, InType, "opApply") && (){
+enum HaveNonStaticOpApply(InType) = __traits(hasMember, InType, "opApply") && () {
     InType inType;
     alias Overloads = __traits(getOverloads, inType, "opApply");
 
@@ -93,6 +93,7 @@ template fqnSym(alias T) {
 
     static string adjustIdent(string s) {
         import sidero.base.algorithm : skipOver, findSplit;
+
         if (s.skipOver("package ") || s.skipOver("module "))
             return s;
         return s.findSplit("(")[0];
@@ -206,9 +207,22 @@ template fqnType(T, bool alreadyConst, bool alreadyImmutable, bool alreadyShared
     } else static if (isAggregateType!T || is(T == enum)) {
         enum fqnType = chain!(fqnSym!T);
     } else static if (isStaticArray!T) {
-        import std.conv : to;
+        enum LengthText = () {
+            size_t temp = T.length;
+            string ret;
 
-        enum fqnType = chain!(fqnType!(typeof(T.init[0]), qualifiers) ~ "[" ~ to!string(T.length) ~ "]");
+            while (temp > 0) {
+                size_t next = temp / 10;
+
+                char c = cast(char)((temp - (next * 10)) + '0');
+                ret = "" ~ c ~ ret;
+
+                temp = next;
+            }
+
+            return ret;
+        }();
+        enum fqnType = chain!(fqnType!(typeof(T.init[0]), qualifiers) ~ "[" ~ LengthText ~ "]");
     } else static if (isArray!T) {
         enum fqnType = chain!(fqnType!(typeof(T.init[0]), qualifiers) ~ "[]");
     } else static if (isAssociativeArray!T) {

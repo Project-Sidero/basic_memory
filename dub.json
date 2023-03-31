@@ -41,7 +41,7 @@
             "workingDirectory": "database"
         },
         {
-            "name": "makeUnicodeTables",
+            "name": "makeUnicodeStrings",
             "targetType": "sourceLibrary",
             "sourcePaths": [],
             "importPaths": [],
@@ -95,7 +95,7 @@
             "libs-windows": ["Ws2_32", "advapi32"],
             "versions": ["Windows7"],
             "dependencies": {
-                "sidero_base:makeUnicodeTables": "*"
+                "sidero_base:makeUnicodeStrings": "*"
             }
         }
     ],

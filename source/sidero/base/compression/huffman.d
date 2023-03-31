@@ -340,7 +340,7 @@ unittest {
 private:
 
 size_t frequencyOfBytes(MainType, SecondaryType, size_t NumberOfPossibleValues)(scope const(MainType)[] input,
-        size_t limitUniques, out float[NumberOfPossibleValues] frequencies, scope const(SecondaryType)[] secondaryInput...) {
+        size_t limitUniques, ref float[NumberOfPossibleValues] frequencies, scope const(SecondaryType)[] secondaryInput...) {
     import sidero.base.math.utils : isClose;
 
     size_t currentUniques, consumed;

@@ -16,3 +16,4 @@ basic_memory-test-*
 .idea/
 sidero_base.iml
 *.exp
+database/tz/
