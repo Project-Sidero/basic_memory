@@ -54,6 +54,7 @@ void compressDeflate(scope ref BitReader source, scope ref BitWriter result, Def
 
     DeflateCompressionImpl impl = DeflateCompressionImpl(source, result, compressionRate, amountNeededInFirstBatch,
             amountInFirstBatch, allocator);
+    impl.perform();
 }
 
 struct DeflateCompressionImpl {
@@ -69,8 +70,6 @@ struct DeflateCompressionImpl {
 
     this(scope ref BitReader source, scope ref BitWriter result, DeflateCompressionRate compressionRate,
             size_t amountNeededInFirstBatch, out size_t amountInFirstBatch, RCAllocator allocator = RCAllocator.init) @trusted {
-        import std.algorithm : min;
-
         this.source = &source;
         this.result = &result;
         this.compressionRate = compressionRate;
@@ -79,6 +78,11 @@ struct DeflateCompressionImpl {
         this.allocator = allocator;
 
         initGlobalTrees;
+    }
+
+    void perform() {
+        import std.algorithm : min;
+
         const initialConsumed = source.consumed;
         bool isFirst = true;
 
@@ -322,25 +326,24 @@ struct DeflateCompressionImpl {
 
     void hashChainImplementation(bool isFirst, size_t offsetOfBlock, scope const(ubyte)[] toCompress,
             bool useDynamicHuffMan, int lookForBetter, size_t maxLayers, size_t maxInLayer) @trusted {
-        /+//import std.math : sqrt;
+        import std.math : sqrt;
 
         if (isFirst) {
-            //hashChain = HashChain(cast(size_t)sqrt(cast(float)toCompress.length), maxLayers, 3, maxInLayer, 258, allocator);
+            hashChain = HashChain(cast(size_t)sqrt(cast(float)toCompress.length), maxLayers, 3, maxInLayer, 258, allocator);
         }
 
         {
-            //hashChain.addLayer;
-            /+dynamicHuffManSymbols = Appender!ushort(allocator);
+            hashChain.addLayer;
+            dynamicHuffManSymbols = Appender!ushort(allocator);
             dynamicHuffManDistances = Appender!ushort(allocator);
             onlyDynamicHuffManDistances = Appender!ushort(allocator);
             symbolExtras = Appender!(ushort[2])(allocator);
-            distanceExtras = Appender!(ushort[2])(allocator);+/
+            distanceExtras = Appender!(ushort[2])(allocator);
         }
 
-        size_t offset = offsetOfBlock;+/
+        size_t offset = offsetOfBlock;
 
-
-        /+ushort[2][3] calculateDistanceSymbol(size_t matchOffset, size_t matchLength) {
+        ushort[2][3] calculateDistanceSymbol(size_t matchOffset, size_t matchLength) {
             ushort[2][3] ret;
 
             {
@@ -534,7 +537,7 @@ struct DeflateCompressionImpl {
         } else {
             // EMIT 256 aka end
             emitFixedSymbol(256);
-        }+/
+        }
     }
 }
 
