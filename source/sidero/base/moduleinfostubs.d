@@ -78,4 +78,5 @@ enum Stubs = [
         ModuleInfoStub("_D6sidero4base10containers12dynamicarray12__ModuleInfoZ", "sidero.base.containers.dynamicarray"),
         ModuleInfoStub("_D6sidero4base10allocators10predefined12__ModuleInfoZ", "sidero.base.allocators.predefined"),
         ModuleInfoStub("_D6sidero4base11parallelism7rwmutex12__ModuleInfoZ", "sidero.base.parallelism.rwmutex"),
+        ModuleInfoStub("_D6sidero4base8datetime8duration12__ModuleInfoZ", "sidero.base.datetime.duration"),
     ];
