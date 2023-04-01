@@ -235,7 +235,10 @@ InputRange find(alias pred = "a == b", InputRange, Element)(InputRange haystack,
 /// See std.algorithm.searching, heavily modified. License: Boost.
 auto findSplit(alias pred = "a == b", R1, R2)(R1 haystack, R2 needle)
         if ((isInputRange!R1 || isDynamicArray!R1) && (isInputRange!R2 || isDynamicArray!R2)) {
-    import std.typecons : Tuple;
+    static struct Values(Args...) {
+        Args args;
+        alias args this;
+    }
 
     static struct Result(S1, S2) if ((isForwardRange!S1 || isDynamicArray!S1) && (isForwardRange!S2 || isDynamicArray!S2)) {
         this(S1 pre, S1 separator, S2 post) {
@@ -246,7 +249,7 @@ auto findSplit(alias pred = "a == b", R1, R2)(R1 haystack, R2 needle)
             asTuple = rhs;
         }
 
-        Tuple!(S1, S1, S2) asTuple;
+        Values!(S1, S1, S2) asTuple;
         static if (hasConstEmptyMember!(typeof(asTuple[1]))) {
             bool opCast(T : bool)() const {
                 return !asTuple[1].empty;
