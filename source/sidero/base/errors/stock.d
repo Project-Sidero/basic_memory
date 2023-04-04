@@ -19,4 +19,6 @@ enum {
     TimeOutException = ErrorMessage("TOE", "Timeout exception"),
     ///
     PlatformNotImplementedException = ErrorMessage("PNIE", "Platform is not implemented"),
+    ///
+    UnknownPlatformBehaviorException = ErrorMessage("UPBE", "Platform behavior is unexpected"),
 }

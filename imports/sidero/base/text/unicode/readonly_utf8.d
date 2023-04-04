@@ -24,6 +24,12 @@ struct String_UTF8 {
             shared(ptrdiff_t) refCount;
             RCAllocator allocator;
             const(void)[] original;
+
+            export ulong toHash() const @safe nothrow {
+                assert(0);
+            }
+
+            @disable bool opEquals(ref const LifeTime other) const;
         }
 
         static struct Iterator {
