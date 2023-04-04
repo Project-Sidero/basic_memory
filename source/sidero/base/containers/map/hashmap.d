@@ -391,7 +391,7 @@ export:
 }
 
 private:
-import sidero.base.parallelism.mutualexclusion : TestTestSetLockInline;
+import sidero.base.synchronization.mutualexclusion : TestTestSetLockInline;
 import sidero.base.traits : isAnyPointer;
 
 struct HashMapImpl(RealKeyType, ValueType) {

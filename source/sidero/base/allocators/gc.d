@@ -139,7 +139,7 @@ void registerGC(scope void* key, EnableFunction enable, DisableFunction disable,
 
     rwlock.pureWriteLock;
     scope (exit)
-        rwlock.writeUnlock;
+        rwlock.pureWriteUnlock;
 
     GCInfo* current = gcInfoLL;
     GCInfo** parent = &gcInfoLL;
@@ -191,7 +191,7 @@ void registerGC(scope void* key, EnableFunction enable, DisableFunction disable,
 void deregisterGC(scope void* key) nothrow {
     rwlock.pureWriteLock;
     scope (exit)
-        rwlock.writeUnlock;
+        rwlock.pureWriteUnlock;
 
     GCInfo* current = gcInfoLL;
     GCInfo** parent = &gcInfoLL;
@@ -253,7 +253,7 @@ package(sidero.base.allocators) {
 
 private:
 import sidero.base.allocators.predefined;
-import sidero.base.parallelism.rwmutex;
+import sidero.base.synchronization.rwmutex;
 
 __gshared {
     ReaderWriterLockInline rwlock;

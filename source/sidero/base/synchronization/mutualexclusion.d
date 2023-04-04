@@ -5,7 +5,7 @@ License: Artistic v2
 Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
 */
-module sidero.base.parallelism.mutualexclusion;
+module sidero.base.synchronization.mutualexclusion;
 import sidero.base.attributes;
 
 export:

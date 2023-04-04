@@ -22,7 +22,7 @@ struct AllocatorLocking(PoolAllocator) {
     enum NeedsLocking = false;
 
     private @PrettyPrintIgnore {
-        import sidero.base.parallelism.mutualexclusion : TestTestSetLockInline;
+        import sidero.base.synchronization.mutualexclusion : TestTestSetLockInline;
 
         TestTestSetLockInline mutex;
     }

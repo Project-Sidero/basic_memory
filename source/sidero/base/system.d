@@ -646,7 +646,7 @@ pragma(crt_constructor) extern (C) void initializeSystemInfo() @trusted {
 }
 
 private @hidden:
-import sidero.base.parallelism.mutualexclusion : TestTestSetLockInline;
+import sidero.base.synchronization.mutualexclusion : TestTestSetLockInline;
 
 enum {
     LOCALE_NAME_MAX_LENGTH = 85

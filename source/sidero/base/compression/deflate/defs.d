@@ -31,7 +31,7 @@ enum DeflateCompressionRate {
 
 package(sidero.base.compression):
 import sidero.base.compression.huffman;
-import sidero.base.parallelism.mutualexclusion;
+import sidero.base.synchronization.mutualexclusion;
 import sidero.base.errors;
 
 struct TreeState {

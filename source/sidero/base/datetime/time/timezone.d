@@ -604,7 +604,7 @@ export @safe nothrow @nogc:
 }
 
 private:
-import sidero.base.parallelism.mutualexclusion : TestTestSetLockInline;
+import sidero.base.synchronization.mutualexclusion : TestTestSetLockInline;
 import sidero.base.datetime.time.internal.iana;
 import sidero.base.datetime.time.internal.posix;
 import sidero.base.datetime.time.internal.windows;

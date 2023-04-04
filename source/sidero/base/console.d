@@ -1155,7 +1155,7 @@ pragma(crt_destructor) extern (C) void deinitializeConsole() @trusted {
 }
 
 private @hidden:
-import sidero.base.parallelism.mutualexclusion;
+import sidero.base.synchronization.mutualexclusion;
 import core.stdc.stdio : FILE;
 
 __gshared {

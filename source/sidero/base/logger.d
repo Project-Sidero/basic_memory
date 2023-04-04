@@ -588,7 +588,7 @@ version (Windows) {
 
 private:
 import sidero.base.containers.map.concurrenthashmap;
-import sidero.base.parallelism.mutualexclusion : TestTestSetLockInline;
+import sidero.base.synchronization.mutualexclusion : TestTestSetLockInline;
 import sidero.base.internal.filesystem;
 import sidero.base.datetime;
 

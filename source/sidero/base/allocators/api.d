@@ -11,7 +11,7 @@ import std.typecons : Ternary;
 
 ///
 private {
-    import sidero.base.parallelism.mutualexclusion;
+    import sidero.base.synchronization.mutualexclusion;
 
     __gshared TestTestSetLockInline globalAllocatorLock;
     __gshared RCAllocator globalAllocator_;
