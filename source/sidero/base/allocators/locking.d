@@ -112,15 +112,18 @@ scope @safe @nogc pure nothrow:
     Hooks allocations and add then remove ranges as allocations/deallocations/reallocations occur.
  */
 struct GCAllocatorLock(PoolAllocator) {
-    private import sidero.base.allocators.gc;
+    import sidero.base.allocators.gc;
+    import sidero.base.allocators.buffers.freetree : AllocatedTree;
 
     ///
     PoolAllocator poolAllocator;
 
+    private AllocatedTree!() allocatedTree;
+
     ///
     enum NeedsLocking = false;
 
-scope @safe @nogc pure nothrow:
+scope @safe @nogc nothrow:
 
     ///
     this(return scope ref GCAllocatorLock other) @trusted {
@@ -130,7 +133,20 @@ scope @safe @nogc pure nothrow:
 
         this.poolAllocator = other.poolAllocator;
         other.poolAllocator = PoolAllocator.init;
+
+        this.allocatedTree = other.allocatedTree;
+        other.allocatedTree = AllocatedTree!().init;
     }
+
+    ~this() {
+        readLockImpl;
+        scope (exit)
+            readUnlockImpl;
+
+        allocatedTree.deallocateAll((array) { removeRangeImpl(array); return true; });
+    }
+
+pure:
 
     ///
     bool isNull() const {
@@ -145,8 +161,10 @@ scope @safe @nogc pure nothrow:
 
         void[] got = poolAllocator.allocate(size, ti);
 
-        if (got !is null)
+        if (got !is null) {
+            allocatedTree.store(got);
             addRangeImpl(got, ti);
+        }
 
         return got;
     }
@@ -162,7 +180,10 @@ scope @safe @nogc pure nothrow:
         bool got = poolAllocator.reallocate(array, newSize);
 
         if (got) {
+            allocatedTree.remove(original);
             removeRangeImpl(original);
+
+            allocatedTree.store(array);
             addRangeImpl(array);
         }
 
@@ -178,6 +199,7 @@ scope @safe @nogc pure nothrow:
         scope (exit)
             readUnlockImpl;
 
+        allocatedTree.store(array);
         removeRangeImpl(array);
         return poolAllocator.deallocate(array);
     }
@@ -200,6 +222,7 @@ scope @safe @nogc pure nothrow:
             scope (exit)
                 readUnlockImpl;
 
+            allocatedTree.deallocateAll((array) { removeRangeImpl(array); return true; });
             return poolAllocator.deallocateAll();
         }
     }
