@@ -3,100 +3,100 @@ module sidero.base.internal.unicode.scripts;
 // Generated do not modify
 export extern(C) immutable(ubyte) sidero_utf_lut_getScript(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x0 && input <= 0xD7FB) {
-        return cast(ubyte)LUT_9C76A4C[0 + (input - 0)];
+        return cast(ubyte)LUT_9C76A4C[cast(size_t)(0 + (input - 0x0))];
     } else if (input >= 0xF900 && input <= 0x16F9F) {
         if (input <= 0x13438) {
             if (input <= 0x101FD)
-                return cast(ubyte)LUT_9C76A4C[55292 + (input - 63744)];
+                return cast(ubyte)LUT_9C76A4C[cast(size_t)(55292 + (input - 0xF900))];
             else if (input >= 0x10280 && input <= 0x105BC)
-                return cast(ubyte)LUT_9C76A4C[57594 + (input - 66176)];
+                return cast(ubyte)LUT_9C76A4C[cast(size_t)(57594 + (input - 0x10280))];
             else if (input >= 0x10600 && input <= 0x107BA)
-                return cast(ubyte)LUT_9C76A4C[58423 + (input - 67072)];
+                return cast(ubyte)LUT_9C76A4C[cast(size_t)(58423 + (input - 0x10600))];
             else if (input >= 0x10800 && input <= 0x1093F)
-                return cast(ubyte)LUT_9C76A4C[58866 + (input - 67584)];
+                return cast(ubyte)LUT_9C76A4C[cast(size_t)(58866 + (input - 0x10800))];
             else if (input >= 0x10980 && input <= 0x10BAF)
-                return cast(ubyte)LUT_9C76A4C[59186 + (input - 67968)];
+                return cast(ubyte)LUT_9C76A4C[cast(size_t)(59186 + (input - 0x10980))];
             else if (input >= 0x10C00 && input <= 0x10D39)
-                return cast(ubyte)LUT_9C76A4C[59746 + (input - 68608)];
+                return cast(ubyte)LUT_9C76A4C[cast(size_t)(59746 + (input - 0x10C00))];
             else if (input >= 0x10E60 && input <= 0x10EB1)
-                return cast(ubyte)LUT_9C76A4C[60060 + (input - 69216)];
+                return cast(ubyte)LUT_9C76A4C[cast(size_t)(60060 + (input - 0x10E60))];
             else if (input >= 0x10F00 && input <= 0x1123E)
-                return cast(ubyte)LUT_9C76A4C[60142 + (input - 69376)];
+                return cast(ubyte)LUT_9C76A4C[cast(size_t)(60142 + (input - 0x10F00))];
             else if (input >= 0x11280 && input <= 0x11374)
-                return cast(ubyte)LUT_9C76A4C[60973 + (input - 70272)];
+                return cast(ubyte)LUT_9C76A4C[cast(size_t)(60973 + (input - 0x11280))];
             else if (input >= 0x11400 && input <= 0x114D9)
-                return cast(ubyte)LUT_9C76A4C[61218 + (input - 70656)];
+                return cast(ubyte)LUT_9C76A4C[cast(size_t)(61218 + (input - 0x11400))];
             else if (input >= 0x11580 && input <= 0x11746)
-                return cast(ubyte)LUT_9C76A4C[61436 + (input - 71040)];
+                return cast(ubyte)LUT_9C76A4C[cast(size_t)(61436 + (input - 0x11580))];
             else if (input >= 0x11800 && input <= 0x1183B)
                 return cast(ubyte)97;
             else if (input >= 0x118A0 && input <= 0x11959)
-                return cast(ubyte)LUT_9C76A4C[61891 + (input - 71840)];
+                return cast(ubyte)LUT_9C76A4C[cast(size_t)(61891 + (input - 0x118A0))];
             else if (input >= 0x119A0 && input <= 0x11AF8)
-                return cast(ubyte)LUT_9C76A4C[62077 + (input - 72096)];
+                return cast(ubyte)LUT_9C76A4C[cast(size_t)(62077 + (input - 0x119A0))];
             else if (input >= 0x11C00 && input <= 0x11CB6)
-                return cast(ubyte)LUT_9C76A4C[62422 + (input - 72704)];
+                return cast(ubyte)LUT_9C76A4C[cast(size_t)(62422 + (input - 0x11C00))];
             else if (input >= 0x11D00 && input <= 0x11DA9)
-                return cast(ubyte)LUT_9C76A4C[62605 + (input - 72960)];
+                return cast(ubyte)LUT_9C76A4C[cast(size_t)(62605 + (input - 0x11D00))];
             else if (input >= 0x11EE0 && input <= 0x11EF8)
                 return cast(ubyte)10;
             else if (input >= 0x11FB0 && input <= 0x12399)
-                return cast(ubyte)LUT_9C76A4C[62775 + (input - 73648)];
+                return cast(ubyte)LUT_9C76A4C[cast(size_t)(62775 + (input - 0x11FB0))];
             else if (input >= 0x12400 && input <= 0x12543)
-                return cast(ubyte)LUT_9C76A4C[63777 + (input - 74752)];
+                return cast(ubyte)LUT_9C76A4C[cast(size_t)(63777 + (input - 0x12400))];
             else if (input >= 0x12F90)
-                return cast(ubyte)LUT_9C76A4C[64101 + (input - 77712)];
+                return cast(ubyte)LUT_9C76A4C[cast(size_t)(64101 + (input - 0x12F90))];
         } else if (input >= 0x14400) {
             if (input <= 0x14646)
                 return cast(ubyte)78;
             else if (input >= 0x16800 && input <= 0x16B8F)
-                return cast(ubyte)LUT_9C76A4C[65294 + (input - 92160)];
+                return cast(ubyte)LUT_9C76A4C[cast(size_t)(65294 + (input - 0x16800))];
             else if (input >= 0x16E40 && input <= 0x16E9A)
                 return cast(ubyte)17;
             else if (input >= 0x16F00)
-                return cast(ubyte)LUT_9C76A4C[66206 + (input - 93952)];
+                return cast(ubyte)LUT_9C76A4C[cast(size_t)(66206 + (input - 0x16F00))];
         }
     } else if (input >= 0x16FE0 && input <= 0x1FBF9) {
         if (input == 0xFFFF) {
             if (input <= 0x18D08)
-                return cast(ubyte)LUT_9C76A4C[66366 + (input - 94176)];
+                return cast(ubyte)LUT_9C76A4C[cast(size_t)(66366 + (input - 0x16FE0))];
             else if (input >= 0x1AFF0 && input <= 0x1B2FB)
-                return cast(ubyte)LUT_9C76A4C[73831 + (input - 110576)];
+                return cast(ubyte)LUT_9C76A4C[cast(size_t)(73831 + (input - 0x1AFF0))];
             else if (input >= 0x1BC00)
-                return cast(ubyte)LUT_9C76A4C[74611 + (input - 113664)];
+                return cast(ubyte)LUT_9C76A4C[cast(size_t)(74611 + (input - 0x1BC00))];
         } else if (input >= 0x1CF00) {
             if (input <= 0x1D245)
-                return cast(ubyte)LUT_9C76A4C[74775 + (input - 118528)];
+                return cast(ubyte)LUT_9C76A4C[cast(size_t)(74775 + (input - 0x1CF00))];
             else if (input >= 0x1D2E0 && input <= 0x1D378)
-                return cast(ubyte)LUT_9C76A4C[75613 + (input - 119520)];
+                return cast(ubyte)LUT_9C76A4C[cast(size_t)(75613 + (input - 0x1D2E0))];
             else if (input >= 0x1D400 && input <= 0x1DAAF)
-                return cast(ubyte)LUT_9C76A4C[75766 + (input - 119808)];
+                return cast(ubyte)LUT_9C76A4C[cast(size_t)(75766 + (input - 0x1D400))];
             else if (input >= 0x1DF00 && input <= 0x1DF1E)
                 return cast(ubyte)30;
             else if (input >= 0x1E000 && input <= 0x1E02A)
-                return cast(ubyte)LUT_9C76A4C[77478 + (input - 122880)];
+                return cast(ubyte)LUT_9C76A4C[cast(size_t)(77478 + (input - 0x1E000))];
             else if (input >= 0x1E100 && input <= 0x1E14F)
-                return cast(ubyte)LUT_9C76A4C[77521 + (input - 123136)];
+                return cast(ubyte)LUT_9C76A4C[cast(size_t)(77521 + (input - 0x1E100))];
             else if (input >= 0x1E290 && input <= 0x1E2FF)
-                return cast(ubyte)LUT_9C76A4C[77601 + (input - 123536)];
+                return cast(ubyte)LUT_9C76A4C[cast(size_t)(77601 + (input - 0x1E290))];
             else if (input >= 0x1E7E0 && input <= 0x1E95F)
-                return cast(ubyte)LUT_9C76A4C[77713 + (input - 124896)];
+                return cast(ubyte)LUT_9C76A4C[cast(size_t)(77713 + (input - 0x1E7E0))];
             else if (input >= 0x1EC71 && input <= 0x1ECB4)
                 return cast(ubyte)80;
             else if (input >= 0x1ED01 && input <= 0x1ED3D)
                 return cast(ubyte)80;
             else if (input >= 0x1EE00 && input <= 0x1EEF1)
-                return cast(ubyte)LUT_9C76A4C[78097 + (input - 126464)];
+                return cast(ubyte)LUT_9C76A4C[cast(size_t)(78097 + (input - 0x1EE00))];
             else if (input >= 0x1F000 && input <= 0x1F265)
-                return cast(ubyte)LUT_9C76A4C[78339 + (input - 126976)];
+                return cast(ubyte)LUT_9C76A4C[cast(size_t)(78339 + (input - 0x1F000))];
             else if (input >= 0x1F300 && input <= 0x1F8B1)
-                return cast(ubyte)LUT_9C76A4C[78953 + (input - 127744)];
+                return cast(ubyte)LUT_9C76A4C[cast(size_t)(78953 + (input - 0x1F300))];
             else if (input >= 0x1F900)
-                return cast(ubyte)LUT_9C76A4C[80411 + (input - 129280)];
+                return cast(ubyte)LUT_9C76A4C[cast(size_t)(80411 + (input - 0x1F900))];
         }
     } else if (input >= 0x20000 && input <= 0x2FA1D) {
         if (input <= 0x2EBE0) {
-            return cast(ubyte)LUT_9C76A4C[81173 + (input - 131072)];
+            return cast(ubyte)LUT_9C76A4C[cast(size_t)(81173 + (input - 0x20000))];
         } else if (input >= 0x2F800) {
             return cast(ubyte)71;
         }
@@ -104,7 +104,7 @@ export extern(C) immutable(ubyte) sidero_utf_lut_getScript(dchar input) @trusted
         return cast(ubyte)71;
     } else if (input >= 0xE0001 && input <= 0xE01EF) {
         if (input <= 0xE007F)
-            return cast(ubyte)LUT_9C76A4C[141558 + (input - 917505)];
+            return cast(ubyte)LUT_9C76A4C[cast(size_t)(141558 + (input - 0xE0001))];
         else if (input >= 0xE0100)
             return cast(ubyte)42;
     }
@@ -116,100 +116,100 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptUnknown(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x0 && input <= 0xD7FB) {
-        return cast(bool)LUT_E6CF7FFC[0 + (input - 0)];
+        return cast(bool)LUT_E6CF7FFC[cast(size_t)(0 + (input - 0x0))];
     } else if (input >= 0xF900 && input <= 0x16F9F) {
         if (input <= 0x13438) {
             if (input <= 0x101FD)
-                return cast(bool)LUT_E6CF7FFC[55292 + (input - 63744)];
+                return cast(bool)LUT_E6CF7FFC[cast(size_t)(55292 + (input - 0xF900))];
             else if (input >= 0x10280 && input <= 0x105BC)
-                return cast(bool)LUT_E6CF7FFC[57594 + (input - 66176)];
+                return cast(bool)LUT_E6CF7FFC[cast(size_t)(57594 + (input - 0x10280))];
             else if (input >= 0x10600 && input <= 0x107BA)
-                return cast(bool)LUT_E6CF7FFC[58423 + (input - 67072)];
+                return cast(bool)LUT_E6CF7FFC[cast(size_t)(58423 + (input - 0x10600))];
             else if (input >= 0x10800 && input <= 0x1093F)
-                return cast(bool)LUT_E6CF7FFC[58866 + (input - 67584)];
+                return cast(bool)LUT_E6CF7FFC[cast(size_t)(58866 + (input - 0x10800))];
             else if (input >= 0x10980 && input <= 0x10BAF)
-                return cast(bool)LUT_E6CF7FFC[59186 + (input - 67968)];
+                return cast(bool)LUT_E6CF7FFC[cast(size_t)(59186 + (input - 0x10980))];
             else if (input >= 0x10C00 && input <= 0x10D39)
-                return cast(bool)LUT_E6CF7FFC[59746 + (input - 68608)];
+                return cast(bool)LUT_E6CF7FFC[cast(size_t)(59746 + (input - 0x10C00))];
             else if (input >= 0x10E60 && input <= 0x10EB1)
-                return cast(bool)LUT_E6CF7FFC[60060 + (input - 69216)];
+                return cast(bool)LUT_E6CF7FFC[cast(size_t)(60060 + (input - 0x10E60))];
             else if (input >= 0x10F00 && input <= 0x1123E)
-                return cast(bool)LUT_E6CF7FFC[60142 + (input - 69376)];
+                return cast(bool)LUT_E6CF7FFC[cast(size_t)(60142 + (input - 0x10F00))];
             else if (input >= 0x11280 && input <= 0x11374)
-                return cast(bool)LUT_E6CF7FFC[60973 + (input - 70272)];
+                return cast(bool)LUT_E6CF7FFC[cast(size_t)(60973 + (input - 0x11280))];
             else if (input >= 0x11400 && input <= 0x114D9)
-                return cast(bool)LUT_E6CF7FFC[61218 + (input - 70656)];
+                return cast(bool)LUT_E6CF7FFC[cast(size_t)(61218 + (input - 0x11400))];
             else if (input >= 0x11580 && input <= 0x11746)
-                return cast(bool)LUT_E6CF7FFC[61436 + (input - 71040)];
+                return cast(bool)LUT_E6CF7FFC[cast(size_t)(61436 + (input - 0x11580))];
             else if (input >= 0x11800 && input <= 0x1183B)
                 return cast(bool)false;
             else if (input >= 0x118A0 && input <= 0x11959)
-                return cast(bool)LUT_E6CF7FFC[61891 + (input - 71840)];
+                return cast(bool)LUT_E6CF7FFC[cast(size_t)(61891 + (input - 0x118A0))];
             else if (input >= 0x119A0 && input <= 0x11AF8)
-                return cast(bool)LUT_E6CF7FFC[62077 + (input - 72096)];
+                return cast(bool)LUT_E6CF7FFC[cast(size_t)(62077 + (input - 0x119A0))];
             else if (input >= 0x11C00 && input <= 0x11CB6)
-                return cast(bool)LUT_E6CF7FFC[62422 + (input - 72704)];
+                return cast(bool)LUT_E6CF7FFC[cast(size_t)(62422 + (input - 0x11C00))];
             else if (input >= 0x11D00 && input <= 0x11DA9)
-                return cast(bool)LUT_E6CF7FFC[62605 + (input - 72960)];
+                return cast(bool)LUT_E6CF7FFC[cast(size_t)(62605 + (input - 0x11D00))];
             else if (input >= 0x11EE0 && input <= 0x11EF8)
                 return cast(bool)false;
             else if (input >= 0x11FB0 && input <= 0x12399)
-                return cast(bool)LUT_E6CF7FFC[62775 + (input - 73648)];
+                return cast(bool)LUT_E6CF7FFC[cast(size_t)(62775 + (input - 0x11FB0))];
             else if (input >= 0x12400 && input <= 0x12543)
-                return cast(bool)LUT_E6CF7FFC[63777 + (input - 74752)];
+                return cast(bool)LUT_E6CF7FFC[cast(size_t)(63777 + (input - 0x12400))];
             else if (input >= 0x12F90)
-                return cast(bool)LUT_E6CF7FFC[64101 + (input - 77712)];
+                return cast(bool)LUT_E6CF7FFC[cast(size_t)(64101 + (input - 0x12F90))];
         } else if (input >= 0x14400) {
             if (input <= 0x14646)
                 return cast(bool)false;
             else if (input >= 0x16800 && input <= 0x16B8F)
-                return cast(bool)LUT_E6CF7FFC[65294 + (input - 92160)];
+                return cast(bool)LUT_E6CF7FFC[cast(size_t)(65294 + (input - 0x16800))];
             else if (input >= 0x16E40 && input <= 0x16E9A)
                 return cast(bool)false;
             else if (input >= 0x16F00)
-                return cast(bool)LUT_E6CF7FFC[66206 + (input - 93952)];
+                return cast(bool)LUT_E6CF7FFC[cast(size_t)(66206 + (input - 0x16F00))];
         }
     } else if (input >= 0x16FE0 && input <= 0x1FBF9) {
         if (input == 0xFFFF) {
             if (input <= 0x18D08)
-                return cast(bool)LUT_E6CF7FFC[66366 + (input - 94176)];
+                return cast(bool)LUT_E6CF7FFC[cast(size_t)(66366 + (input - 0x16FE0))];
             else if (input >= 0x1AFF0 && input <= 0x1B2FB)
-                return cast(bool)LUT_E6CF7FFC[73831 + (input - 110576)];
+                return cast(bool)LUT_E6CF7FFC[cast(size_t)(73831 + (input - 0x1AFF0))];
             else if (input >= 0x1BC00)
-                return cast(bool)LUT_E6CF7FFC[74611 + (input - 113664)];
+                return cast(bool)LUT_E6CF7FFC[cast(size_t)(74611 + (input - 0x1BC00))];
         } else if (input >= 0x1CF00) {
             if (input <= 0x1D245)
-                return cast(bool)LUT_E6CF7FFC[74775 + (input - 118528)];
+                return cast(bool)LUT_E6CF7FFC[cast(size_t)(74775 + (input - 0x1CF00))];
             else if (input >= 0x1D2E0 && input <= 0x1D378)
-                return cast(bool)LUT_E6CF7FFC[75613 + (input - 119520)];
+                return cast(bool)LUT_E6CF7FFC[cast(size_t)(75613 + (input - 0x1D2E0))];
             else if (input >= 0x1D400 && input <= 0x1DAAF)
-                return cast(bool)LUT_E6CF7FFC[75766 + (input - 119808)];
+                return cast(bool)LUT_E6CF7FFC[cast(size_t)(75766 + (input - 0x1D400))];
             else if (input >= 0x1DF00 && input <= 0x1DF1E)
                 return cast(bool)false;
             else if (input >= 0x1E000 && input <= 0x1E02A)
-                return cast(bool)LUT_E6CF7FFC[77478 + (input - 122880)];
+                return cast(bool)LUT_E6CF7FFC[cast(size_t)(77478 + (input - 0x1E000))];
             else if (input >= 0x1E100 && input <= 0x1E14F)
-                return cast(bool)LUT_E6CF7FFC[77521 + (input - 123136)];
+                return cast(bool)LUT_E6CF7FFC[cast(size_t)(77521 + (input - 0x1E100))];
             else if (input >= 0x1E290 && input <= 0x1E2FF)
-                return cast(bool)LUT_E6CF7FFC[77601 + (input - 123536)];
+                return cast(bool)LUT_E6CF7FFC[cast(size_t)(77601 + (input - 0x1E290))];
             else if (input >= 0x1E7E0 && input <= 0x1E95F)
-                return cast(bool)LUT_E6CF7FFC[77713 + (input - 124896)];
+                return cast(bool)LUT_E6CF7FFC[cast(size_t)(77713 + (input - 0x1E7E0))];
             else if (input >= 0x1EC71 && input <= 0x1ECB4)
                 return cast(bool)false;
             else if (input >= 0x1ED01 && input <= 0x1ED3D)
                 return cast(bool)false;
             else if (input >= 0x1EE00 && input <= 0x1EEF1)
-                return cast(bool)LUT_E6CF7FFC[78097 + (input - 126464)];
+                return cast(bool)LUT_E6CF7FFC[cast(size_t)(78097 + (input - 0x1EE00))];
             else if (input >= 0x1F000 && input <= 0x1F265)
-                return cast(bool)LUT_E6CF7FFC[78339 + (input - 126976)];
+                return cast(bool)LUT_E6CF7FFC[cast(size_t)(78339 + (input - 0x1F000))];
             else if (input >= 0x1F300 && input <= 0x1F8B1)
-                return cast(bool)LUT_E6CF7FFC[78953 + (input - 127744)];
+                return cast(bool)LUT_E6CF7FFC[cast(size_t)(78953 + (input - 0x1F300))];
             else if (input >= 0x1F900)
-                return cast(bool)LUT_E6CF7FFC[80411 + (input - 129280)];
+                return cast(bool)LUT_E6CF7FFC[cast(size_t)(80411 + (input - 0x1F900))];
         }
     } else if (input >= 0x20000 && input <= 0x2FA1D) {
         if (input <= 0x2EBE0) {
-            return cast(bool)LUT_E6CF7FFC[81173 + (input - 131072)];
+            return cast(bool)LUT_E6CF7FFC[cast(size_t)(81173 + (input - 0x20000))];
         } else if (input >= 0x2F800) {
             return cast(bool)false;
         }
@@ -217,7 +217,7 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptUnknown(dchar input) @tr
         return cast(bool)false;
     } else if (input >= 0xE0001 && input <= 0xE01EF) {
         if (input <= 0xE007F)
-            return cast(bool)LUT_E6CF7FFC[141558 + (input - 917505)];
+            return cast(bool)LUT_E6CF7FFC[cast(size_t)(141558 + (input - 0xE0001))];
         else if (input >= 0xE0100)
             return cast(bool)false;
     }
@@ -229,7 +229,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptOld_Hungarian(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x10C80 && input <= 0x10CFF)
-        return cast(bool)LUT_1FA9D118[0 + (input - 68736)];
+        return cast(bool)LUT_1FA9D118[cast(size_t)(0 + (input - 0x10C80))];
     return typeof(return).init;
 }
 private {
@@ -240,7 +240,7 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptCoptic(dchar input) @tru
     if (input >= 0x3E2 && input <= 0x3EF)
         return cast(bool)true;
     else if (input >= 0x2C80 && input <= 0x2CFF)
-        return cast(bool)LUT_7C0369F8[0 + (input - 11392)];
+        return cast(bool)LUT_7C0369F8[cast(size_t)(0 + (input - 0x2C80))];
     return typeof(return).init;
 }
 private {
@@ -256,7 +256,7 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptOl_Chiki(dchar input) @t
 export extern(C) immutable(bool) sidero_utf_lut_isScriptCyrillic(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x400 && input <= 0x2DFF) {
         if (input <= 0x52F)
-            return cast(bool)LUT_F77B53E6[0 + (input - 1024)];
+            return cast(bool)LUT_F77B53E6[cast(size_t)(0 + (input - 0x400))];
         else if (input >= 0x1C80 && input <= 0x1C88)
             return cast(bool)true;
         else if (input == 0x1D2B)
@@ -285,7 +285,7 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptThaana(dchar input) @tru
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptInscriptional_Parthian(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x10B40 && input <= 0x10B5F)
-        return cast(bool)LUT_4529E28F[0 + (input - 68416)];
+        return cast(bool)LUT_4529E28F[cast(size_t)(0 + (input - 0x10B40))];
     return typeof(return).init;
 }
 private {
@@ -294,7 +294,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptNabataean(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x10880 && input <= 0x108AF)
-        return cast(bool)LUT_9698C3F2[0 + (input - 67712)];
+        return cast(bool)LUT_9698C3F2[cast(size_t)(0 + (input - 0x10880))];
     return typeof(return).init;
 }
 private {
@@ -321,7 +321,7 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptMakasar(dchar input) @tr
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptSiddham(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x11580 && input <= 0x115DD)
-        return cast(bool)LUT_6049FAB7[0 + (input - 71040)];
+        return cast(bool)LUT_6049FAB7[cast(size_t)(0 + (input - 0x11580))];
     return typeof(return).init;
 }
 private {
@@ -330,7 +330,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptOld_Persian(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x103A0 && input <= 0x103D5)
-        return cast(bool)LUT_6C011E81[0 + (input - 66464)];
+        return cast(bool)LUT_6C011E81[cast(size_t)(0 + (input - 0x103A0))];
     return typeof(return).init;
 }
 private {
@@ -339,7 +339,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptImperial_Aramaic(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x10840 && input <= 0x1085F)
-        return cast(bool)LUT_C8D18EAB[0 + (input - 67648)];
+        return cast(bool)LUT_C8D18EAB[cast(size_t)(0 + (input - 0x10840))];
     return typeof(return).init;
 }
 private {
@@ -366,7 +366,7 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptDeseret(dchar input) @tr
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptKaithi(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x11080 && input <= 0x110CD)
-        return cast(bool)LUT_D780113A[0 + (input - 69760)];
+        return cast(bool)LUT_D780113A[cast(size_t)(0 + (input - 0x11080))];
     return typeof(return).init;
 }
 private {
@@ -381,7 +381,7 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptMedefaidrin(dchar input)
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptKayah_Li(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0xA900 && input <= 0xA92F)
-        return cast(bool)LUT_2597166A[0 + (input - 43264)];
+        return cast(bool)LUT_2597166A[cast(size_t)(0 + (input - 0xA900))];
     return typeof(return).init;
 }
 private {
@@ -390,10 +390,10 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptHiragana(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x3041 && input <= 0x309F) {
-        return cast(bool)LUT_1A0FF87F[0 + (input - 12353)];
+        return cast(bool)LUT_1A0FF87F[cast(size_t)(0 + (input - 0x3041))];
     } else if (input >= 0x1B001 && input <= 0x1F200) {
         if (input <= 0x1B152)
-            return cast(bool)LUT_1A0FF87F[95 + (input - 110593)];
+            return cast(bool)LUT_1A0FF87F[cast(size_t)(95 + (input - 0x1B001))];
         else if (input == 0x1F200)
             return cast(bool)true;
     }
@@ -405,7 +405,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptAhom(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x11700 && input <= 0x11746)
-        return cast(bool)LUT_352E72E4[0 + (input - 71424)];
+        return cast(bool)LUT_352E72E4[cast(size_t)(0 + (input - 0x11700))];
     return typeof(return).init;
 }
 private {
@@ -414,7 +414,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptDevanagari(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x900 && input <= 0x97F) {
-        return cast(bool)LUT_382EAB7[0 + (input - 2304)];
+        return cast(bool)LUT_382EAB7[cast(size_t)(0 + (input - 0x900))];
     } else if (input >= 0xA8E0 && input <= 0xA8FF) {
         return cast(bool)true;
     }
@@ -426,7 +426,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptTibetan(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0xF00 && input <= 0xFDA)
-        return cast(bool)LUT_FC4D8668[0 + (input - 3840)];
+        return cast(bool)LUT_FC4D8668[cast(size_t)(0 + (input - 0xF00))];
     return typeof(return).init;
 }
 private {
@@ -435,7 +435,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptNko(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x7C0 && input <= 0x7FF)
-        return cast(bool)LUT_1B9ECFC8[0 + (input - 1984)];
+        return cast(bool)LUT_1B9ECFC8[cast(size_t)(0 + (input - 0x7C0))];
     return typeof(return).init;
 }
 private {
@@ -444,7 +444,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptBrahmi(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x11000 && input <= 0x1107F)
-        return cast(bool)LUT_5A53EABD[0 + (input - 69632)];
+        return cast(bool)LUT_5A53EABD[cast(size_t)(0 + (input - 0x11000))];
     return typeof(return).init;
 }
 private {
@@ -453,7 +453,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptOsage(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x104B0 && input <= 0x104FB)
-        return cast(bool)LUT_C36A233[0 + (input - 66736)];
+        return cast(bool)LUT_C36A233[cast(size_t)(0 + (input - 0x104B0))];
     return typeof(return).init;
 }
 private {
@@ -472,7 +472,7 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptCuneiform(dchar input) @
     if (input >= 0x12000 && input <= 0x12399)
         return cast(bool)true;
     else if (input >= 0x12400 && input <= 0x12543)
-        return cast(bool)LUT_7E3F3F81[0 + (input - 74752)];
+        return cast(bool)LUT_7E3F3F81[cast(size_t)(0 + (input - 0x12400))];
     return typeof(return).init;
 }
 private {
@@ -481,7 +481,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptTakri(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x11680 && input <= 0x116C9)
-        return cast(bool)LUT_E47F0AB7[0 + (input - 71296)];
+        return cast(bool)LUT_E47F0AB7[cast(size_t)(0 + (input - 0x11680))];
     return typeof(return).init;
 }
 private {
@@ -498,30 +498,30 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptLatin(dchar input) @trus
     if (input >= 0x41 && input <= 0xFF5A) {
         if (input <= 0x2C7F) {
             if (input <= 0x2E4)
-                return cast(bool)LUT_D4A90BD3[0 + (input - 65)];
+                return cast(bool)LUT_D4A90BD3[cast(size_t)(0 + (input - 0x41))];
             else if (input >= 0x1D00 && input <= 0x1DBE)
-                return cast(bool)LUT_D4A90BD3[676 + (input - 7424)];
+                return cast(bool)LUT_D4A90BD3[cast(size_t)(676 + (input - 0x1D00))];
             else if (input >= 0x1E00 && input <= 0x1EFF)
                 return cast(bool)true;
             else if (input >= 0x2071 && input <= 0x209C)
-                return cast(bool)LUT_D4A90BD3[867 + (input - 8305)];
+                return cast(bool)LUT_D4A90BD3[cast(size_t)(867 + (input - 0x2071))];
             else if (input >= 0x212A && input <= 0x2188)
-                return cast(bool)LUT_D4A90BD3[911 + (input - 8490)];
+                return cast(bool)LUT_D4A90BD3[cast(size_t)(911 + (input - 0x212A))];
             else if (input >= 0x2C60)
                 return cast(bool)true;
         } else if (input >= 0xA722) {
             if (input <= 0xA7FF)
-                return cast(bool)LUT_D4A90BD3[1006 + (input - 42786)];
+                return cast(bool)LUT_D4A90BD3[cast(size_t)(1006 + (input - 0xA722))];
             else if (input >= 0xAB30 && input <= 0xAB69)
-                return cast(bool)LUT_D4A90BD3[1228 + (input - 43824)];
+                return cast(bool)LUT_D4A90BD3[cast(size_t)(1228 + (input - 0xAB30))];
             else if (input >= 0xFB00 && input <= 0xFB06)
                 return cast(bool)true;
             else if (input >= 0xFF21)
-                return cast(bool)LUT_D4A90BD3[1286 + (input - 65313)];
+                return cast(bool)LUT_D4A90BD3[cast(size_t)(1286 + (input - 0xFF21))];
         }
     } else if (input >= 0x10780 && input <= 0x1DF1E) {
         if (input <= 0x107BA) {
-            return cast(bool)LUT_D4A90BD3[1344 + (input - 67456)];
+            return cast(bool)LUT_D4A90BD3[cast(size_t)(1344 + (input - 0x10780))];
         } else if (input >= 0x1DF00) {
             return cast(bool)true;
         }
@@ -540,7 +540,7 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptHanunoo(dchar input) @tr
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptLimbu(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x1900 && input <= 0x194F)
-        return cast(bool)LUT_71E4BE89[0 + (input - 6400)];
+        return cast(bool)LUT_71E4BE89[cast(size_t)(0 + (input - 0x1900))];
     return typeof(return).init;
 }
 private {
@@ -549,7 +549,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptSaurashtra(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0xA880 && input <= 0xA8D9)
-        return cast(bool)LUT_F4275E96[0 + (input - 43136)];
+        return cast(bool)LUT_F4275E96[cast(size_t)(0 + (input - 0xA880))];
     return typeof(return).init;
 }
 private {
@@ -567,7 +567,7 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptLisu(dchar input) @trust
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptEgyptian_Hieroglyphs(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x13000 && input <= 0x13438)
-        return cast(bool)LUT_7E69C3AF[0 + (input - 77824)];
+        return cast(bool)LUT_7E69C3AF[cast(size_t)(0 + (input - 0x13000))];
     return typeof(return).init;
 }
 private {
@@ -588,7 +588,7 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptPalmyrene(dchar input) @
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptTagbanwa(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x1760 && input <= 0x1773)
-        return cast(bool)LUT_B763095E[0 + (input - 5984)];
+        return cast(bool)LUT_B763095E[cast(size_t)(0 + (input - 0x1760))];
     return typeof(return).init;
 }
 private {
@@ -597,7 +597,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptOld_Italic(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x10300 && input <= 0x1032F)
-        return cast(bool)LUT_F48E572A[0 + (input - 66304)];
+        return cast(bool)LUT_F48E572A[cast(size_t)(0 + (input - 0x10300))];
     return typeof(return).init;
 }
 private {
@@ -606,7 +606,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptCaucasian_Albanian(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x10530 && input <= 0x1056F)
-        return cast(bool)LUT_374F86AD[0 + (input - 66864)];
+        return cast(bool)LUT_374F86AD[cast(size_t)(0 + (input - 0x10530))];
     return typeof(return).init;
 }
 private {
@@ -615,7 +615,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptMalayalam(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0xD00 && input <= 0xD7F)
-        return cast(bool)LUT_FB6E00FF[0 + (input - 3328)];
+        return cast(bool)LUT_FB6E00FF[cast(size_t)(0 + (input - 0xD00))];
     return typeof(return).init;
 }
 private {
@@ -630,13 +630,13 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptInherited(dchar input) @
             else if (input >= 0x485 && input <= 0x486)
                 return cast(bool)true;
             else if (input >= 0x64B && input <= 0x670)
-                return cast(bool)LUT_49CFB5F8[0 + (input - 1611)];
+                return cast(bool)LUT_49CFB5F8[cast(size_t)(0 + (input - 0x64B))];
             else if (input >= 0x951 && input <= 0x954)
                 return cast(bool)true;
             else if (input >= 0x1AB0 && input <= 0x1ACE)
                 return cast(bool)true;
             else if (input >= 0x1CD0 && input <= 0x1CF9)
-                return cast(bool)LUT_49CFB5F8[38 + (input - 7376)];
+                return cast(bool)LUT_49CFB5F8[cast(size_t)(38 + (input - 0x1CD0))];
             else if (input >= 0x1DC0 && input <= 0x1DFF)
                 return cast(bool)true;
             else if (input >= 0x200C && input <= 0x200D)
@@ -648,7 +648,7 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptInherited(dchar input) @
             else if (input >= 0x3099)
                 return cast(bool)true;
         } else if (input >= 0xFE00) {
-            return cast(bool)LUT_49CFB5F8[80 + (input - 65024)];
+            return cast(bool)LUT_49CFB5F8[cast(size_t)(80 + (input - 0xFE00))];
         }
     } else if (input >= 0x101FD && input <= 0x1D1AD) {
         if (input == 0xFFFF) {
@@ -660,9 +660,9 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptInherited(dchar input) @
                 return cast(bool)true;
         } else if (input >= 0x1CF00) {
             if (input <= 0x1CF46)
-                return cast(bool)LUT_49CFB5F8[126 + (input - 118528)];
+                return cast(bool)LUT_49CFB5F8[cast(size_t)(126 + (input - 0x1CF00))];
             else if (input >= 0x1D167)
-                return cast(bool)LUT_49CFB5F8[197 + (input - 119143)];
+                return cast(bool)LUT_49CFB5F8[cast(size_t)(197 + (input - 0x1D167))];
         }
     } else if (input >= 0xE0100 && input <= 0xE01EF) {
         return cast(bool)true;
@@ -675,7 +675,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptSora_Sompeng(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x110D0 && input <= 0x110F9)
-        return cast(bool)LUT_4240B1F9[0 + (input - 69840)];
+        return cast(bool)LUT_4240B1F9[cast(size_t)(0 + (input - 0x110D0))];
     return typeof(return).init;
 }
 private {
@@ -684,7 +684,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptLinear_B(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x10000 && input <= 0x100FA)
-        return cast(bool)LUT_3380AF0[0 + (input - 65536)];
+        return cast(bool)LUT_3380AF0[cast(size_t)(0 + (input - 0x10000))];
     return typeof(return).init;
 }
 private {
@@ -693,7 +693,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptNyiakeng_Puachue_Hmong(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x1E100 && input <= 0x1E14F)
-        return cast(bool)LUT_97FC825A[0 + (input - 123136)];
+        return cast(bool)LUT_97FC825A[cast(size_t)(0 + (input - 0x1E100))];
     return typeof(return).init;
 }
 private {
@@ -702,7 +702,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptMeroitic_Cursive(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x109A0 && input <= 0x109FF)
-        return cast(bool)LUT_1A006B4[0 + (input - 68000)];
+        return cast(bool)LUT_1A006B4[cast(size_t)(0 + (input - 0x109A0))];
     return typeof(return).init;
 }
 private {
@@ -711,7 +711,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptThai(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0xE01 && input <= 0xE5B)
-        return cast(bool)LUT_6D8683B3[0 + (input - 3585)];
+        return cast(bool)LUT_6D8683B3[cast(size_t)(0 + (input - 0xE01))];
     return typeof(return).init;
 }
 private {
@@ -720,7 +720,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptMende_Kikakui(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x1E800 && input <= 0x1E8D6)
-        return cast(bool)LUT_D4B53471[0 + (input - 124928)];
+        return cast(bool)LUT_D4B53471[cast(size_t)(0 + (input - 0x1E800))];
     return typeof(return).init;
 }
 private {
@@ -741,7 +741,7 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptOld_Turkic(dchar input) 
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptSamaritan(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x800 && input <= 0x83E)
-        return cast(bool)LUT_860F994D[0 + (input - 2048)];
+        return cast(bool)LUT_860F994D[cast(size_t)(0 + (input - 0x800))];
     return typeof(return).init;
 }
 private {
@@ -756,7 +756,7 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptOld_South_Arabian(dchar 
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptHanifi_Rohingya(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x10D00 && input <= 0x10D39)
-        return cast(bool)LUT_B52EA559[0 + (input - 68864)];
+        return cast(bool)LUT_B52EA559[cast(size_t)(0 + (input - 0x10D00))];
     return typeof(return).init;
 }
 private {
@@ -765,7 +765,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptBalinese(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x1B00 && input <= 0x1B7E)
-        return cast(bool)LUT_F460236[0 + (input - 6912)];
+        return cast(bool)LUT_F460236[cast(size_t)(0 + (input - 0x1B00))];
     return typeof(return).init;
 }
 private {
@@ -774,7 +774,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptMandaic(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x840 && input <= 0x85E)
-        return cast(bool)LUT_8F00CD28[0 + (input - 2112)];
+        return cast(bool)LUT_8F00CD28[cast(size_t)(0 + (input - 0x840))];
     return typeof(return).init;
 }
 private {
@@ -783,7 +783,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptSignWriting(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x1D800 && input <= 0x1DAAF)
-        return cast(bool)LUT_4370F02C[0 + (input - 120832)];
+        return cast(bool)LUT_4370F02C[cast(size_t)(0 + (input - 0x1D800))];
     return typeof(return).init;
 }
 private {
@@ -792,7 +792,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptTifinagh(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x2D30 && input <= 0x2D7F)
-        return cast(bool)LUT_5C091C62[0 + (input - 11568)];
+        return cast(bool)LUT_5C091C62[cast(size_t)(0 + (input - 0x2D30))];
     return typeof(return).init;
 }
 private {
@@ -801,7 +801,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptTai_Viet(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0xAA80 && input <= 0xAADF)
-        return cast(bool)LUT_DED41C39[0 + (input - 43648)];
+        return cast(bool)LUT_DED41C39[cast(size_t)(0 + (input - 0xAA80))];
     return typeof(return).init;
 }
 private {
@@ -810,7 +810,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptSyriac(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x700 && input <= 0x74F)
-        return cast(bool)LUT_5FDAC242[0 + (input - 1792)];
+        return cast(bool)LUT_5FDAC242[cast(size_t)(0 + (input - 0x700))];
     else if (input >= 0x860 && input <= 0x86A)
         return cast(bool)true;
     return typeof(return).init;
@@ -833,7 +833,7 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptElymaic(dchar input) @tr
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptHatran(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x108E0 && input <= 0x108FF)
-        return cast(bool)LUT_F9470111[0 + (input - 67808)];
+        return cast(bool)LUT_F9470111[cast(size_t)(0 + (input - 0x108E0))];
     return typeof(return).init;
 }
 private {
@@ -850,7 +850,7 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptGlagolitic(dchar input) 
     if (input >= 0x2C00 && input <= 0x2C5F) {
         return cast(bool)true;
     } else if (input >= 0x1E000 && input <= 0x1E02A) {
-        return cast(bool)LUT_5BDFB3BF[0 + (input - 122880)];
+        return cast(bool)LUT_5BDFB3BF[cast(size_t)(0 + (input - 0x1E000))];
     }
     return typeof(return).init;
 }
@@ -860,7 +860,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptOsmanya(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x10480 && input <= 0x104A9)
-        return cast(bool)LUT_224DFF02[0 + (input - 66688)];
+        return cast(bool)LUT_224DFF02[cast(size_t)(0 + (input - 0x10480))];
     return typeof(return).init;
 }
 private {
@@ -869,7 +869,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptLinear_A(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x10600 && input <= 0x10767)
-        return cast(bool)LUT_FB5ED712[0 + (input - 67072)];
+        return cast(bool)LUT_FB5ED712[cast(size_t)(0 + (input - 0x10600))];
     return typeof(return).init;
 }
 private {
@@ -878,7 +878,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptMro(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x16A40 && input <= 0x16A6F)
-        return cast(bool)LUT_DE32B41E[0 + (input - 92736)];
+        return cast(bool)LUT_DE32B41E[cast(size_t)(0 + (input - 0x16A40))];
     return typeof(return).init;
 }
 private {
@@ -887,7 +887,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptChakma(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x11100 && input <= 0x11147)
-        return cast(bool)LUT_D5FED074[0 + (input - 69888)];
+        return cast(bool)LUT_D5FED074[cast(size_t)(0 + (input - 0x11100))];
     return typeof(return).init;
 }
 private {
@@ -896,7 +896,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptModi(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x11600 && input <= 0x11659)
-        return cast(bool)LUT_1BCD3548[0 + (input - 71168)];
+        return cast(bool)LUT_1BCD3548[cast(size_t)(0 + (input - 0x11600))];
     return typeof(return).init;
 }
 private {
@@ -905,7 +905,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptBassa_Vah(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x16AD0 && input <= 0x16AF5)
-        return cast(bool)LUT_50EED7BE[0 + (input - 92880)];
+        return cast(bool)LUT_50EED7BE[cast(size_t)(0 + (input - 0x16AD0))];
     return typeof(return).init;
 }
 private {
@@ -916,19 +916,19 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptHan(dchar input) @truste
     if (input >= 0x2E80 && input <= 0xFAD9) {
         if (input <= 0x4DBF) {
             if (input <= 0x303B)
-                return cast(bool)LUT_B7EDEC2[0 + (input - 11904)];
+                return cast(bool)LUT_B7EDEC2[cast(size_t)(0 + (input - 0x2E80))];
             else if (input >= 0x3400)
                 return cast(bool)true;
         } else if (input >= 0x4E00 && input <= 0x9FFF) {
             return cast(bool)true;
         } else if (input >= 0xF900) {
-            return cast(bool)LUT_B7EDEC2[444 + (input - 63744)];
+            return cast(bool)LUT_B7EDEC2[cast(size_t)(444 + (input - 0xF900))];
         }
     } else if (input >= 0x16FE2 && input <= 0x16FF1) {
-        return cast(bool)LUT_B7EDEC2[918 + (input - 94178)];
+        return cast(bool)LUT_B7EDEC2[cast(size_t)(918 + (input - 0x16FE2))];
     } else if (input >= 0x20000 && input <= 0x2FA1D) {
         if (input <= 0x2EBE0) {
-            return cast(bool)LUT_B7EDEC2[934 + (input - 131072)];
+            return cast(bool)LUT_B7EDEC2[cast(size_t)(934 + (input - 0x20000))];
         } else if (input >= 0x2F800) {
             return cast(bool)true;
         }
@@ -943,7 +943,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptMultani(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x11280 && input <= 0x112A9)
-        return cast(bool)LUT_C94F0992[0 + (input - 70272)];
+        return cast(bool)LUT_C94F0992[cast(size_t)(0 + (input - 0x11280))];
     return typeof(return).init;
 }
 private {
@@ -962,7 +962,7 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptBopomofo(dchar input) @t
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptAdlam(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x1E900 && input <= 0x1E95F)
-        return cast(bool)LUT_58D2D0D4[0 + (input - 125184)];
+        return cast(bool)LUT_58D2D0D4[cast(size_t)(0 + (input - 0x1E900))];
     return typeof(return).init;
 }
 private {
@@ -979,7 +979,7 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptKhitan_Small_Script(dcha
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptLao(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0xE81 && input <= 0xEDF)
-        return cast(bool)LUT_6C08203F[0 + (input - 3713)];
+        return cast(bool)LUT_6C08203F[cast(size_t)(0 + (input - 0xE81))];
     return typeof(return).init;
 }
 private {
@@ -988,7 +988,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptPsalter_Pahlavi(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x10B80 && input <= 0x10BAF)
-        return cast(bool)LUT_46B523D3[0 + (input - 68480)];
+        return cast(bool)LUT_46B523D3[cast(size_t)(0 + (input - 0x10B80))];
     return typeof(return).init;
 }
 private {
@@ -1017,13 +1017,13 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptCommon(dchar input) @tru
     if (input >= 0x0 && input <= 0xFFFD) {
         if (input <= 0x4DFF) {
             if (input <= 0xF7)
-                return cast(bool)LUT_A51C63A4[0 + (input - 0)];
+                return cast(bool)LUT_A51C63A4[cast(size_t)(0 + (input - 0x0))];
             else if (input >= 0x2B9 && input <= 0x2FF)
-                return cast(bool)LUT_A51C63A4[248 + (input - 697)];
+                return cast(bool)LUT_A51C63A4[cast(size_t)(248 + (input - 0x2B9))];
             else if (input >= 0x374 && input <= 0x387)
-                return cast(bool)LUT_A51C63A4[319 + (input - 884)];
+                return cast(bool)LUT_A51C63A4[cast(size_t)(319 + (input - 0x374))];
             else if (input >= 0x605 && input <= 0x640)
-                return cast(bool)LUT_A51C63A4[339 + (input - 1541)];
+                return cast(bool)LUT_A51C63A4[cast(size_t)(339 + (input - 0x605))];
             else if (input == 0x6DD)
                 return cast(bool)true;
             else if (input == 0x8E2)
@@ -1041,23 +1041,23 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptCommon(dchar input) @tru
             else if (input >= 0x1735 && input <= 0x1736)
                 return cast(bool)true;
             else if (input >= 0x1802 && input <= 0x1805)
-                return cast(bool)LUT_A51C63A4[399 + (input - 6146)];
+                return cast(bool)LUT_A51C63A4[cast(size_t)(399 + (input - 0x1802))];
             else if (input >= 0x1CD3 && input <= 0x1CFA)
-                return cast(bool)LUT_A51C63A4[403 + (input - 7379)];
+                return cast(bool)LUT_A51C63A4[cast(size_t)(403 + (input - 0x1CD3))];
             else if (input >= 0x2000 && input <= 0x27FF)
-                return cast(bool)LUT_A51C63A4[443 + (input - 8192)];
+                return cast(bool)LUT_A51C63A4[cast(size_t)(443 + (input - 0x2000))];
             else if (input >= 0x2900 && input <= 0x2BFF)
-                return cast(bool)LUT_A51C63A4[2491 + (input - 10496)];
+                return cast(bool)LUT_A51C63A4[cast(size_t)(2491 + (input - 0x2900))];
             else if (input >= 0x2E00 && input <= 0x2E5D)
                 return cast(bool)true;
             else if (input >= 0x2FF0 && input <= 0x303F)
-                return cast(bool)LUT_A51C63A4[3259 + (input - 12272)];
+                return cast(bool)LUT_A51C63A4[cast(size_t)(3259 + (input - 0x2FF0))];
             else if (input >= 0x309B && input <= 0x30A0)
-                return cast(bool)LUT_A51C63A4[3339 + (input - 12443)];
+                return cast(bool)LUT_A51C63A4[cast(size_t)(3339 + (input - 0x309B))];
             else if (input >= 0x30FB && input <= 0x30FC)
                 return cast(bool)true;
             else if (input >= 0x3190 && input <= 0x32FF)
-                return cast(bool)LUT_A51C63A4[3345 + (input - 12688)];
+                return cast(bool)LUT_A51C63A4[cast(size_t)(3345 + (input - 0x3190))];
             else if (input >= 0x3358 && input <= 0x33FF)
                 return cast(bool)true;
             else if (input >= 0x4DC0)
@@ -1074,46 +1074,46 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptCommon(dchar input) @tru
             else if (input == 0xA9CF)
                 return cast(bool)true;
             else if (input >= 0xAB5B && input <= 0xAB6B)
-                return cast(bool)LUT_A51C63A4[3713 + (input - 43867)];
+                return cast(bool)LUT_A51C63A4[cast(size_t)(3713 + (input - 0xAB5B))];
             else if (input >= 0xFD3E && input <= 0xFD3F)
                 return cast(bool)true;
             else if (input >= 0xFE10 && input <= 0xFE6B)
-                return cast(bool)LUT_A51C63A4[3730 + (input - 65040)];
+                return cast(bool)LUT_A51C63A4[cast(size_t)(3730 + (input - 0xFE10))];
             else if (input >= 0xFEFF)
-                return cast(bool)LUT_A51C63A4[3822 + (input - 65279)];
+                return cast(bool)LUT_A51C63A4[cast(size_t)(3822 + (input - 0xFEFF))];
         } else if (input >= 0xFFE0) {
-            return cast(bool)LUT_A51C63A4[3983 + (input - 65504)];
+            return cast(bool)LUT_A51C63A4[cast(size_t)(3983 + (input - 0xFFE0))];
         }
     } else if (input >= 0x10100 && input <= 0x1FBF9) {
         if (input == 0xFFFF) {
             if (input <= 0x1013F)
-                return cast(bool)LUT_A51C63A4[4013 + (input - 65792)];
+                return cast(bool)LUT_A51C63A4[cast(size_t)(4013 + (input - 0x10100))];
             else if (input >= 0x10190 && input <= 0x101FC)
-                return cast(bool)LUT_A51C63A4[4077 + (input - 65936)];
+                return cast(bool)LUT_A51C63A4[cast(size_t)(4077 + (input - 0x10190))];
             else if (input >= 0x102E1)
                 return cast(bool)true;
         } else if (input >= 0x1BCA0) {
             if (input <= 0x1BCA3)
                 return cast(bool)true;
             else if (input >= 0x1CF50 && input <= 0x1D1EA)
-                return cast(bool)LUT_A51C63A4[4186 + (input - 118608)];
+                return cast(bool)LUT_A51C63A4[cast(size_t)(4186 + (input - 0x1CF50))];
             else if (input >= 0x1D2E0 && input <= 0x1D378)
-                return cast(bool)LUT_A51C63A4[4853 + (input - 119520)];
+                return cast(bool)LUT_A51C63A4[cast(size_t)(4853 + (input - 0x1D2E0))];
             else if (input >= 0x1D400 && input <= 0x1D7FF)
-                return cast(bool)LUT_A51C63A4[5006 + (input - 119808)];
+                return cast(bool)LUT_A51C63A4[cast(size_t)(5006 + (input - 0x1D400))];
             else if (input >= 0x1EC71 && input <= 0x1ECB4)
                 return cast(bool)true;
             else if (input >= 0x1ED01 && input <= 0x1ED3D)
                 return cast(bool)true;
             else if (input >= 0x1F000 && input <= 0x1F265)
-                return cast(bool)LUT_A51C63A4[6030 + (input - 126976)];
+                return cast(bool)LUT_A51C63A4[cast(size_t)(6030 + (input - 0x1F000))];
             else if (input >= 0x1F300 && input <= 0x1F8B1)
-                return cast(bool)LUT_A51C63A4[6644 + (input - 127744)];
+                return cast(bool)LUT_A51C63A4[cast(size_t)(6644 + (input - 0x1F300))];
             else if (input >= 0x1F900)
-                return cast(bool)LUT_A51C63A4[8102 + (input - 129280)];
+                return cast(bool)LUT_A51C63A4[cast(size_t)(8102 + (input - 0x1F900))];
         }
     } else if (input >= 0xE0001 && input <= 0xE007F) {
-        return cast(bool)LUT_A51C63A4[8864 + (input - 917505)];
+        return cast(bool)LUT_A51C63A4[cast(size_t)(8864 + (input - 0xE0001))];
     }
     return typeof(return).init;
 }
@@ -1129,7 +1129,7 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptGothic(dchar input) @tru
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptYi(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0xA000 && input <= 0xA4C6)
-        return cast(bool)LUT_D6B07009[0 + (input - 40960)];
+        return cast(bool)LUT_D6B07009[cast(size_t)(0 + (input - 0xA000))];
     return typeof(return).init;
 }
 private {
@@ -1138,7 +1138,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptSinhala(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0xD81 && input <= 0xDF4) {
-        return cast(bool)LUT_FCB15D83[0 + (input - 3457)];
+        return cast(bool)LUT_FCB15D83[cast(size_t)(0 + (input - 0xD81))];
     } else if (input >= 0x111E1 && input <= 0x111F4) {
         return cast(bool)true;
     }
@@ -1150,7 +1150,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptRejang(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0xA930 && input <= 0xA95F)
-        return cast(bool)LUT_11B15544[0 + (input - 43312)];
+        return cast(bool)LUT_11B15544[cast(size_t)(0 + (input - 0xA930))];
     return typeof(return).init;
 }
 private {
@@ -1159,7 +1159,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptLepcha(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x1C00 && input <= 0x1C4F)
-        return cast(bool)LUT_4C82A450[0 + (input - 7168)];
+        return cast(bool)LUT_4C82A450[cast(size_t)(0 + (input - 0x1C00))];
     return typeof(return).init;
 }
 private {
@@ -1168,7 +1168,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptTai_Tham(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x1A20 && input <= 0x1AAD)
-        return cast(bool)LUT_F6590F9C[0 + (input - 6688)];
+        return cast(bool)LUT_F6590F9C[cast(size_t)(0 + (input - 0x1A20))];
     return typeof(return).init;
 }
 private {
@@ -1177,7 +1177,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptDives_Akuru(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x11900 && input <= 0x11959)
-        return cast(bool)LUT_E769DB4[0 + (input - 71936)];
+        return cast(bool)LUT_E769DB4[cast(size_t)(0 + (input - 0x11900))];
     return typeof(return).init;
 }
 private {
@@ -1188,7 +1188,7 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptMeetei_Mayek(dchar input
     if (input >= 0xAAE0 && input <= 0xAAF6)
         return cast(bool)true;
     else if (input >= 0xABC0 && input <= 0xABF9)
-        return cast(bool)LUT_25691838[0 + (input - 43968)];
+        return cast(bool)LUT_25691838[cast(size_t)(0 + (input - 0xABC0))];
     return typeof(return).init;
 }
 private {
@@ -1197,7 +1197,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptTirhuta(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x11480 && input <= 0x114D9)
-        return cast(bool)LUT_D1B3A6A1[0 + (input - 70784)];
+        return cast(bool)LUT_D1B3A6A1[cast(size_t)(0 + (input - 0x11480))];
     return typeof(return).init;
 }
 private {
@@ -1206,7 +1206,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptMarchen(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x11C70 && input <= 0x11CB6)
-        return cast(bool)LUT_CBE25BA[0 + (input - 72816)];
+        return cast(bool)LUT_CBE25BA[cast(size_t)(0 + (input - 0x11C70))];
     return typeof(return).init;
 }
 private {
@@ -1215,7 +1215,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptWancho(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x1E2C0 && input <= 0x1E2FF)
-        return cast(bool)LUT_D4FCA78D[0 + (input - 123584)];
+        return cast(bool)LUT_D4FCA78D[cast(size_t)(0 + (input - 0x1E2C0))];
     return typeof(return).init;
 }
 private {
@@ -1224,7 +1224,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptPhoenician(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x10900 && input <= 0x1091F)
-        return cast(bool)LUT_CE15FA33[0 + (input - 67840)];
+        return cast(bool)LUT_CE15FA33[cast(size_t)(0 + (input - 0x10900))];
     return typeof(return).init;
 }
 private {
@@ -1233,7 +1233,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptGurmukhi(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0xA01 && input <= 0xA76)
-        return cast(bool)LUT_4D143144[0 + (input - 2561)];
+        return cast(bool)LUT_4D143144[cast(size_t)(0 + (input - 0xA01))];
     return typeof(return).init;
 }
 private {
@@ -1242,7 +1242,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptKhudawadi(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x112B0 && input <= 0x112F9)
-        return cast(bool)LUT_733F3BED[0 + (input - 70320)];
+        return cast(bool)LUT_733F3BED[cast(size_t)(0 + (input - 0x112B0))];
     return typeof(return).init;
 }
 private {
@@ -1251,7 +1251,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptKhojki(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x11200 && input <= 0x1123E)
-        return cast(bool)LUT_6DD72F51[0 + (input - 70144)];
+        return cast(bool)LUT_6DD72F51[cast(size_t)(0 + (input - 0x11200))];
     return typeof(return).init;
 }
 private {
@@ -1260,7 +1260,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptNewa(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x11400 && input <= 0x11461)
-        return cast(bool)LUT_190DB4BD[0 + (input - 70656)];
+        return cast(bool)LUT_190DB4BD[cast(size_t)(0 + (input - 0x11400))];
     return typeof(return).init;
 }
 private {
@@ -1275,7 +1275,7 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptDogra(dchar input) @trus
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptOriya(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0xB01 && input <= 0xB77)
-        return cast(bool)LUT_B8C2C38C[0 + (input - 2817)];
+        return cast(bool)LUT_B8C2C38C[cast(size_t)(0 + (input - 0xB01))];
     return typeof(return).init;
 }
 private {
@@ -1284,7 +1284,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptTagalog(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x1700 && input <= 0x171F)
-        return cast(bool)LUT_94D45387[0 + (input - 5888)];
+        return cast(bool)LUT_94D45387[cast(size_t)(0 + (input - 0x1700))];
     return typeof(return).init;
 }
 private {
@@ -1319,7 +1319,7 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptLycian(dchar input) @tru
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptMiao(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x16F00 && input <= 0x16F9F)
-        return cast(bool)LUT_6CA78D0[0 + (input - 93952)];
+        return cast(bool)LUT_6CA78D0[cast(size_t)(0 + (input - 0x16F00))];
     return typeof(return).init;
 }
 private {
@@ -1328,7 +1328,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptTangut(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x16FE0 && input <= 0x18AFF)
-        return cast(bool)LUT_A6341CE4[0 + (input - 94176)];
+        return cast(bool)LUT_A6341CE4[cast(size_t)(0 + (input - 0x16FE0))];
     else if (input >= 0x18D00 && input <= 0x18D08)
         return cast(bool)true;
     return typeof(return).init;
@@ -1339,7 +1339,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptBengali(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x980 && input <= 0x9FE)
-        return cast(bool)LUT_FB88E5F1[0 + (input - 2432)];
+        return cast(bool)LUT_FB88E5F1[cast(size_t)(0 + (input - 0x980))];
     return typeof(return).init;
 }
 private {
@@ -1348,7 +1348,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptInscriptional_Pahlavi(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x10B60 && input <= 0x10B7F)
-        return cast(bool)LUT_AC10536E[0 + (input - 68448)];
+        return cast(bool)LUT_AC10536E[cast(size_t)(0 + (input - 0x10B60))];
     return typeof(return).init;
 }
 private {
@@ -1357,7 +1357,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptVithkuqi(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x10570 && input <= 0x105BC)
-        return cast(bool)LUT_E0886E6F[0 + (input - 66928)];
+        return cast(bool)LUT_E0886E6F[cast(size_t)(0 + (input - 0x10570))];
     return typeof(return).init;
 }
 private {
@@ -1366,7 +1366,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptArmenian(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x531 && input <= 0x58F) {
-        return cast(bool)LUT_1E29A5F[0 + (input - 1329)];
+        return cast(bool)LUT_1E29A5F[cast(size_t)(0 + (input - 0x531))];
     } else if (input >= 0xFB13 && input <= 0xFB17) {
         return cast(bool)true;
     }
@@ -1378,7 +1378,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptNew_Tai_Lue(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x1980 && input <= 0x19DF)
-        return cast(bool)LUT_B625659C[0 + (input - 6528)];
+        return cast(bool)LUT_B625659C[cast(size_t)(0 + (input - 0x1980))];
     return typeof(return).init;
 }
 private {
@@ -1399,7 +1399,7 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptBuhid(dchar input) @trus
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptManichaean(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x10AC0 && input <= 0x10AF6)
-        return cast(bool)LUT_3F467AEC[0 + (input - 68288)];
+        return cast(bool)LUT_3F467AEC[cast(size_t)(0 + (input - 0x10AC0))];
     return typeof(return).init;
 }
 private {
@@ -1410,13 +1410,13 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptGreek(dchar input) @trus
     if (input >= 0x370 && input <= 0xAB65) {
         if (input <= 0x2126) {
             if (input <= 0x3FF)
-                return cast(bool)LUT_EA563DE2[0 + (input - 880)];
+                return cast(bool)LUT_EA563DE2[cast(size_t)(0 + (input - 0x370))];
             else if (input >= 0x1D26 && input <= 0x1D6A)
-                return cast(bool)LUT_EA563DE2[144 + (input - 7462)];
+                return cast(bool)LUT_EA563DE2[cast(size_t)(144 + (input - 0x1D26))];
             else if (input == 0x1DBF)
                 return cast(bool)true;
             else if (input >= 0x1F00 && input <= 0x1FFE)
-                return cast(bool)LUT_EA563DE2[213 + (input - 7936)];
+                return cast(bool)LUT_EA563DE2[cast(size_t)(213 + (input - 0x1F00))];
             else if (input == 0x2126)
                 return cast(bool)true;
         } else if (input == 0xAB65) {
@@ -1424,7 +1424,7 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptGreek(dchar input) @trus
         }
     } else if (input >= 0x10140 && input <= 0x1D245) {
         if (input <= 0x101A0) {
-            return cast(bool)LUT_EA563DE2[468 + (input - 65856)];
+            return cast(bool)LUT_EA563DE2[cast(size_t)(468 + (input - 0x10140))];
         } else if (input >= 0x1D200) {
             return cast(bool)true;
         }
@@ -1443,7 +1443,7 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptBraille(dchar input) @tr
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptAvestan(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x10B00 && input <= 0x10B3F)
-        return cast(bool)LUT_1474D115[0 + (input - 68352)];
+        return cast(bool)LUT_1474D115[cast(size_t)(0 + (input - 0x10B00))];
     return typeof(return).init;
 }
 private {
@@ -1454,22 +1454,22 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptArabic(dchar input) @tru
     if (input >= 0x600 && input <= 0xFEFC) {
         if (input <= 0x8FF) {
             if (input <= 0x6FF)
-                return cast(bool)LUT_DE327125[0 + (input - 1536)];
+                return cast(bool)LUT_DE327125[cast(size_t)(0 + (input - 0x600))];
             else if (input >= 0x750 && input <= 0x77F)
                 return cast(bool)true;
             else if (input >= 0x870)
-                return cast(bool)LUT_DE327125[256 + (input - 2160)];
+                return cast(bool)LUT_DE327125[cast(size_t)(256 + (input - 0x870))];
         } else if (input >= 0xFB50) {
             if (input <= 0xFDFF)
-                return cast(bool)LUT_DE327125[400 + (input - 64336)];
+                return cast(bool)LUT_DE327125[cast(size_t)(400 + (input - 0xFB50))];
             else if (input >= 0xFE70)
-                return cast(bool)LUT_DE327125[1088 + (input - 65136)];
+                return cast(bool)LUT_DE327125[cast(size_t)(1088 + (input - 0xFE70))];
         }
     } else if (input >= 0x10E60 && input <= 0x1EEF1) {
         if (input == 0xFFFF) {
             return cast(bool)true;
         } else if (input >= 0x1EE00) {
-            return cast(bool)LUT_DE327125[1229 + (input - 126464)];
+            return cast(bool)LUT_DE327125[cast(size_t)(1229 + (input - 0x1EE00))];
         }
     }
     return typeof(return).init;
@@ -1480,7 +1480,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptJavanese(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0xA980 && input <= 0xA9DF)
-        return cast(bool)LUT_99B5CDF4[0 + (input - 43392)];
+        return cast(bool)LUT_99B5CDF4[cast(size_t)(0 + (input - 0xA980))];
     return typeof(return).init;
 }
 private {
@@ -1489,7 +1489,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptLydian(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x10920 && input <= 0x1093F)
-        return cast(bool)LUT_A5075CC4[0 + (input - 67872)];
+        return cast(bool)LUT_A5075CC4[cast(size_t)(0 + (input - 0x10920))];
     return typeof(return).init;
 }
 private {
@@ -1510,7 +1510,7 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptCypro_Minoan(dchar input
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptBuginese(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x1A00 && input <= 0x1A1F)
-        return cast(bool)LUT_99D56566[0 + (input - 6656)];
+        return cast(bool)LUT_99D56566[cast(size_t)(0 + (input - 0x1A00))];
     return typeof(return).init;
 }
 private {
@@ -1519,7 +1519,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptBatak(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x1BC0 && input <= 0x1BFF)
-        return cast(bool)LUT_71428C30[0 + (input - 7104)];
+        return cast(bool)LUT_71428C30[cast(size_t)(0 + (input - 0x1BC0))];
     return typeof(return).init;
 }
 private {
@@ -1528,7 +1528,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptNandinagari(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x119A0 && input <= 0x119E4)
-        return cast(bool)LUT_DF69A2FA[0 + (input - 72096)];
+        return cast(bool)LUT_DF69A2FA[cast(size_t)(0 + (input - 0x119A0))];
     return typeof(return).init;
 }
 private {
@@ -1537,7 +1537,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptCham(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0xAA00 && input <= 0xAA5F)
-        return cast(bool)LUT_D8DE0232[0 + (input - 43520)];
+        return cast(bool)LUT_D8DE0232[cast(size_t)(0 + (input - 0xAA00))];
     return typeof(return).init;
 }
 private {
@@ -1546,7 +1546,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptGunjala_Gondi(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x11D60 && input <= 0x11DA9)
-        return cast(bool)LUT_2316CCBF[0 + (input - 73056)];
+        return cast(bool)LUT_2316CCBF[cast(size_t)(0 + (input - 0x11D60))];
     return typeof(return).init;
 }
 private {
@@ -1555,7 +1555,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptCypriot(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x10800 && input <= 0x1083F)
-        return cast(bool)LUT_37CEEBC6[0 + (input - 67584)];
+        return cast(bool)LUT_37CEEBC6[cast(size_t)(0 + (input - 0x10800))];
     return typeof(return).init;
 }
 private {
@@ -1564,7 +1564,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptUgaritic(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x10380 && input <= 0x1039F)
-        return cast(bool)LUT_5A5D56D2[0 + (input - 66432)];
+        return cast(bool)LUT_5A5D56D2[cast(size_t)(0 + (input - 0x10380))];
     return typeof(return).init;
 }
 private {
@@ -1573,11 +1573,11 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptGeorgian(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x10A0 && input <= 0x10FF)
-        return cast(bool)LUT_DCE99D45[0 + (input - 4256)];
+        return cast(bool)LUT_DCE99D45[cast(size_t)(0 + (input - 0x10A0))];
     else if (input >= 0x1C90 && input <= 0x1CBF)
-        return cast(bool)LUT_DCE99D45[96 + (input - 7312)];
+        return cast(bool)LUT_DCE99D45[cast(size_t)(96 + (input - 0x1C90))];
     else if (input >= 0x2D00 && input <= 0x2D2D)
-        return cast(bool)LUT_DCE99D45[144 + (input - 11520)];
+        return cast(bool)LUT_DCE99D45[cast(size_t)(144 + (input - 0x2D00))];
     return typeof(return).init;
 }
 private {
@@ -1592,9 +1592,9 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptSharada(dchar input) @tr
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptTamil(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0xB82 && input <= 0xBFA) {
-        return cast(bool)LUT_F42BFA64[0 + (input - 2946)];
+        return cast(bool)LUT_F42BFA64[cast(size_t)(0 + (input - 0xB82))];
     } else if (input >= 0x11FC0 && input <= 0x11FFF) {
-        return cast(bool)LUT_F42BFA64[121 + (input - 73664)];
+        return cast(bool)LUT_F42BFA64[cast(size_t)(121 + (input - 0x11FC0))];
     }
     return typeof(return).init;
 }
@@ -1604,7 +1604,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptCherokee(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x13A0 && input <= 0x13FD) {
-        return cast(bool)LUT_F46EDE7E[0 + (input - 5024)];
+        return cast(bool)LUT_F46EDE7E[cast(size_t)(0 + (input - 0x13A0))];
     } else if (input >= 0xAB70 && input <= 0xABBF) {
         return cast(bool)true;
     }
@@ -1616,7 +1616,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptPahawh_Hmong(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x16B00 && input <= 0x16B8F)
-        return cast(bool)LUT_74E15140[0 + (input - 92928)];
+        return cast(bool)LUT_74E15140[cast(size_t)(0 + (input - 0x16B00))];
     return typeof(return).init;
 }
 private {
@@ -1631,7 +1631,7 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptSyloti_Nagri(dchar input
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptKharoshthi(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x10A00 && input <= 0x10A58)
-        return cast(bool)LUT_68AB0F0A[0 + (input - 68096)];
+        return cast(bool)LUT_68AB0F0A[cast(size_t)(0 + (input - 0x10A00))];
     return typeof(return).init;
 }
 private {
@@ -1648,17 +1648,17 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptKatakana(dchar input) @t
     if (input >= 0x30A1 && input <= 0xFF9D) {
         if (input <= 0x3357) {
             if (input <= 0x30FF)
-                return cast(bool)LUT_B64A0F83[0 + (input - 12449)];
+                return cast(bool)LUT_B64A0F83[cast(size_t)(0 + (input - 0x30A1))];
             else if (input >= 0x31F0 && input <= 0x31FF)
                 return cast(bool)true;
             else if (input >= 0x32D0)
-                return cast(bool)LUT_B64A0F83[95 + (input - 13008)];
+                return cast(bool)LUT_B64A0F83[cast(size_t)(95 + (input - 0x32D0))];
         } else if (input >= 0xFF66) {
-            return cast(bool)LUT_B64A0F83[231 + (input - 65382)];
+            return cast(bool)LUT_B64A0F83[cast(size_t)(231 + (input - 0xFF66))];
         }
     } else if (input >= 0x1AFF0 && input <= 0x1B167) {
         if (input <= 0x1B000)
-            return cast(bool)LUT_B64A0F83[287 + (input - 110576)];
+            return cast(bool)LUT_B64A0F83[cast(size_t)(287 + (input - 0x1AFF0))];
         else if (input >= 0x1B120 && input <= 0x1B122)
             return cast(bool)true;
         else if (input >= 0x1B164)
@@ -1672,7 +1672,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptTelugu(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0xC00 && input <= 0xC7F)
-        return cast(bool)LUT_E4E0ED8E[0 + (input - 3072)];
+        return cast(bool)LUT_E4E0ED8E[cast(size_t)(0 + (input - 0xC00))];
     return typeof(return).init;
 }
 private {
@@ -1683,14 +1683,14 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptEthiopic(dchar input) @t
     if (input >= 0x1200 && input <= 0xAB2E) {
         if (input <= 0x2DDE) {
             if (input <= 0x1399)
-                return cast(bool)LUT_26196822[0 + (input - 4608)];
+                return cast(bool)LUT_26196822[cast(size_t)(0 + (input - 0x1200))];
             else if (input >= 0x2D80)
-                return cast(bool)LUT_26196822[410 + (input - 11648)];
+                return cast(bool)LUT_26196822[cast(size_t)(410 + (input - 0x2D80))];
         } else if (input >= 0xAB01) {
-            return cast(bool)LUT_26196822[505 + (input - 43777)];
+            return cast(bool)LUT_26196822[cast(size_t)(505 + (input - 0xAB01))];
         }
     } else if (input >= 0x1E7E0 && input <= 0x1E7FE) {
-        return cast(bool)LUT_26196822[551 + (input - 124896)];
+        return cast(bool)LUT_26196822[cast(size_t)(551 + (input - 0x1E7E0))];
     }
     return typeof(return).init;
 }
@@ -1729,9 +1729,9 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptHangul(dchar input) @tru
         if (input <= 0xA97C)
             return cast(bool)true;
         else if (input >= 0xAC00 && input <= 0xD7FB)
-            return cast(bool)LUT_9B835521[0 + (input - 44032)];
+            return cast(bool)LUT_9B835521[cast(size_t)(0 + (input - 0xAC00))];
         else if (input >= 0xFFA0)
-            return cast(bool)LUT_9B835521[11260 + (input - 65440)];
+            return cast(bool)LUT_9B835521[cast(size_t)(11260 + (input - 0xFFA0))];
     }
     return typeof(return).init;
 }
@@ -1741,7 +1741,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptMongolian(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x1800 && input <= 0x18AA) {
-        return cast(bool)LUT_FEA15B46[0 + (input - 6144)];
+        return cast(bool)LUT_FEA15B46[cast(size_t)(0 + (input - 0x1800))];
     } else if (input >= 0x11660 && input <= 0x1166C) {
         return cast(bool)true;
     }
@@ -1765,7 +1765,7 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptMahajani(dchar input) @t
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptKhmer(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x1780 && input <= 0x17F9)
-        return cast(bool)LUT_FB9CE63E[0 + (input - 6016)];
+        return cast(bool)LUT_FB9CE63E[cast(size_t)(0 + (input - 0x1780))];
     else if (input >= 0x19E0 && input <= 0x19FF)
         return cast(bool)true;
     return typeof(return).init;
@@ -1776,7 +1776,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptGrantha(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x11300 && input <= 0x11374)
-        return cast(bool)LUT_DAA4949C[0 + (input - 70400)];
+        return cast(bool)LUT_DAA4949C[cast(size_t)(0 + (input - 0x11300))];
     return typeof(return).init;
 }
 private {
@@ -1785,7 +1785,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptKannada(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0xC80 && input <= 0xCF2)
-        return cast(bool)LUT_4392587F[0 + (input - 3200)];
+        return cast(bool)LUT_4392587F[cast(size_t)(0 + (input - 0xC80))];
     return typeof(return).init;
 }
 private {
@@ -1794,7 +1794,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptYezidi(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x10E80 && input <= 0x10EB1)
-        return cast(bool)LUT_D398C4A2[0 + (input - 69248)];
+        return cast(bool)LUT_D398C4A2[cast(size_t)(0 + (input - 0x10E80))];
     return typeof(return).init;
 }
 private {
@@ -1809,7 +1809,7 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptOld_North_Arabian(dchar 
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptTai_Le(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x1950 && input <= 0x1974)
-        return cast(bool)LUT_BF3F21F1[0 + (input - 6480)];
+        return cast(bool)LUT_BF3F21F1[cast(size_t)(0 + (input - 0x1950))];
     return typeof(return).init;
 }
 private {
@@ -1818,9 +1818,9 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptHebrew(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x591 && input <= 0x5F4) {
-        return cast(bool)LUT_B2B9F96E[0 + (input - 1425)];
+        return cast(bool)LUT_B2B9F96E[cast(size_t)(0 + (input - 0x591))];
     } else if (input >= 0xFB1D && input <= 0xFB4F) {
-        return cast(bool)LUT_B2B9F96E[100 + (input - 64285)];
+        return cast(bool)LUT_B2B9F96E[cast(size_t)(100 + (input - 0xFB1D))];
     }
     return typeof(return).init;
 }
@@ -1830,7 +1830,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptGujarati(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0xA81 && input <= 0xAFF)
-        return cast(bool)LUT_49F633FC[0 + (input - 2689)];
+        return cast(bool)LUT_49F633FC[cast(size_t)(0 + (input - 0xA81))];
     return typeof(return).init;
 }
 private {
@@ -1839,7 +1839,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptTangsa(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x16A70 && input <= 0x16AC9)
-        return cast(bool)LUT_E9CBE00A[0 + (input - 92784)];
+        return cast(bool)LUT_E9CBE00A[cast(size_t)(0 + (input - 0x16A70))];
     return typeof(return).init;
 }
 private {
@@ -1854,7 +1854,7 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptCarian(dchar input) @tru
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptBhaiksuki(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x11C00 && input <= 0x11C6C)
-        return cast(bool)LUT_46055E15[0 + (input - 72704)];
+        return cast(bool)LUT_46055E15[cast(size_t)(0 + (input - 0x11C00))];
     return typeof(return).init;
 }
 private {
@@ -1863,7 +1863,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptMasaram_Gondi(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x11D00 && input <= 0x11D59)
-        return cast(bool)LUT_B53E7022[0 + (input - 72960)];
+        return cast(bool)LUT_B53E7022[cast(size_t)(0 + (input - 0x11D00))];
     return typeof(return).init;
 }
 private {
@@ -1872,7 +1872,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptRunic(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x16A0 && input <= 0x16F8)
-        return cast(bool)LUT_C17EAE31[0 + (input - 5792)];
+        return cast(bool)LUT_C17EAE31[cast(size_t)(0 + (input - 0x16A0))];
     return typeof(return).init;
 }
 private {
@@ -1881,7 +1881,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptDuployan(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x1BC00 && input <= 0x1BC9F)
-        return cast(bool)LUT_63A82D8C[0 + (input - 113664)];
+        return cast(bool)LUT_63A82D8C[cast(size_t)(0 + (input - 0x1BC00))];
     return typeof(return).init;
 }
 private {
@@ -1890,7 +1890,7 @@ private {
 
 export extern(C) immutable(bool) sidero_utf_lut_isScriptWarang_Citi(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x118A0 && input <= 0x118FF)
-        return cast(bool)LUT_AB4B4B15[0 + (input - 71840)];
+        return cast(bool)LUT_AB4B4B15[cast(size_t)(0 + (input - 0x118A0))];
     return typeof(return).init;
 }
 private {

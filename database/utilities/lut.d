@@ -193,7 +193,7 @@ private:
                     if (lutType[$ - 1] == '*')
                         resultAppender ~= "&";
 
-                    resultAppender.formattedWrite!"%s[%s + (input - %s)]"(lutName, lutDatem.entriesOffset,
+                    resultAppender.formattedWrite!"%s[cast(size_t)(%s + (input - 0x%X))]"(lutName, lutDatem.entriesOffset,
                     cast(size_t)lutDatem.datem.range.start);
                     resultAppender ~= ";\n";
                 } else {

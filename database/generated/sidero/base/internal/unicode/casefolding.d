@@ -5,11 +5,11 @@ export extern(C) immutable(dstring) sidero_utf_lut_getCaseFolding(dchar input) @
     if (input >= 0x41 && input <= 0xFF3A) {
         if (input <= 0x2CF2) {
             if (input <= 0x5A)
-                return cast(dstring)LUT_9E8CB5FE[0 + (input - 65)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(0 + (input - 0x41))];
             else if (input == 0xB5)
                 return cast(dstring)LUT_9E8CB5FE_DString[0 .. 1];
             else if (input >= 0xC0 && input <= 0xDF)
-                return cast(dstring)LUT_9E8CB5FE[26 + (input - 192)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(26 + (input - 0xC0))];
             else if (input == 0x100)
                 return cast(dstring)LUT_9E8CB5FE_DString[1 .. 2];
             else if (input == 0x102)
@@ -131,7 +131,7 @@ export extern(C) immutable(dstring) sidero_utf_lut_getCaseFolding(dchar input) @
             else if (input == 0x176)
                 return cast(dstring)LUT_9E8CB5FE_DString[62 .. 63];
             else if (input >= 0x178 && input <= 0x179)
-                return cast(dstring)LUT_9E8CB5FE[58 + (input - 376)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(58 + (input - 0x178))];
             else if (input == 0x17B)
                 return cast(dstring)LUT_9E8CB5FE_DString[63 .. 64];
             else if (input == 0x17D)
@@ -139,27 +139,27 @@ export extern(C) immutable(dstring) sidero_utf_lut_getCaseFolding(dchar input) @
             else if (input == 0x17F)
                 return cast(dstring)LUT_9E8CB5FE_DString[65 .. 66];
             else if (input >= 0x181 && input <= 0x182)
-                return cast(dstring)LUT_9E8CB5FE[60 + (input - 385)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(60 + (input - 0x181))];
             else if (input == 0x184)
                 return cast(dstring)LUT_9E8CB5FE_DString[66 .. 67];
             else if (input >= 0x186 && input <= 0x1A0)
-                return cast(dstring)LUT_9E8CB5FE[62 + (input - 390)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(62 + (input - 0x186))];
             else if (input == 0x1A2)
                 return cast(dstring)LUT_9E8CB5FE_DString[67 .. 68];
             else if (input == 0x1A4)
                 return cast(dstring)LUT_9E8CB5FE_DString[68 .. 69];
             else if (input >= 0x1A6 && input <= 0x1A7)
-                return cast(dstring)LUT_9E8CB5FE[89 + (input - 422)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(89 + (input - 0x1A6))];
             else if (input == 0x1A9)
                 return cast(dstring)LUT_9E8CB5FE_DString[69 .. 70];
             else if (input == 0x1AC)
                 return cast(dstring)LUT_9E8CB5FE_DString[70 .. 71];
             else if (input >= 0x1AE && input <= 0x1B3)
-                return cast(dstring)LUT_9E8CB5FE[91 + (input - 430)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(91 + (input - 0x1AE))];
             else if (input == 0x1B5)
                 return cast(dstring)LUT_9E8CB5FE_DString[71 .. 72];
             else if (input >= 0x1B7 && input <= 0x1B8)
-                return cast(dstring)LUT_9E8CB5FE[97 + (input - 439)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(97 + (input - 0x1B7))];
             else if (input == 0x1BC)
                 return cast(dstring)LUT_9E8CB5FE_DString[72 .. 73];
             else if (input >= 0x1C4 && input <= 0x1C5)
@@ -209,7 +209,7 @@ export extern(C) immutable(dstring) sidero_utf_lut_getCaseFolding(dchar input) @
             else if (input == 0x1F4)
                 return cast(dstring)LUT_9E8CB5FE_DString[96 .. 97];
             else if (input >= 0x1F6 && input <= 0x1F8)
-                return cast(dstring)LUT_9E8CB5FE[99 + (input - 502)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(99 + (input - 0x1F6))];
             else if (input == 0x1FA)
                 return cast(dstring)LUT_9E8CB5FE_DString[97 .. 98];
             else if (input == 0x1FC)
@@ -269,11 +269,11 @@ export extern(C) immutable(dstring) sidero_utf_lut_getCaseFolding(dchar input) @
             else if (input == 0x232)
                 return cast(dstring)LUT_9E8CB5FE_DString[125 .. 126];
             else if (input >= 0x23A && input <= 0x23E)
-                return cast(dstring)LUT_9E8CB5FE[102 + (input - 570)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(102 + (input - 0x23A))];
             else if (input == 0x241)
                 return cast(dstring)LUT_9E8CB5FE_DString[126 .. 127];
             else if (input >= 0x243 && input <= 0x246)
-                return cast(dstring)LUT_9E8CB5FE[107 + (input - 579)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(107 + (input - 0x243))];
             else if (input == 0x248)
                 return cast(dstring)LUT_9E8CB5FE_DString[127 .. 128];
             else if (input == 0x24A)
@@ -295,17 +295,17 @@ export extern(C) immutable(dstring) sidero_utf_lut_getCaseFolding(dchar input) @
             else if (input == 0x386)
                 return cast(dstring)LUT_9E8CB5FE_DString[136 .. 137];
             else if (input >= 0x388 && input <= 0x38A)
-                return cast(dstring)LUT_9E8CB5FE[111 + (input - 904)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(111 + (input - 0x388))];
             else if (input == 0x38C)
                 return cast(dstring)LUT_9E8CB5FE_DString[137 .. 138];
             else if (input >= 0x38E && input <= 0x3AB)
-                return cast(dstring)LUT_9E8CB5FE[114 + (input - 910)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(114 + (input - 0x38E))];
             else if (input == 0x3B0)
                 return cast(dstring)LUT_9E8CB5FE_DString[138 .. 141];
             else if (input == 0x3C2)
                 return cast(dstring)LUT_9E8CB5FE_DString[141 .. 142];
             else if (input >= 0x3CF && input <= 0x3D6)
-                return cast(dstring)LUT_9E8CB5FE[144 + (input - 975)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(144 + (input - 0x3CF))];
             else if (input == 0x3D8)
                 return cast(dstring)LUT_9E8CB5FE_DString[142 .. 143];
             else if (input == 0x3DA)
@@ -331,11 +331,11 @@ export extern(C) immutable(dstring) sidero_utf_lut_getCaseFolding(dchar input) @
             else if (input == 0x3EE)
                 return cast(dstring)LUT_9E8CB5FE_DString[153 .. 154];
             else if (input >= 0x3F0 && input <= 0x3F5)
-                return cast(dstring)LUT_9E8CB5FE[152 + (input - 1008)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(152 + (input - 0x3F0))];
             else if (input == 0x3F7)
                 return cast(dstring)LUT_9E8CB5FE_DString[154 .. 155];
             else if (input >= 0x3F9 && input <= 0x42F)
-                return cast(dstring)LUT_9E8CB5FE[158 + (input - 1017)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(158 + (input - 0x3F9))];
             else if (input == 0x460)
                 return cast(dstring)LUT_9E8CB5FE_DString[155 .. 156];
             else if (input == 0x462)
@@ -425,7 +425,7 @@ export extern(C) immutable(dstring) sidero_utf_lut_getCaseFolding(dchar input) @
             else if (input == 0x4BE)
                 return cast(dstring)LUT_9E8CB5FE_DString[198 .. 199];
             else if (input >= 0x4C0 && input <= 0x4C1)
-                return cast(dstring)LUT_9E8CB5FE[213 + (input - 1216)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(213 + (input - 0x4C0))];
             else if (input == 0x4C3)
                 return cast(dstring)LUT_9E8CB5FE_DString[199 .. 200];
             else if (input == 0x4C5)
@@ -535,21 +535,21 @@ export extern(C) immutable(dstring) sidero_utf_lut_getCaseFolding(dchar input) @
             else if (input == 0x52E)
                 return cast(dstring)LUT_9E8CB5FE_DString[252 .. 253];
             else if (input >= 0x531 && input <= 0x556)
-                return cast(dstring)LUT_9E8CB5FE[215 + (input - 1329)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(215 + (input - 0x531))];
             else if (input == 0x587)
                 return cast(dstring)LUT_9E8CB5FE_DString[253 .. 255];
             else if (input >= 0x10A0 && input <= 0x10C5)
-                return cast(dstring)LUT_9E8CB5FE[253 + (input - 4256)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(253 + (input - 0x10A0))];
             else if (input == 0x10C7)
                 return cast(dstring)LUT_9E8CB5FE_DString[255 .. 256];
             else if (input == 0x10CD)
                 return cast(dstring)LUT_9E8CB5FE_DString[256 .. 257];
             else if (input >= 0x13F8 && input <= 0x13FD)
-                return cast(dstring)LUT_9E8CB5FE[291 + (input - 5112)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(291 + (input - 0x13F8))];
             else if (input >= 0x1C80 && input <= 0x1C88)
-                return cast(dstring)LUT_9E8CB5FE[297 + (input - 7296)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(297 + (input - 0x1C80))];
             else if (input >= 0x1C90 && input <= 0x1CBF)
-                return cast(dstring)LUT_9E8CB5FE[306 + (input - 7312)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(306 + (input - 0x1C90))];
             else if (input == 0x1E00)
                 return cast(dstring)LUT_9E8CB5FE_DString[257 .. 258];
             else if (input == 0x1E02)
@@ -701,7 +701,7 @@ export extern(C) immutable(dstring) sidero_utf_lut_getCaseFolding(dchar input) @
             else if (input == 0x1E94)
                 return cast(dstring)LUT_9E8CB5FE_DString[331 .. 332];
             else if (input >= 0x1E96 && input <= 0x1E9A)
-                return cast(dstring)LUT_9E8CB5FE[354 + (input - 7830)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(354 + (input - 0x1E96))];
             else if (input == 0x1E9B)
                 return cast(dstring)LUT_9E8CB5FE_DString[305 .. 306];
             else if (input == 0x1E9E)
@@ -803,15 +803,15 @@ export extern(C) immutable(dstring) sidero_utf_lut_getCaseFolding(dchar input) @
             else if (input == 0x1EFE)
                 return cast(dstring)LUT_9E8CB5FE_DString[381 .. 382];
             else if (input >= 0x1F08 && input <= 0x1F0F)
-                return cast(dstring)LUT_9E8CB5FE[359 + (input - 7944)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(359 + (input - 0x1F08))];
             else if (input >= 0x1F18 && input <= 0x1F1D)
-                return cast(dstring)LUT_9E8CB5FE[367 + (input - 7960)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(367 + (input - 0x1F18))];
             else if (input >= 0x1F28 && input <= 0x1F2F)
-                return cast(dstring)LUT_9E8CB5FE[373 + (input - 7976)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(373 + (input - 0x1F28))];
             else if (input >= 0x1F38 && input <= 0x1F3F)
-                return cast(dstring)LUT_9E8CB5FE[381 + (input - 7992)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(381 + (input - 0x1F38))];
             else if (input >= 0x1F48 && input <= 0x1F4D)
-                return cast(dstring)LUT_9E8CB5FE[389 + (input - 8008)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(389 + (input - 0x1F48))];
             else if (input == 0x1F50)
                 return cast(dstring)LUT_9E8CB5FE_DString[382 .. 384];
             else if (input == 0x1F52)
@@ -829,37 +829,37 @@ export extern(C) immutable(dstring) sidero_utf_lut_getCaseFolding(dchar input) @
             else if (input == 0x1F5F)
                 return cast(dstring)LUT_9E8CB5FE_DString[396 .. 397];
             else if (input >= 0x1F68 && input <= 0x1F6F)
-                return cast(dstring)LUT_9E8CB5FE[395 + (input - 8040)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(395 + (input - 0x1F68))];
             else if (input >= 0x1F80 && input <= 0x1FBC)
-                return cast(dstring)LUT_9E8CB5FE[403 + (input - 8064)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(403 + (input - 0x1F80))];
             else if (input == 0x1FBE)
                 return cast(dstring)LUT_9E8CB5FE_DString[131 .. 132];
             else if (input >= 0x1FC2 && input <= 0x1FCC)
-                return cast(dstring)LUT_9E8CB5FE[464 + (input - 8130)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(464 + (input - 0x1FC2))];
             else if (input >= 0x1FD2 && input <= 0x1FDB)
-                return cast(dstring)LUT_9E8CB5FE[475 + (input - 8146)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(475 + (input - 0x1FD2))];
             else if (input >= 0x1FE2 && input <= 0x1FEC)
-                return cast(dstring)LUT_9E8CB5FE[485 + (input - 8162)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(485 + (input - 0x1FE2))];
             else if (input >= 0x1FF2 && input <= 0x1FFC)
-                return cast(dstring)LUT_9E8CB5FE[496 + (input - 8178)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(496 + (input - 0x1FF2))];
             else if (input == 0x2126)
                 return cast(dstring)LUT_9E8CB5FE_DString[397 .. 398];
             else if (input >= 0x212A && input <= 0x212B)
-                return cast(dstring)LUT_9E8CB5FE[507 + (input - 8490)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(507 + (input - 0x212A))];
             else if (input == 0x2132)
                 return cast(dstring)LUT_9E8CB5FE_DString[398 .. 399];
             else if (input >= 0x2160 && input <= 0x216F)
-                return cast(dstring)LUT_9E8CB5FE[509 + (input - 8544)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(509 + (input - 0x2160))];
             else if (input == 0x2183)
                 return cast(dstring)LUT_9E8CB5FE_DString[399 .. 400];
             else if (input >= 0x24B6 && input <= 0x24CF)
-                return cast(dstring)LUT_9E8CB5FE[525 + (input - 9398)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(525 + (input - 0x24B6))];
             else if (input >= 0x2C00 && input <= 0x2C2F)
-                return cast(dstring)LUT_9E8CB5FE[551 + (input - 11264)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(551 + (input - 0x2C00))];
             else if (input == 0x2C60)
                 return cast(dstring)LUT_9E8CB5FE_DString[400 .. 401];
             else if (input >= 0x2C62 && input <= 0x2C64)
-                return cast(dstring)LUT_9E8CB5FE[599 + (input - 11362)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(599 + (input - 0x2C62))];
             else if (input == 0x2C67)
                 return cast(dstring)LUT_9E8CB5FE_DString[401 .. 402];
             else if (input == 0x2C69)
@@ -867,13 +867,13 @@ export extern(C) immutable(dstring) sidero_utf_lut_getCaseFolding(dchar input) @
             else if (input == 0x2C6B)
                 return cast(dstring)LUT_9E8CB5FE_DString[403 .. 404];
             else if (input >= 0x2C6D && input <= 0x2C70)
-                return cast(dstring)LUT_9E8CB5FE[602 + (input - 11373)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(602 + (input - 0x2C6D))];
             else if (input == 0x2C72)
                 return cast(dstring)LUT_9E8CB5FE_DString[404 .. 405];
             else if (input == 0x2C75)
                 return cast(dstring)LUT_9E8CB5FE_DString[405 .. 406];
             else if (input >= 0x2C7E && input <= 0x2C80)
-                return cast(dstring)LUT_9E8CB5FE[606 + (input - 11390)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(606 + (input - 0x2C7E))];
             else if (input == 0x2C82)
                 return cast(dstring)LUT_9E8CB5FE_DString[406 .. 407];
             else if (input == 0x2C84)
@@ -1134,7 +1134,7 @@ export extern(C) immutable(dstring) sidero_utf_lut_getCaseFolding(dchar input) @
             else if (input == 0xA77B)
                 return cast(dstring)LUT_9E8CB5FE_DString[534 .. 535];
             else if (input >= 0xA77D && input <= 0xA77E)
-                return cast(dstring)LUT_9E8CB5FE[609 + (input - 42877)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(609 + (input - 0xA77D))];
             else if (input == 0xA780)
                 return cast(dstring)LUT_9E8CB5FE_DString[535 .. 536];
             else if (input == 0xA782)
@@ -1172,7 +1172,7 @@ export extern(C) immutable(dstring) sidero_utf_lut_getCaseFolding(dchar input) @
             else if (input == 0xA7A8)
                 return cast(dstring)LUT_9E8CB5FE_DString[552 .. 553];
             else if (input >= 0xA7AA && input <= 0xA7B4)
-                return cast(dstring)LUT_9E8CB5FE[611 + (input - 42922)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(611 + (input - 0xA7AA))];
             else if (input == 0xA7B6)
                 return cast(dstring)LUT_9E8CB5FE_DString[553 .. 554];
             else if (input == 0xA7B8)
@@ -1188,7 +1188,7 @@ export extern(C) immutable(dstring) sidero_utf_lut_getCaseFolding(dchar input) @
             else if (input == 0xA7C2)
                 return cast(dstring)LUT_9E8CB5FE_DString[559 .. 560];
             else if (input >= 0xA7C4 && input <= 0xA7C7)
-                return cast(dstring)LUT_9E8CB5FE[622 + (input - 42948)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(622 + (input - 0xA7C4))];
             else if (input == 0xA7C9)
                 return cast(dstring)LUT_9E8CB5FE_DString[560 .. 561];
             else if (input == 0xA7D0)
@@ -1200,30 +1200,30 @@ export extern(C) immutable(dstring) sidero_utf_lut_getCaseFolding(dchar input) @
             else if (input == 0xA7F5)
                 return cast(dstring)LUT_9E8CB5FE_DString[564 .. 565];
             else if (input >= 0xAB70 && input <= 0xABBF)
-                return cast(dstring)LUT_9E8CB5FE[626 + (input - 43888)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(626 + (input - 0xAB70))];
             else if (input >= 0xFB00 && input <= 0xFB06)
-                return cast(dstring)LUT_9E8CB5FE[706 + (input - 64256)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(706 + (input - 0xFB00))];
             else if (input >= 0xFB13 && input <= 0xFB17)
-                return cast(dstring)LUT_9E8CB5FE[713 + (input - 64275)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(713 + (input - 0xFB13))];
             else if (input >= 0xFF21)
-                return cast(dstring)LUT_9E8CB5FE[718 + (input - 65313)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(718 + (input - 0xFF21))];
         }
     } else if (input >= 0x10400 && input <= 0x1E921) {
         if (input <= 0x16E5F) {
             if (input <= 0x10427)
-                return cast(dstring)LUT_9E8CB5FE[744 + (input - 66560)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(744 + (input - 0x10400))];
             else if (input >= 0x104B0 && input <= 0x104D3)
-                return cast(dstring)LUT_9E8CB5FE[784 + (input - 66736)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(784 + (input - 0x104B0))];
             else if (input >= 0x10570 && input <= 0x10595)
-                return cast(dstring)LUT_9E8CB5FE[820 + (input - 66928)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(820 + (input - 0x10570))];
             else if (input >= 0x10C80 && input <= 0x10CB2)
-                return cast(dstring)LUT_9E8CB5FE[858 + (input - 68736)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(858 + (input - 0x10C80))];
             else if (input >= 0x118A0 && input <= 0x118BF)
-                return cast(dstring)LUT_9E8CB5FE[909 + (input - 71840)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(909 + (input - 0x118A0))];
             else if (input >= 0x16E40)
-                return cast(dstring)LUT_9E8CB5FE[941 + (input - 93760)];
+                return cast(dstring)LUT_9E8CB5FE[cast(size_t)(941 + (input - 0x16E40))];
         } else if (input >= 0x1E900) {
-            return cast(dstring)LUT_9E8CB5FE[973 + (input - 125184)];
+            return cast(dstring)LUT_9E8CB5FE[cast(size_t)(973 + (input - 0x1E900))];
         }
     }
     return null;
@@ -1248,11 +1248,11 @@ export extern(C) immutable(dchar) sidero_utf_lut_getCaseFoldingFast(dchar input)
     if (input >= 0x41 && input <= 0xFF3A) {
         if (input <= 0x2CF2) {
             if (input <= 0x5A)
-                return cast(dchar)LUT_25074147[0 + (input - 65)];
+                return cast(dchar)LUT_25074147[cast(size_t)(0 + (input - 0x41))];
             else if (input == 0xB5)
                 return cast(dchar)0x3BC;
             else if (input >= 0xC0 && input <= 0xDE)
-                return cast(dchar)LUT_25074147[26 + (input - 192)];
+                return cast(dchar)LUT_25074147[cast(size_t)(26 + (input - 0xC0))];
             else if (input == 0x100)
                 return cast(dchar)0x101;
             else if (input == 0x102)
@@ -1370,7 +1370,7 @@ export extern(C) immutable(dchar) sidero_utf_lut_getCaseFoldingFast(dchar input)
             else if (input == 0x176)
                 return cast(dchar)0x177;
             else if (input >= 0x178 && input <= 0x179)
-                return cast(dchar)LUT_25074147[57 + (input - 376)];
+                return cast(dchar)LUT_25074147[cast(size_t)(57 + (input - 0x178))];
             else if (input == 0x17B)
                 return cast(dchar)0x17C;
             else if (input == 0x17D)
@@ -1378,27 +1378,27 @@ export extern(C) immutable(dchar) sidero_utf_lut_getCaseFoldingFast(dchar input)
             else if (input == 0x17F)
                 return cast(dchar)0x73;
             else if (input >= 0x181 && input <= 0x182)
-                return cast(dchar)LUT_25074147[59 + (input - 385)];
+                return cast(dchar)LUT_25074147[cast(size_t)(59 + (input - 0x181))];
             else if (input == 0x184)
                 return cast(dchar)0x185;
             else if (input >= 0x186 && input <= 0x1A0)
-                return cast(dchar)LUT_25074147[61 + (input - 390)];
+                return cast(dchar)LUT_25074147[cast(size_t)(61 + (input - 0x186))];
             else if (input == 0x1A2)
                 return cast(dchar)0x1A3;
             else if (input == 0x1A4)
                 return cast(dchar)0x1A5;
             else if (input >= 0x1A6 && input <= 0x1A7)
-                return cast(dchar)LUT_25074147[88 + (input - 422)];
+                return cast(dchar)LUT_25074147[cast(size_t)(88 + (input - 0x1A6))];
             else if (input == 0x1A9)
                 return cast(dchar)0x283;
             else if (input == 0x1AC)
                 return cast(dchar)0x1AD;
             else if (input >= 0x1AE && input <= 0x1B3)
-                return cast(dchar)LUT_25074147[90 + (input - 430)];
+                return cast(dchar)LUT_25074147[cast(size_t)(90 + (input - 0x1AE))];
             else if (input == 0x1B5)
                 return cast(dchar)0x1B6;
             else if (input >= 0x1B7 && input <= 0x1B8)
-                return cast(dchar)LUT_25074147[96 + (input - 439)];
+                return cast(dchar)LUT_25074147[cast(size_t)(96 + (input - 0x1B7))];
             else if (input == 0x1BC)
                 return cast(dchar)0x1BD;
             else if (input >= 0x1C4 && input <= 0x1C5)
@@ -1446,7 +1446,7 @@ export extern(C) immutable(dchar) sidero_utf_lut_getCaseFoldingFast(dchar input)
             else if (input == 0x1F4)
                 return cast(dchar)0x1F5;
             else if (input >= 0x1F6 && input <= 0x1F8)
-                return cast(dchar)LUT_25074147[98 + (input - 502)];
+                return cast(dchar)LUT_25074147[cast(size_t)(98 + (input - 0x1F6))];
             else if (input == 0x1FA)
                 return cast(dchar)0x1FB;
             else if (input == 0x1FC)
@@ -1506,11 +1506,11 @@ export extern(C) immutable(dchar) sidero_utf_lut_getCaseFoldingFast(dchar input)
             else if (input == 0x232)
                 return cast(dchar)0x233;
             else if (input >= 0x23A && input <= 0x23E)
-                return cast(dchar)LUT_25074147[101 + (input - 570)];
+                return cast(dchar)LUT_25074147[cast(size_t)(101 + (input - 0x23A))];
             else if (input == 0x241)
                 return cast(dchar)0x242;
             else if (input >= 0x243 && input <= 0x246)
-                return cast(dchar)LUT_25074147[106 + (input - 579)];
+                return cast(dchar)LUT_25074147[cast(size_t)(106 + (input - 0x243))];
             else if (input == 0x248)
                 return cast(dchar)0x249;
             else if (input == 0x24A)
@@ -1532,15 +1532,15 @@ export extern(C) immutable(dchar) sidero_utf_lut_getCaseFoldingFast(dchar input)
             else if (input == 0x386)
                 return cast(dchar)0x3AC;
             else if (input >= 0x388 && input <= 0x38A)
-                return cast(dchar)LUT_25074147[110 + (input - 904)];
+                return cast(dchar)LUT_25074147[cast(size_t)(110 + (input - 0x388))];
             else if (input == 0x38C)
                 return cast(dchar)0x3CC;
             else if (input >= 0x38E && input <= 0x3AB)
-                return cast(dchar)LUT_25074147[113 + (input - 910)];
+                return cast(dchar)LUT_25074147[cast(size_t)(113 + (input - 0x38E))];
             else if (input == 0x3C2)
                 return cast(dchar)0x3C3;
             else if (input >= 0x3CF && input <= 0x3D6)
-                return cast(dchar)LUT_25074147[143 + (input - 975)];
+                return cast(dchar)LUT_25074147[cast(size_t)(143 + (input - 0x3CF))];
             else if (input == 0x3D8)
                 return cast(dchar)0x3D9;
             else if (input == 0x3DA)
@@ -1566,11 +1566,11 @@ export extern(C) immutable(dchar) sidero_utf_lut_getCaseFoldingFast(dchar input)
             else if (input == 0x3EE)
                 return cast(dchar)0x3EF;
             else if (input >= 0x3F0 && input <= 0x3F5)
-                return cast(dchar)LUT_25074147[151 + (input - 1008)];
+                return cast(dchar)LUT_25074147[cast(size_t)(151 + (input - 0x3F0))];
             else if (input == 0x3F7)
                 return cast(dchar)0x3F8;
             else if (input >= 0x3F9 && input <= 0x42F)
-                return cast(dchar)LUT_25074147[157 + (input - 1017)];
+                return cast(dchar)LUT_25074147[cast(size_t)(157 + (input - 0x3F9))];
             else if (input == 0x460)
                 return cast(dchar)0x461;
             else if (input == 0x462)
@@ -1660,7 +1660,7 @@ export extern(C) immutable(dchar) sidero_utf_lut_getCaseFoldingFast(dchar input)
             else if (input == 0x4BE)
                 return cast(dchar)0x4BF;
             else if (input >= 0x4C0 && input <= 0x4C1)
-                return cast(dchar)LUT_25074147[212 + (input - 1216)];
+                return cast(dchar)LUT_25074147[cast(size_t)(212 + (input - 0x4C0))];
             else if (input == 0x4C3)
                 return cast(dchar)0x4C4;
             else if (input == 0x4C5)
@@ -1770,19 +1770,19 @@ export extern(C) immutable(dchar) sidero_utf_lut_getCaseFoldingFast(dchar input)
             else if (input == 0x52E)
                 return cast(dchar)0x52F;
             else if (input >= 0x531 && input <= 0x556)
-                return cast(dchar)LUT_25074147[214 + (input - 1329)];
+                return cast(dchar)LUT_25074147[cast(size_t)(214 + (input - 0x531))];
             else if (input >= 0x10A0 && input <= 0x10C5)
-                return cast(dchar)LUT_25074147[252 + (input - 4256)];
+                return cast(dchar)LUT_25074147[cast(size_t)(252 + (input - 0x10A0))];
             else if (input == 0x10C7)
                 return cast(dchar)0x2D27;
             else if (input == 0x10CD)
                 return cast(dchar)0x2D2D;
             else if (input >= 0x13F8 && input <= 0x13FD)
-                return cast(dchar)LUT_25074147[290 + (input - 5112)];
+                return cast(dchar)LUT_25074147[cast(size_t)(290 + (input - 0x13F8))];
             else if (input >= 0x1C80 && input <= 0x1C88)
-                return cast(dchar)LUT_25074147[296 + (input - 7296)];
+                return cast(dchar)LUT_25074147[cast(size_t)(296 + (input - 0x1C80))];
             else if (input >= 0x1C90 && input <= 0x1CBF)
-                return cast(dchar)LUT_25074147[305 + (input - 7312)];
+                return cast(dchar)LUT_25074147[cast(size_t)(305 + (input - 0x1C90))];
             else if (input == 0x1E00)
                 return cast(dchar)0x1E01;
             else if (input == 0x1E02)
@@ -2034,15 +2034,15 @@ export extern(C) immutable(dchar) sidero_utf_lut_getCaseFoldingFast(dchar input)
             else if (input == 0x1EFE)
                 return cast(dchar)0x1EFF;
             else if (input >= 0x1F08 && input <= 0x1F0F)
-                return cast(dchar)LUT_25074147[353 + (input - 7944)];
+                return cast(dchar)LUT_25074147[cast(size_t)(353 + (input - 0x1F08))];
             else if (input >= 0x1F18 && input <= 0x1F1D)
-                return cast(dchar)LUT_25074147[361 + (input - 7960)];
+                return cast(dchar)LUT_25074147[cast(size_t)(361 + (input - 0x1F18))];
             else if (input >= 0x1F28 && input <= 0x1F2F)
-                return cast(dchar)LUT_25074147[367 + (input - 7976)];
+                return cast(dchar)LUT_25074147[cast(size_t)(367 + (input - 0x1F28))];
             else if (input >= 0x1F38 && input <= 0x1F3F)
-                return cast(dchar)LUT_25074147[375 + (input - 7992)];
+                return cast(dchar)LUT_25074147[cast(size_t)(375 + (input - 0x1F38))];
             else if (input >= 0x1F48 && input <= 0x1F4D)
-                return cast(dchar)LUT_25074147[383 + (input - 8008)];
+                return cast(dchar)LUT_25074147[cast(size_t)(383 + (input - 0x1F48))];
             else if (input == 0x1F59)
                 return cast(dchar)0x1F51;
             else if (input == 0x1F5B)
@@ -2052,43 +2052,43 @@ export extern(C) immutable(dchar) sidero_utf_lut_getCaseFoldingFast(dchar input)
             else if (input == 0x1F5F)
                 return cast(dchar)0x1F57;
             else if (input >= 0x1F68 && input <= 0x1F6F)
-                return cast(dchar)LUT_25074147[389 + (input - 8040)];
+                return cast(dchar)LUT_25074147[cast(size_t)(389 + (input - 0x1F68))];
             else if (input >= 0x1F88 && input <= 0x1F8F)
-                return cast(dchar)LUT_25074147[397 + (input - 8072)];
+                return cast(dchar)LUT_25074147[cast(size_t)(397 + (input - 0x1F88))];
             else if (input >= 0x1F98 && input <= 0x1F9F)
-                return cast(dchar)LUT_25074147[405 + (input - 8088)];
+                return cast(dchar)LUT_25074147[cast(size_t)(405 + (input - 0x1F98))];
             else if (input >= 0x1FA8 && input <= 0x1FAF)
-                return cast(dchar)LUT_25074147[413 + (input - 8104)];
+                return cast(dchar)LUT_25074147[cast(size_t)(413 + (input - 0x1FA8))];
             else if (input >= 0x1FB8 && input <= 0x1FBC)
-                return cast(dchar)LUT_25074147[421 + (input - 8120)];
+                return cast(dchar)LUT_25074147[cast(size_t)(421 + (input - 0x1FB8))];
             else if (input == 0x1FBE)
                 return cast(dchar)0x3B9;
             else if (input >= 0x1FC8 && input <= 0x1FCC)
-                return cast(dchar)LUT_25074147[426 + (input - 8136)];
+                return cast(dchar)LUT_25074147[cast(size_t)(426 + (input - 0x1FC8))];
             else if (input >= 0x1FD8 && input <= 0x1FDB)
-                return cast(dchar)LUT_25074147[431 + (input - 8152)];
+                return cast(dchar)LUT_25074147[cast(size_t)(431 + (input - 0x1FD8))];
             else if (input >= 0x1FE8 && input <= 0x1FEC)
-                return cast(dchar)LUT_25074147[435 + (input - 8168)];
+                return cast(dchar)LUT_25074147[cast(size_t)(435 + (input - 0x1FE8))];
             else if (input >= 0x1FF8 && input <= 0x1FFC)
-                return cast(dchar)LUT_25074147[440 + (input - 8184)];
+                return cast(dchar)LUT_25074147[cast(size_t)(440 + (input - 0x1FF8))];
             else if (input == 0x2126)
                 return cast(dchar)0x3C9;
             else if (input >= 0x212A && input <= 0x212B)
-                return cast(dchar)LUT_25074147[445 + (input - 8490)];
+                return cast(dchar)LUT_25074147[cast(size_t)(445 + (input - 0x212A))];
             else if (input == 0x2132)
                 return cast(dchar)0x214E;
             else if (input >= 0x2160 && input <= 0x216F)
-                return cast(dchar)LUT_25074147[447 + (input - 8544)];
+                return cast(dchar)LUT_25074147[cast(size_t)(447 + (input - 0x2160))];
             else if (input == 0x2183)
                 return cast(dchar)0x2184;
             else if (input >= 0x24B6 && input <= 0x24CF)
-                return cast(dchar)LUT_25074147[463 + (input - 9398)];
+                return cast(dchar)LUT_25074147[cast(size_t)(463 + (input - 0x24B6))];
             else if (input >= 0x2C00 && input <= 0x2C2F)
-                return cast(dchar)LUT_25074147[489 + (input - 11264)];
+                return cast(dchar)LUT_25074147[cast(size_t)(489 + (input - 0x2C00))];
             else if (input == 0x2C60)
                 return cast(dchar)0x2C61;
             else if (input >= 0x2C62 && input <= 0x2C64)
-                return cast(dchar)LUT_25074147[537 + (input - 11362)];
+                return cast(dchar)LUT_25074147[cast(size_t)(537 + (input - 0x2C62))];
             else if (input == 0x2C67)
                 return cast(dchar)0x2C68;
             else if (input == 0x2C69)
@@ -2096,13 +2096,13 @@ export extern(C) immutable(dchar) sidero_utf_lut_getCaseFoldingFast(dchar input)
             else if (input == 0x2C6B)
                 return cast(dchar)0x2C6C;
             else if (input >= 0x2C6D && input <= 0x2C70)
-                return cast(dchar)LUT_25074147[540 + (input - 11373)];
+                return cast(dchar)LUT_25074147[cast(size_t)(540 + (input - 0x2C6D))];
             else if (input == 0x2C72)
                 return cast(dchar)0x2C73;
             else if (input == 0x2C75)
                 return cast(dchar)0x2C76;
             else if (input >= 0x2C7E && input <= 0x2C80)
-                return cast(dchar)LUT_25074147[544 + (input - 11390)];
+                return cast(dchar)LUT_25074147[cast(size_t)(544 + (input - 0x2C7E))];
             else if (input == 0x2C82)
                 return cast(dchar)0x2C83;
             else if (input == 0x2C84)
@@ -2363,7 +2363,7 @@ export extern(C) immutable(dchar) sidero_utf_lut_getCaseFoldingFast(dchar input)
             else if (input == 0xA77B)
                 return cast(dchar)0xA77C;
             else if (input >= 0xA77D && input <= 0xA77E)
-                return cast(dchar)LUT_25074147[547 + (input - 42877)];
+                return cast(dchar)LUT_25074147[cast(size_t)(547 + (input - 0xA77D))];
             else if (input == 0xA780)
                 return cast(dchar)0xA781;
             else if (input == 0xA782)
@@ -2401,7 +2401,7 @@ export extern(C) immutable(dchar) sidero_utf_lut_getCaseFoldingFast(dchar input)
             else if (input == 0xA7A8)
                 return cast(dchar)0xA7A9;
             else if (input >= 0xA7AA && input <= 0xA7B4)
-                return cast(dchar)LUT_25074147[549 + (input - 42922)];
+                return cast(dchar)LUT_25074147[cast(size_t)(549 + (input - 0xA7AA))];
             else if (input == 0xA7B6)
                 return cast(dchar)0xA7B7;
             else if (input == 0xA7B8)
@@ -2417,7 +2417,7 @@ export extern(C) immutable(dchar) sidero_utf_lut_getCaseFoldingFast(dchar input)
             else if (input == 0xA7C2)
                 return cast(dchar)0xA7C3;
             else if (input >= 0xA7C4 && input <= 0xA7C7)
-                return cast(dchar)LUT_25074147[560 + (input - 42948)];
+                return cast(dchar)LUT_25074147[cast(size_t)(560 + (input - 0xA7C4))];
             else if (input == 0xA7C9)
                 return cast(dchar)0xA7CA;
             else if (input == 0xA7D0)
@@ -2429,26 +2429,26 @@ export extern(C) immutable(dchar) sidero_utf_lut_getCaseFoldingFast(dchar input)
             else if (input == 0xA7F5)
                 return cast(dchar)0xA7F6;
             else if (input >= 0xAB70 && input <= 0xABBF)
-                return cast(dchar)LUT_25074147[564 + (input - 43888)];
+                return cast(dchar)LUT_25074147[cast(size_t)(564 + (input - 0xAB70))];
             else if (input >= 0xFF21)
-                return cast(dchar)LUT_25074147[644 + (input - 65313)];
+                return cast(dchar)LUT_25074147[cast(size_t)(644 + (input - 0xFF21))];
         }
     } else if (input >= 0x10400 && input <= 0x1E921) {
         if (input <= 0x16E5F) {
             if (input <= 0x10427)
-                return cast(dchar)LUT_25074147[670 + (input - 66560)];
+                return cast(dchar)LUT_25074147[cast(size_t)(670 + (input - 0x10400))];
             else if (input >= 0x104B0 && input <= 0x104D3)
-                return cast(dchar)LUT_25074147[710 + (input - 66736)];
+                return cast(dchar)LUT_25074147[cast(size_t)(710 + (input - 0x104B0))];
             else if (input >= 0x10570 && input <= 0x10595)
-                return cast(dchar)LUT_25074147[746 + (input - 66928)];
+                return cast(dchar)LUT_25074147[cast(size_t)(746 + (input - 0x10570))];
             else if (input >= 0x10C80 && input <= 0x10CB2)
-                return cast(dchar)LUT_25074147[784 + (input - 68736)];
+                return cast(dchar)LUT_25074147[cast(size_t)(784 + (input - 0x10C80))];
             else if (input >= 0x118A0 && input <= 0x118BF)
-                return cast(dchar)LUT_25074147[835 + (input - 71840)];
+                return cast(dchar)LUT_25074147[cast(size_t)(835 + (input - 0x118A0))];
             else if (input >= 0x16E40)
-                return cast(dchar)LUT_25074147[867 + (input - 93760)];
+                return cast(dchar)LUT_25074147[cast(size_t)(867 + (input - 0x16E40))];
         } else if (input >= 0x1E900) {
-            return cast(dchar)LUT_25074147[899 + (input - 125184)];
+            return cast(dchar)LUT_25074147[cast(size_t)(899 + (input - 0x1E900))];
         }
     }
     return input;
@@ -2467,7 +2467,7 @@ export extern(C) immutable(size_t) sidero_utf_lut_lengthOfCaseFolding(dchar inpu
             else if (input >= 0xC0 && input <= 0xD6)
                 return cast(size_t)1;
             else if (input >= 0xD8 && input <= 0xDF)
-                return cast(size_t)LUT_E95E25E4[0 + (input - 216)];
+                return cast(size_t)LUT_E95E25E4[cast(size_t)(0 + (input - 0xD8))];
             else if (input >= 0x100 && input <= 0x12E)
                 return cast(size_t)1;
             else if (input == 0x130)
@@ -2491,7 +2491,7 @@ export extern(C) immutable(size_t) sidero_utf_lut_lengthOfCaseFolding(dchar inpu
             else if (input >= 0x386 && input <= 0x38C)
                 return cast(size_t)1;
             else if (input >= 0x38E && input <= 0x390)
-                return cast(size_t)LUT_E95E25E4[8 + (input - 910)];
+                return cast(size_t)LUT_E95E25E4[cast(size_t)(8 + (input - 0x38E))];
             else if (input >= 0x391 && input <= 0x3AB)
                 return cast(size_t)1;
             else if (input == 0x3B0)
@@ -2527,35 +2527,35 @@ export extern(C) immutable(size_t) sidero_utf_lut_lengthOfCaseFolding(dchar inpu
             else if (input == 0x1F50)
                 return cast(size_t)2;
             else if (input >= 0x1F52 && input <= 0x1F56)
-                return cast(size_t)LUT_E95E25E4[11 + (input - 8018)];
+                return cast(size_t)LUT_E95E25E4[cast(size_t)(11 + (input - 0x1F52))];
             else if (input >= 0x1F59 && input <= 0x1F5F)
                 return cast(size_t)1;
             else if (input >= 0x1F68 && input <= 0x1F6F)
                 return cast(size_t)1;
             else if (input >= 0x1F80 && input <= 0x1FB4)
-                return cast(size_t)LUT_E95E25E4[16 + (input - 8064)];
+                return cast(size_t)LUT_E95E25E4[cast(size_t)(16 + (input - 0x1F80))];
             else if (input >= 0x1FB6 && input <= 0x1FBC)
-                return cast(size_t)LUT_E95E25E4[69 + (input - 8118)];
+                return cast(size_t)LUT_E95E25E4[cast(size_t)(69 + (input - 0x1FB6))];
             else if (input == 0x1FBE)
                 return cast(size_t)1;
             else if (input >= 0x1FC2 && input <= 0x1FC4)
                 return cast(size_t)2;
             else if (input >= 0x1FC6 && input <= 0x1FCC)
-                return cast(size_t)LUT_E95E25E4[76 + (input - 8134)];
+                return cast(size_t)LUT_E95E25E4[cast(size_t)(76 + (input - 0x1FC6))];
             else if (input >= 0x1FD2 && input <= 0x1FD3)
                 return cast(size_t)3;
             else if (input >= 0x1FD6 && input <= 0x1FD7)
-                return cast(size_t)LUT_E95E25E4[83 + (input - 8150)];
+                return cast(size_t)LUT_E95E25E4[cast(size_t)(83 + (input - 0x1FD6))];
             else if (input >= 0x1FD8 && input <= 0x1FDB)
                 return cast(size_t)1;
             else if (input >= 0x1FE2 && input <= 0x1FE7)
-                return cast(size_t)LUT_E95E25E4[85 + (input - 8162)];
+                return cast(size_t)LUT_E95E25E4[cast(size_t)(85 + (input - 0x1FE2))];
             else if (input >= 0x1FE8 && input <= 0x1FEC)
                 return cast(size_t)1;
             else if (input >= 0x1FF2 && input <= 0x1FF4)
                 return cast(size_t)2;
             else if (input >= 0x1FF6 && input <= 0x1FFC)
-                return cast(size_t)LUT_E95E25E4[91 + (input - 8182)];
+                return cast(size_t)LUT_E95E25E4[cast(size_t)(91 + (input - 0x1FF6))];
             else if (input >= 0x2126 && input <= 0x212B)
                 return cast(size_t)1;
             else if (input == 0x2132)
@@ -2582,7 +2582,7 @@ export extern(C) immutable(size_t) sidero_utf_lut_lengthOfCaseFolding(dchar inpu
             else if (input >= 0xAB70 && input <= 0xABBF)
                 return cast(size_t)1;
             else if (input >= 0xFB00 && input <= 0xFB06)
-                return cast(size_t)LUT_E95E25E4[98 + (input - 64256)];
+                return cast(size_t)LUT_E95E25E4[cast(size_t)(98 + (input - 0xFB00))];
             else if (input >= 0xFB13 && input <= 0xFB17)
                 return cast(size_t)2;
             else if (input >= 0xFF21)

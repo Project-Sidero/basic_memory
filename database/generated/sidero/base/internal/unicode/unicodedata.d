@@ -5,13 +5,13 @@ export extern(C) immutable(size_t) sidero_utf_lut_lengthOfFullyDecomposed(dchar 
     if (input >= 0xA0 && input <= 0xFFEE) {
         if (input <= 0x33FF) {
             if (input <= 0x233)
-                return cast(size_t)LUT_BABC6130[0 + (input - 160)];
+                return cast(size_t)LUT_BABC6130[cast(size_t)(0 + (input - 0xA0))];
             else if (input >= 0x2B0 && input <= 0x2E4)
-                return cast(size_t)LUT_BABC6130[404 + (input - 688)];
+                return cast(size_t)LUT_BABC6130[cast(size_t)(404 + (input - 0x2B0))];
             else if (input >= 0x340 && input <= 0x477)
-                return cast(size_t)LUT_BABC6130[457 + (input - 832)];
+                return cast(size_t)LUT_BABC6130[cast(size_t)(457 + (input - 0x340))];
             else if (input >= 0x4C1 && input <= 0x4F9)
-                return cast(size_t)LUT_BABC6130[769 + (input - 1217)];
+                return cast(size_t)LUT_BABC6130[cast(size_t)(769 + (input - 0x4C1))];
             else if (input == 0x587)
                 return cast(size_t)2;
             else if (input >= 0x622 && input <= 0x626)
@@ -19,45 +19,45 @@ export extern(C) immutable(size_t) sidero_utf_lut_lengthOfFullyDecomposed(dchar 
             else if (input >= 0x675 && input <= 0x678)
                 return cast(size_t)2;
             else if (input >= 0x6C0 && input <= 0x6D3)
-                return cast(size_t)LUT_BABC6130[826 + (input - 1728)];
+                return cast(size_t)LUT_BABC6130[cast(size_t)(826 + (input - 0x6C0))];
             else if (input >= 0x929 && input <= 0x95F)
-                return cast(size_t)LUT_BABC6130[846 + (input - 2345)];
+                return cast(size_t)LUT_BABC6130[cast(size_t)(846 + (input - 0x929))];
             else if (input >= 0x9CB && input <= 0x9DF)
-                return cast(size_t)LUT_BABC6130[901 + (input - 2507)];
+                return cast(size_t)LUT_BABC6130[cast(size_t)(901 + (input - 0x9CB))];
             else if (input >= 0xA33 && input <= 0xA5E)
-                return cast(size_t)LUT_BABC6130[922 + (input - 2611)];
+                return cast(size_t)LUT_BABC6130[cast(size_t)(922 + (input - 0xA33))];
             else if (input >= 0xB48 && input <= 0xBCC)
-                return cast(size_t)LUT_BABC6130[966 + (input - 2888)];
+                return cast(size_t)LUT_BABC6130[cast(size_t)(966 + (input - 0xB48))];
             else if (input == 0xC48)
                 return cast(size_t)2;
             else if (input >= 0xCC0 && input <= 0xCCB)
-                return cast(size_t)LUT_BABC6130[1099 + (input - 3264)];
+                return cast(size_t)LUT_BABC6130[cast(size_t)(1099 + (input - 0xCC0))];
             else if (input >= 0xD4A && input <= 0xD4C)
                 return cast(size_t)2;
             else if (input >= 0xDDA && input <= 0xDDE)
-                return cast(size_t)LUT_BABC6130[1111 + (input - 3546)];
+                return cast(size_t)LUT_BABC6130[cast(size_t)(1111 + (input - 0xDDA))];
             else if (input == 0xE33)
                 return cast(size_t)2;
             else if (input >= 0xEB3 && input <= 0xFB9)
-                return cast(size_t)LUT_BABC6130[1116 + (input - 3763)];
+                return cast(size_t)LUT_BABC6130[cast(size_t)(1116 + (input - 0xEB3))];
             else if (input == 0x1026)
                 return cast(size_t)2;
             else if (input == 0x10FC)
                 return cast(size_t)1;
             else if (input >= 0x1B06 && input <= 0x1B43)
-                return cast(size_t)LUT_BABC6130[1379 + (input - 6918)];
+                return cast(size_t)LUT_BABC6130[cast(size_t)(1379 + (input - 0x1B06))];
             else if (input >= 0x1D2C && input <= 0x1DBF)
-                return cast(size_t)LUT_BABC6130[1441 + (input - 7468)];
+                return cast(size_t)LUT_BABC6130[cast(size_t)(1441 + (input - 0x1D2C))];
             else if (input >= 0x1E00 && input <= 0x20A8)
-                return cast(size_t)LUT_BABC6130[1589 + (input - 7680)];
+                return cast(size_t)LUT_BABC6130[cast(size_t)(1589 + (input - 0x1E00))];
             else if (input >= 0x2100 && input <= 0x232A)
-                return cast(size_t)LUT_BABC6130[2270 + (input - 8448)];
+                return cast(size_t)LUT_BABC6130[cast(size_t)(2270 + (input - 0x2100))];
             else if (input >= 0x2460 && input <= 0x24EA)
-                return cast(size_t)LUT_BABC6130[2825 + (input - 9312)];
+                return cast(size_t)LUT_BABC6130[cast(size_t)(2825 + (input - 0x2460))];
             else if (input == 0x2A0C)
                 return cast(size_t)4;
             else if (input >= 0x2A74 && input <= 0x2A76)
-                return cast(size_t)LUT_BABC6130[2964 + (input - 10868)];
+                return cast(size_t)LUT_BABC6130[cast(size_t)(2964 + (input - 0x2A74))];
             else if (input == 0x2ADC)
                 return cast(size_t)2;
             else if (input >= 0x2C7C && input <= 0x2C7D)
@@ -67,50 +67,50 @@ export extern(C) immutable(size_t) sidero_utf_lut_lengthOfFullyDecomposed(dchar 
             else if (input == 0x2E9F)
                 return cast(size_t)1;
             else if (input >= 0x2EF3 && input <= 0x319F)
-                return cast(size_t)LUT_BABC6130[2967 + (input - 12019)];
+                return cast(size_t)LUT_BABC6130[cast(size_t)(2967 + (input - 0x2EF3))];
             else if (input >= 0x3200)
-                return cast(size_t)LUT_BABC6130[3652 + (input - 12800)];
+                return cast(size_t)LUT_BABC6130[cast(size_t)(3652 + (input - 0x3200))];
         } else if (input >= 0xA69C) {
             if (input <= 0xA69D)
                 return cast(size_t)1;
             else if (input == 0xA770)
                 return cast(size_t)1;
             else if (input >= 0xA7F2 && input <= 0xA7F9)
-                return cast(size_t)LUT_BABC6130[4164 + (input - 42994)];
+                return cast(size_t)LUT_BABC6130[cast(size_t)(4164 + (input - 0xA7F2))];
             else if (input >= 0xAB5C && input <= 0xAB69)
-                return cast(size_t)LUT_BABC6130[4172 + (input - 43868)];
+                return cast(size_t)LUT_BABC6130[cast(size_t)(4172 + (input - 0xAB5C))];
             else if (input >= 0xF900)
-                return cast(size_t)LUT_BABC6130[4186 + (input - 63744)];
+                return cast(size_t)LUT_BABC6130[cast(size_t)(4186 + (input - 0xF900))];
         }
     } else if (input >= 0x10781 && input <= 0x1FBF9) {
         if (input <= 0x11938) {
             if (input <= 0x107BA)
-                return cast(size_t)LUT_BABC6130[5961 + (input - 67457)];
+                return cast(size_t)LUT_BABC6130[cast(size_t)(5961 + (input - 0x10781))];
             else if (input >= 0x1109A && input <= 0x110AB)
-                return cast(size_t)LUT_BABC6130[6019 + (input - 69786)];
+                return cast(size_t)LUT_BABC6130[cast(size_t)(6019 + (input - 0x1109A))];
             else if (input >= 0x1112E && input <= 0x1112F)
                 return cast(size_t)2;
             else if (input >= 0x1134B && input <= 0x1134C)
                 return cast(size_t)2;
             else if (input >= 0x114BB && input <= 0x114BE)
-                return cast(size_t)LUT_BABC6130[6037 + (input - 70843)];
+                return cast(size_t)LUT_BABC6130[cast(size_t)(6037 + (input - 0x114BB))];
             else if (input >= 0x115BA && input <= 0x115BB)
                 return cast(size_t)2;
             else if (input == 0x11938)
                 return cast(size_t)2;
         } else if (input >= 0x1D15E) {
             if (input <= 0x1D164)
-                return cast(size_t)LUT_BABC6130[6041 + (input - 119134)];
+                return cast(size_t)LUT_BABC6130[cast(size_t)(6041 + (input - 0x1D15E))];
             else if (input >= 0x1D1BB && input <= 0x1D1C0)
-                return cast(size_t)LUT_BABC6130[6048 + (input - 119227)];
+                return cast(size_t)LUT_BABC6130[cast(size_t)(6048 + (input - 0x1D1BB))];
             else if (input >= 0x1D400 && input <= 0x1D7FF)
-                return cast(size_t)LUT_BABC6130[6054 + (input - 119808)];
+                return cast(size_t)LUT_BABC6130[cast(size_t)(6054 + (input - 0x1D400))];
             else if (input >= 0x1EE00 && input <= 0x1EEBB)
-                return cast(size_t)LUT_BABC6130[7078 + (input - 126464)];
+                return cast(size_t)LUT_BABC6130[cast(size_t)(7078 + (input - 0x1EE00))];
             else if (input >= 0x1F100 && input <= 0x1F190)
-                return cast(size_t)LUT_BABC6130[7266 + (input - 127232)];
+                return cast(size_t)LUT_BABC6130[cast(size_t)(7266 + (input - 0x1F100))];
             else if (input >= 0x1F200 && input <= 0x1F251)
-                return cast(size_t)LUT_BABC6130[7411 + (input - 127488)];
+                return cast(size_t)LUT_BABC6130[cast(size_t)(7411 + (input - 0x1F200))];
             else if (input >= 0x1FBF0)
                 return cast(size_t)1;
         }
@@ -126,95 +126,95 @@ private {
 export extern(C) immutable(long[]) sidero_utf_lut_getNumeric(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x30 && input <= 0x32BF) {
         if (input <= 0x39) {
-            return cast(long[])LUT_DAB950BA[0 + (input - 48)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(0 + (input - 0x30))];
         } else if (input >= 0xB2 && input <= 0xB3) {
-            return cast(long[])LUT_DAB950BA[10 + (input - 178)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(10 + (input - 0xB2))];
         } else if (input == 0xB9) {
             { static immutable ret = [1L, 1L];
             return ret; }
         } else if (input >= 0xBC && input <= 0xBE) {
-            return cast(long[])LUT_DAB950BA[12 + (input - 188)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(12 + (input - 0xBC))];
         } else if (input >= 0x660 && input <= 0x669) {
-            return cast(long[])LUT_DAB950BA[15 + (input - 1632)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(15 + (input - 0x660))];
         } else if (input >= 0x6F0 && input <= 0x6F9) {
-            return cast(long[])LUT_DAB950BA[25 + (input - 1776)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(25 + (input - 0x6F0))];
         } else if (input >= 0x7C0 && input <= 0x7C9) {
-            return cast(long[])LUT_DAB950BA[35 + (input - 1984)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(35 + (input - 0x7C0))];
         } else if (input >= 0x966 && input <= 0x96F) {
-            return cast(long[])LUT_DAB950BA[45 + (input - 2406)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(45 + (input - 0x966))];
         } else if (input >= 0x9E6 && input <= 0x9F9) {
-            return cast(long[])LUT_DAB950BA[55 + (input - 2534)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(55 + (input - 0x9E6))];
         } else if (input >= 0xA66 && input <= 0xA6F) {
-            return cast(long[])LUT_DAB950BA[75 + (input - 2662)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(75 + (input - 0xA66))];
         } else if (input >= 0xAE6 && input <= 0xAEF) {
-            return cast(long[])LUT_DAB950BA[85 + (input - 2790)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(85 + (input - 0xAE6))];
         } else if (input >= 0xB66 && input <= 0xB77) {
-            return cast(long[])LUT_DAB950BA[95 + (input - 2918)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(95 + (input - 0xB66))];
         } else if (input >= 0xBE6 && input <= 0xBF2) {
-            return cast(long[])LUT_DAB950BA[113 + (input - 3046)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(113 + (input - 0xBE6))];
         } else if (input >= 0xC66 && input <= 0xC6F) {
-            return cast(long[])LUT_DAB950BA[126 + (input - 3174)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(126 + (input - 0xC66))];
         } else if (input >= 0xC78 && input <= 0xC7E) {
-            return cast(long[])LUT_DAB950BA[136 + (input - 3192)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(136 + (input - 0xC78))];
         } else if (input >= 0xCE6 && input <= 0xCEF) {
-            return cast(long[])LUT_DAB950BA[143 + (input - 3302)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(143 + (input - 0xCE6))];
         } else if (input >= 0xD58 && input <= 0xD5E) {
-            return cast(long[])LUT_DAB950BA[153 + (input - 3416)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(153 + (input - 0xD58))];
         } else if (input >= 0xD66 && input <= 0xD78) {
-            return cast(long[])LUT_DAB950BA[160 + (input - 3430)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(160 + (input - 0xD66))];
         } else if (input >= 0xDE6 && input <= 0xDEF) {
-            return cast(long[])LUT_DAB950BA[179 + (input - 3558)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(179 + (input - 0xDE6))];
         } else if (input >= 0xE50 && input <= 0xE59) {
-            return cast(long[])LUT_DAB950BA[189 + (input - 3664)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(189 + (input - 0xE50))];
         } else if (input >= 0xED0 && input <= 0xED9) {
-            return cast(long[])LUT_DAB950BA[199 + (input - 3792)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(199 + (input - 0xED0))];
         } else if (input >= 0xF20 && input <= 0xF33) {
-            return cast(long[])LUT_DAB950BA[209 + (input - 3872)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(209 + (input - 0xF20))];
         } else if (input >= 0x1040 && input <= 0x1049) {
-            return cast(long[])LUT_DAB950BA[229 + (input - 4160)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(229 + (input - 0x1040))];
         } else if (input >= 0x1090 && input <= 0x1099) {
-            return cast(long[])LUT_DAB950BA[239 + (input - 4240)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(239 + (input - 0x1090))];
         } else if (input >= 0x1369 && input <= 0x137C) {
-            return cast(long[])LUT_DAB950BA[249 + (input - 4969)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(249 + (input - 0x1369))];
         } else if (input >= 0x16EE && input <= 0x16F0) {
-            return cast(long[])LUT_DAB950BA[269 + (input - 5870)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(269 + (input - 0x16EE))];
         } else if (input >= 0x17E0 && input <= 0x17E9) {
-            return cast(long[])LUT_DAB950BA[272 + (input - 6112)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(272 + (input - 0x17E0))];
         } else if (input >= 0x17F0 && input <= 0x17F9) {
-            return cast(long[])LUT_DAB950BA[282 + (input - 6128)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(282 + (input - 0x17F0))];
         } else if (input >= 0x1810 && input <= 0x1819) {
-            return cast(long[])LUT_DAB950BA[292 + (input - 6160)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(292 + (input - 0x1810))];
         } else if (input >= 0x1946 && input <= 0x194F) {
-            return cast(long[])LUT_DAB950BA[302 + (input - 6470)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(302 + (input - 0x1946))];
         } else if (input >= 0x19D0 && input <= 0x19DA) {
-            return cast(long[])LUT_DAB950BA[312 + (input - 6608)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(312 + (input - 0x19D0))];
         } else if (input >= 0x1A80 && input <= 0x1A89) {
-            return cast(long[])LUT_DAB950BA[323 + (input - 6784)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(323 + (input - 0x1A80))];
         } else if (input >= 0x1A90 && input <= 0x1A99) {
-            return cast(long[])LUT_DAB950BA[333 + (input - 6800)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(333 + (input - 0x1A90))];
         } else if (input >= 0x1B50 && input <= 0x1B59) {
-            return cast(long[])LUT_DAB950BA[343 + (input - 6992)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(343 + (input - 0x1B50))];
         } else if (input >= 0x1BB0 && input <= 0x1BB9) {
-            return cast(long[])LUT_DAB950BA[353 + (input - 7088)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(353 + (input - 0x1BB0))];
         } else if (input >= 0x1C40 && input <= 0x1C49) {
-            return cast(long[])LUT_DAB950BA[363 + (input - 7232)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(363 + (input - 0x1C40))];
         } else if (input >= 0x1C50 && input <= 0x1C59) {
-            return cast(long[])LUT_DAB950BA[373 + (input - 7248)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(373 + (input - 0x1C50))];
         } else if (input == 0x2070) {
             { static immutable ret = [0L, 1L];
             return ret; }
         } else if (input >= 0x2074 && input <= 0x2079) {
-            return cast(long[])LUT_DAB950BA[383 + (input - 8308)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(383 + (input - 0x2074))];
         } else if (input >= 0x2080 && input <= 0x2089) {
-            return cast(long[])LUT_DAB950BA[389 + (input - 8320)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(389 + (input - 0x2080))];
         } else if (input >= 0x2150 && input <= 0x2189) {
-            return cast(long[])LUT_DAB950BA[399 + (input - 8528)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(399 + (input - 0x2150))];
         } else if (input >= 0x2460 && input <= 0x249B) {
-            return cast(long[])LUT_DAB950BA[457 + (input - 9312)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(457 + (input - 0x2460))];
         } else if (input >= 0x24EA && input <= 0x24FF) {
-            return cast(long[])LUT_DAB950BA[517 + (input - 9450)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(517 + (input - 0x24EA))];
         } else if (input >= 0x2776 && input <= 0x2793) {
-            return cast(long[])LUT_DAB950BA[539 + (input - 10102)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(539 + (input - 0x2776))];
         } else if (input >= 0x2CFD && input <= 0x3007) {
             if (input == 0x2CFD)
                 { static immutable ret = [1L, 2L];
@@ -223,39 +223,39 @@ export extern(C) immutable(long[]) sidero_utf_lut_getNumeric(dchar input) @trust
                 { static immutable ret = [0L, 1L];
                 return ret; }
         } else if (input >= 0x3021 && input <= 0x3029) {
-            return cast(long[])LUT_DAB950BA[569 + (input - 12321)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(569 + (input - 0x3021))];
         } else if (input >= 0x3038 && input <= 0x303A) {
-            return cast(long[])LUT_DAB950BA[578 + (input - 12344)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(578 + (input - 0x3038))];
         } else if (input >= 0x3192 && input <= 0x3195) {
-            return cast(long[])LUT_DAB950BA[581 + (input - 12690)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(581 + (input - 0x3192))];
         } else if (input >= 0x3220 && input <= 0x3229) {
-            return cast(long[])LUT_DAB950BA[585 + (input - 12832)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(585 + (input - 0x3220))];
         } else if (input >= 0x3248 && input <= 0x325F) {
-            return cast(long[])LUT_DAB950BA[595 + (input - 12872)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(595 + (input - 0x3248))];
         } else if (input >= 0x3280 && input <= 0x3289) {
-            return cast(long[])LUT_DAB950BA[619 + (input - 12928)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(619 + (input - 0x3280))];
         } else if (input >= 0x32B1) {
-            return cast(long[])LUT_DAB950BA[629 + (input - 12977)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(629 + (input - 0x32B1))];
         }
     } else if (input >= 0xA620 && input <= 0xABF9) {
         if (input <= 0xA629) {
-            return cast(long[])LUT_DAB950BA[644 + (input - 42528)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(644 + (input - 0xA620))];
         } else if (input >= 0xA6E6 && input <= 0xA6EF) {
-            return cast(long[])LUT_DAB950BA[654 + (input - 42726)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(654 + (input - 0xA6E6))];
         } else if (input >= 0xA830 && input <= 0xA835) {
-            return cast(long[])LUT_DAB950BA[664 + (input - 43056)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(664 + (input - 0xA830))];
         } else if (input >= 0xA8D0 && input <= 0xA8D9) {
-            return cast(long[])LUT_DAB950BA[670 + (input - 43216)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(670 + (input - 0xA8D0))];
         } else if (input >= 0xA900 && input <= 0xA909) {
-            return cast(long[])LUT_DAB950BA[680 + (input - 43264)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(680 + (input - 0xA900))];
         } else if (input >= 0xA9D0 && input <= 0xA9D9) {
-            return cast(long[])LUT_DAB950BA[690 + (input - 43472)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(690 + (input - 0xA9D0))];
         } else if (input >= 0xA9F0 && input <= 0xA9F9) {
-            return cast(long[])LUT_DAB950BA[700 + (input - 43504)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(700 + (input - 0xA9F0))];
         } else if (input >= 0xAA50 && input <= 0xAA59) {
-            return cast(long[])LUT_DAB950BA[710 + (input - 43600)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(710 + (input - 0xAA50))];
         } else if (input >= 0xABF0) {
-            return cast(long[])LUT_DAB950BA[720 + (input - 44016)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(720 + (input - 0xABF0))];
         }
     } else if (input >= 0xF96B && input <= 0x11FD4) {
         if (input <= 0xF9B2) {
@@ -272,22 +272,22 @@ export extern(C) immutable(long[]) sidero_utf_lut_getNumeric(dchar input) @trust
                 { static immutable ret = [0L, 1L];
                 return ret; }
         } else if (input >= 0xF9D1 && input <= 0xF9D3) {
-            return cast(long[])LUT_DAB950BA[730 + (input - 63953)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(730 + (input - 0xF9D1))];
         } else if (input == 0xF9FD) {
             { static immutable ret = [10L, 1L];
             return ret; }
         } else if (input >= 0xFF10 && input <= 0xFF19) {
-            return cast(long[])LUT_DAB950BA[733 + (input - 65296)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(733 + (input - 0xFF10))];
         } else if (input >= 0x10107 && input <= 0x10133) {
-            return cast(long[])LUT_DAB950BA[743 + (input - 65799)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(743 + (input - 0x10107))];
         } else if (input >= 0x10140 && input <= 0x10178) {
-            return cast(long[])LUT_DAB950BA[788 + (input - 65856)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(788 + (input - 0x10140))];
         } else if (input >= 0x1018A && input <= 0x1018B) {
-            return cast(long[])LUT_DAB950BA[845 + (input - 65930)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(845 + (input - 0x1018A))];
         } else if (input >= 0x102E1 && input <= 0x102FB) {
-            return cast(long[])LUT_DAB950BA[847 + (input - 66273)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(847 + (input - 0x102E1))];
         } else if (input >= 0x10320 && input <= 0x10323) {
-            return cast(long[])LUT_DAB950BA[874 + (input - 66336)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(874 + (input - 0x10320))];
         } else if (input >= 0x10341 && input <= 0x1034A) {
             if (input == 0x10341)
                 { static immutable ret = [90L, 1L];
@@ -296,117 +296,117 @@ export extern(C) immutable(long[]) sidero_utf_lut_getNumeric(dchar input) @trust
                 { static immutable ret = [900L, 1L];
                 return ret; }
         } else if (input >= 0x103D1 && input <= 0x103D5) {
-            return cast(long[])LUT_DAB950BA[878 + (input - 66513)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(878 + (input - 0x103D1))];
         } else if (input >= 0x104A0 && input <= 0x104A9) {
-            return cast(long[])LUT_DAB950BA[883 + (input - 66720)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(883 + (input - 0x104A0))];
         } else if (input >= 0x10858 && input <= 0x1085F) {
-            return cast(long[])LUT_DAB950BA[893 + (input - 67672)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(893 + (input - 0x10858))];
         } else if (input >= 0x10879 && input <= 0x1087F) {
-            return cast(long[])LUT_DAB950BA[901 + (input - 67705)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(901 + (input - 0x10879))];
         } else if (input >= 0x108A7 && input <= 0x108AF) {
-            return cast(long[])LUT_DAB950BA[908 + (input - 67751)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(908 + (input - 0x108A7))];
         } else if (input >= 0x108FB && input <= 0x108FF) {
-            return cast(long[])LUT_DAB950BA[917 + (input - 67835)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(917 + (input - 0x108FB))];
         } else if (input >= 0x10916 && input <= 0x1091B) {
-            return cast(long[])LUT_DAB950BA[922 + (input - 67862)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(922 + (input - 0x10916))];
         } else if (input >= 0x109BC && input <= 0x109FF) {
-            return cast(long[])LUT_DAB950BA[928 + (input - 68028)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(928 + (input - 0x109BC))];
         } else if (input >= 0x10A40 && input <= 0x10A48) {
-            return cast(long[])LUT_DAB950BA[996 + (input - 68160)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(996 + (input - 0x10A40))];
         } else if (input >= 0x10A7D && input <= 0x10A7E) {
-            return cast(long[])LUT_DAB950BA[1005 + (input - 68221)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1005 + (input - 0x10A7D))];
         } else if (input >= 0x10A9D && input <= 0x10A9F) {
-            return cast(long[])LUT_DAB950BA[1007 + (input - 68253)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1007 + (input - 0x10A9D))];
         } else if (input >= 0x10AEB && input <= 0x10AEF) {
-            return cast(long[])LUT_DAB950BA[1010 + (input - 68331)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1010 + (input - 0x10AEB))];
         } else if (input >= 0x10B58 && input <= 0x10B5F) {
-            return cast(long[])LUT_DAB950BA[1015 + (input - 68440)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1015 + (input - 0x10B58))];
         } else if (input >= 0x10B78 && input <= 0x10B7F) {
-            return cast(long[])LUT_DAB950BA[1023 + (input - 68472)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1023 + (input - 0x10B78))];
         } else if (input >= 0x10BA9 && input <= 0x10BAF) {
-            return cast(long[])LUT_DAB950BA[1031 + (input - 68521)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1031 + (input - 0x10BA9))];
         } else if (input >= 0x10CFA && input <= 0x10CFF) {
-            return cast(long[])LUT_DAB950BA[1038 + (input - 68858)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1038 + (input - 0x10CFA))];
         } else if (input >= 0x10D30 && input <= 0x10D39) {
-            return cast(long[])LUT_DAB950BA[1044 + (input - 68912)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1044 + (input - 0x10D30))];
         } else if (input >= 0x10E60 && input <= 0x10E7E) {
-            return cast(long[])LUT_DAB950BA[1054 + (input - 69216)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1054 + (input - 0x10E60))];
         } else if (input >= 0x10F1D && input <= 0x10F26) {
-            return cast(long[])LUT_DAB950BA[1085 + (input - 69405)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1085 + (input - 0x10F1D))];
         } else if (input >= 0x10F51 && input <= 0x10F54) {
-            return cast(long[])LUT_DAB950BA[1095 + (input - 69457)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1095 + (input - 0x10F51))];
         } else if (input >= 0x10FC5 && input <= 0x10FCB) {
-            return cast(long[])LUT_DAB950BA[1099 + (input - 69573)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1099 + (input - 0x10FC5))];
         } else if (input >= 0x11052 && input <= 0x1106F) {
-            return cast(long[])LUT_DAB950BA[1106 + (input - 69714)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1106 + (input - 0x11052))];
         } else if (input >= 0x110F0 && input <= 0x110F9) {
-            return cast(long[])LUT_DAB950BA[1136 + (input - 69872)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1136 + (input - 0x110F0))];
         } else if (input >= 0x11136 && input <= 0x1113F) {
-            return cast(long[])LUT_DAB950BA[1146 + (input - 69942)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1146 + (input - 0x11136))];
         } else if (input >= 0x111D0 && input <= 0x111D9) {
-            return cast(long[])LUT_DAB950BA[1156 + (input - 70096)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1156 + (input - 0x111D0))];
         } else if (input >= 0x111E1 && input <= 0x111F4) {
-            return cast(long[])LUT_DAB950BA[1166 + (input - 70113)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1166 + (input - 0x111E1))];
         } else if (input >= 0x112F0 && input <= 0x112F9) {
-            return cast(long[])LUT_DAB950BA[1186 + (input - 70384)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1186 + (input - 0x112F0))];
         } else if (input >= 0x11450 && input <= 0x11459) {
-            return cast(long[])LUT_DAB950BA[1196 + (input - 70736)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1196 + (input - 0x11450))];
         } else if (input >= 0x114D0 && input <= 0x114D9) {
-            return cast(long[])LUT_DAB950BA[1206 + (input - 70864)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1206 + (input - 0x114D0))];
         } else if (input >= 0x11650 && input <= 0x11659) {
-            return cast(long[])LUT_DAB950BA[1216 + (input - 71248)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1216 + (input - 0x11650))];
         } else if (input >= 0x116C0 && input <= 0x116C9) {
-            return cast(long[])LUT_DAB950BA[1226 + (input - 71360)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1226 + (input - 0x116C0))];
         } else if (input >= 0x11730 && input <= 0x1173B) {
-            return cast(long[])LUT_DAB950BA[1236 + (input - 71472)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1236 + (input - 0x11730))];
         } else if (input >= 0x118E0 && input <= 0x118F2) {
-            return cast(long[])LUT_DAB950BA[1248 + (input - 71904)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1248 + (input - 0x118E0))];
         } else if (input >= 0x11950 && input <= 0x11959) {
-            return cast(long[])LUT_DAB950BA[1267 + (input - 72016)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1267 + (input - 0x11950))];
         } else if (input >= 0x11C50 && input <= 0x11C6C) {
-            return cast(long[])LUT_DAB950BA[1277 + (input - 72784)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1277 + (input - 0x11C50))];
         } else if (input >= 0x11D50 && input <= 0x11D59) {
-            return cast(long[])LUT_DAB950BA[1306 + (input - 73040)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1306 + (input - 0x11D50))];
         } else if (input >= 0x11DA0 && input <= 0x11DA9) {
-            return cast(long[])LUT_DAB950BA[1316 + (input - 73120)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1316 + (input - 0x11DA0))];
         } else if (input >= 0x11FC0) {
-            return cast(long[])LUT_DAB950BA[1326 + (input - 73664)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1326 + (input - 0x11FC0))];
         }
     } else if (input >= 0x12400 && input <= 0x1246E) {
-        return cast(long[])LUT_DAB950BA[1347 + (input - 74752)];
+        return cast(long[])LUT_DAB950BA[cast(size_t)(1347 + (input - 0x12400))];
     } else if (input >= 0x16A60 && input <= 0x16E96) {
         if (input <= 0x16A69) {
-            return cast(long[])LUT_DAB950BA[1458 + (input - 92768)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1458 + (input - 0x16A60))];
         } else if (input >= 0x16AC0 && input <= 0x16AC9) {
-            return cast(long[])LUT_DAB950BA[1468 + (input - 92864)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1468 + (input - 0x16AC0))];
         } else if (input >= 0x16B50 && input <= 0x16B61) {
-            return cast(long[])LUT_DAB950BA[1478 + (input - 93008)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1478 + (input - 0x16B50))];
         } else if (input >= 0x16E80) {
-            return cast(long[])LUT_DAB950BA[1496 + (input - 93824)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1496 + (input - 0x16E80))];
         }
     } else if (input >= 0x1D2E0 && input <= 0x1FBF9) {
         if (input <= 0x1D2F3) {
-            return cast(long[])LUT_DAB950BA[1519 + (input - 119520)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1519 + (input - 0x1D2E0))];
         } else if (input >= 0x1D360 && input <= 0x1D378) {
-            return cast(long[])LUT_DAB950BA[1539 + (input - 119648)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1539 + (input - 0x1D360))];
         } else if (input >= 0x1D7CE && input <= 0x1D7FF) {
-            return cast(long[])LUT_DAB950BA[1564 + (input - 120782)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1564 + (input - 0x1D7CE))];
         } else if (input >= 0x1E140 && input <= 0x1E149) {
-            return cast(long[])LUT_DAB950BA[1614 + (input - 123200)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1614 + (input - 0x1E140))];
         } else if (input >= 0x1E2F0 && input <= 0x1E2F9) {
-            return cast(long[])LUT_DAB950BA[1624 + (input - 123632)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1624 + (input - 0x1E2F0))];
         } else if (input >= 0x1E8C7 && input <= 0x1E8CF) {
-            return cast(long[])LUT_DAB950BA[1634 + (input - 125127)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1634 + (input - 0x1E8C7))];
         } else if (input >= 0x1E950 && input <= 0x1E959) {
-            return cast(long[])LUT_DAB950BA[1643 + (input - 125264)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1643 + (input - 0x1E950))];
         } else if (input >= 0x1EC71 && input <= 0x1ECB4) {
-            return cast(long[])LUT_DAB950BA[1653 + (input - 126065)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1653 + (input - 0x1EC71))];
         } else if (input >= 0x1ED01 && input <= 0x1ED3D) {
-            return cast(long[])LUT_DAB950BA[1721 + (input - 126209)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1721 + (input - 0x1ED01))];
         } else if (input >= 0x1F100 && input <= 0x1F10C) {
-            return cast(long[])LUT_DAB950BA[1782 + (input - 127232)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1782 + (input - 0x1F100))];
         } else if (input >= 0x1FBF0) {
-            return cast(long[])LUT_DAB950BA[1795 + (input - 130032)];
+            return cast(long[])LUT_DAB950BA[cast(size_t)(1795 + (input - 0x1FBF0))];
         }
     } else if (input == 0x2F890) {
         { static immutable ret = [9L, 1L];
@@ -420,93 +420,93 @@ private {
 
 export extern(C) immutable(ubyte) sidero_utf_lut_getGeneralCategory(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x0 && input <= 0x101FD) {
-        return cast(ubyte)LUT_7D2A0DCE[0 + (input - 0)];
+        return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(0 + (input - 0x0))];
     } else if (input >= 0x10280 && input <= 0x1FBF9) {
         if (input <= 0x16F9F) {
             if (input <= 0x105BC)
-                return cast(ubyte)LUT_7D2A0DCE[66046 + (input - 66176)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(66046 + (input - 0x10280))];
             else if (input >= 0x10600 && input <= 0x107BA)
-                return cast(ubyte)LUT_7D2A0DCE[66875 + (input - 67072)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(66875 + (input - 0x10600))];
             else if (input >= 0x10800 && input <= 0x1093F)
-                return cast(ubyte)LUT_7D2A0DCE[67318 + (input - 67584)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(67318 + (input - 0x10800))];
             else if (input >= 0x10980 && input <= 0x10BAF)
-                return cast(ubyte)LUT_7D2A0DCE[67638 + (input - 67968)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(67638 + (input - 0x10980))];
             else if (input >= 0x10C00 && input <= 0x10D39)
-                return cast(ubyte)LUT_7D2A0DCE[68198 + (input - 68608)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(68198 + (input - 0x10C00))];
             else if (input >= 0x10E60 && input <= 0x10EB1)
-                return cast(ubyte)LUT_7D2A0DCE[68512 + (input - 69216)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(68512 + (input - 0x10E60))];
             else if (input >= 0x10F00 && input <= 0x1123E)
-                return cast(ubyte)LUT_7D2A0DCE[68594 + (input - 69376)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(68594 + (input - 0x10F00))];
             else if (input >= 0x11280 && input <= 0x11374)
-                return cast(ubyte)LUT_7D2A0DCE[69425 + (input - 70272)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(69425 + (input - 0x11280))];
             else if (input >= 0x11400 && input <= 0x114D9)
-                return cast(ubyte)LUT_7D2A0DCE[69670 + (input - 70656)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(69670 + (input - 0x11400))];
             else if (input >= 0x11580 && input <= 0x11746)
-                return cast(ubyte)LUT_7D2A0DCE[69888 + (input - 71040)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(69888 + (input - 0x11580))];
             else if (input >= 0x11800 && input <= 0x1183B)
-                return cast(ubyte)LUT_7D2A0DCE[70343 + (input - 71680)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(70343 + (input - 0x11800))];
             else if (input >= 0x118A0 && input <= 0x11959)
-                return cast(ubyte)LUT_7D2A0DCE[70403 + (input - 71840)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(70403 + (input - 0x118A0))];
             else if (input >= 0x119A0 && input <= 0x11AF8)
-                return cast(ubyte)LUT_7D2A0DCE[70589 + (input - 72096)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(70589 + (input - 0x119A0))];
             else if (input >= 0x11C00 && input <= 0x11CB6)
-                return cast(ubyte)LUT_7D2A0DCE[70934 + (input - 72704)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(70934 + (input - 0x11C00))];
             else if (input >= 0x11D00 && input <= 0x11DA9)
-                return cast(ubyte)LUT_7D2A0DCE[71117 + (input - 72960)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(71117 + (input - 0x11D00))];
             else if (input >= 0x11EE0 && input <= 0x11EF8)
-                return cast(ubyte)LUT_7D2A0DCE[71287 + (input - 73440)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(71287 + (input - 0x11EE0))];
             else if (input >= 0x11FB0 && input <= 0x12399)
-                return cast(ubyte)LUT_7D2A0DCE[71312 + (input - 73648)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(71312 + (input - 0x11FB0))];
             else if (input >= 0x12400 && input <= 0x12543)
-                return cast(ubyte)LUT_7D2A0DCE[72314 + (input - 74752)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(72314 + (input - 0x12400))];
             else if (input >= 0x12F90 && input <= 0x13438)
-                return cast(ubyte)LUT_7D2A0DCE[72638 + (input - 77712)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(72638 + (input - 0x12F90))];
             else if (input >= 0x14400 && input <= 0x14646)
                 return cast(ubyte)6;
             else if (input >= 0x16800 && input <= 0x16B8F)
-                return cast(ubyte)LUT_7D2A0DCE[73831 + (input - 92160)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(73831 + (input - 0x16800))];
             else if (input >= 0x16E40 && input <= 0x16E9A)
-                return cast(ubyte)LUT_7D2A0DCE[74743 + (input - 93760)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(74743 + (input - 0x16E40))];
             else if (input >= 0x16F00)
-                return cast(ubyte)LUT_7D2A0DCE[74834 + (input - 93952)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(74834 + (input - 0x16F00))];
         } else if (input >= 0x16FE0 && input <= 0x1BCA3) {
             if (input <= 0x18D08)
-                return cast(ubyte)LUT_7D2A0DCE[74994 + (input - 94176)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(74994 + (input - 0x16FE0))];
             else if (input >= 0x1AFF0 && input <= 0x1B2FB)
-                return cast(ubyte)LUT_7D2A0DCE[82459 + (input - 110576)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(82459 + (input - 0x1AFF0))];
             else if (input >= 0x1BC00)
-                return cast(ubyte)LUT_7D2A0DCE[83239 + (input - 113664)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(83239 + (input - 0x1BC00))];
         } else if (input >= 0x1CF00) {
             if (input <= 0x1D245)
-                return cast(ubyte)LUT_7D2A0DCE[83403 + (input - 118528)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(83403 + (input - 0x1CF00))];
             else if (input >= 0x1D2E0 && input <= 0x1D378)
-                return cast(ubyte)LUT_7D2A0DCE[84241 + (input - 119520)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(84241 + (input - 0x1D2E0))];
             else if (input >= 0x1D400 && input <= 0x1DAAF)
-                return cast(ubyte)LUT_7D2A0DCE[84394 + (input - 119808)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(84394 + (input - 0x1D400))];
             else if (input >= 0x1DF00 && input <= 0x1DF1E)
-                return cast(ubyte)LUT_7D2A0DCE[86106 + (input - 122624)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(86106 + (input - 0x1DF00))];
             else if (input >= 0x1E000 && input <= 0x1E02A)
-                return cast(ubyte)LUT_7D2A0DCE[86137 + (input - 122880)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(86137 + (input - 0x1E000))];
             else if (input >= 0x1E100 && input <= 0x1E14F)
-                return cast(ubyte)LUT_7D2A0DCE[86180 + (input - 123136)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(86180 + (input - 0x1E100))];
             else if (input >= 0x1E290 && input <= 0x1E2FF)
-                return cast(ubyte)LUT_7D2A0DCE[86260 + (input - 123536)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(86260 + (input - 0x1E290))];
             else if (input >= 0x1E7E0 && input <= 0x1E95F)
-                return cast(ubyte)LUT_7D2A0DCE[86372 + (input - 124896)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(86372 + (input - 0x1E7E0))];
             else if (input >= 0x1EC71 && input <= 0x1ECB4)
-                return cast(ubyte)LUT_7D2A0DCE[86756 + (input - 126065)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(86756 + (input - 0x1EC71))];
             else if (input >= 0x1ED01 && input <= 0x1ED3D)
-                return cast(ubyte)LUT_7D2A0DCE[86824 + (input - 126209)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(86824 + (input - 0x1ED01))];
             else if (input >= 0x1EE00 && input <= 0x1EEF1)
-                return cast(ubyte)LUT_7D2A0DCE[86885 + (input - 126464)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(86885 + (input - 0x1EE00))];
             else if (input >= 0x1F000 && input <= 0x1F265)
-                return cast(ubyte)LUT_7D2A0DCE[87127 + (input - 126976)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(87127 + (input - 0x1F000))];
             else if (input >= 0x1F300)
-                return cast(ubyte)LUT_7D2A0DCE[87741 + (input - 127744)];
+                return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(87741 + (input - 0x1F300))];
         }
     } else if (input >= 0x20000 && input <= 0x2FA1D) {
         if (input <= 0x2EBE0) {
-            return cast(ubyte)LUT_7D2A0DCE[90039 + (input - 131072)];
+            return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(90039 + (input - 0x20000))];
         } else if (input >= 0x2F800) {
             return cast(ubyte)6;
         }
@@ -514,11 +514,11 @@ export extern(C) immutable(ubyte) sidero_utf_lut_getGeneralCategory(dchar input)
         return cast(ubyte)6;
     } else if (input >= 0xE0001 && input <= 0xE01EF) {
         if (input <= 0xE007F)
-            return cast(ubyte)LUT_7D2A0DCE[150424 + (input - 917505)];
+            return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(150424 + (input - 0xE0001))];
         else if (input >= 0xE0100)
             return cast(ubyte)8;
     } else if (input >= 0xF0000 && input <= 0x10FFFD) {
-        return cast(ubyte)LUT_7D2A0DCE[150551 + (input - 983040)];
+        return cast(ubyte)LUT_7D2A0DCE[cast(size_t)(150551 + (input - 0xF0000))];
     }
     return typeof(return).init;
 }

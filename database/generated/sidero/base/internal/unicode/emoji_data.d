@@ -4,48 +4,48 @@ module sidero.base.internal.unicode.emoji_data;
 export extern(C) immutable(bool) sidero_utf_lut_isMemberOfEmoji(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x23 && input <= 0x3299) {
         if (input <= 0x39)
-            return cast(bool)LUT_12B46777[0 + (input - 35)];
+            return cast(bool)LUT_12B46777[cast(size_t)(0 + (input - 0x23))];
         else if (input >= 0xA9 && input <= 0xAE)
-            return cast(bool)LUT_12B46777[23 + (input - 169)];
+            return cast(bool)LUT_12B46777[cast(size_t)(23 + (input - 0xA9))];
         else if (input >= 0x203C && input <= 0x2049)
-            return cast(bool)LUT_12B46777[29 + (input - 8252)];
+            return cast(bool)LUT_12B46777[cast(size_t)(29 + (input - 0x203C))];
         else if (input >= 0x2122 && input <= 0x2139)
-            return cast(bool)LUT_12B46777[43 + (input - 8482)];
+            return cast(bool)LUT_12B46777[cast(size_t)(43 + (input - 0x2122))];
         else if (input >= 0x2194 && input <= 0x21AA)
-            return cast(bool)LUT_12B46777[67 + (input - 8596)];
+            return cast(bool)LUT_12B46777[cast(size_t)(67 + (input - 0x2194))];
         else if (input >= 0x231A && input <= 0x2328)
-            return cast(bool)LUT_12B46777[90 + (input - 8986)];
+            return cast(bool)LUT_12B46777[cast(size_t)(90 + (input - 0x231A))];
         else if (input >= 0x23CF && input <= 0x23FA)
-            return cast(bool)LUT_12B46777[105 + (input - 9167)];
+            return cast(bool)LUT_12B46777[cast(size_t)(105 + (input - 0x23CF))];
         else if (input == 0x24C2)
             return cast(bool)true;
         else if (input >= 0x25AA && input <= 0x27BF)
-            return cast(bool)LUT_12B46777[149 + (input - 9642)];
+            return cast(bool)LUT_12B46777[cast(size_t)(149 + (input - 0x25AA))];
         else if (input >= 0x2934 && input <= 0x2935)
             return cast(bool)true;
         else if (input >= 0x2B05 && input <= 0x2B55)
-            return cast(bool)LUT_12B46777[683 + (input - 11013)];
+            return cast(bool)LUT_12B46777[cast(size_t)(683 + (input - 0x2B05))];
         else if (input >= 0x3030 && input <= 0x303D)
-            return cast(bool)LUT_12B46777[764 + (input - 12336)];
+            return cast(bool)LUT_12B46777[cast(size_t)(764 + (input - 0x3030))];
         else if (input >= 0x3297)
-            return cast(bool)LUT_12B46777[778 + (input - 12951)];
+            return cast(bool)LUT_12B46777[cast(size_t)(778 + (input - 0x3297))];
     } else if (input >= 0x1F004 && input <= 0x1FAF6) {
         if (input == 0x1F004)
             return cast(bool)true;
         else if (input == 0x1F0CF)
             return cast(bool)true;
         else if (input >= 0x1F170 && input <= 0x1F19A)
-            return cast(bool)LUT_12B46777[781 + (input - 127344)];
+            return cast(bool)LUT_12B46777[cast(size_t)(781 + (input - 0x1F170))];
         else if (input >= 0x1F1E6 && input <= 0x1F251)
-            return cast(bool)LUT_12B46777[824 + (input - 127462)];
+            return cast(bool)LUT_12B46777[cast(size_t)(824 + (input - 0x1F1E6))];
         else if (input >= 0x1F300 && input <= 0x1F6FC)
-            return cast(bool)LUT_12B46777[932 + (input - 127744)];
+            return cast(bool)LUT_12B46777[cast(size_t)(932 + (input - 0x1F300))];
         else if (input >= 0x1F7E0 && input <= 0x1F7F0)
-            return cast(bool)LUT_12B46777[1953 + (input - 128992)];
+            return cast(bool)LUT_12B46777[cast(size_t)(1953 + (input - 0x1F7E0))];
         else if (input >= 0x1F90C && input <= 0x1F9FF)
-            return cast(bool)LUT_12B46777[1970 + (input - 129292)];
+            return cast(bool)LUT_12B46777[cast(size_t)(1970 + (input - 0x1F90C))];
         else if (input >= 0x1FA70)
-            return cast(bool)LUT_12B46777[2214 + (input - 129648)];
+            return cast(bool)LUT_12B46777[cast(size_t)(2214 + (input - 0x1FA70))];
     }
     return typeof(return).init;
 }
@@ -58,30 +58,30 @@ export extern(C) immutable(bool) sidero_utf_lut_isMemberOfEmoji_Presentation(dch
         if (input <= 0x231B)
             return cast(bool)true;
         else if (input >= 0x23E9 && input <= 0x23F3)
-            return cast(bool)LUT_A79F9CFE[0 + (input - 9193)];
+            return cast(bool)LUT_A79F9CFE[cast(size_t)(0 + (input - 0x23E9))];
         else if (input >= 0x25FD && input <= 0x27BF)
-            return cast(bool)LUT_A79F9CFE[11 + (input - 9725)];
+            return cast(bool)LUT_A79F9CFE[cast(size_t)(11 + (input - 0x25FD))];
         else if (input >= 0x2B1B)
-            return cast(bool)LUT_A79F9CFE[462 + (input - 11035)];
+            return cast(bool)LUT_A79F9CFE[cast(size_t)(462 + (input - 0x2B1B))];
     } else if (input >= 0x1F004 && input <= 0x1FAF6) {
         if (input == 0x1F004)
             return cast(bool)true;
         else if (input == 0x1F0CF)
             return cast(bool)true;
         else if (input >= 0x1F18E && input <= 0x1F19A)
-            return cast(bool)LUT_A79F9CFE[521 + (input - 127374)];
+            return cast(bool)LUT_A79F9CFE[cast(size_t)(521 + (input - 0x1F18E))];
         else if (input >= 0x1F1E6 && input <= 0x1F251)
-            return cast(bool)LUT_A79F9CFE[534 + (input - 127462)];
+            return cast(bool)LUT_A79F9CFE[cast(size_t)(534 + (input - 0x1F1E6))];
         else if (input >= 0x1F300 && input <= 0x1F5A4)
-            return cast(bool)LUT_A79F9CFE[642 + (input - 127744)];
+            return cast(bool)LUT_A79F9CFE[cast(size_t)(642 + (input - 0x1F300))];
         else if (input >= 0x1F5FB && input <= 0x1F6FC)
-            return cast(bool)LUT_A79F9CFE[1319 + (input - 128507)];
+            return cast(bool)LUT_A79F9CFE[cast(size_t)(1319 + (input - 0x1F5FB))];
         else if (input >= 0x1F7E0 && input <= 0x1F7F0)
-            return cast(bool)LUT_A79F9CFE[1577 + (input - 128992)];
+            return cast(bool)LUT_A79F9CFE[cast(size_t)(1577 + (input - 0x1F7E0))];
         else if (input >= 0x1F90C && input <= 0x1F9FF)
-            return cast(bool)LUT_A79F9CFE[1594 + (input - 129292)];
+            return cast(bool)LUT_A79F9CFE[cast(size_t)(1594 + (input - 0x1F90C))];
         else if (input >= 0x1FA70)
-            return cast(bool)LUT_A79F9CFE[1838 + (input - 129648)];
+            return cast(bool)LUT_A79F9CFE[cast(size_t)(1838 + (input - 0x1FA70))];
     }
     return typeof(return).init;
 }
@@ -100,22 +100,22 @@ export extern(C) immutable(bool) sidero_utf_lut_isMemberOfEmoji_Modifier_Base(dc
         if (input == 0x261D)
             return cast(bool)true;
         else if (input >= 0x26F9)
-            return cast(bool)LUT_84FDFF98[0 + (input - 9977)];
+            return cast(bool)LUT_84FDFF98[cast(size_t)(0 + (input - 0x26F9))];
     } else if (input >= 0x1F385 && input <= 0x1FAF6) {
         if (input <= 0x1F3CC)
-            return cast(bool)LUT_84FDFF98[21 + (input - 127877)];
+            return cast(bool)LUT_84FDFF98[cast(size_t)(21 + (input - 0x1F385))];
         else if (input >= 0x1F442 && input <= 0x1F4AA)
-            return cast(bool)LUT_84FDFF98[93 + (input - 128066)];
+            return cast(bool)LUT_84FDFF98[cast(size_t)(93 + (input - 0x1F442))];
         else if (input >= 0x1F574 && input <= 0x1F596)
-            return cast(bool)LUT_84FDFF98[198 + (input - 128372)];
+            return cast(bool)LUT_84FDFF98[cast(size_t)(198 + (input - 0x1F574))];
         else if (input >= 0x1F645 && input <= 0x1F64F)
-            return cast(bool)LUT_84FDFF98[233 + (input - 128581)];
+            return cast(bool)LUT_84FDFF98[cast(size_t)(233 + (input - 0x1F645))];
         else if (input >= 0x1F6A3 && input <= 0x1F6CC)
-            return cast(bool)LUT_84FDFF98[244 + (input - 128675)];
+            return cast(bool)LUT_84FDFF98[cast(size_t)(244 + (input - 0x1F6A3))];
         else if (input >= 0x1F90C && input <= 0x1F9DD)
-            return cast(bool)LUT_84FDFF98[286 + (input - 129292)];
+            return cast(bool)LUT_84FDFF98[cast(size_t)(286 + (input - 0x1F90C))];
         else if (input >= 0x1FAC3)
-            return cast(bool)LUT_84FDFF98[496 + (input - 129731)];
+            return cast(bool)LUT_84FDFF98[cast(size_t)(496 + (input - 0x1FAC3))];
     }
     return typeof(return).init;
 }
@@ -127,7 +127,7 @@ export extern(C) immutable(bool) sidero_utf_lut_isMemberOfEmoji_Component(dchar 
     if (input >= 0x23 && input <= 0xFE0F) {
         if (input <= 0x20E3) {
             if (input <= 0x39)
-                return cast(bool)LUT_CCBC831C[0 + (input - 35)];
+                return cast(bool)LUT_CCBC831C[cast(size_t)(0 + (input - 0x23))];
             else if (input == 0x200D)
                 return cast(bool)true;
             else if (input == 0x20E3)
@@ -154,38 +154,38 @@ private {
 export extern(C) immutable(bool) sidero_utf_lut_isMemberOfExtended_Pictographic(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0xA9 && input <= 0x3299) {
         if (input <= 0xAE)
-            return cast(bool)LUT_DBE5A0FE[0 + (input - 169)];
+            return cast(bool)LUT_DBE5A0FE[cast(size_t)(0 + (input - 0xA9))];
         else if (input >= 0x203C && input <= 0x2049)
-            return cast(bool)LUT_DBE5A0FE[6 + (input - 8252)];
+            return cast(bool)LUT_DBE5A0FE[cast(size_t)(6 + (input - 0x203C))];
         else if (input >= 0x2122 && input <= 0x2139)
-            return cast(bool)LUT_DBE5A0FE[20 + (input - 8482)];
+            return cast(bool)LUT_DBE5A0FE[cast(size_t)(20 + (input - 0x2122))];
         else if (input >= 0x2194 && input <= 0x21AA)
-            return cast(bool)LUT_DBE5A0FE[44 + (input - 8596)];
+            return cast(bool)LUT_DBE5A0FE[cast(size_t)(44 + (input - 0x2194))];
         else if (input >= 0x231A && input <= 0x2328)
-            return cast(bool)LUT_DBE5A0FE[67 + (input - 8986)];
+            return cast(bool)LUT_DBE5A0FE[cast(size_t)(67 + (input - 0x231A))];
         else if (input == 0x2388)
             return cast(bool)true;
         else if (input >= 0x23CF && input <= 0x23FA)
-            return cast(bool)LUT_DBE5A0FE[82 + (input - 9167)];
+            return cast(bool)LUT_DBE5A0FE[cast(size_t)(82 + (input - 0x23CF))];
         else if (input == 0x24C2)
             return cast(bool)true;
         else if (input >= 0x25AA && input <= 0x27BF)
-            return cast(bool)LUT_DBE5A0FE[126 + (input - 9642)];
+            return cast(bool)LUT_DBE5A0FE[cast(size_t)(126 + (input - 0x25AA))];
         else if (input >= 0x2934 && input <= 0x2935)
             return cast(bool)true;
         else if (input >= 0x2B05 && input <= 0x2B55)
-            return cast(bool)LUT_DBE5A0FE[660 + (input - 11013)];
+            return cast(bool)LUT_DBE5A0FE[cast(size_t)(660 + (input - 0x2B05))];
         else if (input >= 0x3030 && input <= 0x303D)
-            return cast(bool)LUT_DBE5A0FE[741 + (input - 12336)];
+            return cast(bool)LUT_DBE5A0FE[cast(size_t)(741 + (input - 0x3030))];
         else if (input >= 0x3297)
-            return cast(bool)LUT_DBE5A0FE[755 + (input - 12951)];
+            return cast(bool)LUT_DBE5A0FE[cast(size_t)(755 + (input - 0x3297))];
     } else if (input >= 0x1F000 && input <= 0x1FFFD) {
         if (input <= 0x1F6FF)
-            return cast(bool)LUT_DBE5A0FE[758 + (input - 126976)];
+            return cast(bool)LUT_DBE5A0FE[cast(size_t)(758 + (input - 0x1F000))];
         else if (input >= 0x1F774 && input <= 0x1F77F)
             return cast(bool)true;
         else if (input >= 0x1F7D5 && input <= 0x1FAFF)
-            return cast(bool)LUT_DBE5A0FE[2550 + (input - 128981)];
+            return cast(bool)LUT_DBE5A0FE[cast(size_t)(2550 + (input - 0x1F7D5))];
         else if (input >= 0x1FC00)
             return cast(bool)true;
     }

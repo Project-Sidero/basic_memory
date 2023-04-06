@@ -5,117 +5,117 @@ export extern(C) immutable(void*) sidero_utf_lut_getDecompositionMap3(dchar inpu
     if (input >= 0xA0 && input <= 0xFFEE) {
         if (input <= 0x33FF) {
             if (input <= 0x233)
-                return cast(void*)&LUT_44763C42[0 + (input - 160)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(0 + (input - 0xA0))];
             else if (input >= 0x2B0 && input <= 0x2E4)
-                return cast(void*)&LUT_44763C42[404 + (input - 688)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(404 + (input - 0x2B0))];
             else if (input >= 0x340 && input <= 0x477)
-                return cast(void*)&LUT_44763C42[457 + (input - 832)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(457 + (input - 0x340))];
             else if (input >= 0x4C1 && input <= 0x4F9)
-                return cast(void*)&LUT_44763C42[769 + (input - 1217)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(769 + (input - 0x4C1))];
             else if (input == 0x587)
-                return cast(void*)&LUT_44763C42[826 + (input - 1415)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(826 + (input - 0x587))];
             else if (input >= 0x622 && input <= 0x626)
-                return cast(void*)&LUT_44763C42[827 + (input - 1570)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(827 + (input - 0x622))];
             else if (input >= 0x675 && input <= 0x678)
-                return cast(void*)&LUT_44763C42[832 + (input - 1653)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(832 + (input - 0x675))];
             else if (input >= 0x6C0 && input <= 0x6D3)
-                return cast(void*)&LUT_44763C42[836 + (input - 1728)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(836 + (input - 0x6C0))];
             else if (input >= 0x929 && input <= 0x95F)
-                return cast(void*)&LUT_44763C42[856 + (input - 2345)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(856 + (input - 0x929))];
             else if (input >= 0x9CB && input <= 0x9DF)
-                return cast(void*)&LUT_44763C42[911 + (input - 2507)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(911 + (input - 0x9CB))];
             else if (input >= 0xA33 && input <= 0xA5E)
-                return cast(void*)&LUT_44763C42[932 + (input - 2611)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(932 + (input - 0xA33))];
             else if (input >= 0xB48 && input <= 0xBCC)
-                return cast(void*)&LUT_44763C42[976 + (input - 2888)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(976 + (input - 0xB48))];
             else if (input == 0xC48)
-                return cast(void*)&LUT_44763C42[1109 + (input - 3144)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(1109 + (input - 0xC48))];
             else if (input >= 0xCC0 && input <= 0xCCB)
-                return cast(void*)&LUT_44763C42[1110 + (input - 3264)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(1110 + (input - 0xCC0))];
             else if (input >= 0xD4A && input <= 0xD4C)
-                return cast(void*)&LUT_44763C42[1122 + (input - 3402)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(1122 + (input - 0xD4A))];
             else if (input >= 0xDDA && input <= 0xDDE)
-                return cast(void*)&LUT_44763C42[1125 + (input - 3546)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(1125 + (input - 0xDDA))];
             else if (input == 0xE33)
-                return cast(void*)&LUT_44763C42[1130 + (input - 3635)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(1130 + (input - 0xE33))];
             else if (input >= 0xEB3 && input <= 0xFB9)
-                return cast(void*)&LUT_44763C42[1131 + (input - 3763)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(1131 + (input - 0xEB3))];
             else if (input == 0x1026)
-                return cast(void*)&LUT_44763C42[1394 + (input - 4134)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(1394 + (input - 0x1026))];
             else if (input == 0x10FC)
-                return cast(void*)&LUT_44763C42[1395 + (input - 4348)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(1395 + (input - 0x10FC))];
             else if (input >= 0x1B06 && input <= 0x1B43)
-                return cast(void*)&LUT_44763C42[1396 + (input - 6918)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(1396 + (input - 0x1B06))];
             else if (input >= 0x1D2C && input <= 0x1DBF)
-                return cast(void*)&LUT_44763C42[1458 + (input - 7468)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(1458 + (input - 0x1D2C))];
             else if (input >= 0x1E00 && input <= 0x20A8)
-                return cast(void*)&LUT_44763C42[1606 + (input - 7680)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(1606 + (input - 0x1E00))];
             else if (input >= 0x2100 && input <= 0x232A)
-                return cast(void*)&LUT_44763C42[2287 + (input - 8448)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(2287 + (input - 0x2100))];
             else if (input >= 0x2460 && input <= 0x24EA)
-                return cast(void*)&LUT_44763C42[2842 + (input - 9312)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(2842 + (input - 0x2460))];
             else if (input == 0x2A0C)
-                return cast(void*)&LUT_44763C42[2981 + (input - 10764)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(2981 + (input - 0x2A0C))];
             else if (input >= 0x2A74 && input <= 0x2A76)
-                return cast(void*)&LUT_44763C42[2982 + (input - 10868)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(2982 + (input - 0x2A74))];
             else if (input == 0x2ADC)
-                return cast(void*)&LUT_44763C42[2985 + (input - 10972)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(2985 + (input - 0x2ADC))];
             else if (input >= 0x2C7C && input <= 0x2C7D)
-                return cast(void*)&LUT_44763C42[2986 + (input - 11388)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(2986 + (input - 0x2C7C))];
             else if (input == 0x2D6F)
-                return cast(void*)&LUT_44763C42[2988 + (input - 11631)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(2988 + (input - 0x2D6F))];
             else if (input == 0x2E9F)
-                return cast(void*)&LUT_44763C42[2989 + (input - 11935)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(2989 + (input - 0x2E9F))];
             else if (input >= 0x2EF3 && input <= 0x319F)
-                return cast(void*)&LUT_44763C42[2990 + (input - 12019)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(2990 + (input - 0x2EF3))];
             else if (input >= 0x3200)
-                return cast(void*)&LUT_44763C42[3675 + (input - 12800)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(3675 + (input - 0x3200))];
         } else if (input >= 0xA69C) {
             if (input <= 0xA69D)
-                return cast(void*)&LUT_44763C42[4187 + (input - 42652)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(4187 + (input - 0xA69C))];
             else if (input == 0xA770)
-                return cast(void*)&LUT_44763C42[4189 + (input - 42864)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(4189 + (input - 0xA770))];
             else if (input >= 0xA7F2 && input <= 0xA7F9)
-                return cast(void*)&LUT_44763C42[4190 + (input - 42994)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(4190 + (input - 0xA7F2))];
             else if (input >= 0xAB5C && input <= 0xAB69)
-                return cast(void*)&LUT_44763C42[4198 + (input - 43868)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(4198 + (input - 0xAB5C))];
             else if (input >= 0xF900)
-                return cast(void*)&LUT_44763C42[4212 + (input - 63744)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(4212 + (input - 0xF900))];
         }
     } else if (input >= 0x10781 && input <= 0x1FBF9) {
         if (input <= 0x11938) {
             if (input <= 0x107BA)
-                return cast(void*)&LUT_44763C42[5987 + (input - 67457)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(5987 + (input - 0x10781))];
             else if (input >= 0x1109A && input <= 0x110AB)
-                return cast(void*)&LUT_44763C42[6045 + (input - 69786)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(6045 + (input - 0x1109A))];
             else if (input >= 0x1112E && input <= 0x1112F)
-                return cast(void*)&LUT_44763C42[6063 + (input - 69934)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(6063 + (input - 0x1112E))];
             else if (input >= 0x1134B && input <= 0x1134C)
-                return cast(void*)&LUT_44763C42[6065 + (input - 70475)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(6065 + (input - 0x1134B))];
             else if (input >= 0x114BB && input <= 0x114BE)
-                return cast(void*)&LUT_44763C42[6067 + (input - 70843)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(6067 + (input - 0x114BB))];
             else if (input >= 0x115BA && input <= 0x115BB)
-                return cast(void*)&LUT_44763C42[6071 + (input - 71098)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(6071 + (input - 0x115BA))];
             else if (input == 0x11938)
-                return cast(void*)&LUT_44763C42[6073 + (input - 71992)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(6073 + (input - 0x11938))];
         } else if (input >= 0x1D15E) {
             if (input <= 0x1D164)
-                return cast(void*)&LUT_44763C42[6074 + (input - 119134)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(6074 + (input - 0x1D15E))];
             else if (input >= 0x1D1BB && input <= 0x1D1C0)
-                return cast(void*)&LUT_44763C42[6081 + (input - 119227)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(6081 + (input - 0x1D1BB))];
             else if (input >= 0x1D400 && input <= 0x1D7FF)
-                return cast(void*)&LUT_44763C42[6087 + (input - 119808)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(6087 + (input - 0x1D400))];
             else if (input >= 0x1EE00 && input <= 0x1EEBB)
-                return cast(void*)&LUT_44763C42[7111 + (input - 126464)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(7111 + (input - 0x1EE00))];
             else if (input >= 0x1F100 && input <= 0x1F190)
-                return cast(void*)&LUT_44763C42[7299 + (input - 127232)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(7299 + (input - 0x1F100))];
             else if (input >= 0x1F200 && input <= 0x1F251)
-                return cast(void*)&LUT_44763C42[7444 + (input - 127488)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(7444 + (input - 0x1F200))];
             else if (input >= 0x1FBF0)
-                return cast(void*)&LUT_44763C42[7526 + (input - 130032)];
+                return cast(void*)&LUT_44763C42[cast(size_t)(7526 + (input - 0x1FBF0))];
         }
     } else if (input >= 0x2F800 && input <= 0x2FA1D) {
-        return cast(void*)&LUT_44763C42[7536 + (input - 194560)];
+        return cast(void*)&LUT_44763C42[cast(size_t)(7536 + (input - 0x2F800))];
     }
     return null;
 }

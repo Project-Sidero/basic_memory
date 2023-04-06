@@ -5,132 +5,132 @@ export extern(C) immutable(ubyte) sidero_utf_lut_getWordBreakProperty(dchar inpu
     if (input >= 0xA && input <= 0xD7FB) {
         if (input <= 0x3357) {
             if (input <= 0xE59)
-                return cast(ubyte)LUT_8EA7BE65[0 + (input - 10)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(0 + (input - 0xA))];
             else if (input >= 0xEB1 && input <= 0xFC6)
-                return cast(ubyte)LUT_8EA7BE65[3664 + (input - 3761)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(3664 + (input - 0xEB1))];
             else if (input >= 0x102B && input <= 0x1773)
-                return cast(ubyte)LUT_8EA7BE65[3942 + (input - 4139)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(3942 + (input - 0x102B))];
             else if (input >= 0x17B4 && input <= 0x194F)
-                return cast(ubyte)LUT_8EA7BE65[5807 + (input - 6068)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(5807 + (input - 0x17B4))];
             else if (input >= 0x19D0 && input <= 0x2188)
-                return cast(ubyte)LUT_8EA7BE65[6219 + (input - 6608)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(6219 + (input - 0x19D0))];
             else if (input >= 0x24B6 && input <= 0x24E9)
                 return cast(ubyte)11;
             else if (input >= 0x2C00 && input <= 0x2E2F)
-                return cast(ubyte)LUT_8EA7BE65[8196 + (input - 11264)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(8196 + (input - 0x2C00))];
             else if (input >= 0x3000 && input <= 0x303C)
-                return cast(ubyte)LUT_8EA7BE65[8756 + (input - 12288)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(8756 + (input - 0x3000))];
             else if (input >= 0x3099 && input <= 0x31FF)
-                return cast(ubyte)LUT_8EA7BE65[8817 + (input - 12441)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(8817 + (input - 0x3099))];
             else if (input >= 0x32D0)
-                return cast(ubyte)LUT_8EA7BE65[9176 + (input - 13008)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(9176 + (input - 0x32D0))];
         } else if (input >= 0xA000) {
             if (input <= 0xA48C)
                 return cast(ubyte)11;
             else if (input >= 0xA4D0)
-                return cast(ubyte)LUT_8EA7BE65[9312 + (input - 42192)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(9312 + (input - 0xA4D0))];
         }
     } else if (input >= 0xFB00 && input <= 0x16FF1) {
         if (input <= 0x13438) {
             if (input <= 0x100FA)
-                return cast(ubyte)LUT_8EA7BE65[22412 + (input - 64256)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(22412 + (input - 0xFB00))];
             else if (input >= 0x10140 && input <= 0x10174)
                 return cast(ubyte)11;
             else if (input == 0x101FD)
                 return cast(ubyte)7;
             else if (input >= 0x10280 && input <= 0x105BC)
-                return cast(ubyte)LUT_8EA7BE65[23943 + (input - 66176)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(23943 + (input - 0x10280))];
             else if (input >= 0x10600 && input <= 0x107BA)
-                return cast(ubyte)LUT_8EA7BE65[24772 + (input - 67072)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(24772 + (input - 0x10600))];
             else if (input >= 0x10800 && input <= 0x1089E)
-                return cast(ubyte)LUT_8EA7BE65[25215 + (input - 67584)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(25215 + (input - 0x10800))];
             else if (input >= 0x108E0 && input <= 0x10939)
-                return cast(ubyte)LUT_8EA7BE65[25374 + (input - 67808)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(25374 + (input - 0x108E0))];
             else if (input >= 0x10980 && input <= 0x109BF)
-                return cast(ubyte)LUT_8EA7BE65[25464 + (input - 67968)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(25464 + (input - 0x10980))];
             else if (input >= 0x10A00 && input <= 0x10B91)
-                return cast(ubyte)LUT_8EA7BE65[25528 + (input - 68096)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(25528 + (input - 0x10A00))];
             else if (input >= 0x10C00 && input <= 0x10D39)
-                return cast(ubyte)LUT_8EA7BE65[25930 + (input - 68608)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(25930 + (input - 0x10C00))];
             else if (input >= 0x10E80 && input <= 0x10EB1)
-                return cast(ubyte)LUT_8EA7BE65[26244 + (input - 69248)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(26244 + (input - 0x10E80))];
             else if (input >= 0x10F00 && input <= 0x1123E)
-                return cast(ubyte)LUT_8EA7BE65[26294 + (input - 69376)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(26294 + (input - 0x10F00))];
             else if (input >= 0x11280 && input <= 0x11374)
-                return cast(ubyte)LUT_8EA7BE65[27125 + (input - 70272)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(27125 + (input - 0x11280))];
             else if (input >= 0x11400 && input <= 0x114D9)
-                return cast(ubyte)LUT_8EA7BE65[27370 + (input - 70656)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(27370 + (input - 0x11400))];
             else if (input >= 0x11580 && input <= 0x116C9)
-                return cast(ubyte)LUT_8EA7BE65[27588 + (input - 71040)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(27588 + (input - 0x11580))];
             else if (input >= 0x1171D && input <= 0x11739)
-                return cast(ubyte)LUT_8EA7BE65[27918 + (input - 71453)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(27918 + (input - 0x1171D))];
             else if (input >= 0x11800 && input <= 0x1183A)
-                return cast(ubyte)LUT_8EA7BE65[27947 + (input - 71680)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(27947 + (input - 0x11800))];
             else if (input >= 0x118A0 && input <= 0x11959)
-                return cast(ubyte)LUT_8EA7BE65[28006 + (input - 71840)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(28006 + (input - 0x118A0))];
             else if (input >= 0x119A0 && input <= 0x11AF8)
-                return cast(ubyte)LUT_8EA7BE65[28192 + (input - 72096)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(28192 + (input - 0x119A0))];
             else if (input >= 0x11C00 && input <= 0x11CB6)
-                return cast(ubyte)LUT_8EA7BE65[28537 + (input - 72704)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(28537 + (input - 0x11C00))];
             else if (input >= 0x11D00 && input <= 0x11DA9)
-                return cast(ubyte)LUT_8EA7BE65[28720 + (input - 72960)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(28720 + (input - 0x11D00))];
             else if (input >= 0x11EE0 && input <= 0x11EF6)
-                return cast(ubyte)LUT_8EA7BE65[28890 + (input - 73440)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(28890 + (input - 0x11EE0))];
             else if (input == 0x11FB0)
                 return cast(ubyte)11;
             else if (input >= 0x12000 && input <= 0x12399)
                 return cast(ubyte)11;
             else if (input >= 0x12400 && input <= 0x12543)
-                return cast(ubyte)LUT_8EA7BE65[28913 + (input - 74752)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(28913 + (input - 0x12400))];
             else if (input >= 0x12F90)
-                return cast(ubyte)LUT_8EA7BE65[29237 + (input - 77712)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(29237 + (input - 0x12F90))];
         } else if (input >= 0x14400) {
             if (input <= 0x14646)
                 return cast(ubyte)11;
             else if (input >= 0x16800 && input <= 0x16B8F)
-                return cast(ubyte)LUT_8EA7BE65[30430 + (input - 92160)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(30430 + (input - 0x16800))];
             else if (input >= 0x16E40 && input <= 0x16E7F)
                 return cast(ubyte)11;
             else if (input >= 0x16F00 && input <= 0x16F9F)
-                return cast(ubyte)LUT_8EA7BE65[31342 + (input - 93952)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(31342 + (input - 0x16F00))];
             else if (input >= 0x16FE0)
-                return cast(ubyte)LUT_8EA7BE65[31502 + (input - 94176)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(31502 + (input - 0x16FE0))];
         }
     } else if (input >= 0x1AFF0 && input <= 0x1FBF9) {
         if (input == 0xFFFF) {
             if (input <= 0x1B000)
-                return cast(ubyte)LUT_8EA7BE65[31520 + (input - 110576)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(31520 + (input - 0x1AFF0))];
             else if (input >= 0x1B120 && input <= 0x1B122)
                 return cast(ubyte)10;
             else if (input >= 0x1B164 && input <= 0x1B167)
                 return cast(ubyte)10;
             else if (input >= 0x1BC00)
-                return cast(ubyte)LUT_8EA7BE65[31537 + (input - 113664)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(31537 + (input - 0x1BC00))];
         } else if (input >= 0x1CF00) {
             if (input <= 0x1CF46)
-                return cast(ubyte)LUT_8EA7BE65[31701 + (input - 118528)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(31701 + (input - 0x1CF00))];
             else if (input >= 0x1D165 && input <= 0x1D1AD)
-                return cast(ubyte)LUT_8EA7BE65[31772 + (input - 119141)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(31772 + (input - 0x1D165))];
             else if (input >= 0x1D242 && input <= 0x1D244)
                 return cast(ubyte)7;
             else if (input >= 0x1D400 && input <= 0x1D7FF)
-                return cast(ubyte)LUT_8EA7BE65[31845 + (input - 119808)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(31845 + (input - 0x1D400))];
             else if (input >= 0x1DA00 && input <= 0x1DAAF)
-                return cast(ubyte)LUT_8EA7BE65[32869 + (input - 121344)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(32869 + (input - 0x1DA00))];
             else if (input >= 0x1DF00 && input <= 0x1DF1E)
                 return cast(ubyte)11;
             else if (input >= 0x1E000 && input <= 0x1E02A)
-                return cast(ubyte)LUT_8EA7BE65[33045 + (input - 122880)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(33045 + (input - 0x1E000))];
             else if (input >= 0x1E100 && input <= 0x1E14E)
-                return cast(ubyte)LUT_8EA7BE65[33088 + (input - 123136)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(33088 + (input - 0x1E100))];
             else if (input >= 0x1E290 && input <= 0x1E2F9)
-                return cast(ubyte)LUT_8EA7BE65[33167 + (input - 123536)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(33167 + (input - 0x1E290))];
             else if (input >= 0x1E7E0 && input <= 0x1E959)
-                return cast(ubyte)LUT_8EA7BE65[33273 + (input - 124896)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(33273 + (input - 0x1E7E0))];
             else if (input >= 0x1EE00 && input <= 0x1EEBB)
-                return cast(ubyte)LUT_8EA7BE65[33651 + (input - 126464)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(33651 + (input - 0x1EE00))];
             else if (input >= 0x1F130 && input <= 0x1F189)
-                return cast(ubyte)LUT_8EA7BE65[33839 + (input - 127280)];
+                return cast(ubyte)LUT_8EA7BE65[cast(size_t)(33839 + (input - 0x1F130))];
             else if (input >= 0x1F1E6 && input <= 0x1F1FF)
                 return cast(ubyte)8;
             else if (input >= 0x1F3FB && input <= 0x1F3FF)
@@ -140,7 +140,7 @@ export extern(C) immutable(ubyte) sidero_utf_lut_getWordBreakProperty(dchar inpu
         }
     } else if (input >= 0xE0001 && input <= 0xE01EF) {
         if (input <= 0xE007F)
-            return cast(ubyte)LUT_8EA7BE65[33929 + (input - 917505)];
+            return cast(ubyte)LUT_8EA7BE65[cast(size_t)(33929 + (input - 0xE0001))];
         else if (input >= 0xE0100)
             return cast(ubyte)7;
     }

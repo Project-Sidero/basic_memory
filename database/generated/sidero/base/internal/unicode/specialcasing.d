@@ -4,21 +4,21 @@ module sidero.base.internal.unicode.specialcasing;
 export extern(C) immutable(void*) sidero_utf_lut_getSpecialCasing2None(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0xDF && input <= 0x1FFC) {
         if (input == 0xDF)
-            return cast(void*)&LUT_7F14197C[0 + (input - 223)];
+            return cast(void*)&LUT_7F14197C[cast(size_t)(0 + (input - 0xDF))];
         else if (input >= 0x130 && input <= 0x149)
-            return cast(void*)&LUT_7F14197C[1 + (input - 304)];
+            return cast(void*)&LUT_7F14197C[cast(size_t)(1 + (input - 0x130))];
         else if (input == 0x1F0)
-            return cast(void*)&LUT_7F14197C[27 + (input - 496)];
+            return cast(void*)&LUT_7F14197C[cast(size_t)(27 + (input - 0x1F0))];
         else if (input >= 0x390 && input <= 0x3B0)
-            return cast(void*)&LUT_7F14197C[28 + (input - 912)];
+            return cast(void*)&LUT_7F14197C[cast(size_t)(28 + (input - 0x390))];
         else if (input == 0x587)
-            return cast(void*)&LUT_7F14197C[61 + (input - 1415)];
+            return cast(void*)&LUT_7F14197C[cast(size_t)(61 + (input - 0x587))];
         else if (input >= 0x1E96 && input <= 0x1E9A)
-            return cast(void*)&LUT_7F14197C[62 + (input - 7830)];
+            return cast(void*)&LUT_7F14197C[cast(size_t)(62 + (input - 0x1E96))];
         else if (input >= 0x1F50)
-            return cast(void*)&LUT_7F14197C[67 + (input - 8016)];
+            return cast(void*)&LUT_7F14197C[cast(size_t)(67 + (input - 0x1F50))];
     } else if (input >= 0xFB00 && input <= 0xFB17) {
-        return cast(void*)&LUT_7F14197C[240 + (input - 64256)];
+        return cast(void*)&LUT_7F14197C[cast(size_t)(240 + (input - 0xFB00))];
     }
     return null;
 }
@@ -29,13 +29,13 @@ private {
 
 export extern(C) immutable(void*) sidero_utf_lut_getSpecialCasing2Lithuanian(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x49 && input <= 0x4A)
-        return cast(void*)&LUT_C8B9F92E[0 + (input - 73)];
+        return cast(void*)&LUT_C8B9F92E[cast(size_t)(0 + (input - 0x49))];
     else if (input >= 0xCC && input <= 0xCD)
-        return cast(void*)&LUT_C8B9F92E[2 + (input - 204)];
+        return cast(void*)&LUT_C8B9F92E[cast(size_t)(2 + (input - 0xCC))];
     else if (input >= 0x128 && input <= 0x12E)
-        return cast(void*)&LUT_C8B9F92E[4 + (input - 296)];
+        return cast(void*)&LUT_C8B9F92E[cast(size_t)(4 + (input - 0x128))];
     else if (input == 0x307)
-        return cast(void*)&LUT_C8B9F92E[11 + (input - 775)];
+        return cast(void*)&LUT_C8B9F92E[cast(size_t)(11 + (input - 0x307))];
     return null;
 }
 private {
@@ -45,11 +45,11 @@ private {
 
 export extern(C) immutable(void*) sidero_utf_lut_getSpecialCasing2Turkish(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x49 && input <= 0x69)
-        return cast(void*)&LUT_4E6901CD[0 + (input - 73)];
+        return cast(void*)&LUT_4E6901CD[cast(size_t)(0 + (input - 0x49))];
     else if (input == 0x130)
-        return cast(void*)&LUT_4E6901CD[33 + (input - 304)];
+        return cast(void*)&LUT_4E6901CD[cast(size_t)(33 + (input - 0x130))];
     else if (input == 0x307)
-        return cast(void*)&LUT_4E6901CD[34 + (input - 775)];
+        return cast(void*)&LUT_4E6901CD[cast(size_t)(34 + (input - 0x307))];
     return null;
 }
 private {
@@ -59,11 +59,11 @@ private {
 
 export extern(C) immutable(void*) sidero_utf_lut_getSpecialCasing2Azeri(dchar input) @trusted nothrow @nogc pure {
     if (input >= 0x49 && input <= 0x69)
-        return cast(void*)&LUT_627EDE0E[0 + (input - 73)];
+        return cast(void*)&LUT_627EDE0E[cast(size_t)(0 + (input - 0x49))];
     else if (input == 0x130)
-        return cast(void*)&LUT_627EDE0E[33 + (input - 304)];
+        return cast(void*)&LUT_627EDE0E[cast(size_t)(33 + (input - 0x130))];
     else if (input == 0x307)
-        return cast(void*)&LUT_627EDE0E[34 + (input - 775)];
+        return cast(void*)&LUT_627EDE0E[cast(size_t)(34 + (input - 0x307))];
     return null;
 }
 private {

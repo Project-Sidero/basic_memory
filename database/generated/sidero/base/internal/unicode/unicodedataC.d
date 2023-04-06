@@ -4,123 +4,123 @@ module sidero.base.internal.unicode.unicodedataC;
 export extern(C) immutable(dchar) sidero_utf_lut_getCompositionCanonical2(ulong input) @trusted nothrow @nogc pure {
     if (input >= 0x30000000041 && input <= 0x30000001FFE) {
         if (input <= 0x300000001B0)
-            return cast(dchar)LUT_53F7478D[0 + (input - 3298534883393)];
+            return cast(dchar)LUT_53F7478D[cast(size_t)(0 + (input - 0x30000000041))];
         else if (input >= 0x30000000391 && input <= 0x30000000438)
-            return cast(dchar)LUT_53F7478D[368 + (input - 3298534884241)];
+            return cast(dchar)LUT_53F7478D[cast(size_t)(368 + (input - 0x30000000391))];
         else if (input >= 0x30000001F00)
-            return cast(dchar)LUT_53F7478D[536 + (input - 3298534891264)];
+            return cast(dchar)LUT_53F7478D[cast(size_t)(536 + (input - 0x30000001F00))];
     } else if (input >= 0x30100000041 && input <= 0x30100001FFE) {
         if (input <= 0x301000001B0)
-            return cast(dchar)LUT_53F7478D[791 + (input - 3302829850689)];
+            return cast(dchar)LUT_53F7478D[cast(size_t)(791 + (input - 0x30100000041))];
         else if (input >= 0x30100000308 && input <= 0x3010000043A)
-            return cast(dchar)LUT_53F7478D[1159 + (input - 3302829851400)];
+            return cast(dchar)LUT_53F7478D[cast(size_t)(1159 + (input - 0x30100000308))];
         else if (input >= 0x30100001F00)
-            return cast(dchar)LUT_53F7478D[1466 + (input - 3302829858560)];
+            return cast(dchar)LUT_53F7478D[cast(size_t)(1466 + (input - 0x30100001F00))];
     } else if (input >= 0x30200000041 && input <= 0x30200001ECD) {
         if (input <= 0x3020000007A)
-            return cast(dchar)LUT_53F7478D[1721 + (input - 3307124817985)];
+            return cast(dchar)LUT_53F7478D[cast(size_t)(1721 + (input - 0x30200000041))];
         else if (input >= 0x30200001EA0)
-            return cast(dchar)LUT_53F7478D[1779 + (input - 3307124825760)];
+            return cast(dchar)LUT_53F7478D[cast(size_t)(1779 + (input - 0x30200001EA0))];
     } else if (input >= 0x30300000041 && input <= 0x303000001B0) {
-        return cast(dchar)LUT_53F7478D[1825 + (input - 3311419785281)];
+        return cast(dchar)LUT_53F7478D[cast(size_t)(1825 + (input - 0x30300000041))];
     } else if (input >= 0x30400000041 && input <= 0x30400001E5B) {
         if (input <= 0x3040000022F)
-            return cast(dchar)LUT_53F7478D[2193 + (input - 3315714752577)];
+            return cast(dchar)LUT_53F7478D[cast(size_t)(2193 + (input - 0x30400000041))];
         else if (input >= 0x30400000391 && input <= 0x30400000443)
-            return cast(dchar)LUT_53F7478D[2688 + (input - 3315714753425)];
+            return cast(dchar)LUT_53F7478D[cast(size_t)(2688 + (input - 0x30400000391))];
         else if (input >= 0x30400001E36)
-            return cast(dchar)LUT_53F7478D[2867 + (input - 3315714760246)];
+            return cast(dchar)LUT_53F7478D[cast(size_t)(2867 + (input - 0x30400001E36))];
     } else if (input >= 0x30600000041 && input <= 0x30600001EA1) {
         if (input <= 0x30600000075)
-            return cast(dchar)LUT_53F7478D[2905 + (input - 3324304687169)];
+            return cast(dchar)LUT_53F7478D[cast(size_t)(2905 + (input - 0x30600000041))];
         else if (input >= 0x30600000228 && input <= 0x30600000229)
-            return cast(dchar)LUT_53F7478D[2958 + (input - 3324304687656)];
+            return cast(dchar)LUT_53F7478D[cast(size_t)(2958 + (input - 0x30600000228))];
         else if (input >= 0x30600000391 && input <= 0x30600000443)
-            return cast(dchar)LUT_53F7478D[2960 + (input - 3324304688017)];
+            return cast(dchar)LUT_53F7478D[cast(size_t)(2960 + (input - 0x30600000391))];
         else if (input >= 0x30600001EA0)
-            return cast(dchar)LUT_53F7478D[3139 + (input - 3324304694944)];
+            return cast(dchar)LUT_53F7478D[cast(size_t)(3139 + (input - 0x30600001EA0))];
     } else if (input >= 0x30700000041 && input <= 0x30700001E63) {
         if (input <= 0x3070000017F)
-            return cast(dchar)LUT_53F7478D[3141 + (input - 3328599654465)];
+            return cast(dchar)LUT_53F7478D[cast(size_t)(3141 + (input - 0x30700000041))];
         else if (input >= 0x30700001E62)
-            return cast(dchar)LUT_53F7478D[3460 + (input - 3328599662178)];
+            return cast(dchar)LUT_53F7478D[cast(size_t)(3460 + (input - 0x30700001E62))];
     } else if (input >= 0x30800000041 && input <= 0x308000004E9) {
         if (input <= 0x3080000016B)
-            return cast(dchar)LUT_53F7478D[3462 + (input - 3332894621761)];
+            return cast(dchar)LUT_53F7478D[cast(size_t)(3462 + (input - 0x30800000041))];
         else if (input >= 0x30800000399)
-            return cast(dchar)LUT_53F7478D[3761 + (input - 3332894622617)];
+            return cast(dchar)LUT_53F7478D[cast(size_t)(3761 + (input - 0x30800000399))];
     } else if (input >= 0x30900000041 && input <= 0x309000001B0) {
-        return cast(dchar)LUT_53F7478D[4098 + (input - 3337189589057)];
+        return cast(dchar)LUT_53F7478D[cast(size_t)(4098 + (input - 0x30900000041))];
     } else if (input >= 0x30A00000041 && input <= 0x30A00000079) {
-        return cast(dchar)LUT_53F7478D[4466 + (input - 3341484556353)];
+        return cast(dchar)LUT_53F7478D[cast(size_t)(4466 + (input - 0x30A00000041))];
     } else if (input >= 0x30B0000004F && input <= 0x30B00000443) {
         if (input <= 0x30B00000075)
-            return cast(dchar)LUT_53F7478D[4523 + (input - 3345779523663)];
+            return cast(dchar)LUT_53F7478D[cast(size_t)(4523 + (input - 0x30B0000004F))];
         else if (input >= 0x30B00000423)
-            return cast(dchar)LUT_53F7478D[4562 + (input - 3345779524643)];
+            return cast(dchar)LUT_53F7478D[cast(size_t)(4562 + (input - 0x30B00000423))];
     } else if (input >= 0x30C00000041 && input <= 0x30C00000292) {
-        return cast(dchar)LUT_53F7478D[4595 + (input - 3350074490945)];
+        return cast(dchar)LUT_53F7478D[cast(size_t)(4595 + (input - 0x30C00000041))];
     } else if (input >= 0x30F00000041 && input <= 0x30F00000475) {
         if (input <= 0x30F00000075)
-            return cast(dchar)LUT_53F7478D[5189 + (input - 3362959392833)];
+            return cast(dchar)LUT_53F7478D[cast(size_t)(5189 + (input - 0x30F00000041))];
         else if (input >= 0x30F00000474)
-            return cast(dchar)LUT_53F7478D[5242 + (input - 3362959393908)];
+            return cast(dchar)LUT_53F7478D[cast(size_t)(5242 + (input - 0x30F00000474))];
     } else if (input >= 0x31100000041 && input <= 0x31100000075) {
-        return cast(dchar)LUT_53F7478D[5244 + (input - 3371549327425)];
+        return cast(dchar)LUT_53F7478D[cast(size_t)(5244 + (input - 0x31100000041))];
     } else if (input >= 0x31300000391 && input <= 0x313000003C9) {
-        return cast(dchar)LUT_53F7478D[5297 + (input - 3380139262865)];
+        return cast(dchar)LUT_53F7478D[cast(size_t)(5297 + (input - 0x31300000391))];
     } else if (input >= 0x31400000391 && input <= 0x314000003C9) {
-        return cast(dchar)LUT_53F7478D[5354 + (input - 3384434230161)];
+        return cast(dchar)LUT_53F7478D[cast(size_t)(5354 + (input - 0x31400000391))];
     } else if (input >= 0x31B0000004F && input <= 0x31B00000075) {
-        return cast(dchar)LUT_53F7478D[5411 + (input - 3414499000399)];
+        return cast(dchar)LUT_53F7478D[cast(size_t)(5411 + (input - 0x31B0000004F))];
     } else if (input >= 0x32300000041 && input <= 0x323000001B0) {
         if (input <= 0x3230000007A)
-            return cast(dchar)LUT_53F7478D[5450 + (input - 3448858738753)];
+            return cast(dchar)LUT_53F7478D[cast(size_t)(5450 + (input - 0x32300000041))];
         else if (input >= 0x323000001A0)
-            return cast(dchar)LUT_53F7478D[5508 + (input - 3448858739104)];
+            return cast(dchar)LUT_53F7478D[cast(size_t)(5508 + (input - 0x323000001A0))];
     } else if (input >= 0x32400000055 && input <= 0x32400000075) {
-        return cast(dchar)LUT_53F7478D[5525 + (input - 3453153706069)];
+        return cast(dchar)LUT_53F7478D[cast(size_t)(5525 + (input - 0x32400000055))];
     } else if (input >= 0x32500000041 && input <= 0x32500000061) {
-        return cast(dchar)LUT_53F7478D[5558 + (input - 3457448673345)];
+        return cast(dchar)LUT_53F7478D[cast(size_t)(5558 + (input - 0x32500000041))];
     } else if (input >= 0x32600000053 && input <= 0x32600000074) {
-        return cast(dchar)LUT_53F7478D[5591 + (input - 3461743640659)];
+        return cast(dchar)LUT_53F7478D[cast(size_t)(5591 + (input - 0x32600000053))];
     } else if (input >= 0x32700000043 && input <= 0x32700000074) {
-        return cast(dchar)LUT_53F7478D[5625 + (input - 3466038607939)];
+        return cast(dchar)LUT_53F7478D[cast(size_t)(5625 + (input - 0x32700000043))];
     } else if (input >= 0x32800000041 && input <= 0x32800000075) {
-        return cast(dchar)LUT_53F7478D[5675 + (input - 3470333575233)];
+        return cast(dchar)LUT_53F7478D[cast(size_t)(5675 + (input - 0x32800000041))];
     } else if (input >= 0x32D00000044 && input <= 0x32D00000075) {
-        return cast(dchar)LUT_53F7478D[5728 + (input - 3491808411716)];
+        return cast(dchar)LUT_53F7478D[cast(size_t)(5728 + (input - 0x32D00000044))];
     } else if (input >= 0x32E00000048 && input <= 0x32E00000068) {
-        return cast(dchar)LUT_53F7478D[5778 + (input - 3496103379016)];
+        return cast(dchar)LUT_53F7478D[cast(size_t)(5778 + (input - 0x32E00000048))];
     } else if (input >= 0x33000000045 && input <= 0x33000000075) {
-        return cast(dchar)LUT_53F7478D[5811 + (input - 3504693313605)];
+        return cast(dchar)LUT_53F7478D[cast(size_t)(5811 + (input - 0x33000000045))];
     } else if (input >= 0x33100000042 && input <= 0x3310000007A) {
-        return cast(dchar)LUT_53F7478D[5860 + (input - 3508988280898)];
+        return cast(dchar)LUT_53F7478D[cast(size_t)(5860 + (input - 0x33100000042))];
     } else if (input >= 0x3380000003C && input <= 0x338000022B5) {
         if (input <= 0x3380000003E)
-            return cast(dchar)LUT_53F7478D[5917 + (input - 3539053051964)];
+            return cast(dchar)LUT_53F7478D[cast(size_t)(5917 + (input - 0x3380000003C))];
         else if (input >= 0x33800002190)
-            return cast(dchar)LUT_53F7478D[5920 + (input - 3539053060496)];
+            return cast(dchar)LUT_53F7478D[cast(size_t)(5920 + (input - 0x33800002190))];
     } else if (input >= 0x342000000A8 && input <= 0x34200001FFE) {
         if (input == 0x342000000A8)
             return cast(dchar)0x1FC1;
         else if (input >= 0x342000003B1 && input <= 0x342000003CB)
-            return cast(dchar)LUT_53F7478D[6214 + (input - 3582002725809)];
+            return cast(dchar)LUT_53F7478D[cast(size_t)(6214 + (input - 0x342000003B1))];
         else if (input >= 0x34200001F00)
-            return cast(dchar)LUT_53F7478D[6241 + (input - 3582002732800)];
+            return cast(dchar)LUT_53F7478D[cast(size_t)(6241 + (input - 0x34200001F00))];
     } else if (input >= 0x34500000391 && input <= 0x34500001FF6) {
         if (input <= 0x345000003CE)
-            return cast(dchar)LUT_53F7478D[6496 + (input - 3594887627665)];
+            return cast(dchar)LUT_53F7478D[cast(size_t)(6496 + (input - 0x34500000391))];
         else if (input >= 0x34500001F00)
-            return cast(dchar)LUT_53F7478D[6558 + (input - 3594887634688)];
+            return cast(dchar)LUT_53F7478D[cast(size_t)(6558 + (input - 0x34500001F00))];
     } else if (input == 0x65300000627) {
         return cast(dchar)0x622;
     } else if (input >= 0x65400000627 && input <= 0x654000006D5) {
-        return cast(dchar)LUT_53F7478D[6805 + (input - 6957847021095)];
+        return cast(dchar)LUT_53F7478D[cast(size_t)(6805 + (input - 0x65400000627))];
     } else if (input == 0x65500000627) {
         return cast(dchar)0x625;
     } else if (input >= 0x93C00000928 && input <= 0x93C00000933) {
-        return cast(dchar)LUT_53F7478D[6980 + (input - 10153302690088)];
+        return cast(dchar)LUT_53F7478D[cast(size_t)(6980 + (input - 0x93C00000928))];
     } else if (input == 0x9BE000009C7) {
         return cast(dchar)0x9CB;
     } else if (input == 0x9D7000009C7) {
@@ -132,23 +132,23 @@ export extern(C) immutable(dchar) sidero_utf_lut_getCompositionCanonical2(ulong 
     } else if (input == 0xB5700000B47) {
         return cast(dchar)0xB4C;
     } else if (input >= 0xBBE00000BC6 && input <= 0xBBE00000BC7) {
-        return cast(dchar)LUT_53F7478D[6992 + (input - 12910671694790)];
+        return cast(dchar)LUT_53F7478D[cast(size_t)(6992 + (input - 0xBBE00000BC6))];
     } else if (input >= 0xBD700000B92 && input <= 0xBD700000BC6) {
-        return cast(dchar)LUT_53F7478D[6994 + (input - 13018045877138)];
+        return cast(dchar)LUT_53F7478D[cast(size_t)(6994 + (input - 0xBD700000B92))];
     } else if (input == 0xC5600000C46) {
         return cast(dchar)0xC48;
     } else if (input == 0xCC200000CC6) {
         return cast(dchar)0xCCA;
     } else if (input >= 0xCD500000CBF && input <= 0xCD500000CCA) {
-        return cast(dchar)LUT_53F7478D[7047 + (input - 14108967570623)];
+        return cast(dchar)LUT_53F7478D[cast(size_t)(7047 + (input - 0xCD500000CBF))];
     } else if (input == 0xCD600000CC6) {
         return cast(dchar)0xCC8;
     } else if (input >= 0xD3E00000D46 && input <= 0xD3E00000D47) {
-        return cast(dchar)LUT_53F7478D[7059 + (input - 14559939136838)];
+        return cast(dchar)LUT_53F7478D[cast(size_t)(7059 + (input - 0xD3E00000D46))];
     } else if (input == 0xD5700000D46) {
         return cast(dchar)0xD4C;
     } else if (input >= 0xDCA00000DD9 && input <= 0xDCA00000DDC) {
-        return cast(dchar)LUT_53F7478D[7061 + (input - 15161234558425)];
+        return cast(dchar)LUT_53F7478D[cast(size_t)(7061 + (input - 0xDCA00000DD9))];
     } else if (input == 0xDCF00000DD9) {
         return cast(dchar)0xDDC;
     } else if (input == 0xDDF00000DD9) {
@@ -162,15 +162,15 @@ export extern(C) immutable(dchar) sidero_utf_lut_getCompositionCanonical2(ulong 
     } else if (input == 0x102E00001025) {
         return cast(dchar)0x1026;
     } else if (input >= 0x1B3500001B05 && input <= 0x1B3500001B42) {
-        return cast(dchar)LUT_53F7478D[7065 + (input - 29914447223557)];
+        return cast(dchar)LUT_53F7478D[cast(size_t)(7065 + (input - 0x1B3500001B05))];
     } else if (input >= 0x309900003046 && input <= 0x3099000030FD) {
-        return cast(dchar)LUT_53F7478D[7127 + (input - 53433688141894)];
+        return cast(dchar)LUT_53F7478D[cast(size_t)(7127 + (input - 0x309900003046))];
     } else if (input >= 0x309A0000306F && input <= 0x309A000030DB) {
-        return cast(dchar)LUT_53F7478D[7311 + (input - 53437983109231)];
+        return cast(dchar)LUT_53F7478D[cast(size_t)(7311 + (input - 0x309A0000306F))];
     } else if (input >= 0x110BA00011099 && input <= 0x110BA000110A5) {
-        return cast(dchar)LUT_53F7478D[7420 + (input - 299866026741913)];
+        return cast(dchar)LUT_53F7478D[cast(size_t)(7420 + (input - 0x110BA00011099))];
     } else if (input >= 0x1112700011131 && input <= 0x1112700011132) {
-        return cast(dchar)LUT_53F7478D[7433 + (input - 300334178177329)];
+        return cast(dchar)LUT_53F7478D[cast(size_t)(7433 + (input - 0x1112700011131))];
     } else if (input == 0x1133E00011347) {
         return cast(dchar)0x1134B;
     } else if (input == 0x1135700011347) {
@@ -182,7 +182,7 @@ export extern(C) immutable(dchar) sidero_utf_lut_getCompositionCanonical2(ulong 
     } else if (input == 0x114BD000114B9) {
         return cast(dchar)0x114BE;
     } else if (input >= 0x115AF000115B8 && input <= 0x115AF000115B9) {
-        return cast(dchar)LUT_53F7478D[7435 + (input - 305316340241848)];
+        return cast(dchar)LUT_53F7478D[cast(size_t)(7435 + (input - 0x115AF000115B8))];
     } else if (input == 0x1193000011935) {
         return cast(dchar)0x11938;
     }
@@ -194,112 +194,112 @@ private {
 
 export extern(C) immutable(dchar) sidero_utf_lut_getCompositionCompatibility2(ulong input) @trusted nothrow @nogc pure {
     if (input >= 0x2100000021 && input <= 0x210000003F) {
-        return cast(dchar)LUT_D4AB8411[0 + (input - 141733920801)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(0 + (input - 0x2100000021))];
     } else if (input >= 0x2C00000030 && input <= 0x2C00000039) {
-        return cast(dchar)LUT_D4AB8411[31 + (input - 188978561072)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(31 + (input - 0x2C00000030))];
     } else if (input >= 0x2E0000002E && input <= 0x2E00000039) {
-        return cast(dchar)LUT_D4AB8411[41 + (input - 197568495662)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(41 + (input - 0x2E0000002E))];
     } else if (input >= 0x3000000031 && input <= 0x3000000035) {
-        return cast(dchar)LUT_D4AB8411[53 + (input - 206158430257)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(53 + (input - 0x3000000031))];
     } else if (input >= 0x3100000031 && input <= 0x3100000034) {
-        return cast(dchar)LUT_D4AB8411[58 + (input - 210453397553)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(58 + (input - 0x3100000031))];
     } else if (input >= 0x3200000031 && input <= 0x3200000034) {
-        return cast(dchar)LUT_D4AB8411[62 + (input - 214748364849)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(62 + (input - 0x3200000031))];
     } else if (input >= 0x3300000031 && input <= 0x3300000034) {
-        return cast(dchar)LUT_D4AB8411[66 + (input - 219043332145)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(66 + (input - 0x3300000031))];
     } else if (input >= 0x3400000031 && input <= 0x3400000034) {
-        return cast(dchar)LUT_D4AB8411[70 + (input - 223338299441)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(70 + (input - 0x3400000031))];
     } else if (input >= 0x3500000031 && input <= 0x3500000034) {
-        return cast(dchar)LUT_D4AB8411[74 + (input - 227633266737)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(74 + (input - 0x3500000031))];
     } else if (input >= 0x3600000031 && input <= 0x3600000034) {
-        return cast(dchar)LUT_D4AB8411[78 + (input - 231928234033)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(78 + (input - 0x3600000031))];
     } else if (input >= 0x3700000031 && input <= 0x3700000034) {
-        return cast(dchar)LUT_D4AB8411[82 + (input - 236223201329)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(82 + (input - 0x3700000031))];
     } else if (input >= 0x3800000031 && input <= 0x3800000034) {
-        return cast(dchar)LUT_D4AB8411[86 + (input - 240518168625)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(86 + (input - 0x3800000031))];
     } else if (input >= 0x3900000031 && input <= 0x3900000034) {
-        return cast(dchar)LUT_D4AB8411[90 + (input - 244813135921)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(90 + (input - 0x3900000031))];
     } else if (input == 0x3D0000003D) {
         return cast(dchar)0x2A75;
     } else if (input >= 0x3F00000021 && input <= 0x3F0000003F) {
-        return cast(dchar)LUT_D4AB8411[94 + (input - 270582939681)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(94 + (input - 0x3F00000021))];
     } else if (input >= 0x410000006B && input <= 0x41000003BC) {
         if (input <= 0x4100000070)
-            return cast(dchar)LUT_D4AB8411[125 + (input - 279172874347)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(125 + (input - 0x410000006B))];
         else if (input == 0x41000003BC)
             return cast(dchar)0x3382;
     } else if (input >= 0x4200000047 && input <= 0x4200000064) {
-        return cast(dchar)LUT_D4AB8411[131 + (input - 283467841607)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(131 + (input - 0x4200000047))];
     } else if (input >= 0x430000004D && input <= 0x43000000B0) {
-        return cast(dchar)LUT_D4AB8411[161 + (input - 287762808909)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(161 + (input - 0x430000004D))];
     } else if (input >= 0x4400000043 && input <= 0x4400000053) {
-        return cast(dchar)LUT_D4AB8411[261 + (input - 292057776195)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(261 + (input - 0x4400000043))];
     } else if (input >= 0x460000006E && input <= 0x46000003BC) {
         if (input <= 0x46000000B0)
-            return cast(dchar)LUT_D4AB8411[278 + (input - 300647710830)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(278 + (input - 0x460000006E))];
         else if (input == 0x46000003BC)
             return cast(dchar)0x338C;
     } else if (input == 0x4800000050) {
         return cast(dchar)0x33D7;
     } else if (input >= 0x4900000049 && input <= 0x4900000058) {
-        return cast(dchar)LUT_D4AB8411[345 + (input - 313532612681)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(345 + (input - 0x4900000049))];
     } else if (input >= 0x4A00000044 && input <= 0x4A0000004E) {
-        return cast(dchar)LUT_D4AB8411[361 + (input - 317827579972)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(361 + (input - 0x4A00000044))];
     } else if (input == 0x4B0000004B) {
         return cast(dchar)0x33CD;
     } else if (input >= 0x4D0000004B && input <= 0x4D00000054) {
-        return cast(dchar)LUT_D4AB8411[372 + (input - 330712481867)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(372 + (input - 0x4D0000004B))];
     } else if (input == 0x5000000048) {
         return cast(dchar)0x33CB;
     } else if (input >= 0x520000004D && input <= 0x5200000050) {
-        return cast(dchar)LUT_D4AB8411[382 + (input - 352187318349)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(382 + (input - 0x520000004D))];
     } else if (input == 0x5300000053) {
         return cast(dchar)0x1F14D;
     } else if (input >= 0x5500000041 && input <= 0x5500000049) {
-        return cast(dchar)LUT_D4AB8411[386 + (input - 365072220225)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(386 + (input - 0x5500000041))];
     } else if (input >= 0x5600000048 && input <= 0x56000003BC) {
         if (input <= 0x5600000070)
-            return cast(dchar)LUT_D4AB8411[395 + (input - 369367187528)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(395 + (input - 0x5600000048))];
         else if (input == 0x56000003BC)
             return cast(dchar)0x33B6;
     } else if (input >= 0x570000004D && input <= 0x57000003BC) {
         if (input <= 0x5700000070)
-            return cast(dchar)LUT_D4AB8411[436 + (input - 373662154829)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(436 + (input - 0x570000004D))];
         else if (input == 0x57000003BC)
             return cast(dchar)0x33BC;
     } else if (input == 0x5800000049) {
         return cast(dchar)0x2168;
     } else if (input >= 0x5A00000044 && input <= 0x5A00000057) {
-        return cast(dchar)LUT_D4AB8411[472 + (input - 386547056708)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(472 + (input - 0x5A00000044))];
     } else if (input >= 0x6100000050 && input <= 0x6100000068) {
-        return cast(dchar)LUT_D4AB8411[492 + (input - 416611827792)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(492 + (input - 0x6100000050))];
     } else if (input >= 0x6200000057 && input <= 0x620000006D) {
-        return cast(dchar)LUT_D4AB8411[517 + (input - 420906795095)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(517 + (input - 0x6200000057))];
     } else if (input >= 0x6300000063 && input <= 0x6300000070) {
-        return cast(dchar)LUT_D4AB8411[540 + (input - 425201762403)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(540 + (input - 0x6300000063))];
     } else if (input == 0x6400000063) {
         return cast(dchar)0x33C5;
     } else if (input == 0x6600000066) {
         return cast(dchar)0xFB00;
     } else if (input >= 0x6700000048 && input <= 0x67000003BC) {
         if (input <= 0x670000006D)
-            return cast(dchar)LUT_D4AB8411[554 + (input - 442381631560)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(554 + (input - 0x6700000048))];
         else if (input == 0x67000003BC)
             return cast(dchar)0x338D;
     } else if (input >= 0x6900000066 && input <= 0x6900000078) {
-        return cast(dchar)LUT_D4AB8411[592 + (input - 450971566182)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(592 + (input - 0x6900000066))];
     } else if (input >= 0x6A0000004C && input <= 0x6A0000006E) {
-        return cast(dchar)LUT_D4AB8411[611 + (input - 455266533452)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(611 + (input - 0x6A0000004C))];
     } else if (input == 0x6C00000066) {
         return cast(dchar)0xFB02;
     } else if (input >= 0x6D00000063 && input <= 0x6D000003BC) {
         if (input <= 0x6D0000006E)
-            return cast(dchar)LUT_D4AB8411[646 + (input - 468151435363)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(646 + (input - 0x6D00000063))];
         else if (input == 0x6D000003BC)
             return cast(dchar)0x339B;
     } else if (input >= 0x6E00000069 && input <= 0x6E000002BC) {
         if (input <= 0x6E0000006C)
-            return cast(dchar)LUT_D4AB8411[658 + (input - 472446402665)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(658 + (input - 0x6E00000069))];
         else if (input == 0x6E000002BC)
             return cast(dchar)0x149;
     } else if (input == 0x6F0000004E) {
@@ -310,159 +310,159 @@ export extern(C) immutable(dchar) sidero_utf_lut_getCompositionCompatibility2(ul
         return cast(dchar)0x33DB;
     } else if (input >= 0x7300000052 && input <= 0x73000003BC) {
         if (input <= 0x7300000070)
-            return cast(dchar)LUT_D4AB8411[662 + (input - 493921239122)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(662 + (input - 0x7300000052))];
         else if (input == 0x73000003BC)
             return cast(dchar)0x33B2;
     } else if (input >= 0x740000006B && input <= 0x740000017F) {
         if (input <= 0x7400000073)
-            return cast(dchar)LUT_D4AB8411[693 + (input - 498216206443)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(693 + (input - 0x740000006B))];
         else if (input == 0x740000017F)
             return cast(dchar)0xFB05;
     } else if (input >= 0x7600000053 && input <= 0x7600000069) {
-        return cast(dchar)LUT_D4AB8411[702 + (input - 506806141011)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(702 + (input - 0x7600000053))];
     } else if (input >= 0x7800000069 && input <= 0x780000006C) {
-        return cast(dchar)LUT_D4AB8411[725 + (input - 515396075625)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(725 + (input - 0x7800000069))];
     } else if (input == 0x7900000047) {
         return cast(dchar)0x33C9;
     } else if (input >= 0x7A00000044 && input <= 0x7A00000064) {
-        return cast(dchar)LUT_D4AB8411[729 + (input - 523986010180)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(729 + (input - 0x7A00000044))];
     } else if (input == 0xB20000006D) {
         return cast(dchar)0x33A1;
     } else if (input == 0xB30000006D) {
         return cast(dchar)0x33A5;
     } else if (input >= 0xB70000004C && input <= 0xB70000006C) {
-        return cast(dchar)LUT_D4AB8411[762 + (input - 785979015244)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(762 + (input - 0xB70000004C))];
     } else if (input == 0x17D00000044) {
         return cast(dchar)0x1C4;
     } else if (input >= 0x17E00000044 && input <= 0x17E00000064) {
-        return cast(dchar)LUT_D4AB8411[795 + (input - 1640677507140)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(795 + (input - 0x17E00000044))];
     } else if (input == 0x2BE00000061) {
         return cast(dchar)0x1E9A;
     } else if (input >= 0x30000000041 && input <= 0x30000001FFE) {
         if (input <= 0x300000001B0)
-            return cast(dchar)LUT_D4AB8411[828 + (input - 3298534883393)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(828 + (input - 0x30000000041))];
         else if (input >= 0x30000000391 && input <= 0x30000000438)
-            return cast(dchar)LUT_D4AB8411[1196 + (input - 3298534884241)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(1196 + (input - 0x30000000391))];
         else if (input >= 0x30000001F00)
-            return cast(dchar)LUT_D4AB8411[1364 + (input - 3298534891264)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(1364 + (input - 0x30000001F00))];
     } else if (input >= 0x30100000020 && input <= 0x30100001FFE) {
         if (input <= 0x301000001B0)
-            return cast(dchar)LUT_D4AB8411[1619 + (input - 3302829850656)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(1619 + (input - 0x30100000020))];
         else if (input >= 0x30100000308 && input <= 0x3010000043A)
-            return cast(dchar)LUT_D4AB8411[2020 + (input - 3302829851400)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(2020 + (input - 0x30100000308))];
         else if (input >= 0x30100001F00)
-            return cast(dchar)LUT_D4AB8411[2327 + (input - 3302829858560)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(2327 + (input - 0x30100001F00))];
     } else if (input >= 0x30200000041 && input <= 0x30200001ECD) {
         if (input <= 0x3020000007A)
-            return cast(dchar)LUT_D4AB8411[2582 + (input - 3307124817985)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(2582 + (input - 0x30200000041))];
         else if (input >= 0x30200001EA0)
-            return cast(dchar)LUT_D4AB8411[2640 + (input - 3307124825760)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(2640 + (input - 0x30200001EA0))];
     } else if (input >= 0x30300000020 && input <= 0x303000001B0) {
-        return cast(dchar)LUT_D4AB8411[2686 + (input - 3311419785248)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(2686 + (input - 0x30300000020))];
     } else if (input >= 0x30400000020 && input <= 0x30400001E5B) {
         if (input <= 0x3040000022F)
-            return cast(dchar)LUT_D4AB8411[3087 + (input - 3315714752544)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(3087 + (input - 0x30400000020))];
         else if (input >= 0x30400000391 && input <= 0x30400000443)
-            return cast(dchar)LUT_D4AB8411[3615 + (input - 3315714753425)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(3615 + (input - 0x30400000391))];
         else if (input >= 0x30400001E36)
-            return cast(dchar)LUT_D4AB8411[3794 + (input - 3315714760246)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(3794 + (input - 0x30400001E36))];
     } else if (input == 0x30500000020) {
         return cast(dchar)0x203E;
     } else if (input >= 0x30600000020 && input <= 0x30600001EA1) {
         if (input <= 0x30600000075)
-            return cast(dchar)LUT_D4AB8411[3832 + (input - 3324304687136)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(3832 + (input - 0x30600000020))];
         else if (input >= 0x30600000228 && input <= 0x30600000229)
-            return cast(dchar)LUT_D4AB8411[3918 + (input - 3324304687656)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(3918 + (input - 0x30600000228))];
         else if (input >= 0x30600000391 && input <= 0x30600000443)
-            return cast(dchar)LUT_D4AB8411[3920 + (input - 3324304688017)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(3920 + (input - 0x30600000391))];
         else if (input >= 0x30600001EA0)
-            return cast(dchar)LUT_D4AB8411[4099 + (input - 3324304694944)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(4099 + (input - 0x30600001EA0))];
     } else if (input >= 0x30700000020 && input <= 0x30700001E63) {
         if (input <= 0x3070000017F)
-            return cast(dchar)LUT_D4AB8411[4101 + (input - 3328599654432)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(4101 + (input - 0x30700000020))];
         else if (input >= 0x30700001E62)
-            return cast(dchar)LUT_D4AB8411[4453 + (input - 3328599662178)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(4453 + (input - 0x30700001E62))];
     } else if (input >= 0x30800000020 && input <= 0x308000004E9) {
         if (input <= 0x3080000016B)
-            return cast(dchar)LUT_D4AB8411[4455 + (input - 3332894621728)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(4455 + (input - 0x30800000020))];
         else if (input >= 0x30800000399)
-            return cast(dchar)LUT_D4AB8411[4787 + (input - 3332894622617)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(4787 + (input - 0x30800000399))];
     } else if (input >= 0x30900000041 && input <= 0x309000001B0) {
-        return cast(dchar)LUT_D4AB8411[5124 + (input - 3337189589057)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(5124 + (input - 0x30900000041))];
     } else if (input >= 0x30A00000020 && input <= 0x30A00000079) {
-        return cast(dchar)LUT_D4AB8411[5492 + (input - 3341484556320)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(5492 + (input - 0x30A00000020))];
     } else if (input >= 0x30B00000020 && input <= 0x30B00000443) {
         if (input <= 0x30B00000075)
-            return cast(dchar)LUT_D4AB8411[5582 + (input - 3345779523616)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(5582 + (input - 0x30B00000020))];
         else if (input >= 0x30B00000423)
-            return cast(dchar)LUT_D4AB8411[5668 + (input - 3345779524643)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(5668 + (input - 0x30B00000423))];
     } else if (input >= 0x30C00000041 && input <= 0x30C00000292) {
-        return cast(dchar)LUT_D4AB8411[5701 + (input - 3350074490945)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(5701 + (input - 0x30C00000041))];
     } else if (input >= 0x30F00000041 && input <= 0x30F00000475) {
         if (input <= 0x30F00000075)
-            return cast(dchar)LUT_D4AB8411[6295 + (input - 3362959392833)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(6295 + (input - 0x30F00000041))];
         else if (input >= 0x30F00000474)
-            return cast(dchar)LUT_D4AB8411[6348 + (input - 3362959393908)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(6348 + (input - 0x30F00000474))];
     } else if (input >= 0x31100000041 && input <= 0x31100000075) {
-        return cast(dchar)LUT_D4AB8411[6350 + (input - 3371549327425)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(6350 + (input - 0x31100000041))];
     } else if (input >= 0x31300000020 && input <= 0x313000003C9) {
         if (input == 0x31300000020)
             return cast(dchar)0x1FBD;
         else if (input >= 0x31300000391)
-            return cast(dchar)LUT_D4AB8411[6403 + (input - 3380139262865)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(6403 + (input - 0x31300000391))];
     } else if (input >= 0x31400000020 && input <= 0x314000003C9) {
         if (input == 0x31400000020)
             return cast(dchar)0x1FFE;
         else if (input >= 0x31400000391)
-            return cast(dchar)LUT_D4AB8411[6460 + (input - 3384434230161)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(6460 + (input - 0x31400000391))];
     } else if (input >= 0x31B0000004F && input <= 0x31B00000075) {
-        return cast(dchar)LUT_D4AB8411[6517 + (input - 3414499000399)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(6517 + (input - 0x31B0000004F))];
     } else if (input >= 0x32300000041 && input <= 0x323000001B0) {
         if (input <= 0x3230000007A)
-            return cast(dchar)LUT_D4AB8411[6556 + (input - 3448858738753)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(6556 + (input - 0x32300000041))];
         else if (input >= 0x323000001A0)
-            return cast(dchar)LUT_D4AB8411[6614 + (input - 3448858739104)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(6614 + (input - 0x323000001A0))];
     } else if (input >= 0x32400000055 && input <= 0x32400000075) {
-        return cast(dchar)LUT_D4AB8411[6631 + (input - 3453153706069)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(6631 + (input - 0x32400000055))];
     } else if (input >= 0x32500000041 && input <= 0x32500000061) {
-        return cast(dchar)LUT_D4AB8411[6664 + (input - 3457448673345)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(6664 + (input - 0x32500000041))];
     } else if (input >= 0x32600000053 && input <= 0x32600000074) {
-        return cast(dchar)LUT_D4AB8411[6697 + (input - 3461743640659)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(6697 + (input - 0x32600000053))];
     } else if (input >= 0x32700000020 && input <= 0x32700000074) {
-        return cast(dchar)LUT_D4AB8411[6731 + (input - 3466038607904)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(6731 + (input - 0x32700000020))];
     } else if (input >= 0x32800000020 && input <= 0x32800000075) {
-        return cast(dchar)LUT_D4AB8411[6816 + (input - 3470333575200)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(6816 + (input - 0x32800000020))];
     } else if (input >= 0x32D00000044 && input <= 0x32D00000075) {
-        return cast(dchar)LUT_D4AB8411[6902 + (input - 3491808411716)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(6902 + (input - 0x32D00000044))];
     } else if (input >= 0x32E00000048 && input <= 0x32E00000068) {
-        return cast(dchar)LUT_D4AB8411[6952 + (input - 3496103379016)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(6952 + (input - 0x32E00000048))];
     } else if (input >= 0x33000000045 && input <= 0x33000000075) {
-        return cast(dchar)LUT_D4AB8411[6985 + (input - 3504693313605)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(6985 + (input - 0x33000000045))];
     } else if (input >= 0x33100000042 && input <= 0x3310000007A) {
-        return cast(dchar)LUT_D4AB8411[7034 + (input - 3508988280898)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(7034 + (input - 0x33100000042))];
     } else if (input == 0x33300000020) {
         return cast(dchar)0x2017;
     } else if (input >= 0x3380000003C && input <= 0x338000022B5) {
         if (input <= 0x3380000003E)
-            return cast(dchar)LUT_D4AB8411[7091 + (input - 3539053051964)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(7091 + (input - 0x3380000003C))];
         else if (input >= 0x33800002190)
-            return cast(dchar)LUT_D4AB8411[7094 + (input - 3539053060496)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(7094 + (input - 0x33800002190))];
     } else if (input >= 0x34200000020 && input <= 0x34200001FFE) {
         if (input <= 0x342000000A8)
-            return cast(dchar)LUT_D4AB8411[7388 + (input - 3582002724896)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(7388 + (input - 0x34200000020))];
         else if (input >= 0x342000003B1 && input <= 0x342000003CB)
-            return cast(dchar)LUT_D4AB8411[7525 + (input - 3582002725809)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(7525 + (input - 0x342000003B1))];
         else if (input >= 0x34200001F00)
-            return cast(dchar)LUT_D4AB8411[7552 + (input - 3582002732800)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(7552 + (input - 0x34200001F00))];
     } else if (input >= 0x34500000020 && input <= 0x34500001FF6) {
         if (input == 0x34500000020)
             return cast(dchar)0x37A;
         else if (input >= 0x34500000391 && input <= 0x345000003CE)
-            return cast(dchar)LUT_D4AB8411[7807 + (input - 3594887627665)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(7807 + (input - 0x34500000391))];
         else if (input >= 0x34500001F00)
-            return cast(dchar)LUT_D4AB8411[7869 + (input - 3594887634688)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(7869 + (input - 0x34500001F00))];
     } else if (input >= 0x3A90000004D && input <= 0x3A90000006B) {
-        return cast(dchar)LUT_D4AB8411[8116 + (input - 4024384356429)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(8116 + (input - 0x3A90000004D))];
     } else if (input == 0x56500000574) {
         return cast(dchar)0xFB14;
     } else if (input == 0x56B00000574) {
@@ -470,7 +470,7 @@ export extern(C) immutable(dchar) sidero_utf_lut_getCompositionCompatibility2(ul
     } else if (input == 0x56D00000574) {
         return cast(dchar)0xFB17;
     } else if (input >= 0x57600000574 && input <= 0x5760000057E) {
-        return cast(dchar)LUT_D4AB8411[8147 + (input - 6004364281204)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(8147 + (input - 0x57600000574))];
     } else if (input == 0x58200000565) {
         return cast(dchar)0x587;
     } else if (input == 0x5DC000005D0) {
@@ -482,36 +482,36 @@ export extern(C) immutable(dchar) sidero_utf_lut_getCompositionCompatibility2(ul
     } else if (input == 0x62500000644) {
         return cast(dchar)0xFEF9;
     } else if (input >= 0x62700000626 && input <= 0x62700000645) {
-        return cast(dchar)LUT_D4AB8411[8158 + (input - 6764573492774)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(8158 + (input - 0x62700000626))];
     } else if (input >= 0x62C00000626 && input <= 0x62C0000064A) {
-        return cast(dchar)LUT_D4AB8411[8190 + (input - 6786048329254)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(8190 + (input - 0x62C00000626))];
     } else if (input >= 0x62D00000626 && input <= 0x62D0000064A) {
-        return cast(dchar)LUT_D4AB8411[8227 + (input - 6790343296550)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(8227 + (input - 0x62D00000626))];
     } else if (input >= 0x62E00000626 && input <= 0x62E0000064A) {
-        return cast(dchar)LUT_D4AB8411[8264 + (input - 6794638263846)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(8264 + (input - 0x62E00000626))];
     } else if (input >= 0x63100000626 && input <= 0x6310000064A) {
-        return cast(dchar)LUT_D4AB8411[8301 + (input - 6807523165734)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(8301 + (input - 0x63100000626))];
     } else if (input >= 0x63200000626 && input <= 0x6320000064A) {
-        return cast(dchar)LUT_D4AB8411[8338 + (input - 6811818133030)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(8338 + (input - 0x63200000626))];
     } else if (input == 0x64400000643) {
         return cast(dchar)0xFCEB;
     } else if (input >= 0x64500000626 && input <= 0x6450000064A) {
-        return cast(dchar)LUT_D4AB8411[8375 + (input - 6893422511654)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(8375 + (input - 0x64500000626))];
     } else if (input >= 0x64600000626 && input <= 0x6460000064A) {
-        return cast(dchar)LUT_D4AB8411[8412 + (input - 6897717478950)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(8412 + (input - 0x64600000626))];
     } else if (input >= 0x64700000626 && input <= 0x6470000064A) {
-        return cast(dchar)LUT_D4AB8411[8449 + (input - 6902012446246)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(8449 + (input - 0x64700000626))];
     } else if (input == 0x64800000626) {
         return cast(dchar)0xFBEE;
     } else if (input >= 0x64900000626 && input <= 0x6490000064A) {
-        return cast(dchar)LUT_D4AB8411[8486 + (input - 6910602380838)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(8486 + (input - 0x64900000626))];
     } else if (input >= 0x64A00000626 && input <= 0x64A0000064A) {
-        return cast(dchar)LUT_D4AB8411[8523 + (input - 6914897348134)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(8523 + (input - 0x64A00000626))];
     } else if (input >= 0x64B00000020 && input <= 0x64B00000640) {
         if (input == 0x64B00000020)
             return cast(dchar)0xFE70;
         else if (input >= 0x64B00000627)
-            return cast(dchar)LUT_D4AB8411[8560 + (input - 6919192315431)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(8560 + (input - 0x64B00000627))];
     } else if (input == 0x64C00000020) {
         return cast(dchar)0xFE72;
     } else if (input == 0x64D00000020) {
@@ -544,13 +544,13 @@ export extern(C) immutable(dchar) sidero_utf_lut_getCompositionCompatibility2(ul
     } else if (input == 0x65300000627) {
         return cast(dchar)0x622;
     } else if (input >= 0x65400000627 && input <= 0x654000006D5) {
-        return cast(dchar)LUT_D4AB8411[8586 + (input - 6957847021095)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(8586 + (input - 0x65400000627))];
     } else if (input == 0x65500000627) {
         return cast(dchar)0x625;
     } else if (input >= 0x67000000630 && input <= 0x67000000649) {
-        return cast(dchar)LUT_D4AB8411[8761 + (input - 7078106105392)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(8761 + (input - 0x67000000630))];
     } else if (input >= 0x67400000627 && input <= 0x674000006C7) {
-        return cast(dchar)LUT_D4AB8411[8787 + (input - 7095285974567)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(8787 + (input - 0x67400000627))];
     } else if (input == 0x6C600000626) {
         return cast(dchar)0xFBF2;
     } else if (input == 0x6C700000626) {
@@ -562,7 +562,7 @@ export extern(C) immutable(dchar) sidero_utf_lut_getCompositionCompatibility2(ul
     } else if (input == 0x6D500000626) {
         return cast(dchar)0xFBEC;
     } else if (input >= 0x93C00000928 && input <= 0x93C00000933) {
-        return cast(dchar)LUT_D4AB8411[8948 + (input - 10153302690088)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(8948 + (input - 0x93C00000928))];
     } else if (input == 0x9BE000009C7) {
         return cast(dchar)0x9CB;
     } else if (input == 0x9D7000009C7) {
@@ -574,23 +574,23 @@ export extern(C) immutable(dchar) sidero_utf_lut_getCompositionCompatibility2(ul
     } else if (input == 0xB5700000B47) {
         return cast(dchar)0xB4C;
     } else if (input >= 0xBBE00000BC6 && input <= 0xBBE00000BC7) {
-        return cast(dchar)LUT_D4AB8411[8960 + (input - 12910671694790)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(8960 + (input - 0xBBE00000BC6))];
     } else if (input >= 0xBD700000B92 && input <= 0xBD700000BC6) {
-        return cast(dchar)LUT_D4AB8411[8962 + (input - 13018045877138)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(8962 + (input - 0xBD700000B92))];
     } else if (input == 0xC5600000C46) {
         return cast(dchar)0xC48;
     } else if (input == 0xCC200000CC6) {
         return cast(dchar)0xCCA;
     } else if (input >= 0xCD500000CBF && input <= 0xCD500000CCA) {
-        return cast(dchar)LUT_D4AB8411[9015 + (input - 14108967570623)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(9015 + (input - 0xCD500000CBF))];
     } else if (input == 0xCD600000CC6) {
         return cast(dchar)0xCC8;
     } else if (input >= 0xD3E00000D46 && input <= 0xD3E00000D47) {
-        return cast(dchar)LUT_D4AB8411[9027 + (input - 14559939136838)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(9027 + (input - 0xD3E00000D46))];
     } else if (input == 0xD5700000D46) {
         return cast(dchar)0xD4C;
     } else if (input >= 0xDCA00000DD9 && input <= 0xDCA00000DDC) {
-        return cast(dchar)LUT_D4AB8411[9029 + (input - 15161234558425)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(9029 + (input - 0xDCA00000DD9))];
     } else if (input == 0xDCF00000DD9) {
         return cast(dchar)0xDDC;
     } else if (input == 0xDDF00000DD9) {
@@ -610,15 +610,15 @@ export extern(C) immutable(dchar) sidero_utf_lut_getCompositionCompatibility2(ul
     } else if (input == 0xF8000000F71) {
         return cast(dchar)0xF81;
     } else if (input >= 0xF8100000FB2 && input <= 0xF8100000FB3) {
-        return cast(dchar)LUT_D4AB8411[9033 + (input - 17046725201842)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(9033 + (input - 0xF8100000FB2))];
     } else if (input == 0x102E00001025) {
         return cast(dchar)0x1026;
     } else if (input >= 0x116100001100 && input <= 0x116100001112) {
-        return cast(dchar)LUT_D4AB8411[9035 + (input - 19108309504256)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(9035 + (input - 0x116100001100))];
     } else if (input == 0x116E0000110B) {
         return cast(dchar)0x327E;
     } else if (input >= 0x1B3500001B05 && input <= 0x1B3500001B42) {
-        return cast(dchar)LUT_D4AB8411[9054 + (input - 29914447223557)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(9054 + (input - 0x1B3500001B05))];
     } else if (input == 0x203200002032) {
         return cast(dchar)0x2033;
     } else if (input == 0x203500002035) {
@@ -627,7 +627,7 @@ export extern(C) immutable(dchar) sidero_utf_lut_getCompositionCompatibility2(ul
         return cast(dchar)0x215F;
     } else if (input >= 0x211300000064 && input <= 0x2113000003BC) {
         if (input <= 0x21130000006D)
-            return cast(dchar)LUT_D4AB8411[9116 + (input - 36365488095332)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(9116 + (input - 0x211300000064))];
         else if (input == 0x2113000003BC)
             return cast(dchar)0x3395;
     } else if (input == 0x222B0000222B) {
@@ -642,16 +642,16 @@ export extern(C) immutable(dchar) sidero_utf_lut_getCompositionCompatibility2(ul
         if (input == 0x309900000020)
             return cast(dchar)0x309B;
         else if (input >= 0x309900003046)
-            return cast(dchar)LUT_D4AB8411[9126 + (input - 53433688141894)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(9126 + (input - 0x309900003046))];
     } else if (input >= 0x309A00000020 && input <= 0x309A000030DB) {
         if (input == 0x309A00000020)
             return cast(dchar)0x309C;
         else if (input >= 0x309A0000306F)
-            return cast(dchar)LUT_D4AB8411[9310 + (input - 53437983109231)];
+            return cast(dchar)LUT_D4AB8411[cast(size_t)(9310 + (input - 0x309A0000306F))];
     } else if (input >= 0x30AC000030AE && input <= 0x30AC000030E1) {
-        return cast(dchar)LUT_D4AB8411[9419 + (input - 53515292520622)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(9419 + (input - 0x30AC000030AE))];
     } else if (input >= 0x30B3000030B3 && input <= 0x30B3000030D4) {
-        return cast(dchar)LUT_D4AB8411[9471 + (input - 53545357291699)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(9471 + (input - 0x30B3000030B3))];
     } else if (input == 0x30B7000030C7) {
         return cast(dchar)0x3325;
     } else if (input == 0x30BD000030DA) {
@@ -667,11 +667,11 @@ export extern(C) immutable(dchar) sidero_utf_lut_getCompositionCompatibility2(ul
     } else if (input == 0x30EA000030DF) {
         return cast(dchar)0x3349;
     } else if (input >= 0x30EB000030C9 && input <= 0x30EB000030D3) {
-        return cast(dchar)LUT_D4AB8411[9505 + (input - 53785875460297)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(9505 + (input - 0x30EB000030C9))];
     } else if (input == 0x30ED000030AD) {
         return cast(dchar)0x3314;
     } else if (input >= 0x30F3000030C8 && input <= 0x30F3000030DB) {
-        return cast(dchar)LUT_D4AB8411[9516 + (input - 53820235198664)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(9516 + (input - 0x30F3000030C8))];
     } else if (input >= 0x548C00004EE4 && input <= 0x548C0000662D) {
         if (input == 0x548C00004EE4)
             return cast(dchar)0x32FF;
@@ -680,19 +680,19 @@ export extern(C) immutable(dchar) sidero_utf_lut_getCompositionCompatibility2(ul
     } else if (input == 0x621000005E73) {
         return cast(dchar)0x337B;
     } else if (input >= 0x65E500000031 && input <= 0x65E500000039) {
-        return cast(dchar)LUT_D4AB8411[9536 + (input - 112034221916209)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(9536 + (input - 0x65E500000031))];
     } else if (input >= 0x670800000031 && input <= 0x670800000039) {
-        return cast(dchar)LUT_D4AB8411[9545 + (input - 113284057399345)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(9545 + (input - 0x670800000031))];
     } else if (input == 0x6B6300005927) {
         return cast(dchar)0x337D;
     } else if (input == 0x6CBB0000660E) {
         return cast(dchar)0x337E;
     } else if (input >= 0x70B900000030 && input <= 0x70B900000039) {
-        return cast(dchar)LUT_D4AB8411[9554 + (input - 123939871260720)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(9554 + (input - 0x70B900000030))];
     } else if (input >= 0x110BA00011099 && input <= 0x110BA000110A5) {
-        return cast(dchar)LUT_D4AB8411[9564 + (input - 299866026741913)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(9564 + (input - 0x110BA00011099))];
     } else if (input >= 0x1112700011131 && input <= 0x1112700011132) {
-        return cast(dchar)LUT_D4AB8411[9577 + (input - 300334178177329)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(9577 + (input - 0x1112700011131))];
     } else if (input == 0x1133E00011347) {
         return cast(dchar)0x1134B;
     } else if (input == 0x1135700011347) {
@@ -704,7 +704,7 @@ export extern(C) immutable(dchar) sidero_utf_lut_getCompositionCompatibility2(ul
     } else if (input == 0x114BD000114B9) {
         return cast(dchar)0x114BE;
     } else if (input >= 0x115AF000115B8 && input <= 0x115AF000115B9) {
-        return cast(dchar)LUT_D4AB8411[9579 + (input - 305316340241848)];
+        return cast(dchar)LUT_D4AB8411[cast(size_t)(9579 + (input - 0x115AF000115B8))];
     } else if (input == 0x1193000011935) {
         return cast(dchar)0x11938;
     }
