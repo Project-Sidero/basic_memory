@@ -1,6 +1,6 @@
 module sidero.base.algorithm;
-import std.range : isInputRange, isBidirectionalRange, isForwardRange;
 import sidero.base.traits;
+import sidero.base.range;
 
 export @safe nothrow @nogc:
 
