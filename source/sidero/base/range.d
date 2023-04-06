@@ -10,6 +10,14 @@ template ElementType(R)
         alias ElementType = void;
 }
 /// Ditto
+template ElementEncodingType(R)
+{
+    static if (is(StringTypeOf!R) && is(R : E[], E))
+        alias ElementEncodingType = E;
+    else
+        alias ElementEncodingType = ElementType!R;
+}
+/// Ditto
 enum bool isInputRange(R) =
 is(typeof(R.init) == R)
 && is(typeof((R r) { return r.empty; } (R.init)) == bool)

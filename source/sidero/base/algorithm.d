@@ -131,7 +131,7 @@ bool skipOver(Input1, Input2)(scope ref Input1 input1, scope Input2 input2)
 InputRange find(alias pred = "a == b", InputRange, Element)(InputRange haystack, scope Element needle)
         if ((isInputRange!InputRange || isDynamicArray!InputRange)) {
     import std.functional : unaryFun, binaryFun;
-    import std.range : ElementType, ElementEncodingType;
+    import sidero.base.range : ElementType, ElementEncodingType;
 
     alias R = InputRange;
     alias E = Element;
