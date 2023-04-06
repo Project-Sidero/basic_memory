@@ -461,6 +461,12 @@ struct PosixTZBase {
     bool loadFromFile() scope const {
         return !loadFromTZifFile.isNull;
     }
+
+    export ulong toHash() scope const {
+        import sidero.base.hash.utils : hashOf;
+
+        return hashOf(this);
+    }
 }
 
 bool isInDaylightSavings(scope const ref PosixTZBase self, scope DateTime!GregorianDate date) {
@@ -544,7 +550,7 @@ struct PosixTZBaseRule {
         this.tupleof = other.tupleof;
     }
 
-    int opCmp(scope const ref PosixTZBaseRule other) scope const {
+    export int opCmp(scope const ref PosixTZBaseRule other) scope const {
         if (this.type < other.type)
             return -1;
         else if (this.type > other.type)

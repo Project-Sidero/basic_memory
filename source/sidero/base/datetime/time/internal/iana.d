@@ -13,6 +13,7 @@ package(sidero.base.datetime) @safe nothrow @nogc:
 
 bool loadAutoIANA(scope String_UTF8 path = String_UTF8.init) @trusted {
     import sidero.base.internal.filesystem;
+
     if (path.length == 0)
         path = getDefaultTZDirectory();
 
@@ -300,6 +301,12 @@ struct IanaTZBase {
 
     this(return scope ref IanaTZBase other) scope @trusted {
         this.tupleof = other.tupleof;
+    }
+
+    export ulong toHash() scope const {
+        import sidero.base.hash.utils : hashOf;
+
+        return hashOf(this);
     }
 
 package(sidero.base.datetime):
@@ -762,6 +769,12 @@ struct TZFile {
         this.tupleof = other.tupleof;
     }
 
+    export ulong toHash() scope const {
+        import sidero.base.hash.utils : hashOf;
+
+        return hashOf(this);
+    }
+
     static struct Transition {
         // Seconds since Unix Epoch
         long appliesOn;
@@ -784,6 +797,12 @@ struct TZFile {
 
         this(return scope ref PostTransitionInfo other) scope {
             this.tupleof = other.tupleof;
+        }
+
+        export ulong toHash() scope const {
+            import sidero.base.hash.utils : hashOf;
+
+            return hashOf(this);
         }
     }
 

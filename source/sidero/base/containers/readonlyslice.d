@@ -663,6 +663,8 @@ private:
         shared(ptrdiff_t) refCount;
         RCAllocator allocator;
         LiteralType original;
+
+        @disable bool opEquals(ref const LifeTime other) const;
     }
 
     static struct Iterator {
@@ -679,7 +681,9 @@ private:
                 RCAllocator allocator2 = this.allocator;
                 allocator2.dispose(&this);
             }
+
         }
+        @disable bool opEquals(ref const Iterator other) const;
     }
 
     void setupIterator() @trusted scope {

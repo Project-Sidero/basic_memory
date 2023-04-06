@@ -178,11 +178,8 @@ scope @safe @nogc pure nothrow:
         scope (exit)
             readUnlockImpl;
 
-        bool got = poolAllocator.deallocate(array);
-        if (got)
-            removeRangeImpl(array);
-
-        return got;
+        removeRangeImpl(array);
+        return poolAllocator.deallocate(array);
     }
 
     static if (__traits(hasMember, PoolAllocator, "owns")) {

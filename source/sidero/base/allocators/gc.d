@@ -238,6 +238,8 @@ package(sidero.base.allocators) {
     }
 
     void removeRangeImpl(scope void[] block) @trusted pure @nogc nothrow {
+        assert(block.ptr !is null);
+
         static void handle(scope void[] block) @trusted {
             GCInfo* current = gcInfoLL;
             while (current !is null) {

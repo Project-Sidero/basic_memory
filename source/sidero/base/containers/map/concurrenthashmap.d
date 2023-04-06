@@ -25,7 +25,7 @@ struct ConcurrentHashMap(RealKeyType, ValueType) {
             auto iterator = state.createIteratorExternal();
             int result;
 
-            while(result == 0 && !state.iteratorEmptyExternal(iterator)) {
+            while (result == 0 && !state.iteratorEmptyExternal(iterator)) {
                 ResultReference!KeyType gotKey;
                 ResultReference!ValueType gotValue;
 
@@ -759,31 +759,33 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
     void debugPosition(scope Iterator* iterator = null) scope @trusted {
         version (D_BetterC) {
         } else {
-            version(unittest) debug {
-                import std.stdio;
+            version (unittest)
+                debug {
+                    import std.stdio;
 
-                try {
-                    debug writeln("refCount: ", nodeList.refCount, " aliveNodes: ", nodeList.aliveNodes, " allNodes: ", nodeList.allNodes);
+                    try {
+                        debug writeln("refCount: ", nodeList.refCount, " aliveNodes: ", nodeList.aliveNodes,
+                                " allNodes: ", nodeList.allNodes);
 
-                    foreach (node; nodeList) {
-                        if (iterator !is null && iterator.forwards.node is node)
-                            debug write(">");
+                        foreach (node; nodeList) {
+                            if (iterator !is null && iterator.forwards.node is node)
+                                debug write(">");
 
-                        debug writef!"0x%X %s=%s %s:%s"(node, node.previous.previous is null ? "" : "$", node.next.next is null ?
-                        "" : "$", node.key, node.value);
+                            debug writef!"0x%X %s=%s %s:%s"(node, node.previous.previous is null ? "" : "$",
+                                    node.next.next is null ? "" : "$", node.key, node.value);
 
-                        debug write(" refcount ", node.refCount);
-                        if (node.previousReadyToBeDeleted !is null)
-                            debug writef!" prtbd 0x%X"(node.previousReadyToBeDeleted);
+                            debug write(" refcount ", node.refCount);
+                            if (node.previousReadyToBeDeleted !is null)
+                                debug writef!" prtbd 0x%X"(node.previousReadyToBeDeleted);
+                        }
+
+                        debug writeln;
+
+                        debug stdout.flush;
+                        debug stderr.flush;
+                    } catch (Exception) {
                     }
-
-                    debug writeln;
-
-                    debug stdout.flush;
-                    debug stderr.flush;
-                } catch (Exception) {
                 }
-            }
         }
     }
 }
@@ -868,7 +870,7 @@ struct ConcurrentHashMapIterator(RealKeyType, ValueType) {
 
     @safe nothrow @nogc:
 
-         ~this() scope {
+        export ~this() scope {
             assert(node is null);
         }
 
@@ -897,7 +899,7 @@ struct ConcurrentHashMapIterator(RealKeyType, ValueType) {
                 // okay we are at the end, gotta skip to the next buckets first item
                 size_t bucketId = nodeList.getBucketId(node.hash) + 1;
                 // just in case we are already at the end.
-                node = &nodeList.buckets[$-1].tail;
+                node = &nodeList.buckets[$ - 1].tail;
 
                 while (bucketId < nodeList.buckets.length) {
                     auto bucket = &nodeList.buckets[bucketId];

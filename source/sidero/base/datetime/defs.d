@@ -233,6 +233,11 @@ export @safe nothrow @nogc:
         return ret;
     }
 
+    /// Get a date/time pair
+    long[2] pair() scope const {
+        return [this.date.toDaysSinceY2k().amount, this.time.totalNanoSeconds()];
+    }
+
     //
 
     ///

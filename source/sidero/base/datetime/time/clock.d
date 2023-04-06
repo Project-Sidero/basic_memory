@@ -51,8 +51,8 @@ DateTime!GregorianDate accurateDateTime() @trusted {
 
         if (utcT !is null) {
             // this is UTC+0
-            ret = typeof(return )(GregorianDate(utcT.tm_year + 1900, cast(ubyte)utcT.tm_mon, cast(ubyte)utcT.tm_mday),
-            TimeOfDay(cast(ubyte)utcT.tm_hour, cast(ubyte)utcT.tm_min, cast(ubyte)utcT.tm_sec), fixedUTC0);
+            ret = typeof(return)(GregorianDate(utcT.tm_year + 1900, cast(ubyte)utcT.tm_mon, cast(ubyte)utcT.tm_mday),
+                    TimeOfDay(cast(ubyte)utcT.tm_hour, cast(ubyte)utcT.tm_min, cast(ubyte)utcT.tm_sec), fixedUTC0);
             needTimeZoneAdjustment = true;
         }
     }

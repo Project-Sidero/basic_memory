@@ -27,6 +27,8 @@ struct DynamicArray(Type) {
             invariant {
                 assert(!allocator.isNull);
             }
+
+            @disable bool opEquals(ref const State other) const;
         }
 
         State* state;
@@ -118,7 +120,17 @@ export:
     }
 
     ///
-    inout(ElementType)[] unsafeGetLiteral() @system nothrow return @nogc inout {
+    ElementType[] unsafeGetLiteral() @system nothrow return @nogc {
+        if (state is null)
+            return null;
+        else if (maximumOffset == size_t.max)
+            return this.state.slice[minimumOffset .. state.amountUsed];
+        else
+            return this.state.slice[minimumOffset .. maximumOffset];
+    }
+
+    ///
+    const(ElementType)[] unsafeGetLiteral() @system nothrow return @nogc const {
         if (state is null)
             return null;
         else if (maximumOffset == size_t.max)

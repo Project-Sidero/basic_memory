@@ -83,6 +83,6 @@ enum Stubs = [
                 "sidero.base.parallelism.rwmutex"),
         ModuleInfoStub("_D6sidero4base8datetime8duration12__ModuleInfoZ", "sidero.base.datetime.duration"),
         ModuleInfoStub("_D6sidero4base10containers3map7hashmap12__ModuleInfoZ", "sidero.base.containers.map.hashmap"),
-        ModuleInfoStub("_D6sidero4base15synchronization15mutualexclusion12__ModuleInfoZ",
-                "sidero.base.synchronization.mutualexclusion"),
+        ModuleInfoStub("_D6sidero4base15synchronization15mutualexclusion12__ModuleInfoZ", "sidero.base.synchronization.mutualexclusion"),
+        ModuleInfoStub("_D6sidero4base8datetime12__ModuleInfoZ", "sidero.base.datetime"),
     ];

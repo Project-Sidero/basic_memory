@@ -157,7 +157,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
 
                 blockList.mutex.unlock;
                 result = del(offset, value);
-                blockList.mutex.lock;
+                blockList.mutex.pureLock;
 
                 if (result)
                     break;
@@ -217,7 +217,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
 
                 blockList.mutex.unlock;
                 result = del(offset, value);
-                blockList.mutex.lock;
+                blockList.mutex.pureLock;
 
                 if (result)
                     break;

@@ -163,6 +163,8 @@ scope:
     ///
     bool deallocate(scope void[] data) {
         assert(!isNull);
+        assert(data.ptr !is null);
+        assert(data.length > 0);
         return deallocate_(data);
     }
 
@@ -432,8 +434,11 @@ bool shrinkArray(T, Allocator)(scope auto ref Allocator alloc, scope ref T[] arr
 
 /// A subset of std.experimental.allocator one simplified to be faster to compile.
 void dispose(Type, Allocator)(auto ref Allocator alloc, scope auto ref Type* p) {
+    void[] toDeallocate = (cast(void*)p)[0 .. Type.sizeof];
+
     destroy(*p);
-    alloc.deallocate((cast(void*)p)[0 .. Type.sizeof]);
+    alloc.deallocate(toDeallocate);
+
     p = null;
 }
 

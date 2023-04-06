@@ -10,11 +10,6 @@ import sidero.base.attributes;
 
 export:
 
-version (D_BetterC) {
-} else {
-    import core.thread : Thread;
-}
-
 ///
 struct TestTestSetLockInline {
     private @PrettyPrintIgnore shared(bool) state;
@@ -22,32 +17,10 @@ struct TestTestSetLockInline {
     @disable this(this);
 
 export @safe @nogc nothrow:
-
-    version (D_BetterC) {
-    } else {
-        ///
-        void lock() @trusted {
-            import core.atomic : cas, atomicFence, atomicLoad;
-
-            for (;;) {
-                if (atomicLoad(state)) {
-                    atomicFence();
-
-                    while (atomicLoad(state)) {
-                        Thread.yield;
-                    }
-                }
-
-                if (cas(&state, false, true))
-                    return;
-            }
-        }
-    }
-
 pure:
 
     /// A much more limited lock method, that is pure.
-    void pureLock() {
+    void pureLock() scope {
         import core.atomic : cas, atomicFence, atomicLoad;
 
         for (;;) {
@@ -60,14 +33,14 @@ pure:
     }
 
     ///
-    bool tryLock() {
+    bool tryLock() scope {
         import core.atomic : cas;
 
         return cas(&state, false, true);
     }
 
     ///
-    void unlock() {
+    void unlock() scope {
         import core.atomic : atomicStore;
 
         atomicStore(state, false);

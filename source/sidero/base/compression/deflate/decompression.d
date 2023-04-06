@@ -245,6 +245,11 @@ ErrorInfo readDynamicHuffmanTrees(scope ref BitReader bitReader, scope ref TreeS
             bdtcl[offset] = codeLength.get;
         }
 
+        foreach(i; hclen .. 19) {
+            const offset = codeLengthAlphabet[i];
+            bdtcl[offset] = 0;
+        }
+
         ErrorInfo error = getDeflateHuffmanBits(bdtcl[], &codeLengthTree.addLeafMSB);
         if (error.isSet)
             return error;
@@ -310,7 +315,6 @@ ErrorInfo readDynamicHuffmanTrees(scope ref BitReader bitReader, scope ref TreeS
     bool test(ubyte[] toDecompress, ubyte[] expected) {
         Slice!ubyte output;
         auto consumed = decompressDeflate(toDecompress, output);
-
         if (!consumed || consumed.get != toDecompress.length || output.length != expected.length)
             return false;
 

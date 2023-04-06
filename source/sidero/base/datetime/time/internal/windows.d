@@ -101,6 +101,27 @@ struct WindowsTimeZoneBase {
         this.tupleof = other.tupleof;
     }
 
+    export bool opEquals(scope const WindowsTimeZoneBase other) scope const @trusted {
+        return (cast(WindowsTimeZoneBase)this).tupleof == (cast(WindowsTimeZoneBase)other).tupleof;
+    }
+
+    export int opCmp(scope const WindowsTimeZoneBase other) scope const @trusted {
+        static foreach (i; 1 .. this.tupleof.length) {
+            if ((cast(WindowsTimeZoneBase)this).tupleof[i] < (cast(WindowsTimeZoneBase)other).tupleof[i])
+                return -1;
+            else if ((cast(WindowsTimeZoneBase)this).tupleof[i] > (cast(WindowsTimeZoneBase)other).tupleof[i])
+                return 1;
+        }
+
+        return 0;
+    }
+
+    export ulong toHash() scope const {
+        import sidero.base.hash.utils : hashOf;
+
+        return hashOf(this);
+    }
+
 package(sidero.base.datetime):
 
     bool haveDaylightSavings() scope {
@@ -143,16 +164,16 @@ package(sidero.base.datetime):
                 }
 
                 ret.state.windowsBase.standardOffset.seconds = (-tzi.StandardBias * 60) + baseLineBias;
-                ret.state.windowsBase.standardOffset.appliesOnDate = GregorianDate(year, cast(ubyte)tzi.StandardDate.wMonth,
-                        cast(ubyte)tzi.StandardDate.wDay);
+                ret.state.windowsBase.standardOffset.appliesOnDate = GregorianDate(year,
+                        cast(ubyte)tzi.StandardDate.wMonth, cast(ubyte)tzi.StandardDate.wDay);
                 ret.state.windowsBase.standardOffset.appliesOnTime = TimeOfDay(cast(ubyte)tzi.StandardDate.wHour,
                         cast(ubyte)tzi.StandardDate.wMinute, cast(ubyte)tzi.StandardDate.wSecond,
                         cast(uint)(tzi.StandardDate.wMilliseconds * 1000));
 
                 if (ret.state.haveDaylightSavings) {
                     ret.state.windowsBase.daylightSavingsOffset.seconds = (-tzi.DaylightBias * 60) + baseLineBias;
-                    ret.state.windowsBase.daylightSavingsOffset.appliesOnDate = GregorianDate(year, cast(ubyte)tzi.DaylightDate.wMonth,
-                            cast(ubyte)tzi.DaylightDate.wDay);
+                    ret.state.windowsBase.daylightSavingsOffset.appliesOnDate = GregorianDate(year,
+                            cast(ubyte)tzi.DaylightDate.wMonth, cast(ubyte)tzi.DaylightDate.wDay);
                     ret.state.windowsBase.daylightSavingsOffset.appliesOnTime = TimeOfDay(cast(ubyte)tzi.DaylightDate.wHour,
                             cast(ubyte)tzi.DaylightDate.wMinute, cast(ubyte)tzi.DaylightDate.wSecond,
                             cast(uint)(tzi.DaylightDate.wMilliseconds * 1000));
@@ -171,13 +192,13 @@ package(sidero.base.datetime):
         GregorianDate appliesOnDate;
         TimeOfDay appliesOnTime;
 
-        @safe nothrow @nogc:
+    @safe nothrow @nogc:
 
-        bool opEquals(const Bias other) scope const {
+        export bool opEquals(ref const Bias other) scope const {
             return this.tupleof == other.tupleof;
         }
 
-        int opCmp(const Bias other) scope const @trusted {
+        export int opCmp(ref const Bias other) scope const @trusted {
             if (this.seconds < other.seconds)
                 return -1;
             else if (this.seconds > other.seconds)

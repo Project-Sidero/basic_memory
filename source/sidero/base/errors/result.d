@@ -38,7 +38,7 @@ export:
             }
         }
 
-        static if (__traits(hasMember, Type, "toHash")) {
+        static if (__traits(hasMember, Type, "toHash") && !__traits(isDisabled, Type.toHash)) {
             ///
             auto toHash() const {
                 if (error__.info.id !is null)
@@ -307,7 +307,7 @@ scope nothrow @nogc @safe:
         }
     }
 
-    static if (__traits(hasMember, Type, "toHash")) {
+    static if (__traits(hasMember, Type, "toHash") && !__traits(isDisabled, Type.toHash)) {
         ///
         auto toHash() const {
             if (!this)
