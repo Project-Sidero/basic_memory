@@ -25,12 +25,12 @@ export @safe nothrow @nogc:
 pure:
 
     /// A limited lock method, that is pure.
-    void pureWriteLock() {
+    void pureWriteLock() scope {
         globalLock.pureLock;
     }
 
     /// A limited lock method, that is pure.
-    void pureReadLock() @trusted {
+    void pureReadLock() scope @trusted {
         readerLock.pureLock;
         if (atomicOp!"+="(readers, 1) == 1)
             globalLock.pureLock;
@@ -38,20 +38,20 @@ pure:
     }
 
     /// A limited unlock method, that is pure.
-    void pureReadUnlock() @trusted {
+    void pureWriteUnlock() scope {
+        globalLock.unlock;
+    }
+
+    /// A limited unlock method, that is pure.
+    void pureReadUnlock() scope @trusted {
         readerLock.pureLock;
         if (atomicOp!"-="(readers, 1) == 0)
             globalLock.unlock;
         readerLock.unlock;
     }
 
-    ///
-    void pureWriteUnlock() {
-        globalLock.unlock;
-    }
-
     /// A limited conversion method, that is pure.
-    void pureConvertReadToWrite() @trusted {
+    void pureConvertReadToWrite() scope @trusted {
         readerLock.pureLock;
         if (atomicOp!"-="(readers, 1) == 0)
             globalLock.unlock;
@@ -60,12 +60,12 @@ pure:
     }
 
     ///
-    bool tryWriteLock() {
+    bool tryWriteLock() scope {
         return globalLock.tryLock();
     }
 
     ///
-    bool tryReadLock() {
+    bool tryReadLock() scope {
         if (!readerLock.tryLock)
             return false;
 
