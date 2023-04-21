@@ -16,6 +16,11 @@ version (Posix) {
 } else
     static assert(0, "Unimplemented");
 
+/// Get the cpu core count with threads (Hyper Threading)
+uint cpuCount() @trusted {
+    return cpuCount_;
+}
+
 ///
 struct EnvironmentVariables {
 export @safe nothrow @nogc:
@@ -643,6 +648,27 @@ pragma(crt_constructor) extern (C) void initializeSystemInfo() @trusted {
         }
     } else
         static assert(0, "Unimplemented getting command line arguments");
+
+    version (Windows) {
+        import core.sys.windows.windows : GetSystemInfo, SYSTEM_INFO;
+
+        SYSTEM_INFO systemInfo;
+        GetSystemInfo(&systemInfo);
+
+        cpuCount_ = systemInfo.dwNumberOfProcessors;
+    } else version (Posix) {
+        // solution: https://stackoverflow.com/a/66805243
+        import core.stdc.stdio : FILE, fopen, fscanf, fclose;
+
+        FILE* cpuinfo = fopen("/proc/cpuinfo", "r");
+
+        while (cpuinfo !is null && !fscanf(cpuinfo, "siblings\t: %u", &cpuCount_)) {
+            fscanf(cpuinfo, "%*[^c]");
+        }
+
+        fclose(cpuinfo);
+    } else
+        static assert(0, "Unimplemented cpu count");
 }
 
 private @hidden:
@@ -668,6 +694,8 @@ __gshared {
     bool isUnicodeLanguageOverridden;
 
     Slice!String_UTF8 _commandLineArguments;
+
+    uint cpuCount_;
 }
 
 Locale getLocaleImpl(ref bool refresh) @trusted {
