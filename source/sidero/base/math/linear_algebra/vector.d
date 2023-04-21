@@ -26,7 +26,7 @@ struct Vector(Type, size_t Dimension) {
     Type[Dimension] data;
     alias data this;
 
-@safe nothrow @nogc:
+export @safe nothrow @nogc:
 
     ///
     this(scope Type[] data...) scope {

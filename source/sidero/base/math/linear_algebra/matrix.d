@@ -30,7 +30,7 @@ struct Matrix(Type, size_t Rows, size_t Columns) {
     ///
     Type[Rows * Columns] data;
 
-@safe nothrow @nogc:
+export @safe nothrow @nogc:
 
     static {
         ///
