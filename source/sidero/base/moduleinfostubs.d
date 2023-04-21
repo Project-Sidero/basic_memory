@@ -6,9 +6,56 @@ else version (D_BetterC)
     version = NeedStubs;
 
 version (NeedStubs) {
-    static foreach (Stub; Stubs) {
+    static foreach (ModuleName; [
+        "sidero.base.allocators.gc", "sidero.base.allocators", "sidero.base.allocators.api",
+        "sidero.base.console", "sidero.base.traits",
+        "sidero.base.text.format", "sidero.base.errors", "sidero.base.containers.readonlyslice",
+        "sidero.base.math.linear_algebra", "sidero.base.errors.result", "sidero.base.hash.utils", "sidero.base.hash.fnv",
+        "sidero.base.algorithm", "sidero.base.text", "sidero.base.containers.map.concurrenthashmap",
+        "sidero.base.containers.dynamicarray", "sidero.base.allocators.predefined",
+        "sidero.base.parallelism.rwmutex", "sidero.base.datetime.duration",
+        "sidero.base.containers.map.hashmap",
+        "sidero.base.synchronization.mutualexclusion", "sidero.base.datetime", "sidero.base.system",
+    ]) {
         mixin(() {
-            string ret = "export extern(C) void " ~ Stub.mangleName ~ "() { asm { naked; ";
+            string mangleName = "_D";
+
+            {
+                void emitLength(size_t amount) {
+                    string ret;
+
+                    while (amount > 0) {
+                        size_t num = amount - ((amount / 10) * 10);
+
+                        ret = "" ~ (cast(char)(num + '0')) ~ ret;
+
+                        amount /= 10;
+                    }
+
+                    mangleName ~= ret;
+                }
+
+                string temp = ModuleName;
+
+                GetNextMP: while (temp.length > 0) {
+                    foreach (i, c; temp) {
+                        if (c == '.') {
+                            emitLength(i);
+                            mangleName ~= temp[0 .. i];
+                            temp = temp[i + 1 .. $];
+                            continue GetNextMP;
+                        }
+                    }
+
+                    emitLength(temp.length);
+                    mangleName ~= temp;
+                    break;
+                }
+
+                mangleName ~= "12__ModuleInfoZ";
+            }
+
+            string ret = "export extern(C) void " ~ mangleName ~ "() { asm { naked; ";
 
             void add(ubyte b) {
                 ret ~= "db 0x";
@@ -38,7 +85,7 @@ version (NeedStubs) {
             add(0);
             add(0);
 
-            foreach (c; Stub.moduleName) {
+            foreach (c; ModuleName) {
                 add(c);
             }
             add(0);
@@ -47,42 +94,3 @@ version (NeedStubs) {
         }());
     }
 }
-
-private:
-struct ModuleInfoStub {
-    string mangleName;
-    string moduleName;
-}
-
-enum Stubs = [
-        ModuleInfoStub("_D6sidero4base10allocators2gc12__ModuleInfoZ", "sidero.base.allocators.gc"),
-        ModuleInfoStub("_D6sidero4base10allocators12__ModuleInfoZ", "sidero.base.allocators"),
-        ModuleInfoStub("_D6sidero4base10allocators3api12__ModuleInfoZ", "sidero.base.allocators.api"),
-        ModuleInfoStub("_D6sidero4base7console12__ModuleInfoZ", "sidero.base.console"),
-        ModuleInfoStub("_D6sidero4base6traits12__ModuleInfoZ", "sidero.base.traits"),
-        ModuleInfoStub("_D6sidero4base4text6format12__ModuleInfoZ", "sidero.base.text.format"),
-        ModuleInfoStub("_D6sidero4base6errors12__ModuleInfoZ",
-                "sidero.base.errors"),
-        ModuleInfoStub("_D6sidero4base10containers13readonlyslice12__ModuleInfoZ",
-                "sidero.base.containers.readonlyslice"),
-        ModuleInfoStub("_D6sidero4base4math14linear_algebra12__ModuleInfoZ",
-                "sidero.base.math.linear_algebra"),
-        ModuleInfoStub("_D6sidero4base6errors6result__T6ResultTvZQk9__xtoHashFNbNeKxSQChQCdQCbQBx__TQBtTvZQBzZm",
-                "sidero.base.errors.result"),
-        ModuleInfoStub("_D6sidero4base4hash5utils12__ModuleInfoZ", "sidero.base.hash.utils"),
-        ModuleInfoStub("_D6sidero4base4hash3fnv12__ModuleInfoZ", "sidero.base.hash.fnv"),
-        ModuleInfoStub("_D6sidero4base9algorithm12__ModuleInfoZ", "sidero.base.algorithm"),
-        ModuleInfoStub("_D6sidero4base4text12__ModuleInfoZ", "sidero.base.text"),
-        ModuleInfoStub("_D6sidero4base10containers3map17concurrenthashmap12__ModuleInfoZ",
-                "sidero.base.containers.map.concurrenthashmap"),
-        ModuleInfoStub("_D6sidero4base10containers12dynamicarray12__ModuleInfoZ",
-                "sidero.base.containers.dynamicarray"),
-        ModuleInfoStub("_D6sidero4base10allocators10predefined12__ModuleInfoZ",
-                "sidero.base.allocators.predefined"),
-        ModuleInfoStub("_D6sidero4base11parallelism7rwmutex12__ModuleInfoZ",
-                "sidero.base.parallelism.rwmutex"),
-        ModuleInfoStub("_D6sidero4base8datetime8duration12__ModuleInfoZ", "sidero.base.datetime.duration"),
-        ModuleInfoStub("_D6sidero4base10containers3map7hashmap12__ModuleInfoZ", "sidero.base.containers.map.hashmap"),
-        ModuleInfoStub("_D6sidero4base15synchronization15mutualexclusion12__ModuleInfoZ", "sidero.base.synchronization.mutualexclusion"),
-        ModuleInfoStub("_D6sidero4base8datetime12__ModuleInfoZ", "sidero.base.datetime"),
-    ];
