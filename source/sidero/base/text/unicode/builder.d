@@ -2645,8 +2645,52 @@ nothrow @safe:
         }
     }
 
-    // TODO: stripLeft
-    // TODO: stripRight
+    @nogc {
+        ///
+        typeof(this) strip() return scope {
+            state.strip;
+            return this;
+        }
+
+        ///
+        unittest {
+            typeof(this) value = typeof(this)(cast(LiteralType)"  \t abc\t\r\n \0");
+            value.strip;
+            assert(value == cast(LiteralType)"abc");
+
+            assert(typeof(this)(cast(LiteralType)"  \t abc\t\r\n \0").strip == cast(LiteralType)"abc");
+        }
+
+        ///
+        typeof(this) stripLeft() return scope {
+            state.stripLeft;
+            return this;
+        }
+
+        ///
+        unittest {
+            typeof(this) value = typeof(this)(cast(LiteralType)"  \t abc\t\r\n \0");
+            value.stripLeft;
+            assert(value == cast(LiteralType)"abc\t\r\n \0");
+
+            assert(typeof(this)(cast(LiteralType)"  \t abc\t\r\n \0").stripLeft == cast(LiteralType)"abc\t\r\n \0");
+        }
+
+        ///
+        typeof(this) stripRight() return scope {
+            state.stripRight;
+            return this;
+        }
+
+        ///
+        unittest {
+            typeof(this) value = typeof(this)(cast(LiteralType)"  \t abc\t\r\n \0");
+            value.stripRight;
+            assert(value == cast(LiteralType)"  \t abc");
+
+            assert(typeof(this)(cast(LiteralType)"  \t abc\t\r\n \0").stripRight == cast(LiteralType)"  \t abc");
+        }
+    }
 
     @nogc {
         ///

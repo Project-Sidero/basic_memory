@@ -1232,8 +1232,60 @@ nothrow @safe:
         }
     }
 
-    // TODO: stripLeft
-    // TODO: stripRight
+    @nogc {
+        ///
+        StringBuilder_ASCII strip() return scope {
+            stripLeft;
+            stripRight;
+            return this;
+        }
+
+        ///
+        /+unittest {
+            typeof(this) value = typeof(this)(cast(LiteralType)"  \t abc\t\r\n \0");
+            value.strip;
+            assert(value == cast(LiteralType)"abc");
+
+            assert(typeof(this)(cast(LiteralType)"  \t abc\t\r\n \0").strip == cast(LiteralType)"abc");
+        }+/
+
+        ///
+        StringBuilder_ASCII stripLeft() return scope {
+            import sidero.base.text.ascii.characters : toLower;
+            if (isNull)
+                return this;
+
+            state.externalStripLeft(iterator);
+            return this;
+        }
+
+        ///
+        unittest {
+            typeof(this) value = typeof(this)(cast(LiteralType)"  \t abc\t\r\n \0");
+            value.stripLeft;
+            assert(value == cast(LiteralType)"abc\t\r\n \0");
+
+            assert(typeof(this)(cast(LiteralType)"  \t abc\t\r\n \0").stripLeft == cast(LiteralType)"abc\t\r\n \0");
+        }
+
+        ///
+        StringBuilder_ASCII stripRight() return scope {
+            if (isNull)
+                return this;
+
+            state.externalStripRight(iterator);
+            return this;
+        }
+
+        ///
+        unittest {
+            typeof(this) value = typeof(this)(cast(LiteralType)"  \t abc\t\r\n \0");
+            value.stripRight;
+            assert(value == cast(LiteralType)"  \t abc");
+
+            assert(typeof(this)(cast(LiteralType)"  \t abc\t\r\n \0").stripRight == cast(LiteralType)"  \t abc");
+        }
+    }
 
     ///
     void remove(ptrdiff_t index, size_t amount) scope @nogc {
@@ -2615,5 +2667,109 @@ struct ASCII_State {
             ret -= startingOffset;
 
         return ret;
+    }
+
+    void externalStripLeft(scope Iterator* iterator) scope @trusted {
+        import sidero.base.text.ascii.characters : isControl, isWhiteSpace;
+        blockList.mutex.pureLock;
+
+        {
+            Cursor forwardsCursor;
+            size_t amount, maximumOffsetFromHead;
+
+            if (iterator is null) {
+                forwardsCursor.setup(&blockList, 0);
+                maximumOffsetFromHead = blockList.numberOfItems;
+            } else {
+                forwardsCursor = iterator.forwards;
+                maximumOffsetFromHead = iterator.backwards.offsetFromHead;
+            }
+
+            Cursor toRemoveCursor = forwardsCursor;
+
+            bool emptyInternal() {
+                return toRemoveCursor.offsetFromHead >= maximumOffsetFromHead;
+            }
+
+            Char frontInternal() {
+                toRemoveCursor.advanceForward(0, maximumOffsetFromHead, true);
+                return toRemoveCursor.get();
+            }
+
+            void popFrontInternal() {
+                import std.algorithm : min;
+
+                toRemoveCursor.advanceForward(1, maximumOffsetFromHead, true);
+            }
+
+            while (!emptyInternal) {
+                size_t advance = 1;
+                ubyte c = frontInternal();
+
+                if (!(isWhiteSpace(c) || isControl(c)))
+                    break;
+
+                amount += advance;
+                popFrontInternal();
+            }
+
+            if (amount > 0)
+                removeOperation(forwardsCursor, maximumOffsetFromHead, amount);
+        }
+
+        blockList.mutex.unlock;
+    }
+
+    void externalStripRight(scope Iterator* iterator) scope @trusted {
+        import sidero.base.text.ascii.characters : isControl, isWhiteSpace;
+        blockList.mutex.pureLock;
+
+        ptrdiff_t endOffsetFromHead = -1;
+        {
+            auto result = changeIndexToOffset(iterator, endOffsetFromHead);
+            assert(!result.isSet);
+        }
+
+        size_t minimumOffsetFromHead, maximumOffsetFromHead, lastConsumed;
+        scope Cursor toRemoveCursor = cursorFor(iterator, minimumOffsetFromHead, maximumOffsetFromHead, endOffsetFromHead);
+        const startingOffset = toRemoveCursor.offsetFromHead;
+
+        {
+            size_t amount;
+
+            bool emptyInternal() {
+                return toRemoveCursor.offsetFromHead < minimumOffsetFromHead || !toRemoveCursor.inData;
+            }
+
+            Char backInternal() {
+                toRemoveCursor.advanceBackwards(0, minimumOffsetFromHead, maximumOffsetFromHead, false, false);
+                return toRemoveCursor.get();
+            }
+
+            void popBackInternal() {
+                import std.algorithm : min;
+
+                toRemoveCursor.advanceBackwards(1, minimumOffsetFromHead, maximumOffsetFromHead, false, false);
+            }
+
+            Cursor lastSuccessRemove = toRemoveCursor;
+
+            while (!emptyInternal) {
+                Cursor currentLocation = toRemoveCursor;
+                ubyte c = backInternal();
+
+                if (!(isWhiteSpace(c) || isControl(c)))
+                    break;
+
+                amount++;
+                popBackInternal();
+                lastSuccessRemove = currentLocation;
+            }
+
+            if (amount > 0)
+                removeOperation(lastSuccessRemove, maximumOffsetFromHead, amount);
+        }
+
+        blockList.mutex.unlock;
     }
 }

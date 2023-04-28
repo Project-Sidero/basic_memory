@@ -425,6 +425,45 @@ scope nothrow @nogc @safe @hidden:
         }, () { return -1; });
     }
 
+    void strip() {
+        this.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+            assert(state !is null);
+            state.strip(iterator);
+        }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+            assert(state !is null);
+            state.strip(iterator);
+        }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+            assert(state !is null);
+            state.strip(iterator);
+        }, () {});
+    }
+
+    void stripLeft() {
+        this.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+            assert(state !is null);
+            state.stripLeft(iterator);
+        }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+            assert(state !is null);
+            state.stripLeft(iterator);
+        }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+            assert(state !is null);
+            state.stripLeft(iterator);
+        }, () {});
+    }
+
+    void stripRight() {
+        this.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+            assert(state !is null);
+            state.stripRight(iterator);
+        }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+            assert(state !is null);
+            state.stripRight(iterator);
+        }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+            assert(state !is null);
+            state.stripRight(iterator);
+        }, () {});
+    }
+
     void toLower(UnicodeLanguage language = UnicodeLanguage.Unknown) {
         this.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
             assert(state !is null);
@@ -1639,6 +1678,95 @@ struct UTF_State(Char) {
         return ret;
     }
 
+    void strip(scope Iterator* iterator) scope {
+        stripLeft(iterator);
+        stripRight(iterator);
+    }
+
+    void stripLeft(scope Iterator* iterator) scope {
+        import sidero.base.text.unicode.characters.database : isWhiteSpace, isControl;
+
+        blockList.mutex.pureLock;
+
+        size_t maximumOffsetFromHead, lastConsumed;
+        scope Cursor toRemoveCursor = cursorFor(iterator, maximumOffsetFromHead, 0);
+        const startingOffset = toRemoveCursor.offsetFromHead;
+
+        {
+            ForeachUTF32 f32 = ForeachUTF32(toRemoveCursor, maximumOffsetFromHead);
+
+            foreach (dchar c; f32) {
+                if (!(isWhiteSpace(c) || isControl(c)))
+                    break;
+            }
+
+            if (f32.lastIteratedCount0 > 0)
+                removeOperation(toRemoveCursor, maximumOffsetFromHead, f32.lastIteratedCount0);
+        }
+
+        blockList.mutex.unlock;
+    }
+
+    void stripRight(scope Iterator* iterator) scope @trusted {
+        import sidero.base.text.unicode.characters.database : isWhiteSpace, isControl;
+
+        blockList.mutex.pureLock;
+
+        ptrdiff_t endOffsetFromHead = -1;
+        {
+            auto result = changeIndexToOffset(iterator, endOffsetFromHead);
+            assert(!result.isSet);
+        }
+
+        size_t minimumOffsetFromHead, maximumOffsetFromHead, lastConsumed;
+        scope Cursor toRemoveCursor = cursorFor(iterator, minimumOffsetFromHead, maximumOffsetFromHead, endOffsetFromHead);
+        const startingOffset = toRemoveCursor.offsetFromHead;
+
+        {
+            Cursor lastSuccessRemove = toRemoveCursor;
+            size_t amount;
+
+            bool emptyInternal() {
+                return toRemoveCursor.offsetFromHead < minimumOffsetFromHead || !toRemoveCursor.inData;
+            }
+
+            Char backInternal() {
+                toRemoveCursor.advanceBackwards(0, minimumOffsetFromHead, maximumOffsetFromHead, false, false);
+                return toRemoveCursor.get();
+            }
+
+            void popBackInternal() {
+                import std.algorithm : min;
+
+                toRemoveCursor.advanceBackwards(1, minimumOffsetFromHead, maximumOffsetFromHead, false, false);
+            }
+
+            while (!emptyInternal) {
+                Cursor currentLocation = toRemoveCursor;
+                size_t advance = 1;
+
+                static if (is(Char == dchar)) {
+                    dchar decoded = backInternal();
+                    popBackInternal();
+                } else {
+                    import sidero.base.encoding.utf : decodeFromEnd;
+
+                    dchar decoded = decodeFromEnd(&emptyInternal, &backInternal, &popBackInternal, advance);
+                }
+
+                if (!(isWhiteSpace(decoded) || isControl(decoded)))
+                    break;
+                amount += advance;
+                lastSuccessRemove = currentLocation;
+            }
+
+            if (amount > 0)
+                removeOperation(lastSuccessRemove, maximumOffsetFromHead, amount);
+        }
+
+        blockList.mutex.unlock;
+    }
+
     alias externalToLower = casingImpl!toUnicodeLowerCase;
     alias externalToUpper = casingImpl!toUnicodeUpperCase;
     alias externalToTitle = casingImpl!toUnicodeTitleCase;
@@ -1731,12 +1859,13 @@ struct UTF_State(Char) {
 
             int result;
 
-            while(result == 0 && !emptyInternal) {
+            while (result == 0 && !emptyInternal) {
                 static if (is(Char == dchar)) {
                     dchar decoded = backInternal();
                     popBackInternal();
                 } else {
                     import sidero.base.encoding.utf : decodeFromEnd;
+
                     size_t advance;
                     dchar decoded = decodeFromEnd(&emptyInternal, &backInternal, &popBackInternal, advance);
                 }

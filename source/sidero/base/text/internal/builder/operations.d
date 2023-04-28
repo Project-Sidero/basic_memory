@@ -114,15 +114,17 @@ mixin template StringBuilderOperations() {
     // exposed /\/\/\/\/\
     // internal \/\/\/\/
 
-    ErrorInfo changeIndexToOffset(scope Iterator* iterator, scope ref ptrdiff_t a) {
+    ErrorInfo changeIndexToOffset(scope Iterator* iterator, scope ref ptrdiff_t a) scope {
         import sidero.base.errors.stock;
 
         size_t actualLength;
 
-        if (iterator is null)
-            actualLength = blockList.numberOfItems;
-        else
+        if (iterator !is null) {
             actualLength = iterator.backwards.offsetFromHead - iterator.forwards.offsetFromHead;
+            if (a == ptrdiff_t.max)
+                a = actualLength;
+        } else
+            actualLength = blockList.numberOfItems;
 
         if (a < 0) {
             if (actualLength < -a) {
@@ -133,10 +135,13 @@ mixin template StringBuilderOperations() {
             a = actualLength + a;
         }
 
+        if (iterator !is null)
+            a += iterator.minimumOffsetFromHead;
+
         return ErrorInfo.init;
     }
 
-    ErrorInfo changeIndexToOffset(scope Iterator* iterator, scope ref ptrdiff_t a, scope ref ptrdiff_t b) {
+    ErrorInfo changeIndexToOffset(scope Iterator* iterator, scope ref ptrdiff_t a, scope ref ptrdiff_t b) scope {
         import sidero.base.errors.stock;
 
         size_t actualLength;
@@ -213,7 +218,7 @@ mixin template StringBuilderOperations() {
     }
 
     // keeps position the same position
-    void removeOperation(scope Iterator* iterator, scope ref Cursor cursor, size_t amount) {
+    void removeOperation(scope Iterator* iterator, scope ref Cursor cursor, size_t amount) scope {
         size_t maximumOffsetFromHead = blockList.numberOfItems;
 
         if (iterator !is null) {
@@ -224,7 +229,7 @@ mixin template StringBuilderOperations() {
     }
 
     // keeps position the same position
-    void removeOperation(scope ref Cursor cursor, size_t maximumOffsetFromHead, size_t amount) {
+    void removeOperation(scope ref Cursor cursor, size_t maximumOffsetFromHead, size_t amount) scope @trusted {
         if (amount > maximumOffsetFromHead || cursor.offsetFromHead + amount > maximumOffsetFromHead) {
             assert(cursor.offsetFromHead < maximumOffsetFromHead);
             amount = maximumOffsetFromHead - cursor.offsetFromHead;
