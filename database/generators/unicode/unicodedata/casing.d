@@ -18,17 +18,17 @@ void Casing() {
     {
 
         foreach (character, entry; state.entries) {
-            if ((""d ~ entry.simpleLowercaseMapping) !in casingDStringMap) {
+            if (entry.haveSimpleLowercaseMapping && (""d ~ entry.simpleLowercaseMapping) !in casingDStringMap) {
                 casingDStringMap[""d ~ entry.simpleLowercaseMapping] = casingText.length;
                 casingText ~= entry.simpleLowercaseMapping;
             }
 
-            if ((""d ~ entry.simpleTitlecaseMapping) !in casingDStringMap) {
+            if (entry.haveSimpleTitlecaseMapping && (""d ~ entry.simpleTitlecaseMapping) !in casingDStringMap) {
                 casingDStringMap[""d ~ entry.simpleTitlecaseMapping] = casingText.length;
                 casingText ~= entry.simpleTitlecaseMapping;
             }
 
-            if ((""d ~ entry.simpleUppercaseMapping) !in casingDStringMap) {
+            if (entry.haveSimpleUppercaseMapping && (""d ~ entry.simpleUppercaseMapping) !in casingDStringMap) {
                 casingDStringMap[""d ~ entry.simpleUppercaseMapping] = casingText.length;
                 casingText ~= entry.simpleUppercaseMapping;
             }
@@ -41,12 +41,21 @@ void Casing() {
         foreach (entry; state.entries) {
             if (entry.haveSimpleLowercaseMapping || entry.haveSimpleTitlecaseMapping || entry.haveSimpleUppercaseMapping) {
                 CasingDiced diced;
-                diced.lowerOffset = cast(ushort)casingDStringMap[""d ~ entry.simpleLowercaseMapping];
-                diced.lowerEnd = cast(ushort)(diced.lowerOffset + (""d ~ entry.simpleLowercaseMapping).length);
-                diced.titleOffset = cast(ushort)casingDStringMap[""d ~ entry.simpleTitlecaseMapping];
-                diced.titleEnd = cast(ushort)(diced.titleOffset + (""d ~ entry.simpleTitlecaseMapping).length);
-                diced.upperOffset = cast(ushort)casingDStringMap[""d ~ entry.simpleUppercaseMapping];
-                diced.upperEnd = cast(ushort)(diced.upperOffset + (""d ~ entry.simpleUppercaseMapping).length);
+
+                if (entry.haveSimpleLowercaseMapping) {
+                    diced.lowerOffset = cast(ushort)casingDStringMap[""d ~ entry.simpleLowercaseMapping];
+                    diced.lowerEnd = cast(ushort)(diced.lowerOffset + (""d ~ entry.simpleLowercaseMapping).length);
+                }
+
+                if (entry.haveSimpleTitlecaseMapping) {
+                    diced.titleOffset = cast(ushort)casingDStringMap[""d ~ entry.simpleTitlecaseMapping];
+                    diced.titleEnd = cast(ushort)(diced.titleOffset + (""d ~ entry.simpleTitlecaseMapping).length);
+                }
+
+                if (entry.haveSimpleUppercaseMapping) {
+                    diced.upperOffset = cast(ushort)casingDStringMap[""d ~ entry.simpleUppercaseMapping];
+                    diced.upperEnd = cast(ushort)(diced.upperOffset + (""d ~ entry.simpleUppercaseMapping).length);
+                }
 
                 foreach (c; entry.range.start .. entry.range.end + 1)
                     sr.add(cast(dchar)c, diced);

@@ -1000,6 +1000,7 @@ scope @hidden:
             import std.traits : OriginalType;
 
             builder ~= __traits(identifier, ActualType);
+            auto tempInput = cast(OriginalType!ActualType)input;
 
             static foreach (m; __traits(allMembers, ActualType)) {
                 if (__traits(getMember, ActualType, m) == input) {
@@ -1010,7 +1011,7 @@ scope @hidden:
             }
 
             builder ~= "("c;
-            write(format, cast(OriginalType!ActualType)input, needQuotes);
+            write(format, tempInput, needQuotes);
             builder ~= ")"c;
         Done:
         } else static if (isBasicType!ActualType || isPointer!ActualType) {

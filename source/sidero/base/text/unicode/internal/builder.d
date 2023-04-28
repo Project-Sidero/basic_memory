@@ -425,6 +425,45 @@ scope nothrow @nogc @safe @hidden:
         }, () { return -1; });
     }
 
+    void toLower(UnicodeLanguage language = UnicodeLanguage.Unknown) {
+        this.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+            assert(state !is null);
+            state.externalToLower(iterator, language);
+        }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+            assert(state !is null);
+            state.externalToLower(iterator, language);
+        }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+            assert(state !is null);
+            state.externalToLower(iterator, language);
+        }, () {});
+    }
+
+    void toUpper(UnicodeLanguage language = UnicodeLanguage.Unknown) {
+        this.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+            assert(state !is null);
+            state.externalToUpper(iterator, language);
+        }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+            assert(state !is null);
+            state.externalToUpper(iterator, language);
+        }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+            assert(state !is null);
+            state.externalToUpper(iterator, language);
+        }, () {});
+    }
+
+    void toTitle(UnicodeLanguage language = UnicodeLanguage.Unknown) {
+        this.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+            assert(state !is null);
+            state.externalToTitle(iterator, language);
+        }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+            assert(state !is null);
+            state.externalToTitle(iterator, language);
+        }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+            assert(state !is null);
+            state.externalToTitle(iterator, language);
+        }, () {});
+    }
+
     bool empty() {
         return this.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
             assert(state !is null);
@@ -567,6 +606,7 @@ struct UTF_State(Char) {
     import sidero.base.text.internal.builder.blocklist;
     import sidero.base.text.internal.builder.iteratorlist;
     import sidero.base.allocators.api;
+    import sidero.base.text.unicode.casing : toUnicodeLowerCase, toUnicodeUpperCase, toUnicodeTitleCase;
 
     mixin template CustomIteratorContents() {
         void[4] forwardBuffer, backwardBuffer;
@@ -1271,6 +1311,32 @@ struct UTF_State(Char) {
 
             return result;
         }
+
+        void advance1Forwards() {
+            void popFrontInternal() {
+                import std.algorithm : min;
+
+                cursor.advanceForward(1, maximumOffsetFromHead, true);
+            }
+
+            static if (is(Char == dchar)) {
+                popFrontInternal();
+            } else {
+                import sidero.base.encoding.utf : decode;
+
+                bool emptyInternal() {
+                    return cursor.offsetFromHead >= maximumOffsetFromHead;
+                }
+
+                Char frontInternal() {
+                    cursor.advanceForward(0, maximumOffsetFromHead, true);
+                    return cursor.get();
+                }
+
+                size_t advance;
+                dchar decoded = decode(&emptyInternal, &frontInternal, &popFrontInternal, advance);
+            }
+        }
     }
 
     void checkForNullIterator() {
@@ -1571,6 +1637,133 @@ struct UTF_State(Char) {
             ret -= startingOffset;
 
         return ret;
+    }
+
+    alias externalToLower = casingImpl!toUnicodeLowerCase;
+    alias externalToUpper = casingImpl!toUnicodeUpperCase;
+    alias externalToTitle = casingImpl!toUnicodeTitleCase;
+
+    void casingImpl(alias UNIcaseFunc)(scope Iterator* iterator, UnicodeLanguage language) @trusted {
+        blockList.mutex.pureLock;
+        language = pickLanguage(language);
+
+        size_t minimumOffsetFromHead, maximumOffsetFromHead;
+        scope Cursor cursor = cursorFor(iterator, minimumOffsetFromHead, maximumOffsetFromHead, 0);
+        size_t primaryAdvance = 1;
+        bool removedOrInserted;
+
+        int primaryForwardsFunc(scope int delegate(ref dchar) @safe nothrow @nogc del) @trusted {
+            int ret;
+
+            bool emptyInternal() {
+                cursor.advanceForward(0, maximumOffsetFromHead, true);
+                return cursor.isOutOfRange(minimumOffsetFromHead, maximumOffsetFromHead);
+            }
+
+            Char frontInternal() {
+                cursor.advanceForward(0, maximumOffsetFromHead, true);
+                return cursor.get();
+            }
+
+            void popFrontInternal() {
+                import std.algorithm : min;
+
+                cursor.advanceForward(1, maximumOffsetFromHead, true);
+            }
+
+            while (ret == 0 && cursor.inData && !emptyInternal) {
+                static if (is(Char == dchar)) {
+                    dchar decoded = frontInternal();
+                    assert(primaryAdvance == 1);
+                } else {
+                    import sidero.base.encoding.utf : decode;
+
+                    Cursor restoreCursor = cursor, otherCursor;
+                    dchar decoded = decode(&emptyInternal, &frontInternal, &popFrontInternal, primaryAdvance);
+                    otherCursor = cursor;
+                    cursor = restoreCursor;
+                }
+
+                ret = del(decoded);
+
+                if (!removedOrInserted) {
+                    static if (is(Char == dchar)) {
+                        popFrontInternal();
+                    } else {
+                        cursor = otherCursor;
+                    }
+                }
+
+                removedOrInserted = false;
+            }
+
+            return ret;
+        }
+
+        int secondaryForwardsFunc(scope int delegate(ref dchar) @safe nothrow @nogc del) {
+            ForeachUTF32 f32 = ForeachUTF32(cursor, maximumOffsetFromHead);
+            f32.advance1Forwards();
+            return f32.opApply(del);
+        }
+
+        int secondaryBackwardsFunc(scope int delegate(ref dchar) @safe nothrow @nogc del) {
+            // first we need a cursor position prior to our current cursor location
+
+            Cursor backwardsCursor = cursor;
+            backwardsCursor.advanceBackwards(1, minimumOffsetFromHead, maximumOffsetFromHead, false, false);
+            if (backwardsCursor.offsetFromHead >= cursor.offsetFromHead)
+                return 0;
+
+            bool emptyInternal() {
+                return backwardsCursor.offsetFromHead < minimumOffsetFromHead || !backwardsCursor.inData;
+            }
+
+            Char backInternal() {
+                backwardsCursor.advanceBackwards(0, minimumOffsetFromHead, maximumOffsetFromHead, false, false);
+                return backwardsCursor.get();
+            }
+
+            void popBackInternal() {
+                import std.algorithm : min;
+
+                backwardsCursor.advanceBackwards(1, minimumOffsetFromHead, maximumOffsetFromHead, false, false);
+            }
+
+            int result;
+
+            while(result == 0 && !emptyInternal) {
+                static if (is(Char == dchar)) {
+                    dchar decoded = backInternal();
+                    popBackInternal();
+                } else {
+                    import sidero.base.encoding.utf : decodeFromEnd;
+                    size_t advance;
+                    dchar decoded = decodeFromEnd(&emptyInternal, &backInternal, &popBackInternal, advance);
+                }
+
+                result = del(decoded);
+            }
+
+            return result;
+        }
+
+        void removeThis() {
+            removeOperation(cursor, maximumOffsetFromHead, primaryAdvance);
+            maximumOffsetFromHead -= primaryAdvance;
+            removedOrInserted = true;
+        }
+
+        void insertHere(scope dstring text) @trusted {
+            scope LiteralAsTargetChar!(dchar, Char) latc;
+            latc.literal = text;
+            auto osat = latc.get;
+            maximumOffsetFromHead += insertOperation(cursor, maximumOffsetFromHead, osat);
+            removedOrInserted = true;
+        }
+
+        auto result = UNIcaseFunc(&primaryForwardsFunc, &secondaryForwardsFunc, &secondaryBackwardsFunc,
+                &removeThis, &insertHere, language);
+        blockList.mutex.unlock;
     }
 }
 

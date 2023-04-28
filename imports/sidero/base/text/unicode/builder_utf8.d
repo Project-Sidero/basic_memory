@@ -2648,6 +2648,51 @@ nothrow @safe:
     // TODO: stripLeft
     // TODO: stripRight
 
+    @nogc {
+        ///
+        typeof(this) toLower(UnicodeLanguage language = UnicodeLanguage.Unknown) return scope {
+            state.toLower(language);
+            return this;
+        }
+
+        ///
+        unittest {
+            auto builder = typeof(this)("BA\uFB03yZE");
+            builder[1 .. $ - 1].toLower;
+            assert(builder == "Ba\uFB03yzE");
+        }
+
+        ///
+        typeof(this) toUpper(UnicodeLanguage language = UnicodeLanguage.Unknown) return scope {
+            state.toUpper(language);
+            return this;
+        }
+
+        ///
+        unittest {
+            auto builder = typeof(this)("ba\uFB03yze");
+            builder[1 .. $ - 1].toUpper;
+            assert(builder == "bA\u0046\u0046\u0049YZe");
+        }
+
+        ///
+        typeof(this) toTitle(UnicodeLanguage language = UnicodeLanguage.Unknown) return scope {
+            state.toTitle(language);
+            return this;
+        }
+    }
+
+    ///
+    unittest {
+        auto builder = typeof(this)("ba\uFB03yZe");
+        builder[1 .. $ - 1].toTitle;
+        assert(builder == "bA\uFB03yze");
+
+        builder = typeof(this)("bA \uFB03yZe");
+        builder[1 .. $ - 1].toTitle;
+        assert(builder == "bA \u0046\u0066\u0069yze");
+    }
+
     ///
     void remove(ptrdiff_t index, size_t amount) scope @nogc {
         state.handle((StateIterator.S8 state, ref StateIterator.I8 iterator) {

@@ -644,18 +644,18 @@ nothrow @nogc:
 
     static if (is(Char == char)) {
         ///
-        StringBuilder_UTF8 asMutable(RCAllocator allocator = RCAllocator.init) scope {
-            return StringBuilder_UTF8(allocator, this);
+        StringBuilder_UTF8 asMutable(RCAllocator allocator = RCAllocator.init) scope const @trusted {
+            return StringBuilder_UTF8(allocator, cast()this);
         }
     } else static if (is(Char == wchar)) {
         ///
-        StringBuilder_UTF16 asMutable(RCAllocator allocator = RCAllocator.init) scope {
-            return StringBuilder_UTF16(allocator, this);
+        StringBuilder_UTF16 asMutable(RCAllocator allocator = RCAllocator.init) scope const @trusted {
+            return StringBuilder_UTF16(allocator, cast()this);
         }
     } else static if (is(Char == dchar)) {
         ///
-        StringBuilder_UTF32 asMutable(RCAllocator allocator = RCAllocator.init) scope {
-            return StringBuilder_UTF32(allocator, this);
+        StringBuilder_UTF32 asMutable(RCAllocator allocator = RCAllocator.init) scope const @trusted {
+            return StringBuilder_UTF32(allocator, cast()this);
         }
     }
 
@@ -2927,6 +2927,21 @@ nothrow @nogc:
         assert(value == cast(LiteralType)"  \t abc");
 
         assert(typeof(this)(cast(LiteralType)"  \t abc\t\r\n \0").stripRight == cast(LiteralType)"  \t abc");
+    }
+
+    ///
+    StringBuilder_UTF!Char toLower(RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.Unknown) scope const {
+        return this.asMutable(allocator).toLower(language);
+    }
+
+    ///
+    StringBuilder_UTF!Char toUpper(RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.Unknown) scope const {
+        return this.asMutable(allocator).toUpper(language);
+    }
+
+    ///
+    StringBuilder_UTF!Char toTitle(RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.Unknown) scope const {
+        return this.asMutable(allocator).toTitle(language);
     }
 
     ///

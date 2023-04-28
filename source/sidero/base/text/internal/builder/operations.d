@@ -198,6 +198,20 @@ mixin template StringBuilderOperations() {
         return ret;
     }
 
+    Cursor cursorFor(scope Iterator* iterator, out size_t minimumOffsetFromHead, out size_t maximumOffsetFromHead, size_t offset) scope @trusted {
+        if (iterator !is null) {
+            offset += iterator.forwards.offsetFromHead;
+            maximumOffsetFromHead = iterator.backwards.offsetFromHead;
+            minimumOffsetFromHead = iterator.minimumOffsetFromHead;
+        } else
+            maximumOffsetFromHead = blockList.numberOfItems;
+
+        Cursor ret;
+        ret.setup(&blockList, offset);
+
+        return ret;
+    }
+
     // keeps position the same position
     void removeOperation(scope Iterator* iterator, scope ref Cursor cursor, size_t amount) {
         size_t maximumOffsetFromHead = blockList.numberOfItems;
