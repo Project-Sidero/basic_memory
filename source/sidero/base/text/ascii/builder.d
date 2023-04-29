@@ -1252,6 +1252,7 @@ nothrow @safe:
         ///
         StringBuilder_ASCII stripLeft() return scope {
             import sidero.base.text.ascii.characters : toLower;
+
             if (isNull)
                 return this;
 
@@ -1293,7 +1294,7 @@ nothrow @safe:
             import sidero.base.text.ascii.characters : toLower;
 
             foreachContiguous((data) {
-                foreach(ref c; data) {
+                foreach (ref c; data) {
                     c = c.toLower;
                 }
 
@@ -1315,7 +1316,7 @@ nothrow @safe:
             import sidero.base.text.ascii.characters : toUpper;
 
             foreachContiguous((data) {
-                foreach(ref c; data) {
+                foreach (ref c; data) {
                     c = c.toUpper;
                 }
 
@@ -1339,7 +1340,7 @@ nothrow @safe:
             bool wasAlpha;
 
             foreachContiguous((data) {
-                foreach(ref c; data) {
+                foreach (ref c; data) {
                     bool currentAlpha = c.isAlpha;
 
                     if (wasAlpha)
@@ -1836,12 +1837,13 @@ nothrow @safe:
     }
 
     ///
-    ulong toHash() scope @trusted @nogc {
+    ulong toHash() scope const @trusted @nogc {
         import sidero.base.hash.utils : hashOf;
 
         ulong ret = hashOf();
+        StringBuilder_ASCII* sba = cast(StringBuilder_ASCII*)&this;
 
-        foreachContiguous((scope ref data) { ret = hashOf(data, ret); return 0; });
+        sba.foreachContiguous((scope ref data) { ret = hashOf(data, ret); return 0; });
 
         return ret;
     }
@@ -2752,6 +2754,7 @@ struct ASCII_State {
 
     void externalStripLeft(scope Iterator* iterator) scope @trusted {
         import sidero.base.text.ascii.characters : isControl, isWhiteSpace;
+
         blockList.mutex.pureLock;
 
         {
@@ -2803,6 +2806,7 @@ struct ASCII_State {
 
     void externalStripRight(scope Iterator* iterator) scope @trusted {
         import sidero.base.text.ascii.characters : isControl, isWhiteSpace;
+
         blockList.mutex.pureLock;
 
         ptrdiff_t endOffsetFromHead = -1;

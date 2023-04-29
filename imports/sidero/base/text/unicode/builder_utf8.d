@@ -4238,12 +4238,13 @@ nothrow @safe:
     }
 
     ///
-    ulong toHash() scope @trusted @nogc {
+    ulong toHash() scope const @trusted @nogc {
         import sidero.base.hash.utils : hashOf;
 
         ulong ret = hashOf();
 
-        foreachContiguous((scope ref data) { ret = hashOf(data, ret); return 0; });
+        StringBuilder_UTF8* sb = cast(StringBuilder_UTF8*)&this;
+        sb.foreachContiguous((scope ref data) { ret = hashOf(data, ret); return 0; });
 
         return ret;
     }

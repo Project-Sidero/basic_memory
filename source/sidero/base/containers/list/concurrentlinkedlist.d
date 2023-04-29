@@ -441,11 +441,12 @@ nothrow @nogc:
     }
 
     ///
-    ulong toHash() scope {
-        setupState;
-        setupIterator;
+    ulong toHash() scope const @trusted {
+        scope ConcurrentLinkedList* cll = cast(ConcurrentLinkedList*)&this;
+        cll.setupState;
+        cll.setupIterator;
 
-        return state.hashExternal(iterator);
+        return cll.state.hashExternal(cast(typeof(cll.iterator))iterator);
     }
 
     @property {
