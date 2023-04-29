@@ -2724,17 +2724,17 @@ nothrow @safe:
             state.toTitle(language);
             return this;
         }
-    }
 
-    ///
-    unittest {
-        auto builder = typeof(this)("ba\uFB03yZe");
-        builder[1 .. $ - 1].toTitle;
-        assert(builder == "bA\uFB03yze");
+        ///
+        unittest {
+            auto builder = typeof(this)("ba\uFB03yZe");
+            builder[1 .. $ - 1].toTitle;
+            assert(builder == "bA\uFB03yze");
 
-        builder = typeof(this)("bA \uFB03yZe");
-        builder[1 .. $ - 1].toTitle;
-        assert(builder == "bA \u0046\u0066\u0069yze");
+            builder = typeof(this)("bA \uFB03yZe");
+            builder[1 .. $ - 1].toTitle;
+            assert(builder == "bA \u0046\u0066\u0069yze");
+        }
     }
 
     ///

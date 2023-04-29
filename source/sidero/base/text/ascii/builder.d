@@ -1287,6 +1287,87 @@ nothrow @safe:
         }
     }
 
+    @nogc {
+        ///
+        StringBuilder_ASCII toLower() return scope {
+            import sidero.base.text.ascii.characters : toLower;
+
+            foreachContiguous((data) {
+                foreach(ref c; data) {
+                    c = c.toLower;
+                }
+
+                return 0;
+            }, null);
+
+            return this;
+        }
+
+        ///
+        unittest {
+            auto builder = typeof(this)("BADFTyZE");
+            builder[1 .. $ - 1].toLower;
+            assert(builder == "BadftyzE");
+        }
+
+        ///
+        StringBuilder_ASCII toUpper() return scope {
+            import sidero.base.text.ascii.characters : toUpper;
+
+            foreachContiguous((data) {
+                foreach(ref c; data) {
+                    c = c.toUpper;
+                }
+
+                return 0;
+            }, null);
+
+            return this;
+        }
+
+        ///
+        unittest {
+            auto builder = typeof(this)("badftyze");
+            builder[1 .. $ - 1].toUpper;
+            assert(builder == "bADFTYZe");
+        }
+
+        ///
+        StringBuilder_ASCII toTitle() return scope {
+            import sidero.base.text.ascii.characters : isAlpha, toLower, toUpper;
+
+            bool wasAlpha;
+
+            foreachContiguous((data) {
+                foreach(ref c; data) {
+                    bool currentAlpha = c.isAlpha;
+
+                    if (wasAlpha)
+                        c = c.toLower;
+                    else
+                        c = c.toUpper;
+
+                    wasAlpha = currentAlpha;
+                }
+
+                return 0;
+            }, null);
+
+            return this;
+        }
+
+        ///
+        unittest {
+            auto builder = typeof(this)("baDfTyZe");
+            builder[1 .. $ - 1].toTitle;
+            assert(builder == "bAdftyze");
+
+            builder = typeof(this)("bA DfTyZe");
+            builder[1 .. $ - 1].toTitle;
+            assert(builder == "bA Dftyze");
+        }
+    }
+
     ///
     void remove(ptrdiff_t index, size_t amount) scope @nogc {
         if (state !is null)
