@@ -1486,7 +1486,7 @@ nothrow @nogc:
     }
 
     ///
-    String_UTF8 byUTF8() scope return @trusted {
+    String_UTF8 byUTF8() return scope @trusted {
         String_UTF8 ret;
         ret.lifeTime = cast(String_UTF8.LifeTime*)this.lifeTime;
         ret.literal = this.literal;
@@ -1516,7 +1516,7 @@ nothrow @nogc:
     }
 
     ///
-    String_UTF16 byUTF16() scope return @trusted {
+    String_UTF16 byUTF16() return scope @trusted {
         String_UTF16 ret;
         ret.lifeTime = cast(String_UTF16.LifeTime*)this.lifeTime;
         ret.literal = this.literal;
@@ -1546,7 +1546,7 @@ nothrow @nogc:
     }
 
     ///
-    String_UTF32 byUTF32() scope return @trusted {
+    String_UTF32 byUTF32() return scope @trusted {
         String_UTF32 ret;
         ret.lifeTime = cast(String_UTF32.LifeTime*)this.lifeTime;
         ret.literal = this.literal;
@@ -2792,7 +2792,7 @@ nothrow @nogc:
     }
 
     ///
-    typeof(this) strip() scope return @trusted {
+    typeof(this) strip() return scope @trusted {
         stripLeft();
         stripRight();
         return this;
@@ -2808,7 +2808,7 @@ nothrow @nogc:
     }
 
     ///
-    typeof(this) stripLeft() scope return {
+    typeof(this) stripLeft() return scope {
         literalEncoding.handle(() @trusted {
             auto actual = cast(const(char)[])this.literal;
             size_t amount;
@@ -2864,7 +2864,7 @@ nothrow @nogc:
     }
 
     ///
-    typeof(this) stripRight() scope return {
+    typeof(this) stripRight() return scope {
         literalEncoding.handle(() @trusted {
             auto actual = cast(const(char)[])this.literal[0 .. this.length];
             size_t amount, soFar;

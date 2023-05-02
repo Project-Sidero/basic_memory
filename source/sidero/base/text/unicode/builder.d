@@ -2763,7 +2763,7 @@ nothrow @safe:
 
     @nogc {
         ///
-        typeof(this) insert(ptrdiff_t index, scope const(char)[] input...) scope return {
+        typeof(this) insert(ptrdiff_t index, scope const(char)[] input...) return scope {
             state.setup(Char.sizeof);
             state.insertImpl(input, index);
             return this;
@@ -2775,7 +2775,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) insert(ptrdiff_t index, scope const(wchar)[] input...) scope return {
+        typeof(this) insert(ptrdiff_t index, scope const(wchar)[] input...) return scope {
             state.setup(Char.sizeof);
             state.insertImpl(input, index);
             return this;
@@ -2787,7 +2787,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) insert(ptrdiff_t index, scope const(dchar)[] input...) scope return {
+        typeof(this) insert(ptrdiff_t index, scope const(dchar)[] input...) return scope {
             state.setup(Char.sizeof);
             state.insertImpl(input, index);
             return this;
@@ -2799,7 +2799,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) insert(ptrdiff_t index, scope String_ASCII input) scope return {
+        typeof(this) insert(ptrdiff_t index, scope String_ASCII input) return scope {
             state.setup(Char.sizeof);
             state.insertImpl(input, index);
             return this;
@@ -2811,7 +2811,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) insert(ptrdiff_t index, scope String_UTF8 input) scope return {
+        typeof(this) insert(ptrdiff_t index, scope String_UTF8 input) return scope {
             state.setup(Char.sizeof);
             state.insertImpl(input, index);
             return this;
@@ -2823,7 +2823,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) insert(ptrdiff_t index, scope String_UTF16 input) scope return {
+        typeof(this) insert(ptrdiff_t index, scope String_UTF16 input) return scope {
             state.setup(Char.sizeof);
             state.insertImpl(input, index);
             return this;
@@ -2835,7 +2835,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) insert(ptrdiff_t index, scope String_UTF32 input) scope return {
+        typeof(this) insert(ptrdiff_t index, scope String_UTF32 input) return scope {
             state.setup(Char.sizeof);
             state.insertImpl(input, index);
             return this;
@@ -2847,7 +2847,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) insert(ptrdiff_t index, scope StringBuilder_ASCII input) scope return {
+        typeof(this) insert(ptrdiff_t index, scope StringBuilder_ASCII input) return scope {
             state.setup(Char.sizeof);
             state.insertImpl(input, index);
             return this;
@@ -2859,7 +2859,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) insert(ptrdiff_t index, scope StringBuilder_UTF8 input) scope return {
+        typeof(this) insert(ptrdiff_t index, scope StringBuilder_UTF8 input) return scope {
             state.setup(Char.sizeof);
             state.insertImpl(input, index);
             return this;
@@ -2871,7 +2871,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) insert(ptrdiff_t index, scope StringBuilder_UTF16 input) scope return {
+        typeof(this) insert(ptrdiff_t index, scope StringBuilder_UTF16 input) return scope {
             state.setup(Char.sizeof);
             state.insertImpl(input, index);
             return this;
@@ -2883,7 +2883,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) insert(ptrdiff_t index, scope StringBuilder_UTF32 input) scope return {
+        typeof(this) insert(ptrdiff_t index, scope StringBuilder_UTF32 input) return scope {
             state.setup(Char.sizeof);
             state.insertImpl(input, index);
             return this;
@@ -2897,7 +2897,7 @@ nothrow @safe:
 
     @nogc {
         ///
-        typeof(this) prepend(scope const(char)[] input...) scope return @trusted {
+        typeof(this) prepend(scope const(char)[] input...) return scope @trusted {
             return this.insert(0, input);
         }
 
@@ -2907,7 +2907,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) prepend(scope const(wchar)[] input...) scope return @trusted {
+        typeof(this) prepend(scope const(wchar)[] input...) return scope @trusted {
             return this.insert(0, input);
         }
 
@@ -2917,7 +2917,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) prepend(scope const(dchar)[] input...) scope return @trusted {
+        typeof(this) prepend(scope const(dchar)[] input...) return scope @trusted {
             return this.insert(0, input);
         }
 
@@ -2927,7 +2927,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) prepend(scope String_ASCII input) scope return @trusted {
+        typeof(this) prepend(scope String_ASCII input) return scope @trusted {
             return this.insert(0, input);
         }
 
@@ -2937,7 +2937,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) prepend(scope String_UTF8 input) scope return @trusted {
+        typeof(this) prepend(scope String_UTF8 input) return scope @trusted {
             return this.insert(0, input);
         }
 
@@ -2947,7 +2947,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) prepend(scope String_UTF16 input) scope return @trusted {
+        typeof(this) prepend(scope String_UTF16 input) return scope @trusted {
             return this.insert(0, input);
         }
 
@@ -2957,7 +2957,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) prepend(scope String_UTF32 input) scope return @trusted {
+        typeof(this) prepend(scope String_UTF32 input) return scope @trusted {
             return this.insert(0, input);
         }
 
@@ -2967,7 +2967,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) prepend(scope StringBuilder_ASCII input) scope return @trusted {
+        typeof(this) prepend(scope StringBuilder_ASCII input) return scope @trusted {
             return this.insert(0, input);
         }
 
@@ -2977,7 +2977,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) prepend(scope StringBuilder_UTF8 input) scope return @trusted {
+        typeof(this) prepend(scope StringBuilder_UTF8 input) return scope @trusted {
             return this.insert(0, input);
         }
 
@@ -2987,7 +2987,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) prepend(scope StringBuilder_UTF16 input) scope return @trusted {
+        typeof(this) prepend(scope StringBuilder_UTF16 input) return scope @trusted {
             return this.insert(0, input);
         }
 
@@ -2997,7 +2997,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) prepend(scope StringBuilder_UTF32 input) scope return @trusted {
+        typeof(this) prepend(scope StringBuilder_UTF32 input) return scope @trusted {
             return this.insert(0, input);
         }
 
@@ -3009,7 +3009,7 @@ nothrow @safe:
 
     @nogc {
         ///
-        void opOpAssign(string op : "~")(scope const(char)[] input) scope return @trusted {
+        void opOpAssign(string op : "~")(scope const(char)[] input) return scope @trusted {
             this.append(input);
         }
 
@@ -3021,7 +3021,7 @@ nothrow @safe:
         }
 
         ///
-        void opOpAssign(string op : "~")(scope const(wchar)[] input) scope return @trusted {
+        void opOpAssign(string op : "~")(scope const(wchar)[] input) return scope @trusted {
             this.append(input);
         }
 
@@ -3033,7 +3033,7 @@ nothrow @safe:
         }
 
         ///
-        void opOpAssign(string op : "~")(scope const(dchar)[] input) scope return @trusted {
+        void opOpAssign(string op : "~")(scope const(dchar)[] input) return scope @trusted {
             this.append(input);
         }
 
@@ -3045,7 +3045,7 @@ nothrow @safe:
         }
 
         ///
-        void opOpAssign(string op : "~")(scope String_ASCII input) scope return @trusted {
+        void opOpAssign(string op : "~")(scope String_ASCII input) return scope @trusted {
             this.append(input);
         }
 
@@ -3057,7 +3057,7 @@ nothrow @safe:
         }
 
         ///
-        void opOpAssign(string op : "~")(scope String_UTF8 input) scope return @trusted {
+        void opOpAssign(string op : "~")(scope String_UTF8 input) return scope @trusted {
             this.append(input);
         }
 
@@ -3069,7 +3069,7 @@ nothrow @safe:
         }
 
         ///
-        void opOpAssign(string op : "~")(scope String_UTF16 input) scope return @trusted {
+        void opOpAssign(string op : "~")(scope String_UTF16 input) return scope @trusted {
             this.append(input);
         }
 
@@ -3081,7 +3081,7 @@ nothrow @safe:
         }
 
         ///
-        void opOpAssign(string op : "~")(scope String_UTF32 input) scope return @trusted {
+        void opOpAssign(string op : "~")(scope String_UTF32 input) return scope @trusted {
             this.append(input);
         }
 
@@ -3093,7 +3093,7 @@ nothrow @safe:
         }
 
         ///
-        void opOpAssign(string op : "~")(scope StringBuilder_ASCII input) scope return @trusted {
+        void opOpAssign(string op : "~")(scope StringBuilder_ASCII input) return scope @trusted {
             this.append(input);
         }
 
@@ -3105,7 +3105,7 @@ nothrow @safe:
         }
 
         ///
-        void opOpAssign(string op : "~")(scope StringBuilder_UTF8 input) scope return @trusted {
+        void opOpAssign(string op : "~")(scope StringBuilder_UTF8 input) return scope @trusted {
             this.append(input);
         }
 
@@ -3117,7 +3117,7 @@ nothrow @safe:
         }
 
         ///
-        void opOpAssign(string op : "~")(scope StringBuilder_UTF16 input) scope return @trusted {
+        void opOpAssign(string op : "~")(scope StringBuilder_UTF16 input) return scope @trusted {
             this.append(input);
         }
 
@@ -3129,7 +3129,7 @@ nothrow @safe:
         }
 
         ///
-        void opOpAssign(string op : "~")(scope StringBuilder_UTF32 input) scope return @trusted {
+        void opOpAssign(string op : "~")(scope StringBuilder_UTF32 input) return scope @trusted {
             this.append(input);
         }
 
@@ -3284,7 +3284,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) append(scope const(char)[] input...) scope return @trusted {
+        typeof(this) append(scope const(char)[] input...) return scope @trusted {
             return this.insert(ptrdiff_t.max, input);
         }
 
@@ -3294,7 +3294,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) append(scope const(wchar)[] input...) scope return @trusted {
+        typeof(this) append(scope const(wchar)[] input...) return scope @trusted {
             return this.insert(ptrdiff_t.max, input);
         }
 
@@ -3304,7 +3304,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) append(scope const(dchar)[] input...) scope return @trusted {
+        typeof(this) append(scope const(dchar)[] input...) return scope @trusted {
             return this.insert(ptrdiff_t.max, input);
         }
 
@@ -3314,7 +3314,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) append(scope String_ASCII input) scope return @trusted {
+        typeof(this) append(scope String_ASCII input) return scope @trusted {
             return this.insert(ptrdiff_t.max, input);
         }
 
@@ -3324,7 +3324,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) append(scope String_UTF8 input) scope return @trusted {
+        typeof(this) append(scope String_UTF8 input) return scope @trusted {
             return this.insert(ptrdiff_t.max, input);
         }
 
@@ -3334,7 +3334,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) append(scope String_UTF16 input) scope return @trusted {
+        typeof(this) append(scope String_UTF16 input) return scope @trusted {
             return this.insert(ptrdiff_t.max, input);
         }
 
@@ -3344,7 +3344,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) append(scope String_UTF32 input) scope return @trusted {
+        typeof(this) append(scope String_UTF32 input) return scope @trusted {
             return this.insert(ptrdiff_t.max, input);
         }
 
@@ -3354,7 +3354,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) append(scope StringBuilder_ASCII input) scope return @trusted {
+        typeof(this) append(scope StringBuilder_ASCII input) return scope @trusted {
             return this.insert(ptrdiff_t.max, input);
         }
 
@@ -3364,7 +3364,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) append(scope StringBuilder_UTF8 input) scope return @trusted {
+        typeof(this) append(scope StringBuilder_UTF8 input) return scope @trusted {
             return this.insert(ptrdiff_t.max, input);
         }
 
@@ -3374,7 +3374,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) append(scope StringBuilder_UTF16 input) scope return @trusted {
+        typeof(this) append(scope StringBuilder_UTF16 input) return scope @trusted {
             return this.insert(ptrdiff_t.max, input);
         }
 
@@ -3384,7 +3384,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) append(scope StringBuilder_UTF32 input) scope return @trusted {
+        typeof(this) append(scope StringBuilder_UTF32 input) return scope @trusted {
             return this.insert(ptrdiff_t.max, input);
         }
 
@@ -3396,7 +3396,7 @@ nothrow @safe:
 
     @nogc {
         ///
-        typeof(this) clobberInsert(ptrdiff_t index, scope const(char)[] input...) scope return {
+        typeof(this) clobberInsert(ptrdiff_t index, scope const(char)[] input...) return scope {
             state.setup(Char.sizeof);
             state.insertImpl(input, index, true);
             return this;
@@ -3408,7 +3408,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) clobberInsert(ptrdiff_t index, scope const(wchar)[] input...) scope return {
+        typeof(this) clobberInsert(ptrdiff_t index, scope const(wchar)[] input...) return scope {
             state.setup(Char.sizeof);
             state.insertImpl(input, index, true);
             return this;
@@ -3420,7 +3420,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) clobberInsert(ptrdiff_t index, scope const(dchar)[] input...) scope return {
+        typeof(this) clobberInsert(ptrdiff_t index, scope const(dchar)[] input...) return scope {
             state.setup(Char.sizeof);
             state.insertImpl(input, index, true);
             return this;
@@ -3432,7 +3432,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) clobberInsert(ptrdiff_t index, scope String_ASCII input) scope return {
+        typeof(this) clobberInsert(ptrdiff_t index, scope String_ASCII input) return scope {
             state.setup(Char.sizeof);
             state.insertImpl(input, index, true);
             return this;
@@ -3444,7 +3444,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) clobberInsert(ptrdiff_t index, scope String_UTF8 input) scope return {
+        typeof(this) clobberInsert(ptrdiff_t index, scope String_UTF8 input) return scope {
             state.setup(Char.sizeof);
             state.insertImpl(input, index, true);
             return this;
@@ -3456,7 +3456,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) clobberInsert(ptrdiff_t index, scope String_UTF16 input) scope return {
+        typeof(this) clobberInsert(ptrdiff_t index, scope String_UTF16 input) return scope {
             state.setup(Char.sizeof);
             state.insertImpl(input, index, true);
             return this;
@@ -3468,7 +3468,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) clobberInsert(ptrdiff_t index, scope String_UTF32 input) scope return {
+        typeof(this) clobberInsert(ptrdiff_t index, scope String_UTF32 input) return scope {
             state.setup(Char.sizeof);
             state.insertImpl(input, index, true);
             return this;
@@ -3480,7 +3480,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) clobberInsert(ptrdiff_t index, scope StringBuilder_ASCII input) scope return {
+        typeof(this) clobberInsert(ptrdiff_t index, scope StringBuilder_ASCII input) return scope {
             state.setup(Char.sizeof);
             state.insertImpl(input, index, true);
             return this;
@@ -3492,7 +3492,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) clobberInsert(ptrdiff_t index, scope StringBuilder_UTF8 input) scope return {
+        typeof(this) clobberInsert(ptrdiff_t index, scope StringBuilder_UTF8 input) return scope {
             state.setup(Char.sizeof);
             state.insertImpl(input, index, true);
             return this;
@@ -3504,7 +3504,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) clobberInsert(ptrdiff_t index, scope StringBuilder_UTF16 input) scope return {
+        typeof(this) clobberInsert(ptrdiff_t index, scope StringBuilder_UTF16 input) return scope {
             state.setup(Char.sizeof);
             state.insertImpl(input, index, true);
             return this;
@@ -3516,7 +3516,7 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) clobberInsert(ptrdiff_t index, scope StringBuilder_UTF32 input) scope return {
+        typeof(this) clobberInsert(ptrdiff_t index, scope StringBuilder_UTF32 input) return scope {
             state.setup(Char.sizeof);
             state.insertImpl(input, index, true);
             return this;
