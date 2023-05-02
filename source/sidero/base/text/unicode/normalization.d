@@ -356,12 +356,12 @@ export @safe nothrow @nogc:
     }
 
     bool partial(scope RotatePartialHandlerDelegate handler, scope const(dchar)[] array...) scope @trusted {
-        if (rotateBuffer.length == 0)
+        if (rotateBuffer.length == 0) {
             rotateBuffer = rotateInlineBuffer[];
+            rotateBufferUsed = 0;
+        }
 
         while (array.length > 0) {
-            rotateBufferUsed = 0;
-
             size_t ccc0Count, nonCCC0count;
             foreach (dchar c; array) {
                 ubyte ccc = sidero_utf_lut_getCCC(c);

@@ -129,7 +129,10 @@ export @safe nothrow @nogc:
             size_t inputLength;
 
             foreach (c; input) {
-                inputLength += sidero_utf_lut_lengthOfFullyDecomposed(c);
+                size_t proposed = sidero_utf_lut_lengthOfFullyDecomposed(c);
+                if (proposed == 0)
+                    proposed = 1;
+                inputLength += proposed;
             }
 
             allocateAgainst(inputLength);
@@ -165,7 +168,7 @@ export @safe nothrow @nogc:
     }
 
     /// If you want to know how much of input was consumed to do the match make your input delegate support getting it (ForeachOverUTF does).
-    int compare(scope ForeachOverUTF32Delegate input, bool ignoreLonger = false) scope {
+    int compare(scope ForeachOverUTF32Delegate input, bool ignoreLonger = false) scope @trusted {
         // to make this as cheap as possible, we MUST NOT CALL caseFoldLength.
         // yes we have to call to get the CCC a lot (potentially)
 
@@ -174,7 +177,7 @@ export @safe nothrow @nogc:
 
         rotate.partialReset;
 
-        bool handleRotated(dchar value) @nogc {
+        bool handleRotated(dchar value) @nogc @trusted {
             if (processed >= against.length)
                 return true;
 
