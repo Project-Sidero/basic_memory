@@ -399,6 +399,9 @@ nothrow @nogc:
     ///
     alias opDollar = length;
 
+    ///
+    alias encodingLength = length;
+
     /// Removes null terminator at the end if it has one
     size_t length() const scope {
         size_t ret = this.literal.length;

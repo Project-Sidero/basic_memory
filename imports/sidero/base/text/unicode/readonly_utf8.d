@@ -602,7 +602,7 @@ nothrow @nogc:
     alias opDollar = length;
 
     /**
-        The length of the const(char)[] in its native encoding.
+        The length of the string in its native encoding.
 
         Removes null terminator at the end if it has one.
      */
@@ -642,6 +642,61 @@ nothrow @nogc:
         assert(stack.literal.length == 6);
     }
 
+    /// The length of the string in the current encoding without null termination.
+    size_t encodingLength() scope @nogc {
+        return literalEncoding.handle(() {
+            auto actual = cast(const(char)[])this.literal[0 .. this.length];
+
+            static if (is(Char == char))
+                return actual.length;
+            else static if (is(Char == wchar))
+                return reEncodeLength(actual);
+            else {
+                size_t ret;
+
+                while (actual.length > 0) {
+                    const amount = decodeLength(actual);
+                    actual = actual[amount .. $];
+                    ret++;
+                }
+
+                return ret;
+            }
+        }, () {
+            auto actual = (cast(const(wchar)[])this.literal)[0 .. this.length];
+
+            static if (is(Char == char))
+                return reEncodeLength(actual);
+            else static if (is(Char == wchar))
+                return actual.length;
+            else {
+                size_t ret;
+
+                while (actual.length > 0) {
+                    const amount = decodeLength(actual);
+                    actual = actual[amount .. $];
+                    ret++;
+                }
+
+                return ret;
+            }
+        }, () {
+            auto actual = (cast(const(dchar)[])this.literal)[0 .. this.length];
+
+            static if (is(Char == char))
+                return encodeLengthUTF8(actual);
+            else static if (is(Char == wchar))
+                return encodeLengthUTF16(actual);
+            else
+                return actual.length;
+        });
+    }
+
+    ///
+    unittest {
+        assert(typeof(this)("a\u9EDEz").byUTF32.encodingLength == 3);
+    }
+
     static if (is(Char == char)) {
         ///
         StringBuilder_UTF8 asMutable(RCAllocator allocator = RCAllocator.init) scope const @trusted {
@@ -679,39 +734,7 @@ nothrow @nogc:
                 allocator = globalAllocator();
         }
 
-        size_t needsLength = literalEncoding.handle(() {
-            auto actual = cast(const(char)[])this.literal[0 .. this.length];
-
-            static if (is(Char == char))
-                return actual.length;
-            else static if (is(Char == wchar))
-                return reEncodeLength(actual);
-            else
-                return decodeLength(actual);
-        }, () {
-            auto actual = (cast(const(wchar)[])this.literal)[0 .. this.length];
-
-            static if (is(Char == char))
-                return reEncodeLength(actual);
-            else static if (is(Char == wchar))
-                return actual.length;
-            else
-                return decodeLength(actual);
-        }, () {
-            auto actual = (cast(const(dchar)[])this.literal)[0 .. this.length];
-
-            static if (is(Char == char))
-                return encodeLengthUTF8(actual);
-            else static if (is(Char == wchar))
-                return encodeLengthUTF16(actual);
-            else
-                return actual.length;
-        });
-
-        // zero termination
-        needsLength++;
-
-        Char[] zliteral = allocator.makeArray!Char(needsLength);
+        Char[] zliteral = allocator.makeArray!Char(this.encodingLength + 1);
         zliteral[$ - 1] = '\0';
 
         void copy(Source)(scope Source source) {

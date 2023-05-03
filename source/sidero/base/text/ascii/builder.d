@@ -339,6 +339,8 @@ nothrow @safe:
 
     ///
     alias opDollar = length;
+    ///
+    alias encodingLength = length;
 
     ///
     size_t length() scope @nogc {

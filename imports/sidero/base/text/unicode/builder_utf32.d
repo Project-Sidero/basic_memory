@@ -540,7 +540,7 @@ nothrow @safe:
     ///
     alias opDollar = length;
 
-    ///
+    /// The length of the string in its native encoding.
     size_t length() scope @nogc {
         return state.length;
     }
@@ -549,6 +549,20 @@ nothrow @safe:
     unittest {
         typeof(this) stack = typeof(this)(cast(LiteralType)"hmm...");
         assert(stack.length == 6);
+    }
+
+    /// The length of the string in the current encoding.
+    size_t encodingLength() scope @nogc {
+        size_t ret;
+        this.foreachContiguous(null, (count) {
+            ret += count;
+        });
+        return ret;
+    }
+
+    ///
+    unittest {
+        assert(typeof(this)("a\u9EDEz").byUTF32.encodingLength == 3);
     }
 
     ///
@@ -4262,10 +4276,12 @@ package(sidero.base.text.unicode):
             osiu.iterator = iterator;
 
             osiu.mutex(true);
+            int result;
 
             if (lengthDel !is null)
                 lengthDel(osiu.length());
-            int result = osiu.foreachContiguous(del);
+            if (del !is null)
+                result = osiu.foreachContiguous(del);
 
             osiu.mutex(false);
             return result;
@@ -4277,10 +4293,12 @@ package(sidero.base.text.unicode):
             osiu.iterator = iterator;
 
             osiu.mutex(true);
+            int result;
 
             if (lengthDel !is null)
                 lengthDel(osiu.length());
-            int result = osiu.foreachContiguous(del);
+            if (del !is null)
+            result = osiu.foreachContiguous(del);
 
             osiu.mutex(false);
             return result;
@@ -4292,10 +4310,12 @@ package(sidero.base.text.unicode):
             osiu.iterator = iterator;
 
             osiu.mutex(true);
+            int result;
 
             if (lengthDel !is null)
                 lengthDel(osiu.length());
-            int result = osiu.foreachContiguous(del);
+            if (del !is null)
+            result = osiu.foreachContiguous(del);
 
             osiu.mutex(false);
             return result;
