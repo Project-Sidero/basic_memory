@@ -907,6 +907,11 @@ nothrow @nogc:
     }
 
     ///
+    bool opEquals(scope StringBuilder_ASCII other) scope const @trusted {
+        return this.opCmp(other) == 0;
+    }
+
+    ///
     bool ignoreCaseEquals(scope const(char)[] other, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope const @trusted {
         return (*cast(String_UTF!Char*)&this).ignoreCaseCompareImplSlice(other, allocator, language) == 0;
@@ -964,6 +969,11 @@ nothrow @nogc:
     bool ignoreCaseEquals(scope StringBuilder_UTF32 other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope const @trusted {
         language = pickLanguage(language);
         return other.ignoreCaseEquals(*cast(String_UTF!Char*)&this, language);
+    }
+
+    ///
+    bool ignoreCaseEquals(scope StringBuilder_ASCII other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope const @trusted {
+        return this.ignoreCaseCompare(other, language) == 0;
     }
 
     ///
@@ -1062,6 +1072,16 @@ nothrow @nogc:
     }
 
     ///
+    int opCmp(scope StringBuilder_ASCII other) scope const @trusted {
+        return (*cast(String_UTF!Char*)&this).opCmpImplBuilder(other);
+    }
+
+    unittest {
+        assert(String_UTF32("a"d).opCmp(StringBuilder_ASCII("z")) < 0);
+        assert(String_UTF32("z"d).opCmp(StringBuilder_ASCII("a")) > 0);
+    }
+
+    ///
     int ignoreCaseCompare(scope const(char)[] other, scope RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.Unknown) scope const @trusted {
         return (*cast(String_UTF!Char*)&this).ignoreCaseCompareImplSlice(other, allocator, language);
@@ -1149,6 +1169,17 @@ nothrow @nogc:
     int ignoreCaseCompare(scope StringBuilder_UTF32 other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope const @trusted {
         language = pickLanguage(language);
         return -other.ignoreCaseCompare(*cast(String_UTF!Char*)&this, language);
+    }
+
+    ///
+    int ignoreCaseCompare(scope StringBuilder_ASCII other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope const @trusted {
+        return (*cast(String_UTF!Char*)&this).ignoreCaseCompareImplBuilder(other, RCAllocator.init, language);
+    }
+
+    ///
+    unittest {
+        assert(typeof(this)(cast(LiteralType)"a").ignoreCaseCompare(StringBuilder_ASCII("Z")) < 0);
+        assert(typeof(this)(cast(LiteralType)"Z").ignoreCaseCompare(StringBuilder_ASCII("a")) > 0);
     }
 
     ///
@@ -3212,6 +3243,81 @@ private @hidden:
             });
         }
 
+        int opCmpImplBuilder(scope StringBuilder_ASCII other) {
+            if (isNull)
+                return other.length > 0 ? -1 : 0;
+
+            int matches(Type)(Type us) {
+                if (us.length > 0 && us[$ - 1] == '\0')
+                    us = us[0 .. $ - 1];
+
+                if (us.length < other.length)
+                    return -1;
+                else if (us.length > other.length)
+                    return 1;
+
+                size_t i;
+
+                foreach (c; other) {
+                    if (us[i] < c)
+                        return -1;
+                    else if (us[i] > c)
+                        return 1;
+                    i++;
+                }
+
+                return 0;
+            }
+
+            int needDecode(Type)(Type us) {
+                if (us.length > 0 && us[$ - 1] == '\0')
+                    us = us[0 .. $ - 1];
+
+                foreach (otherC; other) {
+                    dchar usC;
+
+                    static if (typeof(us[0]).sizeof == 4) {
+                        usC = us[0];
+                        us = us[1 .. $];
+                    } else
+                        us = us[decode(us, usC) .. $];
+
+                    if (usC < otherC)
+                        return -1;
+                    else if (usC > otherC)
+                        return 1;
+                }
+
+                if (us.length == 0)
+                    return other.empty ? 0 : -1;
+                else
+                    return 1;
+            }
+
+            return literalEncoding.handle(() {
+                auto actual = cast(const(char)[])this.literal;
+
+                static if (typeof(other[0]).sizeof == char.sizeof) {
+                    return matches(actual);
+                } else
+                    return needDecode(actual);
+            }, () {
+                auto actual = cast(const(wchar)[])this.literal;
+
+                static if (typeof(other[0]).sizeof == wchar.sizeof) {
+                    return matches(actual);
+                } else
+                    return needDecode(actual);
+            }, () {
+                auto actual = cast(const(dchar)[])this.literal;
+
+                static if (typeof(other[0]).sizeof == dchar.sizeof) {
+                    return matches(actual);
+                } else
+                    return needDecode(actual);
+            }, () { return other.length > 0 ? -1 : 0; });
+        }
+
         int ignoreCaseCompareImplReadOnly(scope String_ASCII other, scope RCAllocator allocator = RCAllocator.init,
                 UnicodeLanguage language = UnicodeLanguage.Unknown) {
             return ignoreCaseCompareImplSlice(cast(const(char)[])other.literal, allocator, language);
@@ -3268,6 +3374,46 @@ private @hidden:
             });
 
             return icmpUTF32_NFD(&usH.opApply, &otherH.opApply, allocator, language.isTurkic);
+        }
+
+        int ignoreCaseCompareImplBuilder(scope StringBuilder_ASCII other, scope RCAllocator allocator = RCAllocator.init,
+                UnicodeLanguage language = UnicodeLanguage.Unknown) @trusted {
+            import sidero.base.text.unicode.comparison;
+            import sidero.base.text.unicode.internal.builder : ASCIIStateAsTarget;
+
+            if (isNull)
+                return other.length > 0 ? -1 : 0;
+
+            language = pickLanguage(language);
+            allocator = pickAllocator(allocator);
+
+            scope ForeachOverAnyUTF usH;
+            scope otherH = ASCIIStateAsTarget!dchar(other.state, other.iterator);
+
+            literalEncoding.handle(() @trusted {
+                auto actual = cast(const(char)[])this.literal;
+
+                if (actual.length > 0 && actual[$ - 1] == '\0')
+                    actual = actual[0 .. $ - 1];
+
+                usH = foreachOverAnyUTF(actual);
+            }, () @trusted {
+                auto actual = cast(const(wchar)[])this.literal;
+
+                if (actual.length > 0 && actual[$ - 1] == '\0')
+                    actual = actual[0 .. $ - 1];
+
+                usH = foreachOverAnyUTF(actual);
+            }, () @trusted {
+                auto actual = cast(const(dchar)[])this.literal;
+
+                if (actual.length > 0 && actual[$ - 1] == '\0')
+                    actual = actual[0 .. $ - 1];
+
+                usH = foreachOverAnyUTF(actual);
+            });
+
+            return icmpUTF32_NFD(&usH.opApply, &otherH.foreachValue, allocator, language.isTurkic);
         }
 
         bool startsWithImplSlice(Char2)(scope const(Char2)[] other, scope RCAllocator allocator = RCAllocator.init,
