@@ -452,7 +452,7 @@ nothrow @safe:
     }
 
     ///
-    typeof(this) save() scope @trusted {
+    typeof(this) save() scope @trusted @nogc {
         if (isNull)
             return typeof(this)();
 

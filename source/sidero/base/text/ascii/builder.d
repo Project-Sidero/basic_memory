@@ -292,7 +292,7 @@ nothrow @safe:
     }
 
     ///
-    StringBuilder_ASCII save() scope @trusted {
+    StringBuilder_ASCII save() scope @trusted @nogc {
         if (isNull)
             return StringBuilder_ASCII();
 

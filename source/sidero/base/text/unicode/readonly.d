@@ -39,6 +39,7 @@ struct String_UTF {
 
             void[4] forwardBuffer, backwardBuffer;
             void[] forwardItems, backwardItems;
+            bool primedForwards, primedBackwards;
 
         scope @nogc nothrow:
 
@@ -80,8 +81,22 @@ struct String_UTF {
             this.iterator = null;
             setupIterator;
 
-            if (oldIterator !is null)
+            if (oldIterator !is null) {
                 this.iterator.literal = oldIterator.literal;
+
+                foreach (i; 0 .. oldIterator.forwardItems.length) {
+                    (cast(ubyte[])this.iterator.forwardBuffer)[i] = (cast(ubyte[])oldIterator.forwardItems)[i];
+                }
+                this.iterator.forwardItems = this.iterator.forwardBuffer[0 .. oldIterator.forwardItems.length];
+
+                foreach (i; 0 .. oldIterator.backwardItems.length) {
+                    (cast(ubyte[])this.iterator.backwardBuffer)[i] = (cast(ubyte[])oldIterator.backwardItems)[i];
+                }
+                this.iterator.backwardItems = this.iterator.backwardBuffer[0 .. oldIterator.backwardItems.length];
+
+                this.iterator.primedForwards = oldIterator.primedForwards;
+                this.iterator.primedBackwards = oldIterator.primedBackwards;
+            }
 
             scope (exit) {
                 this.iterator.rc(false);
@@ -112,8 +127,22 @@ struct String_UTF {
             this.iterator = null;
             setupIterator;
 
-            if (oldIterator !is null)
+            if (oldIterator !is null) {
                 this.iterator.literal = oldIterator.literal;
+
+                foreach (i; 0 .. oldIterator.forwardItems.length) {
+                    (cast(ubyte[])this.iterator.forwardBuffer)[i] = (cast(ubyte[])oldIterator.forwardItems)[i];
+                }
+                this.iterator.forwardItems = this.iterator.forwardBuffer[0 .. oldIterator.forwardItems.length];
+
+                foreach (i; 0 .. oldIterator.backwardItems.length) {
+                    (cast(ubyte[])this.iterator.backwardBuffer)[i] = (cast(ubyte[])oldIterator.backwardItems)[i];
+                }
+                this.iterator.backwardItems = this.iterator.backwardBuffer[0 .. oldIterator.backwardItems.length];
+
+                this.iterator.primedForwards = oldIterator.primedForwards;
+                this.iterator.primedBackwards = oldIterator.primedBackwards;
+            }
 
             scope (exit) {
                 this.iterator.rc(false);
@@ -1211,7 +1240,7 @@ nothrow @nogc:
             assert(this.iterator.backwardItems.length > 0);
             return (cast(Char[])this.iterator.backwardItems)[0];
         } else if (needRefill) {
-            popFront;
+            popFrontImpl(false);
         }
 
         // take first in forwards buffer
@@ -1270,7 +1299,7 @@ nothrow @nogc:
             assert(this.iterator.forwardItems.length > 0);
             return (cast(Char[])this.iterator.forwardItems)[$ - 1];
         } else if (needRefill) {
-            popBack;
+            popBackImpl(false);
         }
 
         // take first in forwards buffer
@@ -1316,227 +1345,13 @@ nothrow @nogc:
     }
 
     /// See_Also: front
-    void popFront() scope @trusted {
-        assert(!empty);
-
-        setupIterator;
-
-        const canRefill = this.iterator.literal.length > 0;
-        const needRefill = this.iterator.forwardItems.length == 0;
-        const needToUseOtherBuffer = !canRefill && this.iterator.forwardItems.length == 0 && this.iterator.backwardItems.length > 0;
-
-        void copy(Destination, Source)(scope Destination destination, scope Source source) {
-            foreach (i, c; source)
-                destination[i] = c;
-        }
-
-        if (needToUseOtherBuffer) {
-            this.iterator.backwardItems = (cast(Char[])this.iterator.backwardItems)[1 .. $];
-        } else if (needRefill) {
-            assert(canRefill);
-
-            Char[4 / Char.sizeof] charBuffer = void;
-            size_t amountFilled;
-
-            literalEncoding.handle(() {
-                auto actual = cast(const(char)[])this.iterator.literal;
-
-                static if (is(Char == char)) {
-                    // copy straight
-                    size_t canDo = charBuffer.length;
-                    if (canDo > actual.length)
-                        canDo = actual.length;
-
-                    copy(charBuffer[0 .. canDo], actual[0 .. canDo]);
-
-                    actual = actual[canDo .. $];
-                    amountFilled = canDo;
-                } else static if (is(Char == wchar)) {
-                    // need to reencode
-                    const consumedGiven = reEncode(actual, charBuffer);
-
-                    actual = actual[consumedGiven[0] .. $];
-                    amountFilled = consumedGiven[1];
-                } else static if (is(Char == dchar)) {
-                    // decode
-                    const consumed = decode(actual, charBuffer[0]);
-
-                    actual = actual[consumed .. $];
-                    amountFilled = 1;
-                }
-
-                this.iterator.literal = actual;
-            }, () {
-                auto actual = cast(const(wchar)[])this.iterator.literal;
-
-                static if (is(Char == char)) {
-                    // need to reencode
-                    const consumedGiven = reEncode(actual, charBuffer);
-
-                    actual = actual[consumedGiven[0] .. $];
-                    amountFilled = consumedGiven[1];
-                } else static if (is(Char == wchar)) {
-                    // copy straight
-                    size_t canDo = charBuffer.length;
-                    if (canDo > actual.length)
-                        canDo = actual.length;
-
-                    copy(charBuffer[0 .. canDo], actual[0 .. canDo]);
-
-                    actual = actual[canDo .. $];
-                    amountFilled = canDo;
-                } else static if (is(Char == dchar)) {
-                    // decode
-                    const consumed = decode(actual, charBuffer[0]);
-
-                    actual = actual[consumed .. $];
-                    amountFilled = 1;
-                }
-
-                this.iterator.literal = actual;
-            }, () {
-                auto actual = cast(const(dchar)[])this.iterator.literal;
-
-                static if (is(Char == char)) {
-                    // encode
-                    amountFilled = encodeUTF8(actual[0], charBuffer);
-                    actual = actual[1 .. $];
-                } else static if (is(Char == wchar)) {
-                    // encode
-                    amountFilled = encodeUTF16(actual[0], charBuffer);
-                    actual = actual[1 .. $];
-                } else static if (is(Char == dchar)) {
-                    // copy straight
-                    size_t canDo = charBuffer.length;
-                    if (canDo > actual.length)
-                        canDo = actual.length;
-
-                    copy(charBuffer[0 .. canDo], actual[0 .. canDo]);
-
-                    actual = actual[canDo .. $];
-                    amountFilled = canDo;
-                }
-
-                this.iterator.literal = actual;
-            });
-
-            this.iterator.forwardBuffer = charBuffer;
-            this.iterator.forwardItems = (cast(Char[])this.iterator.forwardBuffer)[0 .. amountFilled];
-        } else {
-            this.iterator.forwardItems = (cast(Char[])this.iterator.forwardItems)[1 .. $];
-        }
+    void popFront() scope {
+        this.popFrontImpl(true);
     }
 
     /// See_Also: back
-    void popBack() scope @trusted {
-        assert(!empty);
-
-        setupIterator;
-
-        const canRefill = this.iterator.literal.length > 0;
-        const needRefill = this.iterator.backwardItems.length == 0;
-        const needToUseOtherBuffer = !canRefill && this.iterator.forwardItems.length > 0 && needRefill;
-
-        void copy(Destination, Source)(scope Destination destination, scope Source source) {
-            foreach (i, c; source)
-                destination[i] = c;
-        }
-
-        if (needToUseOtherBuffer) {
-            this.iterator.forwardItems = (cast(Char[])this.iterator.forwardItems)[0 .. $ - 1];
-        } else if (needRefill) {
-            assert(canRefill);
-
-            Char[4 / Char.sizeof] charBuffer = void;
-            size_t amountFilled;
-
-            literalEncoding.handle(() {
-                auto actual = cast(const(char)[])this.iterator.literal;
-
-                static if (is(Char == char)) {
-                    // copy straight
-                    size_t canDo = charBuffer.length;
-                    if (canDo > actual.length)
-                        canDo = actual.length;
-
-                    copy(charBuffer[0 .. canDo], actual[$ - canDo .. $]);
-
-                    actual = actual[0 .. $ - canDo];
-                    amountFilled = canDo;
-                } else static if (is(Char == wchar)) {
-                    // need to reencode
-                    const consumedGiven = reEncodeFromEnd(actual, charBuffer);
-
-                    actual = actual[0 .. $ - consumedGiven[0]];
-                    amountFilled = consumedGiven[1];
-                } else static if (is(Char == dchar)) {
-                    // decode
-                    const consumed = decodeFromEnd(actual, charBuffer[0]);
-
-                    actual = actual[0 .. $ - consumed];
-                    amountFilled = 1;
-                }
-
-                this.iterator.literal = actual;
-            }, () {
-                auto actual = cast(const(wchar)[])this.iterator.literal;
-
-                static if (is(Char == char)) {
-                    // need to reencode
-                    const consumedGiven = reEncodeFromEnd(actual, charBuffer);
-
-                    actual = actual[0 .. $ - consumedGiven[0]];
-                    amountFilled = consumedGiven[1];
-                } else static if (is(Char == wchar)) {
-                    // copy straight
-                    size_t canDo = charBuffer.length;
-                    if (canDo > actual.length)
-                        canDo = actual.length;
-
-                    copy(charBuffer[0 .. canDo], actual[$ - canDo .. $]);
-
-                    actual = actual[0 .. $ - canDo];
-                    amountFilled = canDo;
-                } else static if (is(Char == dchar)) {
-                    // decode
-                    const consumed = decodeFromEnd(actual, charBuffer[0]);
-
-                    actual = actual[0 .. $ - consumed];
-                    amountFilled = 1;
-                }
-
-                this.iterator.literal = actual;
-            }, () {
-                auto actual = cast(const(dchar)[])this.iterator.literal;
-
-                static if (is(Char == char)) {
-                    // encode
-                    amountFilled = encodeUTF8(actual[$ - 1], charBuffer);
-                    actual = actual[0 .. $ - 1];
-                } else static if (is(Char == wchar)) {
-                    // encode
-                    amountFilled = encodeUTF16(actual[$ - 1], charBuffer);
-                    actual = actual[0 .. $ - 1];
-                } else static if (is(Char == dchar)) {
-                    // copy straight
-                    size_t canDo = charBuffer.length;
-                    if (canDo > actual.length)
-                        canDo = actual.length;
-
-                    copy(charBuffer[0 .. canDo], actual[$ - canDo .. $]);
-
-                    actual = actual[0 .. $ - canDo];
-                    amountFilled = canDo;
-                }
-
-                this.iterator.literal = actual;
-            });
-
-            this.iterator.backwardBuffer = charBuffer;
-            this.iterator.backwardItems = (cast(Char[])this.iterator.backwardBuffer)[0 .. amountFilled];
-        } else {
-            this.iterator.backwardItems = (cast(Char[])this.iterator.backwardItems)[0 .. $ - 1];
-        }
+    void popBack() scope {
+        this.popBackImpl(true);
     }
 
     ///
@@ -1549,6 +1364,18 @@ nothrow @nogc:
 
         if (this.lifeTime !is null)
             atomicOp!"+="(this.lifeTime.refCount, 1);
+
+        if (this.iterator !is null) {
+            ret.setupIterator;
+
+            while (ret.iterator.literal.ptr < this.iterator.literal.ptr) {
+                ret.popFront;
+            }
+
+            while (ret.iterator.literal.length > 0 && &ret.iterator.literal[$ - 1] > &this.iterator.literal[$ - 1]) {
+                ret.popBack;
+            }
+        }
 
         return ret;
     }
@@ -1580,6 +1407,18 @@ nothrow @nogc:
         if (this.lifeTime !is null)
             atomicOp!"+="(this.lifeTime.refCount, 1);
 
+        if (this.iterator !is null) {
+            ret.setupIterator;
+
+            while (ret.iterator.literal.ptr < this.iterator.literal.ptr) {
+                ret.popFront;
+            }
+
+            while (ret.iterator.literal.length > 0 && &ret.iterator.literal[$ - 1] > &this.iterator.literal[$ - 1]) {
+                ret.popBack;
+            }
+        }
+
         return ret;
     }
 
@@ -1609,6 +1448,18 @@ nothrow @nogc:
 
         if (this.lifeTime !is null)
             atomicOp!"+="(this.lifeTime.refCount, 1);
+
+        if (this.iterator !is null) {
+            ret.setupIterator;
+
+            while (ret.iterator.literal.ptr < this.iterator.literal.ptr) {
+                ret.popFront;
+            }
+
+            while (ret.iterator.literal.length > 0 && &ret.iterator.literal[$ - 1] > &this.iterator.literal[$ - 1]) {
+                ret.popBack;
+            }
+        }
 
         return ret;
     }
@@ -3030,7 +2881,7 @@ nothrow @nogc:
         assert(value.literal.length == 6);
     }
 
-private @hidden:
+package(sidero.base.text) @hidden:
     void setupIterator()() scope @trusted {
         if (isNull || haveIterator)
             return;
@@ -3779,6 +3630,238 @@ private @hidden:
                 auto actual = cast(const(dchar)[])other.literal;
                 return lastIndexOfImplSlice(actual, allocator, caseSensitive, language);
             }, () { return -1; });
+        }
+
+        void popFrontImpl(bool allowPriming = false) @trusted {
+            assert(!empty);
+            setupIterator;
+
+            foreach (attempt; 0 .. 1 + (!this.iterator.primedForwards && allowPriming)) {
+                if (attempt == 1 && empty)
+                    return;
+
+                const canRefill = this.iterator.literal.length > 0;
+                const needRefill = this.iterator.forwardItems.length == 0;
+                const needToUseOtherBuffer = !canRefill && this.iterator.forwardItems.length == 0 && this.iterator.backwardItems.length > 0;
+
+                void copy(Destination, Source)(scope Destination destination, scope Source source) {
+                    foreach (i, c; source)
+                        destination[i] = c;
+                }
+
+                if (needToUseOtherBuffer) {
+                    this.iterator.backwardItems = (cast(Char[])this.iterator.backwardItems)[1 .. $];
+                } else if (needRefill) {
+                    assert(canRefill);
+                    this.iterator.primedForwards = true;
+
+                    Char[4 / Char.sizeof] charBuffer = void;
+                    size_t amountFilled;
+
+                    literalEncoding.handle(() {
+                        auto actual = cast(const(char)[])this.iterator.literal;
+
+                        static if (is(Char == char)) {
+                            // copy straight
+                            size_t canDo = charBuffer.length;
+                            if (canDo > actual.length)
+                                canDo = actual.length;
+
+                            copy(charBuffer[0 .. canDo], actual[0 .. canDo]);
+
+                            actual = actual[canDo .. $];
+                            amountFilled = canDo;
+                        } else static if (is(Char == wchar)) {
+                            // need to reencode
+                            const consumedGiven = reEncode(actual, charBuffer);
+
+                            actual = actual[consumedGiven[0] .. $];
+                            amountFilled = consumedGiven[1];
+                        } else static if (is(Char == dchar)) {
+                            // decode
+                            const consumed = decode(actual, charBuffer[0]);
+
+                            actual = actual[consumed .. $];
+                            amountFilled = 1;
+                        }
+
+                        this.iterator.literal = actual;
+                    }, () {
+                        auto actual = cast(const(wchar)[])this.iterator.literal;
+
+                        static if (is(Char == char)) {
+                            // need to reencode
+                            const consumedGiven = reEncode(actual, charBuffer);
+
+                            actual = actual[consumedGiven[0] .. $];
+                            amountFilled = consumedGiven[1];
+                        } else static if (is(Char == wchar)) {
+                            // copy straight
+                            size_t canDo = charBuffer.length;
+                            if (canDo > actual.length)
+                                canDo = actual.length;
+
+                            copy(charBuffer[0 .. canDo], actual[0 .. canDo]);
+
+                            actual = actual[canDo .. $];
+                            amountFilled = canDo;
+                        } else static if (is(Char == dchar)) {
+                            // decode
+                            const consumed = decode(actual, charBuffer[0]);
+
+                            actual = actual[consumed .. $];
+                            amountFilled = 1;
+                        }
+
+                        this.iterator.literal = actual;
+                    }, () {
+                        auto actual = cast(const(dchar)[])this.iterator.literal;
+
+                        static if (is(Char == char)) {
+                            // encode
+                            amountFilled = encodeUTF8(actual[0], charBuffer);
+                            actual = actual[1 .. $];
+                        } else static if (is(Char == wchar)) {
+                            // encode
+                            amountFilled = encodeUTF16(actual[0], charBuffer);
+                            actual = actual[1 .. $];
+                        } else static if (is(Char == dchar)) {
+                            // copy straight
+                            size_t canDo = charBuffer.length;
+                            if (canDo > actual.length)
+                                canDo = actual.length;
+
+                            copy(charBuffer[0 .. canDo], actual[0 .. canDo]);
+
+                            actual = actual[canDo .. $];
+                            amountFilled = canDo;
+                        }
+
+                        this.iterator.literal = actual;
+                    });
+
+                    this.iterator.forwardBuffer = charBuffer;
+                    this.iterator.forwardItems = (cast(Char[])this.iterator.forwardBuffer)[0 .. amountFilled];
+                } else {
+                    this.iterator.forwardItems = (cast(Char[])this.iterator.forwardItems)[1 .. $];
+                }
+            }
+        }
+
+        void popBackImpl(bool allowPriming = false) @trusted {
+            assert(!empty);
+            setupIterator;
+
+            foreach (attempt; 0 .. 1 + (!this.iterator.primedBackwards && allowPriming)) {
+                if (attempt == 1 && empty)
+                    return;
+
+                const canRefill = this.iterator.literal.length > 0;
+                const needRefill = this.iterator.backwardItems.length == 0;
+                const needToUseOtherBuffer = !canRefill && this.iterator.forwardItems.length > 0 && needRefill;
+
+                void copy(Destination, Source)(scope Destination destination, scope Source source) {
+                    foreach (i, c; source)
+                        destination[i] = c;
+                }
+
+                if (needToUseOtherBuffer) {
+                    this.iterator.forwardItems = (cast(Char[])this.iterator.forwardItems)[0 .. $ - 1];
+                } else if (needRefill) {
+                    assert(canRefill);
+                    this.iterator.primedBackwards = true;
+
+                    Char[4 / Char.sizeof] charBuffer = void;
+                    size_t amountFilled;
+
+                    literalEncoding.handle(() {
+                        auto actual = cast(const(char)[])this.iterator.literal;
+
+                        static if (is(Char == char)) {
+                            // copy straight
+                            size_t canDo = charBuffer.length;
+                            if (canDo > actual.length)
+                                canDo = actual.length;
+
+                            copy(charBuffer[0 .. canDo], actual[$ - canDo .. $]);
+
+                            actual = actual[0 .. $ - canDo];
+                            amountFilled = canDo;
+                        } else static if (is(Char == wchar)) {
+                            // need to reencode
+                            const consumedGiven = reEncodeFromEnd(actual, charBuffer);
+
+                            actual = actual[0 .. $ - consumedGiven[0]];
+                            amountFilled = consumedGiven[1];
+                        } else static if (is(Char == dchar)) {
+                            // decode
+                            const consumed = decodeFromEnd(actual, charBuffer[0]);
+
+                            actual = actual[0 .. $ - consumed];
+                            amountFilled = 1;
+                        }
+
+                        this.iterator.literal = actual;
+                    }, () {
+                        auto actual = cast(const(wchar)[])this.iterator.literal;
+
+                        static if (is(Char == char)) {
+                            // need to reencode
+                            const consumedGiven = reEncodeFromEnd(actual, charBuffer);
+
+                            actual = actual[0 .. $ - consumedGiven[0]];
+                            amountFilled = consumedGiven[1];
+                        } else static if (is(Char == wchar)) {
+                            // copy straight
+                            size_t canDo = charBuffer.length;
+                            if (canDo > actual.length)
+                                canDo = actual.length;
+
+                            copy(charBuffer[0 .. canDo], actual[$ - canDo .. $]);
+
+                            actual = actual[0 .. $ - canDo];
+                            amountFilled = canDo;
+                        } else static if (is(Char == dchar)) {
+                            // decode
+                            const consumed = decodeFromEnd(actual, charBuffer[0]);
+
+                            actual = actual[0 .. $ - consumed];
+                            amountFilled = 1;
+                        }
+
+                        this.iterator.literal = actual;
+                    }, () {
+                        auto actual = cast(const(dchar)[])this.iterator.literal;
+
+                        static if (is(Char == char)) {
+                            // encode
+                            amountFilled = encodeUTF8(actual[$ - 1], charBuffer);
+                            actual = actual[0 .. $ - 1];
+                        } else static if (is(Char == wchar)) {
+                            // encode
+                            amountFilled = encodeUTF16(actual[$ - 1], charBuffer);
+                            actual = actual[0 .. $ - 1];
+                        } else static if (is(Char == dchar)) {
+                            // copy straight
+                            size_t canDo = charBuffer.length;
+                            if (canDo > actual.length)
+                                canDo = actual.length;
+
+                            copy(charBuffer[0 .. canDo], actual[$ - canDo .. $]);
+
+                            actual = actual[0 .. $ - canDo];
+                            amountFilled = canDo;
+                        }
+
+                        this.iterator.literal = actual;
+                    });
+
+                    this.iterator.backwardBuffer = charBuffer;
+                    this.iterator.backwardItems = (cast(Char[])this.iterator.backwardBuffer)[0 .. amountFilled];
+                } else {
+                    this.iterator.backwardItems = (cast(Char[])this.iterator.backwardItems)[0 .. $ - 1];
+                }
+            }
         }
     }
 }
