@@ -426,26 +426,18 @@ scope nothrow @nogc @safe @hidden:
     }
 
     void strip() {
-        this.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
-            assert(state !is null);
-            state.strip(iterator);
-        }, (StateIterator.S16 state, StateIterator.I16 iterator) {
-            assert(state !is null);
-            state.strip(iterator);
-        }, (StateIterator.S32 state, StateIterator.I32 iterator) {
-            assert(state !is null);
-            state.strip(iterator);
-        }, () {});
+        this.handle((StateIterator.S8 state, StateIterator.I8 iterator) { assert(state !is null); state.strip(iterator); },
+                (StateIterator.S16 state, StateIterator.I16 iterator) { assert(state !is null); state.strip(iterator); },
+                (StateIterator.S32 state, StateIterator.I32 iterator) { assert(state !is null); state.strip(iterator); }, () {
+        });
     }
 
     void stripLeft() {
         this.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
             assert(state !is null);
             state.stripLeft(iterator);
-        }, (StateIterator.S16 state, StateIterator.I16 iterator) {
-            assert(state !is null);
-            state.stripLeft(iterator);
-        }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+        }, (StateIterator.S16 state, StateIterator.I16 iterator) { assert(state !is null); state.stripLeft(iterator); },
+                (StateIterator.S32 state, StateIterator.I32 iterator) {
             assert(state !is null);
             state.stripLeft(iterator);
         }, () {});
@@ -455,10 +447,8 @@ scope nothrow @nogc @safe @hidden:
         this.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
             assert(state !is null);
             state.stripRight(iterator);
-        }, (StateIterator.S16 state, StateIterator.I16 iterator) {
-            assert(state !is null);
-            state.stripRight(iterator);
-        }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+        }, (StateIterator.S16 state, StateIterator.I16 iterator) { assert(state !is null); state.stripRight(iterator); },
+                (StateIterator.S32 state, StateIterator.I32 iterator) {
             assert(state !is null);
             state.stripRight(iterator);
         }, () {});
@@ -1520,8 +1510,8 @@ struct UTF_State(Char) {
 
             ptrdiff_t minimumOffsetFromHead = otherLength, maximumOffsetFromHead = usLength;
             minimumOffsetFromHead = -minimumOffsetFromHead;
+            changeIndexToOffset(iterator, minimumOffsetFromHead, maximumOffsetFromHead);
 
-            changeIndexToOffset(iterator, minimumOffsetFromHead);
             iterator = iteratorList.newIterator(&blockList, minimumOffsetFromHead, maximumOffsetFromHead);
             debug checkForNullIterator;
         }

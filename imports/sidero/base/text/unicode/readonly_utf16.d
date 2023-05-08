@@ -3258,7 +3258,7 @@ private @hidden:
 
                 size_t i;
 
-                foreach(c; other) {
+                foreach (c; other) {
                     if (us[i] < c)
                         return -1;
                     else if (us[i] > c)
@@ -3273,7 +3273,7 @@ private @hidden:
                 if (us.length > 0 && us[$ - 1] == '\0')
                     us = us[0 .. $ - 1];
 
-                foreach(otherC; other) {
+                foreach (otherC; other) {
                     dchar usC;
 
                     static if (typeof(us[0]).sizeof == 4) {
@@ -3377,7 +3377,7 @@ private @hidden:
         }
 
         int ignoreCaseCompareImplBuilder(scope StringBuilder_ASCII other, scope RCAllocator allocator = RCAllocator.init,
-            UnicodeLanguage language = UnicodeLanguage.Unknown) @trusted {
+                UnicodeLanguage language = UnicodeLanguage.Unknown) @trusted {
             import sidero.base.text.unicode.comparison;
             import sidero.base.text.unicode.internal.builder : ASCIIStateAsTarget;
 
