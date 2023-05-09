@@ -92,7 +92,7 @@
             "lflags-windows": [
                 "/IGNORE:4217"
             ],
-            "libs-windows": ["Ws2_32", "advapi32"],
+            "libs-windows": ["Ws2_32", "advapi32", "Userenv"],
             "versions": ["Windows7"],
             "dependencies": {
                 "sidero_base:makeUnicodeStrings": "*"

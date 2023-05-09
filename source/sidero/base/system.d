@@ -4,7 +4,7 @@ import sidero.base.text;
 import sidero.base.text.unicode.characters.database : UnicodeLanguage;
 import sidero.base.traits : isUTFReadOnly, isUTFBuilder;
 import sidero.base.attributes : hidden;
-import sidero.base.path.file : PathSeparator;
+import sidero.base.path.file;
 
 export @safe nothrow @nogc:
 
@@ -459,8 +459,79 @@ unittest {
 }
 
 ///
-String_UTF8 homeDirectory() @trusted {
-    return _homeDirectory;
+FilePath homeDirectory() @trusted {
+    initMutex.pureLock;
+    FilePath ret = _homeDirectory;
+    initMutex.unlock;
+
+    if (_homeDirectory.isNull) {
+        version (Windows) {
+            import sidero.base.allocators;
+            import core.sys.windows.windows : OpenProcessToken, GetCurrentProcess, CloseHandle, HANDLE, DWORD;
+            import core.sys.windows.winnt : TOKEN_QUERY;
+
+            HANDLE userToken;
+
+            if (OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &userToken)) {
+                DWORD profileDirectoryLength;
+                GetUserProfileDirectoryW(userToken, null, &profileDirectoryLength);
+
+                if (profileDirectoryLength > 0) {
+                    RCAllocator allocator = globalAllocator;
+                    wchar[] profileDirectory = allocator.makeArray!wchar(profileDirectoryLength);
+
+                    if (GetUserProfileDirectoryW(userToken, profileDirectory.ptr, &profileDirectoryLength)) {
+                        auto got = FilePath.from(String_UTF16(profileDirectory, allocator, profileDirectory).byUTF8);
+                        if (got)
+                            ret = got.get;
+                    } else {
+                        allocator.dispose(profileDirectory);
+                    }
+                }
+            }
+
+            CloseHandle(userToken);
+        } else version (Posix) {
+            import core.sys.posix.unistd : sysconf, _SC_GETPW_R_SIZE_MAX, getuid;
+            import core.sys.posix.pwd : getpwuid_r, passwd;
+
+            String_UTF8 attemptedEV = EnvironmentVariables[String_UTF8("HOME")];
+            if (attemptedEV.length > 0) {
+                auto got = FilePath.from(attemptedEV);
+                if (got)
+                    ret = got.get;
+            } else {
+                const sizeNeeded = sysconf(_SC_GETPW_R_SIZE_MAX);
+                DynamicArray!ubyte buffer = DynamicArray!ubyte(sizeNeeded > 0 ? sizeNeeded : 16384);
+
+                passwd pwdBuffer;
+                passwd* pwdResult;
+
+                int result = getpwuid_r(getuid(), &pwdBuffer, buffer.ptr, buffer.length, &pwdResult);
+
+                if (result != 0 || pwdResult is null) {
+                    // do nothing, well this is odd... *sigh*
+                } else {
+                    const homeDirectoryLength = strlen(pwdBuffer.pw_dir);
+
+                    if (homeDirectoryLength > 0) {
+                        auto got = FilePath.from(String_UTF8(pwdBuffer.pw_dir[0 .. homeDirectoryLength]));
+                        if (got)
+                            ret = got.get;
+                    }
+                }
+            }
+        } else
+            static assert(0, "Unimplemented getting of home directory");
+
+        if (!ret.isNull) {
+            initMutex.pureLock;
+            _homeDirectory = ret;
+            initMutex.unlock;
+        }
+    }
+
+    return ret;
 }
 
 ///
@@ -674,62 +745,6 @@ pragma(crt_constructor) extern (C) void initializeSystemInfo() @trusted {
         } else
             static assert(0, "Unimplemented cpu count");
     }
-
-    {
-        version (Windows) {
-            import sidero.base.allocators;
-            import core.sys.windows.winbase : OpenProcessToken, GetCurrentProcess, CloseHandle;
-            import core.sys.windows.winnt : TOKEN_QUERY;
-
-            HANDLE userToken;
-
-            if (OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &userToken)) {
-                DWORD profileDirectoryLength;
-                GetUserProfileDirectoryW(userToken, null, &profileDirectoryLength);
-
-                if (profileDirectoryLength > 0) {
-                    RCAllocator allocator = globalAllocator;
-                    wchar[] profileDirectory = allocator.makeArray!wchar(profileDirectoryLength);
-
-                    if (GetUserProfileDirectoryW(userToken, profileDirectory.ptr, &profileDirectoryLength)) {
-                        _homeDirectory = String_UTF16(profileDirectory, allocator, profileDirectory).byUTF8;
-                    } else {
-                        allocator.dispose(profileDirectory);
-                    }
-                }
-            }
-
-            CloseHandle(userToken);
-        } else version (Posix) {
-            import core.sys.posix.unistd : sysconf, _SC_GETPW_R_SIZE_MAX, getuid;
-            import core.sys.posix.pwd : getpwuid_r, passwd;
-
-            String_UTF8 attemptedEV = EnvironmentVariables[String_UTF8("HOME")];
-            if (attemptedEV.length > 0) {
-                if (attemptedEV.endsWith("/"))
-                    attemptedEV = attemptedEV[0 .. $ - 1];
-                _homeDirectory = attemptedEV;
-            } else {
-                const sizeNeeded = sysconf(_SC_GETPW_R_SIZE_MAX);
-                DynamicArray!ubyte buffer = DynamicArray!ubyte(sizeNeeded > 0 ? sizeNeeded : 16384);
-
-                passwd pwdBuffer;
-                passwd* pwdResult;
-
-                int result = getpwuid_r(getuid(), &pwdBuffer, buffer.ptr, buffer.length, &pwdResult);
-
-                if (result != 0 || pwdResult is null) {
-                    // do nothing, well this is odd... *sigh*
-                } else {
-                    const homeDirectoryLength = strlen(pwdBuffer.pw_dir);
-
-                    if (homeDirectoryLength > 0)
-                        _homeDirectory = String_UTF8(pwdBuffer.pw_dir[0 .. homeDirectoryLength]).dup;
-                }
-            }
-        } else
-            static assert(0, "Unimplemented getting of home directory");
-    }
 }
 
 private @hidden:
@@ -745,7 +760,7 @@ version (Windows) {
 
     extern (Windows) int GetUserDefaultLocaleName(LPWSTR, int);
 
-    extern(Windows) bool GetUserProfileDirectoryW(HANDLE, LPWSTR, DWORD*);
+    extern (Windows) bool GetUserProfileDirectoryW(HANDLE, LPWSTR, DWORD*);
 }
 
 __gshared {
@@ -758,7 +773,7 @@ __gshared {
     bool isUnicodeLanguageOverridden;
 
     Slice!String_UTF8 _commandLineArguments;
-    String_UTF8 _homeDirectory;
+    FilePath _homeDirectory;
 
     uint cpuCount_;
 }
