@@ -87,7 +87,7 @@ mixin template StringBuilderOperations() {
         changeIndexToOffset(iterator, offset);
 
         size_t maximumOffsetFromHead;
-        Cursor cursor = cursorFor(iterator, maximumOffsetFromHead, offset);
+        Cursor cursor = cursorFor(null, maximumOffsetFromHead, offset);
         assert(other.length() > 0);
         insertOperation(cursor, maximumOffsetFromHead, other, clobber);
         assert(other.length() > 0);
@@ -104,7 +104,7 @@ mixin template StringBuilderOperations() {
 
         if (!errorInfo.isSet) {
             size_t maximumOffsetFromHead;
-            Cursor cursor = cursorFor(iterator, maximumOffsetFromHead, offset);
+            Cursor cursor = cursorFor(null, maximumOffsetFromHead, offset);
             removeOperation(cursor, maximumOffsetFromHead, amount);
         }
 

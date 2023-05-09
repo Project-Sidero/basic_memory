@@ -4,17 +4,9 @@ import sidero.base.text;
 import sidero.base.text.unicode.characters.database : UnicodeLanguage;
 import sidero.base.traits : isUTFReadOnly, isUTFBuilder;
 import sidero.base.attributes : hidden;
+import sidero.base.path.file : PathSeparator;
 
 export @safe nothrow @nogc:
-
-version (Posix) {
-    ///
-    enum PathSeperator = '/';
-} else version (Windows) {
-    ///
-    enum PathSeperator = '\\';
-} else
-    static assert(0, "Unimplemented");
 
 /// Get the cpu core count with threads (Hyper Threading)
 uint cpuCount() @trusted {
@@ -348,8 +340,8 @@ String_UTF8 currentWorkingDirectory() @trusted {
             auto length2 = GetCurrentDirectoryW(cast(uint)buffer.length, cast(LPWSTR)buffer.ptr);
 
             if (length2 + 1 == length) {
-                if (buffer[length2] != PathSeperator) {
-                    buffer[length2] = PathSeperator;
+                if (buffer[length2] != PathSeparator) {
+                    buffer[length2] = PathSeparator;
                     length2++;
                     buffer[length2] = '\0';
                 }
@@ -381,8 +373,8 @@ String_UTF8 currentWorkingDirectory() @trusted {
 
             size_t length = strlen(got);
 
-            if (got[length] != PathSeperator) {
-                got[length] = PathSeperator;
+            if (got[length] != PathSeparator) {
+                got[length] = PathSeparator;
                 length++;
                 got[length] = '\0';
             }
@@ -415,7 +407,7 @@ void currentWorkingDirectory(scope String_ASCII value) @trusted {
 ///
 unittest {
     assert(!currentWorkingDirectory().isNull);
-    assert(currentWorkingDirectory().endsWith([PathSeperator]));
+    assert(currentWorkingDirectory().endsWith([PathSeparator]));
     currentWorkingDirectory = String_ASCII();
 }
 
@@ -462,8 +454,13 @@ void currentWorkingDirectory(Input)(scope Input value) @trusted if (isUTFReadOnl
 ///
 unittest {
     assert(!currentWorkingDirectory().isNull);
-    assert(currentWorkingDirectory().endsWith([PathSeperator]));
+    assert(currentWorkingDirectory().endsWith([PathSeparator]));
     currentWorkingDirectory = String_UTF8();
+}
+
+///
+String_UTF8 homeDirectory() @trusted {
+    return _homeDirectory;
 }
 
 ///
@@ -553,122 +550,186 @@ pragma(crt_constructor) extern (C) void initializeSystemInfo() @trusted {
     import core.stdc.wchar_ : wcslen;
 
     initMutex.pureLock;
-    DynamicArray!String_UTF8 ret = DynamicArray!String_UTF8(0);
 
     scope (exit) {
-        _commandLineArguments = ret.asReadOnly;
         initMutex.unlock;
     }
 
-    void handle(String_UTF8 arg) {
-        if (!arg.isPtrNullTerminated)
-            arg = arg.dup;
+    {
+        DynamicArray!String_UTF8 ret = DynamicArray!String_UTF8(0);
 
-        ret ~= arg;
-    }
-
-    version (Posix) {
-        import core.stdc.stdio : FILE, fopen, fclose, fread;
-
-        enum FilePath = "/proc/self/cmdline";
-        FILE* file = fopen(FilePath, "rb");
-
-        if (file !is null) {
-            StringBuilder_UTF8 temp = StringBuilder_UTF8(globalAllocator());
-
-            size_t length, length2;
-            char[100] buffer;
-
-            while ((length = fread(buffer.ptr, 1, buffer.length, file)) > 0) {
-                char[] wasRead = buffer[length];
-
-                while ((length2 = strlen(wasRead.ptr)) > 0) {
-                    char[] current = wasRead[0 .. length2];
-
-                    temp ~= current;
-
-                    if (length2 == wasRead.length) {
-                        // we didn't max out
-                    } else {
-                        // we maxed out so we're done for this one.
-                        handle(temp.asReadOnly);
-                        temp.clear;
-                    }
-
-                    wasRead = wasRead[length2 .. $];
-                }
-            }
-
-            if (temp.length > 0)
-                handle(temp.asReadOnly);
-
-            fclose(file);
+        scope (exit) {
+            _commandLineArguments = ret.asReadOnly;
         }
-    } else version (Windows) {
-        import core.sys.windows.winbase : GetCommandLineW;
 
-        wchar* got = GetCommandLineW();
-        wchar[] temp = got[0 .. wcslen(got)];
+        void handle(String_UTF8 arg) {
+            if (!arg.isPtrNullTerminated)
+                arg = arg.dup;
 
-        while (temp.length > 0) {
-            size_t length;
-            char delim = ' ';
+            ret ~= arg;
+        }
 
-            foreach (wchar c; temp) {
-                if (c == ' ' || c == '\t')
-                    length++;
-                else
-                    break;
+        version (Posix) {
+            import core.stdc.stdio : FILE, fopen, fclose, fread;
+
+            enum FilePath = "/proc/self/cmdline";
+            FILE* file = fopen(FilePath, "rb");
+
+            if (file !is null) {
+                StringBuilder_UTF8 temp = StringBuilder_UTF8(globalAllocator());
+
+                size_t length, length2;
+                char[100] buffer;
+
+                while ((length = fread(buffer.ptr, 1, buffer.length, file)) > 0) {
+                    char[] wasRead = buffer[length];
+
+                    while ((length2 = strlen(wasRead.ptr)) > 0) {
+                        char[] current = wasRead[0 .. length2];
+
+                        temp ~= current;
+
+                        if (length2 == wasRead.length) {
+                            // we didn't max out
+                        } else {
+                            // we maxed out so we're done for this one.
+                            handle(temp.asReadOnly);
+                            temp.clear;
+                        }
+
+                        wasRead = wasRead[length2 .. $];
+                    }
+                }
+
+                if (temp.length > 0)
+                    handle(temp.asReadOnly);
+
+                fclose(file);
             }
+        } else version (Windows) {
+            import core.sys.windows.winbase : GetCommandLineW;
 
-            temp = temp[length .. $];
+            wchar* got = GetCommandLineW();
+            wchar[] temp = got[0 .. wcslen(got)];
 
-            if (temp.length > 0) {
-                if (temp[0] == '"')
-                    delim = '"';
+            while (temp.length > 0) {
+                size_t length;
+                char delim = ' ';
 
-                length = 0;
                 foreach (wchar c; temp) {
-                    length++;
-                    if (c == delim)
+                    if (c == ' ' || c == '\t')
+                        length++;
+                    else
                         break;
                 }
 
-                wchar[] current = temp[0 .. length];
                 temp = temp[length .. $];
 
-                if (delim == '"' && length >= 2) {
-                    current = current[1 .. $];
-                    if (current[$ - 1] == '"')
-                        current = current[0 .. $ - 1];
+                if (temp.length > 0) {
+                    if (temp[0] == '"')
+                        delim = '"';
+
+                    length = 0;
+                    foreach (wchar c; temp) {
+                        length++;
+                        if (c == delim)
+                            break;
+                    }
+
+                    wchar[] current = temp[0 .. length];
+                    temp = temp[length .. $];
+
+                    if (delim == '"' && length >= 2) {
+                        current = current[1 .. $];
+                        if (current[$ - 1] == '"')
+                            current = current[0 .. $ - 1];
+                    }
+
+                    handle(String_UTF8(cast(wstring)current));
                 }
-
-                handle(String_UTF8(cast(wstring)current));
             }
-        }
-    } else
-        static assert(0, "Unimplemented getting command line arguments");
+        } else
+            static assert(0, "Unimplemented getting command line arguments");
+    }
 
-    version (Windows) {
-        import core.sys.windows.windows : GetSystemInfo, SYSTEM_INFO;
+    {
+        version (Windows) {
+            import core.sys.windows.windows : GetSystemInfo, SYSTEM_INFO;
 
-        SYSTEM_INFO systemInfo;
-        GetSystemInfo(&systemInfo);
+            SYSTEM_INFO systemInfo;
+            GetSystemInfo(&systemInfo);
 
-        cpuCount_ = systemInfo.dwNumberOfProcessors;
-    } else version (Posix) {
-        // solution: https://stackoverflow.com/a/66805243
-        import core.stdc.stdio : FILE, fopen, fscanf, fclose;
+            cpuCount_ = systemInfo.dwNumberOfProcessors;
+        } else version (Posix) {
+            // solution: https://stackoverflow.com/a/66805243
+            import core.stdc.stdio : FILE, fopen, fscanf, fclose;
 
-        FILE* cpuinfo = fopen("/proc/cpuinfo", "r");
+            FILE* cpuinfo = fopen("/proc/cpuinfo", "r");
 
-        while (cpuinfo !is null && !fscanf(cpuinfo, "siblings\t: %u", &cpuCount_)) {
-            fscanf(cpuinfo, "%*[^c]");
-        }
+            while (cpuinfo !is null && !fscanf(cpuinfo, "siblings\t: %u", &cpuCount_)) {
+                fscanf(cpuinfo, "%*[^c]");
+            }
 
-        fclose(cpuinfo);
-    } else
-        static assert(0, "Unimplemented cpu count");
+            fclose(cpuinfo);
+        } else
+            static assert(0, "Unimplemented cpu count");
+    }
+
+    {
+        version (Windows) {
+            import sidero.base.allocators;
+            import core.sys.windows.winbase : OpenProcessToken, GetCurrentProcess, CloseHandle;
+            import core.sys.windows.winnt : TOKEN_QUERY;
+
+            HANDLE userToken;
+
+            if (OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &userToken)) {
+                DWORD profileDirectoryLength;
+                GetUserProfileDirectoryW(userToken, null, &profileDirectoryLength);
+
+                if (profileDirectoryLength > 0) {
+                    RCAllocator allocator = globalAllocator;
+                    wchar[] profileDirectory = allocator.makeArray!wchar(profileDirectoryLength);
+
+                    if (GetUserProfileDirectoryW(userToken, profileDirectory.ptr, &profileDirectoryLength)) {
+                        _homeDirectory = String_UTF16(profileDirectory, allocator, profileDirectory).byUTF8;
+                    } else {
+                        allocator.dispose(profileDirectory);
+                    }
+                }
+            }
+
+            CloseHandle(userToken);
+        } else version (Posix) {
+            import core.sys.posix.unistd : sysconf, _SC_GETPW_R_SIZE_MAX, getuid;
+            import core.sys.posix.pwd : getpwuid_r, passwd;
+
+            String_UTF8 attemptedEV = EnvironmentVariables[String_UTF8("HOME")];
+            if (attemptedEV.length > 0) {
+                if (attemptedEV.endsWith("/"))
+                    attemptedEV = attemptedEV[0 .. $ - 1];
+                _homeDirectory = attemptedEV;
+            } else {
+                const sizeNeeded = sysconf(_SC_GETPW_R_SIZE_MAX);
+                DynamicArray!ubyte buffer = DynamicArray!ubyte(sizeNeeded > 0 ? sizeNeeded : 16384);
+
+                passwd pwdBuffer;
+                passwd* pwdResult;
+
+                int result = getpwuid_r(getuid(), &pwdBuffer, buffer.ptr, buffer.length, &pwdResult);
+
+                if (result != 0 || pwdResult is null) {
+                    // do nothing, well this is odd... *sigh*
+                } else {
+                    const homeDirectoryLength = strlen(pwdBuffer.pw_dir);
+
+                    if (homeDirectoryLength > 0)
+                        _homeDirectory = String_UTF8(pwdBuffer.pw_dir[0 .. homeDirectoryLength]).dup;
+                }
+            }
+        } else
+            static assert(0, "Unimplemented getting of home directory");
+    }
 }
 
 private @hidden:
@@ -680,8 +741,11 @@ enum {
 
 version (Windows) {
     import core.sys.windows.winnt : LPWSTR;
+    import core.sys.windows.windows : DWORD, HANDLE;
 
     extern (Windows) int GetUserDefaultLocaleName(LPWSTR, int);
+
+    extern(Windows) bool GetUserProfileDirectoryW(HANDLE, LPWSTR, DWORD*);
 }
 
 __gshared {
@@ -694,6 +758,7 @@ __gshared {
     bool isUnicodeLanguageOverridden;
 
     Slice!String_UTF8 _commandLineArguments;
+    String_UTF8 _homeDirectory;
 
     uint cpuCount_;
 }

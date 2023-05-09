@@ -2815,6 +2815,9 @@ struct ASCII_State {
         {
             auto result = changeIndexToOffset(iterator, endOffsetFromHead);
             assert(!result.isSet);
+
+            if (iterator !is null)
+                endOffsetFromHead -= iterator.minimumOffsetFromHead;
         }
 
         size_t minimumOffsetFromHead, maximumOffsetFromHead, lastConsumed;

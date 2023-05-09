@@ -13,6 +13,11 @@ struct Optional(T) {
 export @safe nothrow @nogc:
 
     ///
+    this(return scope ref Optional other) scope @trusted {
+        this.tupleof = other.tupleof;
+    }
+
+    ///
     this(scope T value) scope {
         this = value;
     }
@@ -49,7 +54,7 @@ export @safe nothrow @nogc:
     }
 
     ///
-    ref T get() scope {
+    ref T get() scope return {
         assert(this.isSet, "Value must be set to get, did you check if isNull first?");
         return this.value;
     }
