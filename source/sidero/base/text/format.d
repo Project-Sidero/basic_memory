@@ -514,16 +514,15 @@ private @hidden:
                                 if (!hadToString) {
                                     static if (gotUDAs.length == 0) {
                                         size_t offsetForToString = builder.length;
-                                        alias symbol = __traits(child, input, Symbols[SymbolId]);
 
-                                        static if (__traits(compiles, symbol(builder))) {
-                                            symbol(builder);
+                                        static if (__traits(compiles, __traits(child, input, Symbols[SymbolId])(builder))) {
+                                            __traits(child, input, Symbols[SymbolId])(builder);
                                             hadToString = true;
-                                        } else static if (__traits(compiles, symbol(&builder.put))) {
-                                            symbol(&builder.put);
+                                        } else static if (__traits(compiles, __traits(child, input, Symbols[SymbolId])(&builder.put))) {
+                                            __traits(child, input, Symbols[SymbolId])(&builder.put);
                                             hadToString = true;
-                                        } else static if (__traits(compiles, builder ~= symbol())) {
-                                            builder ~= symbol();
+                                        } else static if (__traits(compiles, builder ~= __traits(child, input, Symbols[SymbolId])())) {
+                                            builder ~= __traits(child, input, Symbols[SymbolId])();
                                             hadToString = true;
                                         }
 
@@ -561,16 +560,15 @@ private @hidden:
                                 if (!hadToString) {
                                     static if (gotUDAs.length == 0) {
                                         size_t offsetForToString = builder.length;
-                                        alias symbol = __traits(child, input, Symbols[SymbolId]);
 
-                                        static if (__traits(compiles, symbol(builder))) {
-                                            symbol(builder);
+                                        static if (__traits(compiles, __traits(child, input, Symbols[SymbolId])(builder))) {
+                                            __traits(child, input, Symbols[SymbolId])(builder);
                                             hadToString = true;
-                                        } else static if (__traits(compiles, symbol(&builder.put))) {
-                                            symbol(&builder.put);
+                                        } else static if (__traits(compiles, __traits(child, input, Symbols[SymbolId])(&builder.put))) {
+                                            __traits(child, input, Symbols[SymbolId])(&builder.put);
                                             hadToString = true;
-                                        } else static if (__traits(compiles, builder ~= symbol())) {
-                                            builder ~= symbol();
+                                        } else static if (__traits(compiles, builder ~= __traits(child, input, Symbols[SymbolId])())) {
+                                            builder ~= __traits(child, input, Symbols[SymbolId])();
                                             hadToString = true;
                                         }
 
@@ -579,8 +577,8 @@ private @hidden:
 
                                             if (subset == FQN) {
                                                 builder.remove(offsetForToString, size_t.max);
-                                            } else if (subset.contains("\n") || subset.length > 40) {
-                                                // forty was chosen mostly at random,
+                                            } else if (subset.contains("\n") || subset.length > 60) {
+                                                // sixty was chosen mostly at random,
                                                 // but its half a lot of max line lengths (80) so can't be too bad
                                                 builder.insert(offsetForToString, "->\n"c);
                                             } else if (!prior.endsWith("(")) {
@@ -1228,24 +1226,43 @@ scope @hidden:
             }
 
             static if (haveToString!ActualType) {
-                size_t offsetForToString = builder.length;
+                {
+                    bool hadToString;
+                    alias Symbols = __traits(getOverloads, ActualType, "toString");
 
-                static if (__traits(compiles, { input.toString(builder); })) {
-                    input.toString(builder);
-                } else static if (__traits(compiles, { builder ~= input.toString(); })) {
-                    builder ~= input.toString();
-                } else static if (__traits(compiles, { input.toString(&builder.put); })) {
-                    input.toString(&builder.put);
-                }
+                    static foreach (SymbolId; 0 .. Symbols.length) {
+                        {
+                            alias gotUDAs = Filter!(isDesiredUDA!PrintIgnore, __traits(getAttributes, Symbols[SymbolId]));
+                            alias gotUDAsPretty = Filter!(isDesiredUDA!PrettyPrintIgnore, __traits(getAttributes, Symbols[SymbolId]));
 
-                if (builder.length > offsetForToString) {
-                    static FQN = fullyQualifiedName!ActualType;
-                    auto subset = builder[offsetForToString .. $];
+                            if (!hadToString) {
+                                static if (gotUDAs.length == 0 && gotUDAsPretty.length == 0) {
+                                    size_t offsetForToString = builder.length;
 
-                    if (subset == FQN)
-                        builder.remove(offsetForToString, FQN.length);
-                    else
-                        builder.insert(offsetForToString, cast(string)" -> ");
+                                    static if (__traits(compiles, __traits(child, input, Symbols[SymbolId])(builder))) {
+                                        __traits(child, input, Symbols[SymbolId])(builder);
+                                        hadToString = true;
+                                    } else static if (__traits(compiles, __traits(child, input, Symbols[SymbolId])(&builder.put))) {
+                                        __traits(child, input, Symbols[SymbolId])(&builder.put);
+                                        hadToString = true;
+                                    } else static if (__traits(compiles, builder ~= __traits(child, input, Symbols[SymbolId])())) {
+                                        builder ~= __traits(child, input, Symbols[SymbolId])();
+                                        hadToString = true;
+                                    }
+
+                                    if (hadToString && builder.length > offsetForToString) {
+                                        static FQN = fullyQualifiedName!ActualType;
+                                        auto subset = builder[offsetForToString .. $];
+
+                                        if (subset == FQN)
+                                            builder.remove(offsetForToString, FQN.length);
+                                        else
+                                            builder.insert(offsetForToString, cast(string)" -> ");
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
