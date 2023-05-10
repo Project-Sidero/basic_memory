@@ -94,17 +94,23 @@ export @safe nothrow @nogc:
     }
 
     ///
-    FilePath dup(return scope RCAllocator allocator = RCAllocator.init) scope {
+    FilePath dup(return scope RCAllocator allocator = RCAllocator.init) scope const @trusted {
         if (isNull)
             return FilePath.init;
 
         if (allocator.isNull)
             allocator = globalAllocator();
 
+        FilePathState* state = cast(FilePathState*)this.state;
+
+        state.mutex.pureLock;
+        scope (exit)
+            state.mutex.unlock;
+
         FilePath ret;
         ret.state = allocator.make!FilePathState;
 
-        *ret.state = *this.state;
+        *ret.state = *state;
         ret.state.allocator = allocator;
         return ret;
     }
@@ -114,6 +120,28 @@ export @safe nothrow @nogc:
         if (isNull)
             return typeof(return)(NullPointerException);
         return typeof(return)(state.platformRule);
+    }
+
+    ///
+    bool isAbsolute() scope const {
+        auto got = this.relativeTo;
+        if (got.isNull)
+            return false;
+        return got == FilePathRelativeTo.Nothing;
+    }
+
+    ///
+    Optional!FilePathRelativeTo relativeTo() scope const @trusted {
+        if (isNull)
+            return typeof(return).init;
+
+        FilePathState* state = cast(FilePathState*)this.state;
+
+        state.mutex.pureLock;
+        scope (exit)
+            state.mutex.unlock;
+
+        return typeof(return)(state.relativeTo);
     }
 
     ///
@@ -130,9 +158,23 @@ export @safe nothrow @nogc:
     }
 
     ///
-    String_UTF8 hostname(RCAllocator allocator = RCAllocator.init) {
+    bool couldPointToEntry() scope const {
+        if (isNull)
+            return false;
+        else
+            return state.couldPointToEntry;
+    }
+
+    ///
+    String_UTF8 hostname(RCAllocator allocator = RCAllocator.init) scope const @trusted {
         if (isNull || state.lengthOfHost == 0)
             return String_UTF8.init;
+
+        FilePathState* state = cast(FilePathState*)this.state;
+
+        state.mutex.pureLock;
+        scope (exit)
+            state.mutex.unlock;
 
         auto part = state.storage[state.lengthOfLeading .. state.lengthOfLeading + state.lengthOfHost];
 
@@ -159,10 +201,15 @@ export @safe nothrow @nogc:
     }
 
     ///
-    String_UTF8 share(RCAllocator allocator = RCAllocator.init) {
+    String_UTF8 share(RCAllocator allocator = RCAllocator.init) scope const @trusted {
         if (isNull || state.lengthOfShare == 0)
             return String_UTF8.init;
 
+        FilePathState* state = cast(FilePathState*)this.state;
+
+        state.mutex.pureLock;
+        scope (exit)
+            state.mutex.unlock;
         auto part = state
             .storage[state.lengthOfLeading + state.lengthOfHost .. state.lengthOfLeading + state.lengthOfHost + state.lengthOfShare];
 
@@ -189,9 +236,15 @@ export @safe nothrow @nogc:
     }
 
     ///
-    Optional!char drive() {
+    Optional!char drive() scope const @trusted {
         if (isNull || state.lengthOfWindowsDrive == 0)
             return Optional!char.init;
+
+        FilePathState* state = cast(FilePathState*)this.state;
+
+        state.mutex.pureLock;
+        scope (exit)
+            state.mutex.unlock;
 
         auto part = state.storage[state.lengthOfLeading .. state.lengthOfLeading + state.lengthOfWindowsDrive];
         return Optional!char(part.front);
@@ -209,9 +262,15 @@ export @safe nothrow @nogc:
     }
 
     ///
-    DynamicArray!String_UTF8 components(RCAllocator allocator = RCAllocator.init) {
+    DynamicArray!String_UTF8 components(RCAllocator allocator = RCAllocator.init) scope const @trusted {
         if (isNull)
             return DynamicArray!String_UTF8.init;
+
+        FilePathState* state = cast(FilePathState*)this.state;
+
+        state.mutex.pureLock;
+        scope (exit)
+            state.mutex.unlock;
 
         const offset = state.offsetOfComponents();
         const lengthOfComponents = state.storage.length - offset;
@@ -254,6 +313,224 @@ export @safe nothrow @nogc:
         assert(FilePath.from("path/goes/here", FilePathPlatform.Posix).assumeOkay.components == [
             String_UTF8("path"), String_UTF8("goes"), String_UTF8("here")
         ]);
+    }
+
+    ///
+    ErrorResult makeAbsolute(scope FilePath cwd = FilePath.init, scope FilePath home = FilePath.init) scope {
+        import sidero.base.system : homeDirectory, currentWorkingDirectory;
+
+        if (isNull)
+            return ErrorResult(NullPointerException);
+
+        state.mutex.pureLock;
+        scope (exit)
+            state.mutex.unlock;
+
+        final switch (state.platformRule) {
+        case FilePathPlatform.Windows:
+            final switch (state.relativeTo) {
+            case FilePathRelativeTo.Nothing:
+                // ok already done!
+                break;
+            case FilePathRelativeTo.Home:
+                // just need home
+                if (home.isNull)
+                    home = homeDirectory();
+                if (home.isNull || !home.isAbsolute || !home.state.couldPointToEntry)
+                    return ErrorResult(UnknownPlatformBehaviorException(
+                            "Could not get an absolute home directory, so path could not be made absolute"));
+                else if (home.state is this.state)
+                    return ErrorResult(MalformedInputException("Home path cannot have the same state as us"));
+                home.state.mutex.pureLock;
+
+                // we are in the form of %USERPROFILE%\\path
+                // home will be an absolute path that does not end in an separator,
+                //  so we won't have to account for that here
+                state.storage.remove(0, 13);
+                state.storage.prepend(home.state.storage);
+
+                state.lengthOfLeading = home.state.lengthOfLeading;
+                state.lengthOfWindowsDrive = home.state.lengthOfWindowsDrive;
+                state.lengthOfHost = home.state.lengthOfHost;
+                state.lengthOfShare = home.state.lengthOfShare;
+
+                if (state.lengthOfShare > 0) // \\host\share \path
+                    state.lengthOfShare++;
+                else if (state.lengthOfWindowsDrive == 3 && home.state.storage.length == home.state.offsetOfComponents()) { // C:\ \path
+                    // lengths is correct, but there is an extra separator, so we'll remove it if there is storage after it
+                    state.storage.remove(state.offsetOfComponents(), 1);
+                }
+
+                home.state.mutex.unlock;
+                break;
+            case FilePathRelativeTo.CurrentWorkingDirectory:
+                // just need cwd
+                if (cwd.isNull)
+                    cwd = currentWorkingDirectory();
+                if (cwd.isNull || !cwd.isAbsolute || !home.state.couldPointToEntry)
+                    return ErrorResult(UnknownPlatformBehaviorException(
+                            "Could not get an absolute current working directory, so path could not be made absolute"));
+                else if (cwd.state is this.state)
+                    return ErrorResult(MalformedInputException("Current working path cannot have the same state as us"));
+                cwd.state.mutex.pureLock;
+
+                // we are in the form of path
+                if (!cwd.state.storage.endsWith("\\"))
+                    state.storage.prepend("\\");
+
+                state.storage.prepend(cwd.state.storage);
+                state.lengthOfLeading = cwd.state.lengthOfLeading;
+                state.lengthOfWindowsDrive = cwd.state.lengthOfWindowsDrive;
+                state.lengthOfHost = cwd.state.lengthOfHost;
+                state.lengthOfShare = cwd.state.lengthOfShare;
+
+                cwd.state.mutex.unlock;
+                break;
+            case FilePathRelativeTo.DriveAndCWD:
+                if (cwd.isNull)
+                    cwd = currentWorkingDirectory();
+                if (cwd.isNull || !cwd.isAbsolute || !cwd.state.couldPointToEntry || cwd.state.lengthOfHost > 0)
+                    return ErrorResult(UnknownPlatformBehaviorException(
+                            "Could not get an absolute current working directory, so path could not be made absolute"));
+                else if (cwd.state is this.state)
+                    return ErrorResult(MalformedInputException("Current working path cannot have the same state as us"));
+                cwd.state.mutex.pureLock;
+
+                // we are in the form of C:path
+
+                state.storage.insert(state.offsetOfComponents(), "\\\\"c);
+                state.lengthOfWindowsDrive++;
+                // ok we are now in c:\\path
+                state.storage.insert(state.offsetOfComponents(), cwd.state.storage[cwd.state.offsetOfComponents() .. $]);
+
+                state.storage.prepend("\\\\?\\");
+                state.lengthOfLeading = 4;
+
+                cwd.state.mutex.unlock;
+                break;
+            case FilePathRelativeTo.CurrentDrive:
+                if (cwd.isNull)
+                    cwd = currentWorkingDirectory();
+                if (cwd.isNull || !cwd.isAbsolute || !cwd.state.couldPointToEntry || cwd.state.lengthOfHost > 0)
+                    return ErrorResult(UnknownPlatformBehaviorException(
+                            "Could not get an absolute current working directory, so path could not be made absolute"));
+                else if (cwd.state is this.state)
+                    return ErrorResult(MalformedInputException("Current working path cannot have the same state as us"));
+                cwd.state.mutex.pureLock;
+
+                // we are in the form of \path
+                state.storage.remove(0, 1);
+                state.storage.prepend(cwd.state.storage[0 .. cwd.state.offsetOfComponents()]);
+                state.lengthOfLeading = cwd.state.lengthOfLeading;
+                state.lengthOfWindowsDrive = cwd.state.lengthOfWindowsDrive;
+
+                cwd.state.mutex.unlock;
+                break;
+            }
+            break;
+        case FilePathPlatform.Posix:
+            final switch (state.relativeTo) {
+            case FilePathRelativeTo.Nothing:
+                // ok already done!
+                break;
+            case FilePathRelativeTo.Home:
+                // just need home
+                if (home.isNull)
+                    home = homeDirectory();
+                if (home.isNull || !home.isAbsolute || !home.state.couldPointToEntry)
+                    return ErrorResult(UnknownPlatformBehaviorException(
+                            "Could not get an absolute home directory, so path could not be made absolute"));
+                else if (home.state is this.state)
+                    return ErrorResult(MalformedInputException("Home path cannot have the same state as us"));
+                home.state.mutex.pureLock;
+
+                // home is in form /path
+                // we are replacing our ~ with a / so length of leading does not change
+                state.storage.remove(0, 1);
+                state.storage.prepend(home.state.storage);
+
+                // we did not remove the following / when we removed the ~ and home will not include an ending /
+                // so everything is done at this point!
+
+                home.state.mutex.unlock;
+                break;
+            case FilePathRelativeTo.CurrentWorkingDirectory:
+                // just need cwd
+                if (cwd.isNull)
+                    cwd = currentWorkingDirectory();
+                if (cwd.isNull || !cwd.isAbsolute || !home.state.couldPointToEntry)
+                    return ErrorResult(UnknownPlatformBehaviorException(
+                            "Could not get an absolute current working directory, so path could not be made absolute"));
+                else if (cwd.state is this.state)
+                    return ErrorResult(MalformedInputException("Current working path cannot have the same state as us"));
+                cwd.state.mutex.pureLock;
+
+                // cwd is in the form of /path
+                // we are not replacing our leading (but we are adding one)
+                assert(state.lengthOfLeading == 0, "Posix CWD path should not have any value for leading");
+                state.storage.prepend("/");
+                state.lengthOfLeading = 1;
+                state.storage.prepend(cwd.state.storage);
+
+                cwd.state.mutex.unlock;
+                break;
+            case FilePathRelativeTo.DriveAndCWD:
+            case FilePathRelativeTo.CurrentDrive:
+                assert(0,
+                        "Posix paths don't support being relative to current drive and path on another drive");
+            }
+            break;
+        }
+
+        // make sure to do this step in a different string builder, because we'll need to roll back if it didn't work :(
+        {
+            ErrorInfo error = this.evaluateRelativeComponents;
+            if (error.isSet)
+                return typeof(return)(error);
+        }
+
+        return ErrorResult.init;
+    }
+
+    /// Ditto
+    Result!FilePath asAbsolute(scope FilePath cwd = FilePath.init, scope FilePath home = FilePath.init,
+            scope return RCAllocator allocator = RCAllocator.init) {
+        FilePath ret = this.dup(allocator);
+        auto error = ret.makeAbsolute(cwd, home);
+
+        if (error)
+            return typeof(return)(ret);
+        else
+            return typeof(return)(error.getError());
+    }
+
+    ///
+    @trusted unittest {
+        assert(FilePath.from("bin", FilePathPlatform.Posix).assumeOkay.asAbsolute(FilePath.from("/usr",
+                FilePathPlatform.Posix).assumeOkay, FilePath.from("/home/sidero", FilePathPlatform.Posix).assumeOkay).assumeOkay ==
+                "/usr/bin");
+        assert(FilePath.from("~/.bin", FilePathPlatform.Posix).assumeOkay.asAbsolute(FilePath.from("/usr",
+                FilePathPlatform.Posix).assumeOkay, FilePath.from("/home/sidero", FilePathPlatform.Posix).assumeOkay).assumeOkay ==
+                "/home/sidero/.bin");
+
+        assert(FilePath.from("bin", FilePathPlatform.Windows).assumeOkay.asAbsolute(FilePath.from("C:\\Windows",
+                FilePathPlatform.Windows).assumeOkay, FilePath.from("C:\\Users\\Sidero", FilePathPlatform.Windows).assumeOkay).assumeOkay ==
+                "\\\\?\\C:\\Windows\\bin");
+        assert(FilePath.from("~/.bin", FilePathPlatform.Windows).assumeOkay.asAbsolute(FilePath.from("C:\\Windows",
+                FilePathPlatform.Windows).assumeOkay, FilePath.from("C:\\Users\\Sidero", FilePathPlatform.Windows).assumeOkay).assumeOkay ==
+                "\\\\?\\C:\\Users\\Sidero\\.bin");
+        assert(FilePath.from("D:bin", FilePathPlatform.Windows).assumeOkay.asAbsolute(FilePath.from("C:\\My Program",
+                FilePathPlatform.Windows).assumeOkay, FilePath.from("C:\\Users\\Sidero", FilePathPlatform.Windows).assumeOkay).assumeOkay ==
+                "\\\\?\\D:\\My Program\\bin");
+        assert(FilePath.from("\\bin", FilePathPlatform.Windows).assumeOkay.asAbsolute(FilePath.from("C:\\My Program",
+                FilePathPlatform.Windows).assumeOkay, FilePath.from("C:\\Users\\Sidero", FilePathPlatform.Windows).assumeOkay).assumeOkay ==
+                "\\\\?\\C:\\bin");
+
+        assert(FilePath.from("../bin", FilePathPlatform.Posix).assumeOkay.asAbsolute(FilePath.from("/usr",
+                FilePathPlatform.Posix).assumeOkay, FilePath.from("/home/sidero", FilePathPlatform.Posix).assumeOkay).assumeOkay == "/bin");
+        assert(FilePath.from("../bin", FilePathPlatform.Windows).assumeOkay.asAbsolute(FilePath.from("C:\\Windows",
+                FilePathPlatform.Windows).assumeOkay, FilePath.from("C:\\Users\\Sidero", FilePathPlatform.Windows).assumeOkay).assumeOkay ==
+                "\\\\?\\C:\\bin");
     }
 
     ///
@@ -322,7 +599,26 @@ export @safe nothrow @nogc:
             return String_UTF8.init;
 
         FilePathState* state = cast(FilePathState*)this.state;
+
+        state.mutex.pureLock;
+        scope (exit)
+            state.mutex.unlock;
+
         return state.storage.asReadOnly(allocator);
+    }
+
+    ///
+    String_UTF16 toStringUTF16(return scope RCAllocator allocator = RCAllocator.init) scope const @trusted {
+        if (isNull)
+            return String_UTF16.init;
+
+        FilePathState* state = cast(FilePathState*)this.state;
+
+        state.mutex.pureLock;
+        scope (exit)
+            state.mutex.unlock;
+
+        return state.storage.byUTF16.asReadOnly(allocator);
     }
 
     static {
@@ -394,9 +690,6 @@ export @safe nothrow @nogc:
 
         ///
         @trusted unittest {
-            import sidero.base.console;
-
-            //debugWriteln(FilePath.from("C:\\some/./path/", FilePathPlatform.Windows).assumeOkay.toString());
             assert(FilePath.from("some/path", FilePathPlatform.Windows).assumeOkay == "some\\path");
             assert(FilePath.from("some/path", FilePathPlatform.Posix).assumeOkay == "some/path");
             assert(FilePath.from("some\\path", FilePathPlatform.Posix).assumeOkay == "some\\path");
@@ -422,7 +715,148 @@ export @safe nothrow @nogc:
             assert(FilePath.from("some/./path/", FilePathPlatform.Posix).assumeOkay == "some/path");
             assert(FilePath.from("C:\\some/./path/", FilePathPlatform.Windows).assumeOkay == "\\\\?\\C:\\some\\path");
             assert(FilePath.from("/some/./path/", FilePathPlatform.Posix).assumeOkay == "/some/path");
+
+            assert(FilePath.from("root/some/../path", FilePathPlatform.Windows).assumeOkay == "root\\path");
+            assert(FilePath.from("root/some/../path", FilePathPlatform.Posix).assumeOkay == "root/path");
         }
+    }
+
+private:
+
+    ErrorInfo evaluateRelativeComponents() scope {
+        StringBuilder_UTF8 storage = state.storage.dup(state.allocator);
+
+        final switch (state.platformRule) {
+        case FilePathPlatform.Windows:
+            StringBuilder_UTF8 allComponents = storage[state.offsetOfComponents() .. $], components = allComponents;
+
+            while (components.length > 0) {
+                StringBuilder_UTF8 component;
+                const indexOfSeparator = components.indexOf("\\");
+
+                if (indexOfSeparator < 0) {
+                    component = components;
+                    components = StringBuilder_UTF8.init;
+                } else {
+                    component = components[0 .. indexOfSeparator];
+                    components = components[indexOfSeparator + 1 .. $];
+                }
+
+                if (component == "..") {
+                    // we want to remove the prior component, but first we need to figure out where that is!
+                    StringBuilder_UTF8 upUntilThis = allComponents[0 .. $ - components.length];
+                    // it is in the form of path\..\ or path\..
+                    const amountToRemove = components.length > 0 ? 3 : 2;
+
+                    if (upUntilThis.length == amountToRemove) {
+                        // not legal if this is an absolute path
+                        if (state.relativeTo == FilePathRelativeTo.Nothing)
+                            return typeof(return)(MalformedInputException("Found relative parent component in an absolute path"));
+                    } else if (upUntilThis.length > 0) {
+                        if (components.length > 0) {
+                            // there is another component following this, therefore there is a separator so we are in the form of
+                            // path\..\
+                            upUntilThis.remove(-3, 3);
+                            // and now we are path\ muchhhhh better
+                        } else {
+                            // there is no components following this therefore we are in the form of path\..
+                            upUntilThis.remove(-2, 2);
+                            // and now we are path\
+                        }
+
+                        ptrdiff_t lastSeparatorIndex = upUntilThis[0 .. $ - 1].lastIndexOf("\\");
+                        if (lastSeparatorIndex < 0) {
+                            upUntilThis.remove(0, upUntilThis.length);
+                        } else {
+                            upUntilThis.remove(lastSeparatorIndex, upUntilThis.length - (lastSeparatorIndex + 1));
+                        }
+                    }
+                } else if (components.isNull) {
+                    ptrdiff_t amountToRemove;
+
+                    foreach_reverse (c; component) {
+                        if (c == ' ' || c == '.')
+                            amountToRemove++;
+                        else
+                            break;
+                    }
+
+                    if (amountToRemove > 0)
+                        component.remove(-amountToRemove, amountToRemove);
+                } else {
+                    if (component.endsWith("."))
+                        component.remove(-1, 1);
+                }
+            }
+
+            // Turn multiple back slahes into one
+            storage[state.lengthOfLeading .. $].replace("\\\\", "\\");
+
+            // remove a trailing slash
+            if (storage[state.lengthOfLeading .. $].endsWith("\\")) {
+                storage.remove(-1, 1);
+            }
+            break;
+        case FilePathPlatform.Posix:
+            StringBuilder_UTF8 allComponents = storage[state.offsetOfComponents() .. $], components = allComponents;
+
+            while (components.length > 0) {
+                StringBuilder_UTF8 component;
+                const indexOfSeparator = components.indexOf("/");
+
+                if (indexOfSeparator < 0) {
+                    component = components;
+                    components = StringBuilder_UTF8.init;
+                } else {
+                    component = components[0 .. indexOfSeparator];
+                    components = components[indexOfSeparator + 1 .. $];
+                }
+
+                if (component == "..") {
+                    // we want to remove the prior component, but first we need to figure out where that is!
+                    StringBuilder_UTF8 upUntilThis = allComponents[0 .. $ - components.length];
+                    // it is in the form of path/../ or path/..
+                    const amountToRemove = components.length > 0 ? 3 : 2;
+
+                    if (upUntilThis.length == amountToRemove) {
+                        // not legal if this is an absolute path
+                        if (state.relativeTo == FilePathRelativeTo.Nothing)
+                            return typeof(return)(MalformedInputException("Found relative parent component in an absolute path"));
+                    } else if (upUntilThis.length > 0) {
+                        if (components.length > 0) {
+                            // there is another component following this, therefore there is a separator so we are in the form of
+                            // path/../
+                            upUntilThis.remove(-3, 3);
+                            // and now we are path/ muchhhhh better
+                        } else {
+                            // there is no components following this therefore we are in the form of path/..
+                            upUntilThis.remove(-2, 2);
+                            // and now we are path/
+                        }
+
+                        ptrdiff_t lastSeparatorIndex = upUntilThis[0 .. $ - 1].lastIndexOf("/");
+                        if (lastSeparatorIndex < 0) {
+                            upUntilThis.remove(0, upUntilThis.length);
+                        } else {
+                            upUntilThis.remove(lastSeparatorIndex, upUntilThis.length - (lastSeparatorIndex + 1));
+                        }
+                    }
+                } else if (component == ".") {
+                    component.remove(-1, 1);
+                }
+            }
+
+            // Turn multiple back slahes into one
+            storage[state.lengthOfLeading .. $].replace("//", "/");
+
+            // remove a trailing slash
+            if (storage[state.lengthOfLeading .. $].endsWith("/"))
+                storage.remove(-1, 1);
+            break;
+        }
+
+        state.storage = storage;
+        return ErrorInfo.init;
     }
 }
 
@@ -443,9 +877,9 @@ enum FilePathRelativeTo {
     ///
     CurrentWorkingDirectory,
     ///
-    CurrentDrive,
+    DriveAndCWD,
     ///
-    PathOnAnotherDrive,
+    CurrentDrive,
 }
 
 private @hidden:
@@ -498,6 +932,8 @@ struct FilePathState {
     size_t lengthOfWindowsDrive;
     size_t lengthOfHost;
     size_t lengthOfShare;
+
+    bool couldPointToEntry;
 
 @safe nothrow @nogc:
 
@@ -557,6 +993,12 @@ Result!FilePath parseFilePathFromString(Input)(scope Input input, scope return R
 
             // - is UNC \\
             const isUNCPath = !isDevicePath && !noProcessDevicePath && !isAbsoluteDevicePath && input.startsWith("\\\\");
+            const haveUNChost = isUNCPath && () { Input temp = input[2 .. $]; return temp.length > 0; }();
+            const haveUNCshare = haveUNChost && () {
+                Input temp = input[2 .. $];
+                ptrdiff_t index = temp.indexOf("\\");
+                return index > 0 && temp.length > index + 1;
+            }();
 
             // - is fully qualified DOS path, L:\
             const isSecondColon = !isUNCPath && deviceLessInput[1 .. $].startsWith(":");
@@ -571,7 +1013,7 @@ Result!FilePath parseFilePathFromString(Input)(scope Input input, scope return R
             const isRelativeToCurrentDrive = !isDevicePath && !isUNCPath && !isDOSPath && !isLegacyDevice && input.startsWith("\\");
 
             // - relative to the current directory on another drive, D:path
-            const isRelativeToPathOnAnotherDrive = !isDevicePath && !isUNCPath && !isDOSPath && !isLegacyDevice &&
+            const isRelativeToPathOnCurrentDrive = !isDevicePath && !isUNCPath && !isDOSPath && !isLegacyDevice &&
                 haveDOSDrive && !isDOSPath;
 
             // - relative to home directory, ~
@@ -580,13 +1022,15 @@ Result!FilePath parseFilePathFromString(Input)(scope Input input, scope return R
 
             // - otherwise they are relative to cwd
 
-            if (isRelativeToCurrentDrive)
+            if (isRelativeToPathOnCurrentDrive)
+                ret.state.relativeTo = FilePathRelativeTo.DriveAndCWD;
+            else if (isRelativeToCurrentDrive)
                 ret.state.relativeTo = FilePathRelativeTo.CurrentDrive;
-            else if (isRelativeToPathOnAnotherDrive)
-                ret.state.relativeTo = FilePathRelativeTo.PathOnAnotherDrive;
             else if (isRelativeToHome || isRelativeToHomeEnv)
                 ret.state.relativeTo = FilePathRelativeTo.Home;
             else if (isDOSPath || isDevicePath)
+                ret.state.relativeTo = FilePathRelativeTo.Nothing;
+            else if (isUNCPath)
                 ret.state.relativeTo = FilePathRelativeTo.Nothing;
             else if (isLegacyDevice) {
                 ret.state.storage.prepend("\\\\.\\");
@@ -606,6 +1050,17 @@ Result!FilePath parseFilePathFromString(Input)(scope Input input, scope return R
                 ret.state.lengthOfLeading = 13;
             } else if (isRelativeToHomeEnv)
                 ret.state.lengthOfLeading = 13;
+
+            // we want to know if this could point to an entry in the file system
+            // this can only be the case iff its a:
+            //  - DOS path c:\
+            //  - Legacy device \\.\COM1
+            //  - Relative to home ~\path or %USERPROFILE%\path
+            //  - Is a UNC path
+            //  - or just in general relative to cwd
+            ret.state.couldPointToEntry = ret.state.relativeTo == FilePathRelativeTo.CurrentWorkingDirectory ||
+                isDOSPath || isLegacyDevice || ret.state.relativeTo == FilePathRelativeTo.Home || ((!isDevicePath ||
+                        (isUNCPath && haveUNCshare)) && ret.state.relativeTo == FilePathRelativeTo.Nothing);
 
             // Turn multiple back slahes into one
             ret.state.storage[ret.state.lengthOfLeading .. $].replace("\\\\", "\\");
@@ -647,49 +1102,9 @@ Result!FilePath parseFilePathFromString(Input)(scope Input input, scope return R
             }
 
             {
-                StringBuilder_UTF8 components = ret.state.storage[ret.state.offsetOfComponents() .. $];
-
-                while (components.length > 0) {
-                    StringBuilder_UTF8 component;
-                    const indexOfSeparator = components.indexOf("\\");
-
-                    if (indexOfSeparator < 0) {
-                        component = components;
-                        components = StringBuilder_UTF8.init;
-                    } else {
-                        component = components[0 .. indexOfSeparator];
-                        components = components[indexOfSeparator + 1 .. $];
-                    }
-
-                    if (component == "..") {
-                        // not legal if this is an absolute path
-                        if (ret.state.relativeTo == FilePathRelativeTo.Nothing)
-                            return typeof(return)(MalformedInputException("Found relative parent component in an absolute path"));
-                    } else if (components.isNull) {
-                        ptrdiff_t amountToRemove;
-
-                        foreach_reverse (c; component) {
-                            if (c == ' ' || c == '.')
-                                amountToRemove++;
-                            else
-                                break;
-                        }
-
-                        if (amountToRemove > 0)
-                            component.remove(-amountToRemove, amountToRemove);
-                    } else {
-                        if (component.endsWith("."))
-                            component.remove(-1, 1);
-                    }
-                }
-            }
-
-            // Turn multiple back slahes into one
-            ret.state.storage[ret.state.lengthOfLeading .. $].replace("\\\\", "\\");
-
-            // remove a trailing slash
-            if (ret.state.storage[ret.state.lengthOfLeading .. $].endsWith("\\")) {
-                ret.state.storage.remove(-1, 1);
+                ErrorInfo error = ret.evaluateRelativeComponents;
+                if (error.isSet)
+                    return typeof(return)(error);
             }
         }
 
@@ -727,42 +1142,14 @@ Result!FilePath parseFilePathFromString(Input)(scope Input input, scope return R
         }
 
         ret.state.storage ~= input;
+        ret.state.couldPointToEntry = true;
 
         {
-            {
-                StringBuilder_UTF8 components = ret.state.storage[ret.state.offsetOfComponents() .. $];
-
-                while (components.length > 0) {
-                    StringBuilder_UTF8 component;
-                    const indexOfSeparator = components.indexOf("/");
-
-                    if (indexOfSeparator < 0) {
-                        component = components;
-                        components = StringBuilder_UTF8.init;
-                    } else {
-                        component = components[0 .. indexOfSeparator];
-                        components = components[indexOfSeparator + 1 .. $];
-                    }
-
-                    if (component == "..") {
-                        if (ret.state.relativeTo == FilePathRelativeTo.Nothing) {
-                            // not legal if this is an absolute path
-                            return typeof(return)(MalformedInputException("Found relative parent component in an absolute path"));
-                        }
-                    } else if (component == ".") {
-                        component.remove(-1, 1);
-                    }
-                }
-            }
+            ErrorInfo error = ret.evaluateRelativeComponents;
+            if (error.isSet)
+                return typeof(return)(error);
         }
 
-        // Turn multiple back slahes into one
-        ret.state.storage[ret.state.lengthOfLeading .. $].replace("//", "/");
-
-        // remove a trailing slash
-        if (ret.state.storage[ret.state.lengthOfLeading .. $].endsWith("/")) {
-            ret.state.storage.remove(-1, 1);
-        }
         return typeof(return)(ret);
     }
 }

@@ -322,8 +322,8 @@ unittest {
     assert(EnvironmentVariables[String_ASCII("SideroBaseTextEnv")].isNull);
 }
 
-/// Has a terminating path seperator
-String_UTF8 currentWorkingDirectory() @trusted {
+///
+FilePath currentWorkingDirectory() @trusted {
     import sidero.base.allocators.api;
     import core.stdc.string : strlen;
 
@@ -333,24 +333,26 @@ String_UTF8 currentWorkingDirectory() @trusted {
         import core.sys.windows.winbase : GetCurrentDirectoryW;
         import core.sys.windows.winnt : LPWSTR;
 
-        for (;;) {
-            auto length = GetCurrentDirectoryW(0, cast(LPWSTR)null);
-            wchar[] buffer = allocator.makeArray!wchar(length + 1);
+        auto length = GetCurrentDirectoryW(0, cast(LPWSTR)null);
+        wchar[] buffer = allocator.makeArray!wchar(length + 1);
 
-            auto length2 = GetCurrentDirectoryW(cast(uint)buffer.length, cast(LPWSTR)buffer.ptr);
+        auto length2 = GetCurrentDirectoryW(cast(uint)buffer.length, cast(LPWSTR)buffer.ptr);
 
-            if (length2 + 1 == length) {
-                if (buffer[length2] != PathSeparator) {
-                    buffer[length2] = PathSeparator;
-                    length2++;
-                    buffer[length2] = '\0';
-                }
-
-                return String_UTF8(buffer[0 .. length2], allocator, buffer);
-            } else {
-                allocator.dispose(buffer);
+        if (length2 + 1 == length) {
+            if (buffer[length2] != PathSeparator) {
+                buffer[length2] = PathSeparator;
+                length2++;
+                buffer[length2] = '\0';
             }
+
+            auto fp = FilePath.from(String_UTF8(buffer[0 .. length2]));
+            if (fp)
+                return fp.get;
+        } else {
+            allocator.dispose(buffer);
         }
+
+        return FilePath.init;
     } else version (Posix) {
         import core.sys.posix.unistd : getcwd;
 
@@ -379,83 +381,37 @@ String_UTF8 currentWorkingDirectory() @trusted {
                 got[length] = '\0';
             }
 
-            return String_UTF8(got[0 .. length], allocator, buffer);
+            auto fp = String_UTF8(got[0 .. length], allocator, buffer);
+            if (fp)
+                return fp.get;
+            break;
         }
+
+        return FilePath.init;
     } else
         static assert(0, "Unimplemented");
 }
 
 ///
-void currentWorkingDirectory(scope String_ASCII value) @trusted {
+void currentWorkingDirectory(scope FilePath value) @trusted {
     if (value.isNull)
         return;
-    else if (!value.isPtrNullTerminated)
-        value = value.dup();
 
-    version (Windows) {
-        import core.sys.windows.winbase : SetCurrentDirectoryA;
-
-        SetCurrentDirectoryA(cast(char*)value.ptr);
-    } else version (Posix) {
-        import core.sys.posix.unistd : chdir;
-
-        chdir(cast(char*)value.ptr);
-    } else
-        static assert(0, "Unimplemented");
-}
-
-///
-unittest {
-    assert(!currentWorkingDirectory().isNull);
-    assert(currentWorkingDirectory().endsWith([PathSeparator]));
-    currentWorkingDirectory = String_ASCII();
-}
-
-///
-void currentWorkingDirectory(Input)(scope Input value) @trusted if (isUTFBuilder!Input) {
-    version (Windows) {
-        currentWorkingDirectory(value.byUTF16.asReadOnly);
-    } else {
-        currentWorkingDirectory(value.byUTF8.asReadOnly);
-    }
-}
-
-///
-void currentWorkingDirectory(Input)(scope Input value) @trusted if (isUTFReadOnly!Input) {
-    if (value.isNull)
-        return;
+    if (value.relativeTo != FilePathRelativeTo.Nothing)
+        value = value.asAbsolute;
 
     version (Windows) {
         import core.sys.windows.winbase : SetCurrentDirectoryW;
 
-        String_UTF16 toUse = value.byUTF16;
-
-        if (!toUse.isPtrNullTerminated || toUse.isEncodingChanged)
-            toUse = toUse.dup();
-
-        SetCurrentDirectoryW(cast(wchar*)toUse.ptr);
+        String_UTF16 path = value.toStringUTF16();
+        SetCurrentDirectoryW(cast(wchar*)path.ptr);
     } else version (Posix) {
         import core.sys.posix.unistd : chdir;
 
-        static if (is(Char == char)) {
-            String_UTF8 toUse = value;
-        } else {
-            String_UTF8 toUse = value.byUTF8;
-        }
-
-        if (!toUse.isPtrNullTerminated || toUse.isEncodingChanged)
-            toUse = toUse.dup();
-
-        chdir(cast(char*)toUse.ptr);
+        String_UTF8 path = value.toString();
+        chdir(cast(char*)path.ptr);
     } else
         static assert(0, "Unimplemented");
-}
-
-///
-unittest {
-    assert(!currentWorkingDirectory().isNull);
-    assert(currentWorkingDirectory().endsWith([PathSeparator]));
-    currentWorkingDirectory = String_UTF8();
 }
 
 ///
