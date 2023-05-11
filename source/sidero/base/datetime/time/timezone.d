@@ -12,6 +12,7 @@ import sidero.base.text;
 import sidero.base.traits;
 import sidero.base.allocators;
 import sidero.base.attributes;
+import sidero.base.path.file;
 
 ///
 enum {
@@ -591,13 +592,8 @@ export @safe nothrow @nogc:
     }
 
     /// Load the IANA database for a given path, will detect Android zone file
-    static void loadIANADatabase(scope String_UTF8 path = String_UTF8.init) @trusted {
+    static void loadIANADatabase(scope FilePath path = FilePath.init) @trusted {
         mutex.pureLock;
-
-        if (path.length > 0 && !path.endsWith("/")) {
-            path = (path ~ "/").asReadOnly;
-        }
-
         useIANA = loadAutoIANA(path);
         mutex.unlock;
     }

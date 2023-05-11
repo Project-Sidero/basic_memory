@@ -2,20 +2,16 @@ module sidero.base.internal.filesystem;
 import sidero.base.containers.dynamicarray;
 import sidero.base.text;
 import sidero.base.allocators;
+import sidero.base.path.file;
 
 @safe nothrow @nogc:
 
-DynamicArray!Type readFile(Type)(scope string filename, size_t ifNotSize = 0) @trusted {
-    return readFile!Type(String_UTF8(filename), ifNotSize);
-}
-
-DynamicArray!Type readFile(Type)(scope String_UTF8 filename, size_t ifNotSize = 0) @trusted {
+DynamicArray!Type readFile(Type)(scope FilePath filename, size_t ifNotSize = 0) @trusted {
     import core.stdc.stdio;
 
-    if (!filename.isPtrNullTerminated || filename.isEncodingChanged)
-        filename = filename.dup;
+    String_UTF8 path = filename.toString();
 
-    FILE* toRead = fopen(filename.unsafeGetLiteral.ptr, "rb");
+    FILE* toRead = fopen(path.ptr, "rb");
     if (toRead is null)
         return typeof(return).init;
 
@@ -49,17 +45,12 @@ DynamicArray!Type readFile(Type)(scope String_UTF8 filename, size_t ifNotSize = 
     return ret;
 }
 
-ptrdiff_t getFileSize(scope string filename) @trusted {
-    return getFileSize(String_UTF8(filename));
-}
-
-ptrdiff_t getFileSize(scope String_UTF8 filename) @trusted {
+ptrdiff_t getFileSize(scope FilePath filename) @trusted {
     import core.stdc.stdio;
 
-    if (!filename.isPtrNullTerminated || filename.isEncodingChanged)
-        filename = filename.dup;
+    String_UTF8 path = filename.toString();
 
-    FILE* toRead = fopen(filename.unsafeGetLiteral.ptr, "rb");
+    FILE* toRead = fopen(path.ptr, "rb");
     if (toRead is null)
         return -1;
 
@@ -78,24 +69,21 @@ ptrdiff_t getFileSize(scope String_UTF8 filename) @trusted {
     return cast(ptrdiff_t)ret;
 }
 
-bool directoryExists(String_UTF8 directory) @trusted {
+bool directoryExists(FilePath directory) @trusted {
     version (Posix) {
         import core.sys.posix.sys.stat : lstat, stat_t, S_ISDIR;
 
-        if (!directory.isPtrNullTerminated)
-            directory = directory.dup;
+        String_UTF8 path = directory.toString();
 
         stat_t buffer;
-        return lstat(cast(char*)directory.ptr, &buffer) > 0 && S_ISDIR(buffer.st_mode);
+        return lstat(cast(char*)path.ptr, &buffer) > 0 && S_ISDIR(buffer.st_mode);
     } else version (Windows) {
         import core.sys.windows.winbase : GetFileAttributesW;
         import core.sys.windows.winnt : INVALID_FILE_ATTRIBUTES, FILE_ATTRIBUTE_DIRECTORY;
 
-        String_UTF16 directory16 = directory.byUTF16;
-        if (!directory16.isPtrNullTerminated)
-            directory16 = directory16.dup;
+        String_UTF16 path = directory.toStringUTF16();
 
-        auto got = GetFileAttributesW(cast(wchar*)directory16.ptr);
+        auto got = GetFileAttributesW(cast(wchar*)path.ptr);
         return got != INVALID_FILE_ATTRIBUTES && got & FILE_ATTRIBUTE_DIRECTORY;
     } else
         static assert(0, "Unimplemented");
@@ -116,12 +104,18 @@ struct FileAppender {
         other.tupleof = FileAppender.init.tupleof;
     }
 
+    deprecated
     this(String_UTF8 filename) scope @trusted {
         if (filename.isPtrNullTerminated)
             this.filename = filename;
         else
             this.filename = filename.dup;
 
+        descriptor = fopen(cast(char*)this.filename.ptr, "a");
+    }
+
+    this(FilePath filename) scope @trusted {
+        this.filename = filename.toString();
         descriptor = fopen(cast(char*)this.filename.ptr, "a");
     }
 

@@ -8,19 +8,20 @@ import sidero.base.containers.dynamicarray;
 import sidero.base.text;
 import sidero.base.errors;
 import sidero.base.allocators;
+import sidero.base.path.file;
 
 package(sidero.base.datetime) @safe nothrow @nogc:
 
-bool loadAutoIANA(scope String_UTF8 path = String_UTF8.init) @trusted {
+bool loadAutoIANA(scope FilePath path = FilePath.init) @trusted {
     import sidero.base.internal.filesystem;
 
-    if (path.length == 0)
+    if (path.isNull)
         path = getDefaultTZDirectory();
 
     version (Android) {
         const wasAndroid = androidFileSize > 0 || tzDatabase.length == 0;
     } else {
-        const wasAndroid = androidFileSize > 0 || getFileSize((path ~ "tzdata").asReadOnly) > 0;
+        const wasAndroid = androidFileSize > 0 || getFileSize(path.dup ~ "tzdata") > 0;
     }
 
     tzDatabase.clear;
@@ -51,7 +52,7 @@ void reloadTZ(bool forceReload = true) @trusted {
         androidFileSize = 0;
     }
 
-    String_UTF8 path = loadedPath;
+    FilePath path = loadedPath;
 
     if (wasAndroid)
         loadForAndroid(path);
@@ -59,19 +60,18 @@ void reloadTZ(bool forceReload = true) @trusted {
         loadStandard(path);
 }
 
-void loadForAndroid(scope String_UTF8 path = String_UTF8.init) @trusted {
+void loadForAndroid(scope FilePath path = FilePath.init) @trusted {
     import sidero.base.internal.filesystem;
     import sidero.base.allocators;
     import std.bitmanip : bigEndianToNative;
 
-    if (path.length == 0)
+    if (path.isNull)
         path = getDefaultTZDirectory();
 
     // The Android file format for tzdata is documented in ZoneCompactor.java
     // available here: https://android.googlesource.com/platform/system/timezone/+/master/input_tools/android/zone_compactor/main/java/ZoneCompactor.java
 
-    String_UTF8 filename = (path ~ "tzdata").asReadOnly;
-    auto rawFileRead = readFile!ubyte(filename, androidFileSize);
+    auto rawFileRead = readFile!ubyte(path.dup ~ "tzdata", androidFileSize);
 
     if (rawFileRead.length == 0)
         return;
@@ -186,16 +186,15 @@ void loadForAndroid(scope String_UTF8 path = String_UTF8.init) @trusted {
     // we don't need them, as the information we need is at the start.
 }
 
-void loadStandard(scope String_UTF8 path = String_UTF8.init) @trusted {
+void loadStandard(scope FilePath path = FilePath.init) @trusted {
     import sidero.base.internal.filesystem;
 
-    if (path.length == 0)
+    if (path.isNull)
         path = getDefaultTZDirectory();
     loadedPath = path.dup;
 
     void readRegions(scope ref size_t length, scope string zoneFile) {
-        String_UTF8 filename = (path ~ zoneFile).asReadOnly;
-        auto rawFileRead = readFile!char(filename, length);
+        auto rawFileRead = readFile!char(path.dup ~ zoneFile, length);
 
         if (rawFileRead.length > 0)
             length = rawFileRead.length;
@@ -265,12 +264,13 @@ void loadStandard(scope String_UTF8 path = String_UTF8.init) @trusted {
         assert(region);
         assert(value);
 
-        String_UTF8 filename = (path ~ region.get).asReadOnly;
-        auto rawFileRead = readFile!ubyte(filename, value.fileSize);
+        auto rawFileRead = readFile!ubyte(path ~ region.get, value.fileSize);
 
-        TZFile loaded;
-        loadTZ(rawFileRead, region.get, loaded);
-        value = loaded;
+        if (!rawFileRead.isNull) {
+            TZFile loaded;
+            loadTZ(rawFileRead, region.get, loaded);
+            value = loaded;
+        }
     }
 }
 
@@ -442,12 +442,12 @@ private:
 
 __gshared {
     size_t androidFileSize, zoneTabLength, zone1970TabLength;
-    String_UTF8 loadedPath, defaultTZDirectory;
+    FilePath loadedPath, defaultTZDirectory;
     ConcurrentHashMap!(String_UTF8, TZFile) tzDatabase;
     ConcurrentHashMap!(String_UTF8, String_UTF8) posixTZToIANA;
 }
 
-String_UTF8 getDefaultTZDirectory() @trusted {
+FilePath getDefaultTZDirectory() @trusted {
     import sidero.base.system : EnvironmentVariables;
 
     // default directories are copied straight from Phobos
@@ -467,9 +467,13 @@ String_UTF8 getDefaultTZDirectory() @trusted {
         String_UTF8 tzdir = EnvironmentVariables[String_UTF8("TZDIR\0")];
 
         if (tzdir.length > 0) {
-            defaultTZDirectory = tzdir;
+            auto got = FilePath.from(tzdir);
+            if (got)
+                defaultTZDirectory = got.get;
         } else {
-            defaultTZDirectory = DefaultTZDirectory;
+            auto got = FilePath.from(DefaultTZDirectory);
+            if (got)
+                defaultTZDirectory = got.get;
         }
     }
 
