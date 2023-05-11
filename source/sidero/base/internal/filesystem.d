@@ -104,16 +104,6 @@ struct FileAppender {
         other.tupleof = FileAppender.init.tupleof;
     }
 
-    deprecated
-    this(String_UTF8 filename) scope @trusted {
-        if (filename.isPtrNullTerminated)
-            this.filename = filename;
-        else
-            this.filename = filename.dup;
-
-        descriptor = fopen(cast(char*)this.filename.ptr, "a");
-    }
-
     this(FilePath filename) scope @trusted {
         this.filename = filename.toString();
         descriptor = fopen(cast(char*)this.filename.ptr, "a");

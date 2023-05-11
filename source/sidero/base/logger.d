@@ -4,6 +4,7 @@ import sidero.base.attributes;
 import sidero.base.allocators;
 import sidero.base.errors;
 import sidero.base.console;
+import sidero.base.path.file;
 
 export @safe nothrow @nogc:
 
@@ -192,8 +193,14 @@ export:
     }
 
     /// Prefix (Separator DateTime)? . Extension
-    void setLogFile(String_UTF8 rootLogDirectory, String_UTF8 filePrefix, String_UTF8 filePrefixSeparator,
+    ErrorResult setLogFile(FilePath rootLogDirectory, String_UTF8 filePrefix, String_UTF8 filePrefixSeparator,
             String_UTF8 fileExtension, LogRotateFrequency rotateFrequency = LogRotateFrequency.OnStart) {
+        if (rootLogDirectory.couldPointToEntry) {
+            if (!rootLogDirectory.asAbsolute())
+                rootLogDirectory = rootLogDirectory.asAbsolute();
+        } else
+            return ErrorResult(MalformedInputException("Expected a log directory path that could be made absolute"));
+
         mutex.pureLock;
         fileTarget.rootLogDirectory = rootLogDirectory;
         fileTarget.filePrefix = filePrefix;
@@ -201,6 +208,8 @@ export:
         fileTarget.fileExtension = fileExtension;
         fileTarget.logRotateFrequency = rotateFrequency;
         mutex.unlock;
+
+        return ErrorResult.init;
     }
 
     ///
@@ -415,13 +424,9 @@ private:
 
             if (triggered) {
                 // recreate!
+                FilePath fp = fileTarget.rootLogDirectory.dup;
 
                 StringBuilder_UTF8 filename;
-                filename ~= fileTarget.rootLogDirectory;
-
-                if (filename.length > 0 && !(filename.endsWith("/") || filename.endsWith("\\")))
-                    filename ~= "/"c;
-
                 filename ~= fileTarget.filePrefix;
 
                 if (fileTarget.logRotateFrequency == LogRotateFrequency.None) {
@@ -434,7 +439,9 @@ private:
                 if (fileTarget.fileExtension.length > 0 && !fileTarget.fileExtension.startsWith("."))
                     filename ~= "."c;
                 filename ~= fileTarget.fileExtension;
-                fileTarget.logStream = FileAppender(filename.asReadOnly);
+
+                fp ~= filename;
+                fileTarget.logStream = FileAppender(filename.toString());
             }
 
             fileTarget.logStream.append(contentBuilder);
@@ -613,7 +620,8 @@ struct ConsoleTarget {
 }
 
 struct FileTarget {
-    String_UTF8 rootLogDirectory, filePrefix, filePrefixSeparator, fileExtension;
+    FilePath rootLogDirectory;
+    String_UTF8 filePrefix, filePrefixSeparator, fileExtension;
 
     GDateTime logRotateLastDateTime;
     LogRotateFrequency logRotateFrequency;
