@@ -482,6 +482,11 @@ export @safe nothrow @nogc:
             break;
         }
 
+        // the above code paths should always result in this if we are here
+        state.couldPointToEntry = true;
+        state.relativeTo = FilePathRelativeTo.Nothing;
+
+
         // make sure to do this step in a different string builder, because we'll need to roll back if it didn't work :(
         {
             ErrorInfo error = this.evaluateRelativeComponents;
