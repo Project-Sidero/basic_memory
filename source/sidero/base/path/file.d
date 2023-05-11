@@ -89,8 +89,9 @@ export @safe nothrow @nogc:
     }
 
     ///
-    bool isNull() scope const {
-        return state is null;
+    bool isNull() scope const @trusted {
+        FilePathState* state = cast(FilePathState*)this.state;
+        return state is null || state.storage.length == 0;
     }
 
     ///
@@ -315,6 +316,28 @@ export @safe nothrow @nogc:
         ]);
     }
 
+    ///
+    FilePath removeComponents() scope return {
+        if (!isNull) {
+            state.storage.remove(state.offsetOfComponents(), size_t.max);
+            // nothing changes, our completeness nor if we are relative to anything, so we're done
+        }
+
+        return this;
+    }
+
+    ///
+    @trusted unittest {
+        assert(FilePath.from(".bin", FilePathPlatform.Posix).assumeOkay.removeComponents.isNull);
+        assert(FilePath.from("~/.bin", FilePathPlatform.Posix).assumeOkay.removeComponents == "~/");
+        assert(FilePath.from("/root/bin", FilePathPlatform.Posix).assumeOkay.removeComponents == "/");
+
+        assert(FilePath.from(".bin", FilePathPlatform.Windows).assumeOkay.removeComponents.isNull);
+        assert(FilePath.from("~/.bin", FilePathPlatform.Windows).assumeOkay.removeComponents == "%USERPROFILE%\\");
+        assert(FilePath.from("C:\\My Program\bin", FilePathPlatform.Windows).assumeOkay.removeComponents == "\\\\?\\C:\\");
+        assert(FilePath.from("\\\\hostname\\share\\My Program\bin", FilePathPlatform.Windows).assumeOkay.removeComponents == "\\\\hostname\\share\\");
+    }
+
     /// Ditto
     FilePath opBinary(string op : "~")(scope String_UTF8.LiteralType input) scope return {
         ErrorResult error = this ~= input;
@@ -426,6 +449,16 @@ export @safe nothrow @nogc:
     }
 
     /// Ditto
+    FilePath opBinary(string op : "~")(scope DynamicArray!String_UTF8 input) scope return {
+        ErrorResult error = this ~= input;
+
+        if (error)
+            return this;
+        else
+            return FilePath.init;
+    }
+
+    /// Ditto
     ErrorResult opOpAssign(string op : "~")(scope String_UTF8.LiteralType input) scope {
         scope temp = String_UTF32.init;
         temp.__ctor(input);
@@ -484,6 +517,17 @@ export @safe nothrow @nogc:
     /// Ditto
     ErrorResult opOpAssign(string op : "~")(scope StringBuilder_UTF32 input) scope {
         return appendComponent(input);
+    }
+
+    /// Ditto
+    ErrorResult opOpAssign(string op : "~")(scope DynamicArray!String_UTF8 input) scope {
+        foreach (scope component; input) {
+            auto got = appendComponent(component);
+            if (!got)
+                return ErrorResult(got.getError);
+        }
+
+        return ErrorResult.init;
     }
 
     ///
@@ -1203,17 +1247,16 @@ Result!FilePath parseFilePathFromString(Input)(scope Input input, scope return R
 
         {
             // 1. identify path
+            StringBuilder_UTF8 deviceLessInput = ret.state.storage[];
 
             // - is device path, begins with \\? or \\.
-            const noProcessDevicePath = input.startsWith("\\\\?");
-            const isAbsoluteDevicePath = !noProcessDevicePath && input.startsWith("\\\\.");
+            const noProcessDevicePath = deviceLessInput.startsWith("\\\\?");
+            const isAbsoluteDevicePath = !noProcessDevicePath && deviceLessInput.startsWith("\\\\.");
             const isDevicePath = noProcessDevicePath || isAbsoluteDevicePath;
 
-            Input deviceLessInput = input;
-
             if (isDevicePath) {
-                if (input.startsWith("\\\\?\\") || input.startsWith("\\\\.\\")) {
-                    deviceLessInput = input[4 .. $];
+                if (deviceLessInput.startsWith("\\\\?\\") || deviceLessInput.startsWith("\\\\.\\")) {
+                    deviceLessInput = deviceLessInput[4 .. $];
                 } else if (input.length > 3) {
                     return typeof(return)(MalformedInputException(
                             "Error Windows device path must have separator after the leading device specifier"));
@@ -1221,17 +1264,17 @@ Result!FilePath parseFilePathFromString(Input)(scope Input input, scope return R
             }
 
             // - is UNC \\
-            const isUNCPath = !isDevicePath && !noProcessDevicePath && !isAbsoluteDevicePath && input.startsWith("\\\\");
-            const haveUNChost = isUNCPath && () { Input temp = input[2 .. $]; return temp.length > 0; }();
+            const isUNCPath = !isDevicePath && !noProcessDevicePath && !isAbsoluteDevicePath && deviceLessInput.startsWith("\\\\");
+            const haveUNChost = isUNCPath && () { StringBuilder_UTF8 temp = deviceLessInput[2 .. $]; return temp.length > 0; }();
             const haveUNCshare = haveUNChost && () {
-                Input temp = input[2 .. $];
+                StringBuilder_UTF8 temp = deviceLessInput[2 .. $];
                 ptrdiff_t index = temp.indexOf("\\");
                 return index > 0 && temp.length > index + 1;
             }();
 
             // - is fully qualified DOS path, L:\
             const isSecondColon = !isUNCPath && deviceLessInput[1 .. $].startsWith(":");
-            const firstChar = deviceLessInput.front;
+            const firstChar = deviceLessInput[].front;
             const haveDOSDrive = !isUNCPath && firstChar < ubyte.max && isAlpha(cast(ubyte)firstChar) && isSecondColon;
             const isDOSPath = haveDOSDrive && deviceLessInput[2 .. $].startsWith("\\");
 
@@ -1239,15 +1282,18 @@ Result!FilePath parseFilePathFromString(Input)(scope Input input, scope return R
             const isLegacyDevice = !isUNCPath && !isDOSPath && isLegacyWindowsDevice(deviceLessInput);
 
             // - relative to root of current drive, \
-            const isRelativeToCurrentDrive = !isDevicePath && !isUNCPath && !isDOSPath && !isLegacyDevice && input.startsWith("\\");
+            const isRelativeToCurrentDrive = !isDevicePath && !isUNCPath && !isDOSPath && !isLegacyDevice &&
+                deviceLessInput.startsWith("\\");
 
             // - relative to the current directory on another drive, D:path
             const isRelativeToPathOnCurrentDrive = !isDevicePath && !isUNCPath && !isDOSPath && !isLegacyDevice &&
                 haveDOSDrive && !isDOSPath;
 
             // - relative to home directory, ~
-            const isRelativeToHome = input.startsWith("~");
-            const isRelativeToHomeEnv = input.startsWith("%USERPROFILE%");
+            const isRelativeToHome = deviceLessInput.startsWith("~");
+            const isRelativeToHomeEnv = deviceLessInput.startsWith("%USERPROFILE%");
+            const isRelativeToHomeSep = isRelativeToHome && deviceLessInput.startsWith("~\\");
+            const isRelativeToHomeEnvSep = isRelativeToHomeEnv && deviceLessInput.startsWith("%USERPROFILE%\\");
 
             // - otherwise they are relative to cwd
 
@@ -1271,14 +1317,14 @@ Result!FilePath parseFilePathFromString(Input)(scope Input input, scope return R
                 ret.state.lengthOfLeading = 4;
             else if (isDevicePath)
                 ret.state.lengthOfLeading = 3;
-            else if (isUNCPath || (isRelativeToHome && input.startsWith("~\\")))
+            else if (isUNCPath)
                 ret.state.lengthOfLeading = 2;
             else if (isRelativeToHome) {
                 ret.state.storage.remove(0, 1);
                 ret.state.storage.prepend("%USERPROFILE%");
-                ret.state.lengthOfLeading = 13;
+                ret.state.lengthOfLeading = 13 + isRelativeToHomeSep;
             } else if (isRelativeToHomeEnv)
-                ret.state.lengthOfLeading = 13;
+                ret.state.lengthOfLeading = 13 + isRelativeToHomeEnvSep;
 
             // we want to know if this could point to an entry in the file system
             // this can only be the case iff its a:
