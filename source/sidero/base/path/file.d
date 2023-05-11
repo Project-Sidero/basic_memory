@@ -315,6 +315,191 @@ export @safe nothrow @nogc:
         ]);
     }
 
+    /// Ditto
+    FilePath opBinary(string op : "~")(scope String_UTF8.LiteralType input) scope return {
+        ErrorResult error = this ~= input;
+
+        if (error)
+            return this;
+        else
+            return FilePath.init;
+    }
+
+    /// Ditto
+    FilePath opBinary(string op : "~")(scope String_UTF16.LiteralType input) scope return {
+        ErrorResult error = this ~= input;
+
+        if (error)
+            return this;
+        else
+            return FilePath.init;
+    }
+
+    /// Ditto
+    FilePath opBinary(string op : "~")(scope String_UTF32.LiteralType input) scope return {
+        ErrorResult error = this ~= input;
+
+        if (error)
+            return this;
+        else
+            return FilePath.init;
+    }
+
+    /// Ditto
+    FilePath opBinary(string op : "~")(scope String_ASCII input) scope return {
+        ErrorResult error = this ~= input;
+
+        if (error)
+            return this;
+        else
+            return FilePath.init;
+    }
+
+    /// Ditto
+    FilePath opBinary(string op : "~")(scope String_UTF8 input) scope return {
+        ErrorResult error = this ~= input;
+
+        if (error)
+            return this;
+        else
+            return FilePath.init;
+    }
+
+    /// Ditto
+    FilePath opBinary(string op : "~")(scope String_UTF16 input) scope return {
+        ErrorResult error = this ~= input;
+
+        if (error)
+            return this;
+        else
+            return FilePath.init;
+    }
+
+    /// Ditto
+    FilePath opBinary(string op : "~")(scope String_UTF32 input) scope return {
+        ErrorResult error = this ~= input;
+
+        if (error)
+            return this;
+        else
+            return FilePath.init;
+    }
+
+    /// Ditto
+    FilePath opBinary(string op : "~")(scope StringBuilder_ASCII input) scope return {
+        ErrorResult error = this ~= input;
+
+        if (error)
+            return this;
+        else
+            return FilePath.init;
+    }
+
+    /// Ditto
+    FilePath opBinary(string op : "~")(scope StringBuilder_UTF8 input) scope return {
+        ErrorResult error = this ~= input;
+
+        if (error)
+            return this;
+        else
+            return FilePath.init;
+    }
+
+    /// Ditto
+    FilePath opBinary(string op : "~")(scope StringBuilder_UTF16 input) scope return {
+        ErrorResult error = this ~= input;
+
+        if (error)
+            return this;
+        else
+            return FilePath.init;
+    }
+
+    /// Ditto
+    FilePath opBinary(string op : "~")(scope StringBuilder_UTF32 input) scope return {
+        ErrorResult error = this ~= input;
+
+        if (error)
+            return this;
+        else
+            return FilePath.init;
+    }
+
+    /// Ditto
+    ErrorResult opOpAssign(string op : "~")(scope String_UTF8.LiteralType input) scope {
+        scope temp = String_UTF32.init;
+        temp.__ctor(input);
+        return appendComponent(temp);
+    }
+
+    /// Ditto
+    ErrorResult opOpAssign(string op : "~")(scope String_UTF16.LiteralType input) scope {
+        scope temp = String_UTF32.init;
+        temp.__ctor(input);
+        return appendComponent(temp);
+    }
+
+    /// Ditto
+    ErrorResult opOpAssign(string op : "~")(scope String_UTF32.LiteralType input) scope {
+        scope temp = String_UTF32.init;
+        temp.__ctor(input);
+        return appendComponent(temp);
+    }
+
+    /// Ditto
+    ErrorResult opOpAssign(string op : "~")(scope String_ASCII input) scope {
+        return appendComponent(input);
+    }
+
+    /// Ditto
+    ErrorResult opOpAssign(string op : "~")(scope String_UTF8 input) scope {
+        return appendComponent(input.byUTF32);
+    }
+
+    /// Ditto
+    ErrorResult opOpAssign(string op : "~")(scope String_UTF16 input) scope {
+        return appendComponent(input.byUTF32);
+    }
+
+    /// Ditto
+    ErrorResult opOpAssign(string op : "~")(scope String_UTF32 input) scope {
+        return appendComponent(input);
+    }
+
+    /// Ditto
+    ErrorResult opOpAssign(string op : "~")(scope StringBuilder_ASCII input) scope {
+        return appendComponent(input);
+    }
+
+    /// Ditto
+    ErrorResult opOpAssign(string op : "~")(scope StringBuilder_UTF8 input) scope {
+        return appendComponent(input.byUTF32);
+    }
+
+    /// Ditto
+    ErrorResult opOpAssign(string op : "~")(scope StringBuilder_UTF16 input) scope {
+        return appendComponent(input.byUTF32);
+    }
+
+    /// Ditto
+    ErrorResult opOpAssign(string op : "~")(scope StringBuilder_UTF32 input) scope {
+        return appendComponent(input);
+    }
+
+    ///
+    @trusted unittest {
+        assert(FilePath.init ~ "base" == "base");
+        assert(FilePath.from("base", FilePathPlatform.Windows).assumeOkay ~ "hello" == "base\\hello");
+        assert(FilePath.from("base", FilePathPlatform.Posix).assumeOkay ~ "hello" == "base/hello");
+
+        assert(FilePath.from("/root", FilePathPlatform.Posix).assumeOkay ~ ".bin" == "/root/.bin");
+        assert(FilePath.from("~", FilePathPlatform.Posix).assumeOkay ~ ".bin" == "~/.bin");
+
+        assert(FilePath.from("C:\\", FilePathPlatform.Windows).assumeOkay ~ "My Program" == "\\\\?\\C:\\My Program");
+        assert(FilePath.from("~", FilePathPlatform.Windows).assumeOkay ~ ".bin" == "%USERPROFILE%\\.bin");
+        assert(FilePath.from("\\\\hostname\\share", FilePathPlatform.Windows).assumeOkay ~ "files" == "\\\\hostname\\share\\files");
+    }
+
     ///
     ErrorResult makeAbsolute(scope FilePath cwd = FilePath.init, scope FilePath home = FilePath.init) scope {
         import sidero.base.system : homeDirectory, currentWorkingDirectory;
@@ -486,7 +671,6 @@ export @safe nothrow @nogc:
         state.couldPointToEntry = true;
         state.relativeTo = FilePathRelativeTo.Nothing;
 
-
         // make sure to do this step in a different string builder, because we'll need to roll back if it didn't work :(
         {
             ErrorInfo error = this.evaluateRelativeComponents;
@@ -559,11 +743,6 @@ export @safe nothrow @nogc:
     }
 
     ///
-    bool opEquals(scope StringBuilder_ASCII other) scope const {
-        return this.toString().equals(other);
-    }
-
-    ///
     bool opEquals(scope String_UTF8 other) scope const {
         return this.toString() == other;
     }
@@ -576,6 +755,11 @@ export @safe nothrow @nogc:
     ///
     bool opEquals(scope String_UTF32 other) scope const {
         return this.toString() == other;
+    }
+
+    ///
+    bool opEquals(scope StringBuilder_ASCII other) scope const {
+        return this.toString().equals(other);
     }
 
     ///
@@ -862,6 +1046,46 @@ private:
 
         state.storage = storage;
         return ErrorInfo.init;
+    }
+
+    ErrorResult appendComponent(Input)(scope Input input) scope {
+        if (input.length == 0)
+            return ErrorResult.init;
+        else if (isNull) {
+            auto got = FilePath.from(input);
+            if (!got)
+                return ErrorResult(got.getError);
+
+            FilePath fp = got.get;
+            this.state = fp.state;
+            fp.state = null;
+
+            return ErrorResult.init;
+        } else {
+            if (!state.couldPointToEntry) {
+                // oh noes, our path is not complete enough to be usable,
+                // therefore the input is useless
+                return ErrorResult(NonMatchingStateToArgumentException(
+                        "The file path provided is incomplete and cannot have components added to it"));
+            }
+
+            final switch (state.platformRule) {
+            case FilePathPlatform.Windows:
+                state.storage ~= "\\";
+                break;
+            case FilePathPlatform.Posix:
+                state.storage ~= "/";
+                break;
+            }
+
+            state.storage ~= input;
+
+            auto error = this.evaluateRelativeComponents();
+            if (error.isSet)
+                return ErrorResult(error);
+            else
+                return ErrorResult.init;
+        }
     }
 }
 
