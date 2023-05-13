@@ -396,7 +396,7 @@ size_t decodeLength(T)(scope T refill) if (isSomeFunction!T) {
             auto tempInput = buffer[0 .. inBuffer + toCopy];
 
             while (inBuffer > 0) {
-                size_t consumed = decodeLength(tempInput);
+                size_t consumed = decodeLength(tempInput[0]);
                 result += consumed;
 
                 if (consumed >= inBuffer) {
@@ -410,7 +410,7 @@ size_t decodeLength(T)(scope T refill) if (isSomeFunction!T) {
                 tempInput = tempInput[consumed .. $];
             }
         } else {
-            size_t consumed = decodeLength(input);
+            size_t consumed = decodeLength(input[0]);
             result += consumed;
             input = input[consumed .. $];
         }
@@ -1219,7 +1219,7 @@ size_t codePointsFromStart(scope const(char)[] input, size_t countCharacters) {
         if (input.length == 0)
             return 0;
 
-        size_t got = decodeLength(input);
+        size_t got = decodeLength(input[0]);
         ret += got;
 
         input = input[got .. $];
@@ -1267,7 +1267,7 @@ size_t codePointsFromStart(scope const(wchar)[] input, size_t countCharacters) {
         if (input.length == 0)
             return 0;
 
-        size_t got = decodeLength(input);
+        size_t got = decodeLength(input[0]);
         ret += got;
 
         input = input[got .. $];
@@ -1442,14 +1442,14 @@ size_t decodeFromEnd(scope const(wchar)[] input, ref dchar result, bool advanceI
 }
 
 ///
-size_t decodeLength(scope const(char)[] input) {
-    size_t consumed = cast(size_t)(input.length > 0);
+size_t decodeLength(scope char input) {
+    size_t consumed = 1;
 
-    if (input.length >= 2 && (input[0] & 0xE0) == 0xC0) {
+    if ((input & 0xE0) == 0xC0) {
         consumed = 2;
-    } else if (input.length >= 3 && (input[0] & 0xF0) == 0xE0) {
+    } else if ((input & 0xF0) == 0xE0) {
         consumed = 3;
-    } else if (input.length >= 4 && (input[0] & 0xF8) == 0xF0 && input[0] <= 0xF4) {
+    } else if ((input & 0xF8) == 0xF0 && input <= 0xF4) {
         consumed = 4;
     }
 
@@ -1472,10 +1472,10 @@ size_t decodeLengthFromEnd(scope const(char)[] input) {
 }
 
 ///
-size_t decodeLength(scope const(wchar)[] input) {
-    size_t consumed = cast(size_t)(input.length > 0);
+size_t decodeLength(scope wchar input) {
+    size_t consumed = 1;
 
-    if (input.length >= 2 && input[0] >= 0xD800 && input[0] <= 0xDBFF && input[1] >= 0xDC00 && input[1] <= 0xDFFF)
+    if (input >= 0xD800 && input <= 0xDBFF)
         consumed = 2;
 
     return consumed;

@@ -32,7 +32,7 @@ Result!dchar readChar(Duration timeout = Duration.min) @trusted {
                         if (ReadConsoleW(hStdin, &outputBuffer16[outputBufferCount], 1, &readLength, null)) {
                             outputBufferCount++;
 
-                            if (outputBufferCount == 2 || decodeLength(outputBuffer16[0 .. 1]) == 1)
+                            if (outputBufferCount == 2 || decodeLength(outputBuffer16[0]) == 1)
                                 break;
                         } else {
                             break;
@@ -76,7 +76,7 @@ Result!dchar readChar(Duration timeout = Duration.min) @trusted {
 
                                 ReadConsoleInputW(hStdin, buffer.ptr, cast(uint)readLength, &readLength);
 
-                                if (decodeLength(outputBuffer16[0 .. outputBufferCount]) == outputBufferCount || outputBufferCount == 2) {
+                                if (decodeLength(outputBuffer16[0]) == outputBufferCount || outputBufferCount == 2) {
                                     break ReadLoopWindows;
                                 }
                             }
@@ -132,7 +132,7 @@ Result!dchar readChar(Duration timeout = Duration.min) @trusted {
 
                 outputBuffer[outputBufferCount++] = cast(char)got;
 
-                if (decodeLength(outputBuffer[0 .. outputBufferCount]) == outputBufferCount || outputBufferCount == 4)
+                if (decodeLength(outputBuffer[0]) == outputBufferCount || outputBufferCount == 4)
                     break;
             }
 

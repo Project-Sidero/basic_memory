@@ -684,7 +684,7 @@ nothrow @nogc:
                 size_t ret;
 
                 while (actual.length > 0) {
-                    const amount = decodeLength(actual);
+                    const amount = decodeLength(actual[0]);
                     actual = actual[amount .. $];
                     ret++;
                 }
@@ -702,7 +702,7 @@ nothrow @nogc:
                 size_t ret;
 
                 while (actual.length > 0) {
-                    const amount = decodeLength(actual);
+                    const amount = decodeLength(actual[0]);
                     actual = actual[amount .. $];
                     ret++;
                 }
@@ -3412,10 +3412,10 @@ package(sidero.base.text) @hidden:
                 }
 
                 foreach (i; 0 .. toIncrease) {
-                    const size_t characterLength = us.literalEncoding.handle(() {
-                        return decodeLength(cast(const(char)[])us.literal);
-                    }, () { return decodeLength(cast(const(wchar)[])us.literal); }, () {
-                        return decodeLength(cast(const(dchar)[])us.literal);
+                    const characterLength = us.literalEncoding.handle(() {
+                        return us.literal.length > 0 ? decodeLength((cast(const(char)[])us.literal)[0]) : 0;
+                    }, () { return us.literal.length > 0 ? decodeLength((cast(const(wchar)[])us.literal)[0]) : 0;}, () {
+                        return us.literal.length > 0 ? 1 : 0;
                     });
 
                     us = us[characterLength .. $];
@@ -3473,10 +3473,10 @@ package(sidero.base.text) @hidden:
                 }
 
                 foreach (i; 0 .. toIncrease) {
-                    const size_t characterLength = us.literalEncoding.handle(() {
-                        return decodeLength(cast(const(char)[])us.literal);
-                    }, () { return decodeLength(cast(const(wchar)[])us.literal); }, () {
-                        return decodeLength(cast(const(dchar)[])us.literal);
+                    const characterLength = us.literalEncoding.handle(() {
+                        return us.literal.length > 0 ? decodeLength((cast(const(char)[])us.literal)[0]) : 0;
+                    }, () { return us.literal.length > 0 ? decodeLength((cast(const(wchar)[])us.literal)[0]) : 0;}, () {
+                        return us.literal.length > 0 ? 1 : 0;
                     });
 
                     us = us[characterLength .. $];
@@ -3535,10 +3535,10 @@ package(sidero.base.text) @hidden:
                 }
 
                 foreach (i; 0 .. toIncrease) {
-                    const size_t characterLength = us.literalEncoding.handle(() {
-                        return decodeLength(cast(const(char)[])us.literal);
-                    }, () { return decodeLength(cast(const(wchar)[])us.literal); }, () {
-                        return decodeLength(cast(const(dchar)[])us.literal);
+                    const characterLength = us.literalEncoding.handle(() {
+                        return us.literal.length > 0 ? decodeLength((cast(const(char)[])us.literal)[0]) : 0;
+                    }, () { return us.literal.length > 0 ? decodeLength((cast(const(wchar)[])us.literal)[0]) : 0;}, () {
+                        return us.literal.length > 0 ? 1 : 0;
                     });
 
                     us = us[characterLength .. $];
@@ -3599,10 +3599,10 @@ package(sidero.base.text) @hidden:
                 }
 
                 foreach (i; 0 .. toIncrease) {
-                    const size_t characterLength = us.literalEncoding.handle(() {
-                        return decodeLength(cast(const(char)[])us.literal);
-                    }, () { return decodeLength(cast(const(wchar)[])us.literal); }, () {
-                        return decodeLength(cast(const(dchar)[])us.literal);
+                    const characterLength = us.literalEncoding.handle(() {
+                        return us.literal.length > 0 ? decodeLength((cast(const(char)[])us.literal)[0]) : 0;
+                    }, () { return us.literal.length > 0 ? decodeLength((cast(const(wchar)[])us.literal)[0]) : 0;}, () {
+                        return us.literal.length > 0 ? 1 : 0;
                     });
 
                     us = us[characterLength .. $];
