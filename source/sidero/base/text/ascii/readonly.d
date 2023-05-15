@@ -404,8 +404,10 @@ nothrow @nogc:
 
     /// Removes null terminator at the end if it has one
     size_t length() const scope {
-        size_t ret = this.literal.length;
-        if (ret > 0 && this.literal[$ - 1] == '\0')
+        auto literal = this.iterator !is null ? this.iterator.literal : this.literal;
+
+        size_t ret = literal.length;
+        if (ret > 0 && literal[$ - 1] == '\0')
             ret--;
         return ret;
     }
@@ -706,8 +708,7 @@ nothrow @nogc:
     @property {
         ///
         bool empty() scope {
-            return (haveIterator && this.iterator.literal.length == 0) || this.literal.length == 0 ||
-                (this.literal.length == 1 && this.literal[0] == '\0');
+            return (haveIterator && this.iterator.literal.length == 0) || (!haveIterator && this.literal.length == 0);
         }
 
         ///

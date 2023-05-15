@@ -110,11 +110,11 @@ export:
 
 nothrow @safe:
 
-    void opAssign(ref StringBuilder_ASCII other) @nogc {
+    void opAssign(ref return scope StringBuilder_ASCII other) @nogc {
         __ctor(other);
     }
 
-    void opAssign(StringBuilder_ASCII other) @nogc {
+    void opAssign(return scope StringBuilder_ASCII other) @nogc {
         __ctor(other);
     }
 
