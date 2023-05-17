@@ -78,6 +78,8 @@ unittest {
     assert(calculateLengthOfScheme("d://") == "d".length);
     assert(calculateLengthOfScheme("d://a/b.c") == "d".length);
     assert(calculateLengthOfScheme("D://a/b.c") == "D".length);
+
+    assert(calculateLengthOfScheme("a\U00001F30Fz:/") == 0);
 }
 
 /// Returns the prefix, length, suffix of user info section
@@ -149,6 +151,7 @@ unittest {
     assert(calculateLengthOfUserInfo("/abc") == [0, 0, 0]);
     assert(calculateLengthOfUserInfo("abc@") == [0, 3, 1]);
     assert(calculateLengthOfUserInfo("abc", false) == [0, 3, 0]);
+    assert(calculateLengthOfUserInfo("a\u2606z"d, false) == [0, 3, 0]);
 }
 
 ///
@@ -218,6 +221,7 @@ unittest {
     assert(calculateLengthOfHost("123.456.789.000") == 15);
     assert(calculateLengthOfHost("a%42%43d") == 8);
     assert(calculateLengthOfHost("a+c") == 3);
+    assert(calculateLengthOfHost("a\u2606z"d) == 3);
 
     assert(calculateLengthOfHost("[AAAA:BBBB:CCCC:DDDD:EEEE:FFFF:1111:2222]") == 41);
     assert(calculateLengthOfHost("[AAAA:BBBB::FFFF:1111:2222]") == 27);
@@ -296,6 +300,7 @@ unittest {
     assert(calculateLengthOfPort("a") == [0, 0]);
     assert(calculateLengthOfPort(":a") == [1, 0]);
     assert(calculateLengthOfPort(":359") == [1, 3]);
+    assert(calculateLengthOfPort("1\u26062") == [0, 0]);
 }
 
 ///
@@ -487,6 +492,8 @@ unittest {
     assert(calculateLengthOfQuery("?/path/segments") == [0, 15]);
     assert(calculateLengthOfQuery("/path/segments") == [14, 0]);
     assert(calculateLengthOfQuery("/") == [1, 0]);
+
+    assert(calculateLengthOfQuery("/a\u2606z?eg=\u2607"d) == [4, 5]);
 }
 
 ///
@@ -559,30 +566,22 @@ unittest {
     assert(calculateLengthOfFragment("#foobar/thing") == 13);
     assert(calculateLengthOfFragment("#foobar?thing") == 13);
     assert(calculateLengthOfFragment("foobar/thing") == 0);
+    assert(calculateLengthOfFragment("#fo\u2606bar"d) == 7);
 }
 
 private:
 
 size_t calculateLengthOfSchemeImpl(Input)(scope Input input, bool requireSuffix = true) @trusted {
-    import ascii = sidero.base.text.ascii.characters : isAlpha, isAlphaNumeric, isNumeric;
-    import uni = sidero.base.text.unicode.characters.database : isAlpha;
+    import sidero.base.text.ascii.characters : isAlpha, isAlphaNumeric, isNumeric;
 
     input = input[];
 
     bool checkIfAlpha(C)(C input) {
-        static if (is(C == ubyte)) {
-            return ascii.isAlpha(input);
-        } else {
-            return uni.isAlpha(input);
-        }
+        return input <= 128 && isAlpha(cast(ubyte)input);
     }
 
     bool checkIfAlphaNum(C)(C input) {
-        static if (is(C == ubyte)) {
-            return ascii.isAlphaNumeric(input);
-        } else {
-            return (input <= 128 && ascii.isNumeric(cast(ubyte)input)) || uni.isAlpha(input);
-        }
+        return input <= 128 && isAlphaNumeric(cast(ubyte)input);
     }
 
     // check for initial ALPHA
@@ -620,33 +619,16 @@ size_t calculateLengthOfSchemeImpl(Input)(scope Input input, bool requireSuffix 
 }
 
 size_t[3] calculateLengthOfUserInfoImpl(Input)(scope Input input, bool requireSuffix = true) @trusted {
-    import ascii = sidero.base.text.ascii.characters : isAlpha, isAlphaNumeric, isNumeric;
-    import uni = sidero.base.text.unicode.characters.database : isAlpha;
+    import sidero.base.text.ascii.characters : isAlphaNumeric, isNumeric;
 
     input = input[];
 
-    bool checkIfAlpha(C)(C input) {
-        static if (is(C == ubyte)) {
-            return ascii.isAlpha(input);
-        } else {
-            return uni.isAlpha(input);
-        }
-    }
-
     bool checkIfAlphaNum(C)(C input) {
-        static if (is(C == ubyte)) {
-            return ascii.isAlphaNumeric(input);
-        } else {
-            return (input <= 128 && ascii.isNumeric(cast(ubyte)input)) || uni.isAlpha(input);
-        }
+        return input <= 128 && isAlphaNumeric(cast(ubyte)input);
     }
 
     bool checkIfNum(C)(C input) {
-        static if (is(C == ubyte)) {
-            return ascii.isNumeric(input);
-        } else {
-            return input <= 128 && ascii.isNumeric(cast(ubyte)input);
-        }
+        return input <= 128 && isNumeric(cast(ubyte)input);
     }
 
     size_t prefix, length, suffix, suffixAt;
@@ -706,7 +688,7 @@ size_t[3] calculateLengthOfUserInfoImpl(Input)(scope Input input, bool requireSu
                     inHex = 1;
                     break;
                 default:
-                    if (checkIfAlphaNum(c))
+                    if (checkIfAlphaNum(c) || c >= 128)
                         break;
                     break Loop;
                 }
@@ -727,8 +709,7 @@ size_t[3] calculateLengthOfUserInfoImpl(Input)(scope Input input, bool requireSu
 }
 
 size_t calculateLengthOfHostImpl(Input)(scope Input input) @trusted {
-    import ascii = sidero.base.text.ascii.characters : isAlpha, isAlphaNumeric, isNumeric;
-    import uni = sidero.base.text.unicode.characters.database : isAlpha;
+    import sidero.base.text.ascii.characters : isAlpha, isAlphaNumeric, isNumeric;
 
     input = input[];
 
@@ -737,27 +718,15 @@ size_t calculateLengthOfHostImpl(Input)(scope Input input) @trusted {
     // host          = IP-literal / IPv4address / reg-name
 
     bool checkIfAlpha(C)(C input) {
-        static if (is(C == ubyte)) {
-            return ascii.isAlpha(input);
-        } else {
-            return uni.isAlpha(input);
-        }
+        return input <= 128 && isAlpha(cast(ubyte)input);
     }
 
     bool checkIfAlphaNum(C)(C input) {
-        static if (is(C == ubyte)) {
-            return ascii.isAlphaNumeric(input);
-        } else {
-            return (input <= 128 && ascii.isNumeric(cast(ubyte)input)) || uni.isAlpha(input);
-        }
+        return input <= 128 && isAlphaNumeric(cast(ubyte)input);
     }
 
     bool checkIfNum(C)(C input) {
-        static if (is(C == ubyte)) {
-            return ascii.isNumeric(input);
-        } else {
-            return input <= 128 && ascii.isNumeric(cast(ubyte)input);
-        }
+        return input <= 128 && isNumeric(cast(ubyte)input);
     }
 
     if (input.startsWith("[")) {
@@ -793,7 +762,7 @@ size_t calculateLengthOfHostImpl(Input)(scope Input input) @trusted {
                     case '~':
                         break;
                     default:
-                        if (checkIfAlphaNum(c))
+                        if (checkIfAlphaNum(c) || c >= 128)
                             break;
                         return 0;
                     }
@@ -997,7 +966,7 @@ size_t calculateLengthOfHostImpl(Input)(scope Input input) @trusted {
                             break;
 
                         default:
-                            if (checkIfAlphaNum(c))
+                            if (checkIfAlphaNum(c) || c>= 128)
                                 break;
                             break Loop;
                         }
@@ -1106,8 +1075,7 @@ size_t[4] calculateLengthOfConnectionInfoImpl(Input)(scope Input input, ptrdiff_
 }
 
 size_t[2] calculateLengthOfQueryImpl(Input)(scope Input input, bool requireFirstPrefix = true) @trusted {
-    import ascii = sidero.base.text.ascii.characters : isAlpha, isAlphaNumeric, isNumeric;
-    import uni = sidero.base.text.unicode.characters.database : isAlpha;
+    import sidero.base.text.ascii.characters : isAlphaNumeric;
 
     input = input[];
 
@@ -1115,11 +1083,7 @@ size_t[2] calculateLengthOfQueryImpl(Input)(scope Input input, bool requireFirst
     bool gotQuery;
 
     bool checkIfAlphaNum(C)(C input) {
-        static if (is(C == ubyte)) {
-            return ascii.isAlphaNumeric(input);
-        } else {
-            return (input <= 128 && ascii.isNumeric(cast(ubyte)input)) || uni.isAlpha(input);
-        }
+        return input <= 128 && isAlphaNumeric(cast(ubyte)input);
     }
 
     // URI           = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
@@ -1170,7 +1134,7 @@ size_t[2] calculateLengthOfQueryImpl(Input)(scope Input input, bool requireFirst
                     break;
 
                 default:
-                    if (checkIfAlphaNum(c))
+                    if (checkIfAlphaNum(c) || c >= 128)
                         break;
                     break Loop;
                 }
@@ -1187,15 +1151,10 @@ size_t[2] calculateLengthOfQueryImpl(Input)(scope Input input, bool requireFirst
 }
 
 size_t calculateLengthOfFragmentImpl(Input)(scope Input input) {
-    import ascii = sidero.base.text.ascii.characters : isAlpha, isAlphaNumeric, isNumeric;
-    import uni = sidero.base.text.unicode.characters.database : isAlpha;
+    import sidero.base.text.ascii.characters : isAlphaNumeric;
 
     bool checkIfAlphaNum(C)(C input) {
-        static if (is(C == ubyte)) {
-            return ascii.isAlphaNumeric(input);
-        } else {
-            return (input <= 128 && ascii.isNumeric(cast(ubyte)input)) || uni.isAlpha(input);
-        }
+        return input <= 128 && isAlphaNumeric(cast(ubyte)input);
     }
 
     if (input.startsWith("#")) {
@@ -1237,7 +1196,7 @@ size_t calculateLengthOfFragmentImpl(Input)(scope Input input) {
                     break;
 
                 default:
-                    if (checkIfAlphaNum(c))
+                    if (checkIfAlphaNum(c) || c >= 128)
                         break;
                     break Loop;
                 }
