@@ -806,7 +806,10 @@ size_t calculateLengthOfHostImpl(Input)(scope Input input) @trusted {
             size_t leftHexCount, rightHexCount;
             bool postColonColon;
 
-            foreach (c; ipLiteral) {
+            while (!ipLiteral.empty) {
+                const c = ipLiteral.front;
+                const lengthAtStart = ipLiteral.length;
+
                 if (postColonColon) {
                     if (leftHexCount > 8)
                         return 0;
@@ -868,9 +871,11 @@ size_t calculateLengthOfHostImpl(Input)(scope Input input) @trusted {
                         return 0;
                 }
 
-                length++;
+                ipLiteral.popFront;
+                length += lengthAtStart - ipLiteral.length;
             }
 
+            // ]
             if (!doIPV4)
                 length++;
         }
@@ -894,7 +899,11 @@ size_t calculateLengthOfHostImpl(Input)(scope Input input) @trusted {
 
             int inOctets, inDecOctet, octetValue;
 
-            foreach (c; input[length .. $]) {
+            auto input2 = input[length .. $];
+            while (!input2.empty) {
+                const c = input2.front;
+                const lengthAtStart = input2.length;
+
                 if (c == '.') {
                     inDecOctet = 0;
                     inOctets++;
@@ -906,6 +915,8 @@ size_t calculateLengthOfHostImpl(Input)(scope Input input) @trusted {
                 if (inOctets == 5)
                     break;
 
+                input2.popFront;
+
                 if (c != '.') {
                     if (inDecOctet > 2 || c < '0' || c > '9')
                         break;
@@ -913,7 +924,7 @@ size_t calculateLengthOfHostImpl(Input)(scope Input input) @trusted {
                     octetValue *= 10;
                     octetValue += c - '0';
 
-                    length++;
+                    length += lengthAtStart - input2.length;
                     inDecOctet++;
 
                     if (inDecOctet == 3 && octetValue > 255)
@@ -934,7 +945,10 @@ size_t calculateLengthOfHostImpl(Input)(scope Input input) @trusted {
                 // yeahhhhh so certainly not a host name and certainly not an ipv4 address
             } else {
                 int inHex;
-                Loop: foreach (c; input) {
+                Loop: while (!input.empty) {
+                    const c = input.front;
+                    const lengthAtStart = input.length;
+
                     if (c == ':' || c == '/')
                         break;
 
@@ -966,12 +980,14 @@ size_t calculateLengthOfHostImpl(Input)(scope Input input) @trusted {
                             break;
 
                         default:
-                            if (checkIfAlphaNum(c) || c>= 128)
+                            if (checkIfAlphaNum(c) || c >= 128)
                                 break;
                             break Loop;
                         }
                     }
-                    length++;
+
+                    input.popFront;
+                    length += lengthAtStart - input.length;
                 }
             }
         }
@@ -1099,7 +1115,10 @@ size_t[2] calculateLengthOfQueryImpl(Input)(scope Input input, bool requireFirst
 
         int inHex;
 
-        Loop: foreach (c; input) {
+        Loop: while (!input.empty) {
+            const c = input.front;
+            const lengthAtStart = input.length;
+
             if (inHex > 0) {
                 // pct-encoded
                 if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
@@ -1140,10 +1159,12 @@ size_t[2] calculateLengthOfQueryImpl(Input)(scope Input input, bool requireFirst
                 }
             }
 
+            input.popFront;
+
             if (gotQuery)
-                lengthOfQuery++;
+                lengthOfQuery += lengthAtStart - input.length;
             else
-                lengthOfSegments++;
+                lengthOfSegments += lengthAtStart - input.length;
         }
     }
 
@@ -1164,7 +1185,12 @@ size_t calculateLengthOfFragmentImpl(Input)(scope Input input) {
         size_t length = 1;
         int inHex;
 
-        Loop: foreach (c; input[1 .. $]) {
+        input.popFront;
+
+        Loop: while (!input.empty) {
+            const c = input.front;
+            const lengthAtStart = input.length;
+
             if (inHex > 0) {
                 // pct-encoded
                 if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
@@ -1202,7 +1228,8 @@ size_t calculateLengthOfFragmentImpl(Input)(scope Input input) {
                 }
             }
 
-            length++;
+            input.popFront;
+            length += lengthAtStart - input.length;
         }
 
         return length;
