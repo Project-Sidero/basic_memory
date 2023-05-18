@@ -319,8 +319,12 @@ export @safe nothrow @nogc:
     ///
     FilePath removeComponents() scope return {
         if (!isNull) {
+            state.mutex.pureLock;
+
             state.storage.remove(state.offsetOfComponents(), size_t.max);
             // nothing changes, our completeness nor if we are relative to anything, so we're done
+
+            state.mutex.unlock;
         }
 
         return this;
@@ -335,7 +339,8 @@ export @safe nothrow @nogc:
         assert(FilePath.from(".bin", FilePathPlatform.Windows).assumeOkay.removeComponents.isNull);
         assert(FilePath.from("~/.bin", FilePathPlatform.Windows).assumeOkay.removeComponents == "%USERPROFILE%\\");
         assert(FilePath.from("C:\\My Program\bin", FilePathPlatform.Windows).assumeOkay.removeComponents == "\\\\?\\C:\\");
-        assert(FilePath.from("\\\\hostname\\share\\My Program\bin", FilePathPlatform.Windows).assumeOkay.removeComponents == "\\\\hostname\\share\\");
+        assert(FilePath.from("\\\\hostname\\share\\My Program\bin", FilePathPlatform.Windows)
+                .assumeOkay.removeComponents == "\\\\hostname\\share\\");
     }
 
     /// Ditto
@@ -827,6 +832,72 @@ export @safe nothrow @nogc:
     }
 
     ///
+    int opCmp(scope String_UTF8.LiteralType other) scope const {
+        scope String_UTF8 temp;
+        temp.__ctor(other);
+        return cmpImpl(temp);
+    }
+
+    ///
+    int opCmp(scope String_UTF16.LiteralType other) scope const {
+        scope String_UTF16 temp;
+        temp.__ctor(other);
+        return cmpImpl(temp);
+    }
+
+    ///
+    int opCmp(scope String_UTF32.LiteralType other) scope const {
+        scope String_UTF32 temp;
+        temp.__ctor(other);
+        return cmpImpl(temp);
+    }
+
+    ///
+    int opCmp(scope String_ASCII other) scope const {
+        return cmpImpl(other);
+    }
+
+    ///
+    int opCmp(scope String_UTF8 other) scope const {
+        return cmpImpl(other);
+    }
+
+    ///
+    int opCmp(scope String_UTF16 other) scope const {
+        return cmpImpl(other);
+    }
+
+    ///
+    int opCmp(scope String_UTF32 other) scope const {
+        return cmpImpl(other);
+    }
+
+    ///
+    int opCmp(scope StringBuilder_ASCII other) scope const {
+        return cmpImpl(other);
+    }
+
+    ///
+    int opCmp(scope StringBuilder_UTF8 other) scope const {
+        return cmpImpl(other);
+    }
+
+    ///
+    int opCmp(scope StringBuilder_UTF16 other) scope const {
+        return cmpImpl(other);
+    }
+
+    ///
+    int opCmp(scope StringBuilder_UTF32 other) scope const {
+        return cmpImpl(other);
+    }
+
+    ///
+    int opCmp(scope FilePath other) scope const {
+        return this.toString() == other.toString();
+    }
+
+    ///
     String_UTF8 toString(return scope RCAllocator allocator = RCAllocator.init) scope const @trusted {
         if (isNull)
             return String_UTF8.init;
@@ -1130,6 +1201,21 @@ private:
             else
                 return ErrorResult.init;
         }
+    }
+
+    int cmpImpl(Input)(scope Input other) scope const @trusted {
+        if (isNull)
+            return other.isNull ? 0 : -1;
+        else if (other.isNull)
+            return 1;
+
+        FilePathState* state = cast(FilePathState*)this.state;
+
+        state.mutex.pureLock;
+        scope (exit)
+            state.mutex.unlock;
+
+        return state.storage.compare(other);
     }
 }
 
