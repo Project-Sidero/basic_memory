@@ -846,476 +846,471 @@ nothrow @nogc:
         assert(got == "abc def");
     }
 
-    version (none) {
-        //
-
-        ///
-        StringBuilder_ASCII prepend(scope const(char)[] other...) scope {
-            return this.insert(0, other);
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("def").prepend("abc") == "abcdef");
-        }
-
-        ///
-        StringBuilder_ASCII prepend(scope String_ASCII other) scope {
-            return this.insert(0, other);
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("def").prepend(String_ASCII("abc")) == "abcdef");
-        }
-
-        ///
-        StringBuilder_ASCII prepend(scope LiteralType other...) scope {
-            return this.insert(0, other);
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("def").prepend(cast(LiteralType)['a', 'b', 'c']) == "abcdef");
-        }
-
-        ///
-        StringBuilder_ASCII prepend(scope StringBuilder_ASCII other) scope {
-            return this.insert(0, other);
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("def").prepend(StringBuilder_ASCII("abc")) == "abcdef");
-        }
-
-        ///
-        StringBuilder_ASCII insert(size_t offset, scope const(char)[] input...) scope {
-            return this.insert(offset, cast(LiteralType)input);
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("def").insert(1, "abc") == "dabcef");
-        }
-
-        ///
-        StringBuilder_ASCII insert(size_t offset, scope String_ASCII other) scope {
-            return this.insert(offset, other.literal);
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("def").insert(1, String_ASCII("abc")) == "dabcef");
-        }
-
-        ///
-        StringBuilder_ASCII insert(size_t offset, scope LiteralType other...) scope @trusted {
-            StringBuilder_ASCII ret;
-
-            if (this.lifeTime !is null)
-                ret = StringBuilder_ASCII(this.lifeTime.allocator);
-
-            ret ~= this;
-            ret.insert(offset, other);
-
-            return ret;
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("def").insert(cast(size_t)1, cast(LiteralType)['a', 'b', 'c']) == "dabcef");
-        }
-
-        ///
-        StringBuilder_ASCII insert(size_t offset, scope StringBuilder_ASCII other) scope @trusted {
-            StringBuilder_ASCII ret;
-
-            if (this.lifeTime !is null)
-                ret = StringBuilder_ASCII(this.lifeTime.allocator);
-
-            ret ~= this;
-            ret.insert(offset, other);
-
-            return ret;
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("def").insert(1, StringBuilder_ASCII("abc")) == "dabcef");
-        }
-
-        ///
-        StringBuilder_ASCII append(scope const(char)[] input...) scope {
-            return this.insert(size_t.max, cast(LiteralType)input);
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("abc").append("def") == "abcdef");
-        }
-
-        ///
-        StringBuilder_ASCII append(scope String_ASCII other) scope {
-            return this.insert(size_t.max, other.literal);
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("abc").append(String_ASCII("def")) == "abcdef");
-        }
-
-        ///
-        StringBuilder_ASCII append(scope LiteralType other...) scope {
-            return this.insert(size_t.max, other);
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("abc").append(cast(LiteralType)"def") == "abcdef");
-        }
-
-        ///
-        StringBuilder_ASCII append(scope StringBuilder_ASCII other) scope {
-            return this.insert(size_t.max, other);
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("abc").append(StringBuilder_ASCII("def")) == "abcdef");
-        }
-
-        ///
-        StringBuilder_ASCII clobberPrepend(scope const(char)[] input...) {
-            return this.clobberInsert(0, cast(LiteralType)input);
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("defg").clobberPrepend("abc") == "abcg");
-        }
-
-        ///
-        StringBuilder_ASCII clobberPrepend(scope String_ASCII other) {
-            return this.clobberInsert(0, other.literal);
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("defg").clobberPrepend(String_ASCII("abc")) == "abcg");
-        }
-
-        ///
-        StringBuilder_ASCII clobberPrepend(scope LiteralType other...) {
-            return this.clobberInsert(0, other);
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("defg").clobberPrepend(cast(LiteralType)['a', 'b', 'c']) == "abcg");
-        }
-
-        ///
-        StringBuilder_ASCII clobberPrepend(scope StringBuilder_ASCII other) {
-            return this.clobberInsert(0, other);
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("defg").clobberPrepend(StringBuilder_ASCII("abc")) == "abcg");
-        }
-
-        ///
-        StringBuilder_ASCII clobberInsert(size_t offset, scope const(char)[] input...) {
-            return this.clobberInsert(offset, cast(LiteralType)input);
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("defgd").clobberInsert(1, "abc") == "dabcd");
-        }
-
-        ///
-        StringBuilder_ASCII clobberInsert(size_t offset, scope String_ASCII other) {
-            return this.clobberInsert(offset, other.literal);
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("defgd").clobberInsert(1, String_ASCII("abc")) == "dabcd");
-        }
-
-        ///
-        StringBuilder_ASCII clobberInsert(size_t offset, scope LiteralType other...) @trusted {
-            StringBuilder_ASCII ret;
-
-            if (this.lifeTime !is null)
-                ret = StringBuilder_ASCII(this.lifeTime.allocator);
-
-            ret ~= this;
-            ret.clobberInsert(offset, other);
-
-            return ret;
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("defgd").clobberInsert(cast(size_t)1, cast(LiteralType)['a', 'b', 'c']) == "dabcd");
-        }
-
-        ///
-        StringBuilder_ASCII clobberInsert(size_t offset, scope StringBuilder_ASCII other) @trusted {
-            StringBuilder_ASCII ret;
-
-            if (this.lifeTime !is null)
-                ret = StringBuilder_ASCII(this.lifeTime.allocator);
-
-            ret ~= this;
-            ret.clobberInsert(offset, other);
-
-            return ret;
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("defgd").clobberInsert(1, StringBuilder_ASCII("abc")) == "dabcd");
-        }
-
-        //
-
-        ///
-        StringBuilder_ASCII replace(scope const(char)[] toFind, scope String_ASCII toReplace, bool caseSensitive = true,
-                bool onceOnly = false) scope @trusted {
-            StringBuilder_ASCII ret = this.asMutable();
-            ret.replace(toFind, toReplace, caseSensitive, onceOnly);
-            return ret;
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("my haystack text").replace("y", String_ASCII("ie")) == "mie haiestack text");
-        }
-
-        ///
-        StringBuilder_ASCII replace(scope LiteralType toFind, scope String_ASCII toReplace, bool caseSensitive = true, bool onceOnly = false) scope @trusted {
-            StringBuilder_ASCII ret = this.asMutable();
-            ret.replace(toFind, toReplace, caseSensitive, onceOnly);
-            return ret;
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("my haystack text").replace(cast(LiteralType)"y", String_ASCII("ie")) == "mie haiestack text");
-        }
-
-        ///
-        StringBuilder_ASCII replace(scope String_ASCII toFind, scope const(char)[] toReplace, bool caseSensitive = true,
-                bool onceOnly = false) scope @trusted {
-            StringBuilder_ASCII ret = this.asMutable();
-            ret.replace(toFind, toReplace, caseSensitive, onceOnly);
-            return ret;
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("my haystack text").replace(String_ASCII("y"), "ie") == "mie haiestack text");
-        }
-
-        ///
-        StringBuilder_ASCII replace(scope String_ASCII toFind, scope LiteralType toReplace, bool caseSensitive = true, bool onceOnly = false) scope @trusted {
-            StringBuilder_ASCII ret = this.asMutable();
-            ret.replace(toFind, toReplace, caseSensitive, onceOnly);
-            return ret;
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("my haystack text").replace(String_ASCII("y"), cast(LiteralType)"ie") == "mie haiestack text");
-        }
-
-        ///
-        StringBuilder_ASCII replace(scope String_ASCII toFind, scope String_ASCII toReplace, bool caseSensitive = true, bool onceOnly = false) scope @trusted {
-            StringBuilder_ASCII ret = this.asMutable();
-            ret.replace(toFind, toReplace, caseSensitive, onceOnly);
-            return ret;
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("my haystack text").replace(String_ASCII("y"), String_ASCII("ie")) == "mie haiestack text");
-        }
-
-        //
-
-        ///
-        StringBuilder_ASCII replace(scope LiteralType toFind, scope LiteralType toReplace, bool caseSensitive = true, bool onceOnly = false) scope @trusted {
-            StringBuilder_ASCII ret = this.asMutable();
-            ret.replace(toFind, toReplace, caseSensitive, onceOnly);
-            return ret;
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("my haystack text").replace(cast(LiteralType)"y", cast(LiteralType)"ie") == "mie haiestack text");
-        }
-
-        ///
-        StringBuilder_ASCII replace(scope LiteralType toFind, scope const(char)[] toReplace, bool caseSensitive = true, bool onceOnly = false) scope @trusted {
-            StringBuilder_ASCII ret = this.asMutable();
-            ret.replace(toFind, toReplace, caseSensitive, onceOnly);
-            return ret;
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("my haystack text").replace(cast(LiteralType)"y", "ie") == "mie haiestack text");
-        }
-
-        ///
-        StringBuilder_ASCII replace(scope const(char)[] toFind, scope LiteralType toReplace, bool caseSensitive = true, bool onceOnly = false) scope @trusted {
-            StringBuilder_ASCII ret = this.asMutable();
-            ret.replace(toFind, toReplace, caseSensitive, onceOnly);
-            return ret;
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("my haystack text").replace("y", cast(LiteralType)"ie") == "mie haiestack text");
-        }
-
-        ///
-        StringBuilder_ASCII replace(scope const(char)[] toFind, scope const(char)[] toReplace, bool caseSensitive = true,
-                bool onceOnly = false) scope @trusted {
-            StringBuilder_ASCII ret = this.asMutable();
-            ret.replace(toFind, toReplace, caseSensitive, onceOnly);
-            return ret;
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("my haystack text").replace("y", "ie") == "mie haiestack text");
-        }
-
-        //
-
-        ///
-        StringBuilder_ASCII replace(scope LiteralType toFind, scope StringBuilder_ASCII toReplace,
-                bool caseSensitive = true, bool onceOnly = false) scope @trusted {
-            StringBuilder_ASCII ret = this.asMutable();
-            ret.replace(toFind, toReplace, caseSensitive, onceOnly);
-            return ret;
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("my haystack text").replace(cast(LiteralType)"y", StringBuilder_ASCII("ie")) == "mie haiestack text");
-        }
-
-        ///
-        StringBuilder_ASCII replace(scope const(char)[] toFind, scope StringBuilder_ASCII toReplace,
-                bool caseSensitive = true, bool onceOnly = false) scope @trusted {
-            StringBuilder_ASCII ret = this.asMutable();
-            ret.replace(toFind, toReplace, caseSensitive, onceOnly);
-            return ret;
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("my haystack text").replace("y", StringBuilder_ASCII("ie")) == "mie haiestack text");
-        }
-
-        ///
-        StringBuilder_ASCII replace(scope StringBuilder_ASCII toFind, scope LiteralType toReplace,
-                bool caseSensitive = true, bool onceOnly = false) scope @trusted {
-            StringBuilder_ASCII ret = this.asMutable();
-            ret.replace(toFind, toReplace, caseSensitive, onceOnly);
-            return ret;
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("my haystack text").replace(StringBuilder_ASCII("y"), cast(LiteralType)"ie") == "mie haiestack text");
-        }
-
-        ///
-        StringBuilder_ASCII replace(scope StringBuilder_ASCII toFind, scope const(char)[] toReplace,
-                bool caseSensitive = true, bool onceOnly = false) scope @trusted {
-            StringBuilder_ASCII ret = this.asMutable();
-            ret.replace(toFind, toReplace, caseSensitive, onceOnly);
-            return ret;
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("my haystack text").replace(StringBuilder_ASCII("y"), "ie") == "mie haiestack text");
-        }
-
-        ///
-        StringBuilder_ASCII replace(scope StringBuilder_ASCII toFind, scope StringBuilder_ASCII toReplace,
-                bool caseSensitive = true, bool onceOnly = false) scope @trusted {
-            StringBuilder_ASCII ret = this.asMutable();
-            ret.replace(toFind, toReplace, caseSensitive, onceOnly);
-            return ret;
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("my haystack text").replace(StringBuilder_ASCII("y"), StringBuilder_ASCII("ie")) == "mie haiestack text");
-        }
-
-        //
-
-        ///
-        StringBuilder_ASCII replace(scope String_ASCII toFind, scope StringBuilder_ASCII toReplace,
-                bool caseSensitive = true, bool onceOnly = false) scope @trusted {
-            StringBuilder_ASCII ret = this.asMutable();
-            ret.replace(toFind, toReplace, caseSensitive, onceOnly);
-            return ret;
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("my haystack text").replace(String_ASCII("y"), StringBuilder_ASCII("ie")) == "mie haiestack text");
-        }
-
-        ///
-        StringBuilder_ASCII replace(scope StringBuilder_ASCII toFind, scope String_ASCII toReplace,
-                bool caseSensitive = true, bool onceOnly = false) scope @trusted {
-            StringBuilder_ASCII ret = this.asMutable();
-            ret.replace(toFind, toReplace, caseSensitive, onceOnly);
-            return ret;
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("my haystack text").replace(StringBuilder_ASCII("y"), String_ASCII("ie")) == "mie haiestack text");
-        }
-
-        //
-
-        ///
-        StringBuilder_ASCII toLower() scope @trusted {
-            StringBuilder_ASCII ret = this.asMutable();
-            ret.toLower();
-            return ret;
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("Hello World!").toLower() == "hello world!");
-        }
-
-        ///
-        StringBuilder_ASCII toUpper() scope @trusted {
-            StringBuilder_ASCII ret = this.asMutable();
-            ret.toUpper();
-            return ret;
-        }
-
-        ///
-        unittest {
-            assert(String_ASCII("Hello World!").toUpper() == "HELLO WORLD!");
-        }
+    //
+
+    ///
+    StringBuilder_ASCII prepend(scope const(char)[] other...) scope {
+        return this.insert(0, other);
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("def").prepend("abc") == "abcdef");
+    }
+
+    ///
+    StringBuilder_ASCII prepend(scope String_ASCII other) scope {
+        return this.insert(0, other);
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("def").prepend(String_ASCII("abc")) == "abcdef");
+    }
+
+    ///
+    StringBuilder_ASCII prepend(scope LiteralType other...) scope {
+        return this.insert(0, other);
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("def").prepend(cast(LiteralType)['a', 'b', 'c']) == "abcdef");
+    }
+
+    ///
+    StringBuilder_ASCII prepend(scope StringBuilder_ASCII other) scope {
+        return this.insert(0, other);
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("def").prepend(StringBuilder_ASCII("abc")) == "abcdef");
+    }
+
+    ///
+    StringBuilder_ASCII insert(ptrdiff_t offset, scope const(char)[] input...) scope {
+        return this.insert(offset, cast(LiteralType)input);
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("def").insert(1, "abc") == "dabcef");
+    }
+
+    ///
+    StringBuilder_ASCII insert(ptrdiff_t offset, scope String_ASCII other) scope {
+        return this.insert(offset, other.literal);
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("def").insert(1, String_ASCII("abc")) == "dabcef");
+    }
+
+    ///
+    StringBuilder_ASCII insert(ptrdiff_t offset, scope LiteralType other...) scope @trusted {
+        StringBuilder_ASCII ret;
+
+        if (this.lifeTime !is null)
+            ret = StringBuilder_ASCII(this.lifeTime.allocator);
+
+        ret ~= this;
+        ret.insert(offset, other);
+
+        return ret;
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("def").insert(1L, cast(LiteralType)['a', 'b', 'c']) == "dabcef");
+    }
+
+    ///
+    StringBuilder_ASCII insert(ptrdiff_t offset, scope StringBuilder_ASCII other) scope @trusted {
+        StringBuilder_ASCII ret;
+
+        if (this.lifeTime !is null)
+            ret = StringBuilder_ASCII(this.lifeTime.allocator);
+
+        ret ~= this;
+        ret.insert(offset, other);
+
+        return ret;
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("def").insert(1, StringBuilder_ASCII("abc")) == "dabcef");
+    }
+
+    ///
+    StringBuilder_ASCII append(scope const(char)[] input...) scope {
+        return this.insert(ptrdiff_t.max, cast(LiteralType)input);
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("abc").append("def") == "abcdef");
+    }
+
+    ///
+    StringBuilder_ASCII append(scope String_ASCII other) scope {
+        return this.insert(ptrdiff_t.max, other.literal);
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("abc").append(String_ASCII("def")) == "abcdef");
+    }
+
+    ///
+    StringBuilder_ASCII append(scope LiteralType other...) scope {
+        return this.insert(ptrdiff_t.max, other);
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("abc").append(cast(LiteralType)"def") == "abcdef");
+    }
+
+    ///
+    StringBuilder_ASCII append(scope StringBuilder_ASCII other) scope {
+        return this.insert(ptrdiff_t.max, other);
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("abc").append(StringBuilder_ASCII("def")) == "abcdef");
+    }
+
+    ///
+    StringBuilder_ASCII clobberPrepend(scope const(char)[] input...) {
+        return this.clobberInsert(0, cast(LiteralType)input);
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("defg").clobberPrepend("abc") == "abcg");
+    }
+
+    ///
+    StringBuilder_ASCII clobberPrepend(scope String_ASCII other) {
+        return this.clobberInsert(0, other.literal);
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("defg").clobberPrepend(String_ASCII("abc")) == "abcg");
+    }
+
+    ///
+    StringBuilder_ASCII clobberPrepend(scope LiteralType other...) {
+        return this.clobberInsert(0, other);
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("defg").clobberPrepend(cast(LiteralType)['a', 'b', 'c']) == "abcg");
+    }
+
+    ///
+    StringBuilder_ASCII clobberPrepend(scope StringBuilder_ASCII other) {
+        return this.clobberInsert(0, other);
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("defg").clobberPrepend(StringBuilder_ASCII("abc")) == "abcg");
+    }
+
+    ///
+    StringBuilder_ASCII clobberInsert(size_t offset, scope const(char)[] input...) {
+        return this.clobberInsert(offset, cast(LiteralType)input);
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("defgd").clobberInsert(1, "abc") == "dabcd");
+    }
+
+    ///
+    StringBuilder_ASCII clobberInsert(size_t offset, scope String_ASCII other) {
+        return this.clobberInsert(offset, other.literal);
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("defgd").clobberInsert(1, String_ASCII("abc")) == "dabcd");
+    }
+
+    ///
+    StringBuilder_ASCII clobberInsert(size_t offset, scope LiteralType other...) @trusted {
+        StringBuilder_ASCII ret;
+
+        if (this.lifeTime !is null)
+            ret = StringBuilder_ASCII(this.lifeTime.allocator);
+
+        ret ~= this;
+        ret.clobberInsert(offset, other);
+
+        return ret;
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("defgd").clobberInsert(cast(size_t)1, cast(LiteralType)['a', 'b', 'c']) == "dabcd");
+    }
+
+    ///
+    StringBuilder_ASCII clobberInsert(size_t offset, scope StringBuilder_ASCII other) @trusted {
+        StringBuilder_ASCII ret;
+
+        if (this.lifeTime !is null)
+            ret = StringBuilder_ASCII(this.lifeTime.allocator);
+
+        ret ~= this;
+        ret.clobberInsert(offset, other);
+
+        return ret;
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("defgd").clobberInsert(1, StringBuilder_ASCII("abc")) == "dabcd");
+    }
+
+    //
+
+    ///
+    StringBuilder_ASCII replace(scope const(char)[] toFind, scope String_ASCII toReplace, bool caseSensitive = true, bool onceOnly = false) scope @trusted {
+        StringBuilder_ASCII ret = this.asMutable();
+        ret.replace(toFind, toReplace, caseSensitive, onceOnly);
+        return ret;
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("my haystack text").replace("y", String_ASCII("ie")) == "mie haiestack text");
+    }
+
+    ///
+    StringBuilder_ASCII replace(scope LiteralType toFind, scope String_ASCII toReplace, bool caseSensitive = true, bool onceOnly = false) scope @trusted {
+        StringBuilder_ASCII ret = this.asMutable();
+        ret.replace(toFind, toReplace, caseSensitive, onceOnly);
+        return ret;
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("my haystack text").replace(cast(LiteralType)"y", String_ASCII("ie")) == "mie haiestack text");
+    }
+
+    ///
+    StringBuilder_ASCII replace(scope String_ASCII toFind, scope const(char)[] toReplace, bool caseSensitive = true, bool onceOnly = false) scope @trusted {
+        StringBuilder_ASCII ret = this.asMutable();
+        ret.replace(toFind, toReplace, caseSensitive, onceOnly);
+        return ret;
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("my haystack text").replace(String_ASCII("y"), "ie") == "mie haiestack text");
+    }
+
+    ///
+    StringBuilder_ASCII replace(scope String_ASCII toFind, scope LiteralType toReplace, bool caseSensitive = true, bool onceOnly = false) scope @trusted {
+        StringBuilder_ASCII ret = this.asMutable();
+        ret.replace(toFind, toReplace, caseSensitive, onceOnly);
+        return ret;
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("my haystack text").replace(String_ASCII("y"), cast(LiteralType)"ie") == "mie haiestack text");
+    }
+
+    ///
+    StringBuilder_ASCII replace(scope String_ASCII toFind, scope String_ASCII toReplace, bool caseSensitive = true, bool onceOnly = false) scope @trusted {
+        StringBuilder_ASCII ret = this.asMutable();
+        ret.replace(toFind, toReplace, caseSensitive, onceOnly);
+        return ret;
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("my haystack text").replace(String_ASCII("y"), String_ASCII("ie")) == "mie haiestack text");
+    }
+
+    //
+
+    ///
+    StringBuilder_ASCII replace(scope LiteralType toFind, scope LiteralType toReplace, bool caseSensitive = true, bool onceOnly = false) scope @trusted {
+        StringBuilder_ASCII ret = this.asMutable();
+        ret.replace(toFind, toReplace, caseSensitive, onceOnly);
+        return ret;
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("my haystack text").replace(cast(LiteralType)"y", cast(LiteralType)"ie") == "mie haiestack text");
+    }
+
+    ///
+    StringBuilder_ASCII replace(scope LiteralType toFind, scope const(char)[] toReplace, bool caseSensitive = true, bool onceOnly = false) scope @trusted {
+        StringBuilder_ASCII ret = this.asMutable();
+        ret.replace(toFind, toReplace, caseSensitive, onceOnly);
+        return ret;
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("my haystack text").replace(cast(LiteralType)"y", "ie") == "mie haiestack text");
+    }
+
+    ///
+    StringBuilder_ASCII replace(scope const(char)[] toFind, scope LiteralType toReplace, bool caseSensitive = true, bool onceOnly = false) scope @trusted {
+        StringBuilder_ASCII ret = this.asMutable();
+        ret.replace(toFind, toReplace, caseSensitive, onceOnly);
+        return ret;
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("my haystack text").replace("y", cast(LiteralType)"ie") == "mie haiestack text");
+    }
+
+    ///
+    StringBuilder_ASCII replace(scope const(char)[] toFind, scope const(char)[] toReplace, bool caseSensitive = true, bool onceOnly = false) scope @trusted {
+        StringBuilder_ASCII ret = this.asMutable();
+        ret.replace(toFind, toReplace, caseSensitive, onceOnly);
+        return ret;
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("my haystack text").replace("y", "ie") == "mie haiestack text");
+    }
+
+    //
+
+    ///
+    StringBuilder_ASCII replace(scope LiteralType toFind, scope StringBuilder_ASCII toReplace, bool caseSensitive = true,
+            bool onceOnly = false) scope @trusted {
+        StringBuilder_ASCII ret = this.asMutable();
+        ret.replace(toFind, toReplace, caseSensitive, onceOnly);
+        return ret;
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("my haystack text").replace(cast(LiteralType)"y", StringBuilder_ASCII("ie")) == "mie haiestack text");
+    }
+
+    ///
+    StringBuilder_ASCII replace(scope const(char)[] toFind, scope StringBuilder_ASCII toReplace,
+            bool caseSensitive = true, bool onceOnly = false) scope @trusted {
+        StringBuilder_ASCII ret = this.asMutable();
+        ret.replace(toFind, toReplace, caseSensitive, onceOnly);
+        return ret;
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("my haystack text").replace("y", StringBuilder_ASCII("ie")) == "mie haiestack text");
+    }
+
+    ///
+    StringBuilder_ASCII replace(scope StringBuilder_ASCII toFind, scope LiteralType toReplace, bool caseSensitive = true,
+            bool onceOnly = false) scope @trusted {
+        StringBuilder_ASCII ret = this.asMutable();
+        ret.replace(toFind, toReplace, caseSensitive, onceOnly);
+        return ret;
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("my haystack text").replace(StringBuilder_ASCII("y"), cast(LiteralType)"ie") == "mie haiestack text");
+    }
+
+    ///
+    StringBuilder_ASCII replace(scope StringBuilder_ASCII toFind, scope const(char)[] toReplace,
+            bool caseSensitive = true, bool onceOnly = false) scope @trusted {
+        StringBuilder_ASCII ret = this.asMutable();
+        ret.replace(toFind, toReplace, caseSensitive, onceOnly);
+        return ret;
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("my haystack text").replace(StringBuilder_ASCII("y"), "ie") == "mie haiestack text");
+    }
+
+    ///
+    StringBuilder_ASCII replace(scope StringBuilder_ASCII toFind, scope StringBuilder_ASCII toReplace,
+            bool caseSensitive = true, bool onceOnly = false) scope @trusted {
+        StringBuilder_ASCII ret = this.asMutable();
+        ret.replace(toFind, toReplace, caseSensitive, onceOnly);
+        return ret;
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("my haystack text").replace(StringBuilder_ASCII("y"), StringBuilder_ASCII("ie")) == "mie haiestack text");
+    }
+
+    //
+
+    ///
+    StringBuilder_ASCII replace(scope String_ASCII toFind, scope StringBuilder_ASCII toReplace,
+            bool caseSensitive = true, bool onceOnly = false) scope @trusted {
+        StringBuilder_ASCII ret = this.asMutable();
+        ret.replace(toFind, toReplace, caseSensitive, onceOnly);
+        return ret;
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("my haystack text").replace(String_ASCII("y"), StringBuilder_ASCII("ie")) == "mie haiestack text");
+    }
+
+    ///
+    StringBuilder_ASCII replace(scope StringBuilder_ASCII toFind, scope String_ASCII toReplace,
+            bool caseSensitive = true, bool onceOnly = false) scope @trusted {
+        StringBuilder_ASCII ret = this.asMutable();
+        ret.replace(toFind, toReplace, caseSensitive, onceOnly);
+        return ret;
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("my haystack text").replace(StringBuilder_ASCII("y"), String_ASCII("ie")) == "mie haiestack text");
+    }
+
+    //
+
+    ///
+    StringBuilder_ASCII toLower() scope @trusted {
+        StringBuilder_ASCII ret = this.asMutable();
+        ret.toLower();
+        return ret;
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("Hello World!").toLower() == "hello world!");
+    }
+
+    ///
+    StringBuilder_ASCII toUpper() scope @trusted {
+        StringBuilder_ASCII ret = this.asMutable();
+        ret.toUpper();
+        return ret;
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("Hello World!").toUpper() == "HELLO WORLD!");
     }
 
     //
@@ -1410,77 +1405,75 @@ nothrow @nogc:
         assert(!String_ASCII("heLLo! whatzup").ignoreCaseStartsWith(String_ASCII("ello!")));
     }
 
-    version (none) {
-        ///
-        bool startsWith(scope StringBuilder_ASCII other) scope {
-            LiteralType us = this.literal;
-            if (us.length > 0 && us[$ - 1] == '\0')
-                us = us[0 .. $ - 1];
+    ///
+    bool startsWith(scope StringBuilder_ASCII other) scope {
+        LiteralType us = this.literal;
+        if (us.length > 0 && us[$ - 1] == '\0')
+            us = us[0 .. $ - 1];
 
-            if (us.length == 0 || other.isNull)
-                return false;
+        if (us.length == 0 || other.isNull)
+            return false;
 
-            size_t offsetForUs;
-            bool ret = true;
+        size_t offsetForUs;
+        bool ret = true;
 
-            other.foreachBlocks((data) {
-                if (offsetForUs + data.length > us.length || us[offsetForUs .. offsetForUs + data.length] != data) {
-                    ret = false;
-                    return 1;
-                }
+        other.foreachContiguous((data) {
+            if (offsetForUs + data.length > us.length || us[offsetForUs .. offsetForUs + data.length] != data) {
+                ret = false;
+                return 1;
+            }
 
-                offsetForUs += data.length;
-                return 0;
-            }, null);
+            offsetForUs += data.length;
+            return 0;
+        }, null);
 
-            return ret;
-        }
+        return ret;
+    }
 
-        ///
-        unittest {
-            assert(String_ASCII("hello! whatzup").startsWith(StringBuilder_ASCII("hello!")));
-            assert(!String_ASCII("hello! whatzup").startsWith(StringBuilder_ASCII("ello!")));
-        }
+    ///
+    unittest {
+        assert(String_ASCII("hello! whatzup").startsWith(StringBuilder_ASCII("hello!")));
+        assert(!String_ASCII("hello! whatzup").startsWith(StringBuilder_ASCII("ello!")));
+    }
 
-        ///
-        bool ignoreCaseStartsWith(scope StringBuilder_ASCII other) scope {
-            import sidero.base.text.ascii.characters : toLower;
+    ///
+    bool ignoreCaseStartsWith(scope StringBuilder_ASCII other) scope {
+        import sidero.base.text.ascii.characters : toLower;
 
-            LiteralType us = this.literal;
-            if (us.length > 0 && us[$ - 1] == '\0')
-                us = us[0 .. $ - 1];
+        LiteralType us = this.literal;
+        if (us.length > 0 && us[$ - 1] == '\0')
+            us = us[0 .. $ - 1];
 
-            if (us.length == 0 || other.isNull)
-                return false;
+        if (us.length == 0 || other.isNull)
+            return false;
 
-            size_t offsetForUs;
-            bool ret = true;
+        size_t offsetForUs;
+        bool ret = true;
 
-            other.foreachBlocks((data) {
-                if (offsetForUs + data.length <= us.length) {
-                    foreach (i; 0 .. data.length) {
-                        if (data[i].toLower != us[offsetForUs + i].toLower) {
-                            ret = false;
-                            return 1;
-                        }
+        other.foreachContiguous((data) {
+            if (offsetForUs + data.length <= us.length) {
+                foreach (i; 0 .. data.length) {
+                    if (data[i].toLower != us[offsetForUs + i].toLower) {
+                        ret = false;
+                        return 1;
                     }
-                } else {
-                    ret = false;
-                    return 1;
                 }
+            } else {
+                ret = false;
+                return 1;
+            }
 
-                offsetForUs += data.length;
-                return 0;
-            }, null);
+            offsetForUs += data.length;
+            return 0;
+        }, null);
 
-            return ret;
-        }
+        return ret;
+    }
 
-        ///
-        unittest {
-            assert(String_ASCII("heLLo! whatzup").ignoreCaseStartsWith(StringBuilder_ASCII("hello!")));
-            assert(!String_ASCII("heLLo! whatzup").ignoreCaseStartsWith(StringBuilder_ASCII("ello!")));
-        }
+    ///
+    unittest {
+        assert(String_ASCII("heLLo! whatzup").ignoreCaseStartsWith(StringBuilder_ASCII("hello!")));
+        assert(!String_ASCII("heLLo! whatzup").ignoreCaseStartsWith(StringBuilder_ASCII("ello!")));
     }
 
     ///
@@ -1574,90 +1567,88 @@ nothrow @nogc:
         assert(!String_ASCII("bye bye Aw").ignoreCaseEndsWith(String_ASCII("e w")));
     }
 
-    version (none) {
-        ///
-        bool endsWith(scope StringBuilder_ASCII other) scope {
-            LiteralType us = this.literal;
-            if (us.length > 0 && us[$ - 1] == '\0')
-                us = us[0 .. $ - 1];
+    ///
+    bool endsWith(scope StringBuilder_ASCII other) scope {
+        LiteralType us = this.literal;
+        if (us.length > 0 && us[$ - 1] == '\0')
+            us = us[0 .. $ - 1];
 
-            if (us.length == 0 || other.isNull)
-                return false;
+        if (us.length == 0 || other.isNull)
+            return false;
 
-            size_t offsetForUs = size_t.max, otherLength;
-            bool ret = true;
+        size_t offsetForUs = size_t.max, otherLength;
+        bool ret = true;
 
-            other.foreachBlocks((data) {
-                if (offsetForUs == size_t.max) {
-                    if (otherLength > us.length) {
-                        ret = false;
-                        return 1;
-                    }
-
-                    offsetForUs = us.length - otherLength;
-                }
-
-                if (us[offsetForUs .. offsetForUs + data.length] != data) {
+        other.foreachContiguous((data) {
+            if (offsetForUs == size_t.max) {
+                if (otherLength > us.length) {
                     ret = false;
                     return 1;
                 }
 
-                offsetForUs += data.length;
-                return 0;
-            }, (size_t otherLength2) { otherLength = otherLength2; });
+                offsetForUs = us.length - otherLength;
+            }
 
-            return ret;
-        }
+            if (us[offsetForUs .. offsetForUs + data.length] != data) {
+                ret = false;
+                return 1;
+            }
 
-        ///
-        unittest {
-            assert(String_ASCII("bye bye aw").endsWith(StringBuilder_ASCII("e aw")));
-            assert(!String_ASCII("bye bye aw").endsWith(StringBuilder_ASCII("e w")));
-        }
+            offsetForUs += data.length;
+            return 0;
+        }, (size_t otherLength2) { otherLength = otherLength2; });
 
-        ///
-        bool ignoreCaseEndsWith(scope StringBuilder_ASCII other) scope {
-            import sidero.base.text.ascii.characters : toLower;
+        return ret;
+    }
 
-            LiteralType us = this.literal;
-            if (us.length > 0 && us[$ - 1] == '\0')
-                us = us[0 .. $ - 1];
+    ///
+    unittest {
+        assert(String_ASCII("bye bye aw").endsWith(StringBuilder_ASCII("e aw")));
+        assert(!String_ASCII("bye bye aw").endsWith(StringBuilder_ASCII("e w")));
+    }
 
-            if (us.length == 0 || other.isNull)
-                return false;
+    ///
+    bool ignoreCaseEndsWith(scope StringBuilder_ASCII other) scope {
+        import sidero.base.text.ascii.characters : toLower;
 
-            size_t offsetForUs = size_t.max, otherLength;
-            bool ret = true;
+        LiteralType us = this.literal;
+        if (us.length > 0 && us[$ - 1] == '\0')
+            us = us[0 .. $ - 1];
 
-            other.foreachBlocks((data) {
-                if (offsetForUs == size_t.max) {
-                    if (otherLength > us.length) {
-                        ret = false;
-                        return 1;
-                    }
+        if (us.length == 0 || other.isNull)
+            return false;
 
-                    offsetForUs = us.length - otherLength;
+        size_t offsetForUs = size_t.max, otherLength;
+        bool ret = true;
+
+        other.foreachContiguous((data) {
+            if (offsetForUs == size_t.max) {
+                if (otherLength > us.length) {
+                    ret = false;
+                    return 1;
                 }
 
-                foreach (i; 0 .. data.length) {
-                    if (data[i].toLower != us[offsetForUs + i].toLower) {
-                        ret = false;
-                        return 1;
-                    }
+                offsetForUs = us.length - otherLength;
+            }
+
+            foreach (i; 0 .. data.length) {
+                if (data[i].toLower != us[offsetForUs + i].toLower) {
+                    ret = false;
+                    return 1;
                 }
+            }
 
-                offsetForUs += data.length;
-                return 0;
-            }, (size_t otherLength2) { otherLength = otherLength2; });
+            offsetForUs += data.length;
+            return 0;
+        }, (size_t otherLength2) { otherLength = otherLength2; });
 
-            return ret;
-        }
+        return ret;
+    }
 
-        ///
-        unittest {
-            assert(String_ASCII("bye bye Aw").ignoreCaseEndsWith(StringBuilder_ASCII("e aw")));
-            assert(!String_ASCII("bye bye Aw").ignoreCaseEndsWith(StringBuilder_ASCII("e w")));
-        }
+    ///
+    unittest {
+        assert(String_ASCII("bye bye Aw").ignoreCaseEndsWith(StringBuilder_ASCII("e aw")));
+        assert(!String_ASCII("bye bye Aw").ignoreCaseEndsWith(StringBuilder_ASCII("e w")));
     }
 
     //
@@ -1762,89 +1753,87 @@ nothrow @nogc:
         assert(String_ASCII("to fInd this").ignoreCaseIndexOf(String_ASCII("i")) == 4);
     }
 
-    version (none) {
-        ///
-        ptrdiff_t indexOf(scope StringBuilder_ASCII other) scope {
-            LiteralType us = this.literal;
-            if (us.length > 0 && us[$ - 1] == '\0')
-                us = us[0 .. $ - 1];
+    ///
+    ptrdiff_t indexOf(scope StringBuilder_ASCII other) scope {
+        LiteralType us = this.literal;
+        if (us.length > 0 && us[$ - 1] == '\0')
+            us = us[0 .. $ - 1];
 
-            if (other.length > 0) {
-                while (us.length >= other.length) {
-                    size_t offsetIntoUs, otherLength;
-                    bool matched = true;
+        if (other.length > 0) {
+            while (us.length >= other.length) {
+                size_t offsetIntoUs, otherLength;
+                bool matched = true;
 
-                    other.foreachBlocks((data) {
-                        if (data.length > us.length - offsetIntoUs || data != us[offsetIntoUs .. offsetIntoUs + data.length]) {
-                            matched = false;
-                            return 1;
-                        }
+                other.foreachContiguous((data) {
+                    if (data.length > us.length - offsetIntoUs || data != us[offsetIntoUs .. offsetIntoUs + data.length]) {
+                        matched = false;
+                        return 1;
+                    }
 
-                        offsetIntoUs += data.length;
-                        return 0;
-                    }, (size_t otherLength2) { otherLength = otherLength2; });
+                    offsetIntoUs += data.length;
+                    return 0;
+                }, (size_t otherLength2) { otherLength = otherLength2; });
 
-                    if (matched)
-                        return &us[0] - &this.literal[0];
-                    else
-                        us = us[1 .. $];
-                }
+                if (matched)
+                    return &us[0] - &this.literal[0];
+                else
+                    us = us[1 .. $];
             }
-
-            return -1;
         }
 
-        ///
-        unittest {
-            assert(String_ASCII("to find this").indexOf(StringBuilder_ASCII("nothing")) == -1);
-            assert(String_ASCII("to find this").indexOf(StringBuilder_ASCII("i")) == 4);
-        }
+        return -1;
+    }
 
-        ///
-        ptrdiff_t ignoreCaseIndexOf(scope StringBuilder_ASCII other) scope {
-            import sidero.base.text.ascii.characters : toLower;
+    ///
+    unittest {
+        assert(String_ASCII("to find this").indexOf(StringBuilder_ASCII("nothing")) == -1);
+        assert(String_ASCII("to find this").indexOf(StringBuilder_ASCII("i")) == 4);
+    }
 
-            LiteralType us = this.literal;
-            if (us.length > 0 && us[$ - 1] == '\0')
-                us = us[0 .. $ - 1];
+    ///
+    ptrdiff_t ignoreCaseIndexOf(scope StringBuilder_ASCII other) scope {
+        import sidero.base.text.ascii.characters : toLower;
 
-            if (other.length > 0) {
-                while (us.length >= other.length) {
-                    size_t offsetIntoUs, otherLength;
-                    bool matched = true;
+        LiteralType us = this.literal;
+        if (us.length > 0 && us[$ - 1] == '\0')
+            us = us[0 .. $ - 1];
 
-                    other.foreachBlocks((data) {
-                        if (data.length <= us.length - offsetIntoUs) {
-                            foreach (i; 0 .. data.length) {
-                                if (data[i].toLower != us[offsetIntoUs + i].toLower) {
-                                    matched = false;
-                                    return 1;
-                                }
+        if (other.length > 0) {
+            while (us.length >= other.length) {
+                size_t offsetIntoUs, otherLength;
+                bool matched = true;
+
+                other.foreachContiguous((data) {
+                    if (data.length <= us.length - offsetIntoUs) {
+                        foreach (i; 0 .. data.length) {
+                            if (data[i].toLower != us[offsetIntoUs + i].toLower) {
+                                matched = false;
+                                return 1;
                             }
-                        } else {
-                            matched = false;
-                            return 1;
                         }
+                    } else {
+                        matched = false;
+                        return 1;
+                    }
 
-                        offsetIntoUs += data.length;
-                        return 0;
-                    }, (size_t otherLength2) { otherLength = otherLength2; });
+                    offsetIntoUs += data.length;
+                    return 0;
+                }, (size_t otherLength2) { otherLength = otherLength2; });
 
-                    if (matched)
-                        return &us[0] - &this.literal[0];
-                    else
-                        us = us[1 .. $];
-                }
+                if (matched)
+                    return &us[0] - &this.literal[0];
+                else
+                    us = us[1 .. $];
             }
-
-            return -1;
         }
 
-        ///
-        unittest {
-            assert(String_ASCII("to find this").ignoreCaseIndexOf(StringBuilder_ASCII("nothing")) == -1);
-            assert(String_ASCII("to fInd this").ignoreCaseIndexOf(StringBuilder_ASCII("i")) == 4);
-        }
+        return -1;
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("to find this").ignoreCaseIndexOf(StringBuilder_ASCII("nothing")) == -1);
+        assert(String_ASCII("to fInd this").ignoreCaseIndexOf(StringBuilder_ASCII("i")) == 4);
     }
 
     ///
@@ -1947,101 +1936,99 @@ nothrow @nogc:
         assert(String_ASCII("to find thIs").ignoreCaseLastIndexOf(String_ASCII("i")) == 10);
     }
 
-    version (none) {
-        ///
-        ptrdiff_t lastIndexOf(scope StringBuilder_ASCII other) scope {
-            LiteralType us = this.literal;
-            if (us.length > 0 && us[$ - 1] == '\0')
-                us = us[0 .. $ - 1];
+    ///
+    ptrdiff_t lastIndexOf(scope StringBuilder_ASCII other) scope {
+        LiteralType us = this.literal;
+        if (us.length > 0 && us[$ - 1] == '\0')
+            us = us[0 .. $ - 1];
 
-            if (us.length == 0 || other.isNull)
-                return -1;
+        if (us.length == 0 || other.isNull)
+            return -1;
 
-            ptrdiff_t possibleValue = -1;
+        ptrdiff_t possibleValue = -1;
 
-            if (other.length > 0) {
-                while (us.length >= other.length) {
-                    size_t offsetIntoUs, otherLength;
-                    bool matched = true;
+        if (other.length > 0) {
+            while (us.length >= other.length) {
+                size_t offsetIntoUs, otherLength;
+                bool matched = true;
 
-                    other.foreachBlocks((data) {
-                        if (data.length > us.length - offsetIntoUs || data != us[offsetIntoUs .. offsetIntoUs + data.length]) {
-                            matched = false;
-                            return 1;
-                        }
+                other.foreachContiguous((data) {
+                    if (data.length > us.length - offsetIntoUs || data != us[offsetIntoUs .. offsetIntoUs + data.length]) {
+                        matched = false;
+                        return 1;
+                    }
 
-                        offsetIntoUs += data.length;
-                        return 0;
-                    }, (size_t otherLength2) { otherLength = otherLength2; });
+                    offsetIntoUs += data.length;
+                    return 0;
+                }, (size_t otherLength2) { otherLength = otherLength2; });
 
-                    if (matched) {
-                        possibleValue = &us[0] - &this.literal[0];
-                        us = us[other.length .. $];
-                    } else
-                        us = us[1 .. $];
-                }
+                if (matched) {
+                    possibleValue = &us[0] - &this.literal[0];
+                    us = us[other.length .. $];
+                } else
+                    us = us[1 .. $];
             }
-
-            return possibleValue;
         }
 
-        ///
-        unittest {
-            assert(String_ASCII("to find this").lastIndexOf(StringBuilder_ASCII("nothing")) == -1);
-            assert(String_ASCII("to find this").lastIndexOf(StringBuilder_ASCII("i")) == 10);
-        }
+        return possibleValue;
+    }
 
-        ///
-        ptrdiff_t ignoreCaseLastIndexOf(scope StringBuilder_ASCII other) scope {
-            import sidero.base.text.ascii.characters : toLower;
+    ///
+    unittest {
+        assert(String_ASCII("to find this").lastIndexOf(StringBuilder_ASCII("nothing")) == -1);
+        assert(String_ASCII("to find this").lastIndexOf(StringBuilder_ASCII("i")) == 10);
+    }
 
-            LiteralType us = this.literal;
-            if (us.length > 0 && us[$ - 1] == '\0')
-                us = us[0 .. $ - 1];
+    ///
+    ptrdiff_t ignoreCaseLastIndexOf(scope StringBuilder_ASCII other) scope {
+        import sidero.base.text.ascii.characters : toLower;
 
-            if (us.length == 0 || other.isNull)
-                return -1;
+        LiteralType us = this.literal;
+        if (us.length > 0 && us[$ - 1] == '\0')
+            us = us[0 .. $ - 1];
 
-            ptrdiff_t possibleValue = -1;
+        if (us.length == 0 || other.isNull)
+            return -1;
 
-            if (other.length > 0) {
-                while (us.length >= other.length) {
-                    size_t offsetIntoUs, otherLength;
-                    bool matched = true;
+        ptrdiff_t possibleValue = -1;
 
-                    other.foreachBlocks((data) {
-                        if (data.length <= us.length - offsetIntoUs) {
-                            foreach (i; 0 .. data.length) {
-                                if (data[i].toLower != us[offsetIntoUs + i].toLower) {
-                                    matched = false;
-                                    return 1;
-                                }
+        if (other.length > 0) {
+            while (us.length >= other.length) {
+                size_t offsetIntoUs, otherLength;
+                bool matched = true;
+
+                other.foreachContiguous((data) {
+                    if (data.length <= us.length - offsetIntoUs) {
+                        foreach (i; 0 .. data.length) {
+                            if (data[i].toLower != us[offsetIntoUs + i].toLower) {
+                                matched = false;
+                                return 1;
                             }
-                        } else {
-                            matched = false;
-                            return 1;
                         }
+                    } else {
+                        matched = false;
+                        return 1;
+                    }
 
-                        offsetIntoUs += data.length;
-                        return 0;
-                    }, (size_t otherLength2) { otherLength = otherLength2; });
+                    offsetIntoUs += data.length;
+                    return 0;
+                }, (size_t otherLength2) { otherLength = otherLength2; });
 
-                    if (matched) {
-                        possibleValue = &us[0] - &this.literal[0];
-                        us = us[other.length .. $];
-                    } else
-                        us = us[1 .. $];
-                }
+                if (matched) {
+                    possibleValue = &us[0] - &this.literal[0];
+                    us = us[other.length .. $];
+                } else
+                    us = us[1 .. $];
             }
-
-            return possibleValue;
         }
 
-        ///
-        unittest {
-            assert(String_ASCII("to find this").ignoreCaseLastIndexOf(StringBuilder_ASCII("nothing")) == -1);
-            assert(String_ASCII("to find thIs").ignoreCaseLastIndexOf(StringBuilder_ASCII("i")) == 10);
-        }
+        return possibleValue;
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("to find this").ignoreCaseLastIndexOf(StringBuilder_ASCII("nothing")) == -1);
+        assert(String_ASCII("to find thIs").ignoreCaseLastIndexOf(StringBuilder_ASCII("i")) == 10);
     }
 
     //
@@ -2156,97 +2143,95 @@ nothrow @nogc:
         assert(String_ASCII("congrats its alive").ignoreCaseCount(String_ASCII("b")) == 0);
     }
 
-    version (none) {
-        ///
-        size_t count(scope StringBuilder_ASCII other) scope {
-            LiteralType us = this.literal;
-            if (us.length > 0 && us[$ - 1] == '\0')
-                us = us[0 .. $ - 1];
+    ///
+    size_t count(scope StringBuilder_ASCII other) scope {
+        LiteralType us = this.literal;
+        if (us.length > 0 && us[$ - 1] == '\0')
+            us = us[0 .. $ - 1];
 
-            if (other.length == 0)
+        if (other.length == 0)
+            return 0;
+
+        size_t got;
+
+        while (us.length >= other.length) {
+            size_t offsetIntoUs, otherLength;
+            bool matched = true;
+
+            other.foreachContiguous((data) {
+                if (data.length > us.length - offsetIntoUs || data != us[offsetIntoUs .. offsetIntoUs + data.length]) {
+                    matched = false;
+                    return 1;
+                }
+
+                offsetIntoUs += data.length;
                 return 0;
+            }, (size_t otherLength2) { otherLength = otherLength2; });
 
-            size_t got;
-
-            while (us.length >= other.length) {
-                size_t offsetIntoUs, otherLength;
-                bool matched = true;
-
-                other.foreachBlocks((data) {
-                    if (data.length > us.length - offsetIntoUs || data != us[offsetIntoUs .. offsetIntoUs + data.length]) {
-                        matched = false;
-                        return 1;
-                    }
-
-                    offsetIntoUs += data.length;
-                    return 0;
-                }, (size_t otherLength2) { otherLength = otherLength2; });
-
-                if (matched) {
-                    got++;
-                    us = us[other.length .. $];
-                } else
-                    us = us[1 .. $];
-            }
-
-            return got;
+            if (matched) {
+                got++;
+                us = us[other.length .. $];
+            } else
+                us = us[1 .. $];
         }
 
-        ///
-        unittest {
-            assert(String_ASCII("congrats its alive").count(StringBuilder_ASCII("a")) == 2);
-            assert(String_ASCII("congrats its alive").count(StringBuilder_ASCII("b")) == 0);
-        }
+        return got;
+    }
 
-        ///
-        size_t ignoreCaseCount(scope StringBuilder_ASCII other) scope {
-            import sidero.base.text.ascii.characters : toLower;
+    ///
+    unittest {
+        assert(String_ASCII("congrats its alive").count(StringBuilder_ASCII("a")) == 2);
+        assert(String_ASCII("congrats its alive").count(StringBuilder_ASCII("b")) == 0);
+    }
 
-            LiteralType us = this.literal;
-            if (us.length > 0 && us[$ - 1] == '\0')
-                us = us[0 .. $ - 1];
+    ///
+    size_t ignoreCaseCount(scope StringBuilder_ASCII other) scope {
+        import sidero.base.text.ascii.characters : toLower;
 
-            if (other.length == 0)
-                return 0;
+        LiteralType us = this.literal;
+        if (us.length > 0 && us[$ - 1] == '\0')
+            us = us[0 .. $ - 1];
 
-            size_t got;
+        if (other.length == 0)
+            return 0;
 
-            while (us.length >= other.length) {
-                size_t offsetIntoUs, otherLength;
-                bool matched = true;
+        size_t got;
 
-                other.foreachBlocks((data) {
-                    if (data.length <= us.length - offsetIntoUs) {
-                        foreach (i; 0 .. data.length) {
-                            if (data[i].toLower != us[offsetIntoUs + i].toLower) {
-                                matched = false;
-                                return 1;
-                            }
+        while (us.length >= other.length) {
+            size_t offsetIntoUs, otherLength;
+            bool matched = true;
+
+            other.foreachContiguous((data) {
+                if (data.length <= us.length - offsetIntoUs) {
+                    foreach (i; 0 .. data.length) {
+                        if (data[i].toLower != us[offsetIntoUs + i].toLower) {
+                            matched = false;
+                            return 1;
                         }
-                    } else {
-                        matched = false;
-                        return 1;
                     }
+                } else {
+                    matched = false;
+                    return 1;
+                }
 
-                    offsetIntoUs += data.length;
-                    return 0;
-                }, (size_t otherLength2) { otherLength = otherLength2; });
+                offsetIntoUs += data.length;
+                return 0;
+            }, (size_t otherLength2) { otherLength = otherLength2; });
 
-                if (matched) {
-                    got++;
-                    us = us[other.length .. $];
-                } else
-                    us = us[1 .. $];
-            }
-
-            return got;
+            if (matched) {
+                got++;
+                us = us[other.length .. $];
+            } else
+                us = us[1 .. $];
         }
 
-        ///
-        unittest {
-            assert(String_ASCII("congrAts its alive").ignoreCaseCount(StringBuilder_ASCII("a")) == 2);
-            assert(String_ASCII("congrats its alive").ignoreCaseCount(StringBuilder_ASCII("b")) == 0);
-        }
+        return got;
+    }
+
+    ///
+    unittest {
+        assert(String_ASCII("congrAts its alive").ignoreCaseCount(StringBuilder_ASCII("a")) == 2);
+        assert(String_ASCII("congrats its alive").ignoreCaseCount(StringBuilder_ASCII("b")) == 0);
     }
 
     //
@@ -2329,32 +2314,30 @@ nothrow @nogc:
         assert(!String_ASCII("youwanna what?").ignoreCaseContains(String_ASCII("bahhhh")));
     }
 
-    version (none) {
-        ///
-        bool contains(scope StringBuilder_ASCII other) scope {
-            if (other.isNull)
-                return 0;
-            return indexOf(other) >= 0;
-        }
+    ///
+    bool contains(scope StringBuilder_ASCII other) scope {
+        if (other.isNull)
+            return 0;
+        return indexOf(other) >= 0;
+    }
 
-        ///
-        unittest {
-            assert(String_ASCII("youwanna what?").contains(StringBuilder_ASCII("wanna")));
-            assert(!String_ASCII("youwanna what?").contains(StringBuilder_ASCII("bahhhh")));
-        }
+    ///
+    unittest {
+        assert(String_ASCII("youwanna what?").contains(StringBuilder_ASCII("wanna")));
+        assert(!String_ASCII("youwanna what?").contains(StringBuilder_ASCII("bahhhh")));
+    }
 
-        ///
-        bool ignoreCaseContains(scope StringBuilder_ASCII other) scope {
-            if (other.isNull)
-                return 0;
-            return ignoreCaseIndexOf(other) >= 0;
-        }
+    ///
+    bool ignoreCaseContains(scope StringBuilder_ASCII other) scope {
+        if (other.isNull)
+            return 0;
+        return ignoreCaseIndexOf(other) >= 0;
+    }
 
-        ///
-        unittest {
-            assert(String_ASCII("youwaNNa what?").ignoreCaseContains(StringBuilder_ASCII("wanna")));
-            assert(!String_ASCII("youwanna what?").ignoreCaseContains(StringBuilder_ASCII("bahhhh")));
-        }
+    ///
+    unittest {
+        assert(String_ASCII("youwaNNa what?").ignoreCaseContains(StringBuilder_ASCII("wanna")));
+        assert(!String_ASCII("youwanna what?").ignoreCaseContains(StringBuilder_ASCII("bahhhh")));
     }
 
     //
