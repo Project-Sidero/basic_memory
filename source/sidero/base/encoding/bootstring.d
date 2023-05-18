@@ -14,6 +14,11 @@ struct BootString(uint Base, uint Tmin, uint Tmax, uint Skew, uint Damp, uint In
 export @safe nothrow @nogc static:
 
     ///
+    bool needsEncoding(dchar c) {
+        return c >= 0x80;
+    }
+
+    ///
     Result!StringBuilder_ASCII encode(scope String_ASCII input) {
         StringBuilder_ASCII ret = StringBuilder_ASCII(globalAllocator());
         auto result = encode(ret, input);
@@ -500,6 +505,12 @@ unittest {
 /// Punycode + ACE prefix support (xn--).
 struct IDNAPunycode {
 export @safe nothrow @nogc static:
+
+    ///
+    bool needsEncoding(dchar c) {
+        return c >= 0x80;
+    }
+
     ///
     Result!StringBuilder_ASCII encode(scope String_ASCII input) {
         StringBuilder_ASCII ret = StringBuilder_ASCII(globalAllocator());

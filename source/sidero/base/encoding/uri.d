@@ -8,6 +8,11 @@ struct URIEncoding(alias NeedsEncoding) {
 export @safe nothrow @nogc static:
 
     ///
+    bool needsEncoding(dchar c) {
+        return NeedsEncoding(c);
+    }
+
+    ///
     StringBuilder_ASCII encode(scope String_UTF8.LiteralType input, scope return RCAllocator allocator = RCAllocator.init) @trusted {
         StringBuilder_ASCII output = StringBuilder_ASCII(allocator);
 
@@ -430,7 +435,7 @@ unittest {
     assert(got.get == "\0\t\v\f\b\a\r\n !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~");
 }
 
-///
+/// You probably don't want this. Use Bootstring instead.
 alias URIHostEncoding = URIEncoding!((c) {
     switch (c) {
     case '!':
