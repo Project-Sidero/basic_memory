@@ -132,6 +132,7 @@ export @safe nothrow @nogc:
 
         ///
         @trusted unittest {
+            assert(URIAddress.from("").assumeOkay.isNull);
             assert(URIAddress.from("scheme://@host:1234/path/segments").assumeOkay == String_ASCII("scheme://host:1234/path/segments"));
             assert(URIAddress.from("scheme://user:@host:1234/path/segments")
                     .assumeOkay == String_ASCII("scheme://user:@host:1234/path/segments"));
@@ -203,17 +204,15 @@ Result!URIAddress parseURIFromString(Input)(scope Input input, bool encode, scop
     // [ :/ , user@ , host , :port ]
     auto lengthOfConnectionInfo = calculateLengthOfConnectionInfo(input, lengthOfScheme);
 
-    if (lengthOfConnectionInfo[2] == 0) {
-        // we cannot represent a URI if we don't have a host
-        return typeof(return)(MalformedInputException("A URI requires a host"));
-    }
-
     // [ /segments , ?query ]
     const lengthOfQuery = calculateLengthOfQuery(input[lengthOfScheme + lengthOfConnectionInfo[0] +
         lengthOfConnectionInfo[1] + lengthOfConnectionInfo[2] + lengthOfConnectionInfo[3] .. $]);
     // #fragment
     const lengthOfFragment = calculateLengthOfFragment(input[lengthOfScheme + lengthOfConnectionInfo[0] +
         lengthOfConnectionInfo[1] + lengthOfConnectionInfo[2] + lengthOfConnectionInfo[3] + lengthOfQuery[0] + lengthOfQuery[1] .. $]);
+
+    if (lengthOfConnectionInfo[2] == 0 && (lengthOfQuery[0] == 0 || lengthOfQuery[1] == 0 || lengthOfFragment == 0))
+        return typeof(return).init;
 
     URIAddress ret;
     ret.state = allocator.make!URIAddressState;
