@@ -1037,6 +1037,7 @@ size_t[4] calculateLengthOfConnectionInfoImpl(Input)(scope Input input, ptrdiff_
         lengthOfScheme = calculateLengthOfSchemeImpl(input);
 
     if (lengthOfScheme > 0) {
+        // :
         input = input[lengthOfScheme + 1 .. $];
         lengthOfPrefix = 1;
     }

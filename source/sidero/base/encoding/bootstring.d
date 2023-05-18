@@ -257,11 +257,42 @@ private:
             return cast(ubyte)(c + 22 + 75 * (c < 26) - ((flag != 0) << 5));
         }
 
-        foreach (c; input) {
-            if (c < 0x80) {
-                // basic character
-                output ~= [cast(ubyte)c];
-                numberOfBasicCharacters++;
+        {
+            int inHex;
+
+            foreach (c; input) {
+                if (c == '%') {
+                    if (inHex > 0)
+                        return ErrorResult(MalformedInputException("Error percentage while handling percentage encoding"));
+
+                    output ~= [cast(ubyte)c];
+                    numberOfBasicCharacters++;
+
+                    inHex = 1;
+                } else if (inHex > 0) {
+                    switch (c) {
+                    case '0': .. case '9':
+                    case 'A': .. case 'Z':
+                        output ~= [cast(ubyte)c];
+                        break;
+                    case 'a': .. case 'z':
+                        enum aToA = 'A' - 'a';
+                        output ~= [cast(ubyte)(c + aToA)];
+                        break;
+                    default:
+                        return ErrorResult(MalformedInputException("Error percentage encoding character out of range"));
+                    }
+
+                    numberOfBasicCharacters++;
+
+                    inHex++;
+                    if (inHex == 3)
+                        inHex = 0;
+                } else if (c < 0x80) {
+                    // basic character
+                    output ~= [cast(ubyte)c];
+                    numberOfBasicCharacters++;
+                }
             }
         }
 
