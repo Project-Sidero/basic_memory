@@ -354,9 +354,9 @@ nothrow @safe:
     }
 
     ///
-    StringBuilder_ASCII dup(RCAllocator allocator = RCAllocator.init) scope @nogc {
+    StringBuilder_ASCII dup(scope return RCAllocator allocator = RCAllocator.init) scope const @nogc @trusted {
         StringBuilder_ASCII ret = StringBuilder_ASCII(allocator);
-        ret.insertImplBuilder(this);
+        ret.insertImplBuilder(*cast(StringBuilder_ASCII*)&this);
         return ret;
     }
 
@@ -402,6 +402,11 @@ nothrow @safe:
         assert(readOnly.length == 16);
         assert(readOnly.literal.length == 17);
         assert(readOnly == Text);
+    }
+
+    ///
+    StringBuilder_ASCII asMutable(scope return RCAllocator allocator = RCAllocator.init) scope const @nogc {
+        return this.dup(allocator);
     }
 
     ///

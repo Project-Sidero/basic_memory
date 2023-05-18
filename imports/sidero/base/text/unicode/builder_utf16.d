@@ -566,10 +566,10 @@ nothrow @safe:
     }
 
     ///
-    typeof(this) dup(RCAllocator allocator = RCAllocator.init) scope @nogc {
-        typeof(this) ret = typeof(this)(allocator);
+    typeof(this) dup(scope return RCAllocator allocator = RCAllocator.init) scope const @nogc @trusted {
+        auto ret = StringBuilder_UTF16(allocator);
         ret.state.setup(Char.sizeof);
-        ret.state.insertImpl(this);
+        ret.state.insertImpl(*cast(StringBuilder_UTF16*)&this);
         return ret;
     }
 
@@ -615,6 +615,11 @@ nothrow @safe:
         assert(readOnly.length == 16);
         assert((cast(LiteralType)readOnly.literal).length == 17);
         assert(readOnly == Text);
+    }
+
+    ///
+    typeof(this) asMutable(scope return RCAllocator allocator = RCAllocator.init) scope const @nogc {
+        return this.dup(allocator);
     }
 
     @nogc {
