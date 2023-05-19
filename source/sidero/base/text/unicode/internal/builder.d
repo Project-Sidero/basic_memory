@@ -2213,16 +2213,14 @@ struct AnyAsTargetChar(TargetChar) {
                 osiu32.state = state;
                 osiu32.iterator = iterator;
                 osat = osiu32.get;
-            }, () { assert(0); });
+            }, () {});
         } else static if (isUTFReadOnly!Input) {
             input.stripZeroTerminator;
 
             input.literalEncoding.handle(() @trusted { latc8.literal = cast(string)input.literal; osat = latc8.get(); }, () @trusted {
                 latc16.literal = cast(wstring)input.literal;
                 osat = latc16.get();
-            }, () @trusted { latc32.literal = cast(dstring)input.literal; osat = latc32.get(); }, () @trusted {
-                assert(0);
-            });
+            }, () @trusted { latc32.literal = cast(dstring)input.literal; osat = latc32.get(); }, () @trusted {});
         } else static if (is(typeof(actualInput) == const(char)[])) {
             latc8.literal = input;
             osat = latc8.get();

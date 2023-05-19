@@ -274,12 +274,14 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
             ilt.iteratorList.rcIteratorInternal(false, iterator);
         }
 
-        bool empty() {
-            blockList.mutex.pureLock;
-            scope (exit)
-                blockList.mutex.unlock;
+        bool empty() const @trusted {
+            Iterator* self = cast(Iterator*)&this;
 
-            return emptyInternal();
+            self.blockList.mutex.pureLock;
+            scope (exit)
+                self.blockList.mutex.unlock;
+
+            return self.emptyInternal();
         }
 
         Char front() {

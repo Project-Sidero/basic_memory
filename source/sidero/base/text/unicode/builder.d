@@ -357,7 +357,8 @@ nothrow @safe:
     }
 
     ///
-    bool isNull() scope @nogc {
+    bool isNull() scope const @nogc @trusted {
+        auto state = cast(StateIterator*)&state;
         return state.isNull;
     }
 
@@ -541,7 +542,8 @@ nothrow @safe:
     alias opDollar = length;
 
     /// The length of the string in its native encoding.
-    size_t length() scope @nogc {
+    size_t length() scope const @nogc @trusted {
+        auto state = cast(StateIterator*)&state;
         return state.length;
     }
 

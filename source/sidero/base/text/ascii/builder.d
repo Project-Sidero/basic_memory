@@ -232,7 +232,7 @@ nothrow @safe:
     }
 
     ///
-    bool isNull() scope @nogc {
+    bool isNull() scope const @nogc {
         return state is null || (iterator !is null && iterator.empty);
     }
 
@@ -343,8 +343,9 @@ nothrow @safe:
     alias encodingLength = length;
 
     ///
-    size_t length() scope @nogc {
-        return state !is null ? state.externalLength(iterator) : 0;
+    size_t length() scope const @nogc @trusted {
+        auto state = cast(ASCII_State*)state;
+        return state !is null ? state.externalLength(cast(ASCII_State.Iterator*)iterator) : 0;
     }
 
     ///
@@ -630,7 +631,7 @@ nothrow @safe:
     alias put = append;
 
     ///
-    bool empty() scope @nogc {
+    bool empty() scope const @nogc {
         return state is null ? true : (iterator is null ? (this.length == 0) : iterator.empty);
     }
 
