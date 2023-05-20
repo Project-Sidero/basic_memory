@@ -1,6 +1,7 @@
 module sidero.base.errors.result;
 import sidero.base.errors.message;
 import sidero.base.math.utils : isClose;
+import sidero.base.attributes;
 
 export:
 
@@ -19,7 +20,7 @@ auto result(Type)(Type argument) {
 alias ErrorResult = Result!void;
 
 ///
-struct Result(Type) {
+@mustuse struct Result(Type) {
 export:
     ///
     enum HaveValue = !is(Type == void);
@@ -97,7 +98,7 @@ scope nothrow @nogc @safe:
 
     ///
     void opAssign(scope Result other) {
-        this.__ctor(other);
+        cast(void)this.__ctor(other);
     }
 
     ///
@@ -216,7 +217,7 @@ unittest {
 }
 
 ///
-struct ResultReference(Type) {
+@mustuse struct ResultReference(Type) {
 export:
     alias RCHandle = void delegate(bool addRef, scope void* _user) @safe nothrow @nogc;
 
