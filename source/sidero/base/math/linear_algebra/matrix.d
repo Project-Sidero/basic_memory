@@ -61,7 +61,7 @@ export @safe nothrow @nogc:
         ///
         Matrix identity() {
             Matrix ret;
-            .identity(ret.data[], Columns);
+            cast(void).identity(ret.data[], Columns);
             return ret;
         }
     }
