@@ -4,9 +4,11 @@ import sidero.base.allocators;
 import sidero.base.attributes;
 import sidero.base.errors;
 import sidero.base.text;
+import sidero.base.containers.dynamicarray;
 
 export @safe nothrow @nogc:
 
+///
 struct URIAddress {
     private {
         URIAddressState* state;
@@ -17,6 +19,313 @@ export @safe nothrow @nogc:
     ///
     bool isNull() scope const {
         return state is null;
+    }
+
+    ///
+    String_ASCII scheme() scope const @trusted {
+        if (isNull || state.lengthOfScheme == 0)
+            return String_ASCII.init;
+
+        URIAddressState* state = cast(URIAddressState*)this.state;
+        state.mutex.pureLock;
+        scope (exit)
+            state.mutex.unlock;
+
+        return state.storage[state.offsetOfScheme .. state.offsetOfScheme + state.lengthOfScheme].asReadOnly();
+    }
+
+    ///
+    @trusted unittest {
+        assert(URIAddress.from("myscheme://user:pass@host/path?query#fragment").assumeOkay.scheme == "myscheme");
+    }
+
+    ///
+    String_ASCII userInfo() scope const @trusted {
+        if (isNull || state.lengthOfConnectionInfo == 0)
+            return String_ASCII.init;
+
+        URIAddressState* state = cast(URIAddressState*)this.state;
+        state.mutex.pureLock;
+        scope (exit)
+            state.mutex.unlock;
+
+        return state.storage[state.offsetOfConnectionInfo .. state.offsetOfConnectionInfo + state.lengthOfConnectionInfo].asReadOnly();
+    }
+
+    ///
+    @trusted unittest {
+        assert(URIAddress.from("myscheme://user:pass@host/path?query#fragment").assumeOkay.userInfo == "user:pass");
+    }
+
+    ///
+    StringBuilder_UTF8 decodedUserInfo() scope const @trusted {
+        import sidero.base.encoding.uri;
+
+        if (isNull || state.lengthOfConnectionInfo == 0)
+            return StringBuilder_UTF8.init;
+
+        URIAddressState* state = cast(URIAddressState*)this.state;
+        state.mutex.pureLock;
+        scope (exit)
+            state.mutex.unlock;
+
+        auto sliced = state.storage[state.offsetOfConnectionInfo .. state.offsetOfConnectionInfo + state.lengthOfConnectionInfo];
+        auto ret = URIUserInfoEncoding.decode(sliced);
+
+        if (ret)
+            return ret.get;
+        else
+            return StringBuilder_UTF8.init;
+    }
+
+    ///
+    String_ASCII host() scope const @trusted {
+        if (isNull || state.lengthOfHost == 0)
+            return String_ASCII.init;
+
+        URIAddressState* state = cast(URIAddressState*)this.state;
+        state.mutex.pureLock;
+        scope (exit)
+            state.mutex.unlock;
+
+        return state.storage[state.offsetOfHost .. state.offsetOfHost + state.lengthOfHost].asReadOnly();
+    }
+
+    ///
+    @trusted unittest {
+        assert(URIAddress.from("myscheme://user:pass@host/path?query#fragment").assumeOkay.host == "host");
+    }
+
+    ///
+    StringBuilder_UTF8 decodedHost() scope const @trusted {
+        import sidero.base.encoding.bootstring;
+
+        if (isNull || state.lengthOfHost == 0)
+            return StringBuilder_UTF8.init;
+
+        URIAddressState* state = cast(URIAddressState*)this.state;
+        state.mutex.pureLock;
+        scope (exit)
+            state.mutex.unlock;
+
+        auto sliced = state.storage[state.offsetOfHost .. state.offsetOfHost + state.lengthOfHost];
+        auto ret = IDNAPunycode.decode(sliced);
+
+        if (ret)
+            return ret.get.byUTF8;
+        else
+            return StringBuilder_UTF8.init;
+    }
+
+    ///
+    DynamicArray!String_ASCII segments(scope return RCAllocator allocator = RCAllocator.init) scope const @trusted {
+        if (isNull || state.lengthOfPath == 0)
+            return typeof(return).init;
+
+        URIAddressState* state = cast(URIAddressState*)this.state;
+        state.mutex.pureLock;
+        scope (exit)
+            state.mutex.unlock;
+
+        auto sliced = state.storage[state.offsetOfPath .. state.offsetOfPath + state.lengthOfPath].asReadOnly(allocator);
+
+        DynamicArray!String_ASCII ret = DynamicArray!String_ASCII(0, allocator);
+        ret.reserve(sliced.count("/") + 1);
+
+        while (!sliced.empty) {
+            ptrdiff_t index = sliced.indexOf("/");
+
+            if (index < 0) {
+                ret ~= sliced;
+                sliced = String_ASCII.init;
+
+            } else if (index == 0) {
+                sliced = sliced[1 .. $];
+            } else {
+                ret ~= sliced[0 .. index];
+                sliced = sliced[index + 1 .. $];
+            }
+        }
+
+        return ret;
+    }
+
+    ///
+    @trusted unittest {
+        assert(URIAddress.from("myscheme://user:pass@host/path/goes/here?query#fragment")
+                .assumeOkay.segments == [String_ASCII("path"), String_ASCII("goes"), String_ASCII("here")]);
+    }
+
+    ///
+    DynamicArray!StringBuilder_UTF8 decodedSegments(scope return RCAllocator allocator = RCAllocator.init) scope const @trusted {
+        import sidero.base.encoding.uri;
+
+        if (isNull || state.lengthOfPath == 0)
+            return typeof(return).init;
+
+        URIAddressState* state = cast(URIAddressState*)this.state;
+        state.mutex.pureLock;
+        scope (exit)
+            state.mutex.unlock;
+
+        auto sliced = state.storage[state.offsetOfPath .. state.offsetOfPath + state.lengthOfPath].asReadOnly(allocator);
+
+        StringBuilder_UTF8 buffer = StringBuilder_UTF8(allocator);
+
+        DynamicArray!StringBuilder_UTF8 ret = DynamicArray!StringBuilder_UTF8(0, allocator);
+        ret.reserve(sliced.count("/") + 1);
+
+        while (!sliced.empty) {
+            const oldLength = buffer.length;
+            ptrdiff_t index = sliced.indexOf("/");
+
+            if (index < 0) {
+                cast(void)URIQueryFragmentEncoding.decode(buffer, sliced);
+                sliced = String_ASCII.init;
+                ret ~= buffer[oldLength .. $];
+            } else if (index == 0) {
+                sliced = sliced[1 .. $];
+                continue;
+            } else {
+                cast(void)URIQueryFragmentEncoding.decode(buffer, sliced[0 .. index]);
+                sliced = sliced[index + 1 .. $];
+                ret ~= buffer[oldLength .. $];
+            }
+        }
+
+        return ret;
+    }
+
+    ///
+    @trusted unittest {
+        assert(URIAddress.from("myscheme://user:pass@host/path/goes/here?query#fragment")
+                .assumeOkay.decodedSegments == [
+                    StringBuilder_UTF8("path"), StringBuilder_UTF8("goes"), StringBuilder_UTF8("here")
+        ]);
+    }
+
+    ///
+    DynamicArray!String_ASCII queries(scope return RCAllocator allocator = RCAllocator.init) scope const @trusted {
+        if (isNull || state.lengthOfQuery < 2)
+            return typeof(return).init;
+
+        URIAddressState* state = cast(URIAddressState*)this.state;
+        state.mutex.pureLock;
+        scope (exit)
+            state.mutex.unlock;
+
+        auto sliced = state.storage[state.offsetOfQuery .. state.offsetOfQuery + state.lengthOfQuery].asReadOnly(allocator);
+
+        DynamicArray!String_ASCII ret = DynamicArray!String_ASCII(0, allocator);
+        ret.reserve(sliced.count("&") + 1);
+
+        while (!sliced.empty) {
+            ptrdiff_t index = sliced.indexOf("&");
+
+            if (index < 0) {
+                ret ~= sliced;
+                sliced = String_ASCII.init;
+            } else if (index == 0) {
+                sliced = sliced[1 .. $];
+            } else {
+                ret ~= sliced[0 .. index];
+                sliced = sliced[index + 1 .. $];
+            }
+        }
+
+        return ret;
+    }
+
+    ///
+    @trusted unittest {
+        assert(URIAddress.from("myscheme://user:pass@host/path/goes/here?query1=2&query4#fragment")
+                .assumeOkay.queries == [String_ASCII("query1=2"), String_ASCII("query4")]);
+    }
+
+    ///
+    DynamicArray!StringBuilder_UTF8 decodedQueries(scope return RCAllocator allocator = RCAllocator.init) scope const @trusted {
+        import sidero.base.encoding.uri;
+
+        if (isNull || state.lengthOfQuery == 0)
+            return typeof(return).init;
+
+        URIAddressState* state = cast(URIAddressState*)this.state;
+        state.mutex.pureLock;
+        scope (exit)
+            state.mutex.unlock;
+
+        auto sliced = state.storage[state.offsetOfQuery .. state.offsetOfQuery + state.lengthOfQuery].asReadOnly(allocator);
+
+        StringBuilder_UTF8 buffer = StringBuilder_UTF8(allocator);
+
+        DynamicArray!StringBuilder_UTF8 ret = DynamicArray!StringBuilder_UTF8(0, allocator);
+        ret.reserve(sliced.count("&") + 1);
+
+        while (!sliced.empty) {
+            const oldLength = buffer.length;
+            ptrdiff_t index = sliced.indexOf("&");
+
+            if (index < 0) {
+                cast(void)URIQueryFragmentEncoding.decode(buffer, sliced);
+                sliced = String_ASCII.init;
+                ret ~= buffer[oldLength .. $];
+            } else if (index == 0) {
+                sliced = sliced[1 .. $];
+                continue;
+            } else {
+                cast(void)URIQueryFragmentEncoding.decode(buffer, sliced[0 .. index]);
+                sliced = sliced[index + 1 .. $];
+                ret ~= buffer[oldLength .. $];
+            }
+        }
+
+        return ret;
+    }
+
+    ///
+    @trusted unittest {
+        assert(URIAddress.from("myscheme://user:pass@host/path/goes/here?query1=2&query4#fragment")
+                .assumeOkay.decodedQueries == [StringBuilder_UTF8("query1=2"), StringBuilder_UTF8("query4")]);
+    }
+
+    ///
+    String_ASCII fragment() scope const @trusted {
+        if (isNull || state.lengthOfFragment == 0)
+            return String_ASCII.init;
+
+        URIAddressState* state = cast(URIAddressState*)this.state;
+        state.mutex.pureLock;
+        scope (exit)
+            state.mutex.unlock;
+
+        return state.storage[state.offsetOfFragment .. state.offsetOfFragment + state.lengthOfFragment].asReadOnly();
+    }
+
+    ///
+    @trusted unittest {
+        assert(URIAddress.from("myscheme://user:pass@host/path?query#fragment").assumeOkay.fragment == "fragment");
+    }
+
+    ///
+    StringBuilder_UTF8 decodedFragment() scope const @trusted {
+        import sidero.base.encoding.uri;
+        import sidero.base.encoding.bootstring;
+
+        if (isNull || state.lengthOfFragment == 0)
+            return StringBuilder_UTF8.init;
+
+        URIAddressState* state = cast(URIAddressState*)this.state;
+        state.mutex.pureLock;
+        scope (exit)
+            state.mutex.unlock;
+
+        auto sliced = state.storage[state.offsetOfFragment .. state.offsetOfFragment + state.lengthOfFragment];
+        auto ret = URIQueryFragmentEncoding.decode(sliced);
+
+        if (ret)
+            return ret.get;
+        else
+            return StringBuilder_UTF8.init;
     }
 
     ///
@@ -182,6 +491,36 @@ struct URIAddressState {
     size_t lengthOfPath;
     size_t lengthOfQuery, lengthOfQueryPrefix;
     size_t lengthOfFragment, lengthOfFragmentPrefix;
+
+@safe nothrow @nogc:
+
+    size_t offsetOfScheme() {
+        return 0;
+    }
+
+    size_t offsetOfConnectionInfo() {
+        return this.lengthOfScheme + this.lengthOfSchemeSuffix;
+    }
+
+    size_t offsetOfHost() {
+        return this.offsetOfConnectionInfo() + this.lengthOfConnectionInfo + this.lengthOfConnectionInfoSuffix;
+    }
+
+    size_t offsetOfPort() {
+        return this.offsetOfHost() + this.lengthOfHost + this.lengthOfPortPrefix;
+    }
+
+    size_t offsetOfPath() {
+        return this.offsetOfPort() + this.lengthOfPort;
+    }
+
+    size_t offsetOfQuery() {
+        return this.offsetOfPath() + this.lengthOfPath + this.lengthOfQueryPrefix;
+    }
+
+    size_t offsetOfFragment() {
+        return this.offsetOfQuery() + this.lengthOfQuery + this.lengthOfFragmentPrefix;
+    }
 }
 
 // scheme :
