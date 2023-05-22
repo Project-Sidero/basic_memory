@@ -306,7 +306,11 @@ nothrow @nogc:
         if (ret.lifeTime !is null)
             atomicOp!"+="(ret.lifeTime.refCount, 1);
 
-        ret.literal = this.literal;
+        if (this.iterator !is null)
+            ret.literal = this.iterator.literal;
+        else
+            ret.literal = this.literal;
+
         ret.setupIterator();
         return ret;
     }
@@ -3662,7 +3666,7 @@ package(sidero.base.text) @hidden:
 
                 static if (is(Char == char)) {
                     // copy straight
-                    size_t canDo = charBuffer.length;
+                    size_t canDo = 1;
                     if (canDo > actual.length)
                         canDo = actual.length;
 
@@ -3690,7 +3694,7 @@ package(sidero.base.text) @hidden:
                     amountInOutput = consumedGiven[1];
                 } else static if (is(Char == wchar)) {
                     // copy straight
-                    size_t canDo = charBuffer.length;
+                    size_t canDo = 1;
                     if (canDo > actual.length)
                         canDo = actual.length;
 
@@ -3714,7 +3718,7 @@ package(sidero.base.text) @hidden:
                     amountInOutput = encodeUTF16(actual[0], charBuffer);
                 } else static if (is(Char == dchar)) {
                     // copy straight
-                    size_t canDo = charBuffer.length;
+                    size_t canDo = 1;
                     if (canDo > actual.length)
                         canDo = actual.length;
 

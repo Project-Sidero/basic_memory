@@ -174,7 +174,11 @@ nothrow @nogc:
         if (ret.lifeTime !is null)
             atomicOp!"+="(ret.lifeTime.refCount, 1);
 
-        ret.literal = this.literal;
+        if (this.iterator !is null)
+            ret.literal = this.iterator.literal;
+        else
+            ret.literal = this.literal;
+
         ret.setupIterator();
         return ret;
     }
