@@ -292,6 +292,9 @@ nothrow @nogc:
     }
 
     ///
+    alias save = opSlice;
+
+    ///
     typeof(this) opSlice() scope @trusted {
         if (isNull)
             return typeof(this)();

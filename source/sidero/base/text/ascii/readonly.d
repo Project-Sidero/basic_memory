@@ -161,6 +161,9 @@ nothrow @nogc:
     }
 
     ///
+    alias save = opSlice;
+
+    ///
     String_ASCII opSlice() scope @trusted {
         if (isNull)
             return String_ASCII();
