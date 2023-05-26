@@ -1,5 +1,6 @@
 module sidero.base.range;
 import sidero.base.traits;
+public import std.range : isOutputRange;
 
 /// From std.range.primitives, License: Boost
 template ElementType(R)

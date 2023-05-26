@@ -6,8 +6,7 @@ public import std.traits;
 export:
 
 ///
-enum isAnyString(String) = isSomeString!String || is(String == String_ASCII) || isUTFReadOnly!String ||
-    is(String == StringBuilder_ASCII) || isUTFBuilder!String;
+enum isAnyString(String) = isSomeString!String || isASCII!String || isUTFReadOnly!String || isUTFBuilder!String;
 
 ///
 enum isReadOnlyString(String) = is(String == String_ASCII) || isUTFReadOnly!String;

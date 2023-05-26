@@ -1,5 +1,4 @@
-///
-module sidero.base.text.format;
+module sidero.base.text.format.old;
 import sidero.base.text;
 import sidero.base.errors.result;
 public import sidero.base.attributes : PrintIgnore, PrettyPrintIgnore;
