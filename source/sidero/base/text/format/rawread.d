@@ -18,6 +18,8 @@ bool rawRead(Input, Output)(scope ref Input input, scope out Output output, scop
         return readChar(input, output, format);
     } else static if (__traits(isIntegral, Output)) {
         return readIntegral(input, output, format);
+    } else static if (__traits(isFloating, Output)) {
+        return readFloat(input, output, format);
     } else
         static assert(0, Output.stringof ~ " cannot be read into.");
 }
@@ -82,6 +84,18 @@ unittest {
     from = String_UTF8("hello");
     assert(rawRead(from, c, FormatSpecifier.from("")));
     assert(c == 'h');
+}
+
+///
+unittest {
+    import sidero.base.math.utils;
+
+    float f;
+    String_UTF8 from;
+
+    from = String_UTF8("1.4");
+    assert(rawRead(from, f, FormatSpecifier.from("")));
+    assert(isClose(f, 1.4));
 }
 
 private @hidden:
@@ -378,5 +392,99 @@ bool readIntegral(Input, Output)(scope ref Input input, scope ref Output output,
         output *= -1;
 
     input = inputTemp;
+    return true;
+}
+
+bool readFloat(Input, Output)(scope ref Input input, scope ref Output output, scope FormatSpecifier format) @trusted {
+    import core.stdc.stdio : sscanf;
+
+    Input inputTemp = input.save;
+    inputTemp.stripLeft;
+
+    const canDo = inputTemp.length;
+    const shouldDo = canDo > 64 ? 64 : canDo;
+
+    if (shouldDo == 0)
+        return false;
+
+    static if (is(Input == String_ASCII)) {
+        String_ASCII input2 = inputTemp[0 .. shouldDo].dup;
+    } else static if (is(Input == String_UTF8)) {
+        String_UTF8 input2 = inputTemp[0 .. shouldDo].dup;
+    } else static if (is(Input == String_UTF16)) {
+        String_UTF8 input2 = inputTemp[0 .. shouldDo].byUTF8.dup;
+    } else static if (is(Input == String_UTF32)) {
+        String_UTF8 input2 = inputTemp[0 .. shouldDo].byUTF8.dup;
+    } else static if (is(Input == StringBuilder_ASCII)) {
+        String_ASCII input2 = inputTemp[0 .. shouldDo].asReadOnly;
+    } else static if (is(Input == StringBuilder_UTF8)) {
+        String_UTF8 input2 = inputTemp[0 .. shouldDo].asReadOnly;
+    } else static if (is(Input == StringBuilder_UTF16)) {
+        String_UTF8 input2 = inputTemp[0 .. shouldDo].byUTF8.asReadOnly;
+    } else static if (is(Input == StringBuilder_UTF32)) {
+        String_UTF8 input2 = inputTemp[0 .. shouldDo].byUTF8.asReadOnly;
+    }
+
+    enum FormatPrefix = "%l", FormatSuffix = "%zn\0", FormatDefault = FormatPrefix ~ "f" ~ FormatSuffix;
+
+    static immutable string[__traits(allMembers, FormatSpecifier.Type).length] Formats = [
+        FormatDefault, FormatDefault, FormatDefault, FormatDefault, FormatDefault, FormatDefault, FormatDefault,
+        FormatPrefix ~ "f" ~ FormatSuffix, FormatPrefix ~ "a" ~ FormatSuffix, FormatPrefix ~ "A" ~ FormatSuffix,
+        FormatPrefix ~ "e" ~ FormatSuffix, FormatPrefix ~ "E" ~ FormatSuffix, FormatPrefix ~ "g" ~ FormatSuffix,
+        FormatPrefix ~ "G" ~ FormatSuffix, FormatDefault
+    ];
+
+    auto formatText = Formats[format.type];
+
+    double output2;
+    size_t amountRead;
+
+    auto got = sscanf(input2.ptr, formatText.ptr, &output2, &amountRead);
+    if (got != 1)
+        return false;
+
+    output = cast(Output)output2;
+
+    static if (is(Input == String_ASCII)) {
+        String_ASCII input3 = inputTemp[0 .. shouldDo];
+    } else static if (is(Input == String_UTF8)) {
+        String_UTF8 input3 = inputTemp[0 .. shouldDo];
+    } else static if (is(Input == String_UTF16)) {
+        String_UTF8 input3 = inputTemp[0 .. shouldDo].byUTF8;
+    } else static if (is(Input == String_UTF32)) {
+        String_UTF8 input3 = inputTemp[0 .. shouldDo].byUTF8;
+    } else static if (is(Input == StringBuilder_ASCII)) {
+        String_ASCII input3 = inputTemp[0 .. shouldDo];
+    } else static if (is(Input == StringBuilder_UTF8)) {
+        String_UTF8 input3 = inputTemp[0 .. shouldDo];
+    } else static if (is(Input == StringBuilder_UTF16)) {
+        String_UTF8 input3 = inputTemp[0 .. shouldDo].byUTF8;
+    } else static if (is(Input == StringBuilder_UTF32)) {
+        String_UTF8 input3 = inputTemp[0 .. shouldDo].byUTF8;
+    }
+
+    while (!input3.empty && amountRead > 0) {
+        input3.popFront;
+        amountRead--;
+    }
+
+    static if (is(Input == String_ASCII)) {
+        input = input3.save;
+    } else static if (is(Input == String_UTF8)) {
+        input = input3.save;
+    } else static if (is(Input == String_UTF16)) {
+        input = input3.byUTF16.save;
+    } else static if (is(Input == String_UTF32)) {
+        input = input3.byUTF32.save;
+    } else static if (is(Input == StringBuilder_ASCII)) {
+        input = input3.save;
+    } else static if (is(Input == StringBuilder_UTF8)) {
+        input = input3.save;
+    } else static if (is(Input == StringBuilder_UTF16)) {
+        input = input3.byUTF16.save;
+    } else static if (is(Input == StringBuilder_UTF32)) {
+        input = input3.byUTF32.save;
+    }
+
     return true;
 }
