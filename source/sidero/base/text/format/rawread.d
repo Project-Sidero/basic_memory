@@ -98,7 +98,7 @@ unittest {
     assert(isClose(f, 1.4));
 }
 
-private @hidden:
+private:
 
 bool removeAlternativeFormPrefix(Input)(scope ref Input input, scope FormatSpecifier format) {
     if (!format.useAlternativeForm)
