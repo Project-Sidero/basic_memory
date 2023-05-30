@@ -175,9 +175,9 @@ unittest {
     assert(builder.startsWith("I1@"));
 }
 
-
 private:
 import sidero.base.text.format.write;
+import sidero.base.text.format.escaping;
 
 bool addSign(Builder)(scope ref Builder output, scope FormatSpecifier format, bool positive) {
     final switch (format.sign) {
@@ -320,26 +320,6 @@ void handleFill(Builder)(scope ref Builder output, scope FormatSpecifier format,
         }
         break;
     }
-}
-
-void quoteChar(Builder, Char)(scope ref Builder output, Char c) {
-    switch (c) {
-    case '\\':
-    case '\0':
-    case '\a':
-    case '\b':
-    case '\f':
-    case '\n':
-    case '\r':
-    case '\t':
-    case '\v':
-        output ~= ['\\', c];
-        break;
-    default:
-        output ~= [c];
-        break;
-    }
-
 }
 
 bool writeIntegral(Builder, Input)(scope ref Builder output, scope Input input, scope FormatSpecifier format) {
