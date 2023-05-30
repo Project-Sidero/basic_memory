@@ -334,8 +334,8 @@ bool writeFloat(Builder, Input)(scope ref Builder output, scope Input input, sco
         size_t used = 1;
         formatText[0] = '%';
 
-        if (format.maximumWidth > 0 && format.maximumWidth < int.max) {
-            auto did = snprintf(&formatText[used], formatText.length - (used + 2), ".%d", format.maximumWidth);
+        if (format.precision > 0 && format.precision < int.max) {
+            auto did = snprintf(&formatText[used], formatText.length - (used + 2), ".%d", format.precision);
             if (did > 0)
                 used += did;
         }
