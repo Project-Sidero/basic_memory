@@ -66,6 +66,26 @@ enum fullyQualifiedName(T) = fqnType!(T, false, false, false, false);
 /// Ditto
 enum fullyQualifiedName(alias T) = fqnSym!(T);
 
+/// originally from std.traits. License: Boost
+template isDesiredUDA(alias attribute) {
+    template isDesiredUDA(alias toCheck) {
+        static if (is(typeof(attribute)) && !__traits(isTemplate, attribute)) {
+            static if (__traits(compiles, toCheck == attribute))
+                enum isDesiredUDA = toCheck == attribute;
+            else
+                enum isDesiredUDA = false;
+        } else static if (is(typeof(toCheck))) {
+            static if (__traits(isTemplate, attribute))
+                enum isDesiredUDA = isInstanceOf!(attribute, typeof(toCheck));
+            else
+                enum isDesiredUDA = is(typeof(toCheck) == attribute);
+        } else static if (__traits(isTemplate, attribute))
+                enum isDesiredUDA = isInstanceOf!(attribute, toCheck);
+            else
+                enum isDesiredUDA = is(toCheck == attribute);
+    }
+}
+
 private:
 
 template fqnSym(alias T : X!A, alias X, A...) {
