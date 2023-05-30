@@ -35,7 +35,6 @@ struct String_UTF32 {
         static struct Iterator {
             shared(ptrdiff_t) refCount;
             RCAllocator allocator;
-            const(void)[] literal;
 
             void[4] forwardBuffer, backwardBuffer;
             void[] forwardItems, backwardItems;
@@ -79,13 +78,12 @@ struct String_UTF32 {
                 return 0;
 
             Iterator* oldIterator = this.iterator;
+            auto oldLiteral = this.literal;
 
             this.iterator = null;
             setupIterator;
 
             if (oldIterator !is null) {
-                this.iterator.literal = oldIterator.literal;
-
                 foreach (i; 0 .. oldIterator.forwardItems.length) {
                     (cast(ubyte[])this.iterator.forwardBuffer)[i] = (cast(ubyte[])oldIterator.forwardItems)[i];
                 }
@@ -103,6 +101,7 @@ struct String_UTF32 {
             scope (exit) {
                 this.iterator.rc(false);
                 this.iterator = oldIterator;
+                this.literal = oldLiteral;
             }
 
             int result;
@@ -125,13 +124,12 @@ struct String_UTF32 {
                 return 0;
 
             Iterator* oldIterator = this.iterator;
+            auto oldLiteral = this.literal;
 
             this.iterator = null;
             setupIterator;
 
             if (oldIterator !is null) {
-                this.iterator.literal = oldIterator.literal;
-
                 foreach (i; 0 .. oldIterator.forwardItems.length) {
                     (cast(ubyte[])this.iterator.forwardBuffer)[i] = (cast(ubyte[])oldIterator.forwardItems)[i];
                 }
@@ -149,6 +147,7 @@ struct String_UTF32 {
             scope (exit) {
                 this.iterator.rc(false);
                 this.iterator = oldIterator;
+                this.literal = oldLiteral;
             }
 
             Char temp;
@@ -306,11 +305,7 @@ nothrow @nogc:
         if (ret.lifeTime !is null)
             atomicOp!"+="(ret.lifeTime.refCount, 1);
 
-        if (this.iterator !is null)
-            ret.literal = this.iterator.literal;
-        else
-            ret.literal = this.literal;
-
+        ret.literal = this.literal;
         ret.setupIterator();
         return ret;
     }
@@ -646,24 +641,21 @@ nothrow @nogc:
      */
     size_t length() const scope {
         return literalEncoding.handle(() {
-            auto literal = this.iterator !is null ? this.iterator.literal : this.literal;
-            auto actual = cast(const(char)[])literal;
+            auto actual = cast(const(char)[])this.literal;
 
             size_t ret = actual.length;
             if (ret > 0 && actual[$ - 1] == '\0')
                 ret--;
             return ret;
         }, () {
-            auto literal = this.iterator !is null ? this.iterator.literal : this.literal;
-            auto actual = cast(const(wchar)[])literal;
+            auto actual = cast(const(wchar)[])this.literal;
 
             size_t ret = actual.length;
             if (ret > 0 && actual[$ - 1] == '\0')
                 ret--;
             return ret;
         }, () {
-            auto literal = this.iterator !is null ? this.iterator.literal : this.literal;
-            auto actual = cast(const(dchar)[])literal;
+            auto actual = cast(const(dchar)[])this.literal;
 
             size_t ret = actual.length;
             if (ret > 0 && actual[$ - 1] == '\0')
@@ -1225,8 +1217,16 @@ nothrow @nogc:
 
     ///
     bool empty() scope nothrow @nogc {
-        return (haveIterator && this.iterator.literal.length == 0 && this.iterator.forwardItems.length == 0 &&
-                this.iterator.backwardItems.length == 0) || (!haveIterator && this.length == 0);
+        size_t actualLength = this.length;
+
+        if (haveIterator) {
+            if (iterator.forwardItems.length > 0)
+                actualLength += iterator.amountFromInputForwards;
+            if (iterator.backwardItems.length > 0)
+                actualLength += iterator.amountFromInputBackwards;
+        }
+
+        return actualLength == 0;
     }
 
     ///
@@ -1240,10 +1240,10 @@ nothrow @nogc:
 
     ///
     Char front() scope @trusted {
-        assert(!isNull);
+        assert(!empty);
         setupIterator;
 
-        const canRefill = this.iterator.literal.length > 0;
+        const canRefill = this.length > 0;
         const needRefill = this.iterator.forwardItems.length == 0;
         const needToUseOtherBuffer = !canRefill && needRefill && this.iterator.backwardItems.length > 0;
 
@@ -1300,10 +1300,10 @@ nothrow @nogc:
 
     ///
     Char back() scope @trusted {
-        assert(!isNull);
+        assert(!empty);
         setupIterator;
 
-        const canRefill = this.iterator.literal.length > 0;
+        const canRefill = this.length > 0;
         const needRefill = this.iterator.backwardItems.length == 0;
         const needToUseOtherBuffer = !canRefill && this.iterator.forwardItems.length > 0 && needRefill;
 
@@ -1384,11 +1384,11 @@ nothrow @nogc:
         if (this.iterator !is null) {
             ret.setupIterator;
 
-            while (ret.iterator.literal.ptr < this.iterator.literal.ptr) {
+            while (ret.literal.ptr < this.literal.ptr) {
                 ret.popFront;
             }
 
-            while (ret.iterator.literal.length > 0 && &ret.iterator.literal[$ - 1] > &this.iterator.literal[$ - 1]) {
+            while (ret.literal.length > 0 && &ret.literal[$ - 1] > &this.literal[$ - 1]) {
                 ret.popBack;
             }
         }
@@ -1426,11 +1426,11 @@ nothrow @nogc:
         if (this.iterator !is null) {
             ret.setupIterator;
 
-            while (ret.iterator.literal.ptr < this.iterator.literal.ptr) {
+            while (ret.literal.ptr < this.literal.ptr) {
                 ret.popFront;
             }
 
-            while (ret.iterator.literal.length > 0 && &ret.iterator.literal[$ - 1] > &this.iterator.literal[$ - 1]) {
+            while (ret.literal.length > 0 && &ret.literal[$ - 1] > &this.literal[$ - 1]) {
                 ret.popBack;
             }
         }
@@ -1468,11 +1468,11 @@ nothrow @nogc:
         if (this.iterator !is null) {
             ret.setupIterator;
 
-            while (ret.iterator.literal.ptr < this.iterator.literal.ptr) {
+            while (ret.literal.ptr < this.literal.ptr) {
                 ret.popFront;
             }
 
-            while (ret.iterator.literal.length > 0 && &ret.iterator.literal[$ - 1] > &this.iterator.literal[$ - 1]) {
+            while (ret.literal.length > 0 && &ret.literal[$ - 1] > &this.literal[$ - 1]) {
                 ret.popBack;
             }
         }
@@ -2911,29 +2911,6 @@ package(sidero.base.text) @hidden:
 
         this.iterator = allocator.make!Iterator(1, allocator);
         assert(this.iterator !is null);
-
-        literalEncoding.handle(() @trusted {
-            auto actual = cast(const(char)[])this.literal;
-
-            if (actual.length > 0 && actual[$ - 1] == '\0')
-                actual = actual[0 .. $ - 1];
-
-            this.iterator.literal = actual;
-        }, () @trusted {
-            auto actual = cast(const(wchar)[])this.literal;
-
-            if (actual.length > 0 && actual[$ - 1] == '\0')
-                actual = actual[0 .. $ - 1];
-
-            this.iterator.literal = actual;
-        }, () @trusted {
-            auto actual = cast(const(dchar)[])this.literal;
-
-            if (actual.length > 0 && actual[$ - 1] == '\0')
-                actual = actual[0 .. $ - 1];
-
-            this.iterator.literal = actual;
-        });
     }
 
     RCAllocator pickAllocator(return scope RCAllocator given) scope const @trusted {
@@ -3649,7 +3626,7 @@ package(sidero.base.text) @hidden:
         }
 
         void primeForwards() @trusted {
-            const canRefill = this.iterator.literal.length > 0;
+            const canRefill = this.length > 0;
             assert(canRefill);
 
             Char[4 / Char.sizeof] charBuffer = void;
@@ -3662,7 +3639,7 @@ package(sidero.base.text) @hidden:
             size_t amountInOutput;
 
             literalEncoding.handle(() {
-                auto actual = cast(const(char)[])this.iterator.literal;
+                auto actual = cast(const(char)[])this.literal;
 
                 static if (is(Char == char)) {
                     // copy straight
@@ -3685,7 +3662,7 @@ package(sidero.base.text) @hidden:
                     amountInOutput = 1;
                 }
             }, () {
-                auto actual = cast(const(wchar)[])this.iterator.literal;
+                auto actual = cast(const(wchar)[])this.literal;
 
                 static if (is(Char == char)) {
                     // need to reencode
@@ -3708,7 +3685,7 @@ package(sidero.base.text) @hidden:
                     amountInOutput = 1;
                 }
             }, () {
-                auto actual = cast(const(dchar)[])this.iterator.literal;
+                auto actual = cast(const(dchar)[])this.literal;
 
                 static if (is(Char == char)) {
                     // encode
@@ -3741,20 +3718,20 @@ package(sidero.base.text) @hidden:
                     assert(this.iterator.forwardItems.length > 0);
 
                     literalEncoding.handle(() @trusted {
-                        auto actual = cast(const(char)[])this.iterator.literal;
-                        this.iterator.literal = cast(void[])actual[iterator.amountFromInputForwards .. $];
+                        auto actual = cast(const(char)[])this.literal;
+                        this.literal = cast(void[])actual[iterator.amountFromInputForwards .. $];
                     }, () @trusted {
-                        auto actual = cast(const(wchar)[])this.iterator.literal;
-                        this.iterator.literal = cast(void[])actual[iterator.amountFromInputForwards .. $];
+                        auto actual = cast(const(wchar)[])this.literal;
+                        this.literal = cast(void[])actual[iterator.amountFromInputForwards .. $];
                     }, () @trusted {
-                        auto actual = cast(const(dchar)[])this.iterator.literal;
-                        this.iterator.literal = cast(void[])actual[iterator.amountFromInputForwards .. $];
+                        auto actual = cast(const(dchar)[])this.literal;
+                        this.literal = cast(void[])actual[iterator.amountFromInputForwards .. $];
                     });
 
                     this.iterator.primedForwardsNeedPop = false;
                 }
 
-                const canRefill = this.iterator.literal.length > 0;
+                const canRefill = this.length > 0;
                 const needRefill = this.iterator.forwardItems.length < 2;
                 const needToUseOtherBuffer = !canRefill && needRefill && this.iterator.backwardItems.length > 0;
 
@@ -3774,7 +3751,7 @@ package(sidero.base.text) @hidden:
         }
 
         void primeBackwards() @trusted {
-            const canRefill = this.iterator.literal.length > 0;
+            const canRefill = this.length > 0;
             assert(canRefill);
 
             void copy(Destination, Source)(scope Destination destination, scope Source source) {
@@ -3786,7 +3763,7 @@ package(sidero.base.text) @hidden:
             size_t amountInOutput;
 
             literalEncoding.handle(() {
-                auto actual = cast(const(char)[])this.iterator.literal;
+                auto actual = cast(const(char)[])this.literal;
 
                 static if (is(Char == char)) {
                     // copy straight
@@ -3809,7 +3786,7 @@ package(sidero.base.text) @hidden:
                     amountInOutput = 1;
                 }
             }, () {
-                auto actual = cast(const(wchar)[])this.iterator.literal;
+                auto actual = cast(const(wchar)[])this.literal;
 
                 static if (is(Char == char)) {
                     // need to reencode
@@ -3832,7 +3809,7 @@ package(sidero.base.text) @hidden:
                     amountInOutput = 1;
                 }
             }, () {
-                auto actual = cast(const(dchar)[])this.iterator.literal;
+                auto actual = cast(const(dchar)[])this.literal;
 
                 static if (is(Char == char)) {
                     // encode
@@ -3865,20 +3842,20 @@ package(sidero.base.text) @hidden:
                     assert(this.iterator.backwardItems.length > 0);
 
                     literalEncoding.handle(() @trusted {
-                        auto actual = cast(const(char)[])this.iterator.literal;
-                        this.iterator.literal = cast(void[])actual[0 .. $ - iterator.amountFromInputBackwards];
+                        auto actual = cast(const(char)[])this.literal;
+                        this.literal = cast(void[])actual[0 .. $ - iterator.amountFromInputBackwards];
                     }, () @trusted {
-                        auto actual = cast(const(wchar)[])this.iterator.literal;
-                        this.iterator.literal = cast(void[])actual[0 .. $ - iterator.amountFromInputBackwards];
+                        auto actual = cast(const(wchar)[])this.literal;
+                        this.literal = cast(void[])actual[0 .. $ - iterator.amountFromInputBackwards];
                     }, () @trusted {
-                        auto actual = cast(const(dchar)[])this.iterator.literal;
-                        this.iterator.literal = cast(void[])actual[0 .. $ - iterator.amountFromInputBackwards];
+                        auto actual = cast(const(dchar)[])this.literal;
+                        this.literal = cast(void[])actual[0 .. $ - iterator.amountFromInputBackwards];
                     });
 
                     this.iterator.primedBackwardsNeedPop = false;
                 }
 
-                const canRefill = this.iterator.literal.length > 0;
+                const canRefill = this.length > 0;
                 const needRefill = this.iterator.backwardItems.length < 2;
                 const needToUseOtherBuffer = !canRefill && this.iterator.forwardItems.length > 0 && needRefill;
 
