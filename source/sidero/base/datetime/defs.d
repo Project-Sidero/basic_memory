@@ -504,6 +504,20 @@ export @safe nothrow @nogc:
         }
     }
 
+    ///
+    bool formattedWrite(scope ref StringBuilder_ASCII builder, scope FormatSpecifier format) @safe nothrow @nogc {
+        return false;
+    }
+
+    ///
+    bool formattedWrite(scope ref StringBuilder_UTF8 builder, scope FormatSpecifier format) @safe nothrow @nogc {
+        if (format.fullFormatSpec.length == 0)
+            return false;
+
+        this.format(builder, format.fullFormatSpec);
+        return true;
+    }
+
 private @hidden:
     void timezoneCheck(Delegate)(scope Delegate callback) scope @trusted {
         auto temp = this.asGregorian();
@@ -524,3 +538,4 @@ private @hidden:
         }
     }
 }
+
