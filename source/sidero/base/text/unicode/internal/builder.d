@@ -273,13 +273,15 @@ scope nothrow @nogc @safe @hidden:
         }, () { return 0; });
     }
 
-    int opCmpImpl(Other)(scope Other other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
+    int opCmpImpl(Other)(scope Other other, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) const @trusted {
         scope otherState = AnyAsTargetChar!dchar(other);
 
-        if (other.length == 0)
-            return this.length == 0 ? 0 : 1;
+        StateIterator* self = cast(StateIterator*)&this;
 
-        return this.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+        if (other.length == 0)
+            return self.length == 0 ? 0 : 1;
+
+        return self.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
             assert(state !is null);
             return state.externalOpCmp(iterator, otherState.osat, caseSensitive, language);
         }, (StateIterator.S16 state, StateIterator.I16 iterator) {

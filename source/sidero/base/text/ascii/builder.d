@@ -421,7 +421,7 @@ nothrow @safe:
     alias equals = opEquals;
 
     ///
-    bool opEquals(scope const(char)[] other) scope @nogc {
+    bool opEquals(scope const(char)[] other) scope const @nogc {
         return opCmpImplSlice(other, true) == 0;
     }
 
@@ -434,7 +434,7 @@ nothrow @safe:
     }
 
     ///
-    bool opEquals(scope LiteralType other) scope @nogc {
+    bool opEquals(scope LiteralType other) scope const @nogc {
         return opCmp(other) == 0;
     }
 
@@ -447,7 +447,7 @@ nothrow @safe:
     }
 
     ///
-    bool opEquals(scope String_ASCII other) scope @nogc {
+    bool opEquals(scope String_ASCII other) scope const @nogc {
         other.stripZeroTerminator;
         return opCmpImplSlice(other.literal, true) == 0;
     }
@@ -463,7 +463,7 @@ nothrow @safe:
     }
 
     ///
-    bool opEquals(scope StringBuilder_ASCII other) scope @nogc {
+    bool opEquals(scope StringBuilder_ASCII other) scope const @nogc {
         return opCmpImplBuilder(other, true) == 0;
     }
 
@@ -478,7 +478,7 @@ nothrow @safe:
     }
 
     ///
-    bool ignoreCaseEquals(scope const(char)[] other) scope @nogc {
+    bool ignoreCaseEquals(scope const(char)[] other) scope const @nogc {
         return opCmpImplSlice(other, false) == 0;
     }
 
@@ -491,7 +491,7 @@ nothrow @safe:
     }
 
     ///
-    bool ignoreCaseEquals(scope LiteralType other) scope @nogc {
+    bool ignoreCaseEquals(scope LiteralType other) scope const @nogc {
         return ignoreCaseCompare(other) == 0;
     }
 
@@ -504,7 +504,7 @@ nothrow @safe:
     }
 
     ///
-    bool ignoreCaseEquals(scope String_ASCII other) scope @nogc {
+    bool ignoreCaseEquals(scope String_ASCII other) scope const @nogc {
         other.stripZeroTerminator;
         return opCmpImplSlice(other.literal, false) == 0;
     }
@@ -520,7 +520,7 @@ nothrow @safe:
     }
 
     ///
-    bool ignoreCaseEquals(scope StringBuilder_ASCII other) scope @nogc {
+    bool ignoreCaseEquals(scope StringBuilder_ASCII other) scope const @nogc {
         return opCmpImplBuilder(other, false) == 0;
     }
 
@@ -538,7 +538,7 @@ nothrow @safe:
     alias compare = opCmp;
 
     ///
-    int opCmp(scope const(char)[] other) scope @nogc {
+    int opCmp(scope const(char)[] other) scope const @nogc {
         return opCmpImplSlice(other, true);
     }
 
@@ -549,7 +549,7 @@ nothrow @safe:
     }
 
     ///
-    int opCmp(scope LiteralType other) scope @nogc {
+    int opCmp(scope LiteralType other) scope const @nogc {
         return opCmpImplSlice(other, true);
     }
 
@@ -560,7 +560,7 @@ nothrow @safe:
     }
 
     ///
-    int opCmp(scope String_ASCII other) scope @nogc {
+    int opCmp(scope String_ASCII other) scope const @nogc {
         other.stripZeroTerminator;
         return opCmpImplSlice(other.literal, true);
     }
@@ -572,7 +572,7 @@ nothrow @safe:
     }
 
     ///
-    int opCmp(scope StringBuilder_ASCII other) scope @nogc {
+    int opCmp(scope StringBuilder_ASCII other) scope const @nogc {
         return opCmpImplBuilder(other, true);
     }
 
@@ -583,7 +583,7 @@ nothrow @safe:
     }
 
     ///
-    int ignoreCaseCompare(scope const(char)[] other) scope @nogc {
+    int ignoreCaseCompare(scope const(char)[] other) scope const @nogc {
         return opCmpImplSlice(other, false);
     }
 
@@ -594,7 +594,7 @@ nothrow @safe:
     }
 
     ///
-    int ignoreCaseCompare(scope LiteralType other) scope @nogc {
+    int ignoreCaseCompare(scope LiteralType other) scope const @nogc {
         return opCmpImplSlice(other, false);
     }
 
@@ -605,7 +605,7 @@ nothrow @safe:
     }
 
     ///
-    int ignoreCaseCompare(scope String_ASCII other) scope @nogc {
+    int ignoreCaseCompare(scope String_ASCII other) scope const @nogc {
         other.stripZeroTerminator;
         return opCmpImplSlice(other.literal, false);
     }
@@ -617,7 +617,7 @@ nothrow @safe:
     }
 
     ///
-    int ignoreCaseCompare(scope StringBuilder_ASCII other) scope @nogc {
+    int ignoreCaseCompare(scope StringBuilder_ASCII other) scope const @nogc {
         return opCmpImplBuilder(other, false);
     }
 
@@ -1896,14 +1896,16 @@ private @hidden:
     }
 
     scope @nogc {
-        int opCmpImplSlice(scope const(char)[] other, bool caseSensitive) @trusted {
+        int opCmpImplSlice(scope const(char)[] other, bool caseSensitive) const @trusted {
             return opCmpImplSlice(cast(LiteralType)other, caseSensitive);
         }
 
-        int opCmpImplSlice(scope const(Char)[] other, bool caseSensitive) @trusted {
+        int opCmpImplSlice(scope const(Char)[] other, bool caseSensitive) const @trusted {
             ASCII_State.LiteralAsTarget lat;
             lat.literal = other;
+
             scope osiu = lat.get;
+            scope state = cast(ASCII_State*)this.state;
 
             if (isNull) {
                 if (other.length > 0)
@@ -1911,14 +1913,16 @@ private @hidden:
                 else
                     return 0;
             } else
-                return state.externalOpCmp(iterator, osiu, caseSensitive);
+                return state.externalOpCmp(cast(ASCII_State.Iterator*)iterator, osiu, caseSensitive);
         }
 
-        int opCmpImplBuilder(scope StringBuilder_ASCII other, bool caseSensitive) @trusted {
+        int opCmpImplBuilder(scope StringBuilder_ASCII other, bool caseSensitive) const @trusted {
             ASCII_State.OtherStateIsUs asiu;
             asiu.state = other.state;
             asiu.iterator = other.iterator;
+
             scope osiu = asiu.get;
+            scope state = cast(ASCII_State*)this.state;
 
             if (isNull) {
                 if (other.length > 0)
@@ -1926,7 +1930,7 @@ private @hidden:
                 else
                     return 0;
             } else
-                return state.externalOpCmp(iterator, osiu, caseSensitive);
+                return state.externalOpCmp(cast(ASCII_State.Iterator*)iterator, osiu, caseSensitive);
         }
 
         void insertImplReadOnly(scope String_ASCII other, ptrdiff_t offset = 0, bool clobber = false) @trusted {
