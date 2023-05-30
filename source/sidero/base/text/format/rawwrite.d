@@ -1,5 +1,5 @@
 module sidero.base.text.format.rawwrite;
-import sidero.base.text.format.defs;
+import sidero.base.text.format.specifier;
 import sidero.base.text;
 import sidero.base.attributes;
 import sidero.base.traits;
