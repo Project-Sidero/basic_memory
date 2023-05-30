@@ -43,7 +43,7 @@ bool rawWrite(Builder, Input)(return scope ref Builder output, scope Input input
         } else static if (isAssociativeArray!Input) {
             return writeAA(output, input);
         } else static if (is(Input == struct) || is(Input == class)) {
-            return writeStructClass(output, input);
+            return writeStructClass(output, input, format);
         } else static if (IsStaticArray) {
             return writeIterable(output, input[]);
         } else static if ((isIterable!Input && (HaveNonStaticOpApply!ActualType || !__traits(hasMember, ActualType, "opApply")))) {
@@ -210,6 +210,33 @@ unittest {
     assert(builder == "S1(1, false)S2(11 -> Hi there!)");
 
     assert(rawWrite(builder, clasz, FormatSpecifier.from("{}")));
+}
+
+///
+unittest {
+    StringBuilder_UTF8 builder;
+
+    static struct S1 {
+        int x;
+
+        bool formattedWrite(scope ref StringBuilder_ASCII builder, scope FormatSpecifier format) @safe nothrow @nogc {
+            return false;
+        }
+
+        bool formattedWrite(scope ref StringBuilder_UTF8 builder, scope FormatSpecifier format) @safe nothrow @nogc {
+            if (x == 0 || format.fullFormatSpec.length == 0)
+                return false;
+
+            builder ~= format.fullFormatSpec;
+            return true;
+        }
+    }
+
+    assert(rawWrite(builder, S1(64), FormatSpecifier.from("{:custom}")));
+    assert(builder == "S1(custom)");
+
+    assert(rawWrite(builder, S1(0), FormatSpecifier.from("{:custom}")));
+    assert(builder == "S1(custom)S1(0)");
 }
 
 private:
@@ -771,7 +798,7 @@ bool writeInterface(Builder, Input)(scope ref Builder output, scope Input input)
     return true;
 }
 
-bool writeStructClass(Builder, Input)(scope ref Builder output, scope Input input) @trusted {
+bool writeStructClass(Builder, Input)(scope ref Builder output, scope Input input, scope FormatSpecifier format) @trusted {
     import std.meta;
 
     enum haveToString(T) = __traits(hasMember, T, "toString") && (__traits(compiles, {
@@ -783,6 +810,11 @@ bool writeStructClass(Builder, Input)(scope ref Builder output, scope Input inpu
                 T value;
                 value.toString(&builder.put);
             }));
+    enum haveFormattedWrite = __traits(compiles, {
+            Builder builder;
+            Input value;
+            bool got = value.formattedWrite(builder, FormatSpecifier.init);
+        });
 
     output ~= __traits(identifier, Input);
 
@@ -795,105 +827,119 @@ bool writeStructClass(Builder, Input)(scope ref Builder output, scope Input inpu
     }
 
     output ~= "("c;
-    bool isFirst = true;
+    bool isFirst = true, customPrinted;
 
-    static foreach (name; FieldNameTuple!Input) {
-        {
-            alias member = __traits(getMember, input, name);
-            bool ignore;
+    static if (haveFormattedWrite) {
+        const priorLength = output.length;
 
-            foreach (attr; __traits(getAttributes, member)) {
-                ignore = ignore || is(attr == PrintIgnore) || is(attr == PrettyPrintIgnore);
-            }
-
-            static foreach (name2; FieldNameTuple!Input) {
-                {
-                    alias member2 = __traits(getMember, input, name2);
-
-                    if (name != name2) {
-                        ignore = ignore || member.offsetof == member2.offsetof;
-                    }
-                }
-            }
-
-            if (!ignore) {
-                if (!isFirst)
-                    output ~= ", "c;
-                else
-                    isFirst = false;
-
-                formattedWriteImpl(output, String_UTF32.init, true, __traits(getMember, input, name));
-            }
+        if (input.formattedWrite(output, format)) {
+            // ok
+            customPrinted = true;
+        } else if (output.length > priorLength) {
+            // rollback
+            output.remove(priorLength, ptrdiff_t.max);
         }
     }
 
-    static if (is(Input == class)) {
-        static foreach_reverse (i, Base; BaseClassesTuple!Input) {
-            static foreach (name; FieldNameTuple!Base) {
-                {
-                    alias member = __traits(getMember, cast(Base)input, name);
-                    bool ignore;
+    if (!customPrinted) {
+        static foreach (name; FieldNameTuple!Input) {
+            {
+                alias member = __traits(getMember, input, name);
+                bool ignore;
 
-                    foreach (attr; __traits(getAttributes, member)) {
-                        ignore = ignore || is(attr == PrintIgnore) || is(attr == PrettyPrintIgnore);
-                    }
+                foreach (attr; __traits(getAttributes, member)) {
+                    ignore = ignore || is(attr == PrintIgnore) || is(attr == PrettyPrintIgnore);
+                }
 
-                    static foreach (name2; FieldNameTuple!Base) {
-                        {
-                            alias member2 = __traits(getMember, cast(Base)input, name2);
+                static foreach (name2; FieldNameTuple!Input) {
+                    {
+                        alias member2 = __traits(getMember, input, name2);
 
-                            if (name != name2) {
-                                ignore = ignore || member.offsetof == member2.offsetof;
-                            }
+                        if (name != name2) {
+                            ignore = ignore || member.offsetof == member2.offsetof;
                         }
                     }
+                }
 
-                    if (!ignore) {
-                        if (!isFirst)
-                            output ~= ", "c;
-                        else
-                            isFirst = false;
+                if (!ignore) {
+                    if (!isFirst)
+                        output ~= ", "c;
+                    else
+                        isFirst = false;
 
-                        formattedWrite(output, FormatSpecifier.init, true, __traits(getMember, cast(Base)input, name));
+                    formattedWriteImpl(output, String_UTF32.init, true, __traits(getMember, input, name));
+                }
+            }
+        }
+
+        static if (is(Input == class)) {
+            static foreach_reverse (i, Base; BaseClassesTuple!Input) {
+                static foreach (name; FieldNameTuple!Base) {
+                    {
+                        alias member = __traits(getMember, cast(Base)input, name);
+                        bool ignore;
+
+                        foreach (attr; __traits(getAttributes, member)) {
+                            ignore = ignore || is(attr == PrintIgnore) || is(attr == PrettyPrintIgnore);
+                        }
+
+                        static foreach (name2; FieldNameTuple!Base) {
+                            {
+                                alias member2 = __traits(getMember, cast(Base)input, name2);
+
+                                if (name != name2) {
+                                    ignore = ignore || member.offsetof == member2.offsetof;
+                                }
+                            }
+                        }
+
+                        if (!ignore) {
+                            if (!isFirst)
+                                output ~= ", "c;
+                            else
+                                isFirst = false;
+
+                            formattedWrite(output, FormatSpecifier.init, true, __traits(getMember, cast(Base)input, name));
+                        }
                     }
                 }
             }
         }
-    }
 
-    static if (haveToString!Input) {
-        {
-            bool hadToString;
-            alias Symbols = __traits(getOverloads, Input, "toString");
+        static if (haveToString!Input) {
+            {
+                bool hadToString;
+                alias Symbols = __traits(getOverloads, Input, "toString");
 
-            static foreach (SymbolId; 0 .. Symbols.length) {
-                {
-                    alias gotUDAs = Filter!(isDesiredUDA!PrintIgnore, __traits(getAttributes, Symbols[SymbolId]));
-                    alias gotUDAsPretty = Filter!(isDesiredUDA!PrettyPrintIgnore, __traits(getAttributes, Symbols[SymbolId]));
+                static foreach (SymbolId; 0 .. Symbols.length) {
+                    {
+                        alias gotUDAs = Filter!(isDesiredUDA!PrintIgnore, __traits(getAttributes, Symbols[SymbolId]));
+                        alias gotUDAsPretty = Filter!(isDesiredUDA!PrettyPrintIgnore, __traits(getAttributes, Symbols[SymbolId]));
 
-                    if (!hadToString) {
-                        static if (gotUDAs.length == 0 && gotUDAsPretty.length == 0) {
-                            size_t offsetForToString = output.length;
+                        if (!hadToString) {
+                            static if (gotUDAs.length == 0 && gotUDAsPretty.length == 0) {
+                                size_t offsetForToString = output.length;
 
-                            static if (__traits(compiles, __traits(child, input, Symbols[SymbolId])(output))) {
-                                __traits(child, input, Symbols[SymbolId])(output);
-                                hadToString = true;
-                            } else static if (__traits(compiles, __traits(child, input, Symbols[SymbolId])(&output.put))) {
-                                __traits(child, input, Symbols[SymbolId])(&output.put);
-                                hadToString = true;
-                            } else static if (__traits(compiles, output ~= __traits(child, input, Symbols[SymbolId])())) {
-                                output ~= __traits(child, input, Symbols[SymbolId])();
-                                hadToString = true;
-                            }
+                                static if (__traits(compiles, __traits(child, input, Symbols[SymbolId])(output))) {
+                                    __traits(child, input, Symbols[SymbolId])(output);
+                                    hadToString = true;
+                                } else static if (__traits(compiles, __traits(child, input, Symbols[SymbolId])(&output.put))) {
+                                    __traits(child, input, Symbols[SymbolId])(&output.put);
+                                    hadToString = true;
+                                } else static if (__traits(compiles, output ~= __traits(child, input, Symbols[SymbolId])())) {
+                                    output ~= __traits(child, input, Symbols[SymbolId])();
+                                    hadToString = true;
+                                }
 
-                            if (hadToString && output.length > offsetForToString) {
-                                static FQN = fullyQualifiedName!Input;
-                                auto subset = output[offsetForToString .. $];
+                                if (hadToString && output.length > offsetForToString) {
+                                    static FQN = fullyQualifiedName!Input;
+                                    auto subset = output[offsetForToString .. $];
 
-                                if (subset == FQN)
-                                    output.remove(offsetForToString, FQN.length);
-                                else
-                                    output.insert(offsetForToString, " -> "c);
+                                    if (subset == FQN)
+                                        output.remove(offsetForToString, FQN.length);
+                                    else
+                                        output.insert(offsetForToString, " -> "c);
+                                }
                             }
                         }
                     }
