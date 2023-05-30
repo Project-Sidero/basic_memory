@@ -130,7 +130,7 @@ bool removeAlternativeFormPrefix(Input)(scope ref Input input, scope FormatSpeci
         needed = "0";
         break;
 
-    case FormatSpecifier.Type.Pointers: /// 0x
+    case FormatSpecifier.Type.Pointer: /// 0x
     case FormatSpecifier.Type.Hex: // 0x
         needed = "0x";
         break;
@@ -304,7 +304,7 @@ bool readIntegral(Input, Output)(scope ref Input input, scope ref Output output,
         base = 10;
         break;
 
-    case FormatSpecifier.Type.Pointers:
+    case FormatSpecifier.Type.Pointer:
     case FormatSpecifier.Type.Hex:
     case FormatSpecifier.Type.HexCapital:
         base = 16;

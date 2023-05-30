@@ -10,45 +10,45 @@ export @safe nothrow @nogc:
 ///
 StringBuilder_UTF8 formattedWrite(Args...)(scope String_ASCII formatString, scope Args args) {
     StringBuilder_ASCII ret = StringBuilder_ASCII(globalAllocator());
-    return formattedWriteImpl(ret, String_UTF8(cast(const(char)[])formatString.unsafeGetLiteral()).byUTF32, args);
+    return formattedWriteImpl(ret, String_UTF8(cast(const(char)[])formatString.unsafeGetLiteral()).byUTF32, false, args);
 }
 
 ///
 StringBuilder_UTF8 formattedWrite(Args...)(scope String_UTF8 formatString, scope Args args) @trusted {
     StringBuilder_UTF8 ret = StringBuilder_UTF8(globalAllocator());
-    return formattedWriteImpl(ret, formatString.byUTF32, args);
+    return formattedWriteImpl(ret, formatString.byUTF32, false, args);
 }
 
 ///
 StringBuilder_UTF16 formattedWrite(Args...)(scope String_UTF16 formatString, scope Args args) @trusted {
     StringBuilder_UTF16 ret = StringBuilder_UTF16(globalAllocator());
-    return formattedWriteImpl(ret, formatString.byUTF32, args);
+    return formattedWriteImpl(ret, formatString.byUTF32, false, args);
 }
 
 ///
 StringBuilder_UTF32 formattedWrite(Args...)(scope String_UTF32 formatString, scope Args args) @trusted {
     StringBuilder_UTF32 ret = StringBuilder_UTF32(globalAllocator());
-    return formattedWriteImpl(ret, formatString.byUTF32, args);
+    return formattedWriteImpl(ret, formatString.byUTF32, false, args);
 }
 
 ///
-StringBuilder_UTF8 formattedWrite(Args...)(scope return ref StringBuilder_ASCII output, scope String_ASCII formatString, scope Args args) {
-    return formattedWriteImpl(output, String_UTF8(cast(const(char)[])formatString.unsafeGetLiteral()).byUTF32, args);
+StringBuilder_UTF8 formattedWrite(Args...)(return scope ref StringBuilder_ASCII output, scope String_ASCII formatString, scope Args args) {
+    return formattedWriteImpl(output, String_UTF8(cast(const(char)[])formatString.unsafeGetLiteral()).byUTF32, false, args);
 }
 
 ///
-StringBuilder_UTF8 formattedWrite(Args...)(scope return ref StringBuilder_UTF8 output, scope String_UTF8 formatString, scope Args args) {
-    return formattedWriteImpl(output, formatString.byUTF32, args);
+StringBuilder_UTF8 formattedWrite(Args...)(return scope ref StringBuilder_UTF8 output, scope String_UTF8 formatString, scope Args args) {
+    return formattedWriteImpl(output, formatString.byUTF32, false, args);
 }
 
 ///
-StringBuilder_UTF16 formattedWrite(Args...)(scope return ref StringBuilder_UTF16 output, scope String_UTF16 formatString, scope Args args) {
-    return formattedWriteImpl(output, formatString.byUTF32, args);
+StringBuilder_UTF16 formattedWrite(Args...)(return scope ref StringBuilder_UTF16 output, scope String_UTF16 formatString, scope Args args) {
+    return formattedWriteImpl(output, formatString.byUTF32, false, args);
 }
 
 ///
-StringBuilder_UTF32 formattedWrite(Args...)(scope return ref StringBuilder_UTF32 output, scope String_UTF32 formatString, scope Args args) {
-    return formattedWriteImpl(output, formatString, args);
+StringBuilder_UTF32 formattedWrite(Args...)(return scope ref StringBuilder_UTF32 output, scope String_UTF32 formatString, scope Args args) {
+    return formattedWriteImpl(output, formatString, false, args);
 }
 
 ///
@@ -56,27 +56,23 @@ unittest {
     assert(formattedWrite(String_UTF8("{1:.1f} {:s}: {:s}"), 1, -1234.0, String_UTF8("success")) == "-1234.0 1: success");
 }
 
-private:
+package(sidero.base.text.format):
 
-Builder formattedWriteImpl(Builder, Args...)(return scope ref Builder output, scope String_UTF32 formatString, scope Args args) @trusted {
-    bool handleArg(size_t id)(scope FormatSpecifier format) {
-        import sidero.base.text.format.rawwrite;
+Builder formattedWriteImpl(Builder, Args...)(return scope ref Builder output, scope String_UTF8 formatString, bool quote, scope Args args) @trusted {
+    return formattedWriteImpl(output, formatString.byUTF32, quote, args);
+}
 
-        alias ArgType = Args[id];
+Builder formattedWriteImpl(Builder, Args...)(return scope ref Builder output, scope String_UTF16 formatString, bool quote, scope Args args) @trusted {
+    return formattedWriteImpl(output, formatString.byUTF32, quote, args);
+}
 
-        static if (isASCII!ArgType) {
-            output ~= args[id];
-            return true;
-        } else static if (isUTFBuilder!Builder && isUTF!ArgType) {
-            output ~= args[id];
-            return true;
-        } else
-            return rawWrite(output, args[id], format);
-    }
+Builder formattedWriteImpl(Builder, Args...)(return scope ref Builder output, scope String_UTF32 formatString, bool quote, scope Args args) @trusted {
+    import sidero.base.text.format.rawwrite;
 
+    size_t argsHandled;
     bool[Args.length] areArgsHandled;
 
-    OuterLoop: while (!formatString.empty) {
+    OuterLoop: while (!formatString.empty || argsHandled < Args.length) {
         size_t argId;
 
         foreach (id, b; areArgsHandled) {
@@ -134,7 +130,7 @@ Builder formattedWriteImpl(Builder, Args...)(return scope ref Builder output, sc
         switch (argId) {
             static foreach (I; 0 .. Args.length) {
         case I:
-                if (handleArg!I(format)) {
+                if (rawWrite(output, args[I], format, quote)) {
                     break ArgSwitch;
                 } else
                     break OuterLoop;
@@ -145,6 +141,7 @@ Builder formattedWriteImpl(Builder, Args...)(return scope ref Builder output, sc
         }
 
         areArgsHandled[argId] = true;
+        argsHandled++;
     }
 
     return output;

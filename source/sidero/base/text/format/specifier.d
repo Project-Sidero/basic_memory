@@ -235,7 +235,7 @@ export @safe nothrow @nogc:
         FloatShortest, /// g, shortest representation of a float, defaults preicion to 6 places
         FloatShortestCapital, /// G shortest representation of a float, defaults to 6 places
 
-        Pointers, /// p, includes the prefix 0x and is in hex
+        Pointer, /// p, includes the prefix 0x and is in hex
     }
 
 private @hidden:
@@ -455,7 +455,7 @@ private @hidden:
                 break;
 
             case 'p':
-                this.type = Type.Pointers;
+                this.type = Type.Pointer;
                 format.popFront;
                 break;
 

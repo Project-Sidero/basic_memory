@@ -2,7 +2,7 @@ module sidero.base.errors.expected;
 import sidero.base.attributes;
 
 /// A kind of error handling that requires a specific number of something to be handled for complete success.
-@mustuse struct Expected(size_t Wanted) if (Wanted > 0) {
+@mustuse struct Expected(size_t Wanted) {
     private @hidden {
         size_t acquired;
     }
