@@ -20,6 +20,8 @@ bool rawRead(Input, Output)(scope ref Input input, scope out Output output, scop
         return readIntegral(input, output, format);
     } else static if (__traits(isFloating, Output)) {
         return readFloat(input, output, format);
+    } else static if (is(Output == struct) || is(Output == class)) {
+        return readStructClass(input, output, format);
     } else
         static assert(0, Output.stringof ~ " cannot be read into.");
 }
@@ -96,6 +98,29 @@ unittest {
     from = String_UTF8("1.4");
     assert(rawRead(from, f, FormatSpecifier.from("")));
     assert(isClose(f, 1.4));
+}
+
+///
+unittest {
+    String_UTF8 from;
+
+    struct S1 {
+        bool isNull = true;
+        int x;
+
+        static bool formattedRead(Input)(scope ref Input input, scope ref S1 output, scope FormatSpecifier format) {
+            output.isNull = false;
+
+            return rawRead(input, output.x, FormatSpecifier.from(""));
+        }
+    }
+
+    S1 value;
+
+    from = String_UTF8("123");
+    assert(rawRead(from, value, FormatSpecifier.from("")));
+    assert(!value.isNull);
+    assert(value.x == 123);
 }
 
 private:
@@ -487,4 +512,23 @@ bool readFloat(Input, Output)(scope ref Input input, scope ref Output output, sc
     }
 
     return true;
+}
+
+bool readStructClass(Input, Output)(scope ref Input input, scope ref Output output, scope FormatSpecifier format) @trusted {
+    enum haveFormattedRead = __traits(compiles, {
+            Input input;
+            Output value;
+            bool got = Output.formattedRead(input, value, FormatSpecifier.init);
+        });
+
+    static if (haveFormattedRead) {
+        Input input2 = input.save;
+
+        if (Output.formattedRead(input2, output, format)) {
+            input = input2;
+            return true;
+        }
+    }
+
+    return false;
 }
