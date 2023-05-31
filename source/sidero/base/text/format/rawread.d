@@ -524,6 +524,11 @@ bool readStructClass(Input, Output)(scope ref Input input, scope ref Output outp
     static if (haveFormattedRead) {
         Input input2 = input.save;
 
+        static if (__traits(hasMember, Output, "DefaultFormat")) {
+            if (format.fullFormatSpec.length == 0)
+                format.fullFormatSpec = Output.DefaultFormat;
+        }
+
         if (Output.formattedRead(input2, output, format)) {
             input = input2;
             return true;

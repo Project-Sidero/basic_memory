@@ -832,6 +832,11 @@ bool writeStructClass(Builder, Input)(scope ref Builder output, scope Input inpu
     static if (haveFormattedWrite) {
         const priorLength = output.length;
 
+        static if (__traits(hasMember, Input, "DefaultFormat")) {
+            if (format.fullFormatSpec.length == 0)
+                format.fullFormatSpec = Input.DefaultFormat;
+        }
+
         if (input.formattedWrite(output, format)) {
             // ok
             customPrinted = true;

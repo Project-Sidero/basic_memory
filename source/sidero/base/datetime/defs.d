@@ -24,14 +24,15 @@ struct DateTime(DateType) {
     }
 
     ///
-    static string DefaultFormat = DateType.DefaultFormat ~ " " ~ TimeOfDay.DefaultFormat, ATOMFormat = "Y-m-d\\TH:i:sP",
-        COOKIEFormat = "l, d-M-Y H:i:s T",
-        ISO8601Format = "Y-m-d\\TH:i:sO",
-        ISO8601_EXPANDEDFormat = "X-m-d\\TH:i:sP", RFC822Format = "D, d M y H:i:s O", RFC850Format = "l, d-M-y H:i:s T",
-        RFC1036Format = "D, d M y H:i:s O", RFC1123Format = "D, d M Y H:i:s O",
-        RFC7231Format = "D, d M Y H:i:s \\G\\M\\T", RFC2822Format = "D, d M Y H:i:s O",
-        RFC3339Format = "Y-m-d\\TH:i:sP", RFC3339ExtendedFormat = "Y-m-d\\TH:i:s.vP", RSSFormat = "D, d M Y H:i:s O",
-        W3CFormat = "Y-m-d\\TH:i:sP", LogFileName = "Y-m-d-H";
+    static string DefaultFormat = DateType.DefaultFormat ~ " " ~ TimeOfDay.DefaultFormat,
+        ATOMFormat = "%Y-%m-%dT%H:%i:%s%P", COOKIEFormat = "%l, %d-%M-%Y %H:%i:%s %T",
+        ISO8601Format = "%Y-%m-%dT%H:%i:%s%O",
+        ISO8601_EXPANDEDFormat = "%X-%m-%dT%H:%i:%s%P", RFC822Format = "%D, %d %M %y %H:%i:%s %O",
+        RFC850Format = "%l, %d-%M-%y %H:%i:%s %T", RFC1036Format = "%D, %d %M %y %H:%i:%s %O",
+        RFC1123Format = "%D, %d %M %Y %H:%i:%s %O",
+        RFC7231Format = "%D, %d %M %Y %H:%i:%s GMT",
+        RFC2822Format = "%D, %d %M %Y %H:%i:%s %O", RFC3339Format = "%Y-%m-%dT%H:%i:%s%P", RFC3339ExtendedFormat = "%Y-%m-%dT%H:%i:%s.%v%P",
+        RSSFormat = "%D, %d %M %Y %H:%i:%s %O", W3CFormat = "%Y-%m-%dT%H:%i:%s%P", LogFileName = "%Y-%m-%d-%H";
 
 export @safe nothrow @nogc:
 
@@ -291,17 +292,17 @@ export @safe nothrow @nogc:
     }
 
     ///
-    StringBuilder_UTF8 format(FormatString)(scope FormatString specification) scope const 
+    StringBuilder_UTF8 format(FormatString)(scope FormatString specification, bool usePercentageEscape = true) scope const
             if (isSomeString!FormatString || isReadOnlyString!FormatString) {
         StringBuilder_UTF8 ret;
-        this.format(ret, specification);
+        this.format(ret, specification, usePercentageEscape);
         return ret;
     }
 
     ///
-    void format(Builder, FormatString)(scope ref Builder builder, scope FormatString specification) scope const @trusted
+    void format(Builder, FormatString)(scope ref Builder builder, scope FormatString specification, bool usePercentageEscape = true) scope const @trusted
             if (isBuilderString!Builder && isSomeString!FormatString) {
-        this.format(builder, String_UTF!(Builder.Char)(specification));
+        this.format(builder, String_UTF!(Builder.Char)(specification), usePercentageEscape);
     }
 
     /**
@@ -309,7 +310,7 @@ export @safe nothrow @nogc:
 
      Note: Implements I, O, P, p, T, Z, c, r, U. Defers everything else to respective type
      */
-    void format(Builder, Format)(scope ref Builder builder, scope Format specification) scope const @trusted
+    void format(Builder, Format)(scope ref Builder builder, scope Format specification, bool usePercentageEscape = true) scope const
             if (isBuilderString!Builder && isReadOnlyString!Format) {
         import sidero.base.allocators;
 
@@ -318,80 +319,142 @@ export @safe nothrow @nogc:
 
         bool isEscaped;
 
-        foreach (c; specification.byUTF32()) {
-            if (isEscaped) {
-                typeof(c)[1] str = [c];
-                builder ~= str;
-                isEscaped = false;
-            } else if (c == '\\') {
-                isEscaped = true;
-            } else if (this.time_.formatValue(builder, c)) {
-            } else if (c == 'B') {
-                DateTime temp;
+        if (usePercentageEscape) {
+            foreach (c; specification.byUTF32()) {
+                if (isEscaped) {
+                    isEscaped = false;
+                    if (this.formatValue(builder, c))
+                        continue;
+                } else if (c == '%') {
+                    isEscaped = true;
+                    continue;
+                }
 
-                if (this.timezone_.isNull)
-                    temp = DateTime(cast(DateTime)this, TimeZone.from(0));
+                builder ~= [c];
+            }
+        } else {
+            foreach (c; specification.byUTF32()) {
+                if (isEscaped) {
+                    typeof(c)[1] str = [c];
+                    builder ~= str;
+                    isEscaped = false;
+                } else if (c == '\\') {
+                    isEscaped = true;
+                } else if (this.formatValue(builder, c)) {
+                } else {
+                    builder ~= [c];
+                }
+            }
+        }
+    }
+
+    /// Ditto
+    bool formatValue(Builder)(scope ref Builder builder, dchar specification) scope const @trusted
+            if (isBuilderString!Builder) {
+        switch (specification) {
+        case 'B':
+            DateTime temp;
+
+            if (this.timezone_.isNull)
+                temp = DateTime(cast(DateTime)this, TimeZone.from(0));
+            else
+                temp = cast(DateTime)this;
+
+            // UTC+1
+            TimeZone newTimeZone = TimeZone.from(60);
+            temp = temp.asTimeZone(newTimeZone);
+
+            auto working = cast(uint)(((3600 * temp.hour) + (60 * temp.minute)) / 86.4);
+
+            if (working < 10)
+                builder ~= "0"c;
+            else if (working < 100)
+                builder ~= "00"c;
+
+            builder.formattedWrite("%s", working);
+            return true;
+
+        case 'e':
+            // we are overriding the timezone behavior, because we have the date/time,
+            //  which also means we have access to the unix time which we can use for IANA TZ.
+            builder ~= this.timezone_.nameFor(this.asGregorian());
+            return true;
+
+        case 'I':
+            if (this.timezone_.isNull || !this.timezone_.haveDaylightSavings) {
+                builder ~= "0"c;
+            } else {
+                auto gDateTime = this.asGregorian();
+                bool inDaylight = this.timezone_.isInDaylightSavings(gDateTime);
+
+                builder ~= inDaylight ? "1"c : "0"c;
+            }
+            return true;
+
+        case 'O':
+            if (this.timezone_.isNull) {
+                builder ~= "+0000";
+            } else {
+                auto gDateTime = this.asGregorian();
+                auto bias = this.timezone_.currentSecondsBias(gDateTime);
+
+                TimeOfDay tod = TimeOfDay(0, 0, 0);
+                tod.advanceSeconds(bias < 0 ? -bias : bias);
+
+                if (bias < 0)
+                    builder ~= "-";
                 else
-                    temp = cast(DateTime)this;
+                    builder ~= "+";
 
-                // UTC+1
-                TimeZone newTimeZone = TimeZone.from(60);
-                temp = temp.asTimeZone(newTimeZone);
+                auto hour = tod.hour;
+                if (hour < 10)
+                    builder ~= "0";
+                builder.formattedWrite("%s", hour);
 
-                auto working = cast(uint)(((3600 * temp.hour) + (60 * temp.minute)) / 86.4);
+                auto minutes = tod.minute;
+                if (minutes < 10)
+                    builder ~= "0";
+                builder.formattedWrite("%s", minutes);
+            }
+            return true;
 
-                if (working < 10)
-                    builder ~= "0"c;
-                else if (working < 100)
-                    builder ~= "00"c;
+        case 'P':
+            if (this.timezone_.isNull) {
+                builder ~= "+0000";
+            } else {
+                auto gDateTime = this.asGregorian();
+                auto bias = this.timezone_.currentSecondsBias(gDateTime);
 
-                builder.formattedWrite("%s", working);
-            } else if (c == 'e') {
-                // we are overriding the timezone behavior, because we have the date/time,
-                //  which also means we have access to the unix time which we can use for IANA TZ.
-                builder ~= this.timezone_.nameFor(this.asGregorian());
-            } else if (this.timezone_.formatValue(builder, c)) {
-            } else if (c == 'I') {
-                if (this.timezone_.isNull || !this.timezone_.haveDaylightSavings) {
-                    builder ~= "0"c;
+                TimeOfDay tod = TimeOfDay(0, 0, 0);
+                tod.advanceSeconds(bias < 0 ? -bias : bias);
+
+                if (bias < 0)
+                    builder ~= "-";
+                else
+                    builder ~= "+";
+
+                auto hour = tod.hour;
+                if (hour < 10)
+                    builder ~= "0";
+                builder.formattedWrite("%s:", hour);
+
+                auto minutes = tod.minute;
+                if (minutes < 10)
+                    builder ~= "0";
+                builder.formattedWrite("%s", minutes);
+            }
+            return true;
+
+        case 'p':
+            if (this.timezone_.isNull) {
+                builder ~= "+0000";
+            } else {
+                auto gDateTime = this.asGregorian();
+                auto bias = this.timezone_.currentSecondsBias(gDateTime);
+
+                if (bias == 0) {
+                    builder ~= "Z";
                 } else {
-                    auto gDateTime = this.asGregorian();
-                    bool inDaylight = this.timezone_.isInDaylightSavings(gDateTime);
-
-                    builder ~= inDaylight ? "1"c : "0"c;
-                }
-            } else if (c == 'O') {
-                if (this.timezone_.isNull) {
-                    builder ~= "+0000";
-                } else {
-                    auto gDateTime = this.asGregorian();
-                    auto bias = this.timezone_.currentSecondsBias(gDateTime);
-
-                    TimeOfDay tod = TimeOfDay(0, 0, 0);
-                    tod.advanceSeconds(bias < 0 ? -bias : bias);
-
-                    if (bias < 0)
-                        builder ~= "-";
-                    else
-                        builder ~= "+";
-
-                    auto hour = tod.hour;
-                    if (hour < 10)
-                        builder ~= "0";
-                    builder.formattedWrite("%s", hour);
-
-                    auto minutes = tod.minute;
-                    if (minutes < 10)
-                        builder ~= "0";
-                    builder.formattedWrite("%s", minutes);
-                }
-            } else if (c == 'P') {
-                if (this.timezone_.isNull) {
-                    builder ~= "+0000";
-                } else {
-                    auto gDateTime = this.asGregorian();
-                    auto bias = this.timezone_.currentSecondsBias(gDateTime);
-
                     TimeOfDay tod = TimeOfDay(0, 0, 0);
                     tod.advanceSeconds(bias < 0 ? -bias : bias);
 
@@ -410,111 +473,93 @@ export @safe nothrow @nogc:
                         builder ~= "0";
                     builder.formattedWrite("%s", minutes);
                 }
-            } else if (c == 'p') {
-                if (this.timezone_.isNull) {
-                    builder ~= "+0000";
-                } else {
-                    auto gDateTime = this.asGregorian();
-                    auto bias = this.timezone_.currentSecondsBias(gDateTime);
+            }
+            return true;
 
-                    if (bias == 0) {
-                        builder ~= "Z";
-                    } else {
-                        TimeOfDay tod = TimeOfDay(0, 0, 0);
-                        tod.advanceSeconds(bias < 0 ? -bias : bias);
+        case 'T':
+            if (this.timezone_.isNull) {
+                builder ~= "Z";
+            } else {
+                auto gDateTime = this.asGregorian();
+                auto bias = this.timezone_.currentSecondsBias(gDateTime);
 
-                        if (bias < 0)
-                            builder ~= "-";
-                        else
-                            builder ~= "+";
-
-                        auto hour = tod.hour;
-                        if (hour < 10)
-                            builder ~= "0";
-                        builder.formattedWrite("%s:", hour);
-
-                        auto minutes = tod.minute;
-                        if (minutes < 10)
-                            builder ~= "0";
-                        builder.formattedWrite("%s", minutes);
-                    }
-                }
-            } else if (c == 'T') {
-                if (this.timezone_.isNull) {
+                if (bias == 0) {
                     builder ~= "Z";
                 } else {
-                    auto gDateTime = this.asGregorian();
-                    auto bias = this.timezone_.currentSecondsBias(gDateTime);
-
-                    if (bias == 0) {
-                        builder ~= "Z";
-                    } else {
-                        TimeOfDay tod = TimeOfDay(0, 0, 0);
-                        tod.advanceSeconds(bias < 0 ? -bias : bias);
-
-                        if (bias < 0)
-                            builder ~= "-";
-                        else
-                            builder ~= "+";
-
-                        auto hour = tod.hour;
-                        if (hour < 10)
-                            builder ~= "0";
-                        builder.formattedWrite("%s:", hour);
-
-                        auto minutes = tod.minute;
-                        if (minutes > 0) {
-                            if (minutes < 10)
-                                builder ~= "0";
-                            builder.formattedWrite("%s", minutes);
-                        }
-                    }
-                }
-            } else if (c == 'Z') {
-                if (this.timezone_.isNull) {
-                    builder ~= "0";
-                } else {
-                    auto gDateTime = this.asGregorian();
-                    auto bias = this.timezone_.currentSecondsBias(gDateTime);
-
                     TimeOfDay tod = TimeOfDay(0, 0, 0);
                     tod.advanceSeconds(bias < 0 ? -bias : bias);
 
                     if (bias < 0)
                         builder ~= "-";
+                    else
+                        builder ~= "+";
 
-                    auto seconds = tod.totalSeconds;
-                    builder.formattedWrite("%s", seconds);
-                }
-            } else if (c == 'c') {
-                this.format(builder, ISO8601Format);
-            } else if (c == 'r') {
-                this.format(builder, RFC2822Format);
-            } else if (c == 'U') {
-                auto unixTime = this.toUnixTime;
+                    auto hour = tod.hour;
+                    if (hour < 10)
+                        builder ~= "0";
+                    builder.formattedWrite("%s:", hour);
 
-                if (unixTime) {
-                    builder.formattedWrite("%s", unixTime);
+                    auto minutes = tod.minute;
+                    if (minutes > 0) {
+                        if (minutes < 10)
+                            builder ~= "0";
+                        builder.formattedWrite("%s", minutes);
+                    }
                 }
-            } else if (this.date_.formatValue(builder, c)) {
-            } else {
-                typeof(c)[1] str = [c];
-                builder ~= str;
             }
+            return true;
+
+        case 'Z':
+            if (this.timezone_.isNull) {
+                builder ~= "0";
+            } else {
+                auto gDateTime = this.asGregorian();
+                auto bias = this.timezone_.currentSecondsBias(gDateTime);
+
+                TimeOfDay tod = TimeOfDay(0, 0, 0);
+                tod.advanceSeconds(bias < 0 ? -bias : bias);
+
+                if (bias < 0)
+                    builder ~= "-";
+
+                auto seconds = tod.totalSeconds;
+                builder.formattedWrite("%s", seconds);
+            }
+            return true;
+
+        case 'c':
+            this.format(builder, ISO8601Format);
+            return true;
+
+        case 'r':
+            this.format(builder, RFC2822Format);
+            return true;
+
+        case 'U':
+            auto unixTime = this.toUnixTime;
+
+            if (unixTime) {
+                builder.formattedWrite("%s", unixTime);
+            }
+            return true;
+
+        default:
+            return this.time_.formatValue(builder, specification) || this.timezone_.formatValue(builder,
+                    specification) || this.date_.formatValue(builder, specification);
         }
     }
 
     ///
-    bool formattedWrite(scope ref StringBuilder_ASCII builder, scope FormatSpecifier format) @safe nothrow @nogc {
+    bool formattedWrite(scope ref StringBuilder_ASCII builder, scope FormatSpecifier format, bool usePercentageEscape = true) @safe nothrow @nogc {
         return false;
     }
 
     ///
-    bool formattedWrite(scope ref StringBuilder_UTF8 builder, scope FormatSpecifier format) @safe nothrow @nogc {
+    bool formattedWrite(scope ref StringBuilder_UTF8 builder, scope FormatSpecifier format, bool usePercentageEscape = true) @safe nothrow @nogc {
         if (format.fullFormatSpec.length == 0)
             return false;
 
-        this.format(builder, format.fullFormatSpec);
+        this.format(builder, format.fullFormatSpec, usePercentageEscape);
         return true;
     }
 
@@ -538,4 +583,3 @@ private @hidden:
         }
     }
 }
-

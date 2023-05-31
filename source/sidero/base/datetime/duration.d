@@ -14,7 +14,7 @@ struct Duration {
     }
 
     ///
-    static immutable string DefaultFormat = "a", HumanDeltaFormat = "D";
+    static immutable string DefaultFormat = "%a", HumanDeltaFormat = "%D";
 
 export @safe nothrow @nogc:
 
@@ -161,27 +161,28 @@ export @safe nothrow @nogc:
     }
 
     /// Supports R(sign +/-), r(sign +), d(ays), h(ours), m(inutes), s(econds), i(milliseconds), u(microseconds), n(anoseconds), a(daptive), Human D(elta)
-    StringBuilder_UTF8 format(FormatString)(scope FormatString specification) scope const if (isSomeString!FormatString) {
+    StringBuilder_UTF8 format(FormatString)(scope FormatString specification, bool usePercentageEscape = true) scope const
+            if (isSomeString!FormatString) {
         StringBuilder_UTF8 ret;
-        this.format(ret, specification);
+        this.format(ret, specification, usePercentageEscape);
         return ret;
     }
 
     /// Ditto
-    StringBuilder_UTF8 format(FormatChar)(scope String_UTF!FormatChar specification) scope const {
+    StringBuilder_UTF8 format(FormatChar)(scope String_UTF!FormatChar specification, bool usePercentageEscape = true) scope const {
         StringBuilder_UTF8 ret;
-        this.format(ret, specification);
+        this.format(ret, specification, usePercentageEscape);
         return ret;
     }
 
     /// Ditto
-    void format(Builder, FormatString)(scope ref Builder builder, scope FormatString specification) scope const @trusted
+    void format(Builder, FormatString)(scope ref Builder builder, scope FormatString specification, bool usePercentageEscape = true) scope const @trusted
             if (isBuilderString!Builder && isSomeString!FormatString) {
-        this.format(builder, String_UTF!(Builder.Char)(specification));
+        this.format(builder, String_UTF!(Builder.Char)(specification), usePercentageEscape);
     }
 
     /// Ditto
-    void format(Builder, Format)(scope ref Builder builder, scope Format specification) scope const @trusted
+    void format(Builder, Format)(scope ref Builder builder, scope Format specification, bool usePercentageEscape = true) scope const @trusted
             if (isBuilderString!Builder && isReadOnlyString!Format) {
         import sidero.base.allocators;
 
@@ -190,17 +191,31 @@ export @safe nothrow @nogc:
 
         bool isEscaped;
 
-        foreach (c; specification.byUTF32()) {
-            if (isEscaped) {
-                typeof(c)[1] str = [c];
-                builder ~= str;
-                isEscaped = false;
-            } else if (c == '\\') {
-                isEscaped = true;
-            } else if (this.formatValue(builder, c)) {
-            } else {
-                typeof(c)[1] str = [c];
-                builder ~= str;
+        if (usePercentageEscape) {
+            foreach (c; specification.byUTF32()) {
+                if (isEscaped) {
+                    isEscaped = false;
+                    if (this.formatValue(builder, c))
+                        continue;
+                } else if (c == '%') {
+                    isEscaped = true;
+                    continue;
+                }
+
+                builder ~= [c];
+            }
+        } else {
+            foreach (c; specification.byUTF32()) {
+                if (isEscaped) {
+                    typeof(c)[1] str = [c];
+                    builder ~= str;
+                    isEscaped = false;
+                } else if (c == '\\') {
+                    isEscaped = true;
+                } else if (this.formatValue(builder, c)) {
+                } else {
+                    builder ~= [c];
+                }
             }
         }
     }
