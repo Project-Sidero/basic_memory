@@ -335,15 +335,15 @@ export @safe nothrow @nogc:
         } else {
             foreach (c; specification.byUTF32()) {
                 if (isEscaped) {
-                    typeof(c)[1] str = [c];
-                    builder ~= str;
                     isEscaped = false;
                 } else if (c == '\\') {
                     isEscaped = true;
+                    continue;
                 } else if (this.formatValue(builder, c)) {
-                } else {
-                    builder ~= [c];
+                    continue;
                 }
+
+                builder ~= [c];
             }
         }
     }
@@ -351,6 +351,8 @@ export @safe nothrow @nogc:
     /// Ditto
     bool formatValue(Builder)(scope ref Builder builder, dchar specification) scope const @trusted
             if (isBuilderString!Builder) {
+        import writer = sidero.base.text.format.write;
+
         switch (specification) {
         case 'B':
             DateTime temp;
@@ -371,7 +373,7 @@ export @safe nothrow @nogc:
             else if (working < 100)
                 builder ~= "00"c;
 
-            builder.formattedWrite("%s", working);
+            writer.formattedWrite(builder, "{:s}", working);
             return true;
 
         case 'e':
@@ -409,12 +411,12 @@ export @safe nothrow @nogc:
                 auto hour = tod.hour;
                 if (hour < 10)
                     builder ~= "0";
-                builder.formattedWrite("%s", hour);
+                writer.formattedWrite(builder, "{:s}", hour);
 
                 auto minutes = tod.minute;
                 if (minutes < 10)
                     builder ~= "0";
-                builder.formattedWrite("%s", minutes);
+                writer.formattedWrite(builder, "{:s}", minutes);
             }
             return true;
 
@@ -436,12 +438,12 @@ export @safe nothrow @nogc:
                 auto hour = tod.hour;
                 if (hour < 10)
                     builder ~= "0";
-                builder.formattedWrite("%s:", hour);
+                writer.formattedWrite(builder, "{:s}", hour);
 
                 auto minutes = tod.minute;
                 if (minutes < 10)
                     builder ~= "0";
-                builder.formattedWrite("%s", minutes);
+                writer.formattedWrite(builder, "{:s}", minutes);
             }
             return true;
 
@@ -466,12 +468,12 @@ export @safe nothrow @nogc:
                     auto hour = tod.hour;
                     if (hour < 10)
                         builder ~= "0";
-                    builder.formattedWrite("%s:", hour);
+                    writer.formattedWrite(builder, "{:s}", hour);
 
                     auto minutes = tod.minute;
                     if (minutes < 10)
                         builder ~= "0";
-                    builder.formattedWrite("%s", minutes);
+                    writer.formattedWrite(builder, "{:s}", minutes);
                 }
             }
             return true;
@@ -497,13 +499,13 @@ export @safe nothrow @nogc:
                     auto hour = tod.hour;
                     if (hour < 10)
                         builder ~= "0";
-                    builder.formattedWrite("%s:", hour);
+                    writer.formattedWrite(builder, "{:s}", hour);
 
                     auto minutes = tod.minute;
                     if (minutes > 0) {
                         if (minutes < 10)
                             builder ~= "0";
-                        builder.formattedWrite("%s", minutes);
+                        writer.formattedWrite(builder, "{:s}", minutes);
                     }
                 }
             }
@@ -523,7 +525,7 @@ export @safe nothrow @nogc:
                     builder ~= "-";
 
                 auto seconds = tod.totalSeconds;
-                builder.formattedWrite("%s", seconds);
+                writer.formattedWrite(builder, "{:s}", seconds);
             }
             return true;
 
@@ -539,7 +541,7 @@ export @safe nothrow @nogc:
             auto unixTime = this.toUnixTime;
 
             if (unixTime) {
-                builder.formattedWrite("%s", unixTime);
+                writer.formattedWrite(builder, "{:s}", unixTime);
             }
             return true;
 

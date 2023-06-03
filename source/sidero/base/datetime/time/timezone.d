@@ -391,15 +391,15 @@ export @safe nothrow @nogc:
         } else {
             foreach (c; specification.byUTF32()) {
                 if (isEscaped) {
-                    typeof(c)[1] str = [c];
-                    builder ~= str;
                     isEscaped = false;
                 } else if (c == '\\') {
                     isEscaped = true;
+                    continue;
                 } else if (this.formatValue(builder, c)) {
-                } else {
-                    builder ~= [c];
+                    continue;
                 }
+
+                builder ~= [c];
             }
         }
     }

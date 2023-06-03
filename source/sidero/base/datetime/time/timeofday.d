@@ -348,21 +348,23 @@ export @safe nothrow @nogc:
         } else {
             foreach (c; specification.byUTF32()) {
                 if (isEscaped) {
-                    typeof(c)[1] str = [c];
-                    builder ~= str;
                     isEscaped = false;
                 } else if (c == '\\') {
                     isEscaped = true;
+                    continue;
                 } else if (this.formatValue(builder, c)) {
-                } else {
-                    builder ~= [c];
+                    continue;
                 }
+
+                builder ~= [c];
             }
         }
     }
 
     /// Ditto
     bool formatValue(Builder)(scope ref Builder builder, dchar specification) scope const if (isBuilderString!Builder) {
+        import writer = sidero.base.text.format.write;
+
         switch (specification) {
         case 'a':
             builder ~= this.isAM() ? "am" : "pm";
@@ -376,36 +378,36 @@ export @safe nothrow @nogc:
 
         case 'g':
             auto actual = this.hour_ % 12;
-            builder.formattedWrite("%s", actual);
+            writer.formattedWrite(builder, "{:s}", actual);
             break;
 
         case 'G':
-            builder.formattedWrite("%s", this.hour_);
+            writer.formattedWrite(builder, "{:s}", this.hour_);
             break;
 
         case 'h':
             auto actual = this.hour_ % 12;
             if (actual < 10)
                 builder ~= "0"c;
-            builder.formattedWrite("%s", actual);
+            writer.formattedWrite(builder, "{:s}", actual);
             break;
 
         case 'H':
             if (this.hour_ < 10)
                 builder ~= "0"c;
-            builder.formattedWrite("%s", this.hour_);
+            writer.formattedWrite(builder, "{:s}", this.hour_);
             break;
 
         case 'i':
             if (this.minute_ < 10)
                 builder ~= "0"c;
-            builder.formattedWrite("%s", this.minute_);
+            writer.formattedWrite(builder, "{:s}", this.minute_);
             break;
 
         case 's':
             if (this.second_ < 10)
                 builder ~= "0"c;
-            builder.formattedWrite("%s", this.second_);
+            writer.formattedWrite(builder, "{:s}", this.second_);
             break;
 
         case 'u':
@@ -421,7 +423,7 @@ export @safe nothrow @nogc:
                 builder ~= "00";
             else if (msec < 100_000)
                 builder ~= "0";
-            builder.formattedWrite("%s", msec);
+            writer.formattedWrite(builder, "{:s}", msec);
             break;
 
         case 'v':
@@ -432,11 +434,11 @@ export @safe nothrow @nogc:
             else if (working < 100)
                 builder ~= "0";
 
-            builder.formattedWrite("%s", working);
+            writer.formattedWrite(builder, "{:s}", working);
             break;
 
         case 'V':
-            builder.formattedWrite("%s", this.nanoSeconds_);
+            writer.formattedWrite(builder, "{:s}", this.nanoSeconds_);
             break;
 
         default:

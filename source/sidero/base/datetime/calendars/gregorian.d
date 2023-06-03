@@ -418,21 +418,23 @@ export @safe nothrow @nogc:
         } else {
             foreach (c; specification.byUTF32()) {
                 if (isEscaped) {
-                    typeof(c)[1] str = [c];
-                    builder ~= str;
                     isEscaped = false;
                 } else if (c == '\\') {
                     isEscaped = true;
+                    continue;
                 } else if (this.formatValue(builder, c)) {
-                } else {
-                    builder ~= [c];
+                    continue;
                 }
+
+                builder ~= [c];
             }
         }
     }
 
     /// Ditto
     bool formatValue(Builder)(scope ref Builder builder, dchar specification) scope const if (isBuilderString!Builder) {
+        import writer = sidero.base.text.format.write;
+
         static immutable ThreeLettersDay = ["Mon", "Tue", "Wed", "Thr", "Fri", "Sat", "Sun"];
         static immutable DayText = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
         static immutable OrdinalSuffix = [
@@ -451,7 +453,7 @@ export @safe nothrow @nogc:
         case 'd':
             if (this.day_ < 10)
                 builder ~= "0"c;
-            builder.formattedWrite("%s", this.day_);
+            writer.formattedWrite(builder, "{:s}", this.day_);
             break;
 
         case 'D':
@@ -459,7 +461,7 @@ export @safe nothrow @nogc:
             break;
 
         case 'j':
-            builder.formattedWrite("%s", this.day_);
+            writer.formattedWrite(builder, "{:s}", this.day_);
             break;
 
         case 'l':
@@ -467,7 +469,7 @@ export @safe nothrow @nogc:
             break;
 
         case 'N':
-            builder.formattedWrite("%s", this.dayInWeek() + 1);
+            writer.formattedWrite(builder, "{:s}", this.dayInWeek() + 1);
             break;
 
         case 'S':
@@ -481,15 +483,15 @@ export @safe nothrow @nogc:
             else
                 adjusted++;
 
-            builder.formattedWrite("%s", adjusted);
+            writer.formattedWrite(builder, "{:s}", adjusted);
             break;
 
         case 'z':
-            builder.formattedWrite("%s", this.dayInYear() - 1);
+            writer.formattedWrite(builder, "{:s}", this.dayInYear() - 1);
             break;
 
         case 'W':
-            builder.formattedWrite("%s", (this.dayInYear() - this.firstMondayOfYear()) / 7);
+            writer.formattedWrite(builder, "{:s}", (this.dayInYear() - this.firstMondayOfYear()) / 7);
             break;
 
         case 'F':
@@ -499,7 +501,7 @@ export @safe nothrow @nogc:
         case 'm':
             if (this.month_ < 10)
                 builder ~= "0"c;
-            builder.formattedWrite("%s", this.month_);
+            writer.formattedWrite(builder, "{:s}", this.month_);
             break;
 
         case 'M':
@@ -507,20 +509,20 @@ export @safe nothrow @nogc:
             break;
 
         case 'n':
-            builder.formattedWrite("%s", this.month_);
+            writer.formattedWrite(builder, "{:s}", this.month_);
             break;
 
         case 't':
-            builder.formattedWrite("%s", this.daysInMonth());
+            writer.formattedWrite(builder, "{:s}", this.daysInMonth());
             break;
 
         case 'L':
-            builder.formattedWrite("%d", this.isLeapYear());
+            writer.formattedWrite(builder, "{:s}", this.isLeapYear());
             break;
 
         case 'o':
             if (this.day_ < this.firstMondayOfYear()) {
-                builder.formattedWrite("%s", this.year_ - 1);
+                writer.formattedWrite(builder, "{:s}", this.year_ - 1);
             } else {
                 long temp = this.year_;
 
@@ -536,7 +538,7 @@ export @safe nothrow @nogc:
                 else if (temp < 1000)
                     builder ~= "0";
 
-                builder.formattedWrite("%s", temp);
+                writer.formattedWrite(builder, "{:s}", temp);
             }
             break;
 
@@ -557,7 +559,7 @@ export @safe nothrow @nogc:
             else if (temp < 1000)
                 builder ~= "0";
 
-            builder.formattedWrite("%s", temp);
+            writer.formattedWrite(builder, "{:s}", temp);
             break;
 
         case 'x':
@@ -577,7 +579,7 @@ export @safe nothrow @nogc:
             else if (temp < 1000)
                 builder ~= "0";
 
-            builder.formattedWrite("%s", temp);
+            writer.formattedWrite(builder, "{:s}", temp);
             break;
 
         case 'Y':
@@ -595,7 +597,7 @@ export @safe nothrow @nogc:
             else if (temp < 1000)
                 builder ~= "0";
 
-            builder.formattedWrite("%s", temp);
+            writer.formattedWrite(builder, "{:s}", temp);
             break;
 
         case 'y':
@@ -604,7 +606,7 @@ export @safe nothrow @nogc:
 
             if (temp < 10)
                 builder ~= "0";
-            builder.formattedWrite("%s", temp);
+            writer.formattedWrite(builder, "{:s}", temp);
             break;
 
         default:
