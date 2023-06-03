@@ -8,6 +8,33 @@ import sidero.base.allocators;
 export @safe nothrow @nogc:
 
 ///
+StringBuilder_UTF8 formattedWrite(Args...)(scope String_UTF8.LiteralType formatString, scope Args args) @trusted {
+    scope String_UTF32 tempFormat;
+    tempFormat.__ctor(formatString);
+
+    StringBuilder_UTF8 ret = StringBuilder_UTF8(globalAllocator());
+    return formattedWriteImpl(ret, tempFormat, false, args);
+}
+
+///
+StringBuilder_UTF16 formattedWrite(Args...)(scope String_UTF16.LiteralType formatString, scope Args args) @trusted {
+    scope String_UTF32 tempFormat;
+    tempFormat.__ctor(formatString);
+
+    StringBuilder_UTF16 ret = StringBuilder_UTF16(globalAllocator());
+    return formattedWriteImpl(ret, tempFormat, false, args);
+}
+
+///
+StringBuilder_UTF32 formattedWrite(Args...)(scope String_UTF32.LiteralType formatString, scope Args args) @trusted {
+    scope String_UTF32 tempFormat;
+    tempFormat.__ctor(formatString);
+
+    StringBuilder_UTF32 ret = StringBuilder_UTF32(globalAllocator());
+    return formattedWriteImpl(ret, tempFormat, false, args);
+}
+
+///
 StringBuilder_UTF8 formattedWrite(Args...)(scope String_ASCII formatString, scope Args args) {
     StringBuilder_ASCII ret = StringBuilder_ASCII(globalAllocator());
     return formattedWriteImpl(ret, String_UTF8(cast(const(char)[])formatString.unsafeGetLiteral()).byUTF32, false, args);
@@ -29,6 +56,30 @@ StringBuilder_UTF16 formattedWrite(Args...)(scope String_UTF16 formatString, sco
 StringBuilder_UTF32 formattedWrite(Args...)(scope String_UTF32 formatString, scope Args args) @trusted {
     StringBuilder_UTF32 ret = StringBuilder_UTF32(globalAllocator());
     return formattedWriteImpl(ret, formatString.byUTF32, false, args);
+}
+
+///
+StringBuilder_UTF8 formattedWrite(Args...)(return scope ref StringBuilder_UTF8 output,
+        scope String_UTF8.LiteralType formatString, scope Args args) {
+    scope String_UTF32 tempFormat;
+    tempFormat.__ctor(formatString);
+    return formattedWriteImpl(output, tempFormat, false, args);
+}
+
+///
+StringBuilder_UTF16 formattedWrite(Args...)(return scope ref StringBuilder_UTF16 output,
+        scope String_UTF16.LiteralType formatString, scope Args args) {
+    scope String_UTF32 tempFormat;
+    tempFormat.__ctor(formatString);
+    return formattedWriteImpl(output, tempFormat, false, args);
+}
+
+///
+StringBuilder_UTF32 formattedWrite(Args...)(return scope ref StringBuilder_UTF32 output,
+        scope String_UTF32.LiteralType formatString, scope Args args) {
+    scope String_UTF32 tempFormat;
+    tempFormat.__ctor(formatString);
+    return formattedWriteImpl(output, tempFormat, false, args);
 }
 
 ///
@@ -73,7 +124,7 @@ Builder formattedWriteImpl(Builder, Args...)(return scope ref Builder output, sc
     bool[Args.length] areArgsHandled;
 
     OuterLoop: while (!formatString.empty || argsHandled < Args.length) {
-        size_t argId;
+        size_t argId = size_t.max;
 
         foreach (id, b; areArgsHandled) {
             if (!b) {
@@ -128,9 +179,15 @@ Builder formattedWriteImpl(Builder, Args...)(return scope ref Builder output, sc
 
     ArgSwitch:
         switch (argId) {
+        case size_t.max:
+            break ArgSwitch;
+
             static foreach (I; 0 .. Args.length) {
         case I:
                 if (rawWrite(output, args[I], format, quote)) {
+                    if (!areArgsHandled[argId])
+                        argsHandled++;
+                    areArgsHandled[argId] = true;
                     break ArgSwitch;
                 } else
                     break OuterLoop;
@@ -139,9 +196,6 @@ Builder formattedWriteImpl(Builder, Args...)(return scope ref Builder output, sc
         default:
             break OuterLoop;
         }
-
-        areArgsHandled[argId] = true;
-        argsHandled++;
     }
 
     return output;

@@ -13,15 +13,15 @@ bool rawRead(Input, Output)(scope ref Input input, scope out Output output, scop
         return false;
 
     static if (is(Output == bool)) {
-        return readBool(input, output, format);
+        return readBool(*&input, output, format);
     } else static if (is(Output == char) || is(Output == wchar) || is(Output == dchar)) {
-        return readChar(input, output, format);
+        return readChar(*&input, output, format);
     } else static if (__traits(isIntegral, Output)) {
-        return readIntegral(input, output, format);
+        return readIntegral(*&input, output, format);
     } else static if (__traits(isFloating, Output)) {
-        return readFloat(input, output, format);
+        return readFloat(*&input, output, format);
     } else static if (is(Output == struct) || is(Output == class)) {
-        return readStructClass(input, output, format);
+        return readStructClass(*&input, output, format);
     } else
         static assert(0, Output.stringof ~ " cannot be read into.");
 }
@@ -416,7 +416,7 @@ bool readIntegral(Input, Output)(scope ref Input input, scope ref Output output,
     if (negate)
         output *= -1;
 
-    input = inputTemp;
+    input = inputTemp.save;
     return true;
 }
 
@@ -521,19 +521,19 @@ bool readStructClass(Input, Output)(scope ref Input input, scope ref Output outp
             bool got = Output.formattedRead(input, value, FormatSpecifier.init);
         });
 
-    static if (haveFormattedRead) {
-        Input input2 = input.save;
+    //static if (haveFormattedRead) {
+    Input input2 = input.save;
 
-        static if (__traits(hasMember, Output, "DefaultFormat")) {
-            if (format.fullFormatSpec.length == 0)
-                format.fullFormatSpec = Output.DefaultFormat;
-        }
-
-        if (Output.formattedRead(input2, output, format)) {
-            input = input2;
-            return true;
-        }
+    static if (__traits(hasMember, Output, "DefaultFormat")) {
+        if (format.fullFormatSpec.length == 0)
+            format.fullFormatSpec = Output.DefaultFormat;
     }
+
+    if (Output.formattedRead(input2, output, format)) {
+        input = input2;
+        return true;
+    }
+    //}
 
     return false;
 }

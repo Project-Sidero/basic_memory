@@ -66,15 +66,15 @@ Expected!(Args.length) formattedReadImpl(Input, Args...)(scope ref Input input, 
         alias ArgType = Args[id];
 
         static if (isASCII!ArgType || isUTF!ArgType) {
-            return formattedReadStringImpl(inputTemp, formatString, args[id]);
+            return formattedReadStringImpl(*&inputTemp, formatString, args[id]);
         } else
-            return rawRead(inputTemp, args[id], format);
+            return rawRead(*&inputTemp, args[id], format);
     }
 
     bool[Args.length] areArgsHandled;
 
-    OuterLoop: while (successfullyHandled < Args.length) {
-        size_t argId;
+    OuterLoop: while (successfullyHandled < Args.length || !formatString.empty) {
+        size_t argId = size_t.max;
 
         foreach (id, b; areArgsHandled) {
             if (!b) {
@@ -85,7 +85,6 @@ Expected!(Args.length) formattedReadImpl(Input, Args...)(scope ref Input input, 
 
         {
             bool wasLeftBrace;
-
             while (!inputTemp.empty && !formatString.empty) {
                 if (wasLeftBrace) {
                     if (!formatString.startsWith("{"))
@@ -99,12 +98,20 @@ Expected!(Args.length) formattedReadImpl(Input, Args...)(scope ref Input input, 
                 } else if (inputTemp.startsWith([formatString.front])) {
                     inputTemp.popFront;
                     formatString.popFront;
+                } else if (successfullyHandled > 0) {
+                    successfullyHandled--;
+                    break OuterLoop;
                 } else
                     break OuterLoop;
             }
 
-            if (inputTemp.empty && !formatString.empty)
-                break OuterLoop;
+            if (inputTemp.empty && !formatString.empty) {
+                if (successfullyHandled > 0) {
+                    successfullyHandled--;
+                    break OuterLoop;
+                } else
+                    break OuterLoop;
+            }
         }
 
         FormatSpecifier format;
@@ -118,9 +125,16 @@ Expected!(Args.length) formattedReadImpl(Input, Args...)(scope ref Input input, 
 
     ArgSwitch:
         switch (argId) {
+        case size_t.max:
+            break ArgSwitch;
+
             static foreach (I; 0 .. Args.length) {
         case I:
                 if (handleArg!I(format)) {
+                    if (!areArgsHandled[argId]) {
+                        areArgsHandled[argId] = true;
+                        successfullyHandled++;
+                    }
                     break ArgSwitch;
                 } else
                     break OuterLoop;
@@ -130,11 +144,8 @@ Expected!(Args.length) formattedReadImpl(Input, Args...)(scope ref Input input, 
             break OuterLoop;
         }
 
-        areArgsHandled[argId] = true;
-        successfullyHandled++;
-
-        input = inputTemp;
-        inputTemp = input.save;
+        input = inputTemp.save;
+        inputTemp = input;
     }
 
     return typeof(return)(successfullyHandled);

@@ -129,6 +129,16 @@ export @safe nothrow @nogc:
     }
 
     ///
+    void opOpAssign(string op : "+")(scope const Duration other) scope {
+        this = this + other;
+    }
+
+    ///
+    void opOpAssign(string op : "-")(scope const Duration other) scope {
+        this = this - other;
+    }
+
+    ///
     bool opEquals(scope const Duration other) scope const {
         return this.days_ == other.days_ && this.nanoSeconds_ == other.nanoSeconds_;
     }
@@ -207,21 +217,23 @@ export @safe nothrow @nogc:
         } else {
             foreach (c; specification.byUTF32()) {
                 if (isEscaped) {
-                    typeof(c)[1] str = [c];
-                    builder ~= str;
                     isEscaped = false;
                 } else if (c == '\\') {
                     isEscaped = true;
+                    continue;
                 } else if (this.formatValue(builder, c)) {
-                } else {
-                    builder ~= [c];
+                    continue;
                 }
+
+                builder ~= [c];
             }
         }
     }
 
     /// Ditto
     bool formatValue(Builder)(scope ref Builder builder, dchar specification) scope const if (isBuilderString!Builder) {
+        import writer = sidero.base.text.format.write;
+
         switch (specification) {
         case 'R':
             if (this.days_ < 0 || this.nanoSeconds_ < 0)
@@ -260,49 +272,49 @@ export @safe nothrow @nogc:
 
             if (days != 0) {
                 gotOne = true;
-                builder.formattedWrite("%s days", days);
+                writer.formattedWrite(builder, "{:s} days", days);
             }
 
             if (hours != 0) {
                 if (gotOne)
                     builder ~= " ";
                 gotOne = true;
-                builder.formattedWrite("%s hours", hours);
+                writer.formattedWrite(builder, "{:s} hours", hours);
             }
 
             if (minutes != 0) {
                 if (gotOne)
                     builder ~= " ";
                 gotOne = true;
-                builder.formattedWrite("%s minutes", minutes);
+                writer.formattedWrite(builder, "{:s} minutes", minutes);
             }
 
             if (seconds != 0) {
                 if (gotOne)
                     builder ~= " ";
                 gotOne = true;
-                builder.formattedWrite("%s seconds", seconds);
+                writer.formattedWrite(builder, "{:s} seconds", seconds);
             }
 
             if (milliSecs != 0) {
                 if (gotOne)
                     builder ~= " ";
                 gotOne = true;
-                builder.formattedWrite("%s milliseconds", milliSecs);
+                writer.formattedWrite(builder, "{:s} milliseconds", milliSecs);
             }
 
             if (microSecs != 0) {
                 if (gotOne)
                     builder ~= " ";
                 gotOne = true;
-                builder.formattedWrite("%s microseconds", microSecs);
+                writer.formattedWrite(builder, "{:s} microseconds", microSecs);
             }
 
             if (nanoSecs != 0) {
                 if (gotOne)
                     builder ~= " ";
                 gotOne = true;
-                builder.formattedWrite("%s nanoseconds", nanoSecs);
+                writer.formattedWrite(builder, "{:s} nanoseconds", nanoSecs);
             }
 
             if (!gotOne) {
@@ -311,32 +323,32 @@ export @safe nothrow @nogc:
             break;
 
         case 'd':
-            builder.formattedWrite("%s", this.days_ < 0 ? -this.days_ : this.days_);
+            writer.formattedWrite(builder, "{:s}", this.days_ < 0 ? -this.days_ : this.days_);
             break;
 
         case 'h':
             auto hours = this.hours;
-            builder.formattedWrite("%s", hours < 0 ? -hours : hours);
+            writer.formattedWrite(builder, "{:s}", hours < 0 ? -hours : hours);
             break;
         case 'm':
             auto minutes = this.minutes;
-            builder.formattedWrite("%s", minutes < 0 ? -minutes : minutes);
+            writer.formattedWrite(builder, "{:s}", minutes < 0 ? -minutes : minutes);
             break;
         case 's':
             auto seconds = this.seconds;
-            builder.formattedWrite("%s", seconds < 0 ? -seconds : seconds);
+            writer.formattedWrite(builder, "{:s}", seconds < 0 ? -seconds : seconds);
             break;
         case 'i':
             auto milliSecs = this.milliSeconds;
-            builder.formattedWrite("%s", milliSecs < 0 ? -milliSecs : milliSecs);
+            writer.formattedWrite(builder, "{:s}", milliSecs < 0 ? -milliSecs : milliSecs);
             break;
         case 'u':
             auto microSecs = this.microSeconds;
-            builder.formattedWrite("%s", microSecs < 0 ? -microSecs : microSecs);
+            writer.formattedWrite(builder, "{:s}", microSecs < 0 ? -microSecs : microSecs);
             break;
         case 'n':
             auto nanoSecs = this.nanoSeconds;
-            builder.formattedWrite("%s", nanoSecs < 0 ? -nanoSecs : nanoSecs);
+            writer.formattedWrite(builder, "{:s}", nanoSecs < 0 ? -nanoSecs : nanoSecs);
             break;
 
         case 'D':
@@ -344,28 +356,28 @@ export @safe nothrow @nogc:
 
             if (years != 0) {
                 if (this.days_ < 0)
-                    builder.formattedWrite("%s years ago", -years);
+                    writer.formattedWrite(builder, "{:s} years ago", -years);
                 else
-                    builder.formattedWrite("in %s years", years);
+                    writer.formattedWrite(builder, "in {:s} years", years);
             } else if (this.days_ != 0) {
                 if (this.days_ < 0)
-                    builder.formattedWrite("%s days ago", -this.days_);
+                    writer.formattedWrite(builder, "{:s} days ago", -this.days_);
                 else
-                    builder.formattedWrite("in %s days", this.days_);
+                    writer.formattedWrite(builder, "in {:s} days", this.days_);
             } else {
                 auto hours = this.hours;
                 auto minutes = this.minutes;
 
                 if (hours != 0) {
                     if (this.nanoSeconds_ < 0)
-                        builder.formattedWrite("%s hours ago", -hours);
+                        writer.formattedWrite(builder, "{:s} hours ago", -hours);
                     else
-                        builder.formattedWrite("in %s hours", hours);
+                        writer.formattedWrite(builder, "in {:s} hours", hours);
                 } else if (minutes != 0) {
                     if (this.nanoSeconds_ < 0)
-                        builder.formattedWrite("%s minutes ago", -minutes);
+                        writer.formattedWrite(builder, "{:s} minutes ago", -minutes);
                     else
-                        builder.formattedWrite("in %s minutes", minutes);
+                        writer.formattedWrite(builder, "in {:s} minutes", minutes);
                 } else if (this.nanoSeconds_ < 0) {
                     builder ~= "less than a minute ago";
                 } else {
@@ -407,6 +419,386 @@ export @safe nothrow @nogc:
 
         this.format(builder, format.fullFormatSpec);
         return true;
+    }
+
+    ///
+    static bool parse(Input)(scope ref Input input, scope ref Duration output, scope String_UTF8 specification,
+            bool usePercentageEscape = true) {
+        if (specification.length == 0)
+            return false;
+        bool isEscaped, negate;
+
+        if (usePercentageEscape) {
+            foreach (c; specification.byUTF32()) {
+                if (isEscaped) {
+                    isEscaped = false;
+                    if (output.parseValue(input, negate, c))
+                        continue;
+                } else if (c == '%') {
+                    isEscaped = true;
+                    continue;
+                }
+
+                static if (isASCII!Input) {
+                    if (c >= 128 || !input.startsWith([c]))
+                        return false;
+                } else {
+                    if (!input.startsWith([c]))
+                        return false;
+                }
+
+                input.popFront;
+            }
+        } else {
+            foreach (c; specification.byUTF32()) {
+                if (isEscaped) {
+                    isEscaped = false;
+                } else if (c == '\\') {
+                    isEscaped = true;
+                    continue;
+                } else if (output.parseValue(input, negate, c)) {
+                    continue;
+                }
+
+                static if (isASCII!Input) {
+                    if (c >= 128 || !input.startsWith([c]))
+                        return false;
+                } else {
+                    if (!input.startsWith([c]))
+                        return false;
+                }
+
+                input.popFront;
+            }
+        }
+
+        if (negate)
+            output = -output;
+        input = input.save;
+        return true;
+    }
+
+    ///
+    bool parseValue(Input)(scope ref Input input, scope ref bool negate, dchar specification) {
+        import reader = sidero.base.text.format.read;
+
+        long days, hours, minutes, seconds, milliSecs, microSecs, nanoSecs;
+        Input input2;
+        bool gotOne;
+
+        switch (specification) {
+        case 'R':
+            if (input.startsWith("-"c))
+                negate = true;
+            else if (input.startsWith("+"c))
+                negate = false;
+            else
+                return false;
+
+            input.popFront;
+            return true;
+        case 'r':
+            if (input.startsWith("-"c)) {
+                negate = true;
+                input.popFront;
+            }
+            return true;
+
+        case 'a':
+            if (input.startsWith("-"c)) {
+                negate = true;
+                input.popFront;
+            }
+            break;
+        default:
+            break;
+        }
+
+        switch (specification) {
+        case 'a':
+            input2 = input.save;
+            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d} days"), days)) {
+                gotOne = true;
+                input = input2;
+            } else
+                days = 0;
+
+            input2 = input.save.stripLeft;
+            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d} hours"), hours)) {
+                gotOne = true;
+                input = input2;
+            } else
+                hours = 0;
+
+            input2 = input.save.stripLeft;
+            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d} minutes"), minutes)) {
+                gotOne = true;
+                input = input2;
+            } else
+                minutes = 0;
+
+            input2 = input.save.stripLeft;
+            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d} seconds"), seconds)) {
+                gotOne = true;
+                input = input2;
+            } else
+                seconds = 0;
+
+            input2 = input.save.stripLeft;
+            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d} milliseconds"), milliSecs)) {
+                gotOne = true;
+                input = input2;
+            } else
+                milliSecs = 0;
+
+            input2 = input.save.stripLeft;
+            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d} microseconds"), microSecs)) {
+                gotOne = true;
+                input = input2;
+            } else
+                microSecs = 0;
+
+            input2 = input.save.stripLeft;
+            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d} nanoseconds"), nanoSecs)) {
+                gotOne = true;
+                input = input2;
+            } else
+                nanoSecs = 0;
+
+            if (!gotOne && input.stripLeft.startsWith("0")) {
+                input.popFront;
+                gotOne = true;
+            }
+
+            if (gotOne)
+                this += .days(days) + .hours(hours) + .minutes(minutes) + .seconds(seconds) + .milliSeconds(
+                        milliSecs) + .microSeconds(microSecs) + .nanoSeconds(nanoSecs);
+            return gotOne;
+
+        case 'd':
+            input2 = input.save;
+            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), days)) {
+                gotOne = true;
+                input = input2;
+            }
+
+            if (days < 0) {
+                days *= -1;
+                negate = true;
+            }
+
+            if (gotOne)
+                this += .days(days);
+            return gotOne;
+
+        case 'h':
+            input2 = input.save;
+            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), hours)) {
+                gotOne = true;
+                input = input2;
+            }
+
+            if (hours < 0) {
+                hours *= -1;
+                negate = true;
+            }
+
+            if (gotOne)
+                this += .hours(hours);
+            return gotOne;
+        case 'm':
+            input2 = input.save;
+            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), minutes)) {
+                gotOne = true;
+                input = input2;
+            }
+
+            if (minutes < 0) {
+                minutes *= -1;
+                negate = true;
+            }
+
+            if (gotOne)
+                this += .minutes(minutes);
+            return gotOne;
+        case 's':
+            input2 = input.save;
+            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), seconds)) {
+                gotOne = true;
+                input = input2;
+            }
+
+            if (seconds < 0) {
+                seconds *= -1;
+                negate = true;
+            }
+
+            if (gotOne)
+                this += .seconds(seconds);
+            return gotOne;
+        case 'i':
+            input2 = input.save;
+            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), milliSecs)) {
+                gotOne = true;
+                input = input2;
+            }
+
+            if (milliSecs < 0) {
+                milliSecs *= -1;
+                negate = true;
+            }
+
+            if (gotOne)
+                this += .milliSeconds(milliSecs);
+            return gotOne;
+        case 'u':
+            input2 = input.save;
+            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), microSecs)) {
+                gotOne = true;
+                input = input2;
+            }
+
+            if (microSecs < 0) {
+                microSecs *= -1;
+                negate = true;
+            }
+
+            if (gotOne)
+                this += .microSeconds(microSecs);
+            return gotOne;
+        case 'n':
+            input2 = input.save;
+            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), nanoSecs)) {
+                gotOne = true;
+                input = input2;
+            }
+
+            if (nanoSecs < 0) {
+                nanoSecs *= -1;
+                negate = true;
+            }
+
+            if (gotOne)
+                this += .nanoSeconds(nanoSecs);
+            return gotOne;
+
+        case 'D':
+            long years;
+
+            {
+                input2 = input.save;
+                if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d} years ago"), years)) {
+                    gotOne = true;
+                    input = input2;
+
+                    days = cast(long)(years * 365.25);
+                    negate = true;
+                    goto DoneD;
+                }
+
+                input2 = input.save;
+                if (cast(bool)reader.formattedRead(input2, String_UTF8("in {:d} years"), years)) {
+                    gotOne = true;
+                    input = input2;
+
+                    days = cast(long)(years * 365.25);
+                    goto DoneD;
+                }
+            }
+
+            {
+                input2 = input.save;
+                if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d} days ago"), days)) {
+                    gotOne = true;
+                    input = input2;
+
+                    negate = true;
+                    goto DoneD;
+                }
+
+                input2 = input.save;
+                if (cast(bool)reader.formattedRead(input2, String_UTF8("in {:d} days"), days)) {
+                    gotOne = true;
+                    input = input2;
+                    goto DoneD;
+                }
+            }
+
+            {
+                input2 = input.save;
+                if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d} hours ago"), hours)) {
+                    gotOne = true;
+                    input = input2;
+
+                    negate = true;
+                    goto DoneD;
+                }
+
+                input2 = input.save;
+                if (cast(bool)reader.formattedRead(input2, String_UTF8("in {:d} hours"), hours)) {
+                    gotOne = true;
+                    input = input2;
+                    goto DoneD;
+                }
+            }
+
+            {
+                input2 = input.save;
+                if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d} minutes ago"), minutes)) {
+                    gotOne = true;
+                    input = input2;
+
+                    negate = true;
+                    goto DoneD;
+                }
+
+                input2 = input.save;
+                if (cast(bool)reader.formattedRead(input2, String_UTF8("in {:d} minutes"), minutes)) {
+                    gotOne = true;
+                    input = input2;
+                    goto DoneD;
+                }
+            }
+
+            {
+                if (input.startsWith("less than a minute ago")) {
+                    gotOne = true;
+                    input = input["less than a minute ago".length .. $];
+
+                    seconds = 30;
+                    negate = true;
+                    goto DoneD;
+                } else if (input.startsWith("in less than a minute")) {
+                    gotOne = true;
+                    input = input["in less than a minute".length .. $];
+
+                    seconds = 30;
+                    goto DoneD;
+                }
+            }
+
+        DoneD:
+            if (days < 0)
+                days *= -1;
+            if (hours < 0)
+                hours *= -1;
+            if (minutes < 0)
+                minutes *= -1;
+            if (seconds < 0)
+                seconds *= -1;
+
+            if (gotOne)
+                this += .days(days) + .hours(hours) + .minutes(minutes) + .seconds(seconds);
+            return gotOne;
+
+        default:
+            return false;
+        }
+    }
+
+    ///
+    static bool formattedRead(Input)(scope ref Input input, scope ref Duration output, scope FormatSpecifier format) {
+        return parse(input, output, format.fullFormatSpec);
     }
 
     ///
@@ -478,4 +870,17 @@ Duration nanoSeconds(long amount) {
     Duration temp;
     temp.nanoSeconds_ = amount;
     return Duration.init + temp;
+}
+
+unittest {
+    import sidero.base.text.format.write;
+    import sidero.base.text.format.read;
+    import sidero.base.text : String_UTF8;
+
+    Duration d1 = 2.days + 6.microSeconds;
+    auto formatted = d1.format("%a");
+
+    Duration d2;
+    assert(formattedRead(formatted, String_UTF8("{:%a}"), d2));
+    assert(d1 == d2);
 }
