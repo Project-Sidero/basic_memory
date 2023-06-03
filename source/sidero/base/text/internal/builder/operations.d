@@ -136,7 +136,7 @@ mixin template StringBuilderOperations() {
         }
 
         if (iterator !is null)
-            a += iterator.minimumOffsetFromHead;
+            a += iterator.forwards.offsetFromHead;
 
         return ErrorInfo.init;
     }
@@ -149,9 +149,9 @@ mixin template StringBuilderOperations() {
         if (iterator !is null) {
             actualLength = iterator.backwards.offsetFromHead - iterator.forwards.offsetFromHead;
             if (a == ptrdiff_t.max)
-                a = iterator.maximumOffsetFromHead;
+                a = iterator.backwards.offsetFromHead;
             if (b == ptrdiff_t.max)
-                b = iterator.maximumOffsetFromHead;
+                b = iterator.backwards.offsetFromHead;
         } else
             actualLength = blockList.numberOfItems;
 
@@ -181,13 +181,46 @@ mixin template StringBuilderOperations() {
         }
 
         if (iterator !is null) {
-            a += iterator.minimumOffsetFromHead;
+            a += iterator.forwards.offsetFromHead;
 
-            if (b + iterator.minimumOffsetFromHead <= iterator.maximumOffsetFromHead)
-                b += iterator.minimumOffsetFromHead;
+            if (b + iterator.forwards.offsetFromHead <= iterator.backwards.offsetFromHead)
+                b += iterator.forwards.offsetFromHead;
         }
 
         return ErrorInfo.init;
+    }
+
+    unittest {
+        OpTest!Char opTest = OpTest!Char(globalAllocator());
+        enum Text1 = "These be walkin";
+
+        Cursor.Block* a = opTest.blockList.insert(&opTest.blockList.head);
+
+        a.length = Text1.length;
+        foreach (i, v; Text1)
+            a.get()[i] = v;
+
+        opTest.blockList.numberOfItems = Text1.length;
+        auto iterator1 = opTest.iteratorList.newIterator(&opTest.blockList);
+        assert(iterator1.forwards.offsetFromHead == 0);
+        assert(iterator1.backwards.offsetFromHead == 15);
+
+        iterator1.popFront;
+        iterator1.popBack;
+        assert(iterator1.forwards.offsetFromHead == 1);
+        assert(iterator1.backwards.offsetFromHead == 14);
+
+        auto iterator2 = opTest.newIterator(iterator1, 0, ptrdiff_t.max);
+        assert(iterator2.forwards.offsetFromHead == 1);
+        assert(iterator2.backwards.offsetFromHead == 14);
+
+        auto iterator3 = opTest.newIterator(iterator1, 1, 12);
+        assert(iterator3.forwards.offsetFromHead == 2);
+        assert(iterator3.backwards.offsetFromHead == 13);
+
+        opTest.iteratorList.rcIteratorInternal(false, iterator3);
+        opTest.iteratorList.rcIteratorInternal(false, iterator2);
+        opTest.iteratorList.rcIteratorInternal(false, iterator1);
     }
 
     Cursor cursorFor(scope Iterator* iterator, out size_t maximumOffsetFromHead, size_t offset = 0) scope @trusted {
@@ -207,7 +240,7 @@ mixin template StringBuilderOperations() {
         if (iterator !is null) {
             offset += iterator.forwards.offsetFromHead;
             maximumOffsetFromHead = iterator.backwards.offsetFromHead;
-            minimumOffsetFromHead = iterator.minimumOffsetFromHead;
+            minimumOffsetFromHead = iterator.forwards.offsetFromHead;
         } else
             maximumOffsetFromHead = blockList.numberOfItems;
 
@@ -506,7 +539,7 @@ mixin template StringBuilderOperations() {
 
                 bool foundBlockForwards = iterator.forwards.block is &opTest.blockList.head ||
                     iterator.forwards.block is &opTest.blockList.tail,
-                    foundBlockBackwards = iterator.backwards.block is &opTest.blockList.head ||
+                foundBlockBackwards = iterator.backwards.block is &opTest.blockList.head ||
                     iterator.backwards.block is &opTest.blockList.tail;
                 foreach (Block* block; opTest.blockList) {
                     if (iterator.forwards.block is block) {
@@ -1120,82 +1153,84 @@ struct OpTest(Char) {
     void debugPosition(scope Block* cursorBlock, size_t offsetIntoBlock) @trusted {
         version (D_BetterC) {
         } else {
-            version(unittest) debug {
-                try {
-                    import std.stdio;
+            version (unittest)
+                debug {
+                    try {
+                        import std.stdio;
 
-                    Block* block = &blockList.head;
-                    size_t offsetFromHead;
+                        Block* block = &blockList.head;
+                        size_t offsetFromHead;
 
-                    writeln("====================");
+                        writeln("====================");
 
-                    while (block !is null) {
-                        if (block is cursorBlock)
-                            write(">");
-                        writef!"%s:%X@(%s)"(offsetFromHead, block, *block);
-                        if (block is cursorBlock)
-                            writef!":%s<"(offsetIntoBlock);
-                        write("    [[[", cast(char[])block.get(), "]]]\n");
+                        while (block !is null) {
+                            if (block is cursorBlock)
+                                write(">");
+                            writef!"%s:%X@(%s)"(offsetFromHead, block, *block);
+                            if (block is cursorBlock)
+                                writef!":%s<"(offsetIntoBlock);
+                            write("    [[[", cast(char[])block.get(), "]]]\n");
 
-                        offsetFromHead += block.length;
-                        block = block.next;
-                    }
-
-                    writeln;
-
-                    foreach (iterator; iteratorList) {
-                        try {
-                            writef!"%X@"(iterator);
-                            foreach (v; (*iterator).tupleof)
-                                write(" ", v);
-                            writeln;
-                        } catch (Exception) {
+                            offsetFromHead += block.length;
+                            block = block.next;
                         }
+
+                        writeln;
+
+                        foreach (iterator; iteratorList) {
+                            try {
+                                writef!"%X@"(iterator);
+                                foreach (v; (*iterator).tupleof)
+                                    write(" ", v);
+                                writeln;
+                            } catch (Exception) {
+                            }
+                        }
+                    } catch (Exception) {
                     }
-                } catch (Exception) {
                 }
-            }
         }
     }
 
     void debugPosition(scope Iterator* iterator) @trusted {
         version (D_BetterC) {
         } else {
-            version(unittest) debug {
-                try {
-                    import std.stdio;
+            version (unittest)
+                debug {
+                    try {
+                        import std.stdio;
 
-                    Block* block = &blockList.head;
-                    size_t offsetFromHead;
+                        Block* block = &blockList.head;
+                        size_t offsetFromHead;
 
-                    writeln("====================");
+                        writeln("====================");
 
-                    while (block !is null) {
-                        if (iterator !is null && block is iterator.forwards.block)
-                            write(iterator.forwards.offsetIntoBlock, ">");
-                        writef!"%s:%X@(%s)"(offsetFromHead, block, *block);
-                        if (iterator !is null && block is iterator.backwards.block)
-                            writef!":%s<"(iterator.backwards.offsetIntoBlock);
-                        write("    [[[", cast(char[])block.get(), "]]]\n");
+                        while (block !is null) {
+                            if (iterator !is null && block is iterator.forwards.block)
+                                write(iterator.forwards.offsetIntoBlock, ">");
+                            writef!"%s:%X@(%s)"(offsetFromHead, block, *block);
+                            if (iterator !is null && block is iterator.backwards.block)
+                                writef!":%s<"(iterator.backwards.offsetIntoBlock);
+                            write("    [[[", cast(char[])block.get(), "]]]\n");
 
-                        offsetFromHead += block.length;
-                        block = block.next;
-                    }
-
-                    writeln;
-
-                    foreach (iterator; iteratorList) {
-                        try {
-                            writef!"%X@"(iterator);
-                            foreach (v; (*iterator).tupleof)
-                                write(" ", v);
-                            writeln;
-                        } catch (Exception) {
+                            offsetFromHead += block.length;
+                            block = block.next;
                         }
+
+                        writeln;
+
+                        foreach (iterator; iteratorList) {
+                            try {
+                                writef!"%X@"(iterator);
+                                foreach (v; (*iterator).tupleof)
+                                    write(" ", v);
+                                writeln;
+                            } catch (Exception) {
+                            }
+                        }
+                    } catch (Exception) {
                     }
-                } catch (Exception) {
                 }
-            }
         }
     }
 

@@ -127,6 +127,8 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
         BlockListImpl!Char* blockList;
         ptrdiff_t refCount;
 
+        bool primedBackwards;
+
         static if (is(CustomIteratorContents == void)) {
         } else {
             mixin CustomIteratorContents;
@@ -846,7 +848,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
         }
 
         bool emptyInternal() {
-            size_t actualBack = backwards.offsetFromHead + 1;
+            const actualBack = backwards.offsetFromHead + 1;
             return forwards.offsetFromHead + 1 >= actualBack || actualBack <= forwards.offsetFromHead + 1;
         }
 
@@ -858,6 +860,8 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
         }
 
         Char backInternal() {
+            primeBackwardsInternal;
+
             if (!backwards.inData)
                 backwards.advanceBackwards(0, forwards.offsetFromHead, maximumOffsetFromHead, true, true);
 
@@ -870,7 +874,16 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
             forwards.advanceForward(1, min(backwards.offsetFromHead + 1, maximumOffsetFromHead), true);
         }
 
+        void primeBackwardsInternal() {
+            if (!this.primedBackwards && backwards.inData) {
+                backwards.advanceBackwards(1, forwards.offsetFromHead, maximumOffsetFromHead, true, true);
+            }
+
+            primedBackwards = true;
+        }
+
         void popBackInternal() {
+            primeBackwardsInternal;
             backwards.advanceBackwards(1, forwards.offsetFromHead, maximumOffsetFromHead, true, true);
         }
     }

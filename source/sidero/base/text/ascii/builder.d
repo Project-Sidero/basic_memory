@@ -303,6 +303,22 @@ nothrow @safe:
     }
 
     ///
+    unittest {
+        auto builder = typeof(this)("Smile! You don't want to see my other side.");
+        builder.popFront;
+        builder.popBack;
+
+        assert(builder.length == 41);
+        assert(builder.front == 'm');
+        assert(builder.back == 'e');
+
+        builder = builder.save;
+        assert(builder.length == 41);
+        assert(builder.front == 'm');
+        assert(builder.back == 'e');
+    }
+
+    ///
     alias opSlice = save;
 
     ///

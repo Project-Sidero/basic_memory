@@ -94,6 +94,10 @@ struct String_UTF16 {
                 }
                 this.iterator.backwardItems = this.iterator.backwardBuffer[0 .. oldIterator.backwardItems.length];
 
+                this.iterator.amountFromInputForwards = oldIterator.amountFromInputForwards;
+                this.iterator.amountFromInputBackwards = oldIterator.amountFromInputBackwards;
+                this.iterator.primedForwardsNeedPop = oldIterator.primedForwardsNeedPop;
+                this.iterator.primedBackwardsNeedPop = oldIterator.primedBackwardsNeedPop;
                 this.iterator.primedForwards = oldIterator.primedForwards;
                 this.iterator.primedBackwards = oldIterator.primedBackwards;
             }
@@ -140,6 +144,10 @@ struct String_UTF16 {
                 }
                 this.iterator.backwardItems = this.iterator.backwardBuffer[0 .. oldIterator.backwardItems.length];
 
+                this.iterator.amountFromInputForwards = oldIterator.amountFromInputForwards;
+                this.iterator.amountFromInputBackwards = oldIterator.amountFromInputBackwards;
+                this.iterator.primedForwardsNeedPop = oldIterator.primedForwardsNeedPop;
+                this.iterator.primedBackwardsNeedPop = oldIterator.primedBackwardsNeedPop;
                 this.iterator.primedForwards = oldIterator.primedForwards;
                 this.iterator.primedBackwards = oldIterator.primedBackwards;
             }

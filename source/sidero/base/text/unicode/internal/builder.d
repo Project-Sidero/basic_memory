@@ -642,6 +642,9 @@ struct UTF_State(Char) {
     mixin template CustomIteratorContents() {
         void[4] forwardBuffer, backwardBuffer;
         void[] forwardItems, backwardItems;
+        bool primedForwards, primedBackwardsUTF;
+        bool primedForwardsNeedPop, primedBackwardsNeedPop;
+        size_t amountFromInputForwards, amountFromInputBackwards;
 
         bool emptyUTF() {
             blockList.mutex.pureLock;
@@ -656,15 +659,16 @@ struct UTF_State(Char) {
             scope (exit)
                 blockList.mutex.unlock;
 
+            const canRefill = !this.emptyInternal;
             const needRefill = this.forwardItems.length == 0;
-            const needToUseOtherBuffer = this.emptyInternal && needRefill && this.backwardItems.length > 0;
+            const needToUseOtherBuffer = !canRefill && needRefill && this.backwardItems.length > 0;
 
             if (needToUseOtherBuffer) {
                 // take first in backwards buffer
                 assert(this.backwardItems.length > 0);
                 return (cast(TargetChar[])this.backwardItems)[0];
-            } else if (needRefill) {
-                popFrontInternalUTF!TargetChar;
+            } else if (!this.primedForwards) {
+                primeForwardsUTF!TargetChar;
             }
 
             // take first in forwards buffer
@@ -677,15 +681,16 @@ struct UTF_State(Char) {
             scope (exit)
                 blockList.mutex.unlock;
 
+            const canRefill = !this.emptyInternal;
             const needRefill = this.backwardItems.length == 0;
-            const needToUseOtherBuffer = this.emptyInternal && this.forwardItems.length > 0 && needRefill;
+            const needToUseOtherBuffer = !canRefill && needRefill && this.forwardItems.length > 0;
 
             if (needToUseOtherBuffer) {
                 // take first in backwards buffer
                 assert(this.forwardItems.length > 0);
                 return (cast(TargetChar[])this.forwardItems)[$ - 1];
-            } else if (needRefill) {
-                popBackInternalUTF!TargetChar;
+            } else if (!primedBackwardsUTF) {
+                primeBackwardsUTF!TargetChar;
             }
 
             // take first in forwards buffer
@@ -709,14 +714,13 @@ struct UTF_State(Char) {
             popBackInternalUTF!TargetChar;
         }
 
-        void popFrontInternalUTF(TargetChar)() @trusted {
+        void primeForwardsUTF(TargetChar)() @trusted {
             import sidero.base.encoding.utf;
 
             const needRefill = this.forwardItems.length == 0;
             const needToUseOtherBuffer = this.emptyInternal && this.forwardItems.length == 0 && this.backwardItems.length > 0;
 
             Cursor forwardsTempDecodeCursor = forwards;
-            size_t advance;
 
             bool emptyInternal() {
                 size_t actualBack = backwards.offsetFromHead + 1;
@@ -746,13 +750,14 @@ struct UTF_State(Char) {
                 static if (is(Char == TargetChar)) {
                     // copy straight
 
-                    while (amountFilled < charBuffer.length && !emptyInternal()) {
+                    if (!emptyInternal()) {
                         charBuffer[amountFilled++] = frontInternal();
                         popFrontInternal();
-                        advance++;
+                        this.amountFromInputForwards = 1;
                     }
                 } else static if (is(Char == char)) {
-                    dchar decoded = decode(&emptyInternal, &frontInternal, &popFrontInternal, advance);
+                    this.amountFromInputForwards = 0;
+                    dchar decoded = decode(&emptyInternal, &frontInternal, &popFrontInternal, this.amountFromInputForwards);
 
                     static if (is(TargetChar == wchar)) {
                         amountFilled = encodeUTF16(decoded, charBuffer);
@@ -760,7 +765,8 @@ struct UTF_State(Char) {
                         charBuffer[amountFilled++] = decoded;
                     }
                 } else static if (is(Char == wchar)) {
-                    dchar decoded = decode(&emptyInternal, &frontInternal, &popFrontInternal, advance);
+                    this.amountFromInputForwards = 0;
+                    dchar decoded = decode(&emptyInternal, &frontInternal, &popFrontInternal, this.amountFromInputForwards);
 
                     static if (is(TargetChar == char)) {
                         amountFilled = encodeUTF8(decoded, charBuffer);
@@ -769,7 +775,7 @@ struct UTF_State(Char) {
                     }
                 } else static if (is(Char == dchar)) {
                     dchar decoded = this.frontInternal;
-                    advance = 1;
+                    this.amountFromInputForwards = 1;
 
                     static if (is(TargetChar == char)) {
                         amountFilled = encodeUTF8(decoded, charBuffer);
@@ -780,25 +786,52 @@ struct UTF_State(Char) {
 
                 this.forwardBuffer = charBuffer;
                 this.forwardItems = (cast(TargetChar[])this.forwardBuffer)[0 .. amountFilled];
+                this.primedForwardsNeedPop = true;
             } else {
                 this.forwardItems = (cast(TargetChar[])this.forwardItems)[1 .. $];
             }
 
-            if (advance > 0)
-                forwards.advanceForward(advance, maximumOffsetFromHead, true);
+            this.primedForwards = true;
         }
 
-        void popBackInternalUTF(TargetChar)() @trusted {
+        void popFrontInternalUTF(TargetChar)() @trusted {
+            foreach (_; 0 .. 1 + !this.primedForwards) {
+                if (this.primedForwardsNeedPop) {
+                    forwards.advanceForward(this.amountFromInputForwards, maximumOffsetFromHead, true);
+                    this.primedForwardsNeedPop = false;
+                }
+
+                const needRefill = this.forwardItems.length == 0;
+                const needToUseOtherBuffer = this.emptyInternal && this.forwardItems.length == 0 && this.backwardItems.length > 0;
+
+                if (needToUseOtherBuffer) {
+                    auto items = cast(Char[])this.backwardItems;
+                    assert(items.length > 0);
+                    this.backwardItems = cast(void[])items[1 .. $];
+                } else if (this.forwardItems.length > 0) {
+                    auto items = cast(Char[])this.forwardItems;
+                    this.forwardItems = cast(void[])items[1 .. $];
+                }
+
+                if (this.forwardItems.length == 0 && !this.emptyInternal) {
+                    primeForwardsUTF!TargetChar();
+                }
+            }
+        }
+
+        void primeBackwardsUTF(TargetChar)() @trusted {
             import sidero.base.encoding.utf;
 
+            primeBackwardsInternal;
+
+            const canRefill = !this.emptyInternal;
             const needRefill = this.backwardItems.length == 0;
-            const needToUseOtherBuffer = this.emptyInternal && this.forwardItems.length > 0 && needRefill;
+            const needToUseOtherBuffer = !canRefill && needRefill && this.forwardItems.length > 0;
 
             Cursor backwardsTempDecodeCursor = backwards;
-            size_t advance;
 
             bool emptyInternal() {
-                size_t actualBack = backwardsTempDecodeCursor.offsetFromHead + 1;
+                const actualBack = backwardsTempDecodeCursor.offsetFromHead + 1;
                 return forwards.offsetFromHead + 1 >= actualBack || actualBack <= forwards.offsetFromHead + 1;
             }
 
@@ -823,9 +856,9 @@ struct UTF_State(Char) {
                 static if (is(Char == TargetChar)) {
                     // copy straight
 
-                    while (amountFilled < charBuffer.length && !emptyInternal()) {
+                    if (!emptyInternal()) {
                         amountFilled++;
-                        advance++;
+                        this.amountFromInputBackwards = 1;
 
                         charBuffer[$ - amountFilled] = backInternal();
 
@@ -834,7 +867,8 @@ struct UTF_State(Char) {
 
                     offsetFilled = charBuffer.length - amountFilled;
                 } else static if (is(Char == char)) {
-                    dchar decoded = decodeFromEnd(&emptyInternal, &backInternal, &popBackInternal, advance);
+                    this.amountFromInputBackwards = 0;
+                    dchar decoded = decodeFromEnd(&emptyInternal, &backInternal, &popBackInternal, this.amountFromInputBackwards);
 
                     static if (is(TargetChar == wchar)) {
                         amountFilled = encodeUTF16(decoded, charBuffer);
@@ -842,7 +876,8 @@ struct UTF_State(Char) {
                         charBuffer[amountFilled++] = decoded;
                     }
                 } else static if (is(Char == wchar)) {
-                    dchar decoded = decodeFromEnd(&emptyInternal, &backInternal, &popBackInternal, advance);
+                    this.amountFromInputBackwards = 0;
+                    dchar decoded = decodeFromEnd(&emptyInternal, &backInternal, &popBackInternal, this.amountFromInputBackwards);
 
                     static if (is(TargetChar == char)) {
                         amountFilled = encodeUTF8(decoded, charBuffer);
@@ -851,7 +886,7 @@ struct UTF_State(Char) {
                     }
                 } else static if (is(Char == dchar)) {
                     dchar decoded = backInternal();
-                    advance = 1;
+                    this.amountFromInputBackwards = 1;
 
                     static if (is(TargetChar == char)) {
                         amountFilled = encodeUTF8(decoded, charBuffer);
@@ -862,12 +897,37 @@ struct UTF_State(Char) {
 
                 this.backwardBuffer = charBuffer;
                 this.backwardItems = (cast(TargetChar[])this.backwardBuffer)[offsetFilled .. offsetFilled + amountFilled];
+                this.primedBackwardsNeedPop = true;
             } else {
                 this.backwardItems = (cast(TargetChar[])this.backwardItems)[0 .. $ - 1];
             }
 
-            if (advance > 0) {
-                backwards.advanceBackwards(advance, forwards.offsetFromHead, maximumOffsetFromHead, true, true);
+            this.primedBackwardsUTF = true;
+        }
+
+        void popBackInternalUTF(TargetChar)() @trusted {
+            foreach (_; 0 .. 1 + !this.primedBackwardsUTF) {
+                if (this.primedBackwardsNeedPop) {
+                    backwards.advanceBackwards(this.amountFromInputBackwards, forwards.offsetFromHead, maximumOffsetFromHead, true, true);
+                    this.primedBackwardsNeedPop = false;
+                }
+
+                const canRefill = !this.emptyInternal;
+                const needRefill = this.backwardItems.length == 0;
+                const needToUseOtherBuffer = !canRefill && needRefill && this.forwardItems.length > 0;
+
+                if (needToUseOtherBuffer) {
+                    auto items = cast(Char[])this.forwardItems;
+                    assert(items.length > 0);
+                    this.forwardItems = cast(void[])items[0 .. $ - 1];
+                } else if (this.backwardItems.length > 0) {
+                    auto items = cast(Char[])this.backwardItems;
+                    this.backwardItems = cast(void[])items[0 .. $ - 1];
+                }
+
+                if (this.backwardItems.length == 0 && !this.emptyInternal) {
+                    primeBackwardsUTF!TargetChar();
+                }
             }
         }
     }
