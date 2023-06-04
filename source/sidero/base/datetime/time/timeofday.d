@@ -411,6 +411,7 @@ export @safe nothrow @nogc:
             break;
 
         case 'u':
+            // micro seconds
             auto msec = this.nanoSeconds_ / 1_000;
 
             if (msec < 10)
@@ -427,6 +428,7 @@ export @safe nothrow @nogc:
             break;
 
         case 'v':
+            // milli seconds
             const working = this.nanoSeconds_ / 1_000_000;
 
             if (working < 10)
@@ -460,6 +462,170 @@ export @safe nothrow @nogc:
 
         this.format(builder, format.fullFormatSpec);
         return true;
+    }
+
+    ///
+    static bool parse(Input)(scope ref Input input, scope ref Duration output, scope String_UTF8 specification,
+            bool usePercentageEscape = true) {
+        if (specification.length == 0)
+            return false;
+        bool isEscaped;
+
+        if (usePercentageEscape) {
+            foreach (c; specification.byUTF32()) {
+                if (isEscaped) {
+                    isEscaped = false;
+                    if (output.parseValue(input, c))
+                        continue;
+                } else if (c == '%') {
+                    isEscaped = true;
+                    continue;
+                }
+
+                static if (isASCII!Input) {
+                    if (c >= 128 || !input.startsWith([c]))
+                        return false;
+                } else {
+                    if (!input.startsWith([c]))
+                        return false;
+                }
+
+                input.popFront;
+            }
+        } else {
+            foreach (c; specification.byUTF32()) {
+                if (isEscaped) {
+                    isEscaped = false;
+                } else if (c == '\\') {
+                    isEscaped = true;
+                    continue;
+                } else if (output.parseValue(input, c)) {
+                    continue;
+                }
+
+                static if (isASCII!Input) {
+                    if (c >= 128 || !input.startsWith([c]))
+                        return false;
+                } else {
+                    if (!input.startsWith([c]))
+                        return false;
+                }
+
+                input.popFront;
+            }
+        }
+
+        input = input.save;
+        return true;
+    }
+
+    ///
+    bool parseValue(Input)(scope ref Input input, dchar specification) {
+        import reader = sidero.base.text.format.read;
+
+        Input input2;
+        long hour, minute, second, nanoSecs;
+
+        switch (specification) {
+        case 'a':
+            if (input.startsWith("am")) {
+                if (this.hour_ >= 12)
+                    this.hour_ -= 12;
+                input = input[2 .. $];
+                return true;
+            } else if (input.startsWith("pm")) {
+                if (this.hour_ < 12)
+                    this.hour_ += 12;
+                input = input[2 .. $];
+                return true;
+            } else
+                return false;
+        case 'A':
+            if (input.startsWith("AM")) {
+                if (this.hour_ >= 12)
+                    this.hour_ -= 12;
+                input = input[2 .. $];
+                return true;
+            } else if (input.startsWith("PM")) {
+                if (this.hour_ < 12)
+                    this.hour_ += 12;
+                input = input[2 .. $];
+                return true;
+            } else
+                return false;
+
+        case 'g':
+        case 'h':
+            input2 = input.save;
+            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), hour) && hour < 12 && hour >= 0) {
+                input = input2;
+                this.hour_ = cast(ubyte)hour;
+                return true;
+            } else
+                return false;
+        case 'G':
+        case 'H':
+            input2 = input.save;
+            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), hour) && hour < 24 && hour >= 0) {
+                input = input2;
+                this.hour_ = cast(ubyte)hour;
+                return true;
+            } else
+                return false;
+
+        case 'm':
+            input2 = input.save;
+            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), minute) && minute < 60 && minute >= 0) {
+                input = input2;
+                this.minute_ = cast(ubyte)minute;
+                return true;
+            } else
+                return false;
+
+        case 's':
+            input2 = input.save;
+            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), second) && second < 60 && second >= 0) {
+                input = input2;
+                this.second_ = cast(ubyte)second;
+                return true;
+            } else
+                return false;
+
+        case 'u':
+            input2 = input.save;
+            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), nanoSecs) && nanoSecs < 1_000_000 && nanoSecs >= 0) {
+                input = input2;
+                this.advanceNanoSeconds(cast(uint)(nanoSecs * 1_000));
+                return true;
+            } else
+                return false;
+
+        case 'v':
+            input2 = input.save;
+            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), nanoSecs) && nanoSecs < 1_000 && nanoSecs >= 0) {
+                input = input2;
+                this.advanceNanoSeconds(nanoSecs * 1_000_000);
+                return true;
+            } else
+                return false;
+
+        case 'V':
+            input2 = input.save;
+            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), nanoSecs) && nanoSecs < 100 && nanoSecs >= 0) {
+                input = input2;
+                this.nanoSeconds_ = cast(uint)nanoSecs;
+                return true;
+            } else
+                return false;
+
+        default:
+            return false;
+        }
+    }
+
+    ///
+    static bool formattedRead(Input)(scope ref Input input, scope ref TimeOfDay output, scope FormatSpecifier format) {
+        return parse(input, output, format.fullFormatSpec);
     }
 
     /// midnight

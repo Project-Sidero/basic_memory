@@ -434,27 +434,117 @@ export @safe nothrow @nogc:
     }
 
     ///
+    static bool parse(Input)(scope ref Input input, scope ref TimeZone output, scope String_UTF8 specification,
+            bool usePercentageEscape = true) {
+        if (specification.length == 0)
+            return false;
+        bool isEscaped;
+
+        if (usePercentageEscape) {
+            foreach (c; specification.byUTF32()) {
+                if (isEscaped) {
+                    isEscaped = false;
+                    if (output.parseValue(input, c))
+                        continue;
+                } else if (c == '%') {
+                    isEscaped = true;
+                    continue;
+                }
+
+                static if (isASCII!Input) {
+                    if (c >= 128 || !input.startsWith([c]))
+                        return false;
+                } else {
+                    if (!input.startsWith([c]))
+                        return false;
+                }
+
+                input.popFront;
+            }
+        } else {
+            foreach (c; specification.byUTF32()) {
+                if (isEscaped) {
+                    isEscaped = false;
+                } else if (c == '\\') {
+                    isEscaped = true;
+                    continue;
+                } else if (output.parseValue(input, c)) {
+                    continue;
+                }
+
+                static if (isASCII!Input) {
+                    if (c >= 128 || !input.startsWith([c]))
+                        return false;
+                } else {
+                    if (!input.startsWith([c]))
+                        return false;
+                }
+
+                input.popFront;
+            }
+        }
+
+        input = input.save;
+        return true;
+    }
+
+    ///
+    bool parseValue(Input)(scope ref Input input, dchar specification) {
+        switch (specification) {
+        case 'e':
+            // Windows maxes out at 3 spaces, so we'll check up to 4
+            // IANA has no spaces
+
+            size_t lastLength;
+            bool gotIt;
+
+            foreach (_; 0 .. 4) {
+                ptrdiff_t index = input[lastLength .. $].indexOf(" "c);
+
+                Input sliced;
+                if (index < 0)
+                    sliced = input.save;
+                else
+                    sliced = input[0 .. index];
+
+                lastLength = sliced.length + 1;
+                sliced = sliced.stripLeft;
+
+                if (sliced.length > 0) {
+                    static if (isBuilderString!Input) {
+                        auto got = TimeZone.from(sliced.asReadOnly());
+                    } else {
+                        auto got = TimeZone.from(sliced);
+                    }
+
+                    if (got) {
+                        this = got.get;
+                        gotIt = true;
+                    }
+                }
+
+                if (lastLength >= input.length)
+                    break;
+            }
+
+            return gotIt;
+        default:
+            return false;
+        }
+    }
+
+    ///
+    static bool formattedRead(Input)(scope ref Input input, scope ref TimeZone output, scope FormatSpecifier format) {
+        return parse(input, output, format.fullFormatSpec);
+    }
+
+    ///
     static Result!TimeZone local() @trusted {
         import sidero.base.datetime.cldr;
         import sidero.base.system : EnvironmentVariables;
-        import core.stdc.time;
+        import sidero.base.datetime.time.clock;
 
         mutex.pureLock;
-
-        long currentYear;
-
-        {
-            const yearAsCTime = time(null);
-
-            const got = gmtime(&yearAsCTime);
-
-            if (got is null) {
-                mutex.unlock;
-                return typeof(return)(NoLocalYearException);
-            }
-
-            currentYear = got.tm_year + 1900;
-        }
 
         {
             auto tzVar = EnvironmentVariables[String_UTF8("TZ\0")];
@@ -481,7 +571,7 @@ export @safe nothrow @nogc:
                     // try to load via IANA tz or Windows
                     mutex.unlock;
 
-                    auto got2 = TimeZone.from(tzVar, currentYear);
+                    auto got2 = TimeZone.from(tzVar, currentYear());
                     if (got2)
                         return got2;
                     else
@@ -505,14 +595,14 @@ export @safe nothrow @nogc:
                     auto got2 = findIANATimeZone(String_UTF8(ianaName));
 
                     if (got2) {
-                        auto got3 = got2.forYear(currentYear);
+                        auto got3 = got2.forYear(currentYear());
                         mutex.unlock;
                         return got3;
                     }
                 }
             }
 
-            auto got2 = got.forYear(currentYear);
+            auto got2 = got.forYear(currentYear());
             mutex.unlock;
             return got2;
         } else version (Posix) {
@@ -523,7 +613,7 @@ export @safe nothrow @nogc:
                 return typeof(return)(got.getError);
             }
 
-            auto got2 = got.forYear(currentYear);
+            auto got2 = got.forYear(currentYear());
             mutex.unlock;
             return got2;
         } else
@@ -533,6 +623,82 @@ export @safe nothrow @nogc:
     }
 
     /// Supports Windows and IANA names
+    static Result!TimeZone from(scope String_UTF8.LiteralType wantedName) {
+        import sidero.base.datetime.time.clock;
+
+        scope String_UTF8 tempWanted;
+        tempWanted.__ctor(wantedName);
+        return from(tempWanted, currentYear());
+    }
+
+    /// Ditto
+    static Result!TimeZone from(scope String_UTF16.LiteralType wantedName) {
+        import sidero.base.datetime.time.clock;
+
+        scope String_UTF16 tempWanted;
+        tempWanted.__ctor(wantedName);
+        return from(tempWanted, currentYear());
+    }
+
+    /// Ditto
+    static Result!TimeZone from(scope String_UTF32.LiteralType wantedName) {
+        import sidero.base.datetime.time.clock;
+
+        scope String_UTF32 tempWanted;
+        tempWanted.__ctor(wantedName);
+        return from(tempWanted, currentYear());
+    }
+
+    /// Ditto
+    static Result!TimeZone from(scope String_ASCII wantedName) @trusted {
+        import sidero.base.datetime.time.clock;
+
+        return from(String_UTF8(cast(string)wantedName.unsafeGetLiteral), currentYear());
+    }
+
+    /// Ditto
+    static Result!TimeZone from(scope String_UTF8 wantedName) {
+        import sidero.base.datetime.time.clock;
+
+        return from(wantedName, currentYear());
+    }
+
+    /// Ditto
+    static Result!TimeZone from(scope String_UTF16 wantedName) {
+        import sidero.base.datetime.time.clock;
+
+        return from(wantedName, currentYear());
+    }
+
+    /// Ditto
+    static Result!TimeZone from(scope String_UTF32 wantedName) {
+        import sidero.base.datetime.time.clock;
+
+        return from(wantedName, currentYear());
+    }
+
+    /// Ditto
+    static Result!TimeZone from(scope String_UTF8.LiteralType wantedName, long year) {
+        scope String_UTF8 tempWanted;
+        tempWanted.__ctor(wantedName);
+        return from(tempWanted, year);
+    }
+
+    /// Ditto
+    static Result!TimeZone from(scope String_UTF16.LiteralType wantedName, long year) {
+        scope String_UTF16 tempWanted;
+        tempWanted.__ctor(wantedName);
+        return from(tempWanted, year);
+    }
+
+    /// Ditto
+    static Result!TimeZone from(scope String_UTF32.LiteralType wantedName, long year) {
+        scope String_UTF32 tempWanted;
+        tempWanted.__ctor(wantedName);
+        return from(tempWanted, year);
+    }
+
+    /// Ditto
     static Result!TimeZone from(scope String_UTF8 wantedName, long year) @trusted {
         import sidero.base.datetime.cldr;
 

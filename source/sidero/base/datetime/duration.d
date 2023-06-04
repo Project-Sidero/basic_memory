@@ -478,8 +478,7 @@ export @safe nothrow @nogc:
         return true;
     }
 
-    ///
-    bool parseValue(Input)(scope ref Input input, scope ref bool negate, dchar specification) {
+    private bool parseValue(Input)(scope ref Input input, scope ref bool negate, dchar specification) {
         import reader = sidero.base.text.format.read;
 
         long days, hours, minutes, seconds, milliSecs, microSecs, nanoSecs;

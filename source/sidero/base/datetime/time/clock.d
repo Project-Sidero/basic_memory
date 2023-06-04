@@ -69,6 +69,11 @@ DateTime!GregorianDate accurateDateTime() @trusted {
     return ret;
 }
 
+/// Get the current year
+long currentYear() {
+    return accurateDateTime().year;
+}
+
 version (Windows) {
     import core.sys.windows.winbase : FILETIME, SYSTEMTIME, FileTimeToSystemTime;
 

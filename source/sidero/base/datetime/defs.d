@@ -517,15 +517,7 @@ export @safe nothrow @nogc:
             } else {
                 auto gDateTime = this.asGregorian();
                 auto bias = this.timezone_.currentSecondsBias(gDateTime);
-
-                TimeOfDay tod = TimeOfDay(0, 0, 0);
-                tod.advanceSeconds(bias < 0 ? -bias : bias);
-
-                if (bias < 0)
-                    builder ~= "-";
-
-                auto seconds = tod.totalSeconds;
-                writer.formattedWrite(builder, "{:s}", seconds);
+                writer.formattedWrite(builder, "{:s}", bias);
             }
             return true;
 
@@ -563,6 +555,133 @@ export @safe nothrow @nogc:
 
         this.format(builder, format.fullFormatSpec, usePercentageEscape);
         return true;
+    }
+
+    private alias PI = parse!StringBuilder_UTF8; // just to make sure it all compiles
+
+    ///
+    static bool parse(Input)(scope ref Input input, scope ref DateTime output, scope String_UTF8 specification,
+            bool usePercentageEscape = true) {
+        if (specification.length == 0)
+            return false;
+        bool isEscaped;
+
+        if (usePercentageEscape) {
+            foreach (c; specification.byUTF32()) {
+                if (isEscaped) {
+                    isEscaped = false;
+                    if (output.parseValue(input, c))
+                        continue;
+                } else if (c == '%') {
+                    isEscaped = true;
+                    continue;
+                }
+
+                static if (isASCII!Input) {
+                    if (c >= 128 || !input.startsWith([c]))
+                        return false;
+                } else {
+                    if (!input.startsWith([c]))
+                        return false;
+                }
+
+                input.popFront;
+            }
+        } else {
+            foreach (c; specification.byUTF32()) {
+                if (isEscaped) {
+                    isEscaped = false;
+                } else if (c == '\\') {
+                    isEscaped = true;
+                    continue;
+                } else if (output.parseValue(input, c)) {
+                    continue;
+                }
+
+                static if (isASCII!Input) {
+                    if (c >= 128 || !input.startsWith([c]))
+                        return false;
+                } else {
+                    if (!input.startsWith([c]))
+                        return false;
+                }
+
+                input.popFront;
+            }
+        }
+
+        input = input.save;
+        return true;
+    }
+
+    ///
+    bool parseValue(Input)(scope ref Input input, dchar specification) {
+        import reader = sidero.base.text.format.read;
+
+        Input input2;
+
+        switch (specification) {
+        case 'p':
+        case 'P':
+        case 'T':
+            if (input.startsWith("Z")) {
+                input = input[1 .. $];
+                this.timezone_ = TimeZone.from(0);
+                return true;
+            } else if (input.length >= 4) {
+                long hours, seconds;
+
+                input2 = input[0 .. 2];
+                if (!cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), hours) || !input2.empty || hours >= 24)
+                    return false;
+
+                input2 = input[2 .. 4];
+                if (!cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), seconds) || !input2.empty || seconds >= 60)
+                    return false;
+
+                const bias = (hours * 60) + seconds;
+                this.timezone_ = TimeZone.from(bias);
+                return true;
+            } else
+                return false;
+
+        case 'Z':
+            input2 = input.save;
+            long bias;
+
+            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), bias)) {
+                input = input2;
+                this.timezone_ = TimeZone.from(bias);
+                return true;
+            }
+            return false;
+
+        case 'c':
+            return DateTime.parse(input, this, String_UTF8(ISO8601Format), true);
+
+        case 'r':
+            return DateTime.parse(input, this, String_UTF8(RFC2822Format), true);
+
+        case 'U':
+            input2 = input.save;
+            long unixTime;
+
+            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), unixTime)) {
+                input = input2;
+                this = DateTime.fromUnixTime(unixTime);
+                return true;
+            }
+            return false;
+
+        default:
+            return this.time_.parseValue(input, specification) || this.timezone_.parseValue(input, specification) ||
+                this.date_.parseValue(input, specification);
+        }
+    }
+
+    ///
+    static bool formattedRead(Input)(scope ref Input input, scope ref Duration output, scope FormatSpecifier format) {
+        return parse(input, output, format.fullFormatSpec);
     }
 
 private @hidden:

@@ -631,6 +631,147 @@ export @safe nothrow @nogc:
     }
 
     ///
+    static bool parse(Input)(scope ref Input input, scope ref Duration output, scope String_UTF8 specification,
+            bool usePercentageEscape = true) {
+        if (specification.length == 0)
+            return false;
+        bool isEscaped, negate;
+
+        if (usePercentageEscape) {
+            foreach (c; specification.byUTF32()) {
+                if (isEscaped) {
+                    isEscaped = false;
+                    if (output.parseValue(input, negate, c))
+                        continue;
+                } else if (c == '%') {
+                    isEscaped = true;
+                    continue;
+                }
+
+                static if (isASCII!Input) {
+                    if (c >= 128 || !input.startsWith([c]))
+                        return false;
+                } else {
+                    if (!input.startsWith([c]))
+                        return false;
+                }
+
+                input.popFront;
+            }
+        } else {
+            foreach (c; specification.byUTF32()) {
+                if (isEscaped) {
+                    isEscaped = false;
+                } else if (c == '\\') {
+                    isEscaped = true;
+                    continue;
+                } else if (output.parseValue(input, negate, c)) {
+                    continue;
+                }
+
+                static if (isASCII!Input) {
+                    if (c >= 128 || !input.startsWith([c]))
+                        return false;
+                } else {
+                    if (!input.startsWith([c]))
+                        return false;
+                }
+
+                input.popFront;
+            }
+        }
+
+        if (negate)
+            output = -output;
+        input = input.save;
+        return true;
+    }
+
+    ///
+    bool parseValue(Input)(scope ref Input input, dchar specification) {
+        import reader = sidero.base.text.format.read;
+
+        static immutable FullMonth = [
+            `January`, `February`, `March`, `April`, `May`, `June`, `July`, `August`, `September`, `October`, `November`,
+            `December`
+        ];
+        static immutable ThreeLettersMonth = [
+            `Jan`, `Feb`, `Mar`, `Apr`, `May`, `Jun`, `Jul`, `Aug`, `Sep`, `Oct`, `Nov`, `Dec`
+        ];
+
+        Input input2;
+        long days, month, year;
+
+        switch (specification) {
+        case 'd':
+        case 'j':
+            input2 = input.save;
+            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), days)) {
+                input = input2;
+
+                if (days < 0)
+                    days *= -1;
+                this.day_ = cast(ubyte)days;
+                return true;
+            }
+            return false;
+
+        case 'F':
+            foreach(i, str; FullMonth) {
+                if (input.ignoreCaseStartsWith(str)) {
+                    this.month_ = cast(ubyte)i;
+                    return true;
+                }
+            }
+            return false;
+
+        case 'm':
+        case 'n':
+            input2 = input.save;
+            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), month)) {
+                input = input2;
+
+                if (month < 0)
+                    month *= -1;
+                this.month_ = cast(ubyte)month;
+                return true;
+            }
+            return false;
+
+        case 'M':
+            foreach(i, str; ThreeLettersMonth) {
+                if (input.ignoreCaseStartsWith(str)) {
+                    this.month_ = cast(ubyte)i;
+                    return true;
+                }
+            }
+            return false;
+
+        case 'X':
+        case 'x':
+        case 'Y':
+            input2 = input.save;
+            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), year)) {
+                input = input2;
+
+                if (year < 0)
+                    year *= -1;
+                this.year_ = year;
+                return true;
+            }
+            return false;
+
+        default:
+            return false;
+        }
+    }
+
+    ///
+    static bool formattedRead(Input)(scope ref Input input, scope ref Duration output, scope FormatSpecifier format) {
+        return parse(input, output, format.fullFormatSpec);
+    }
+
+    ///
     enum WeekDay {
         ///
         Monday,
