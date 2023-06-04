@@ -119,6 +119,7 @@ Builder formattedWriteImpl(Builder, Args...)(return scope ref Builder output, sc
 
 Builder formattedWriteImpl(Builder, Args...)(return scope ref Builder output, scope String_UTF32 formatString, bool quote, scope Args args) @trusted {
     import sidero.base.text.format.rawwrite;
+    import std.traits : Unqual;
 
     size_t argsHandled;
     bool[Args.length] areArgsHandled;
@@ -184,7 +185,7 @@ Builder formattedWriteImpl(Builder, Args...)(return scope ref Builder output, sc
 
             static foreach (I; 0 .. Args.length) {
         case I:
-                if (rawWrite(output, args[I], format, quote)) {
+                if (rawWrite(output, cast(Unqual!(Args[I]))args[I], format, quote)) {
                     if (!areArgsHandled[argId])
                         argsHandled++;
                     areArgsHandled[argId] = true;

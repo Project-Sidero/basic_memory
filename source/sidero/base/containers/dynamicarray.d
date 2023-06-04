@@ -576,7 +576,7 @@ scope nothrow @nogc:
 
         ///
         void toString(Sink)(scope ref Sink sink) @trusted {
-            sink.formattedWrite(String_ASCII.init, this.unsafeGetLiteral());
+            sink.formattedWrite("", this.unsafeGetLiteral());
         }
 
         ///
@@ -588,7 +588,7 @@ scope nothrow @nogc:
 
         ///
         void toStringPretty(Sink)(scope ref Sink sink) @trusted {
-            PrettyPrint!String_ASCII prettyPrint;
+            PrettyPrint prettyPrint;
             prettyPrint(sink, this.unsafeGetLiteral());
         }
     }

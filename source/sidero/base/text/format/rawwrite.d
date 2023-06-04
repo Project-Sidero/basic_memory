@@ -28,7 +28,7 @@ bool rawWrite(Builder, Input)(return scope ref Builder output, scope Input input
             return writeBool(output, input, format);
         } else static if (is(Input == char) || (isUTF!Builder && (is(Input == wchar) || is(Input == dchar)))) {
             return writeChar(output, input, format, quote);
-        } else static if (isPointer!Input) {
+        } else static if (isPointer!Input || is(Input == function) || is(Input == delegate)) {
             return writePointer(output, input, format);
         } else static if (__traits(isIntegral, Input)) {
             return writeIntegral(output, input, format);
@@ -46,14 +46,16 @@ bool rawWrite(Builder, Input)(return scope ref Builder output, scope Input input
             return writeStructClass(output, input, format);
         } else static if (IsStaticArray) {
             return writeIterable(output, input[]);
-        } else static if ((isIterable!Input && (HaveNonStaticOpApply!ActualType || !__traits(hasMember, ActualType, "opApply")))) {
+        } else static if (isDynamicArray!Input || (isIterable!Input && !(HaveNonStaticOpApply!ActualType ||
+                __traits(hasMember, ActualType, "opApply")))) {
             return writeIterable(output, input);
         } else static if (is(Input == union)) {
             return writeUnion(output, input);
         } else static if (is(Input == interface)) {
             return writeInterface(output, input);
-        } else
+        } else {
             static assert(0, Input.stringof ~ " cannot be written.");
+        }
     }
 }
 
@@ -613,7 +615,7 @@ bool writePointer(Builder, Input)(scope ref Builder output, scope Input input, s
         if (input !is null) {
             static if (isFunctionPointer!Input) {
                 static if (is(Input == delegate)) {
-                    builder ~= "(";
+                    output ~= "("c;
 
                     if (useNullText && input is null) {
                         output ~= "null"c;
@@ -621,15 +623,15 @@ bool writePointer(Builder, Input)(scope ref Builder output, scope Input input, s
                         writeIntegral(output, cast(size_t)input.ptr, format);
                     }
 
-                    builder ~= ")";
+                    output ~= ")"c;
                 }
             } else static if (__traits(compiles, typeof(*(Input.init)))) {
                 alias PointerAt = typeof(*(Input.init));
 
                 static if (isCopyable!PointerAt) {
-                    builder ~= "(";
+                    output ~= "("c;
                     formattedWriteImpl(output, String_UTF32.init, true, *input);
-                    builder ~= ")";
+                    output ~= ")"c;
                 }
             }
         }
@@ -730,11 +732,22 @@ bool writeIterable(Builder, Input)(scope ref Builder output, scope Input input) 
     output ~= "["c;
     size_t i;
 
-    foreach (v; input) {
-        if (i++ > 0)
-            output ~= ", "c;
+    static if (isDynamicArray!Input) {
+        alias SubType = typeof(input[0]);
 
-        formattedWriteImpl(output, String_UTF32.init, true, v);
+        foreach (v; cast(Unqual!SubType[])input[]) {
+            if (i++ > 0)
+                output ~= ", "c;
+
+            formattedWriteImpl(output, String_UTF32.init, true, v);
+        }
+    } else {
+        foreach (v; input) {
+            if (i++ > 0)
+                output ~= ", "c;
+
+            formattedWriteImpl(output, String_UTF32.init, true, v);
+        }
     }
 
     output ~= "]"c;

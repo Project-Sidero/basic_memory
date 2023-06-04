@@ -773,10 +773,10 @@ export @safe nothrow @nogc:
             TimeOfDay tod = TimeOfDay(0, 0, 0);
             tod.advanceSeconds(seconds < 0 ? -seconds : seconds);
 
-            builder.formattedWrite("%s", tod.hour);
+            builder.formattedWrite("{:s}", tod.hour);
 
             if (tod.minute > 0) {
-                builder.formattedWrite(":%s", tod.minute);
+                builder.formattedWrite("{:s}", tod.minute);
             }
 
             ret.state.name = builder.asReadOnly;

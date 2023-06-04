@@ -70,15 +70,13 @@ export @safe nothrow @nogc:
 
     version (none) {
         ///
-        void toString(scope ref StringBuilder_ASCII writer) const {
-            import sidero.base.text;
-
-            String_ASCII("%s").formattedWrite(writer, value);
+        void toString(scope ref StringBuilder_UTF8 writer) const {
+            formattedWrite(writer, "{:s}", value);
         }
 
         ///
-        StringBuilder_ASCII toString() const @trusted {
-            StringBuilder_ASCII ret = StringBuilder_ASCII();
+        StringBuilder_UTF8 toString() const @trusted {
+            StringBuilder_UTF8 ret = StringBuilder_UTF8();
             this.toString(ret);
             return ret;
         }

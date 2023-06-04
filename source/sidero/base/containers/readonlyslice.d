@@ -640,8 +640,8 @@ nothrow @nogc:
         }
 
         ///
-        void toString(Sink)(scope ref Sink sink) {
-            sink.formattedWrite(String_ASCII.init, cast(Slice)this);
+        void toString(Sink)(scope ref Sink sink) @trusted {
+            sink.formattedWrite("", this.unsafeGetLiteral);
         }
 
         ///
@@ -653,7 +653,7 @@ nothrow @nogc:
 
         ///
         void toStringPretty(Sink)(scope ref Sink sink) {
-            PrettyPrint!String_ASCII prettyPrint;
+            PrettyPrint prettyPrint;
             prettyPrint(sink, cast(Slice)this);
         }
     }

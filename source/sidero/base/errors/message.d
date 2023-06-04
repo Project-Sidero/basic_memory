@@ -73,7 +73,7 @@ export scope @safe nothrow @nogc:
     void toString(S)(scope ref S sink) const {
         import sidero.base.text.format;
 
-        sink.formattedWrite!"Error at %s:%d %s:%s"(this.moduleName, this.line, this.info.id, this.info.message);
+        sink.formattedWrite("Error at {:s}:{:d} {:s}:{:s}", this.moduleName, this.line, this.info.id, this.info.message);
     }
 
 pure:

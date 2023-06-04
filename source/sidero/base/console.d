@@ -516,7 +516,7 @@ void write(Args...)(scope Args args) @trusted {
         static if (isAnyString!Type) {
             if (deliminateArguments) {
                 rawWrite(`"`, useErrorStream);
-                rawWrite(format(String_ASCII.init, arg), useErrorStream);
+                rawWrite(formattedWrite("", arg), useErrorStream);
                 rawWrite(`"`, useErrorStream);
             } else
                 rawWrite(arg, useErrorStream);

@@ -89,9 +89,9 @@ export @safe nothrow @nogc:
     ///
     void toString(S)(scope ref S sink) scope const {
         if (!this.isSet)
-            sink ~= "not-set";
+            sink ~= "not-set"c;
         else
-            sink.formattedWrite!"%s"(this.value);
+            sink.formattedWrite("{:s}", this.value);
     }
 
     static if (__traits(hasMember, T, "toStringPretty")) {
@@ -105,7 +105,7 @@ export @safe nothrow @nogc:
         ///
         void toStringPretty(S)(scope ref S sink) scope const {
             if (!this.isSet) {
-                sink ~= "not-set";
+                sink ~= "not-set"c;
                 return;
             }
 
