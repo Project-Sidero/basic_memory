@@ -8,6 +8,30 @@ import sidero.base.allocators;
 export @safe nothrow @nogc:
 
 ///
+Expected!(Args.length) formattedRead(Input, Args...)(scope ref Input input, scope String_UTF8.LiteralType formatString, scope ref Args args)
+        if (isUTF!Input && Args.length > 0) {
+    String_UTF32 tempFormat;
+    tempFormat.__ctor(formatString);
+    return formattedReadImpl(input, tempFormat, args);
+}
+
+/// Ditto
+Expected!(Args.length) formattedRead(Input, Args...)(scope ref Input input, scope String_UTF16.LiteralType formatString, scope ref Args args)
+        if (isUTF!Input && Args.length > 0) {
+    String_UTF32 tempFormat;
+    tempFormat.__ctor(formatString);
+    return formattedReadImpl(input, tempFormat, args);
+}
+
+/// Ditto
+Expected!(Args.length) formattedRead(Input, Args...)(scope ref Input input, scope String_UTF32.LiteralType formatString, scope ref Args args)
+        if (isUTF!Input && Args.length > 0) {
+    String_UTF32 tempFormat;
+    tempFormat.__ctor(formatString);
+    return formattedReadImpl(input, tempFormat, args);
+}
+
+/// Ditto
 Expected!(Args.length) formattedRead(Input, Args...)(scope ref Input input, scope String_ASCII formatString, scope ref Args args) @trusted
         if (isUTF!Input || isASCII!Input) {
     return formattedReadImpl(input, String_UTF8(cast(const(char)[])formatString.unsafeGetLiteral()).byUTF32, args);
@@ -92,13 +116,31 @@ Expected!(Args.length) formattedReadImpl(Input, Args...)(scope ref Input input, 
 
                     wasLeftBrace = false;
                     formatString.popFront;
+                    continue;
                 } else if (formatString.startsWith("{")) {
                     formatString.popFront;
                     wasLeftBrace = true;
-                } else if (inputTemp.startsWith([formatString.front])) {
+                    continue;
+                }
+
+                static if (isASCII!Input) {
+                    auto c2 = formatString.front;
+                    ubyte c;
+                    if (c2 >= 128)
+                        goto FailStartsWith;
+                    c = cast(ubyte)c2;
+                } else {
+                    auto c = formatString.front;
+                }
+
+                if (inputTemp.startsWith([c])) {
                     inputTemp.popFront;
                     formatString.popFront;
-                } else if (successfullyHandled > 0) {
+                    continue;
+                }
+
+            FailStartsWith:
+                if (successfullyHandled > 0) {
                     successfullyHandled--;
                     break OuterLoop;
                 } else

@@ -5,6 +5,7 @@ import sidero.base.attributes;
 import sidero.base.errors;
 import sidero.base.text;
 import sidero.base.containers.dynamicarray;
+import sidero.base.typecons;
 
 export @safe nothrow @nogc:
 
@@ -115,6 +116,34 @@ export @safe nothrow @nogc:
             return ret.get.byUTF8;
         else
             return StringBuilder_UTF8.init;
+    }
+
+    ///
+    Optional!ushort port() scope const @trusted {
+        if (isNull || state.lengthOfPort == 0)
+            return typeof(return).init;
+
+        URIAddressState* state = cast(URIAddressState*)this.state;
+        state.mutex.pureLock;
+        scope (exit)
+            state.mutex.unlock;
+
+        auto sliced = state.storage[state.offsetOfPort() .. state.offsetOfPort() + state.lengthOfPort];
+
+        ushort ret;
+        if (!formattedRead(sliced, String_ASCII("{:d}"), ret))
+            return typeof(return).init;
+        return typeof(return)(ret);
+    }
+
+    ///
+    @trusted unittest {
+        auto got = URIAddress.from("myscheme://host:1234/path").assumeOkay.port;
+        assert(!got.isNull);
+        assert(got == 1234);
+
+        got = URIAddress.from("myscheme://host:/path").assumeOkay.port;
+        assert(got.isNull);
     }
 
     ///
@@ -494,31 +523,31 @@ struct URIAddressState {
 
 @safe nothrow @nogc:
 
-    size_t offsetOfScheme() {
+    size_t offsetOfScheme() const {
         return 0;
     }
 
-    size_t offsetOfConnectionInfo() {
+    size_t offsetOfConnectionInfo() const {
         return this.lengthOfScheme + this.lengthOfSchemeSuffix;
     }
 
-    size_t offsetOfHost() {
+    size_t offsetOfHost() const {
         return this.offsetOfConnectionInfo() + this.lengthOfConnectionInfo + this.lengthOfConnectionInfoSuffix;
     }
 
-    size_t offsetOfPort() {
+    size_t offsetOfPort() const {
         return this.offsetOfHost() + this.lengthOfHost + this.lengthOfPortPrefix;
     }
 
-    size_t offsetOfPath() {
+    size_t offsetOfPath() const {
         return this.offsetOfPort() + this.lengthOfPort;
     }
 
-    size_t offsetOfQuery() {
+    size_t offsetOfQuery() const {
         return this.offsetOfPath() + this.lengthOfPath + this.lengthOfQueryPrefix;
     }
 
-    size_t offsetOfFragment() {
+    size_t offsetOfFragment() const {
         return this.offsetOfQuery() + this.lengthOfQuery + this.lengthOfFragmentPrefix;
     }
 }
