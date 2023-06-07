@@ -537,7 +537,7 @@ void write(Args...)(scope Args args) @trusted {
             StringBuilder_UTF8 builder = StringBuilder_UTF8(globalAllocator());
 
             if (prettyPrintActive) {
-                PrettyPrint!String_UTF8 prettyPrint;
+                PrettyPrint prettyPrint;
                 prettyPrint.useQuotes = deliminateArguments;
                 prettyPrint.startWithoutPrefix = argumentId == 0 || !deliminateArguments;
 

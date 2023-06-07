@@ -9,6 +9,18 @@ import sidero.base.typecons;
 
 export @safe nothrow @nogc:
 
+/*
+network-path
+//userinfo@host:port/path
+
+absolute-path
+/path
+
+relative-path
+./path
+path
+ */
+
 ///
 struct URIAddress {
     private {
@@ -20,6 +32,28 @@ export @safe nothrow @nogc:
     ///
     bool isNull() scope const {
         return state is null;
+    }
+
+    ///
+    URIAddressRelativeTo relativeTo() scope const @trusted {
+        if (isNull)
+            return typeof(return).init;
+
+        URIAddressState* state = cast(URIAddressState*)this.state;
+
+        state.mutex.pureLock;
+        scope (exit)
+            state.mutex.unlock;
+
+        return state.relativeTo;
+    }
+
+    ///
+    @trusted unittest {
+        assert(URIAddress.from("myscheme://user:pass@host/path?query#fragment").assumeOkay.relativeTo == URIAddressRelativeTo.Nothing);
+        assert(URIAddress.from("//user:pass@host/path?query#fragment").assumeOkay.relativeTo == URIAddressRelativeTo.Network);
+        assert(URIAddress.from("/path").assumeOkay.relativeTo == URIAddressRelativeTo.Absolute);
+        assert(URIAddress.from("./path").assumeOkay.relativeTo == URIAddressRelativeTo.Path);
     }
 
     ///
@@ -358,6 +392,12 @@ export @safe nothrow @nogc:
     }
 
     ///
+    bool isAbsolute() scope const {
+        auto got = this.relativeTo;
+        return !isNull && got == URIAddressRelativeTo.Nothing;
+    }
+
+    ///
     bool opEquals(scope String_ASCII other) scope const {
         return this.toString() == other;
     }
@@ -404,73 +444,74 @@ export @safe nothrow @nogc:
     static {
         /// Consturct a file path given a platform rule set (default is host platform)
         Result!URIAddress from(scope String_ASCII input, bool encode = true,
-                scope String_ASCII defaultScheme = String_ASCII.init, scope return RCAllocator allocator = RCAllocator.init) {
-            return parseURIFromString(input, encode, defaultScheme, allocator);
+                scope URIAddress contextAddress = URIAddress.init, scope return RCAllocator allocator = RCAllocator.init) {
+            return parseURIFromString(input, encode, contextAddress, allocator);
         }
 
         /// Ditto
         Result!URIAddress from(scope StringBuilder_ASCII input, bool encode = true,
-                scope String_ASCII defaultScheme = String_ASCII.init, scope return RCAllocator allocator = RCAllocator.init) {
-            return parseURIFromString(input, encode, defaultScheme, allocator);
+                scope URIAddress contextAddress = URIAddress.init, scope return RCAllocator allocator = RCAllocator.init) {
+            return parseURIFromString(input, encode, contextAddress, allocator);
         }
 
         /// Ditto
         Result!URIAddress from(scope String_UTF8.LiteralType input, bool encode = true,
-                scope String_ASCII defaultScheme = String_ASCII.init, scope return RCAllocator allocator = RCAllocator.init) @trusted {
-            return URIAddress.from(String_UTF32(input), encode, defaultScheme, allocator);
+                scope URIAddress contextAddress = URIAddress.init, scope return RCAllocator allocator = RCAllocator.init) @trusted {
+            return URIAddress.from(String_UTF32(input), encode, contextAddress, allocator);
         }
 
         /// Ditto
         Result!URIAddress from(scope String_UTF16.LiteralType input, bool encode = true,
-                scope String_ASCII defaultScheme = String_ASCII.init, scope return RCAllocator allocator = RCAllocator.init) @trusted {
-            return URIAddress.from(String_UTF32(input), encode, defaultScheme, allocator);
+                scope URIAddress contextAddress = URIAddress.init, scope return RCAllocator allocator = RCAllocator.init) @trusted {
+            return URIAddress.from(String_UTF32(input), encode, contextAddress, allocator);
         }
 
         /// Ditto
         Result!URIAddress from(scope String_UTF32.LiteralType input, bool encode = true,
-                scope String_ASCII defaultScheme = String_ASCII.init, scope return RCAllocator allocator = RCAllocator.init) @trusted {
-            return URIAddress.from(String_UTF32(input), encode, defaultScheme, allocator);
+                scope URIAddress contextAddress = URIAddress.init, scope return RCAllocator allocator = RCAllocator.init) @trusted {
+            return URIAddress.from(String_UTF32(input), encode, contextAddress, allocator);
         }
 
         /// Ditto
-        Result!URIAddress from(scope String_UTF8 input, bool encode = true,
-                scope String_ASCII defaultScheme = String_ASCII.init, scope return RCAllocator allocator = RCAllocator.init) {
-            return parseURIFromString(input.byUTF32, encode, defaultScheme, allocator);
+        Result!URIAddress from(scope String_UTF8 input, bool encode = true, scope URIAddress contextAddress = URIAddress.init,
+                scope return RCAllocator allocator = RCAllocator.init) {
+            return parseURIFromString(input.byUTF32, encode, contextAddress, allocator);
         }
 
         /// Ditto
         Result!URIAddress from(scope String_UTF16 input, bool encode = true,
-                scope String_ASCII defaultScheme = String_ASCII.init, scope return RCAllocator allocator = RCAllocator.init) {
-            return parseURIFromString(input.byUTF32, encode, defaultScheme, allocator);
+                scope URIAddress contextAddress = URIAddress.init, scope return RCAllocator allocator = RCAllocator.init) {
+            return parseURIFromString(input.byUTF32, encode, contextAddress, allocator);
         }
 
         /// Ditto
         Result!URIAddress from(scope String_UTF32 input, bool encode = true,
-                scope String_ASCII defaultScheme = String_ASCII.init, scope return RCAllocator allocator = RCAllocator.init) {
-            return parseURIFromString(input, encode, defaultScheme, allocator);
+                scope URIAddress contextAddress = URIAddress.init, scope return RCAllocator allocator = RCAllocator.init) {
+            return parseURIFromString(input, encode, contextAddress, allocator);
         }
 
         /// Ditto
         Result!URIAddress from(scope StringBuilder_UTF8 input, bool encode = true,
-                scope String_ASCII defaultScheme = String_ASCII.init, scope return RCAllocator allocator = RCAllocator.init) {
-            return parseURIFromString(input.byUTF32, encode, defaultScheme, allocator);
+                scope URIAddress contextAddress = URIAddress.init, scope return RCAllocator allocator = RCAllocator.init) {
+            return parseURIFromString(input.byUTF32, encode, contextAddress, allocator);
         }
 
         /// Ditto
         Result!URIAddress from(scope StringBuilder_UTF16 input, bool encode = true,
-                scope String_ASCII defaultScheme = String_ASCII.init, scope return RCAllocator allocator = RCAllocator.init) {
-            return parseURIFromString(input.byUTF32, encode, defaultScheme, allocator);
+                scope URIAddress contextAddress = URIAddress.init, scope return RCAllocator allocator = RCAllocator.init) {
+            return parseURIFromString(input.byUTF32, encode, contextAddress, allocator);
         }
 
         /// Ditto
         Result!URIAddress from(scope StringBuilder_UTF32 input, bool encode = true,
-                scope String_ASCII defaultScheme = String_ASCII.init, scope return RCAllocator allocator = RCAllocator.init) {
-            return parseURIFromString(input, encode, defaultScheme, allocator);
+                scope URIAddress contextAddress = URIAddress.init, scope return RCAllocator allocator = RCAllocator.init) {
+            return parseURIFromString(input, encode, contextAddress, allocator);
         }
 
         ///
         @trusted unittest {
             assert(URIAddress.from("").assumeOkay.isNull);
+            assert(URIAddress.from("scheme:").assumeOkay == String_ASCII("scheme:"));
             assert(URIAddress.from("scheme://@host:1234/path/segments").assumeOkay == String_ASCII("scheme://host:1234/path/segments"));
             assert(URIAddress.from("scheme://user:@host:1234/path/segments")
                     .assumeOkay == String_ASCII("scheme://user:@host:1234/path/segments"));
@@ -483,6 +524,11 @@ export @safe nothrow @nogc:
             assert(URIAddress.from("scheme://ho%aast#").assumeOkay == String_ASCII("scheme://ho%AAst"));
             assert(URIAddress.from("scheme://host/path//another//").assumeOkay == String_ASCII("scheme://host/path/another/"));
             assert(URIAddress.from("mailto:Joe@example.com").assumeOkay == String_ASCII("mailto:Joe@example.com"));
+            assert(URIAddress.from("//userinfo@host:1234/path").assumeOkay == String_ASCII("//userinfo@host:1234/path"));
+            assert(URIAddress.from("/path").assumeOkay == String_ASCII("/path"));
+            assert(URIAddress.from("../path").assumeOkay == String_ASCII("../path"));
+            assert(URIAddress.from("./path").assumeOkay == String_ASCII("./path"));
+            assert(URIAddress.from("host").assumeOkay == String_ASCII("host"));
         }
     }
 
@@ -503,6 +549,18 @@ private @hidden:
     }
 }
 
+///
+enum URIAddressRelativeTo {
+    ///
+    Nothing,
+    // Starts with two /
+    Network,
+    /// Starts with a single /
+    Absolute,
+    /// Does not start with a /
+    Path
+}
+
 private @hidden:
 import sidero.base.synchronization.mutualexclusion : TestTestSetLockInline;
 
@@ -512,6 +570,8 @@ struct URIAddressState {
     TestTestSetLockInline mutex;
 
     StringBuilder_ASCII storage;
+
+    URIAddressRelativeTo relativeTo;
 
     size_t lengthOfScheme, lengthOfSchemeSuffix;
     size_t lengthOfConnectionInfo, lengthOfConnectionInfoSuffix;
@@ -558,7 +618,7 @@ struct URIAddressState {
 // (scheme ://) authority (/ path) (? query) (# fragment)
 // (scheme :) (path)
 
-Result!URIAddress parseURIFromString(Input)(scope Input input, bool encode, scope String_ASCII defaultScheme,
+Result!URIAddress parseURIFromString(Input)(scope Input input, bool encode, scope URIAddress contextAddress,
         scope return RCAllocator allocator) @trusted {
     import sidero.base.path.uri.length_calculation;
     import sidero.base.encoding.uri;
@@ -572,14 +632,22 @@ Result!URIAddress parseURIFromString(Input)(scope Input input, bool encode, scop
     // [ :/ , user@ , host , :port ]
     auto lengthOfConnectionInfo = calculateLengthOfConnectionInfo(input, lengthOfScheme);
 
+    // do not try to consume the hostname, if there is nothing to distringuish it from a relative path
+    if (!contextAddress.isNull && lengthOfScheme == 0 && lengthOfConnectionInfo[0] == 0 && lengthOfConnectionInfo[1] == 0 &&
+            lengthOfConnectionInfo[3] == 0)
+        lengthOfConnectionInfo[2] = 0;
+
+    const lengthOfSchemeOrConnectionInfo = lengthOfScheme + lengthOfConnectionInfo[0] + lengthOfConnectionInfo[1] +
+        lengthOfConnectionInfo[2] + lengthOfConnectionInfo[3];
+
     // [ /segments , ?query ]
-    const lengthOfQuery = calculateLengthOfQuery(input[lengthOfScheme + lengthOfConnectionInfo[0] +
-        lengthOfConnectionInfo[1] + lengthOfConnectionInfo[2] + lengthOfConnectionInfo[3] .. $]);
+    const lengthOfQuery = calculateLengthOfQuery(input[lengthOfSchemeOrConnectionInfo .. $], lengthOfSchemeOrConnectionInfo > 0);
+
     // #fragment
     const lengthOfFragment = calculateLengthOfFragment(input[lengthOfScheme + lengthOfConnectionInfo[0] +
         lengthOfConnectionInfo[1] + lengthOfConnectionInfo[2] + lengthOfConnectionInfo[3] + lengthOfQuery[0] + lengthOfQuery[1] .. $]);
 
-    if (lengthOfConnectionInfo[2] == 0 && (lengthOfQuery[0] == 0 || lengthOfQuery[1] == 0 || lengthOfFragment == 0))
+    if (lengthOfSchemeOrConnectionInfo == 0 && (lengthOfQuery[0] == 0 && lengthOfQuery[1] == 0 && lengthOfFragment == 0))
         return typeof(return).init;
 
     URIAddress ret;
@@ -590,9 +658,13 @@ Result!URIAddress parseURIFromString(Input)(scope Input input, bool encode, scop
     {
         auto slice = input[];
 
-        // scheme://
-        auto scheme = slice[0 .. lengthOfScheme + lengthOfConnectionInfo[0]];
-        slice = slice[lengthOfScheme + lengthOfConnectionInfo[0] .. $];
+        // scheme
+        auto scheme = slice[0 .. lengthOfScheme];
+        slice = slice[lengthOfScheme .. $];
+
+        // ://
+        auto schemeSuffix = slice[0 .. lengthOfConnectionInfo[0]];
+        slice = slice[lengthOfConnectionInfo[0] .. $];
 
         auto connectionInfo = slice[0 .. lengthOfConnectionInfo[1]];
         slice = slice[lengthOfConnectionInfo[1] .. $];
@@ -613,21 +685,29 @@ Result!URIAddress parseURIFromString(Input)(scope Input input, bool encode, scop
 
         size_t previousLength;
 
+        if (lengthOfSchemeOrConnectionInfo == 0) {
+            // some sort of relative path
+
+            if (segments.startsWith("/")) {
+                ret.state.relativeTo = URIAddressRelativeTo.Absolute;
+            } else {
+                ret.state.relativeTo = URIAddressRelativeTo.Path;
+            }
+        } else if (lengthOfScheme == 0 && lengthOfConnectionInfo[0] == 2 && schemeSuffix == "//"c) {
+            // a relative path, network
+            ret.state.relativeTo = URIAddressRelativeTo.Network;
+        }
+
         {
-            if (lengthOfScheme == 0 && defaultScheme.length > 0) {
+            auto defaultScheme = contextAddress.scheme;
+            bool needToAddSchemeSuffix;
+
+            if ((lengthOfScheme + lengthOfConnectionInfo[0]) == 0 && defaultScheme.length > 0) {
                 auto lowered = defaultScheme.toLower();
 
                 ret.state.storage ~= lowered;
+                needToAddSchemeSuffix = true;
 
-                if (lengthOfConnectionInfo[2] > 0) {
-                    // ://
-                    ret.state.storage ~= "://";
-                    lengthOfConnectionInfo[0] = 3;
-                } else {
-                    // :
-                    ret.state.storage ~= ":";
-                    lengthOfConnectionInfo[0] = 1;
-                }
             } else {
                 auto lowered = scheme.asMutable.toLower;
 
@@ -637,13 +717,27 @@ Result!URIAddress parseURIFromString(Input)(scope Input input, bool encode, scop
             }
 
             ret.state.lengthOfScheme = ret.state.storage.length - previousLength;
-            previousLength = ret.state.storage.length;
 
-            if (ret.state.lengthOfScheme > 0) {
-                assert(ret.state.lengthOfScheme > lengthOfConnectionInfo[0]);
-                ret.state.lengthOfScheme -= lengthOfConnectionInfo[0];
+            if (needToAddSchemeSuffix) {
+                if (lengthOfConnectionInfo[2] > 0) {
+                    // ://
+                    ret.state.storage ~= "://";
+                    lengthOfConnectionInfo[0] = 3;
+                } else {
+                    // :
+                    ret.state.storage ~= ":";
+                    lengthOfConnectionInfo[0] = 1;
+                }
+
+                ret.state.lengthOfSchemeSuffix = lengthOfConnectionInfo[0];
+            } else if (lengthOfConnectionInfo[0] > 0) {
+                foreach(c; schemeSuffix) {
+                    ret.state.storage ~= [cast(ubyte)c];
+                }
                 ret.state.lengthOfSchemeSuffix = lengthOfConnectionInfo[0];
             }
+
+            previousLength = ret.state.storage.length;
         }
 
         if (lengthOfConnectionInfo[1] > 1) {

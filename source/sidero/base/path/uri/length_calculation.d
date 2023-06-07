@@ -1042,7 +1042,7 @@ size_t[4] calculateLengthOfConnectionInfoImpl(Input)(scope Input input, ptrdiff_
         lengthOfPrefix = 1;
     }
 
-    if (input.startsWith("/") && !input.startsWith("//")) {
+    if (lengthOfScheme > 0 && input.startsWith("/") && !input.startsWith("//")) {
         lengthOfPrefix += 1;
         /*
   / path-absolute
@@ -1109,7 +1109,7 @@ size_t[2] calculateLengthOfQueryImpl(Input)(scope Input input, bool requireFirst
         // query         = *( pchar / "/" / "?" )
         // pchar = unreserved / pct-encoded / sub-delims / ":" / "@"
 
-        if (requireFirstPrefix && !(input.startsWith("/") || input.startsWith("?"))) {
+        if (requireFirstPrefix && !(input.startsWith("/") || input.startsWith("?") || input.startsWith("./"))) {
             // oh noes
             return typeof(return).init;
         }

@@ -126,13 +126,11 @@ export @safe nothrow @nogc:
     ///
     bool isAbsolute() scope const {
         auto got = this.relativeTo;
-        if (got.isNull)
-            return false;
-        return got == FilePathRelativeTo.Nothing;
+        return !isNull && got == FilePathRelativeTo.Nothing;
     }
 
     ///
-    Optional!FilePathRelativeTo relativeTo() scope const @trusted {
+    FilePathRelativeTo relativeTo() scope const @trusted {
         if (isNull)
             return typeof(return).init;
 
@@ -142,7 +140,7 @@ export @safe nothrow @nogc:
         scope (exit)
             state.mutex.unlock;
 
-        return typeof(return)(state.relativeTo);
+        return state.relativeTo;
     }
 
     ///
