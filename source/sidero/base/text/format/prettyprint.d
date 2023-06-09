@@ -217,8 +217,9 @@ private:
             // ok print the thing
 
             static if (!is(WrappedType == void)) {
-                scope temp = &input.assumeOkay();
-                this.handle(*temp, useQuotes, useName, forcePrint);
+                if (input) {
+                    this.handle(builder, input.get(), useQuotes, useName, forcePrint);
+                }
                 return;
             }
         }
@@ -701,7 +702,7 @@ private:
         builder ~= "]"c;
     }
 
-    void handleEnum(WrappedType, Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useQuotes, bool useName, bool forcePrint) {
+    void handleEnum(Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useQuotes, bool useName, bool forcePrint) {
         enum FQN = fullyQualifiedName!Type;
         builder ~= FQN;
         auto actualValue = cast(OriginalType!Type)input;
@@ -715,7 +716,7 @@ private:
         }
 
         builder ~= "("c;
-        handle(actualValue, useQuotes, useName, forcePrint);
+        this.handle(builder, actualValue, useQuotes, useName, forcePrint);
         builder ~= ")"c;
     }
 }
