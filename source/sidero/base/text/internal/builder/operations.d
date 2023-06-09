@@ -85,9 +85,11 @@ mixin template StringBuilderOperations() {
 
         assert(other.length() > 0);
         changeIndexToOffset(iterator, offset);
+        if(iterator !is null)
+            offset -= iterator.forwards.offsetFromHead;
 
         size_t maximumOffsetFromHead;
-        Cursor cursor = cursorFor(null, maximumOffsetFromHead, offset);
+        Cursor cursor = cursorFor(iterator, maximumOffsetFromHead, offset);
         assert(other.length() > 0);
         insertOperation(cursor, maximumOffsetFromHead, other, clobber);
         assert(other.length() > 0);
@@ -101,10 +103,12 @@ mixin template StringBuilderOperations() {
         blockList.mutex.pureLock;
 
         auto errorInfo = changeIndexToOffset(iterator, offset);
+        if (iterator !is null)
+            offset -= iterator.forwards.offsetFromHead;
 
         if (!errorInfo.isSet) {
             size_t maximumOffsetFromHead;
-            Cursor cursor = cursorFor(null, maximumOffsetFromHead, offset);
+            Cursor cursor = cursorFor(iterator, maximumOffsetFromHead, offset);
             removeOperation(cursor, maximumOffsetFromHead, amount);
         }
 

@@ -428,31 +428,39 @@ scope nothrow @nogc @safe @hidden:
     }
 
     void strip() {
-        this.handle((StateIterator.S8 state, StateIterator.I8 iterator) { assert(state !is null); state.strip(iterator); },
-                (StateIterator.S16 state, StateIterator.I16 iterator) { assert(state !is null); state.strip(iterator); },
-                (StateIterator.S32 state, StateIterator.I32 iterator) { assert(state !is null); state.strip(iterator); }, () {
-        });
+        this.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+            assert(state !is null);
+            state.externalStrip(iterator);
+        }, (StateIterator.S16 state, StateIterator.I16 iterator) { assert(state !is null); state.externalStrip(iterator); },
+                (StateIterator.S32 state, StateIterator.I32 iterator) {
+            assert(state !is null);
+            state.externalStrip(iterator);
+        }, () {});
     }
 
     void stripLeft() {
         this.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
             assert(state !is null);
-            state.stripLeft(iterator);
-        }, (StateIterator.S16 state, StateIterator.I16 iterator) { assert(state !is null); state.stripLeft(iterator); },
-                (StateIterator.S32 state, StateIterator.I32 iterator) {
+            state.externalStripLeft(iterator);
+        }, (StateIterator.S16 state, StateIterator.I16 iterator) {
             assert(state !is null);
-            state.stripLeft(iterator);
+            state.externalStripLeft(iterator);
+        }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+            assert(state !is null);
+            state.externalStripLeft(iterator);
         }, () {});
     }
 
     void stripRight() {
         this.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
             assert(state !is null);
-            state.stripRight(iterator);
-        }, (StateIterator.S16 state, StateIterator.I16 iterator) { assert(state !is null); state.stripRight(iterator); },
-                (StateIterator.S32 state, StateIterator.I32 iterator) {
+            state.externalStripRight(iterator);
+        }, (StateIterator.S16 state, StateIterator.I16 iterator) {
             assert(state !is null);
-            state.stripRight(iterator);
+            state.externalStripRight(iterator);
+        }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+            assert(state !is null);
+            state.externalStripRight(iterator);
         }, () {});
     }
 
@@ -1730,12 +1738,12 @@ struct UTF_State(Char) {
         return ret;
     }
 
-    void strip(scope Iterator* iterator) scope {
-        stripLeft(iterator);
-        stripRight(iterator);
+    void externalStrip(scope Iterator* iterator) scope {
+        externalStripLeft(iterator);
+        externalStripRight(iterator);
     }
 
-    void stripLeft(scope Iterator* iterator) scope {
+    void externalStripLeft(scope Iterator* iterator) scope {
         import sidero.base.text.unicode.characters.database : isWhiteSpace, isControl;
 
         blockList.mutex.pureLock;
@@ -1759,7 +1767,7 @@ struct UTF_State(Char) {
         blockList.mutex.unlock;
     }
 
-    void stripRight(scope Iterator* iterator) scope @trusted {
+    void externalStripRight(scope Iterator* iterator) scope @trusted {
         import sidero.base.text.unicode.characters.database : isWhiteSpace, isControl;
 
         blockList.mutex.pureLock;
