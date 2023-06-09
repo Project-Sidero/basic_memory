@@ -510,6 +510,7 @@ export @safe nothrow @nogc:
 
         ///
         @trusted unittest {
+            import sidero.base.console;
             assert(URIAddress.from("").assumeOkay.isNull);
             assert(URIAddress.from("scheme:").assumeOkay == String_ASCII("scheme:"));
             assert(URIAddress.from("scheme://@host:1234/path/segments").assumeOkay == String_ASCII("scheme://host:1234/path/segments"));
@@ -528,11 +529,75 @@ export @safe nothrow @nogc:
             assert(URIAddress.from("/path").assumeOkay == String_ASCII("/path"));
             assert(URIAddress.from("../path").assumeOkay == String_ASCII("../path"));
             assert(URIAddress.from("./path").assumeOkay == String_ASCII("./path"));
+            assert(URIAddress.from("./..").assumeOkay == String_ASCII("./.."));
+            assert(URIAddress.from("./path/../another").assumeOkay == String_ASCII("./another"));
+            assert(URIAddress.from("./../..").assumeOkay == String_ASCII("./../.."));
             assert(URIAddress.from("host").assumeOkay == String_ASCII("host"));
         }
     }
 
-private @hidden:
+private:
+    ErrorInfo evaluateRelativeComponents() scope {
+        StringBuilder_ASCII storage = state.storage.dup(state.allocator);
+        StringBuilder_ASCII allComponents = storage[state.offsetOfPath() .. state.offsetOfPath() + state.lengthOfPath],
+            components = allComponents.save;
+
+        bool isFirst = true;
+
+        while (components.length > 0) {
+            StringBuilder_ASCII component, fullComponent;
+            const indexOfSeparator = components.indexOf("/");
+
+            if (indexOfSeparator < 0) {
+                component = components;
+                fullComponent = component;
+                components = StringBuilder_ASCII.init;
+            } else {
+                component = components[0 .. indexOfSeparator];
+                fullComponent = components[0 .. indexOfSeparator + 1];
+                components = components[indexOfSeparator + 1 .. $];
+            }
+            const lengthOfFullComponent = fullComponent.length;
+
+            if (component == "..") {
+                // we want to remove the prior component, but first we need to figure out where that is!
+                StringBuilder_ASCII upUntilThis = allComponents[0 .. $ - (lengthOfFullComponent + components.length)];
+                // it is in the form of path/../ or path/..
+
+                if (upUntilThis.length == lengthOfFullComponent) {
+                    // not legal if this is an absolute path, so swap it for AnotherContext
+                    if (state.relativeTo == URIAddressRelativeTo.Nothing)
+                        state.relativeTo = URIAddressRelativeTo.AnotherContext;
+                } else if (upUntilThis.length > lengthOfFullComponent) {
+                    ptrdiff_t lastSeparatorIndex = upUntilThis[0 .. $ - 1].lastIndexOf("/");
+
+                    if (lastSeparatorIndex < 0) {
+                        if (!upUntilThis.endsWith("./") && upUntilThis != "../") {
+                            upUntilThis.remove(0, upUntilThis.length);
+                        }
+                    } else if (upUntilThis[lastSeparatorIndex + 1 .. $] != "../") {
+                        allComponents[lastSeparatorIndex + 1 .. $ - components.length].remove(0, size_t.max);
+                    }
+                }
+            } else if (component == "." && !isFirst) {
+                component.remove(-1, 1);
+            }
+
+            isFirst = false;
+        }
+
+        // Turn multiple back slahes into one
+        allComponents.replace("//", "/");
+
+        // remove a trailing slash
+        if (allComponents != "./" && allComponents.endsWith("/"))
+            allComponents.remove(-1, 1);
+
+        state.lengthOfPath = allComponents.length;
+        state.storage = storage;
+        return ErrorInfo.init;
+    }
+
     int cmpImpl(Input)(scope Input other) scope const @trusted {
         if (isNull)
             return other.isNull ? 0 : -1;
@@ -553,7 +618,9 @@ private @hidden:
 enum URIAddressRelativeTo {
     ///
     Nothing,
-    // Starts with two /
+    /// Have parent segments that need evaluation in a way we cannot without an absolute path
+    AnotherContext,
+    /// Starts with two /
     Network,
     /// Starts with a single /
     Absolute,
@@ -731,7 +798,7 @@ Result!URIAddress parseURIFromString(Input)(scope Input input, bool encode, scop
 
                 ret.state.lengthOfSchemeSuffix = lengthOfConnectionInfo[0];
             } else if (lengthOfConnectionInfo[0] > 0) {
-                foreach(c; schemeSuffix) {
+                foreach (c; schemeSuffix) {
                     ret.state.storage ~= [cast(ubyte)c];
                 }
                 ret.state.lengthOfSchemeSuffix = lengthOfConnectionInfo[0];
@@ -851,6 +918,12 @@ Result!URIAddress parseURIFromString(Input)(scope Input input, bool encode, scop
             ret.state.lengthOfFragment--;
             ret.state.lengthOfFragmentPrefix = 1;
         }
+    }
+
+    {
+        auto got = ret.evaluateRelativeComponents;
+        if (got.isSet)
+            return typeof(return)(got);
     }
 
     return typeof(return)(ret);

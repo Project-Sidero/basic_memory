@@ -1125,16 +1125,7 @@ private:
                         if (state.relativeTo == FilePathRelativeTo.Nothing)
                             return typeof(return)(MalformedInputException("Found relative parent component in an absolute path"));
                     } else if (upUntilThis.length > 0) {
-                        if (components.length > 0) {
-                            // there is another component following this, therefore there is a separator so we are in the form of
-                            // path/../
-                            upUntilThis.remove(-3, 3);
-                            // and now we are path/ muchhhhh better
-                        } else {
-                            // there is no components following this therefore we are in the form of path/..
-                            upUntilThis.remove(-2, 2);
-                            // and now we are path/
-                        }
+                        upUntilThis.remove(-amountToRemove, amountToRemove);
 
                         ptrdiff_t lastSeparatorIndex = upUntilThis[0 .. $ - 1].lastIndexOf("/");
                         if (lastSeparatorIndex < 0) {
