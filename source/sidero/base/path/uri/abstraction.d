@@ -1,5 +1,4 @@
 module sidero.base.path.uri.abstraction;
-import sidero.base.path.uri.errors;
 import sidero.base.allocators;
 import sidero.base.attributes;
 import sidero.base.errors;
@@ -8,18 +7,6 @@ import sidero.base.containers.dynamicarray;
 import sidero.base.typecons;
 
 export @safe nothrow @nogc:
-
-/*
-network-path
-//userinfo@host:port/path
-
-absolute-path
-/path
-
-relative-path
-./path
-path
- */
 
 ///
 struct URIAddress {

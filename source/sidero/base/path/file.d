@@ -24,40 +24,6 @@ version (Posix) {
 /+
 https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file
 https://learn.microsoft.com/en-us/dotnet/standard/io/file-path-formats
-
-Directory + file names must not end in . or space
-
-Relative does not start with:
-- \\
-- D:\
-- \
-C:\Documents\Newsletters\Summer2018.pdf
-C:\Projects\apilibrary\apilibrary.sln
-
-Relative to drive (take directory components from cwd)
-- D:appendComponents
-C:Projects\apilibrary\apilibrary.sln
-
-Relative to current drive (take drive from cwd)
-- \path
-\Program Files\Custom Utilities\StringFinder.exe
-
-Relative paths (based upon cwd)
-..\Publications\TravelBrochure.pdf
-2018\January.xlsx
-
-Only prepend \\?\ for absolute paths
-
-Device path:
-- \\.\Device\path
-- \\?\Device\path
-
-UNC paths
-- \\server
-- \\server\share
-- \\server\share\path
-\\system07\C$\
-\\Server2\Share\Test\Foo.txt
 +/
 
 ///
