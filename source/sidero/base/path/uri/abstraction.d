@@ -35,6 +35,29 @@ export @safe nothrow @nogc:
     }
 
     ///
+    URIAddress dup(return scope RCAllocator allocator = RCAllocator.init) scope const @trusted {
+        if (isNull)
+            return URIAddress.init;
+
+        if (allocator.isNull)
+            allocator = globalAllocator();
+
+        URIAddressState* state = cast(URIAddressState*)this.state;
+
+        state.mutex.pureLock;
+        scope (exit)
+            state.mutex.unlock;
+
+        URIAddress ret;
+        ret.state = allocator.make!URIAddressState;
+
+        *ret.state = *state;
+        ret.state.allocator = allocator;
+        ret.state.storage = state.storage.dup(allocator);
+        return ret;
+    }
+
+    ///
     URIAddressRelativeTo relativeTo() scope const @trusted {
         if (isNull)
             return typeof(return).init;
@@ -398,6 +421,158 @@ export @safe nothrow @nogc:
     }
 
     ///
+    ErrorResult makeAbsolute(scope URIAddress contextAddress = URIAddress.init) scope {
+        if (isNull)
+            return ErrorResult(NullPointerException);
+        else if (state is contextAddress.state)
+            return ErrorResult(MalformedInputException("Context address is the same as the this instance"));
+
+        URIAddressState* state = cast(URIAddressState*)this.state;
+        state.mutex.pureLock;
+        scope (exit)
+            state.mutex.unlock;
+
+        // do this twice if we are anything other than another context which will resolve path relativeness after we handle the form
+        foreach (_; 0 .. 2) {
+            const allowedToTryAgain = state.relativeTo != URIAddressRelativeTo.AnotherContext;
+
+            final switch (state.relativeTo) {
+            case URIAddressRelativeTo.Nothing:
+                return ErrorResult.init;
+
+            case URIAddressRelativeTo.AnotherContext:
+                // our path segments include parents, which means that the path is actually incomplete
+                // so we need to take the path segments from context address, prepend them
+                // if there is enough new path segments, the result will be an absolute path
+
+                if (contextAddress.isNull)
+                    return ErrorResult(MalformedInputException("Missing context path"));
+
+                URIAddressState* cstate = cast(URIAddressState*)contextAddress.state;
+                cstate.mutex.pureLock;
+                scope (exit)
+                    cstate.mutex.unlock;
+
+                if (cstate.lengthOfPath == 0)
+                    return ErrorResult(MalformedInputException(
+                            "Need a path provided to make a another context relative address into a absolute one"));
+
+                StringBuilder_ASCII sliced = cstate.storage[cstate.offsetOfPath() .. contextAddress.state.offsetOfPath() +
+                    cstate.lengthOfPath];
+                state.storage.insert(state.offsetOfPath(), sliced);
+                state.lengthOfPath += sliced.length;
+                break;
+            case URIAddressRelativeTo.Network:
+                if (contextAddress.isNull)
+                    return ErrorResult(MalformedInputException("Missing context path"));
+
+                URIAddressState* cstate = cast(URIAddressState*)contextAddress.state;
+                cstate.mutex.pureLock;
+                scope (exit)
+                    cstate.mutex.unlock;
+
+                if (cstate.lengthOfScheme == 0)
+                    return ErrorResult(MalformedInputException("Context address must contain a scheme to make a network path absolute"));
+
+                StringBuilder_ASCII sliced = cstate.storage[0 .. cstate.lengthOfScheme];
+                state.storage.prepend(":"c);
+                state.storage.prepend(sliced);
+                state.lengthOfScheme = cstate.lengthOfScheme;
+                state.lengthOfSchemeSuffix++;
+                break;
+            case URIAddressRelativeTo.Absolute:
+                if (contextAddress.isNull)
+                    return ErrorResult(MalformedInputException("Missing context path"));
+
+                URIAddressState* cstate = cast(URIAddressState*)contextAddress.state;
+                cstate.mutex.pureLock;
+                scope (exit)
+                    cstate.mutex.unlock;
+
+                if (cstate.relativeTo != URIAddressRelativeTo.Nothing)
+                    return ErrorResult(MalformedInputException(
+                            "To make a relative absolute path absolute it requires an absolute path and context address is not."));
+
+                StringBuilder_ASCII sliced = cstate.storage[0 .. cstate.offsetOfPath()];
+                state.storage.prepend(sliced);
+
+                state.lengthOfScheme = cstate.lengthOfScheme;
+                state.lengthOfSchemeSuffix = cstate.lengthOfSchemeSuffix;
+                state.lengthOfConnectionInfo = cstate.lengthOfConnectionInfo;
+                state.lengthOfConnectionInfoSuffix = cstate.lengthOfConnectionInfoSuffix;
+                state.lengthOfHost = cstate.lengthOfHost;
+                state.lengthOfPort = cstate.lengthOfPort;
+                state.lengthOfPortPrefix = cstate.lengthOfPortPrefix;
+                break;
+            case URIAddressRelativeTo.Path:
+                if (contextAddress.isNull)
+                    return ErrorResult(MalformedInputException("Missing context path"));
+
+                URIAddressState* cstate = cast(URIAddressState*)contextAddress.state;
+                cstate.mutex.pureLock;
+                scope (exit)
+                    cstate.mutex.unlock;
+
+                if (cstate.relativeTo != URIAddressRelativeTo.Nothing)
+                    return ErrorResult(MalformedInputException(
+                            "To make a relative path absolute it requires an absolute path and context address is not."));
+
+                state.storage.prepend("/"c);
+                state.lengthOfPath++;
+
+                StringBuilder_ASCII sliced = cstate.storage[0 .. cstate.offsetOfPath()];
+                state.storage.prepend(sliced);
+
+                state.lengthOfScheme = cstate.lengthOfScheme;
+                state.lengthOfSchemeSuffix = cstate.lengthOfSchemeSuffix;
+                state.lengthOfConnectionInfo = cstate.lengthOfConnectionInfo;
+                state.lengthOfConnectionInfoSuffix = cstate.lengthOfConnectionInfoSuffix;
+                state.lengthOfHost = cstate.lengthOfHost;
+                state.lengthOfPort = cstate.lengthOfPort;
+                state.lengthOfPortPrefix = cstate.lengthOfPortPrefix;
+                break;
+            }
+
+            state.relativeTo = URIAddressRelativeTo.AnotherContext;
+            this.evaluateRelativeComponents;
+
+            if (!allowedToTryAgain)
+                break;
+        }
+
+        if (state.relativeTo == URIAddressRelativeTo.AnotherContext) {
+            // we failed to make absolute, error
+            return ErrorResult(MalformedInputException("Not enough path segments in context address to resolve relative segments"));
+        } else
+            return ErrorResult.init;
+    }
+
+    /// Ditto
+    Result!URIAddress asAbsolute(scope URIAddress contextAddress = URIAddress.init, scope return RCAllocator allocator = RCAllocator.init) {
+        URIAddress ret = this.dup(allocator);
+        auto error = ret.makeAbsolute(contextAddress);
+
+        if (error)
+            return typeof(return)(ret);
+        else
+            return typeof(return)(error.getError());
+    }
+
+    ///
+    @trusted unittest {
+        assert(URIAddress.from("scheme://host/path").assumeOkay.asAbsolute(URIAddress.from("scheme://host2:1234/path2")
+                .assumeOkay).assumeOkay == String_ASCII("scheme://host/path"));
+        assert(URIAddress.from("//host/path").assumeOkay.asAbsolute(URIAddress.from("scheme://host2:1234/path2")
+                .assumeOkay).assumeOkay == String_ASCII("scheme://host/path"));
+        assert(URIAddress.from("/path").assumeOkay.asAbsolute(URIAddress.from("scheme://host/path2").assumeOkay)
+                .assumeOkay == String_ASCII("scheme://host/path"));
+        assert(URIAddress.from("./path").assumeOkay.asAbsolute(URIAddress.from("scheme://host/path2").assumeOkay)
+                .assumeOkay == String_ASCII("scheme://host/path"));
+        assert(URIAddress.from("scheme://host/..").assumeOkay.asAbsolute(URIAddress.from("scheme://host2:1234/my/path/was")
+                .assumeOkay).assumeOkay == String_ASCII("scheme://host/my/path"));
+    }
+
+    ///
     bool opEquals(scope String_ASCII other) scope const {
         return this.toString() == other;
     }
@@ -510,7 +685,6 @@ export @safe nothrow @nogc:
 
         ///
         @trusted unittest {
-            import sidero.base.console;
             assert(URIAddress.from("").assumeOkay.isNull);
             assert(URIAddress.from("scheme:").assumeOkay == String_ASCII("scheme:"));
             assert(URIAddress.from("scheme://@host:1234/path/segments").assumeOkay == String_ASCII("scheme://host:1234/path/segments"));
@@ -523,7 +697,7 @@ export @safe nothrow @nogc:
             assert(URIAddress.from("scheme://@host").assumeOkay == String_ASCII("scheme://host"));
             assert(URIAddress.from("scheme://host#").assumeOkay == String_ASCII("scheme://host"));
             assert(URIAddress.from("scheme://ho%aast#").assumeOkay == String_ASCII("scheme://ho%AAst"));
-            assert(URIAddress.from("scheme://host/path//another//").assumeOkay == String_ASCII("scheme://host/path/another/"));
+            assert(URIAddress.from("scheme://host/path//another//").assumeOkay == String_ASCII("scheme://host/path/another"));
             assert(URIAddress.from("mailto:Joe@example.com").assumeOkay == String_ASCII("mailto:Joe@example.com"));
             assert(URIAddress.from("//userinfo@host:1234/path").assumeOkay == String_ASCII("//userinfo@host:1234/path"));
             assert(URIAddress.from("/path").assumeOkay == String_ASCII("/path"));
@@ -542,7 +716,7 @@ private:
         StringBuilder_ASCII allComponents = storage[state.offsetOfPath() .. state.offsetOfPath() + state.lengthOfPath],
             components = allComponents.save;
 
-        bool isFirst = true;
+        bool isFirst = true, haveUnresolvedParent;
 
         while (components.length > 0) {
             StringBuilder_ASCII component, fullComponent;
@@ -568,16 +742,23 @@ private:
                     // not legal if this is an absolute path, so swap it for AnotherContext
                     if (state.relativeTo == URIAddressRelativeTo.Nothing)
                         state.relativeTo = URIAddressRelativeTo.AnotherContext;
+                    haveUnresolvedParent = true;
                 } else if (upUntilThis.length > lengthOfFullComponent) {
                     ptrdiff_t lastSeparatorIndex = upUntilThis[0 .. $ - 1].lastIndexOf("/");
 
                     if (lastSeparatorIndex < 0) {
                         if (!upUntilThis.endsWith("./") && upUntilThis != "../") {
                             upUntilThis.remove(0, upUntilThis.length);
+                        } else {
+                            haveUnresolvedParent = true;
                         }
                     } else if (upUntilThis[lastSeparatorIndex + 1 .. $] != "../") {
                         allComponents[lastSeparatorIndex + 1 .. $ - components.length].remove(0, size_t.max);
+                    } else {
+                        haveUnresolvedParent = true;
                     }
+                } else {
+                    haveUnresolvedParent = true;
                 }
             } else if (component == "." && !isFirst) {
                 component.remove(-1, 1);
@@ -590,8 +771,14 @@ private:
         allComponents.replace("//", "/");
 
         // remove a trailing slash
-        if (allComponents != "./" && allComponents.endsWith("/"))
+        if (allComponents != "./" && allComponents.endsWith("/")) {
             allComponents.remove(-1, 1);
+        }
+
+        if (!haveUnresolvedParent && state.relativeTo == URIAddressRelativeTo.AnotherContext)
+            state.relativeTo = URIAddressRelativeTo.Nothing;
+        else if (haveUnresolvedParent && state.relativeTo == URIAddressRelativeTo.Nothing)
+            state.relativeTo = URIAddressRelativeTo.AnotherContext;
 
         state.lengthOfPath = allComponents.length;
         state.storage = storage;
@@ -649,6 +836,12 @@ struct URIAddressState {
     size_t lengthOfFragment, lengthOfFragmentPrefix;
 
 @safe nothrow @nogc:
+
+    void opAssign(ref URIAddressState other) scope {
+        static foreach (i; 4 .. this.tupleof.length) {
+            this.tupleof[i] = other.tupleof[i];
+        }
+    }
 
     size_t offsetOfScheme() const {
         return 0;

@@ -2574,7 +2574,7 @@ struct ASCII_State {
                 size_t otherLength = other.length();
 
                 if (iterator !is null)
-                    maximumOffsetFromHead = iterator.backwards.offsetFromHead - iterator.forwards.offsetFromHead;
+                    maximumOffsetFromHead = iterator.backwards.offsetFromHead;
                 else
                     maximumOffsetFromHead = blockList.numberOfItems;
 

@@ -113,6 +113,7 @@ export @safe nothrow @nogc:
 
         *ret.state = *state;
         ret.state.allocator = allocator;
+        ret.state.storage = state.storage.dup(allocator);
         return ret;
     }
 

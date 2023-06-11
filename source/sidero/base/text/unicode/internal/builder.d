@@ -1565,7 +1565,7 @@ struct UTF_State(Char) {
             size_t otherLength = other.length(), usLength;
 
             if (iterator !is null)
-                usLength = iterator.backwards.offsetFromHead - iterator.forwards.offsetFromHead;
+                usLength = iterator.backwards.offsetFromHead;
             else
                 usLength = blockList.numberOfItems;
 
