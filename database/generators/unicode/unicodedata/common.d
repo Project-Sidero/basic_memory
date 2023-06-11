@@ -43,8 +43,6 @@ How first field ranges are specified (the First, Last bit):
         uint character = parse!uint(fields[0], 16);
         string name;
 
-        nextRangeEnd = false;
-
         if (fields[1].endsWith(">")) {
             bool extractName;
 
@@ -52,13 +50,14 @@ How first field ranges are specified (the First, Last bit):
                 nextRangeEnd = true;
                 extractName = true;
             } else if (fields[1].endsWith("Last>")) {
-                if (!expectedRangeEnd) {
-                    continue;
-                }
+                assert(nextRangeEnd);
+                nextRangeEnd = false;
+                expectedRangeEnd = true;
 
                 extractName = true;
             } else if (fields[1] == "<control>") {
                 if (expectedRangeEnd) {
+                    nextRangeEnd = false;
                     expectedRangeEnd = false;
                     continue;
                 }
