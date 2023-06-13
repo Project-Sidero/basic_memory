@@ -278,6 +278,33 @@ export @safe nothrow @nogc:
     }
 
     ///
+    URIAddress removeSegments() return scope {
+        if (!isNull) {
+            state.mutex.pureLock;
+
+            state.storage.remove(state.offsetOfPath(), state.lengthOfPath);
+            state.lengthOfPath = 0;
+
+            // relative form won't change but we can become empty
+            // queries/fragment will take over this side of authority
+
+            state.mutex.unlock;
+        }
+
+        return this;
+    }
+
+    @trusted unittest {
+        assert(URIAddress.from("myscheme://user:pass@host/path/goes/here?query#fragment")
+                .assumeOkay.removeSegments == String_ASCII("myscheme://user:pass@host?query#fragment"));
+        assert(URIAddress.from("//user:pass@host/path/goes/here?query#fragment")
+                .assumeOkay.removeSegments == String_ASCII("//user:pass@host?query#fragment"));
+        assert(URIAddress.from("/path/goes/here?query#fragment").assumeOkay.removeSegments == String_ASCII("?query#fragment"));
+        assert(URIAddress.from("./path/goes/here?query#fragment").assumeOkay.removeSegments == String_ASCII("?query#fragment"));
+        assert(URIAddress.from("host/goes/here?query#fragment").assumeOkay.removeSegments == String_ASCII("host?query#fragment"));
+    }
+
+    ///
     DynamicArray!String_ASCII queries(scope return RCAllocator allocator = RCAllocator.init) scope const @trusted {
         if (isNull || state.lengthOfQuery < 2)
             return typeof(return).init;
@@ -362,6 +389,34 @@ export @safe nothrow @nogc:
     }
 
     ///
+    URIAddress removeQueries() return scope {
+        if (!isNull) {
+            state.mutex.pureLock;
+
+            state.storage.remove(state.offsetOfQuery() - state.lengthOfQueryPrefix, state.lengthOfQuery + state.lengthOfQueryPrefix);
+            state.lengthOfQueryPrefix = 0;
+            state.lengthOfQuery = 0;
+
+            // relative form won't change but we can become empty
+            // fragment will take over this side of authority
+
+            state.mutex.unlock;
+        }
+
+        return this;
+    }
+
+    @trusted unittest {
+        assert(URIAddress.from("myscheme://user:pass@host/path/goes/here?query#fragment")
+                .assumeOkay.removeQueries == String_ASCII("myscheme://user:pass@host/path/goes/here#fragment"));
+        assert(URIAddress.from("//user:pass@host/path/goes/here?query#fragment")
+                .assumeOkay.removeQueries == String_ASCII("//user:pass@host/path/goes/here#fragment"));
+        assert(URIAddress.from("/path/goes/here?query#fragment").assumeOkay.removeQueries == String_ASCII("/path/goes/here#fragment"));
+        assert(URIAddress.from("./path/goes/here?query#fragment").assumeOkay.removeQueries == String_ASCII("./path/goes/here#fragment"));
+        assert(URIAddress.from("host/goes/here?query#fragment").assumeOkay.removeQueries == String_ASCII("host/goes/here#fragment"));
+    }
+
+    ///
     String_ASCII fragment() scope const @trusted {
         if (isNull || state.lengthOfFragment == 0)
             return String_ASCII.init;
@@ -399,6 +454,33 @@ export @safe nothrow @nogc:
             return ret.get;
         else
             return StringBuilder_UTF8.init;
+    }
+
+    ///
+    URIAddress removeFragment() return scope {
+        if (!isNull) {
+            state.mutex.pureLock;
+
+            state.storage.remove(state.offsetOfFragment() - state.lengthOfFragmentPrefix,
+                    state.lengthOfFragment + state.lengthOfFragmentPrefix);
+            state.lengthOfFragmentPrefix = 0;
+            state.lengthOfFragment = 0;
+
+            // relative form won't change but we can become empty
+            state.mutex.unlock;
+        }
+
+        return this;
+    }
+
+    @trusted unittest {
+        assert(URIAddress.from("myscheme://user:pass@host/path/goes/here?query#fragment")
+                .assumeOkay.removeFragment == String_ASCII("myscheme://user:pass@host/path/goes/here?query"));
+        assert(URIAddress.from("//user:pass@host/path/goes/here?query#fragment")
+                .assumeOkay.removeFragment == String_ASCII("//user:pass@host/path/goes/here?query"));
+        assert(URIAddress.from("/path/goes/here?query#fragment").assumeOkay.removeFragment == String_ASCII("/path/goes/here?query"));
+        assert(URIAddress.from("./path/goes/here?query#fragment").assumeOkay.removeFragment == String_ASCII("./path/goes/here?query"));
+        assert(URIAddress.from("host/goes/here?query#fragment").assumeOkay.removeFragment == String_ASCII("host/goes/here?query"));
     }
 
     ///
@@ -1100,10 +1182,14 @@ Result!URIAddress parseURIFromString(Input)(scope Input input, bool encode, scop
         }
     }
 
-    {
+    if (ret.state.relativeTo == URIAddressRelativeTo.Nothing || contextAddress.isNull) {
         auto got = ret.evaluateRelativeComponents;
         if (got.isSet)
             return typeof(return)(got);
+    } else {
+        auto got = ret.makeAbsolute(contextAddress);
+        if (!got)
+            return typeof(return)(got.getError());
     }
 
     return typeof(return)(ret);

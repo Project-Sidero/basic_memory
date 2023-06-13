@@ -282,11 +282,11 @@ export @safe nothrow @nogc:
     }
 
     ///
-    FilePath removeComponents() scope return {
+    FilePath removeComponents() return scope {
         if (!isNull) {
             state.mutex.pureLock;
 
-            state.storage.remove(state.offsetOfComponents(), size_t.max);
+            state.storage.remove(state.offsetOfComponents(), ptrdiff_t.max);
             // nothing changes, our completeness nor if we are relative to anything, so we're done
 
             state.mutex.unlock;
