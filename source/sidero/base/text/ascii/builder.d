@@ -1317,7 +1317,7 @@ nothrow @safe:
         StringBuilder_ASCII toLower() return scope {
             import sidero.base.text.ascii.characters : toLower;
 
-            foreachContiguous((data) {
+            foreachContiguous((scope ref ubyte[] data) {
                 foreach (ref c; data) {
                     c = c.toLower;
                 }
@@ -1339,7 +1339,7 @@ nothrow @safe:
         StringBuilder_ASCII toUpper() return scope {
             import sidero.base.text.ascii.characters : toUpper;
 
-            foreachContiguous((data) {
+            foreachContiguous((scope ref ubyte[] data) {
                 foreach (ref c; data) {
                     c = c.toUpper;
                 }
@@ -1363,7 +1363,7 @@ nothrow @safe:
 
             bool wasAlpha;
 
-            foreachContiguous((data) {
+            foreachContiguous((scope ref ubyte[] data) {
                 foreach (ref c; data) {
                     bool currentAlpha = c.isAlpha;
 

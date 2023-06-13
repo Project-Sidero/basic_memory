@@ -1424,7 +1424,7 @@ nothrow @nogc:
         size_t offsetForUs;
         bool ret = true;
 
-        other.foreachContiguous((data) {
+        other.foreachContiguous((scope ref ubyte[] data) {
             if (offsetForUs + data.length > us.length || us[offsetForUs .. offsetForUs + data.length] != data) {
                 ret = false;
                 return 1;
@@ -1457,7 +1457,7 @@ nothrow @nogc:
         size_t offsetForUs;
         bool ret = true;
 
-        other.foreachContiguous((data) {
+        other.foreachContiguous((scope ref ubyte[] data) {
             if (offsetForUs + data.length <= us.length) {
                 foreach (i; 0 .. data.length) {
                     if (data[i].toLower != us[offsetForUs + i].toLower) {
@@ -1586,7 +1586,7 @@ nothrow @nogc:
         size_t offsetForUs = size_t.max, otherLength;
         bool ret = true;
 
-        other.foreachContiguous((data) {
+        other.foreachContiguous((scope ref ubyte[] data) {
             if (offsetForUs == size_t.max) {
                 if (otherLength > us.length) {
                     ret = false;
@@ -1628,7 +1628,7 @@ nothrow @nogc:
         size_t offsetForUs = size_t.max, otherLength;
         bool ret = true;
 
-        other.foreachContiguous((data) {
+        other.foreachContiguous((scope ref ubyte[] data) {
             if (offsetForUs == size_t.max) {
                 if (otherLength > us.length) {
                     ret = false;
@@ -1771,7 +1771,7 @@ nothrow @nogc:
                 size_t offsetIntoUs, otherLength;
                 bool matched = true;
 
-                other.foreachContiguous((data) {
+                other.foreachContiguous((scope ref ubyte[] data) {
                     if (data.length > us.length - offsetIntoUs || data != us[offsetIntoUs .. offsetIntoUs + data.length]) {
                         matched = false;
                         return 1;
@@ -1810,7 +1810,7 @@ nothrow @nogc:
                 size_t offsetIntoUs, otherLength;
                 bool matched = true;
 
-                other.foreachContiguous((data) {
+                other.foreachContiguous((scope ref ubyte[] data) {
                     if (data.length <= us.length - offsetIntoUs) {
                         foreach (i; 0 .. data.length) {
                             if (data[i].toLower != us[offsetIntoUs + i].toLower) {
@@ -1959,7 +1959,7 @@ nothrow @nogc:
                 size_t offsetIntoUs, otherLength;
                 bool matched = true;
 
-                other.foreachContiguous((data) {
+                other.foreachContiguous((scope ref ubyte[] data) {
                     if (data.length > us.length - offsetIntoUs || data != us[offsetIntoUs .. offsetIntoUs + data.length]) {
                         matched = false;
                         return 1;
@@ -2004,7 +2004,7 @@ nothrow @nogc:
                 size_t offsetIntoUs, otherLength;
                 bool matched = true;
 
-                other.foreachContiguous((data) {
+                other.foreachContiguous((scope ref ubyte[] data) {
                     if (data.length <= us.length - offsetIntoUs) {
                         foreach (i; 0 .. data.length) {
                             if (data[i].toLower != us[offsetIntoUs + i].toLower) {
@@ -2165,7 +2165,7 @@ nothrow @nogc:
             size_t offsetIntoUs, otherLength;
             bool matched = true;
 
-            other.foreachContiguous((data) {
+            other.foreachContiguous((scope ref ubyte[] data) {
                 if (data.length > us.length - offsetIntoUs || data != us[offsetIntoUs .. offsetIntoUs + data.length]) {
                     matched = false;
                     return 1;
@@ -2208,7 +2208,7 @@ nothrow @nogc:
             size_t offsetIntoUs, otherLength;
             bool matched = true;
 
-            other.foreachContiguous((data) {
+            other.foreachContiguous((scope ref ubyte[] data) {
                 if (data.length <= us.length - offsetIntoUs) {
                     foreach (i; 0 .. data.length) {
                         if (data[i].toLower != us[offsetIntoUs + i].toLower) {
