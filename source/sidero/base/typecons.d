@@ -1,6 +1,7 @@
 ///
 module sidero.base.typecons;
 import sidero.base.text;
+
 export:
 
 /// Similar to std.typecons : Nullable except -betterC compatible
@@ -25,6 +26,10 @@ export @safe nothrow @nogc:
     ///
     bool isNull() scope {
         return !isSet;
+    }
+
+    bool opCast(T : bool)() scope const {
+        return this.isSet;
     }
 
     ///

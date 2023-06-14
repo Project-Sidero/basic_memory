@@ -227,6 +227,7 @@ unittest {
     assert(calculateLengthOfHost("[AAAA:BBBB::FFFF:1111:2222]") == 27);
     assert(calculateLengthOfHost("[::1]") == 5);
     assert(calculateLengthOfHost("[64:ff9b::192.0.2.128]") == 22);
+    assert(calculateLengthOfHost("[64::ff9b:192.0.2.128]") == 22);
     assert(calculateLengthOfHost("[v1337.BAD:BEEF+458]") == 20);
 }
 
@@ -577,11 +578,11 @@ size_t calculateLengthOfSchemeImpl(Input)(scope Input input, bool requireSuffix 
     input = input[];
 
     bool checkIfAlpha(C)(C input) {
-        return input <= 128 && isAlpha(cast(ubyte)input);
+        return input < 128 && isAlpha(cast(ubyte)input);
     }
 
     bool checkIfAlphaNum(C)(C input) {
-        return input <= 128 && isAlphaNumeric(cast(ubyte)input);
+        return input < 128 && isAlphaNumeric(cast(ubyte)input);
     }
 
     // check for initial ALPHA
@@ -624,11 +625,11 @@ size_t[3] calculateLengthOfUserInfoImpl(Input)(scope Input input, bool requireSu
     input = input[];
 
     bool checkIfAlphaNum(C)(C input) {
-        return input <= 128 && isAlphaNumeric(cast(ubyte)input);
+        return input < 128 && isAlphaNumeric(cast(ubyte)input);
     }
 
     bool checkIfNum(C)(C input) {
-        return input <= 128 && isNumeric(cast(ubyte)input);
+        return input < 128 && isNumeric(cast(ubyte)input);
     }
 
     size_t prefix, length, suffix, suffixAt;
@@ -718,15 +719,15 @@ size_t calculateLengthOfHostImpl(Input)(scope Input input) @trusted {
     // host          = IP-literal / IPv4address / reg-name
 
     bool checkIfAlpha(C)(C input) {
-        return input <= 128 && isAlpha(cast(ubyte)input);
+        return input < 128 && isAlpha(cast(ubyte)input);
     }
 
     bool checkIfAlphaNum(C)(C input) {
-        return input <= 128 && isAlphaNumeric(cast(ubyte)input);
+        return input < 128 && isAlphaNumeric(cast(ubyte)input);
     }
 
     bool checkIfNum(C)(C input) {
-        return input <= 128 && isNumeric(cast(ubyte)input);
+        return input < 128 && isNumeric(cast(ubyte)input);
     }
 
     if (input.startsWith("[")) {
@@ -798,17 +799,34 @@ size_t calculateLengthOfHostImpl(Input)(scope Input input) @trusted {
             if (ipLiteral.empty)
                 return 0;
 
+            //lets slice and dice to produce three strings
+            Input ipv6, ipv4;
+
+            {
+                ptrdiff_t index = ipLiteral.lastIndexOf(":"c);
+                if (index >= 0) {
+                    if (ipLiteral[index + 1 .. $].contains("."c)) {
+                        ipv6 = ipLiteral[0 .. index + 1];
+                        ipv4 = ipLiteral[index + 1 .. $];
+                    } else {
+                        ipv6 = ipLiteral;
+                    }
+                } else {
+                    ipv6 = ipLiteral;
+                }
+            }
+
             length = 1;
             uint inHexDigits;
 
-            const startingLength = ipLiteral.length;
+            const startingLength = ipv6.length;
             ptrdiff_t colonColonOffset = ipLiteral.indexOf("::");
             size_t leftHexCount, rightHexCount;
             bool postColonColon;
 
-            while (!ipLiteral.empty) {
-                const c = ipLiteral.front;
-                const lengthAtStart = ipLiteral.length;
+            while (!ipv6.empty) {
+                const c = ipv6.front;
+                const lengthAtStart = ipv6.length;
 
                 if (postColonColon) {
                     if (leftHexCount > 8)
@@ -835,17 +853,14 @@ size_t calculateLengthOfHostImpl(Input)(scope Input input) @trusted {
                             rightHexCount++;
                         inHexDigits++;
                     } else {
-                        doIPV4 = true;
-                        wasIPV6 = true;
-
                         length -= inHexDigits + 1;
                         break;
                     }
-                } else if (colonColonOffset >= 0 && startingLength - ipLiteral.length > colonColonOffset) {
+                } else if (colonColonOffset >= 0 && startingLength - ipv6.length > colonColonOffset) {
                     if (leftHexCount > 8)
                         return 0;
 
-                    postColonColon = startingLength - ipLiteral.length >= (colonColonOffset + 2);
+                    postColonColon = startingLength - ipv6.length >= (colonColonOffset + 2);
                     inHexDigits = 0;
                 } else {
                     /*
@@ -871,8 +886,13 @@ size_t calculateLengthOfHostImpl(Input)(scope Input input) @trusted {
                         return 0;
                 }
 
-                ipLiteral.popFront;
-                length += lengthAtStart - ipLiteral.length;
+                ipv6.popFront;
+                length += lengthAtStart - ipv6.length;
+            }
+
+            if (ipv4.length > 0) {
+                doIPV4 = true;
+                wasIPV6 = true;
             }
 
             // ]
@@ -1100,7 +1120,7 @@ size_t[2] calculateLengthOfQueryImpl(Input)(scope Input input, bool requireFirst
     bool gotQuery;
 
     bool checkIfAlphaNum(C)(C input) {
-        return input <= 128 && isAlphaNumeric(cast(ubyte)input);
+        return input < 128 && isAlphaNumeric(cast(ubyte)input);
     }
 
     // URI           = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
@@ -1176,7 +1196,7 @@ size_t calculateLengthOfFragmentImpl(Input)(scope Input input) {
     import sidero.base.text.ascii.characters : isAlphaNumeric;
 
     bool checkIfAlphaNum(C)(C input) {
-        return input <= 128 && isAlphaNumeric(cast(ubyte)input);
+        return input < 128 && isAlphaNumeric(cast(ubyte)input);
     }
 
     if (input.startsWith("#")) {

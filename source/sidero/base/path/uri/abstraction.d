@@ -1,4 +1,5 @@
 module sidero.base.path.uri.abstraction;
+import sidero.base.path.networking;
 import sidero.base.allocators;
 import sidero.base.attributes;
 import sidero.base.errors;
@@ -683,6 +684,33 @@ export @safe nothrow @nogc:
             state.mutex.unlock;
 
         return state.storage.asReadOnly(allocator);
+    }
+
+    ///
+    NetworkAddress toNetworkAddress() scope const {
+        auto gotPort = this.port;
+        const portValue = gotPort ? gotPort.get : 0;
+        return NetworkAddress.fromURIHost(this.host, portValue, false);
+    }
+
+    ///
+    @trusted unittest {
+        auto nAd = URIAddress.from("scheme://host:1234"c).assumeOkay.toNetworkAddress();
+        assert(nAd.port == 1234);
+
+        nAd.onNetworkOrder((uint address) {
+            // ipv4
+            assert(0);
+        }, (ushort[8] address) { assert(0); }, () {
+            // any ipv4
+            assert(0);
+        }, () {
+            // any ipv6
+            assert(0);
+        }, (scope String_ASCII hostname) { assert(hostname == "host"); }, () {
+            // invalid
+            assert(0);
+        });
     }
 
     static {
