@@ -56,8 +56,8 @@ enum LogRotateFrequency {
 }
 
 ///
-alias CustomTargetMessage = void delegate(LogLevel level, GDateTime dateTime, String_UTF8[2] moduleLine, String_UTF8 tags,
-        String_UTF8 levelText, String_UTF8 composite) @safe nothrow @nogc;
+alias CustomTargetMessage = void delegate(LogLevel level, GDateTime dateTime, String_UTF8 moduleLineUTF8,
+        String_UTF16 moduleLineUTF16, String_UTF8 tags, String_UTF8 levelText, String_UTF8 composite) @safe nothrow @nogc;
 ///
 alias CustomTargetOnRemove = void delegate() @safe nothrow @nogc;
 
@@ -124,6 +124,11 @@ export:
     this(return scope ref Logger other) scope {
         this.tupleof = other.tupleof;
         assert(this.name_.isNull, "Don't copy the Logger around directly, use it only by the LoggerReference");
+    }
+
+    ///
+    bool isNull() scope const {
+        return name.isNull;
     }
 
     ///
@@ -441,7 +446,10 @@ private:
                 filename ~= fileTarget.fileExtension;
 
                 fp ~= filename;
-                fileTarget.logStream = FileAppender(filename.toString());
+
+                auto filePath = FilePath.from(filename);
+                if (filePath)
+                    fileTarget.logStream = FileAppender(filePath.get);
             }
 
             fileTarget.logStream.append(contentBuilder);
@@ -450,8 +458,8 @@ private:
 
         void custom() @trusted {
             foreach (ref ct; customTargets.unsafeGetLiteral()) {
-                ct.message(level, currentDateTime, [String_ASCII(ModuleLine), String_ASCII(ModuleLine2)], tags,
-                        Text[level + (tags.isNull ? 0 : 6)], contentUTF8);
+                ct.messageDel(level, currentDateTime, String_UTF8(ModuleLine), String_UTF16(ModuleLine2), tags,
+                        String_UTF8(LevelTag[level + (tags.isNull ? 0 : 6)]), contentUTF8);
             }
         }
 
@@ -466,7 +474,7 @@ private:
                 contentBuilder ~= LevelTag[level + (tags.isNull ? 0 : 6)];
                 contentBuilder ~= ": ";
 
-                PrettyPrint!String_UTF8 prettyPrinter;
+                PrettyPrint prettyPrinter;
                 prettyPrinter(contentBuilder, args);
             }
 

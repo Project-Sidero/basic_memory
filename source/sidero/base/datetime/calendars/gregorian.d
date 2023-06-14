@@ -11,11 +11,11 @@ struct GregorianDate {
         ubyte month_, day_;
     }
 
+    export @safe nothrow @nogc:
+
     ///
     static immutable string DefaultFormat = "%j/%n/%Y", ISOFormat = "%Y%m%d", ISOExtFormat = "%Y-%m-%d", SimpleFormat = "%Y-%M-%d";
     static const UnixEpoch = GregorianDate(1970, 1, 1);
-
-export @safe nothrow @nogc:
 
     ///
     this(const DaysSinceY2k from) scope {

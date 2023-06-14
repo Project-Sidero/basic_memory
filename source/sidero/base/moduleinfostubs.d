@@ -13,9 +13,9 @@ version (NeedStubs) {
         "sidero.base.math.linear_algebra", "sidero.base.errors.result", "sidero.base.hash.utils", "sidero.base.hash.fnv",
         "sidero.base.algorithm", "sidero.base.text", "sidero.base.containers.map.concurrenthashmap",
         "sidero.base.containers.dynamicarray", "sidero.base.allocators.predefined",
-        "sidero.base.parallelism.rwmutex", "sidero.base.datetime.duration",
-        "sidero.base.containers.map.hashmap",
+        "sidero.base.parallelism.rwmutex", "sidero.base.datetime.duration", "sidero.base.containers.map.hashmap",
         "sidero.base.synchronization.mutualexclusion", "sidero.base.datetime", "sidero.base.system",
+        "sidero.base.logger", "sidero.base.datetime.time.clock",
     ]) {
         mixin(() {
             string mangleName = "_D";
