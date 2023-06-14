@@ -5,7 +5,7 @@ import sidero.base.text;
 import sidero.base.containers.dynamicarray;
 import sidero.base.allocators;
 
-/// port, IPv4, IPv6 are stored in big endian suitable for network API's.
+/// port, IPv4, IPv6 are stored in big endian suitable for network API's. Hostname is stored as IDN/Punycode.
 struct NetworkAddress {
     private @PrintIgnore @PrettyPrintIgnore {
         Type type_;
@@ -318,7 +318,10 @@ export @safe nothrow @nogc:
         NetworkAddress.from("127.0.0.1"c, 0).onNetworkOrder((uint address) {
             // ipv4
             assert(address == 0x100007F);
-        }, (ushort[8] address) { assert(0); }, () {
+        }, (ushort[8] address) {
+            // ipv6
+            assert(0);
+        }, () {
             // any ipv4
             assert(0);
         }, () {
@@ -332,7 +335,10 @@ export @safe nothrow @nogc:
         NetworkAddress.from("0.0.0.0"c, 0).onNetworkOrder((uint address) {
             // ipv4
             assert(0);
-        }, (ushort[8] address) { assert(0); }, () {
+        }, (ushort[8] address) {
+            // ipv6
+            assert(0);
+        }, () {
             // any ipv4
             assert(true);
         }, () {
@@ -346,7 +352,10 @@ export @safe nothrow @nogc:
         NetworkAddress.from("[CDEF::1234:127.0.0.1]"c, 0).onNetworkOrder((uint address) {
             // ipv4
             assert(0);
-        }, (ushort[8] address) { assert(address == [0xEFCD, 0, 0, 0, 0, 0x3412, 0x7F, 0x100]); }, () {
+        }, (ushort[8] address) {
+            // ipv6
+            assert(address == [0xEFCD, 0, 0, 0, 0, 0x3412, 0x7F, 0x100]);
+        }, () {
             // any ipv4
             assert(0);
         }, () {
@@ -360,7 +369,10 @@ export @safe nothrow @nogc:
         NetworkAddress.from("[::]"c, 0).onNetworkOrder((uint address) {
             // ipv4
             assert(0);
-        }, (ushort[8] address) { assert(0); }, () {
+        }, (ushort[8] address) {
+            // ipv6
+            assert(0);
+        }, () {
             // any ipv4
             assert(0);
         }, () {
@@ -374,7 +386,10 @@ export @safe nothrow @nogc:
         NetworkAddress.from("host.name"c, 0).onNetworkOrder((uint address) {
             // ipv4
             assert(0);
-        }, (ushort[8] address) { assert(0); }, () {
+        }, (ushort[8] address) {
+            // ipv6
+            assert(0);
+        }, () {
             // any ipv4
             assert(0);
         }, () {
@@ -391,7 +406,10 @@ export @safe nothrow @nogc:
         NetworkAddress.from("127.0.0.1"c, 0).onSystemOrder((uint address) {
             // ipv4
             assert(address == 0x7F_00_00_01);
-        }, (ushort[8] address) { assert(0); }, () {
+        }, (ushort[8] address) {
+            // ipv6
+            assert(0);
+        }, () {
             // any ipv4
             assert(0);
         }, () {
@@ -405,7 +423,10 @@ export @safe nothrow @nogc:
         NetworkAddress.from("[CDEF::1234:127.0.0.1]"c, 0).onSystemOrder((uint address) {
             // ipv4
             assert(0);
-        }, (ushort[8] address) { assert(address == [0xCDEF, 0, 0, 0, 0, 0x1234, 0x7F00, 0x1]); }, () {
+        }, (ushort[8] address) {
+            // ipv6
+            assert(address == [0xCDEF, 0, 0, 0, 0, 0x1234, 0x7F00, 0x1]);
+        }, () {
             // any ipv4
             assert(0);
         }, () {
@@ -433,15 +454,102 @@ export @safe nothrow @nogc:
             break;
 
         case Type.Hostname:
-            version (Windows) {
-                // TODO: use GetAddrInfoW https://learn.microsoft.com/en-us/windows/win32/api/ws2tcpip/nf-ws2tcpip-getaddrinfow
+            // this Windows specific version of function isn't required as ours is already encoded approprietely to ANSI
+            version (none) {
+                {
+                    String_UTF16 hn16 = String_UTF16(cast(string)this.hostname_.unsafeGetLiteral).dup;
+                    ADDRINFOW* result, current;
+
+                    // use GetAddrInfoW https://learn.microsoft.com/en-us/windows/win32/api/ws2tcpip/nf-ws2tcpip-getaddrinfow
+                    if (GetAddrInfoW(hn16.ptr, null, null, &result) == 0) {
+                        current = result;
+
+                        while (current !is null) {
+                            if (current.ai_addr.sa_family == AF_INET) {
+                                sockaddr_in* address = cast(sockaddr_in*)current.ai_addr;
+                                ret ~= NetworkAddress.fromIPv4(this.port_, address.sin_addr.s_addr, true, true);
+                            } else if (current.ai_addr.sa_family == AF_INET6) {
+                                sockaddr_in6* address = cast(sockaddr_in6*)current.ai_addr;
+                                ret ~= NetworkAddress.fromIPv6(this.port_, address.sin6_addr.s6_addr16, true, true);
+                            }
+
+                            current = current.ai_next;
+                        }
+
+                        FreeAddrInfoW(result);
+                        break;
+                    } else {
+                        // use fallback getaddrinfo
+                    }
+                }
             }
 
-            // TODO: use getaddrinfo https://man7.org/linux/man-pages/man3/getaddrinfo.3.html
+            {
+                addrinfo* result, current;
+
+                if (getaddrinfo(cast(char*)this.hostname_.ptr, null, null, &result) == 0) {
+                    current = result;
+
+                    while (current !is null) {
+                        if (current.ai_addr.sa_family == AF_INET) {
+                            sockaddr_in* address = cast(sockaddr_in*)current.ai_addr;
+                            ret ~= NetworkAddress.fromIPv4(this.port_, address.sin_addr.s_addr, true, true);
+                        } else if (current.ai_addr.sa_family == AF_INET6) {
+                            sockaddr_in6* address = cast(sockaddr_in6*)current.ai_addr;
+                            ret ~= NetworkAddress.fromIPv6(this.port_, address.sin6_addr.s6_addr16, true, true);
+                        }
+
+                        current = current.ai_next;
+                    }
+
+                    freeaddrinfo(result);
+                }
+            }
             break;
         }
 
         return ret;
+    }
+
+    ///
+    StringBuilder_UTF8 toString(return scope RCAllocator allocator = RCAllocator.init) scope const @trusted {
+        StringBuilder_UTF8 sink = StringBuilder_UTF8(allocator);
+        this.toString(sink);
+        return sink;
+    }
+
+    ///
+    void toString(Sink)(scope ref Sink sink) scope const @trusted {
+        import std.bitmanip : swapEndian;
+
+        bool doPort = true;
+
+        (cast(NetworkAddress*)&this).onNetworkOrder((uint address) {
+            // ipv4
+            sink.formattedWrite("{:d}.{:d}.{:d}.{:d}", address & 0xFF, (address >> 8) & 0xFF, (address >> 16) & 0xFF, (address >> 24) & 0xFF);
+        }, (ushort[8] address) {
+            // ipv6
+            sink.formattedWrite("[{:4X}:{:4X}:{:4X}:{:4X}:{:4X}:{:4X}:{:4X}:{:4X}]", swapEndian(address[0]),
+                swapEndian(address[1]), swapEndian(address[2]), swapEndian(address[3]), swapEndian(address[4]),
+                swapEndian(address[5]), swapEndian(address[6]), swapEndian(address[7]));
+        }, () {
+            // any ipv4
+            sink ~= "0.0.0.0"c;
+        }, () {
+            // any ipv6
+            sink ~= "[::]"c;
+        }, (scope String_ASCII hostname) {
+            import sidero.base.encoding.bootstring;
+
+            if (!IDNAPunycode.decode(sink, hostname))
+                doPort = false;
+        }, () {
+            // invalid
+            doPort = false;
+        });
+
+        if (doPort)
+            sink.formattedWrite(":{:d}", this.port());
     }
 
     ///
@@ -622,5 +730,31 @@ private:
                 return true;
             }
         }
+    }
+}
+
+private:
+
+version (Windows) {
+    import core.sys.windows.winsock2 : sockaddr, AF_INET, AF_INET6, sockaddr_in, sockaddr_in6, getaddrinfo, freeaddrinfo, addrinfo;
+
+    enum {
+        AI_V4MAPPED = 0x0800,
+    }
+
+    struct ADDRINFOW {
+        int ai_flags;
+        int ai_family;
+        int ai_socktype;
+        int ai_protocol;
+        size_t ai_addrlen;
+        wchar* ai_canonname;
+        sockaddr* ai_addr;
+        ADDRINFOW* ai_next;
+    }
+
+    extern (Windows) nothrow @nogc {
+        int GetAddrInfoW(const(wchar)*, wchar*, const ADDRINFOW*, ADDRINFOW**);
+        void FreeAddrInfoW(ADDRINFOW*);
     }
 }

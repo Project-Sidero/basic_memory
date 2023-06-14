@@ -939,7 +939,8 @@ bool writeStructClass(Builder, Input)(scope ref Builder output, scope Input inpu
 
                         if (!hadToString) {
                             static if (gotUDAs.length == 0 && gotUDAsPretty.length == 0) {
-                                size_t offsetForToString = output.length;
+                                const offsetForToString = output.length;
+                                const hadOpenBracket = output.endsWith("("c);
 
                                 static if (__traits(compiles, __traits(child, input, Symbols[SymbolId])(output))) {
                                     __traits(child, input, Symbols[SymbolId])(output);
@@ -958,7 +959,7 @@ bool writeStructClass(Builder, Input)(scope ref Builder output, scope Input inpu
 
                                     if (subset == FQN)
                                         output.remove(offsetForToString, FQN.length);
-                                    else
+                                    else if (!hadOpenBracket)
                                         output.insert(offsetForToString, " -> "c);
                                 }
                             }
