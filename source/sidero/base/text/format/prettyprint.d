@@ -461,8 +461,8 @@ private:
             })) {
                 foreach (v; input) {
                     builder ~= "\n"c;
-                    handlePrefix();
-                    handle(v);
+                    handlePrefix(builder);
+                    handle(builder, v);
                     builder ~= ","c;
                 }
             } else

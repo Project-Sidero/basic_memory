@@ -4,7 +4,7 @@ export @safe nothrow @nogc:
 
 ///
 int genericCompare(Type)(scope Type first, scope Type second) @trusted {
-    import std.traits : isArray;
+    import std.traits : isArray, Unqual;
 
     enum isSlice = isArray!Type;
     enum CanCompareDirectly = __traits(compiles, { bool got = Type.init < Type.init; });
@@ -25,10 +25,18 @@ int genericCompare(Type)(scope Type first, scope Type second) @trusted {
         else if (first.length > second.length)
             return 1;
         else {
-            foreach (offset, ref v1; first) {
-                int got = genericCompare(cast()v1, cast()second[offset]);
-                if (got != 0)
-                    return got;
+            static if (is(Unqual!Type == void[])) {
+                foreach (offset, ref v1; cast(ubyte[])first) {
+                    int got = genericCompare(v1, (cast(ubyte[])second)[offset]);
+                    if (got != 0)
+                        return got;
+                }
+            } else {
+                foreach (offset, ref v1; first) {
+                    int got = genericCompare(cast()v1, cast()second[offset]);
+                    if (got != 0)
+                        return got;
+                }
             }
 
             return 0;

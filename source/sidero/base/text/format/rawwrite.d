@@ -735,11 +735,14 @@ bool writeIterable(Builder, Input)(scope ref Builder output, scope Input input) 
     static if (isDynamicArray!Input) {
         alias SubType = typeof(input[0]);
 
-        foreach (v; cast(Unqual!SubType[])input[]) {
-            if (i++ > 0)
-                output ~= ", "c;
+        static if (is(Unqual!SubType == void)) {
+        } else {
+            foreach (v; cast(Unqual!SubType[])input[]) {
+                if (i++ > 0)
+                    output ~= ", "c;
 
-            formattedWriteImpl(output, String_UTF32.init, true, v);
+                formattedWriteImpl(output, String_UTF32.init, true, v);
+            }
         }
     } else {
         foreach (v; input) {
