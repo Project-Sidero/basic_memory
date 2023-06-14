@@ -757,4 +757,9 @@ version (Windows) {
         int GetAddrInfoW(const(wchar)*, wchar*, const ADDRINFOW*, ADDRINFOW**);
         void FreeAddrInfoW(ADDRINFOW*);
     }
-}
+} else version (Posix) {
+    import core.sys.posix.sys.socket : sockaddr, AF_INET, AF_INET6;
+    import core.sys.posix.netinet.in_ : sockaddr_in, sockaddr_in6;
+    import core.sys.posix.netdb : getaddrinfo, freeaddrinfo, addrinfo;
+} else
+    static assert(0, "Not implemented");
