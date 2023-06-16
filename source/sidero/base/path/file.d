@@ -890,6 +890,13 @@ export @safe nothrow @nogc:
         return state.storage.byUTF16.asReadOnly(allocator);
     }
 
+    ///
+    ulong toHash() scope const {
+        if (this.isNull)
+            return StringBuilder_UTF8.init.toHash();
+        return state.storage.toHash();
+    }
+
     static {
         /// Consturct a file path given a platform rule set (default is host platform)
         Result!FilePath from(scope String_ASCII input, FilePathPlatform platformRule = DefaultPlatfromRule,

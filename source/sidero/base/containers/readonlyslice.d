@@ -294,7 +294,7 @@ nothrow @nogc:
     }
 
     ///
-    bool isNull() scope {
+    bool isNull() scope const {
         return this.literal is null || this.literal.length == 0;
     }
 

@@ -687,6 +687,13 @@ export @safe nothrow @nogc:
     }
 
     ///
+    ulong toHash() scope const {
+        if (this.isNull)
+            return StringBuilder_ASCII.init.toHash();
+        return state.storage.toHash();
+    }
+
+    ///
     NetworkAddress toNetworkAddress() scope const {
         auto gotPort = this.port;
         const portValue = gotPort ? gotPort.get : 0;

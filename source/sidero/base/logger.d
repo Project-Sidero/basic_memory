@@ -346,10 +346,10 @@ export:
 private:
     void message(string moduleName, int line, Args...)(LogLevel level, Args args) scope {
         import sidero.base.datetime.time.clock;
-        import std.conv : text, wtext;
+        import sidero.base.internal.conv;
 
-        enum ModuleLine2 = moduleName.wtext ~ ":"w ~ line.wtext;
-        enum ModuleLine = " `" ~ moduleName ~ ":" ~ line.text ~ "` ";
+        enum ModuleLine2 = moduleName.stringToWstring ~ ":"w ~ intToWString!line;
+        enum ModuleLine = " `" ~ moduleName ~ ":" ~ intToString!line ~ "` ";
 
         GDateTime currentDateTime = accurateDateTime();
         StringBuilder_UTF8 dateTimeText = currentDateTime.format(this.dateTimeFormat);

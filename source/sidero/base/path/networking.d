@@ -553,6 +553,12 @@ export @safe nothrow @nogc:
     }
 
     ///
+    ulong toHash() scope const @trusted {
+        import sidero.base.hash.utils;
+        return hashOf(*cast(NetworkAddress*)&this);
+    }
+
+    ///
     enum Type {
         ///
         Invalid,
