@@ -733,11 +733,11 @@ bool writeIterable(Builder, Input)(scope ref Builder output, scope Input input) 
     size_t i;
 
     static if (isDynamicArray!Input) {
-        alias SubType = typeof(input[0]);
+        alias SubType = Unqual!(typeof(input[0]));
 
-        static if (is(Unqual!SubType == void)) {
+        static if (is(SubType == void)) {
         } else {
-            foreach (v; cast(Unqual!SubType[])input[]) {
+            foreach (v; cast(SubType[])input[]) {
                 if (i++ > 0)
                     output ~= ", "c;
 

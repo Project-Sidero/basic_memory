@@ -107,7 +107,7 @@ unittest {
     assert(formattedWrite(String_UTF8("{1:.1f} {:s}: {:s}"), 1, -1234.0, String_UTF8("success")) == "-1234.0 1: success");
 }
 
-package(sidero.base.text.format):
+//package(sidero.base.text.format):
 
 Builder formattedWriteImpl(Builder, Args...)(return scope ref Builder output, scope String_UTF8 formatString, bool quote, scope Args args) @trusted {
     return formattedWriteImpl(output, formatString.byUTF32, quote, args);

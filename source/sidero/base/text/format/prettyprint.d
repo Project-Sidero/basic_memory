@@ -47,7 +47,7 @@ export @safe nothrow @nogc:
         }
     }
 
-/*private:*/
+    /*private:*/
     import sidero.base.traits;
     import sidero.base.text.format.write;
 
@@ -88,7 +88,8 @@ export @safe nothrow @nogc:
             builder ~= this.prefixSuffix;
     }
 
-    void handle(Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useQuotes = true, bool useName = true, bool forcePrint = false) @trusted {
+    void handle(Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useQuotes = true, bool useName = true,
+            bool forcePrint = false) @trusted {
         alias ActualType = Unqual!Type;
 
         static if (is(ActualType == Type)) {
@@ -212,7 +213,8 @@ export @safe nothrow @nogc:
         }
     }
 
-    void handleResult(WrappedType, Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useQuotes, bool useName, bool forcePrint) {
+    void handleResult(WrappedType, Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useQuotes,
+            bool useName, bool forcePrint) {
         if (input && !input.isNull) {
             // ok print the thing
 
@@ -257,11 +259,17 @@ export @safe nothrow @nogc:
             static foreach (name; FieldNameTuple!Type) {
                 {
                     alias member = __traits(getMember, input, name);
-                    bool ignore = __traits(getVisibility, member) == "private";
+                    enum accessible = __traits(getVisibility, member) != "private" && () {
+                        bool ret = true;
 
-                    foreach (attr; __traits(getAttributes, member)) {
-                        ignore = ignore || is(attr == PrettyPrintIgnore);
-                    }
+                        foreach (attr; __traits(getAttributes, member)) {
+                            if (is(attr == PrettyPrintIgnore))
+                                ret = false;
+                        }
+
+                        return ret;
+                    }();
+                    bool ignore = !accessible;
 
                     static foreach (name2; FieldNameTuple!Type) {
                         {
@@ -273,18 +281,20 @@ export @safe nothrow @nogc:
                         }
                     }
 
-                    if (!ignore) {
-                        if (!isFirst)
-                            builder ~= ", "c;
-                        else
-                            isFirst = false;
+                    static if (accessible) {
+                        if (!ignore) {
+                            if (!isFirst)
+                                builder ~= ", "c;
+                            else
+                                isFirst = false;
 
-                        builder ~= "\n"c;
+                            builder ~= "\n"c;
 
-                        this.handlePrefix(builder, false, true, false);
-                        builder ~= name;
-                        builder ~= ": "c;
-                        this.handle(builder, __traits(getMember, input, name), true);
+                            this.handlePrefix(builder, false, true, false);
+                            builder ~= name;
+                            builder ~= ": "c;
+                            this.handle(builder, __traits(getMember, input, name), true);
+                        }
                     }
                 }
             }
@@ -300,11 +310,17 @@ export @safe nothrow @nogc:
                     static foreach (name; FieldNameTuple!Base) {
                         {
                             alias member = __traits(getMember, input, name);
-                            bool ignore = __traits(getVisibility, member) == "private", explicitIgnore;
+                            enum accessible = __traits(getVisibility, member) != "private" && () {
+                                bool ret = true;
 
-                            foreach (attr; __traits(getAttributes, member)) {
-                                explicitIgnore = explicitIgnore || is(attr == PrettyPrintIgnore);
-                            }
+                                foreach (attr; __traits(getAttributes, member)) {
+                                    if (is(attr == PrettyPrintIgnore))
+                                        ret = false;
+                                }
+
+                                return ret;
+                            }();
+                            bool ignore = !accessible;
 
                             static foreach (name2; FieldNameTuple!Type) {
                                 {
@@ -316,17 +332,19 @@ export @safe nothrow @nogc:
                                 }
                             }
 
-                            if (!ignore && !explicitIgnore) {
-                                if (!isFirst)
-                                    builder ~= ", "c;
-                                else
-                                    isFirst = false;
+                            static if (accessible) {
+                                if (!ignore) {
+                                    if (!isFirst)
+                                        builder ~= ", "c;
+                                    else
+                                        isFirst = false;
 
-                                builder ~= "\n";
-                                handlePrefix(builder, false, true, false);
-                                builder ~= name;
-                                builder ~= ": "c;
-                                handle(builder, __traits(getMember, input, name), true);
+                                    builder ~= "\n";
+                                    handlePrefix(builder, false, true, false);
+                                    builder ~= name;
+                                    builder ~= ": "c;
+                                    handle(builder, __traits(getMember, input, name), true);
+                                }
                             }
                         }
                     }
@@ -340,11 +358,18 @@ export @safe nothrow @nogc:
             static foreach (name; FieldNameTuple!Type) {
                 {
                     alias member = __traits(getMember, input, name);
-                    bool accessible = __traits(getVisibility, member) == "private", explicitIgnore, ignore = accessible, overload;
+                    enum accessible = __traits(getVisibility, member) != "private";
+                    enum explicitIgnore = () {
+                        bool ret = true;
 
-                    foreach (attr; __traits(getAttributes, member)) {
-                        explicitIgnore = explicitIgnore || is(attr == PrettyPrintIgnore);
-                    }
+                        foreach (attr; __traits(getAttributes, member)) {
+                            if (is(attr == PrettyPrintIgnore))
+                                ret = false;
+                        }
+
+                        return ret;
+                    }();
+                    bool ignore = !accessible, overload;
 
                     static foreach (name2; FieldNameTuple!Type) {
                         {
@@ -357,25 +382,27 @@ export @safe nothrow @nogc:
                         }
                     }
 
-                    if (ignore && !explicitIgnore) {
-                        if (isFirst) {
-                            isFirst = false;
+                    static if (accessible && !explicitIgnore) {
+                        if (ignore) {
+                            if (isFirst) {
+                                isFirst = false;
+                                builder ~= "\n"c;
+
+                                handlePrefix(builder, false, true, false);
+                                builder ~= "---- ignoring ----"c;
+                            } else
+                                builder ~= ","c;
+
                             builder ~= "\n"c;
-
                             handlePrefix(builder, false, true, false);
-                            builder ~= "---- ignoring ----"c;
-                        } else
-                            builder ~= ","c;
 
-                        builder ~= "\n"c;
-                        handlePrefix(builder, false, true, false);
+                            if (accessible)
+                                builder ~= "private "c;
+                            if (overload)
+                                builder ~= "union "c;
 
-                        if (accessible)
-                            builder ~= "private "c;
-                        if (overload)
-                            builder ~= "union "c;
-
-                        builder ~= name;
+                            builder ~= name;
+                        }
                     }
                 }
             }
@@ -391,12 +418,18 @@ export @safe nothrow @nogc:
                     static foreach (name; FieldNameTuple!Base) {
                         {
                             alias member = __traits(getMember, input, name);
-                            bool accessible = __traits(getVisibility, member) == "private", explicitIgnore,
-                            ignore = accessible, overload;
+                            enum accessible = __traits(getVisibility, member) != "private";
+                            enum explicitIgnore = () {
+                                bool ret = true;
 
-                            foreach (attr; __traits(getAttributes, member)) {
-                                explicitIgnore = explicitIgnore || is(attr == PrettyPrintIgnore);
-                            }
+                                foreach (attr; __traits(getAttributes, member)) {
+                                    if (is(attr == PrettyPrintIgnore))
+                                        ret = false;
+                                }
+
+                                return ret;
+                            }();
+                            bool ignore = !accessible, overload;
 
                             static foreach (name2; FieldNameTuple!Type) {
                                 {
@@ -409,25 +442,27 @@ export @safe nothrow @nogc:
                                 }
                             }
 
-                            if (ignore && !explicitIgnore) {
-                                if (isFirst) {
-                                    isFirst = false;
+                            static if (accessible && !explicitIgnore) {
+                                if (ignore) {
+                                    if (isFirst) {
+                                        isFirst = false;
+                                        builder ~= "\n"c;
+
+                                        handlePrefix(builder, false, true, false);
+                                        builder ~= "---- ignoring ----"c;
+                                    } else
+                                        builder ~= ","c;
+
                                     builder ~= "\n"c;
-
                                     handlePrefix(builder, false, true, false);
-                                    builder ~= "---- ignoring ----"c;
-                                } else
-                                    builder ~= ","c;
 
-                                builder ~= "\n"c;
-                                handlePrefix(builder, false, true, false);
+                                    if (accessible)
+                                        builder ~= "private "c;
+                                    if (overload)
+                                        builder ~= "union "c;
 
-                                if (accessible)
-                                    builder ~= "private "c;
-                                if (overload)
-                                    builder ~= "union "c;
-
-                                builder ~= name;
+                                    builder ~= name;
+                                }
                             }
                         }
                     }
@@ -442,9 +477,9 @@ export @safe nothrow @nogc:
                 builder ~= " ["c;
 
             static if (__traits(compiles, {
-                foreach (key, value; input) {
-                }
-            })) {
+                    foreach (key, value; input) {
+                    }
+                })) {
                 foreach (k, v; input) {
                     builder ~= "\n"c;
                     handlePrefix(builder);
@@ -456,9 +491,9 @@ export @safe nothrow @nogc:
                     builder ~= ","c;
                 }
             } else static if (__traits(compiles, {
-                foreach (value; input) {
-                }
-            })) {
+                    foreach (value; input) {
+                    }
+                })) {
                 foreach (v; input) {
                     builder ~= "\n"c;
                     handlePrefix(builder);
@@ -474,45 +509,47 @@ export @safe nothrow @nogc:
                 builder ~= "]"c;
         }
 
-        bool hadToString;
+        {
+            bool hadToString;
 
-        static if (haveToStringPretty!Type) {
-            {
-                alias Symbols = __traits(getOverloads, Type, "toStringPretty");
+            static if (haveToStringPretty!Type) {
+                {
+                    alias Symbols = __traits(getOverloads, Type, "toStringPretty");
 
-                static foreach (SymbolId; 0 .. Symbols.length) {
-                    {
-                        alias gotUDAs = Filter!(isDesiredUDA!PrettyPrintIgnore, __traits(getAttributes, Symbols[SymbolId]));
+                    static foreach (SymbolId; 0 .. Symbols.length) {
+                        {
+                            alias gotUDAs = Filter!(isDesiredUDA!PrettyPrintIgnore, __traits(getAttributes, Symbols[SymbolId]));
 
-                        if (!hadToString) {
-                            static if (gotUDAs.length == 0) {
-                                size_t offsetForToString = builder.length;
+                            if (!hadToString) {
+                                static if (gotUDAs.length == 0) {
+                                    size_t offsetForToString = builder.length;
 
-                                static if (__traits(compiles, __traits(child, input, Symbols[SymbolId])(builder))) {
-                                    __traits(child, input, Symbols[SymbolId])(builder);
-                                    hadToString = true;
-                                } else static if (__traits(compiles, __traits(child, input, Symbols[SymbolId])(&builder.put))) {
-                                    __traits(child, input, Symbols[SymbolId])(&builder.put);
-                                    hadToString = true;
-                                } else static if (__traits(compiles, builder ~= __traits(child, input, Symbols[SymbolId])())) {
-                                    builder ~= __traits(child, input, Symbols[SymbolId])();
-                                    hadToString = true;
-                                }
+                                    static if (__traits(compiles, __traits(child, input, Symbols[SymbolId])(builder))) {
+                                        __traits(child, input, Symbols[SymbolId])(builder);
+                                        hadToString = true;
+                                    } else static if (__traits(compiles, __traits(child, input, Symbols[SymbolId])(&builder.put))) {
+                                        __traits(child, input, Symbols[SymbolId])(&builder.put);
+                                        hadToString = true;
+                                    } else static if (__traits(compiles, builder ~= __traits(child, input, Symbols[SymbolId])())) {
+                                        builder ~= __traits(child, input, Symbols[SymbolId])();
+                                        hadToString = true;
+                                    }
 
-                                if (hadToString && builder.length > offsetForToString) {
-                                    auto prior = builder[0 .. offsetForToString], subset = builder[offsetForToString .. $];
+                                    if (hadToString && builder.length > offsetForToString) {
+                                        auto prior = builder[0 .. offsetForToString], subset = builder[offsetForToString .. $];
 
-                                    if (subset == FQN)
-                                        builder.remove(offsetForToString, ptrdiff_t.max);
-                                    else if (subset.startsWith(", "c)) {
-                                        builder.remove(offsetForToString, 1);
-                                        builder.insert(offsetForToString + 1, "->\n"c);
-                                    } else if (subset.contains("\n") || subset.length > 40) {
-                                        // forty was chosen mostly at random,
-                                        // but its half a lot of max line lengths (80) so can't be too bad
-                                        builder.insert(offsetForToString, "->\n"c);
-                                    } else if (!prior.endsWith("("c)) {
-                                        builder.insert(offsetForToString, " ->\n"c);
+                                        if (subset == FQN)
+                                            builder.remove(offsetForToString, ptrdiff_t.max);
+                                        else if (subset.startsWith(", "c)) {
+                                            builder.remove(offsetForToString, 1);
+                                            builder.insert(offsetForToString + 1, "->\n"c);
+                                        } else if (subset.contains("\n") || subset.length > 40) {
+                                            // forty was chosen mostly at random,
+                                            // but its half a lot of max line lengths (80) so can't be too bad
+                                            builder.insert(offsetForToString, "->\n"c);
+                                        } else if (!prior.endsWith("("c)) {
+                                            builder.insert(offsetForToString, " ->\n"c);
+                                        }
                                     }
                                 }
                             }
@@ -520,42 +557,42 @@ export @safe nothrow @nogc:
                     }
                 }
             }
-        }
 
-        static if (haveToString!Type) {
-            {
-                alias Symbols = __traits(getOverloads, Type, "toString");
+            static if (haveToString!Type) {
+                {
+                    alias Symbols = __traits(getOverloads, Type, "toString");
 
-                static foreach (SymbolId; 0 .. Symbols.length) {
-                    {
-                        alias gotUDAs = Filter!(isDesiredUDA!PrettyPrintIgnore, __traits(getAttributes, Symbols[SymbolId]));
+                    static foreach (SymbolId; 0 .. Symbols.length) {
+                        {
+                            alias gotUDAs = Filter!(isDesiredUDA!PrettyPrintIgnore, __traits(getAttributes, Symbols[SymbolId]));
 
-                        if (!hadToString) {
-                            static if (gotUDAs.length == 0) {
-                                size_t offsetForToString = builder.length;
+                            if (!hadToString) {
+                                static if (gotUDAs.length == 0) {
+                                    size_t offsetForToString = builder.length;
 
-                                static if (__traits(compiles, __traits(child, input, Symbols[SymbolId])(builder))) {
-                                    __traits(child, input, Symbols[SymbolId])(builder);
-                                    hadToString = true;
-                                } else static if (__traits(compiles, __traits(child, input, Symbols[SymbolId])(&builder.put))) {
-                                    __traits(child, input, Symbols[SymbolId])(&builder.put);
-                                    hadToString = true;
-                                } else static if (__traits(compiles, builder ~= __traits(child, input, Symbols[SymbolId])())) {
-                                    builder ~= __traits(child, input, Symbols[SymbolId])();
-                                    hadToString = true;
-                                }
+                                    static if (__traits(compiles, __traits(child, input, Symbols[SymbolId])(builder))) {
+                                        __traits(child, input, Symbols[SymbolId])(builder);
+                                        hadToString = true;
+                                    } else static if (__traits(compiles, __traits(child, input, Symbols[SymbolId])(&builder.put))) {
+                                        __traits(child, input, Symbols[SymbolId])(&builder.put);
+                                        hadToString = true;
+                                    } else static if (__traits(compiles, builder ~= __traits(child, input, Symbols[SymbolId])())) {
+                                        builder ~= __traits(child, input, Symbols[SymbolId])();
+                                        hadToString = true;
+                                    }
 
-                                if (hadToString && builder.length > offsetForToString) {
-                                    auto prior = builder[0 .. offsetForToString], subset = builder[offsetForToString .. $];
+                                    if (hadToString && builder.length > offsetForToString) {
+                                        auto prior = builder[0 .. offsetForToString], subset = builder[offsetForToString .. $];
 
-                                    if (subset == FQN) {
-                                        builder.remove(offsetForToString, ptrdiff_t.max);
-                                    } else if (subset.contains("\n"c) || subset.length > 60) {
-                                        // sixty was chosen mostly at random,
-                                        // but its half a lot of max line lengths (80) so can't be too bad
-                                        builder.insert(offsetForToString, "->\n"c);
-                                    } else if (!prior.endsWith("("c)) {
-                                        builder.insert(offsetForToString, " ->\n"c);
+                                        if (subset == FQN) {
+                                            builder.remove(offsetForToString, ptrdiff_t.max);
+                                        } else if (subset.contains("\n"c) || subset.length > 60) {
+                                            // sixty was chosen mostly at random,
+                                            // but its half a lot of max line lengths (80) so can't be too bad
+                                            builder.insert(offsetForToString, "->\n"c);
+                                        } else if (!prior.endsWith("("c)) {
+                                            builder.insert(offsetForToString, " ->\n"c);
+                                        }
                                     }
                                 }
                             }

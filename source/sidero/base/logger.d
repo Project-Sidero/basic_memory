@@ -348,7 +348,7 @@ export:
         mutex.unlock;
     }
 
-private:
+/*private:*/
     void message(string moduleName, int line, Args...)(LogLevel level, Args args) scope {
         import sidero.base.datetime.time.clock;
         import sidero.base.internal.conv;
