@@ -169,14 +169,9 @@ Builder formattedWriteImpl(Builder, Args...)(return scope ref Builder output, sc
                 formatString = String_UTF32.init;
         }
 
-        FormatSpecifier format;
-
-        if (!formatString.empty) {
-            format = FormatSpecifier.from(formatString, false);
-
-            if (format.argId >= 0)
-                argId = format.argId;
-        }
+        FormatSpecifier format = !formatString.empty ? FormatSpecifier.from(formatString, false) : FormatSpecifier.init;
+        if (format.argId >= 0)
+            argId = format.argId;
 
     ArgSwitch:
         switch (argId) {

@@ -84,7 +84,7 @@ struct Logger {
         FileTarget fileTarget;
         DynamicArray!CustomTarget customTargets;
 
-        export ref TestTestSetLockInline mutex() scope return nothrow @nogc {
+        export ref TestTestSetLockInline mutex() scope return nothrow @nogc @trusted {
             return *cast(TestTestSetLockInline*)mutexStorage.ptr;
         }
 
@@ -272,15 +272,19 @@ export:
         ret.allocator = allocator;
         ret.name_ = name;
         ret.dateTimeFormat = GDateTime.ISO8601Format;
-        ret.logLevel = LogLevel.Info;
+        ret.targets = LoggingTargets.Console;
 
         ret.fileTarget.filePrefix = String_UTF8("log");
         ret.fileTarget.filePrefixSeparator = String_UTF8("_");
         ret.fileTarget.fileExtension = String_UTF8("log");
         ret.fileTarget.logRotateFrequency = LogRotateFrequency.OnStart;
 
-        if (name == "global")
+        if (name == "global") {
             globalLogger = ret;
+            ret.logLevel = LogLevel.Info;
+        } else {
+            ret.logLevel = LogLevel.Error;
+        }
 
         mutexForCreation.unlock;
         return ret;
@@ -610,7 +614,7 @@ private:
 import sidero.base.containers.map.concurrenthashmap;
 import sidero.base.synchronization.mutualexclusion : TestTestSetLockInline;
 import sidero.base.internal.filesystem;
-import sidero.base.datetime;
+import sidero.base.datetime : GDateTime;
 
 __gshared {
     TestTestSetLockInline mutexForCreation;

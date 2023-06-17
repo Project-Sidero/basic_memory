@@ -7,8 +7,8 @@ int genericCompare(Type)(scope Type first, scope Type second) @trusted {
     import std.traits : isArray, Unqual;
 
     enum isSlice = isArray!Type;
-    enum CanCompareDirectly = __traits(compiles, { bool got = Type.init < Type.init; });
-    enum HaveOpCmp = __traits(compiles, { int got = Type.init.opCmp(Type.init); });
+    enum CanCompareDirectly = __traits(compiles, { bool got = first < second; });
+    enum HaveOpCmp = __traits(compiles, { int got = first.opCmp(second); });
 
     static if (HaveOpCmp) {
         return first.opCmp(second);

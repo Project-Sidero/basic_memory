@@ -70,8 +70,14 @@ DateTime!GregorianDate accurateDateTime() @trusted {
 }
 
 /// Get the current year
-long currentYear() {
-    return accurateDateTime().year;
+long currentYear() @trusted {
+    import core.stdc.time;
+
+    time_t t = time(null);
+    tm* utcT = gmtime(&t);
+    assert(utcT !is null);
+
+    return utcT.tm_year + 1900;
 }
 
 version (Windows) {

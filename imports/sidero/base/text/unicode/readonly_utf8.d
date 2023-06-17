@@ -524,8 +524,10 @@ nothrow @nogc:
 
         ///
         ~this() {
-            if (haveIterator)
+            if (haveIterator) {
+                assert(this.iterator !is null);
                 this.iterator.rc(false);
+            }
 
             if (this.lifeTime !is null && atomicOp!"-="(lifeTime.refCount, 1) == 0) {
                 RCAllocator allocator = lifeTime.allocator;

@@ -44,9 +44,11 @@ export:
     invariant {
         assert(head.next is null || !poolAllocator.isNull);
 
-        Node* current = cast(Node*)head.next;
-        while (current !is null)
-            current = current.next;
+        version(none) {
+            Node* current = cast(Node*)head.next;
+            while (current !is null)
+                current = current.next;
+        }
     }
 
     private {

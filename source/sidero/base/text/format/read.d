@@ -156,14 +156,9 @@ Expected!(Args.length) formattedReadImpl(Input, Args...)(scope ref Input input, 
             }
         }
 
-        FormatSpecifier format;
-
-        if (!formatString.empty) {
-            format = FormatSpecifier.from(formatString, true);
-
-            if (format.argId >= 0)
-                argId = format.argId;
-        }
+        FormatSpecifier format = !formatString.empty ? FormatSpecifier.from(formatString, true) : FormatSpecifier.init;
+        if (format.argId >= 0)
+            argId = format.argId;
 
     ArgSwitch:
         switch (argId) {

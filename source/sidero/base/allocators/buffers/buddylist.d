@@ -40,10 +40,6 @@ export:
     invariant {
         assert(!poolAllocator.isNull);
 
-        foreach (block; blocks) {
-            assert(block is null);
-        }
-
         version (none) {
             foreach (offset; 0 .. NumberOfBlocks) {
                 Block* current = cast(Block*)blocks[offset];
