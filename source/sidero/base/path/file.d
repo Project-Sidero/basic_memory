@@ -997,7 +997,7 @@ export @safe nothrow @nogc:
         }
     }
 
-private:
+/*private:*/
 
     ErrorInfo evaluateRelativeComponents() scope {
         StringBuilder_UTF8 storage = state.storage.dup(state.allocator);

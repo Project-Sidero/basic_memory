@@ -199,7 +199,7 @@ pure:
         scope (exit)
             readUnlockImpl;
 
-        allocatedTree.store(array);
+        allocatedTree.remove(array);
         removeRangeImpl(array);
         return poolAllocator.deallocate(array);
     }

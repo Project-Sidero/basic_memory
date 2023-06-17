@@ -123,7 +123,7 @@ unittest {
     assert(value.x == 123);
 }
 
-private:
+/*private:*/
 
 bool removeAlternativeFormPrefix(Input)(scope ref Input input, scope FormatSpecifier format) {
     if (!format.useAlternativeForm)

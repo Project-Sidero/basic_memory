@@ -84,7 +84,7 @@ struct Logger {
         FileTarget fileTarget;
         DynamicArray!CustomTarget customTargets;
 
-        ref TestTestSetLockInline mutex() scope return nothrow @nogc {
+        export ref TestTestSetLockInline mutex() scope return nothrow @nogc {
             return *cast(TestTestSetLockInline*)mutexStorage.ptr;
         }
 
@@ -238,6 +238,11 @@ export:
     ///
     String_UTF8 toString() scope const {
         return this.name;
+    }
+
+    ///
+    auto toHash() scope const {
+        return this.name_.toHash();
     }
 
     ///
@@ -625,6 +630,11 @@ struct ConsoleTarget {
 
     ConsoleColor[2][6] colors = DefaultConsoleColors;
     bool[6] useErrorStream = DefaultErrorStream;
+
+export @safe nothrow @nogc:
+
+     ~this() {
+    }
 }
 
 struct FileTarget {
@@ -640,13 +650,25 @@ struct FileTarget {
 
     this(return scope ref FileTarget other) scope {
     }
+
+    auto toHash() scope const @trusted {
+        import sidero.base.hash.utils;
+
+        ulong ret = hashOf();
+
+        static foreach(I; 0 .. this.tupleof.length) {
+            ret = hashOf((*cast(FileTarget*)&this).tupleof[I], ret);
+        }
+
+        return ret;
+    }
 }
 
 struct CustomTarget {
     CustomTargetMessage messageDel;
     CustomTargetOnRemove onRemoveDel;
 
-@safe nothrow @nogc:
+export @safe nothrow @nogc:
 
      ~this() scope {
         if (onRemoveDel !is null)

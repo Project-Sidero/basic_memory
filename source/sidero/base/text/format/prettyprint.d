@@ -47,7 +47,7 @@ export @safe nothrow @nogc:
         }
     }
 
-private:
+/*private:*/
     import sidero.base.traits;
     import sidero.base.text.format.write;
 

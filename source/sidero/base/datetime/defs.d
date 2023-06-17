@@ -23,6 +23,8 @@ struct DateTime(DateType) {
         DateType date_;
     }
 
+export @safe nothrow @nogc:
+
     ///
     static string DefaultFormat = DateType.DefaultFormat ~ " " ~ TimeOfDay.DefaultFormat,
         ATOMFormat = "%Y-%m-%dT%H:%i:%s%P", COOKIEFormat = "%l, %d-%M-%Y %H:%i:%s %T",
@@ -33,8 +35,6 @@ struct DateTime(DateType) {
         RFC7231Format = "%D, %d %M %Y %H:%i:%s GMT",
         RFC2822Format = "%D, %d %M %Y %H:%i:%s %O", RFC3339Format = "%Y-%m-%dT%H:%i:%s%P", RFC3339ExtendedFormat = "%Y-%m-%dT%H:%i:%s.%v%P",
         RSSFormat = "%D, %d %M %Y %H:%i:%s %O", W3CFormat = "%Y-%m-%dT%H:%i:%s%P", LogFileName = "%Y-%m-%d-%H";
-
-export @safe nothrow @nogc:
 
     ///
     this(return scope ref DateTime other) scope {

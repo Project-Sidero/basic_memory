@@ -4,7 +4,7 @@ import sidero.base.text;
 import sidero.base.allocators;
 import sidero.base.path.file;
 
-@safe nothrow @nogc:
+export @safe nothrow @nogc:
 
 DynamicArray!Type readFile(Type)(scope FilePath filename, size_t ifNotSize = 0) @trusted {
     import core.stdc.stdio;
@@ -97,7 +97,7 @@ struct FileAppender {
         String_UTF8 filename;
     }
 
-@safe nothrow @nogc:
+export @safe nothrow @nogc:
 
     this(return scope ref FileAppender other) scope {
         this.tupleof = other.tupleof;
@@ -196,5 +196,9 @@ struct FileAppender {
                 reopen;
             }
         }
+    }
+
+    auto toHash() scope const {
+        return filename.toHash();
     }
 }

@@ -421,17 +421,10 @@ nothrow @nogc:
 
     ///
     int opCmp(scope LiteralType other) scope const @trusted {
+        import sidero.base.containers.utils;
+
         LiteralType us = this.literal;
-
-        if (us < other)
-            return -1;
-        else if (us > other)
-            return 1;
-        else {
-            assert(cast(Type[])us == cast(Type[])other);
-
-            return 0;
-        }
+        return genericCompare(us, other);
     }
 
     ///

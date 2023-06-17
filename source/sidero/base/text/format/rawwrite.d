@@ -241,7 +241,7 @@ unittest {
     assert(builder == "S1(custom)S1(0)");
 }
 
-private:
+/*private:*/
 import sidero.base.text.format.write;
 import sidero.base.text.format.escaping;
 
