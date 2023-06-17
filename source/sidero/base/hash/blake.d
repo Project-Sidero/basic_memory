@@ -755,7 +755,7 @@ private:
 }
 
 private:
-import std.bitmanip : nativeToBigEndian, bigEndianToNative;
+import sidero.base.bitmanip : nativeToBigEndian, bigEndianToNative;
 
 static immutable ubyte[][] sigma = [
     [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], [14, 10, 4, 8, 9, 15, 13, 6, 1, 12, 0, 2, 11, 7, 5, 3],

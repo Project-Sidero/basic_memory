@@ -2,6 +2,7 @@ module sidero.base.compression.internal.bitreader;
 import sidero.base.errors;
 
 struct BitReader {
+    import sidero.base.bitmanip : littleEndianToNative, bigEndianToNative;
     const(ubyte)[] source, nextSource;
     size_t consumed;
 
@@ -95,8 +96,6 @@ export:
     }
 
     Result!uint nextIntBE() scope {
-        import std.bitmanip : bigEndianToNative;
-
         checkIfEmpty;
         if (source.length < 4)
             return typeof(return)(MalformedInputException("Not enough input"));
@@ -109,8 +108,6 @@ export:
     }
 
     Result!ushort nextShort() scope {
-        import std.bitmanip : littleEndianToNative;
-
         checkIfEmpty;
         if (source.length < 2)
             return typeof(return)(MalformedInputException("Not enough input"));

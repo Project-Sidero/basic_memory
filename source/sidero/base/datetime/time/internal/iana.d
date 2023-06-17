@@ -63,7 +63,7 @@ void reloadTZ(bool forceReload = true) @trusted {
 void loadForAndroid(scope FilePath path = FilePath.init) @trusted {
     import sidero.base.internal.filesystem;
     import sidero.base.allocators;
-    import std.bitmanip : bigEndianToNative;
+    import sidero.base.bitmanip : bigEndianToNative;
 
     if (path.isNull)
         path = getDefaultTZDirectory();
@@ -483,7 +483,7 @@ FilePath getDefaultTZDirectory() @trusted {
 void loadTZ(scope DynamicArray!ubyte rawFileRead, return scope String_UTF8 region, ref TZFile tzFile) @trusted {
     import sidero.base.internal.filesystem;
     import sidero.base.allocators;
-    import std.bitmanip : bigEndianToNative;
+    import sidero.base.bitmanip : bigEndianToNative;
 
     {
         auto acquired = tzDatabase.get(region, TZFile.init);

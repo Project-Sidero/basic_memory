@@ -4,6 +4,7 @@ import sidero.base.allocators;
 import sidero.base.errors;
 
 struct BitWriter {
+    import sidero.base.bitmanip : nativeToLittleEndian, nativeToBigEndian;
     Appender!ubyte output;
 
     uint bufferByteBits;
@@ -39,8 +40,6 @@ export:
     }
 
     void writeShorts(scope const(ushort)[] input...) scope {
-        import std.bitmanip : nativeToLittleEndian;
-
         flushBits;
 
         foreach (v; input) {
@@ -50,7 +49,6 @@ export:
     }
 
     void writeIntBE(uint value) {
-        import std.bitmanip : nativeToBigEndian;
         auto bytes = nativeToBigEndian(value);
         this.writeBytes(bytes[]);
     }

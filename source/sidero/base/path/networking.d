@@ -8,6 +8,8 @@ import sidero.base.allocators;
 /// port, IPv4, IPv6 are stored in big endian suitable for network API's. Hostname is stored as IDN/Punycode.
 struct NetworkAddress {
     private @PrintIgnore @PrettyPrintIgnore {
+        import sidero.base.bitmanip : swapEndian, littleEndianToNative;
+
         Type type_;
         ushort port_;
 
@@ -33,8 +35,6 @@ export @safe nothrow @nogc:
     ///
     ushort port() scope const {
         version (LittleEndian) {
-            import std.bitmanip : swapEndian;
-
             return swapEndian(this.port_);
         } else
             return this.port_;
@@ -77,8 +77,6 @@ export @safe nothrow @nogc:
             scope void delegate(ushort[8] value) @safe nothrow @nogc on6, scope void delegate() @safe nothrow @nogc onAny4,
             scope void delegate() @safe nothrow @nogc onAny6, scope void delegate(
                 scope String_ASCII hostname) @safe nothrow @nogc onHostname, scope void delegate() @safe nothrow @nogc onNone) scope {
-        import std.bitmanip : swapEndian;
-
         final switch (this.type_) {
         case Type.Invalid:
             onNone();
@@ -106,8 +104,6 @@ export @safe nothrow @nogc:
 
     ///
     static NetworkAddress fromIPv4(ushort port, ubyte a, ubyte b, ubyte c, ubyte d, bool isPortNetworkEndian = false) {
-        import std.bitmanip;
-
         NetworkAddress ret;
         ret.type_ = Type.IPv4;
         ret.port_ = port;
@@ -124,8 +120,6 @@ export @safe nothrow @nogc:
 
     ///
     static NetworkAddress fromIPv4(ushort port, uint value, bool isPortNetworkEndian = false, bool isIPNetworkEndian = false) {
-        import std.bitmanip;
-
         NetworkAddress ret;
         ret.type_ = Type.IPv4;
         ret.port_ = port;
@@ -149,15 +143,11 @@ export @safe nothrow @nogc:
     ///
     static NetworkAddress fromIPv6(ushort port, ushort a, ushort b, ushort c, ushort d, ushort e, ushort f, ushort g, ushort h,
             bool isPortNetworkEndian = false, bool isIPNetworkEndian = false) {
-        import std.bitmanip;
-
         return NetworkAddress.fromIPv6(port, [a, b, c, d, e, f, g, h], isPortNetworkEndian, isIPNetworkEndian);
     }
 
     ///
     static NetworkAddress fromIPv6(ushort port, ushort[8] segments, bool isPortNetworkEndian = false, bool isIPNetworkEndian = false) {
-        import std.bitmanip;
-
         NetworkAddress ret;
         ret.type_ = Type.IPv6;
         ret.port_ = port;
@@ -184,8 +174,6 @@ export @safe nothrow @nogc:
 
     ///
     static NetworkAddress fromAnyIPv4(ushort port, bool isPortNetworkEndian = false) {
-        import std.bitmanip;
-
         NetworkAddress ret;
         ret.type_ = Type.Any4;
         ret.port_ = port;
@@ -200,8 +188,6 @@ export @safe nothrow @nogc:
 
     ///
     static NetworkAddress fromAnyIPv6(ushort port, bool isPortNetworkEndian = false) {
-        import std.bitmanip;
-
         NetworkAddress ret;
         ret.type_ = Type.Any6;
         ret.port_ = port;
@@ -520,8 +506,6 @@ export @safe nothrow @nogc:
 
     ///
     void toString(Sink)(scope ref Sink sink) scope const @trusted {
-        import std.bitmanip : swapEndian;
-
         bool doPort = true;
 
         (cast(NetworkAddress*)&this).onNetworkOrder((uint address) {
@@ -575,8 +559,6 @@ export @safe nothrow @nogc:
     }
 
     package(sidero.base.path) static NetworkAddress fromURIHost(scope return String_ASCII input, ushort port, bool isPortNetworkEndian) {
-        import std.bitmanip : swapEndian;
-
         if (input.isNull) {
             return NetworkAddress.init;
         }
@@ -626,8 +608,6 @@ export @safe nothrow @nogc:
 
 private:
     bool fillInAddress(scope return String_ASCII input) scope @trusted {
-        import std.bitmanip : littleEndianToNative;
-
         if (input.startsWith("[")) {
             const possibleLengthOfHost = input.indexOf("]");
 

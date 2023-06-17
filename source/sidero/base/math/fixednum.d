@@ -235,7 +235,7 @@ export @safe nothrow @nogc pure:
             ubyte[ByteCount] ret;
 
             static if (ByteCount == 16) {
-                import std.bitmanip : nativeToLittleEndian;
+                import sidero.base.bitmanip : nativeToLittleEndian;
 
                 ret[0 .. 8] = nativeToLittleEndian(this.lower);
                 ret[8 .. 16] = nativeToLittleEndian(this.upper);
@@ -250,7 +250,7 @@ export @safe nothrow @nogc pure:
         ///
         ubyte getFirstByte() {
             static if (ByteCount == 16) {
-                import std.bitmanip : nativeToLittleEndian;
+                import sidero.base.bitmanip : nativeToLittleEndian;
                 return nativeToLittleEndian(this.lower)[0];
             } else
                 return this.lower.getFirstByte();

@@ -8,7 +8,7 @@ Copyright: 2022 Richard Andrew Cattermole
 module sidero.base.bitmanip;
 import std.traits : isIntegral;
 
-export:
+export @safe nothrow @nogc pure:
 
 /// Get a bit mask for a given number of bits.
 Return bitMaskForNumberOfBits(Return = size_t, Arg)(Arg numberOfBits) if (isIntegral!Arg) {
@@ -443,4 +443,227 @@ private:
             }
         }
     }
+}
+
+///
+short swapEndian(short input) {
+    return swapEndianImpl(input);
+}
+
+///
+ushort swapEndian(ushort input) {
+    return swapEndianImpl(input);
+}
+
+///
+int swapEndian(int input) {
+    return swapEndianImpl(input);
+}
+
+///
+uint swapEndian(uint input) {
+    return swapEndianImpl(input);
+}
+
+///
+long swapEndian(long input) {
+    return swapEndianImpl(input);
+}
+
+///
+ulong swapEndian(ulong input) {
+    return swapEndianImpl(input);
+}
+
+///
+short littleEndianToNative(T : short)(ubyte[2] input) {
+    return littleEndianToNativeImpl!T(input);
+}
+
+///
+ushort littleEndianToNative(T : ushort)(ubyte[2] input) {
+    return littleEndianToNativeImpl!T(input);
+}
+
+///
+int littleEndianToNative(T : int)(ubyte[4] input) {
+    return littleEndianToNativeImpl!T(input);
+}
+
+///
+uint littleEndianToNative(T : uint)(ubyte[4] input) {
+    return littleEndianToNativeImpl!T(input);
+}
+
+///
+long littleEndianToNative(T : long)(ubyte[8] input) {
+    return littleEndianToNativeImpl!T(input);
+}
+
+///
+ulong littleEndianToNative(T : ulong)(ubyte[8] input) {
+    return littleEndianToNativeImpl!T(input);
+}
+
+///
+short bigEndianToNative(T : short)(ubyte[2] input) {
+    return bigEndianToNativeImpl!T(input);
+}
+
+///
+ushort bigEndianToNative(T : ushort)(ubyte[2] input) {
+    return bigEndianToNativeImpl!T(input);
+}
+
+///
+int bigEndianToNative(T : int)(ubyte[4] input) {
+    return bigEndianToNativeImpl!T(input);
+}
+
+///
+uint bigEndianToNative(T : uint)(ubyte[4] input) {
+    return bigEndianToNativeImpl!T(input);
+}
+
+///
+long bigEndianToNative(T : long)(ubyte[8] input) {
+    return bigEndianToNativeImpl!T(input);
+}
+
+///
+ulong bigEndianToNative(T : ulong)(ubyte[8] input) {
+    return bigEndianToNativeImpl!T(input);
+}
+
+///
+ubyte[2] nativeToLittleEndian(ushort input) {
+    return nativeToLittleEndianImpl(input);
+}
+
+///
+ubyte[2] nativeToLittleEndian(short input) {
+    return nativeToLittleEndianImpl(input);
+}
+
+///
+ubyte[4] nativeToLittleEndian(uint input) {
+    return nativeToLittleEndianImpl(input);
+}
+
+///
+ubyte[4] nativeToLittleEndian(int input) {
+    return nativeToLittleEndianImpl(input);
+}
+
+///
+ubyte[8] nativeToLittleEndian(ulong input) {
+    return nativeToLittleEndianImpl(input);
+}
+
+///
+ubyte[8] nativeToLittleEndian(long input) {
+    return nativeToLittleEndianImpl(input);
+}
+
+///
+ubyte[2] nativeToBigEndian(ushort input) {
+    return nativeToBigEndianImpl(input);
+}
+
+///
+ubyte[2] nativeToBigEndian(short input) {
+    return nativeToBigEndianImpl(input);
+}
+
+///
+ubyte[4] nativeToBigEndian(uint input) {
+    return nativeToBigEndianImpl(input);
+}
+
+///
+ubyte[4] nativeToBigEndian(int input) {
+    return nativeToBigEndianImpl(input);
+}
+
+///
+ubyte[8] nativeToBigEndian(ulong input) {
+    return nativeToBigEndianImpl(input);
+}
+
+///
+ubyte[8] nativeToBigEndian(long input) {
+    return nativeToBigEndianImpl(input);
+}
+
+private:
+
+T swapEndianImpl(T)(T input) {
+    T ret;
+
+    static foreach (I; 0 .. T.sizeof) {
+        static if (I > 0) {
+            ret <<= 8;
+        }
+
+        ret |= (input & 0xFF);
+        input >>= 8;
+    }
+
+    return ret;
+}
+
+T littleEndianToNativeImpl(T)(ubyte[T.sizeof] input) {
+    T ret;
+
+    static foreach (I; 1 .. T.sizeof + 1) {
+        static if (I > 1) {
+            ret <<= 8;
+        }
+
+        ret |= input[$ - I];
+    }
+
+    return ret;
+}
+
+T bigEndianToNativeImpl(T)(ubyte[T.sizeof] input) {
+    T ret;
+
+    static foreach (I; 0 .. T.sizeof) {
+        static if (I > 0) {
+            ret <<= 8;
+        }
+
+        ret |= input[I];
+    }
+
+    return ret;
+}
+
+ubyte[T.sizeof] nativeToLittleEndianImpl(T)(T input) {
+    ubyte[T.sizeof] ret;
+
+    static foreach (I; 0 .. T.sizeof) {
+        static if (I > 0) {
+            input >>= 8;
+        }
+
+        ret[I] = input & 0xFF;
+    }
+
+    return ret;
+}
+
+ubyte[T.sizeof] nativeToBigEndianImpl(T)(T input) {
+    ubyte[T.sizeof] ret;
+
+    static foreach (I; 1 .. T.sizeof + 1) {
+        static if (I > 1) {
+            input >>= 8;
+        }
+
+        ret[$ - I] = input & 0xFF;
+    }
+
+    return ret;
 }
