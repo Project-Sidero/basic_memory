@@ -53,10 +53,10 @@ Result!dchar readChar(Duration timeout = Duration.min) @trusted {
                         dwTimeout = 1_000;
 
                     ReadLoopWindows: for (;;) {
-                        DWORD result = WSAWaitForMultipleEvents(1, &hStdin, false, dwTimeout, true);
+                        DWORD result = WaitForMultipleObjects(1, &hStdin, false, dwTimeout);
 
                         switch (result) {
-                        case WSA_WAIT_EVENT_0:
+                        case WAIT_OBJECT_0:
                             INPUT_RECORD[1] buffer = void;
 
                             if (PeekConsoleInputW(hStdin, buffer.ptr, cast(uint)buffer.length, &readLength)) {
@@ -82,7 +82,7 @@ Result!dchar readChar(Duration timeout = Duration.min) @trusted {
                             }
 
                             break;
-                        case WSA_WAIT_TIMEOUT:
+                        case WAIT_TIMEOUT:
                             mutex.unlock;
                             return typeof(return)(TimeOutException);
                         default:
@@ -222,10 +222,10 @@ StringBuilder_ASCII readLine(return scope ref StringBuilder_ASCII builder, Durat
                         dwTimeout = 1_000;
 
                     ReadLoopWindows: for (;;) {
-                        DWORD result = WSAWaitForMultipleEvents(1, &hStdin, false, dwTimeout, true);
+                        DWORD result = WaitForMultipleObjects(1, &hStdin, false, dwTimeout);
 
                         switch (result) {
-                        case WSA_WAIT_EVENT_0:
+                        case WAIT_OBJECT_0:
                             INPUT_RECORD[128] buffer = void;
 
                             if (PeekConsoleInputA(hStdin, buffer.ptr, cast(uint)buffer.length, &readLength)) {
@@ -264,7 +264,7 @@ StringBuilder_ASCII readLine(return scope ref StringBuilder_ASCII builder, Durat
                             }
 
                             break;
-                        case WSA_WAIT_TIMEOUT:
+                        case WAIT_TIMEOUT:
                         default:
                             break ReadLoopWindows;
                         }
@@ -380,10 +380,10 @@ StringBuilder_UTF8 readLine(return scope ref StringBuilder_UTF8 builder, Duratio
                         dwTimeout = 1_000;
 
                     ReadLoopWindows: for (;;) {
-                        DWORD result = WSAWaitForMultipleEvents(1, &hStdin, false, dwTimeout, true);
+                        DWORD result = WaitForMultipleObjects(1, &hStdin, false, dwTimeout);
 
                         switch (result) {
-                        case WSA_WAIT_EVENT_0:
+                        case WAIT_OBJECT_0:
                             INPUT_RECORD[128] buffer = void;
 
                             if (PeekConsoleInputW(hStdin, buffer.ptr, cast(uint)buffer.length, &readLength)) {
@@ -422,7 +422,7 @@ StringBuilder_UTF8 readLine(return scope ref StringBuilder_UTF8 builder, Duratio
                             }
 
                             break;
-                        case WSA_WAIT_TIMEOUT:
+                        case WAIT_TIMEOUT:
                         default:
                             break ReadLoopWindows;
                         }
@@ -1204,14 +1204,7 @@ version (CRuntime_Microsoft) {
 version (Windows) {
     import core.sys.windows.windows : HANDLE, CHAR, WCHAR, ULONG, BOOL, DWORD, WORD, UINT, COORD, WAIT_TIMEOUT,
         WAIT_OBJECT_0, PeekConsoleInputA, ReadConsoleInputA, PeekConsoleInputW, ReadConsoleInputW, KEY_EVENT,
-        GetConsoleMode, ENABLE_ECHO_INPUT, WriteConsoleA, WriteConsoleW, ReadConsoleW;
-
-    alias WSAEVENT = HANDLE;
-
-    enum {
-        WSA_WAIT_TIMEOUT = WAIT_TIMEOUT,
-        WSA_WAIT_EVENT_0 = WAIT_OBJECT_0
-    }
+        GetConsoleMode, ENABLE_ECHO_INPUT, WriteConsoleA, WriteConsoleW, ReadConsoleW, WaitForMultipleObjects;
 
     // needed cos Unicode
     struct CONSOLE_READCONSOLE_CONTROL {
@@ -1265,7 +1258,6 @@ version (Windows) {
         DWORD dwControlKeyState;
     }
 
-    extern (Windows) DWORD WSAWaitForMultipleEvents(DWORD, const WSAEVENT*, BOOL, DWORD, BOOL);
     extern (Windows) BOOL PeekConsoleInputA(HANDLE, INPUT_RECORD*, DWORD, DWORD*);
     extern (Windows) BOOL PeekConsoleInputW(HANDLE, INPUT_RECORD*, DWORD, DWORD*);
     extern (Windows) BOOL ReadConsoleInputA(HANDLE, INPUT_RECORD*, DWORD, DWORD*);
@@ -1277,26 +1269,28 @@ version (Windows) {
         void allocateWindowsConsole() {
             import core.sys.windows.windows;
 
-            if (AllocConsole())
-                createdConsole = true;
+            if (!createdConsole) {
+                if (AllocConsole())
+                    createdConsole = true;
 
-            hStdin = GetStdHandle(STD_INPUT_HANDLE);
-            hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
-            hStdError = GetStdHandle(STD_ERROR_HANDLE);
+                hStdin = GetStdHandle(STD_INPUT_HANDLE);
+                hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
+                hStdError = GetStdHandle(STD_ERROR_HANDLE);
 
-            GetConsoleMode(hStdin, &originalConsoleInputMode);
-            GetConsoleMode(hStdout, &originalConsoleOutputMode);
-            GetConsoleMode(hStdError, &originalConsoleErrorMode);
-            SetConsoleMode(hStdout, originalConsoleOutputMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING | ENABLE_PROCESSED_OUTPUT);
-            SetConsoleMode(hStdError, originalConsoleErrorMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING | ENABLE_PROCESSED_OUTPUT);
+                GetConsoleMode(hStdin, &originalConsoleInputMode);
+                GetConsoleMode(hStdout, &originalConsoleOutputMode);
+                GetConsoleMode(hStdError, &originalConsoleErrorMode);
+                SetConsoleMode(hStdout, originalConsoleOutputMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING | ENABLE_PROCESSED_OUTPUT);
+                SetConsoleMode(hStdError, originalConsoleErrorMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING | ENABLE_PROCESSED_OUTPUT);
 
-            originalConsoleOutputCP = GetConsoleOutputCP();
-            if (!SetConsoleOutputCP(65001))
-                originalConsoleOutputCP = 0;
+                originalConsoleOutputCP = GetConsoleOutputCP();
+                if (!SetConsoleOutputCP(65001))
+                    originalConsoleOutputCP = 0;
 
-            originalConsoleCP = GetConsoleCP();
-            if (!SetConsoleCP(65001))
-                originalConsoleCP = 0;
+                originalConsoleCP = GetConsoleCP();
+                if (!SetConsoleCP(65001))
+                    originalConsoleCP = 0;
+            }
         }
     }
 

@@ -136,23 +136,37 @@ Builder formattedWriteImpl(Builder, Args...)(return scope ref Builder output, sc
 
         {
             size_t soFar;
-            bool wasLeftBrace;
 
-            foreach (c; formatString) {
-                if (wasLeftBrace) {
-                    if (c == '{') {
-                        wasLeftBrace = false;
-                        soFar++;
+            {
+                size_t notConsumed = formatString.length;
+                bool wasLeftBrace;
+                auto temp = formatString.save;
+
+                while(!temp.empty) {
+                    dchar c = temp.front;
+
+                    if (wasLeftBrace) {
+                        if (c == '{') {
+                            wasLeftBrace = false;
+                            temp.popFront;
+                            notConsumed = temp.length;
+                        } else {
+                            break;
+                        }
+                    } else if (c == '{') {
+                        notConsumed = temp.length;
+                        temp.popFront;
+                        wasLeftBrace = true;
                     } else {
-                        soFar--;
-                        break;
+                        temp.popFront;
+                        notConsumed = temp.length;
                     }
-                } else if (c == '{') {
-                    wasLeftBrace = true;
-                    soFar++;
-                } else {
-                    soFar++;
                 }
+
+                if (temp.empty && wasLeftBrace)
+                    notConsumed = 0;
+
+                soFar = formatString.length - notConsumed;
             }
 
             static if (is(Builder == StringBuilder_ASCII)) {
