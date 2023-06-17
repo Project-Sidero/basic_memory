@@ -771,8 +771,8 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
                             if (iterator !is null && iterator.forwards.node is node)
                                 debug write(">");
 
-                            debug writef!"0x%X %s=%s %s:%s"(node, node.previous.previous is null ? "" : "$",
-                                    node.next.next is null ? "" : "$", node.key, node.value);
+                            debug writef!"0x%X %s=%s %s"(node, node.previous.previous is null ? "" : "$",
+                                    node.next.next is null ? "" : "$", node.key);
 
                             debug write(" refcount ", node.refCount);
                             if (node.previousReadyToBeDeleted !is null)

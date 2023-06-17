@@ -227,7 +227,7 @@ private:
         builder.formattedWrite(""c, input);
     }
 
-    void handleStructClass(Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useQuotes, bool useName, bool forcePrint) {
+    void handleStructClass(Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useQuotes, bool useName, bool forcePrint) @trusted {
         import std.meta : Filter;
 
         static FQN = fullyQualifiedName!Type;
