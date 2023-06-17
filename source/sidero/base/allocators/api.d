@@ -346,8 +346,12 @@ T[] makeArray(T, Allocator)(auto ref Allocator alloc, size_t length) @trusted {
 
     if (array is null)
         return null;
+    else if (array.length < sizeToAllocate) {
+        alloc.deallocate(array);
+        return null;
+    }
 
-    T[] ret = cast(T[])array;
+    T[] ret = (cast(T*)array.ptr)[0 .. length];
 
     static if (is(T == struct) || is(T == class) || is(T == union)) {
         foreach (i; 0 .. length) {
@@ -370,7 +374,7 @@ T[] makeArray(T, Allocator)(auto ref Allocator alloc, const(T)[] initValues) @tr
     if (ret is null)
         return null;
     else if (ret.length != initValues.length) {
-        alloc.deallocate(cast(void[])ret);
+        alloc.deallocate((cast(void*)ret.ptr)[0 .. ret.length]);
         return null;
     } else {
         foreach (i, ref v; initValues)
@@ -387,7 +391,7 @@ bool expandArray(T, Allocator)(scope auto ref Allocator alloc, scope ref T[] arr
         return false;
 
     size_t originalLength = array.length;
-    void[] temp = cast(void[])array;
+    void[] temp = (cast(void*)array.ptr)[0 .. T.sizeof * array.length];
 
     if (!alloc.reallocate(temp, temp.length + (T.sizeof * delta))) {
         return false;
@@ -396,7 +400,7 @@ bool expandArray(T, Allocator)(scope auto ref Allocator alloc, scope ref T[] arr
     foreach (ref v; array[originalLength .. $])
         v = T.init;
 
-    array = cast(T[])temp;
+    array = (cast(T*)temp.ptr)[0 .. originalLength + delta];
     return true;
 }
 
@@ -426,7 +430,7 @@ bool shrinkArray(T, Allocator)(scope auto ref Allocator alloc, scope ref T[] arr
         return true;
     }
 
-    auto temp = cast(void[])array;
+    void[] temp = (cast(void*)array.ptr)[0 .. T.sizeof * array.length];
     bool result = alloc.reallocate(temp, temp.length - (delta * T.sizeof));
     array = cast(T[])temp;
     return result;
@@ -443,7 +447,8 @@ void dispose(Type, Allocator)(auto ref Allocator alloc, scope auto ref Type* p) 
 }
 
 /// Ditto
-void dispose(Type, Allocator)(auto ref Allocator alloc, scope auto ref Type p) if (is(Type == class) || is(Type == interface)) {
+void dispose(Type, Allocator)(auto ref Allocator alloc, scope auto ref Type p) @trusted
+        if (is(Type == class) || is(Type == interface)) {
     if (!p)
         return;
     static if (is(Type == interface)) {
@@ -462,14 +467,14 @@ void dispose(Type, Allocator)(auto ref Allocator alloc, scope auto ref Type p) i
 }
 
 /// Ditto
-void dispose(Type, Allocator)(auto ref Allocator alloc, scope auto ref Type[] array) {
+void dispose(Type, Allocator)(auto ref Allocator alloc, scope auto ref Type[] array) @trusted {
     static if (!is(typeof(array[0]) == void)) {
         foreach (ref e; array) {
             destroy(cast()e);
         }
     }
 
-    alloc.deallocate(cast(void[])array);
+    alloc.deallocate((cast(void*)array.ptr)[0 .. array.length]);
     array = null;
 }
 
