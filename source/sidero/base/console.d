@@ -14,6 +14,9 @@ Result!dchar readChar(Duration timeout = Duration.min) @trusted {
     import core.stdc.stdio : getc, EOF;
 
     mutex.pureLock;
+    scope (exit)
+        mutex.unlock;
+
     const block = timeout < Duration.zero;
 
     size_t outputBufferCount;
@@ -83,7 +86,6 @@ Result!dchar readChar(Duration timeout = Duration.min) @trusted {
 
                             break;
                         case WAIT_TIMEOUT:
-                            mutex.unlock;
                             return typeof(return)(TimeOutException);
                         default:
                             break ReadLoopWindows;
@@ -94,11 +96,8 @@ Result!dchar readChar(Duration timeout = Duration.min) @trusted {
                 if (outputBufferCount > 0) {
                     dchar output;
                     decode(outputBuffer16[0 .. outputBufferCount], output);
-
-                    mutex.unlock;
                     return typeof(return)(output);
                 } else {
-                    mutex.unlock;
                     return typeof(return)(MalformedInputException("No input to read"));
                 }
             }
@@ -144,11 +143,8 @@ Result!dchar readChar(Duration timeout = Duration.min) @trusted {
             if (outputBufferCount > 0) {
                 dchar output;
                 decode(outputBuffer[0 .. outputBufferCount], output);
-
-                mutex.unlock;
                 return typeof(return)(output);
             } else {
-                mutex.unlock;
                 return typeof(return)(MalformedInputException("No input to read"));
             }
         }
@@ -169,6 +165,8 @@ StringBuilder_ASCII readLine(return scope ref StringBuilder_ASCII builder, Durat
     import core.stdc.stdio : getc, EOF;
 
     mutex.pureLock;
+    scope (exit)
+        mutex.unlock;
 
     if (builder.isNull)
         builder = StringBuilder_ASCII(globalAllocator());
@@ -271,7 +269,6 @@ StringBuilder_ASCII readLine(return scope ref StringBuilder_ASCII builder, Durat
                     }
                 }
 
-                mutex.unlock;
                 return builder;
             }
         }
@@ -318,7 +315,6 @@ StdIO:
         }
     }
 
-    mutex.unlock;
     return builder;
 }
 
@@ -327,6 +323,8 @@ StringBuilder_UTF8 readLine(return scope ref StringBuilder_UTF8 builder, Duratio
     import core.stdc.stdio : getc, EOF;
 
     mutex.pureLock;
+    scope (exit)
+        mutex.unlock;
 
     if (builder.isNull)
         builder = StringBuilder_UTF8(globalAllocator());
@@ -429,7 +427,6 @@ StringBuilder_UTF8 readLine(return scope ref StringBuilder_UTF8 builder, Duratio
                     }
                 }
 
-                mutex.unlock;
                 return builder;
             }
         }
@@ -476,7 +473,6 @@ StdIO:
         }
     }
 
-    mutex.unlock;
     return builder;
 }
 
@@ -537,7 +533,7 @@ void write(Args...)(scope Args args) @trusted {
             StringBuilder_UTF8 builder = StringBuilder_UTF8(globalAllocator());
 
             if (prettyPrintActive) {
-                PrettyPrint prettyPrint;
+                PrettyPrint prettyPrint = PrettyPrint.defaults;
                 prettyPrint.useQuotes = deliminateArguments;
                 prettyPrint.startWithoutPrefix = argumentId == 0 || !deliminateArguments;
 
@@ -902,6 +898,9 @@ void rawWrite(scope InBandInfo input, bool useError = false) @trusted {
 
         if (useWindows) {
             mutex.pureLock;
+            scope (exit)
+                mutex.unlock;
+
             allocateWindowsConsole();
 
             HANDLE hOut = useError ? hStdError : hStdout;
@@ -987,7 +986,6 @@ void rawWrite(scope InBandInfo input, bool useError = false) @trusted {
             }
 
             SetConsoleTextAttribute(hOut, attributes);
-            mutex.unlock;
             return;
         }
     }
@@ -1094,6 +1092,9 @@ void enableANSI(bool value = true) @trusted {
 /// Enter raw mode, suitable for TUI. Note disables Ctrl+C signal.
 bool enableRawMode() @trusted {
     mutex.pureLock;
+    scope (exit)
+        mutex.unlock;
+
     bool ret;
 
     // no echo
@@ -1143,20 +1144,23 @@ bool enableRawMode() @trusted {
         }
     }
 
-    mutex.unlock;
     return ret;
 }
 
 ///
-pragma(crt_destructor) extern (C) void deinitializeConsole() @trusted {
+void deinitializeConsole() @trusted {
     mutex.pureLock;
-    deinitializeConsoleImpl();
+    deinitializeConsoleInternal();
     mutex.unlock;
 }
 
 private @hidden:
 import sidero.base.synchronization.mutualexclusion;
 import core.stdc.stdio : FILE;
+
+pragma(crt_destructor) extern (C) void deinitializeConsoleInternal() @trusted {
+    deinitializeConsoleImpl();
+}
 
 __gshared {
     TestTestSetLockInline mutex;

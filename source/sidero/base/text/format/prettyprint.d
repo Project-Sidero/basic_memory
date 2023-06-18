@@ -9,11 +9,11 @@ export @safe nothrow @nogc:
 /// Formats arguments based upon format and configuration, ignores fields with PrettyPrintIgnore UDA.
 struct PrettyPrint {
     /// For each line emit: prefix? prefixToRepeat{depth} prefixSuffix?
-    String_UTF8 prefix, prefixToRepeat = String_UTF8("\t"), prefixSuffix = String_UTF8("- ");
+    String_UTF8 prefix, prefixToRepeat, prefixSuffix;
     /// The text divider to emit for between arguments to pretty printer
-    String_UTF8 betweenArgumentDivider = String_UTF8(", ");
+    String_UTF8 betweenArgumentDivider;
     /// The text divider to emit for between sequential values
-    String_UTF8 betweenValueDivider = String_UTF8(", ");
+    String_UTF8 betweenValueDivider;
 
     ///
     uint depth;
@@ -23,6 +23,23 @@ struct PrettyPrint {
     bool startWithoutPrefix;
 
 export @safe nothrow @nogc:
+
+    /// Some good defaults for a pretty printer
+    static PrettyPrint defaults() {
+        PrettyPrint ret;
+
+        ret.prefixToRepeat = String_UTF8("\t");
+        ret.prefixSuffix = String_UTF8("- ");
+        ret.betweenArgumentDivider = String_UTF8(", ");
+        ret.betweenValueDivider = String_UTF8(", ");
+
+        return ret;
+    };
+
+    ///
+    this(return scope ref PrettyPrint other) scope {
+        this.tupleof = other.tupleof;
+    }
 
     ///
     void opCall(Args...)(scope StringBuilder_UTF16 builder, scope Args args) {

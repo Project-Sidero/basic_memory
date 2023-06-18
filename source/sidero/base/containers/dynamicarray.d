@@ -588,7 +588,7 @@ scope nothrow @nogc:
 
         ///
         void toStringPretty(Sink)(scope ref Sink sink) @trusted {
-            PrettyPrint prettyPrint;
+            PrettyPrint prettyPrint = PrettyPrint.defaults;
             prettyPrint(sink, this.unsafeGetLiteral());
         }
     }

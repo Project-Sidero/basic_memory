@@ -252,7 +252,11 @@ private @hidden:
             }
         }
 
-        FormatSpecifier ret;
+        FormatSpecifier ret = void;
+
+        foreach(ref b; (cast(ubyte*)&ret)[0 .. FormatSpecifier.sizeof]) {
+            b = 0;
+        }
 
         // argId
         {

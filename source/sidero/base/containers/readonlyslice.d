@@ -646,7 +646,7 @@ nothrow @nogc:
 
         ///
         void toStringPretty(Sink)(scope ref Sink sink) {
-            PrettyPrint prettyPrint;
+            PrettyPrint prettyPrint = PrettyPrint.defaults;
             prettyPrint(sink, cast(Slice)this);
         }
     }

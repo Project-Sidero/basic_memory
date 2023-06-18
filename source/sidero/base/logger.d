@@ -482,7 +482,7 @@ export:
                 contentBuilder ~= LevelTag[level + (tags.isNull ? 0 : 6)];
                 contentBuilder ~= ": ";
 
-                PrettyPrint prettyPrinter;
+                PrettyPrint prettyPrinter = PrettyPrint.defaults;
                 prettyPrinter(contentBuilder, args);
             }
 
