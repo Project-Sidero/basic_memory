@@ -768,8 +768,7 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
                 import std.stdio;
 
                 try {
-                    debug writeln("refCount: ", nodeList.refCount, " aliveNodes: ", nodeList.aliveNodes,
-                            " allNodes: ", nodeList.allNodes);
+                    debug writeln("refCount: ", nodeList.refCount, " aliveNodes: ", nodeList.aliveNodes, " allNodes: ", nodeList.allNodes);
 
                     foreach (node; nodeList) {
                         if (iterator !is null && iterator.forwards.node is node)
@@ -843,6 +842,9 @@ struct ConcurrentHashMapIterator(RealKeyType, ValueType) {
         ptrdiff_t refCount;
 
     @safe nothrow @nogc:
+
+        export ~this() pure {
+        }
 
         void rc(bool addRef, scope ref NodeList nodeList, scope ref IteratorList iteratorList) scope @trusted {
             if (addRef)
@@ -918,7 +920,7 @@ struct ConcurrentHashMapIterator(RealKeyType, ValueType) {
             node.onIteratorIn;
         }
 
-        void ifDeletedBringIntoLife() scope @trusted{
+        void ifDeletedBringIntoLife() scope @trusted {
             assert(node !is null);
             assert(cast(size_t)node < size_t.max);
             node.onIteratorOut;

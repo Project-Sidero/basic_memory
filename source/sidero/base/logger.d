@@ -352,7 +352,7 @@ export:
         mutex.unlock;
     }
 
-/*private:*/
+    /*private:*/
     void message(string moduleName, int line, Args...)(LogLevel level, Args args) scope {
         import sidero.base.datetime.time.clock;
         import sidero.base.internal.conv;
@@ -369,16 +369,6 @@ export:
             "TRACE", "INFO", "WARNING", "ERROR", "CRITICAL", "FATAL", " TRACE", " INFO", " WARNING", " ERROR", " CRITICAL",
             " FATAL"
         ];
-
-        void handleConsole() {
-            import sidero.base.console;
-
-            auto fg = consoleTarget.colors[level][0], bg = consoleTarget.colors[level][1];
-
-            writeln(resetDefaultBeforeApplying().deliminateArgs(false).prettyPrintingActive(true).foreground(fg)
-                    .background(bg).useErrorStream(consoleTarget.useErrorStream[level]), dateTimeText, ModuleLine,
-                    tags, LevelTag[level + (tags.isNull ? 0 : 6)], resetDefaultBeforeApplying(), ": ", args, resetDefaultBeforeApplying());
-        }
 
         void syslog() {
             version (Posix) {
@@ -472,8 +462,17 @@ export:
             }
         }
 
-        if (targets & LoggingTargets.Console)
-            handleConsole;
+        if (targets & LoggingTargets.Console) {
+            import sidero.base.console;
+
+            auto fg = consoleTarget.colors[level][0], bg = consoleTarget.colors[level][1];
+            auto formatArg = resetDefaultBeforeApplying().deliminateArgs(false).prettyPrintingActive(true)
+                .foreground(fg).background(bg).useErrorStream(consoleTarget.useErrorStream[level]);
+
+            writeln(formatArg, dateTimeText, ModuleLine, tags, LevelTag[level + (tags.isNull ? 0 : 6)],
+                    resetDefaultBeforeApplying(), ": ", args, resetDefaultBeforeApplying());
+        }
+
         if (targets & LoggingTargets.File || targets & LoggingTargets.Syslog || targets & LoggingTargets.Windows ||
                 targets & LoggingTargets.Custom) {
             {
@@ -660,7 +659,7 @@ struct FileTarget {
 
         ulong ret = hashOf();
 
-        static foreach(I; 0 .. this.tupleof.length) {
+        static foreach (I; 0 .. this.tupleof.length) {
             ret = hashOf((*cast(FileTarget*)&this).tupleof[I], ret);
         }
 
