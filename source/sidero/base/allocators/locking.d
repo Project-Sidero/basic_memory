@@ -114,11 +114,12 @@ scope @safe @nogc pure nothrow:
 struct GCAllocatorLock(PoolAllocator) {
     import sidero.base.allocators.gc;
     import sidero.base.allocators.buffers.freetree : AllocatedTree;
+    import sidero.base.allocators.mapping.malloc;
 
     ///
     PoolAllocator poolAllocator;
 
-    private AllocatedTree!() allocatedTree;
+    private AllocatedTree!(Mallocator) allocatedTree;
 
     ///
     enum NeedsLocking = false;
@@ -127,21 +128,21 @@ scope @safe @nogc nothrow:
 
     ///
     this(return scope ref GCAllocatorLock other) @trusted {
-        readLockImpl;
+        writeLockImpl;
         scope (exit)
-            readUnlockImpl;
+            writeUnlockImpl;
 
         this.poolAllocator = other.poolAllocator;
         other.poolAllocator = PoolAllocator.init;
 
         this.allocatedTree = other.allocatedTree;
-        other.allocatedTree = AllocatedTree!().init;
+        other.allocatedTree = typeof(allocatedTree).init;
     }
 
     ~this() {
-        readLockImpl;
+        writeLockImpl;
         scope (exit)
-            readUnlockImpl;
+            writeUnlockImpl;
 
         allocatedTree.deallocateAll((array) { removeRangeImpl(array); return true; });
     }
@@ -155,9 +156,9 @@ pure:
 
     ///
     void[] allocate(size_t size, TypeInfo ti = null) {
-        readLockImpl;
+        writeLockImpl;
         scope (exit)
-            readUnlockImpl;
+            writeUnlockImpl;
 
         void[] got = poolAllocator.allocate(size, ti);
 
@@ -171,9 +172,9 @@ pure:
 
     ///
     bool reallocate(scope ref void[] array, size_t newSize) {
-        readLockImpl;
+        writeLockImpl;
         scope (exit)
-            readUnlockImpl;
+            writeUnlockImpl;
 
         void[] original = array;
 
@@ -195,9 +196,9 @@ pure:
         if (array is null)
             return false;
 
-        readLockImpl;
+        writeLockImpl;
         scope (exit)
-            readUnlockImpl;
+            writeUnlockImpl;
 
         allocatedTree.remove(array);
         removeRangeImpl(array);
@@ -218,9 +219,9 @@ pure:
     static if (__traits(hasMember, PoolAllocator, "deallocateAll")) {
         ///
         bool deallocateAll() {
-            readLockImpl;
+            writeLockImpl;
             scope (exit)
-                readUnlockImpl;
+                writeUnlockImpl;
 
             allocatedTree.deallocateAll((array) { removeRangeImpl(array); return true; });
             return poolAllocator.deallocateAll();

@@ -23,6 +23,7 @@ struct ConcurrentHashMap(RealKeyType, ValueType) {
                 return 0;
 
             auto iterator = state.createIteratorExternal();
+            assert(iterator !is null);
             int result;
 
             while (result == 0 && !state.iteratorEmptyExternal(iterator)) {
@@ -421,7 +422,7 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
     }
 
     void rcNodeExternal(bool addRef, scope Node* node) scope {
-        mutex.pureLock;
+        /+mutex.pureLock;
 
         if (node !is null) {
             if (addRef)
@@ -434,7 +435,7 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
         }
 
         if (rcInternal(addRef, null))
-            mutex.unlock;
+            mutex.unlock;+/
     }
 
     Iterator* createIteratorExternal() scope @trusted {
@@ -449,6 +450,8 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
 
     bool iteratorEmptyExternal(scope Iterator* iterator) scope {
         mutex.pureLock;
+
+        assert(iterator !is null);
         bool ret = iterator.forwards.isOutOfRange();
 
         mutex.unlock;
@@ -456,6 +459,7 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
     }
 
     bool iteratorGetExternal(scope Iterator* iterator, scope out ResultReference!KeyType key, scope out ResultReference!ValueType value) scope @trusted {
+        assert(iterator !is null);
         mutex.pureLock;
 
         if (iterator.forwards.isOutOfRange()) {
@@ -477,6 +481,7 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
     }
 
     bool iteratorAdvanceExternal(scope Iterator* iterator) scope @trusted {
+        assert(iterator !is null);
         mutex.pureLock;
 
         Node* old = iterator.forwards.node;
@@ -623,7 +628,7 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
     // \/ internal
 
     bool rcInternal(bool addRef, scope Iterator* iterator) scope @trusted {
-        if (addRef) {
+        /+if (addRef) {
             nodeList.refCount++;
             if (iterator !is null)
                 iterator.rc(true, nodeList, iteratorList);
@@ -643,7 +648,7 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
             nodeList.refCount--;
             if (iterator !is null)
                 iterator.rc(false, nodeList, iteratorList);
-        }
+        }+/
 
         return true;
     }
@@ -759,33 +764,32 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
     void debugPosition(scope Iterator* iterator = null) scope @trusted {
         version (D_BetterC) {
         } else {
-            version (unittest)
-                debug {
-                    import std.stdio;
+            debug {
+                import std.stdio;
 
-                    try {
-                        debug writeln("refCount: ", nodeList.refCount, " aliveNodes: ", nodeList.aliveNodes,
-                                " allNodes: ", nodeList.allNodes);
+                try {
+                    debug writeln("refCount: ", nodeList.refCount, " aliveNodes: ", nodeList.aliveNodes,
+                            " allNodes: ", nodeList.allNodes);
 
-                        foreach (node; nodeList) {
-                            if (iterator !is null && iterator.forwards.node is node)
-                                debug write(">");
+                    foreach (node; nodeList) {
+                        if (iterator !is null && iterator.forwards.node is node)
+                            debug write(">");
 
-                            debug writef!"0x%X %s=%s %s"(node, node.previous.previous is null ? "" : "$",
-                                    node.next.next is null ? "" : "$", node.key);
+                        debug writef!"0x%X %s=%s %s"(node, node.previous.previous is null ? "" : "$",
+                                node.next.next is null ? "" : "$", node.key);
 
-                            debug write(" refcount ", node.refCount);
-                            if (node.previousReadyToBeDeleted !is null)
-                                debug writef!" prtbd 0x%X"(node.previousReadyToBeDeleted);
-                        }
-
-                        debug writeln;
-
-                        debug stdout.flush;
-                        debug stderr.flush;
-                    } catch (Exception) {
+                        debug write(" refcount ", node.refCount);
+                        if (node.previousReadyToBeDeleted !is null)
+                            debug writef!" prtbd 0x%X"(node.previousReadyToBeDeleted);
                     }
+
+                    debug writeln;
+
+                    debug stdout.flush;
+                    debug stderr.flush;
+                } catch (Exception) {
                 }
+            }
         }
     }
 }
@@ -870,12 +874,10 @@ struct ConcurrentHashMapIterator(RealKeyType, ValueType) {
 
     @safe nothrow @nogc:
 
-        export ~this() scope {
-            assert(node is null);
-        }
-
         bool isOutOfRange() scope {
-            return node is null || node.next is null;
+            if (node is null)
+                return true;
+            return node.next is null;
         }
 
         void onEOL(scope ref NodeList nodeList) scope {
@@ -916,8 +918,9 @@ struct ConcurrentHashMapIterator(RealKeyType, ValueType) {
             node.onIteratorIn;
         }
 
-        void ifDeletedBringIntoLife() scope {
+        void ifDeletedBringIntoLife() scope @trusted{
             assert(node !is null);
+            assert(cast(size_t)node < size_t.max);
             node.onIteratorOut;
 
             while (node.isDeleted && node.next !is null) {
@@ -1020,7 +1023,7 @@ struct ConcurrentHashMapNode(RealKeyType, ValueType) {
     }
 
     void removeNode(scope Node* node) scope @trusted {
-        assert(node !is null);
+        /+assert(node !is null);
         assert(node.previous !is null);
         assert(node.next !is null);
 
@@ -1049,7 +1052,7 @@ struct ConcurrentHashMapNode(RealKeyType, ValueType) {
 
             this.allNodes--;
             allocator.dispose(node);
-        }
+        }+/
     }
 
     Node* nodeFor(ulong hash) scope @trusted {

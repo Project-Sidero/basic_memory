@@ -224,6 +224,22 @@ package(sidero.base.allocators) {
         (cast(void function()@trusted pure nothrow @nogc)&handle)();
     }
 
+    void writeLockImpl() @trusted pure @nogc nothrow {
+        static void handle() @trusted {
+            rwlock.pureWriteLock;
+        }
+
+        (cast(void function()@trusted pure nothrow @nogc)&handle)();
+    }
+
+    void writeUnlockImpl() @trusted pure @nogc nothrow {
+        static void handle() @trusted {
+            rwlock.pureWriteUnlock;
+        }
+
+        (cast(void function()@trusted pure nothrow @nogc)&handle)();
+    }
+
     void addRangeImpl(scope void[] block, scope TypeInfo ti = null) @trusted pure @nogc nothrow {
         static void handle(scope void[] block, scope TypeInfo ti = null) @trusted {
             GCInfo* current = gcInfoLL;

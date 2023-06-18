@@ -657,10 +657,12 @@ export:
 
     private {
         Node* anchor;
+        ulong integritySearchKey;
 
         static struct Node {
             Node* left, right;
             void[] array;
+            ulong seenIntegrity;
 
             bool matches(scope void* other) scope @trusted nothrow @nogc @hidden {
                 return array.ptr <= other && (array.ptr + array.length) > other;
@@ -690,7 +692,6 @@ scope @safe @nogc pure nothrow:
     ///
     this(return scope ref AllocatedTree other) {
         this.tupleof = other.tupleof;
-        other.anchor = null;
         other = AllocatedTree.init;
     }
 
@@ -725,20 +726,7 @@ scope @safe @nogc pure nothrow:
         if (array is null)
             return;
 
-        Node** parent = &anchor;
-
-        while (*parent !is null) {
-            void* weightOfParentEnd = (*parent).array.ptr + (*parent).array.length;
-            Node* left = (*parent).left, right = (*parent).right;
-
-            if (right !is null && weightOfParentEnd <= array.ptr)
-                parent = &(*parent).right;
-            else if (left !is null && array.ptr + array.length <= weightOf(*parent))
-                parent = &(*parent).left;
-            else
-                break;
-        }
-
+        Node** parent = findParentGivenArray(array);
         Node* current = *parent;
 
         if (current !is null && current.matches(array.ptr)) {
@@ -760,6 +748,7 @@ scope @safe @nogc pure nothrow:
             current.left = null;
             current.right = null;
             current.array = array;
+            current.seenIntegrity = 0;
 
             insert(current, parent);
         }
@@ -770,20 +759,7 @@ scope @safe @nogc pure nothrow:
         if (array is null)
             return;
 
-        Node** parent = &anchor;
-
-        while (*parent !is null) {
-            void* weightOfParentEnd = (*parent).array.ptr + (*parent).array.length;
-            Node* left = (*parent).left, right = (*parent).right;
-
-            if (right !is null && weightOfParentEnd <= array.ptr)
-                parent = &(*parent).right;
-            else if (left !is null && array.ptr + array.length <= weightOf(*parent))
-                parent = &(*parent).left;
-            else
-                break;
-        }
-
+        Node** parent = findParentGivenArray(array);
         Node* current = *parent;
 
         if (current !is null && current.matches(array.ptr)) {
@@ -797,20 +773,7 @@ scope @safe @nogc pure nothrow:
         if (array is null)
             return false;
 
-        Node** parent = &anchor;
-
-        while (*parent !is null) {
-            void* weightOfParentEnd = (*parent).array.ptr + (*parent).array.length;
-            Node* left = (*parent).left, right = (*parent).right;
-
-            if (right !is null && weightOfParentEnd <= array.ptr)
-                parent = &(*parent).right;
-            else if (left !is null && array.ptr + array.length <= weightOf(*parent))
-                parent = &(*parent).left;
-            else
-                break;
-        }
-
+        Node** parent = findParentGivenArray(array);
         return *parent !is null && (*parent).matches(array.ptr);
     }
 
@@ -850,19 +813,21 @@ scope @safe @nogc pure nothrow:
 private @hidden:
     void insert(Node* toInsert, Node** parent) {
         assert(toInsert !is null);
-        void* weightOfToInsert = toInsert.array.ptr;
+
+        const weightOfToInsert = toInsert.array.ptr;
         Node* currentChild = *parent;
 
         // locate parent to insert into
         {
-            void* weightOfToInsertEnd = weightOfToInsert + toInsert.array.length;
+            const weightOfToInsertEnd = weightOfToInsert + toInsert.array.length;
 
             while (weightOf(currentChild) >= weightOfToInsertEnd) {
-                void* weightOfParentEnd = (*parent).array.ptr + (*parent).array.length;
+                const parentArray = (*parent).array.ptr;
+                const endOfParentArray = parentArray + (*parent).array.length;
 
-                if (weightOfToInsert < (*parent).array.ptr)
+                if (weightOfToInsert < parentArray)
                     parent = &currentChild.left;
-                else if (weightOfToInsert > weightOfParentEnd)
+                else if (weightOfToInsert > endOfParentArray)
                     parent = &currentChild.right;
                 else
                     break;
@@ -915,6 +880,75 @@ private @hidden:
 
     void* weightOf(Node* node) {
         return node is null ? null : node.array.ptr;
+    }
+
+    Node** findParentGivenArray(scope void[] array) {
+        const endOfArray = array.ptr + array.length;
+        Node** pointerToParent = &anchor;
+
+        while (*pointerToParent !is null) {
+            const parentArray = (*pointerToParent).array.ptr;
+            const endOfParentArray = parentArray + (*pointerToParent).array.length;
+            Node** left = &(*pointerToParent).left, right = &(*pointerToParent).right;
+
+            if (endOfArray <= parentArray && *left !is null)
+                pointerToParent = left;
+            else if (endOfParentArray <= array.ptr && *right !is null)
+                pointerToParent = right;
+            else
+                break;
+        }
+
+        return pointerToParent;
+    }
+
+    void verifyIntegrity(int line = __LINE__)() @trusted {
+        import core.stdc.stdlib : exit;
+
+        const key = integritySearchKey++;
+        int reason;
+
+        int perNode(Node* parent) {
+            if (parent.seenIntegrity < key)
+                parent.seenIntegrity = key;
+            else
+                return 100;
+
+            if (parent.array.length == 0 || parent.array.ptr is null)
+                return 150;
+
+            int got;
+
+            if (parent.left !is null) {
+                if (parent.left.array.length == 0 || parent.left.array.ptr is null)
+                    return 200;
+                else if (parent.left.array.ptr + parent.left.array.length >= parent.array.ptr)
+                    return 250;
+
+                got = perNode(parent.left);
+                if (got)
+                    return got;
+            }
+
+            if (parent.right !is null) {
+                if (parent.right.array.length == 0 || parent.right.array.ptr is null)
+                    return 300;
+                else if (parent.array.ptr + parent.array.length >= parent.right.array.ptr)
+                    return 350;
+
+                got = perNode(parent.right);
+                if (got)
+                    return got;
+            }
+
+            return 0;
+        }
+
+        if (this.anchor !is null)
+            reason = perNode(this.anchor);
+
+        if (reason != 0)
+            debug exit(reason);
     }
 }
 
