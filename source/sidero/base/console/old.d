@@ -1,4 +1,4 @@
-module sidero.base.console;
+module sidero.base.console.old;
 import sidero.base.text;
 import sidero.base.allocators;
 import sidero.base.typecons : Optional;

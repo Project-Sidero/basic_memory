@@ -2,6 +2,7 @@ module sidero.base.errors.result;
 import sidero.base.errors.message;
 import sidero.base.math.utils : isClose;
 import sidero.base.attributes;
+import sidero.base.internal.logassert;
 
 export:
 
@@ -60,11 +61,10 @@ scope nothrow @nogc @safe:
         }
 
         /// Will verify that you checked
-        ref Type get() return @trusted {
-            if (!error__.checked)
-                assert(0, "You forgot to check if value had an error. assert(thing, thing.error.toString());");
-
-            assert(opCast!bool(), error__.toString().unsafeGetLiteral);
+        ref Type get(string moduleName = __MODULE__, int line = __LINE__) return @trusted {
+            logAssert(error__.checked, "You forgot to check if value had an error. assert(thing, thing.error.toString());",
+                    this.error__, moduleName, line);
+            logAssert(!error__.isSet(), null, this.error__, moduleName, line);
             return value;
         }
 
@@ -73,7 +73,7 @@ scope nothrow @nogc @safe:
 
         /// Will check and only error if there is an error.
         ref Type assumeOkay() return @system {
-            assert(opCast!bool(), error__.toString().unsafeGetLiteral);
+            assert(!error__.isSet(), error__.toString().unsafeGetLiteral);
             return value;
         }
     }
@@ -129,11 +129,10 @@ scope nothrow @nogc @safe:
     }
 
     ///
-    bool isNull() @trusted {
-        if (!error__.checked)
-            assert(0, "You forgot to check if value had an error. assert(thing, thing.error.toString());");
-
-        assert(opCast!bool(), error__.toString().unsafeGetLiteral);
+    bool isNull(string moduleName = __MODULE__, int line = __LINE__) @trusted {
+        logAssert(error__.checked, "You forgot to check if value had an error. assert(thing, thing.error.toString());",
+                this.error__, moduleName, line);
+        logAssert(!error__.isSet(), null, this.error__, moduleName, line);
 
         static if (__traits(hasMember, Type, "isNull")) {
             return value.isNull;
@@ -325,8 +324,8 @@ scope nothrow @nogc @safe:
     @disable void opAssign(Type value) const;
 
     /// Will check and only error if there is an error.
-    ref Type assumeOkay() return @system {
-        assert(opCast!bool(), error__.toString().unsafeGetLiteral);
+    ref Type assumeOkay(string moduleName = __MODULE__, int line = __LINE__) return @system {
+        logAssert(!error__.isSet(), null, this.error__, moduleName, line);
         assert(this._value !is null);
         return *_value;
     }
@@ -351,11 +350,10 @@ scope nothrow @nogc @safe:
     }
 
     ///
-    bool isNull() @trusted const {
-        if (!error__.checked)
-            assert(0, "You forgot to check if value had an error. assert(thing, thing.error.toString());");
-
-        assert(error__.info.message is null, error__.toString().unsafeGetLiteral);
+    bool isNull(string moduleName = __MODULE__, int line = __LINE__) @trusted const {
+        logAssert(error__.checked, "You forgot to check if value had an error. assert(thing, thing.error.toString());",
+                this.error__, moduleName, line);
+        logAssert(!error__.isSet(), null, this.error__, moduleName, line);
 
         if (_value is null)
             return true;
@@ -367,11 +365,10 @@ scope nothrow @nogc @safe:
     }
 
     /// Will verify that you checked
-    ref Type get() return @trusted {
-        if (!error__.checked)
-            assert(0, "You forgot to check if value had an error. assert(thing, thing.error.toString());");
-
-        assert(opCast!bool(), error__.toString().unsafeGetLiteral);
+    ref Type get(string moduleName = __MODULE__, int line = __LINE__) return @trusted {
+        logAssert(error__.checked, "You forgot to check if value had an error. assert(thing, thing.error.toString());",
+                this.error__, moduleName, line);
+        logAssert(!error__.isSet(), null, this.error__, moduleName, line);
         assert(_value !is null);
         return *_value;
     }
