@@ -107,6 +107,7 @@ export @safe nothrow @nogc:
 
     void handle(Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useQuotes = true, bool useName = true,
             bool forcePrint = false) @trusted {
+        import sidero.base.text.format.rawwrite;
         alias ActualType = Unqual!Type;
 
         static if (is(ActualType == Type)) {
@@ -141,6 +142,8 @@ export @safe nothrow @nogc:
                 handleAA(builder, input, useName);
             } else static if (is(ActualType == enum)) {
                 handleEnum(builder, input, useQuotes, useName, forcePrint);
+            } else static if (is(ActualType == char) || is(ActualType == wchar) || is(ActualType == dchar)) {
+                rawWrite(builder, input, FormatSpecifier.init, useQuotes);
             } else {
                 builder.formattedWrite(""c, input);
             }
@@ -237,7 +240,7 @@ export @safe nothrow @nogc:
 
             static if (!is(WrappedType == void)) {
                 if (input) {
-                    this.handle(builder, input.get(), useQuotes, useName, forcePrint);
+                    this.handle(builder, input.get(), true, useName, forcePrint);
                 }
                 return;
             }

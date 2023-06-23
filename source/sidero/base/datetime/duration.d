@@ -247,7 +247,7 @@ export @safe nothrow @nogc:
             break;
 
         case 'a':
-            if (this.days_ < 0 || this.nanoSeconds_ < 0)
+            if (this.days_ != long.min && (this.days_ < 0 || this.nanoSeconds_ < 0))
                 builder ~= "-";
 
             auto days = this.days, hours = this.hours, minutes = this.minutes, seconds = this.seconds,

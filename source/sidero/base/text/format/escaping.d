@@ -170,15 +170,39 @@ Builder unescapeImpl(Builder, Char)(return scope Builder builder, Char quote) {
 void quoteCharImpl(Builder, Char)(scope ref Builder output, Char c) {
     switch (c) {
         case '\\':
+            output ~= "\\\\";
+            break;
+
         case '\0':
+            output ~= "\\0";
+            break;
+
         case '\a':
+            output ~= "\\a";
+            break;
+
         case '\b':
+            output ~= "\\b";
+            break;
+
         case '\f':
+            output ~= "\\f";
+            break;
+
         case '\n':
+            output ~= "\\n";
+            break;
+
         case '\r':
+            output ~= "\\r";
+            break;
+
         case '\t':
+            output ~= "\\t";
+            break;
+
         case '\v':
-            output ~= [cast(Char)'\\', c];
+            output ~= "\\v";
             break;
         default:
             output ~= [c];

@@ -389,6 +389,8 @@ void handleFill(Builder)(scope ref Builder output, scope FormatSpecifier format,
 }
 
 bool writeIntegral(Builder, Input)(scope ref Builder output, scope Input input, scope FormatSpecifier format) {
+    import sidero.base.traits : isSigned;
+
     if (format.alignment == FormatSpecifier.Alignment.None) {
         format.alignment = FormatSpecifier.Alignment.SignAwarePadding;
         format.fillCharacter = '0';
@@ -405,7 +407,7 @@ bool writeIntegral(Builder, Input)(scope ref Builder output, scope Input input, 
     case FormatSpecifier.Type.FloatScientificCapital:
     case FormatSpecifier.Type.FloatShortest:
     case FormatSpecifier.Type.FloatShortestCapital:
-        break;
+        return false;
 
     case FormatSpecifier.Type.Binary:
     case FormatSpecifier.Type.BinaryCapital:
@@ -439,19 +441,30 @@ bool writeIntegral(Builder, Input)(scope ref Builder output, scope Input input, 
             addPrefix(output, format);
         }
     }, () {
+       assert(base > 0);
+        assert(base < 17);
+        assert(base <= alphabet.length);
+        assert(alphabet.length >= base);
+
         const priorLength = output.length;
         bool doneOnce;
-
-        if (input < 0)
-            input *= -1;
 
         while (input != 0 || !doneOnce) {
             auto digit = input % base;
 
+            static if (isSigned!Input) {
+                // if we do this outside, Input.min won't work
+                if (digit < 0)
+                    digit = -digit;
+            }
+
+            assert(digit >= 0);
+            assert(digit < base);
+
             static if (is(Builder == StringBuilder_ASCII)) {
-                output.insert(cast(long)priorLength, cast(ubyte)alphabet[digit]);
+                output.insert(cast(ptrdiff_t)priorLength, cast(ubyte)alphabet[digit]);
             } else {
-                output.insert(cast(long)priorLength, cast(dchar)alphabet[digit]);
+                output.insert(cast(ptrdiff_t)priorLength, cast(dchar)alphabet[digit]);
             }
 
             input /= base;
