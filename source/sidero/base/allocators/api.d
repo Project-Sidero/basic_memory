@@ -374,7 +374,7 @@ T[] makeArray(T, Allocator)(auto ref Allocator alloc, const(T)[] initValues) @tr
     if (ret is null)
         return null;
     else if (ret.length != initValues.length) {
-        alloc.deallocate((cast(void*)ret.ptr)[0 .. ret.length]);
+        alloc.deallocate((cast(void*)ret.ptr)[0 .. T.sizeof * ret.length]);
         return null;
     } else {
         foreach (i, ref v; initValues)
@@ -474,7 +474,7 @@ void dispose(Type, Allocator)(auto ref Allocator alloc, scope auto ref Type[] ar
         }
     }
 
-    alloc.deallocate((cast(void*)array.ptr)[0 .. array.length]);
+    alloc.deallocate((cast(void*)array.ptr)[0 .. Type.sizeof * array.length]);
     array = null;
 }
 

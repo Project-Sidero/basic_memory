@@ -10,12 +10,14 @@ export @safe nothrow @nogc:
 void write(Args...)(scope Args args) {
     import sidero.base.console.internal.writer;
 
-    Writer writer;
-    assert(!writer.prettyPrintActive);
-    assert(!writer.deliminateArguments);
-    writer.isFirstPrettyPrint = true;
+    protectWriteAction(() {
+        Writer writer;
+        assert(!writer.prettyPrintActive);
+        assert(!writer.deliminateArguments);
+        writer.isFirstPrettyPrint = true;
 
-    writer.handle(args);
+        writer.handle(args);
+    });
 }
 
 /// Adds newline at end

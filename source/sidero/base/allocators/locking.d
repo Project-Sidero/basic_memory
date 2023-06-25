@@ -176,13 +176,16 @@ pure:
         scope (exit)
             writeUnlockImpl;
 
-        void[] original = array;
+        auto trueArray = allocatedTree.getTrueRegionOfMemory(array);
+        if (trueArray is null)
+            return false;
+        array = trueArray;
 
-        bool got = poolAllocator.reallocate(array, newSize);
+        const got = poolAllocator.reallocate(array, newSize);
 
         if (got) {
-            allocatedTree.remove(original);
-            removeRangeImpl(original);
+            allocatedTree.remove(trueArray);
+            removeRangeImpl(trueArray);
 
             allocatedTree.store(array);
             addRangeImpl(array);
@@ -200,9 +203,21 @@ pure:
         scope (exit)
             writeUnlockImpl;
 
-        allocatedTree.remove(array);
-        removeRangeImpl(array);
-        return poolAllocator.deallocate(array);
+        debug {
+            auto trueArray = allocatedTree.getTrueRegionOfMemory(array);
+            if (trueArray is null)
+                return false;
+            assert(trueArray.ptr is array.ptr && trueArray.length == array.length);
+        }
+
+        const got = poolAllocator.deallocate(array);
+
+        if (got) {
+            allocatedTree.remove(array);
+            removeRangeImpl(array);
+        }
+
+        return got;
     }
 
     static if (__traits(hasMember, PoolAllocator, "owns")) {

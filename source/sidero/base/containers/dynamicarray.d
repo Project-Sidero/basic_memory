@@ -832,6 +832,11 @@ private:
             b = temp;
         }
 
+        if (a > actualLength)
+            a = actualLength;
+        if (b > actualLength)
+            b = actualLength;
+
         return ErrorInfo.init;
     }
 }
