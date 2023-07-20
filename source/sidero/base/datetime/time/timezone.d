@@ -66,10 +66,10 @@ struct TimeZone {
         }
     }
 
-    ///
-    static string DefaultFormat = "%e";
+    export @safe nothrow @nogc:
 
-export @safe nothrow @nogc:
+    ///
+    static immutable string DefaultFormat = "%e";
 
     ///
     this(return scope ref TimeZone other) scope @trusted {

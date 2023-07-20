@@ -2,16 +2,17 @@ module sidero.base.errors.expected;
 import sidero.base.attributes;
 
 /// A kind of error handling that requires a specific number of something to be handled for complete success.
-@mustuse struct Expected(size_t Wanted) {
+@mustuse struct Expected {
     private @hidden {
-        size_t acquired;
+        size_t acquired, wanted_;
     }
 
 export @safe nothrow @nogc:
 
     ///
-    this(size_t amount) scope {
+    this(size_t wanted, size_t amount) scope {
         this.acquired = amount;
+        this.wanted_ = wanted;
     }
 
     ///
@@ -19,9 +20,13 @@ export @safe nothrow @nogc:
         this.acquired = other.acquired;
     }
 
+    size_t wanted() scope const {
+        return wanted_;
+    }
+
     ///
     bool opCast(T : bool)() scope const {
-        return this.acquired == Wanted;
+        return this.acquired == wanted_;
     }
 
     ///

@@ -77,20 +77,21 @@
                 "source/sidero/base/text/unicode/readonly.d",
                 "source/sidero/base/text/unicode/builder.d"
             ],
-            "dflags": [
-                "-preview=dip1000"
-            ],
             "sourceFiles-windows-dmd": [
                 "msvc_exports.def"
             ],
             "dflags-windows-ldc": [
                 "--fvisibility=public",
                 "--linkonce-templates",
-                "--link-internally",
-                "-preview=dip25"
+                "-preview=dip25",
+                "--link-internally"
+            ],
+            "dflags": [
+                "-preview=dip1000"
             ],
             "lflags-windows": [
-                "/IGNORE:4217"
+                "/IGNORE:4217",
+                "/FORCE:MULTIPLE"
             ],
             "libs-windows": ["Ws2_32", "advapi32", "Userenv"],
             "versions": ["Windows7"],

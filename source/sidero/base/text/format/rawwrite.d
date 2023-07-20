@@ -38,8 +38,8 @@ bool rawWrite(Builder, Input)(return scope ref Builder output, scope Input input
             return writeString(output, input, format, quote);
         } else static if (is(Input : Result!WrappedType, WrappedType) || is(Input : ResultReference!WrappedType, WrappedType)) {
             return writeError!WrappedType(output, input, format, quote);
-        } else static if (is(Input : Expected!Wanted, size_t Wanted)) {
-            return writeExpected(output, Wanted, input.get);
+        } else static if (is(Input == Expected)) {
+            return writeExpected(output, input.wanted, input.get);
         } else static if (isAssociativeArray!Input) {
             return writeAA(output, input);
         } else static if (is(Input == struct) || is(Input == class)) {
@@ -128,7 +128,7 @@ unittest {
     assert(rawWrite(builder, Result!int(22), FormatSpecifier.from("{}")));
     assert(builder == "22");
 
-    assert(rawWrite(builder, Expected!1(0), FormatSpecifier.from("{}")));
+    assert(rawWrite(builder, Expected(1, 0), FormatSpecifier.from("{}")));
     assert(builder == "22Expected(wanted: 1 != got: 0)");
 
     assert(rawWrite(builder, Result!int(NullPointerException), FormatSpecifier.from("{}")));

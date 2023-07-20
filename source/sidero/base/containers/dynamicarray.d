@@ -252,7 +252,7 @@ scope nothrow @nogc:
     @disable auto opCast(T)();
 
     ///
-    bool isNull() {
+    bool isNull() const {
         return state is null;
     }
 

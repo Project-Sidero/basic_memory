@@ -266,7 +266,7 @@ export:
             loggers.cleanupUnreferencedNodes;
         }
 
-        loggers[name] = Logger.init;
+        loggers[name] = Logger();
         ret = loggers[name];
         assert(ret);
         ret.allocator = allocator;

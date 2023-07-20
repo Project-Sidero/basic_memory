@@ -8,7 +8,7 @@ import sidero.base.allocators;
 export @safe nothrow @nogc:
 
 ///
-Expected!(Args.length) formattedRead(Input, Args...)(scope ref Input input, scope String_UTF8.LiteralType formatString, scope ref Args args)
+Expected formattedRead(Input, Args...)(scope ref Input input, scope String_UTF8.LiteralType formatString, scope ref Args args)
         if (isUTF!Input && Args.length > 0) {
     String_UTF32 tempFormat;
     tempFormat.__ctor(formatString);
@@ -16,7 +16,7 @@ Expected!(Args.length) formattedRead(Input, Args...)(scope ref Input input, scop
 }
 
 /// Ditto
-Expected!(Args.length) formattedRead(Input, Args...)(scope ref Input input, scope String_UTF16.LiteralType formatString, scope ref Args args)
+Expected formattedRead(Input, Args...)(scope ref Input input, scope String_UTF16.LiteralType formatString, scope ref Args args)
         if (isUTF!Input && Args.length > 0) {
     String_UTF32 tempFormat;
     tempFormat.__ctor(formatString);
@@ -24,7 +24,7 @@ Expected!(Args.length) formattedRead(Input, Args...)(scope ref Input input, scop
 }
 
 /// Ditto
-Expected!(Args.length) formattedRead(Input, Args...)(scope ref Input input, scope String_UTF32.LiteralType formatString, scope ref Args args)
+Expected formattedRead(Input, Args...)(scope ref Input input, scope String_UTF32.LiteralType formatString, scope ref Args args)
         if (isUTF!Input && Args.length > 0) {
     String_UTF32 tempFormat;
     tempFormat.__ctor(formatString);
@@ -32,25 +32,25 @@ Expected!(Args.length) formattedRead(Input, Args...)(scope ref Input input, scop
 }
 
 /// Ditto
-Expected!(Args.length) formattedRead(Input, Args...)(scope ref Input input, scope String_ASCII formatString, scope ref Args args) @trusted
+Expected formattedRead(Input, Args...)(scope ref Input input, scope String_ASCII formatString, scope ref Args args) @trusted
         if (isUTF!Input || isASCII!Input) {
     return formattedReadImpl(input, String_UTF8(cast(const(char)[])formatString.unsafeGetLiteral()).byUTF32, args);
 }
 
 /// Ditto
-Expected!(Args.length) formattedRead(Input, Args...)(scope ref Input input, scope String_UTF8 formatString, scope ref Args args)
+Expected formattedRead(Input, Args...)(scope ref Input input, scope String_UTF8 formatString, scope ref Args args)
         if (isUTF!Input && Args.length > 0) {
     return formattedReadImpl(input, formatString.byUTF32, args);
 }
 
 /// Ditto
-Expected!(Args.length) formattedRead(Input, Args...)(scope ref Input input, scope String_UTF16 formatString, scope ref Args args)
+Expected formattedRead(Input, Args...)(scope ref Input input, scope String_UTF16 formatString, scope ref Args args)
         if (isUTF!Input && Args.length > 0) {
     return formattedReadImpl(input, formatString.byUTF32, args);
 }
 
 /// Ditto
-Expected!(Args.length) formattedRead(Input, Args...)(scope ref Input input, scope String_UTF32 formatString, scope ref Args args)
+Expected formattedRead(Input, Args...)(scope ref Input input, scope String_UTF32 formatString, scope ref Args args)
         if (isUTF!Input && Args.length > 0) {
     return formattedReadImpl(input, formatString, args);
 }
@@ -80,7 +80,7 @@ unittest {
 
 private:
 
-Expected!(Args.length) formattedReadImpl(Input, Args...)(scope ref Input input, scope String_UTF32 formatString, scope ref Args args) @trusted {
+Expected formattedReadImpl(Input, Args...)(scope ref Input input, scope String_UTF32 formatString, scope ref Args args) @trusted {
     Input inputTemp = input.save;
     size_t successfullyHandled;
 
@@ -185,7 +185,7 @@ Expected!(Args.length) formattedReadImpl(Input, Args...)(scope ref Input input, 
         inputTemp = input;
     }
 
-    return typeof(return)(successfullyHandled);
+    return Expected(Args.length, successfullyHandled);
 }
 
 bool formattedReadStringImpl(Input, ArgType)(scope ref Input input, scope ref String_UTF32 formatString, scope ref ArgType output) @trusted {

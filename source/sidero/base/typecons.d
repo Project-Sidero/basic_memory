@@ -65,20 +65,20 @@ export @safe nothrow @nogc:
     }
 
     ///
-    bool opEquals(scope const T other) scope const {
+    bool opEquals(scope T other) scope const @trusted {
         if (!this.isSet)
             return false;
-        return this.value == other;
+        return (cast(Optional*)&this).value == other;
     }
 
     ///
-    int opCmp(scope const T other) scope const {
+    int opCmp(scope T other) scope const @trusted {
         if (!this.isSet)
             return -1;
 
-        if (this.value == other)
+        if ((cast(Optional*)&this).value == other)
             return 0;
-        else if (this.value < other)
+        else if ((cast(Optional*)&this).value < other)
             return -1;
         else
             return 1;
@@ -92,11 +92,11 @@ export @safe nothrow @nogc:
     }
 
     ///
-    void toString(S)(scope ref S sink) scope const {
+    void toString(S)(scope ref S sink) scope const @trusted {
         if (!this.isSet)
             sink ~= "not-set"c;
         else
-            sink.formattedWrite("{:s}", this.value);
+            sink.formattedWrite("{:s}", (cast(Optional*)&this).value);
     }
 
     static if (__traits(hasMember, T, "toStringPretty")) {
@@ -114,12 +114,12 @@ export @safe nothrow @nogc:
                 return;
             }
 
-            static if (__traits(compiles, { this.value.toStringPretty(sink); })) {
-                this.value.toStringPretty(sink);
-            } else static if (__traits(compiles, { this.value.toStringPretty(&sink.put); })) {
-                this.value.toStringPretty(&sink.put);
-            } else static if (__traits(compiles, { sink ~= this.value.toStringPretty(); })) {
-                sink ~= this.value.toStringPretty();
+            static if (__traits(compiles, { (cast(Optional*)&this).value.toStringPretty(sink); })) {
+                (cast(Optional*)&this).value.toStringPretty(sink);
+            } else static if (__traits(compiles, { (cast(Optional*)&this).value.toStringPretty(&sink.put); })) {
+                (cast(Optional*)&this).value.toStringPretty(&sink.put);
+            } else static if (__traits(compiles, { sink ~= (cast(Optional*)&this).value.toStringPretty(); })) {
+                sink ~= (cast(Optional*)&this).value.toStringPretty();
             }
         }
     }
