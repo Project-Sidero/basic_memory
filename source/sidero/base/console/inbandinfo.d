@@ -27,7 +27,7 @@ enum ConsoleColor {
 
 ///
 struct InBandInfo {
-    ///
+    /// Does not reset useError
     bool resetDefaults;
     ///
     Optional!bool deliminateArguments;

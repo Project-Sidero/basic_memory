@@ -70,6 +70,14 @@ void handleOneWrite(Type)(scope ref Writer writer, size_t argumentId, scope ref 
         if (writer.deliminateArguments)
             rawWriteImpl(String_UTF8(`"`), writer.useErrorStream);
     } else static if (is(Type == InBandInfo)) {
+        if (arg.resetDefaults) {
+            writer.prettyPrintDepth = 0;
+            writer.prettyPrintActive = false;
+            writer.deliminateArguments = false;
+            writer.setPrettyDelim = false;
+            writer.isFirstPrettyPrint = true;
+        }
+
         if (!arg.prettyPrintActive.isNull)
             writer.prettyPrintActive = arg.prettyPrintActive.get;
         if (!arg.deliminateArguments.isNull)
