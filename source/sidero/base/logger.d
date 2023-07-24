@@ -29,17 +29,75 @@ enum LoggingTargets : uint {
 
 ///
 enum LogLevel {
-    /// Outputs everything
+    /**
+    The trace log level, will only output if trace.
+
+    Tracing debug events should only be included in library code for the purposes of understanding failures either in production or during debugging.
+    It may take the place of console writing during the debugging process but it should never reach consumers once debugging in complete.
+    */
     Trace,
-    /// Default, will only output info/warning/error/critical/fatal
+
+    /**
+    The debug log level, will only output for trace to debug inclusive.
+
+    This should be used by library authors to log any action that could fail.
+    It may contain any information required to identify the actions being performed as well as any reason a code path may be failing.
+    */
+    Debug,
+
+    /**
+    A information log level, will only output for trace to info inclusive.
+
+    Use this to inform about commonly desired information.
+    This includes information such as a system handle has been created with its given value, but only if that system handle is commonly accessed externally.
+    You should not be using this to output information that will be exclusively be needed during debugging.
+    */
     Info,
-    /// Will only output warning/error/critical/fatal
+
+    /**
+    A notice log level, will only output for trace to notice inclusive.
+    It is the default.
+
+    Use this to inform about standard logic within a program.
+    This is stuff like a socket connection has been made to a given network address.
+    It should not include the system handle for the socket.
+    */
+    Notice,
+
+    /**
+    The warning log level, will only output for trace to warning inclusive.
+
+    Use this to document a potentially indicative behavior to a problem.
+    What it is indicative of may not be known at this stage.
+    It is used after the ending of a program to help diagnose a problem that has occured.
+    */
     Warning,
-    /// Will only output error/critical/fatal
+
+    /**
+    The error log level, will only output for trace to error inclusive.
+    This will be printed to standard error not standard output.
+
+    For library authors the purpose of this is for recoverable situations but only if the API is be designed for error checking.
+    It allows documenting the cause of a recoverable situation that ends a given library logic.
+    */
     Error,
-    /// Will only output critical/fatal
+    /**
+    A critical log level, will only output for trace to critical inclusive.
+    This will be printed to standard error not standard output.
+
+    For library authors the purpose of this is for unrecoverable situations and the API is designed for error checking.
+    It allows for documenting the cause of a unrecoverable situation that ends a given programs logic.
+    */
     Critical,
-    /// Will only output fatal; this should (but won't) end the program
+    /**
+    Fatal log level, will always be printed.
+    This will be printed to standard error not standard output.
+
+    For use with any erroneous situation that will immediately ends a program life.
+    Use sparingly.
+
+    TODO: this should immediately exit the program
+    */
     Fatal,
 }
 
@@ -281,10 +339,9 @@ export:
 
         if (name == "global") {
             globalLogger = ret;
-            ret.logLevel = LogLevel.Info;
-        } else {
-            ret.logLevel = LogLevel.Error;
         }
+
+        ret.logLevel = LogLevel.Notice;
 
         mutexForCreation.unlock;
         return ret;
@@ -306,14 +363,40 @@ export:
     }
 
     ///
-    void info(string moduleName = __MODULE__, int line = __LINE__, Args...)(Args args) scope {
-        if (logLevel > LogLevel.Warning)
+    void debug_(string moduleName = __MODULE__, int line = __LINE__, Args...)(Args args) scope {
+        if (logLevel > LogLevel.Debug)
+            return;
+
+        mutex.pureLock;
+        message!(moduleName, line)(LogLevel.Debug, args);
+        mutex.unlock;
+    }
+
+    ///
+    alias info = information;
+
+    ///
+    void information(string moduleName = __MODULE__, int line = __LINE__, Args...)(Args args) scope {
+        if (logLevel > LogLevel.Info)
             return;
 
         mutex.pureLock;
         message!(moduleName, line)(LogLevel.Info, args);
         mutex.unlock;
     }
+
+    ///
+    void notice(string moduleName = __MODULE__, int line = __LINE__, Args...)(Args args) scope {
+        if (logLevel > LogLevel.Notice)
+            return;
+
+        mutex.pureLock;
+        message!(moduleName, line)(LogLevel.Notice, args);
+        mutex.unlock;
+    }
+
+    ///
+    alias warn = warning;
 
     ///
     void warning(string moduleName = __MODULE__, int line = __LINE__, Args...)(Args args) scope {
@@ -366,8 +449,8 @@ export:
         String_UTF8 contentUTF8;
 
         static immutable LevelTag = [
-            "TRACE", "INFO", "WARNING", "ERROR", "CRITICAL", "FATAL", " TRACE", " INFO", " WARNING", " ERROR", " CRITICAL",
-            " FATAL"
+            "TRACE", "DEBUG", "INFO", "NOTICE", "WARNING", "ERROR", "CRITICAL", "FATAL",
+            " TRACE", " DEBUG", " INFO", " NOTICE", " WARNING", " ERROR", " CRITICAL", " FATAL"
         ];
 
         void syslog() {
@@ -550,9 +633,25 @@ void trace(string moduleName = __MODULE__, int line = __LINE__, Args...)(Args ar
 }
 
 ///
-void info(string moduleName = __MODULE__, int line = __LINE__, Args...)(Args args) @trusted {
+void debug_(string moduleName = __MODULE__, int line = __LINE__, Args...)(Args args) @trusted {
+    Logger.global.assumeOkay.debug_!(moduleName, line)(args);
+}
+
+///
+alias info = information;
+
+///
+void information(string moduleName = __MODULE__, int line = __LINE__, Args...)(Args args) @trusted {
     Logger.global.assumeOkay.info!(moduleName, line)(args);
 }
+
+///
+void notice(string moduleName = __MODULE__, int line = __LINE__, Args...)(Args args) @trusted {
+    Logger.global.assumeOkay.notice!(moduleName, line)(args);
+}
+
+///
+alias warn = warning;
 
 ///
 void warning(string moduleName = __MODULE__, int line = __LINE__, Args...)(Args args) @trusted {
@@ -624,15 +723,20 @@ __gshared {
 }
 
 struct ConsoleTarget {
-    static immutable DefaultErrorStream = [false, false, false, true, true, true];
-    static immutable ConsoleColor[2][6] DefaultConsoleColors = [
-        [ConsoleColor.Yellow, ConsoleColor.Unknown], [ConsoleColor.Green, ConsoleColor.Unknown],
-        [ConsoleColor.Magenta, ConsoleColor.Unknown], [ConsoleColor.Red, ConsoleColor.Yellow],
-        [ConsoleColor.Red, ConsoleColor.Cyan], [ConsoleColor.Red, ConsoleColor.Blue],
+    static immutable DefaultErrorStream = [false, false, false, false, false, true, true, true];
+    static immutable ConsoleColor[2][8] DefaultConsoleColors = [
+        [ConsoleColor.Yellow, ConsoleColor.Unknown],
+        [ConsoleColor.Blue, ConsoleColor.Unknown],
+        [ConsoleColor.Green, ConsoleColor.Unknown],
+        [ConsoleColor.Unknown, ConsoleColor.Unknown],
+        [ConsoleColor.Magenta, ConsoleColor.Unknown],
+        [ConsoleColor.Red, ConsoleColor.Yellow],
+        [ConsoleColor.Red, ConsoleColor.Cyan],
+        [ConsoleColor.Red, ConsoleColor.Blue],
     ];
 
-    ConsoleColor[2][6] colors = DefaultConsoleColors;
-    bool[6] useErrorStream = DefaultErrorStream;
+    ConsoleColor[2][8] colors = DefaultConsoleColors;
+    bool[8] useErrorStream = DefaultErrorStream;
 
 export @safe nothrow @nogc:
 
@@ -684,7 +788,7 @@ version (Windows) {
 
     __gshared HANDLE windowsEventHandle;
 } else version (Posix) {
-    import core.sys.posix.syslog : LOG_DEBUG, LOG_INFO, LOG_NOTICE, LOG_WARNING, LOG_ERR;
+    import core.sys.posix.syslog : LOG_DEBUG, LOG_INFO, LOG_NOTICE, LOG_WARNING, LOG_ERR, LOG_CRIT;
 
-    static PrioritySyslogForLevels = [LOG_DEBUG, LOG_INFO, LOG_NOTICE, LOG_WARNING, LOG_ERR, LOG_ERR];
+    static PrioritySyslogForLevels = [LOG_DEBUG, LOG_DEBUG, LOG_INFO, LOG_NOTICE, LOG_WARNING, LOG_ERR, LOG_ERR, LOG_CRIT];
 }
