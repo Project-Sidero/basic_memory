@@ -3,12 +3,15 @@ import coreatomic = core.atomic;
 
 export @safe nothrow @nogc pure:
 
-void atomicFence() {
-    pragma(inline, true);
-    coreatomic.atomicFence();
+version(DigitalMars) {
+    void atomicFence() {
+        coreatomic.atomicFence();
+    }
+} else {
+    alias atomicFence = coreatomic.atomicFence;
 }
 
-T atomicLoad(T)(ref return scope shared const T val) {
+T atomicLoad(T)(ref return scope const T val) {
     pragma(inline, true);
     return coreatomic.atomicLoad(val);
 }
