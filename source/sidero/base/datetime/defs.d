@@ -182,7 +182,7 @@ export @safe nothrow @nogc:
     DateTime asTimeZone(return scope TimeZone timezone) scope return @trusted {
         long delta;
 
-        if (!this.timezone_.isNull) {
+        if(!this.timezone_.isNull) {
             auto gDateTime = this.asGregorian();
             auto oldBias = this.timezone_.currentSecondsBias(gDateTime);
             auto newBias = timezone.currentSecondsBias(gDateTime);
@@ -192,7 +192,7 @@ export @safe nothrow @nogc:
         DateTime ret = this;
         ret.timezone_ = timezone;
 
-        if (delta != 0)
+        if(delta != 0)
             ret.advanceSeconds(delta);
 
         return ret;
@@ -205,7 +205,7 @@ export @safe nothrow @nogc:
 
     ///
     Result!long toUnixTime() scope const @trusted {
-        static if (!__traits(hasMember, DateType, "UnixEpoch")) {
+        static if(!__traits(hasMember, DateType, "UnixEpoch")) {
             return typeof(return)(MissingUnixEpochException);
         } else {
             auto gDateTime = this.asGregorian();
@@ -216,7 +216,7 @@ export @safe nothrow @nogc:
             long working = interval.days * 86_400;
             working -= oldBias;
 
-            if (interval.days >= 0)
+            if(interval.days >= 0)
                 working += this.time_.totalSeconds;
             else
                 working -= this.time_.totalSeconds;
@@ -245,18 +245,18 @@ export @safe nothrow @nogc:
     Result!Duration opBinary(string op : "-")(scope DateTime other) scope const {
         auto ourUnixTime = this.toUnixTime, otherUnixTime = other.toUnixTime;
 
-        if (!ourUnixTime)
+        if(!ourUnixTime)
             return typeof(return)(ourUnixTime.getError);
-        else if (!otherUnixTime)
+        else if(!otherUnixTime)
             return typeof(return)(otherUnixTime.getError);
 
         long ourNanoSeconds = this.time.nanoSecond, otherNanoSeconds = other.time.nanoSecond;
         ourNanoSeconds -= (ourNanoSeconds / 1_000_000_000) * 1_000_000_000;
         otherNanoSeconds -= (otherNanoSeconds / 1_000_000_000) * 1_000_000_000;
 
-        if (ourUnixTime < 0)
+        if(ourUnixTime < 0)
             ourNanoSeconds *= -1;
-        if (otherUnixTime < 0)
+        if(otherUnixTime < 0)
             otherNanoSeconds *= -1;
 
         ourNanoSeconds += ourUnixTime * 1_000_000_000;
@@ -273,7 +273,7 @@ export @safe nothrow @nogc:
     int opCmp(scope const DateTime other) scope const {
         const ret = this.date_.opCmp(other.date_);
 
-        if (ret != 0)
+        if(ret != 0)
             return ret;
         else
             return this.time_.opCmp(other.time_);
@@ -314,18 +314,18 @@ export @safe nothrow @nogc:
             if (isBuilderString!Builder && isReadOnlyString!Format) {
         import sidero.base.allocators;
 
-        if (builder.isNull)
+        if(builder.isNull)
             builder = typeof(builder)(globalAllocator());
 
         bool isEscaped;
 
-        if (usePercentageEscape) {
-            foreach (c; specification.byUTF32()) {
-                if (isEscaped) {
+        if(usePercentageEscape) {
+            foreach(c; specification.byUTF32()) {
+                if(isEscaped) {
                     isEscaped = false;
-                    if (this.formatValue(builder, c))
+                    if(this.formatValue(builder, c))
                         continue;
-                } else if (c == '%') {
+                } else if(c == '%') {
                     isEscaped = true;
                     continue;
                 }
@@ -333,13 +333,13 @@ export @safe nothrow @nogc:
                 builder ~= [c];
             }
         } else {
-            foreach (c; specification.byUTF32()) {
-                if (isEscaped) {
+            foreach(c; specification.byUTF32()) {
+                if(isEscaped) {
                     isEscaped = false;
-                } else if (c == '\\') {
+                } else if(c == '\\') {
                     isEscaped = true;
                     continue;
-                } else if (this.formatValue(builder, c)) {
+                } else if(this.formatValue(builder, c)) {
                     continue;
                 }
 
@@ -353,11 +353,11 @@ export @safe nothrow @nogc:
             if (isBuilderString!Builder) {
         import writer = sidero.base.text.format.write;
 
-        switch (specification) {
+        switch(specification) {
         case 'B':
             DateTime temp;
 
-            if (this.timezone_.isNull)
+            if(this.timezone_.isNull)
                 temp = DateTime(cast(DateTime)this, TimeZone.from(0));
             else
                 temp = cast(DateTime)this;
@@ -368,9 +368,9 @@ export @safe nothrow @nogc:
 
             auto working = cast(uint)(((3600 * temp.hour) + (60 * temp.minute)) / 86.4);
 
-            if (working < 10)
+            if(working < 10)
                 builder ~= "0"c;
-            else if (working < 100)
+            else if(working < 100)
                 builder ~= "00"c;
 
             writer.formattedWrite(builder, "{:s}", working);
@@ -383,7 +383,7 @@ export @safe nothrow @nogc:
             return true;
 
         case 'I':
-            if (this.timezone_.isNull || !this.timezone_.haveDaylightSavings) {
+            if(this.timezone_.isNull || !this.timezone_.haveDaylightSavings) {
                 builder ~= "0"c;
             } else {
                 auto gDateTime = this.asGregorian();
@@ -394,7 +394,7 @@ export @safe nothrow @nogc:
             return true;
 
         case 'O':
-            if (this.timezone_.isNull) {
+            if(this.timezone_.isNull) {
                 builder ~= "+0000";
             } else {
                 auto gDateTime = this.asGregorian();
@@ -403,25 +403,25 @@ export @safe nothrow @nogc:
                 TimeOfDay tod = TimeOfDay(0, 0, 0);
                 tod.advanceSeconds(bias < 0 ? -bias : bias);
 
-                if (bias < 0)
+                if(bias < 0)
                     builder ~= "-";
                 else
                     builder ~= "+";
 
                 auto hour = tod.hour;
-                if (hour < 10)
+                if(hour < 10)
                     builder ~= "0";
                 writer.formattedWrite(builder, "{:s}", hour);
 
                 auto minutes = tod.minute;
-                if (minutes < 10)
+                if(minutes < 10)
                     builder ~= "0";
                 writer.formattedWrite(builder, "{:s}", minutes);
             }
             return true;
 
         case 'P':
-            if (this.timezone_.isNull) {
+            if(this.timezone_.isNull) {
                 builder ~= "+0000";
             } else {
                 auto gDateTime = this.asGregorian();
@@ -430,48 +430,48 @@ export @safe nothrow @nogc:
                 TimeOfDay tod = TimeOfDay(0, 0, 0);
                 tod.advanceSeconds(bias < 0 ? -bias : bias);
 
-                if (bias < 0)
+                if(bias < 0)
                     builder ~= "-";
                 else
                     builder ~= "+";
 
                 auto hour = tod.hour;
-                if (hour < 10)
+                if(hour < 10)
                     builder ~= "0";
                 writer.formattedWrite(builder, "{:s}", hour);
 
                 auto minutes = tod.minute;
-                if (minutes < 10)
+                if(minutes < 10)
                     builder ~= "0";
                 writer.formattedWrite(builder, "{:s}", minutes);
             }
             return true;
 
         case 'p':
-            if (this.timezone_.isNull) {
+            if(this.timezone_.isNull) {
                 builder ~= "+0000";
             } else {
                 auto gDateTime = this.asGregorian();
                 auto bias = this.timezone_.currentSecondsBias(gDateTime);
 
-                if (bias == 0) {
+                if(bias == 0) {
                     builder ~= "Z";
                 } else {
                     TimeOfDay tod = TimeOfDay(0, 0, 0);
                     tod.advanceSeconds(bias < 0 ? -bias : bias);
 
-                    if (bias < 0)
+                    if(bias < 0)
                         builder ~= "-";
                     else
                         builder ~= "+";
 
                     auto hour = tod.hour;
-                    if (hour < 10)
+                    if(hour < 10)
                         builder ~= "0";
                     writer.formattedWrite(builder, "{:s}", hour);
 
                     auto minutes = tod.minute;
-                    if (minutes < 10)
+                    if(minutes < 10)
                         builder ~= "0";
                     writer.formattedWrite(builder, "{:s}", minutes);
                 }
@@ -479,31 +479,31 @@ export @safe nothrow @nogc:
             return true;
 
         case 'T':
-            if (this.timezone_.isNull) {
+            if(this.timezone_.isNull) {
                 builder ~= "Z";
             } else {
                 auto gDateTime = this.asGregorian();
                 auto bias = this.timezone_.currentSecondsBias(gDateTime);
 
-                if (bias == 0) {
+                if(bias == 0) {
                     builder ~= "Z";
                 } else {
                     TimeOfDay tod = TimeOfDay(0, 0, 0);
                     tod.advanceSeconds(bias < 0 ? -bias : bias);
 
-                    if (bias < 0)
+                    if(bias < 0)
                         builder ~= "-";
                     else
                         builder ~= "+";
 
                     auto hour = tod.hour;
-                    if (hour < 10)
+                    if(hour < 10)
                         builder ~= "0";
                     writer.formattedWrite(builder, "{:s}", hour);
 
                     auto minutes = tod.minute;
-                    if (minutes > 0) {
-                        if (minutes < 10)
+                    if(minutes > 0) {
+                        if(minutes < 10)
                             builder ~= "0";
                         writer.formattedWrite(builder, "{:s}", minutes);
                     }
@@ -512,7 +512,7 @@ export @safe nothrow @nogc:
             return true;
 
         case 'Z':
-            if (this.timezone_.isNull) {
+            if(this.timezone_.isNull) {
                 builder ~= "0";
             } else {
                 auto gDateTime = this.asGregorian();
@@ -532,7 +532,7 @@ export @safe nothrow @nogc:
         case 'U':
             auto unixTime = this.toUnixTime;
 
-            if (unixTime) {
+            if(unixTime) {
                 writer.formattedWrite(builder, "{:s}", unixTime);
             }
             return true;
@@ -550,7 +550,7 @@ export @safe nothrow @nogc:
 
     ///
     bool formattedWrite(scope ref StringBuilder_UTF8 builder, scope FormatSpecifier format, bool usePercentageEscape = true) @safe nothrow @nogc {
-        if (format.fullFormatSpec.length == 0)
+        if(format.fullFormatSpec.length == 0)
             return false;
 
         this.format(builder, format.fullFormatSpec, usePercentageEscape);
@@ -562,47 +562,47 @@ export @safe nothrow @nogc:
     ///
     static bool parse(Input)(scope ref Input input, scope ref DateTime output, scope String_UTF8 specification,
             bool usePercentageEscape = true) {
-        if (specification.length == 0)
+        if(specification.length == 0)
             return false;
         bool isEscaped;
 
-        if (usePercentageEscape) {
-            foreach (c; specification.byUTF32()) {
-                if (isEscaped) {
+        if(usePercentageEscape) {
+            foreach(c; specification.byUTF32()) {
+                if(isEscaped) {
                     isEscaped = false;
-                    if (output.parseValue(input, c))
+                    if(output.parseValue(input, c))
                         continue;
-                } else if (c == '%') {
+                } else if(c == '%') {
                     isEscaped = true;
                     continue;
                 }
 
-                static if (isASCII!Input) {
-                    if (c >= 128 || !input.startsWith([c]))
+                static if(isASCII!Input) {
+                    if(c >= 128 || !input.startsWith([c]))
                         return false;
                 } else {
-                    if (!input.startsWith([c]))
+                    if(!input.startsWith([c]))
                         return false;
                 }
 
                 input.popFront;
             }
         } else {
-            foreach (c; specification.byUTF32()) {
-                if (isEscaped) {
+            foreach(c; specification.byUTF32()) {
+                if(isEscaped) {
                     isEscaped = false;
-                } else if (c == '\\') {
+                } else if(c == '\\') {
                     isEscaped = true;
                     continue;
-                } else if (output.parseValue(input, c)) {
+                } else if(output.parseValue(input, c)) {
                     continue;
                 }
 
-                static if (isASCII!Input) {
-                    if (c >= 128 || !input.startsWith([c]))
+                static if(isASCII!Input) {
+                    if(c >= 128 || !input.startsWith([c]))
                         return false;
                 } else {
-                    if (!input.startsWith([c]))
+                    if(!input.startsWith([c]))
                         return false;
                 }
 
@@ -620,23 +620,23 @@ export @safe nothrow @nogc:
 
         Input input2;
 
-        switch (specification) {
+        switch(specification) {
         case 'p':
         case 'P':
         case 'T':
-            if (input.startsWith("Z")) {
+            if(input.startsWith("Z")) {
                 input = input[1 .. $];
                 this.timezone_ = TimeZone.from(0);
                 return true;
-            } else if (input.length >= 4) {
+            } else if(input.length >= 4) {
                 long hours, seconds;
 
                 input2 = input[0 .. 2];
-                if (!cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), hours) || !input2.empty || hours >= 24)
+                if(!cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), hours) || !input2.empty || hours >= 24)
                     return false;
 
                 input2 = input[2 .. 4];
-                if (!cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), seconds) || !input2.empty || seconds >= 60)
+                if(!cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), seconds) || !input2.empty || seconds >= 60)
                     return false;
 
                 const bias = (hours * 60) + seconds;
@@ -649,7 +649,7 @@ export @safe nothrow @nogc:
             input2 = input.save;
             long bias;
 
-            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), bias)) {
+            if(cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), bias)) {
                 input = input2;
                 this.timezone_ = TimeZone.from(bias);
                 return true;
@@ -666,7 +666,7 @@ export @safe nothrow @nogc:
             input2 = input.save;
             long unixTime;
 
-            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), unixTime)) {
+            if(cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), unixTime)) {
                 input = input2;
                 this = DateTime.fromUnixTime(unixTime);
                 return true;
@@ -694,11 +694,11 @@ private @hidden:
 
         temp = this.asGregorian();
 
-        if (temp.year != oldYear)
+        if(temp.year != oldYear)
             this.timezone_ = this.timezone_.forYear(temp.year);
         const newBias = this.timezone_.currentSecondsBias(temp);
 
-        if (oldBias != newBias) {
+        if(oldBias != newBias) {
             auto dateInterval = this.time_.advanceSeconds(newBias - oldBias, true);
             this.date_.advanceDays(dateInterval.days);
         }

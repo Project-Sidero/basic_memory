@@ -30,11 +30,11 @@ export:
     enum NeedsLocking = () {
         bool ret;
 
-        static if (__traits(hasMember, Primary, "NeedsLocking"))
-            if (Primary.NeedsLocking)
+        static if(__traits(hasMember, Primary, "NeedsLocking"))
+            if(Primary.NeedsLocking)
                 ret = true;
-        static if (__traits(hasMember, Secondary, "NeedsLocking"))
-            if (Secondary.NeedsLocking)
+        static if(__traits(hasMember, Secondary, "NeedsLocking"))
+            if(Secondary.NeedsLocking)
                 ret = true;
 
         return ret;
@@ -54,12 +54,12 @@ scope @safe @nogc pure nothrow:
 
     ///
     void[] allocate(size_t size, TypeInfo ti = null) {
-        if (isNull)
+        if(isNull)
             return null;
         else {
             void[] ret = primary.allocate(size, ti);
 
-            if (ret is null)
+            if(ret is null)
                 ret = secondary.allocate(size, ti);
 
             return ret;
@@ -68,9 +68,9 @@ scope @safe @nogc pure nothrow:
 
     ///
     bool reallocate(scope ref void[] array, size_t newSize) {
-        if (isNull)
+        if(isNull)
             return false;
-        else if (primary.owns(array) == Ternary.yes || secondary.owns(array) == Ternary.no)
+        else if(primary.owns(array) == Ternary.yes || secondary.owns(array) == Ternary.no)
             return primary.reallocate(array, newSize);
         else
             return secondary.reallocate(array, newSize);
@@ -78,9 +78,9 @@ scope @safe @nogc pure nothrow:
 
     ///
     bool deallocate(scope void[] array) {
-        if (isNull)
+        if(isNull)
             return false;
-        else if (primary.owns(array) == Ternary.yes || secondary.owns(array) == Ternary.no)
+        else if(primary.owns(array) == Ternary.yes || secondary.owns(array) == Ternary.no)
             return primary.deallocate(array);
         else
             return secondary.deallocate(array);
@@ -88,16 +88,16 @@ scope @safe @nogc pure nothrow:
 
     ///
     Ternary owns(scope void[] array) {
-        if (isNull)
+        if(isNull)
             return Ternary.no;
         else
             return primary.owns(array) == Ternary.yes ? Ternary.yes : secondary.owns(array);
     }
 
-    static if (__traits(hasMember, Primary, "deallocateAll") && __traits(hasMember, Secondary, "deallocateAll")) {
+    static if(__traits(hasMember, Primary, "deallocateAll") && __traits(hasMember, Secondary, "deallocateAll")) {
         ///
         bool deallocateAll() {
-            if (isNull)
+            if(isNull)
                 return false;
             else {
                 primary.deallocateAll();
@@ -107,7 +107,7 @@ scope @safe @nogc pure nothrow:
         }
     }
 
-    static if (__traits(hasMember, Primary, "empty") && __traits(hasMember, Secondary, "empty")) {
+    static if(__traits(hasMember, Primary, "empty") && __traits(hasMember, Secondary, "empty")) {
         ///
         bool empty() {
             return isNull || primary.empty() && secondary.empty();

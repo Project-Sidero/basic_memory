@@ -16,12 +16,12 @@ void Composition() {
     {
         SequentialRanges!(dchar, SequentialRangeSplitGroup, 2, ulong) sr;
 
-        CompositionCanonical: foreach (character, entry; state.decompositonMappings) {
-            if (entry.decomposed.length != 2 || entry.tag != CompatibilityFormattingTag.None)
+        CompositionCanonical: foreach(character, entry; state.decompositonMappings) {
+            if(entry.decomposed.length != 2 || entry.tag != CompatibilityFormattingTag.None)
                 continue;
 
-            foreach (ex; compositionExclusionRanges) {
-                if (ex.within(character))
+            foreach(ex; compositionExclusionRanges) {
+                if(ex.within(character))
                     continue CompositionCanonical;
             }
 
@@ -66,12 +66,12 @@ void Composition() {
     {
         SequentialRanges!(dchar, SequentialRangeSplitGroup, 2, ulong) sr;
 
-        CompositionCompatibility: foreach (character, entry; state.decompositonMappings) {
-            if (entry.decomposed.length != 2)
+        CompositionCompatibility: foreach(character, entry; state.decompositonMappings) {
+            if(entry.decomposed.length != 2)
                 continue;
 
-            foreach (ex; compositionExclusionRanges) {
-                if (ex.within(character))
+            foreach(ex; compositionExclusionRanges) {
+                if(ex.within(character))
                     continue CompositionCompatibility;
             }
 

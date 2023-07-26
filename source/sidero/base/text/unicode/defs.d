@@ -1,5 +1,6 @@
 module sidero.base.text.unicode.defs;
 import sidero.base.errors.message;
+
 export:
 
 ///
@@ -48,13 +49,13 @@ export scope const @safe:
         assert(utf16Del !is null);
         assert(utf32Del !is null);
 
-        if (codepointSize == 8)
+        if(codepointSize == 8)
             return utf8Del();
-        else if (codepointSize == 16)
+        else if(codepointSize == 16)
             return utf16Del();
-        else if (codepointSize == 32)
+        else if(codepointSize == 32)
             return utf32Del();
-        else static if (!is(typeof(return) == void))
+        else static if(!is(typeof(return) == void))
             return typeof(return).init;
     }
 
@@ -64,11 +65,11 @@ export scope const @safe:
         assert(utf16Del !is null);
         assert(utf32Del !is null);
 
-        if (codepointSize == 8)
+        if(codepointSize == 8)
             return utf8Del();
-        else if (codepointSize == 16)
+        else if(codepointSize == 16)
             return utf16Del();
-        else if (codepointSize == 32)
+        else if(codepointSize == 32)
             return utf32Del();
         else
             return nullDel();

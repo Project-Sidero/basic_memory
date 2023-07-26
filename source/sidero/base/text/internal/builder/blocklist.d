@@ -57,7 +57,7 @@ struct BlockListImpl(Char) {
     }
 
     void remove(scope Block* block) pure @trusted {
-        if (block is null || block is &head || block is &tail)
+        if(block is null || block is &head || block is &tail)
             return;
 
         block.next.previous = block.previous;
@@ -85,7 +85,7 @@ struct BlockListImpl(Char) {
     void clear() pure {
         Block* block = head.next;
 
-        while (block !is &tail) {
+        while(block !is &tail) {
             assert(block !is null);
             numberOfItems -= block.length;
 
@@ -112,7 +112,7 @@ struct BlockListImpl(Char) {
 
         // until currentBlock's next node is tailBlock
         do {
-            if (canDo <= offset) {
+            if(canDo <= offset) {
                 retActualOffsetFromHead += canDo;
                 offset -= canDo;
                 offsetIntoBlock = canDo;
@@ -120,15 +120,15 @@ struct BlockListImpl(Char) {
                 ret = ret.next;
                 offsetIntoBlock = 0;
                 canDo = ret.length;
-            } else if (canDo > offset) {
+            } else if(canDo > offset) {
                 offsetIntoBlock = offset;
                 break;
             } else
                 assert(0);
         }
-        while ((ret.next !is null || canDo > 0) && offset > 0);
+        while((ret.next !is null || canDo > 0) && offset > 0);
 
-        if (ret.length == offsetIntoBlock && ret.next !is null) {
+        if(ret.length == offsetIntoBlock && ret.next !is null) {
             offsetIntoBlock = 0;
             ret = ret.next;
         }
@@ -138,7 +138,7 @@ struct BlockListImpl(Char) {
         assert(ret !is null);
         assert(ret.length >= offsetIntoBlock);
 
-        if (offset > 0)
+        if(offset > 0)
             assert(ret !is &head);
 
         return ret;
@@ -201,7 +201,7 @@ struct BlockListImpl(Char) {
     bool canFindEverything() @safe nothrow @nogc {
         size_t found;
 
-        foreach (Block* block; this) {
+        foreach(Block* block; this) {
             found += block.length;
         }
 
@@ -212,11 +212,11 @@ struct BlockListImpl(Char) {
         Block* current = head.next;
         int result;
 
-        while (current.next !is null) {
+        while(current.next !is null) {
             Block* next = current.next;
             result = del(current);
 
-            if (result)
+            if(result)
                 return result;
 
             current = next;
@@ -238,10 +238,10 @@ struct BlockListImpl(Char) {
 
         int seenA, seenB;
 
-        foreach (Block* block; bl) {
-            if (block is a)
+        foreach(Block* block; bl) {
+            if(block is a)
                 seenA++;
-            else if (block is b)
+            else if(block is b)
                 seenB++;
             else
                 assert(0);
@@ -264,10 +264,10 @@ struct BlockListImpl(Char) {
         size_t id;
         int result;
 
-        while (current.next !is null) {
+        while(current.next !is null) {
             result = del(id, current.get()[0 .. current.length]);
 
-            if (result)
+            if(result)
                 return result;
 
             current = current.next;
@@ -291,12 +291,12 @@ struct BlockListImpl(Char) {
         int seenA, seenB;
 
         ptrdiff_t lastOffset = -1;
-        foreach (offset, data; bl) {
+        foreach(offset, data; bl) {
             assert(offset == lastOffset + 1);
 
-            if (data is a.get())
+            if(data is a.get())
                 seenA++;
-            else if (data is b.get())
+            else if(data is b.get())
                 seenB++;
             else
                 assert(0);
@@ -317,11 +317,11 @@ struct BlockListImpl(Char) {
         ptrdiff_t id = this.numberOfBlocks - 1;
         int result;
 
-        while (current.previous !is null) {
+        while(current.previous !is null) {
             assert(id >= 0);
             result = del(id, current.get()[0 .. current.length]);
 
-            if (result)
+            if(result)
                 return result;
 
             current = current.previous;
@@ -345,12 +345,12 @@ struct BlockListImpl(Char) {
         int seenA, seenB;
 
         ptrdiff_t lastOffset = 2;
-        foreach_reverse (offset, data; bl) {
+        foreach_reverse(offset, data; bl) {
             assert(offset == lastOffset - 1);
 
-            if (data is a.get())
+            if(data is a.get())
                 seenA++;
-            else if (data is b.get())
+            else if(data is b.get())
                 seenB++;
             else
                 assert(0);
@@ -432,18 +432,18 @@ struct BlockListImpl(Char) {
             Char[] ourData = this.getFull();
             Char[] intoData = into.getFull();
 
-            if (newOffset < into.length)
+            if(newOffset < into.length)
                 into.moveRight(newOffset, newOffset + amount);
 
-            foreach (i; 0 .. amount) {
+            foreach(i; 0 .. amount) {
                 intoData[newOffset + i] = ourData[oldOffset + i];
             }
 
-            if (into.length < newOffset + amount)
+            if(into.length < newOffset + amount)
                 into.length = newOffset + amount;
 
             size_t amountRightOfMoved = (this.length - oldOffset) - amount;
-            if (amountRightOfMoved > 0)
+            if(amountRightOfMoved > 0)
                 moveLeft(oldOffset + amount, oldOffset);
             else
                 this.length -= amount;
@@ -478,7 +478,7 @@ struct BlockListImpl(Char) {
         }
 
         void moveLeft(size_t oldOffset, size_t newOffset) pure {
-            if (oldOffset == this.length) {
+            if(oldOffset == this.length) {
                 this.length = newOffset;
                 return;
             }
@@ -490,7 +490,7 @@ struct BlockListImpl(Char) {
             size_t amountOnTheRight = this.length - oldOffset;
             Char[] data = this.getFull();
 
-            foreach (index; 0 .. amountOnTheRight)
+            foreach(index; 0 .. amountOnTheRight)
                 data[newOffset + index] = data[oldOffset + index];
 
             this.length -= diff;
@@ -521,7 +521,7 @@ struct BlockListImpl(Char) {
 
             Char[] data = this.getFull();
 
-            foreach_reverse (offset; oldOffset .. this.length) {
+            foreach_reverse(offset; oldOffset .. this.length) {
                 data[offset + diff] = data[offset];
             }
 
@@ -553,7 +553,7 @@ struct BlockListImpl(Char) {
 
         accumulator = CacheSize - (Block.sizeof % CacheSize);
 
-        while (accumulator < Char.sizeof * Minimum) {
+        while(accumulator < Char.sizeof * Minimum) {
             accumulator += CacheSize;
         }
 

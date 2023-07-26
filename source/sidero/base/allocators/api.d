@@ -26,11 +26,11 @@ export:
  */
 RCAllocator globalAllocator() @trusted nothrow @nogc {
     globalAllocatorLock.pureLock;
-    scope (exit)
+    scope(exit)
         globalAllocatorLock.unlock;
 
-    if (globalAllocator_.isNull) {
-        version (all) {
+    if(globalAllocator_.isNull) {
+        version(all) {
             import sidero.base.allocators.predefined;
 
             globalAllocator_ = RCAllocator.instanceOf!GeneralPurposeAllocator();
@@ -51,7 +51,7 @@ RCAllocator globalAllocator() @trusted nothrow @nogc {
  */
 void globalAllocator(RCAllocator allocator) @system nothrow @nogc {
     globalAllocatorLock.pureLock;
-    scope (exit)
+    scope(exit)
         globalAllocatorLock.unlock;
 
     globalAllocator_ = allocator;
@@ -81,7 +81,7 @@ export @safe @nogc pure nothrow:
     private static RCAllocator instanceOf_(T)(T* value) @system pure {
         assert(value !is null, "Allocators must either have a global instance or be heap allocated, neither was passed in.");
 
-        static if (__traits(hasMember, T, "NeedsLocking"))
+        static if(__traits(hasMember, T, "NeedsLocking"))
             static assert(!T.NeedsLocking,
                     "An allocator must not require locking to be thread safe. Remove or explicitly lock it to a thread.");
 
@@ -93,16 +93,16 @@ export @safe @nogc pure nothrow:
         ret.deallocate_ = &value.deallocate;
         ret.allocate_ = &value.allocate;
 
-        static if (__traits(hasMember, T, "reallocate"))
+        static if(__traits(hasMember, T, "reallocate"))
             ret.reallocate_ = &value.reallocate;
-        static if (__traits(hasMember, T, "owns"))
+        static if(__traits(hasMember, T, "owns"))
             ret.owns_ = &value.owns;
-        static if (__traits(hasMember, T, "deallocateAll"))
+        static if(__traits(hasMember, T, "deallocateAll"))
             ret.deallocateAll_ = &value.deallocateAll;
-        static if (__traits(hasMember, T, "empty"))
+        static if(__traits(hasMember, T, "empty"))
             ret.empty_ = &value.empty;
 
-        static if (__traits(hasMember, T, "refAdd") && __traits(hasMember, T, "refSub")) {
+        static if(__traits(hasMember, T, "refAdd") && __traits(hasMember, T, "refSub")) {
             ret.refAdd_ = &value.refAdd;
             ret.refSub_ = &value.refSub;
         } else {
@@ -117,7 +117,7 @@ scope:
 
     ///
      ~this() {
-        if (refSub_ !is null)
+        if(refSub_ !is null)
             refSub_();
     }
 
@@ -125,7 +125,7 @@ scope:
     this(return scope ref RCAllocator other) @trusted {
         this.tupleof = other.tupleof;
 
-        if (refAdd_ !is null)
+        if(refAdd_ !is null)
             refAdd_();
     }
 
@@ -136,7 +136,7 @@ scope:
     void opAssign(scope RCAllocator other) @trusted {
         this.tupleof = other.tupleof;
 
-        if (refAdd_ !is null)
+        if(refAdd_ !is null)
             refAdd_();
     }
 
@@ -176,28 +176,28 @@ scope:
 
     ///
     bool reallocate(scope ref void[] array, size_t newSize) {
-        if (reallocate_ is null)
+        if(reallocate_ is null)
             return false;
         return reallocate_(array, newSize);
     }
 
     ///
     Ternary owns(scope void[] array) {
-        if (owns_ is null)
+        if(owns_ is null)
             return Ternary.unknown;
         return owns_(array);
     }
 
     ///
     bool deallocateAll() {
-        if (deallocateAll_ is null)
+        if(deallocateAll_ is null)
             return false;
         return deallocateAll_();
     }
 
     ///
     bool empty() {
-        if (empty_ is null)
+        if(empty_ is null)
             return false;
         return empty_();
     }
@@ -242,7 +242,7 @@ template makeBufferedArrays(Types...) if (Types.length > 0) {
         Result ret;
         allocator.deallocateAll;
 
-        static foreach (i; 0 .. Types.length)
+        static foreach(i; 0 .. Types.length)
             ret[i] = allocator.makeArray!(Types[i])(sizes[i]);
 
         return ret;
@@ -269,49 +269,49 @@ auto make(T, Allocator, Args...)(scope auto ref Allocator alloc, return scope au
 
     size_t sizeToAllocate = T.sizeof;
 
-    static if (is(T == class)) {
+    static if(is(T == class)) {
         sizeToAllocate = __traits(classInstanceSize, T);
     }
 
-    version (D_BetterC) {
+    version(D_BetterC) {
         void[] array = alloc.allocate(sizeToAllocate);
     } else {
         void[] array = alloc.allocate(sizeToAllocate, typeid(T));
     }
 
-    static if (is(T == class)) {
+    static if(is(T == class)) {
         auto ret = cast(T)array.ptr;
     } else {
         auto ret = cast(T*)array.ptr;
     }
 
-    if (array is null)
+    if(array is null)
         return typeof(ret).init;
     assert(ret !is null);
 
-    static if (is(T == class)) {
+    static if(is(T == class)) {
         emplace(&ret);
     } else {
         emplace(ret);
     }
 
-    static if (__traits(compiles, { ret.__ctor(args); })) {
-        version (D_BetterC) {
+    static if(__traits(compiles, { ret.__ctor(args); })) {
+        version(D_BetterC) {
             ret.__ctor(args);
         } else {
             try {
                 ret.__ctor(args);
-            } catch (Exception) {
+            } catch(Exception) {
                 alloc.deallocate(array);
             }
         }
     } else {
-        static if (is(T == class)) {
-            static foreach (i; 0 .. Args.length) {
+        static if(is(T == class)) {
+            static foreach(i; 0 .. Args.length) {
                 ret.tupleof[i] = args[i];
             }
         } else {
-            static foreach (i; 0 .. Args.length) {
+            static foreach(i; 0 .. Args.length) {
                 (*ret).tupleof[i] = args[i];
             }
         }
@@ -322,45 +322,45 @@ auto make(T, Allocator, Args...)(scope auto ref Allocator alloc, return scope au
 
 /// Similar to std.experimental.allocator one
 T[] makeArray(T, Allocator)(auto ref Allocator alloc, size_t length) @trusted {
-    if (length == 0)
+    if(length == 0)
         return null;
 
     enum MaximumInArray = size_t.max / T.sizeof;
 
-    if (length > MaximumInArray)
+    if(length > MaximumInArray)
         return null;
 
     size_t sizeToAllocate = T.sizeof;
 
-    static if (is(T == class)) {
+    static if(is(T == class)) {
         sizeToAllocate = __traits(classInstanceSize, T);
     }
 
     sizeToAllocate *= length;
 
-    version (D_BetterC) {
+    version(D_BetterC) {
         void[] array = alloc.allocate(sizeToAllocate);
     } else {
         void[] array = alloc.allocate(sizeToAllocate, typeid(T[]));
     }
 
-    if (array is null)
+    if(array is null)
         return null;
-    else if (array.length < sizeToAllocate) {
+    else if(array.length < sizeToAllocate) {
         alloc.deallocate(array);
         return null;
     }
 
     T[] ret = (cast(T*)array.ptr)[0 .. length];
 
-    static if (is(T == struct) || is(T == class) || is(T == union)) {
-        foreach (i; 0 .. length) {
+    static if(is(T == struct) || is(T == class) || is(T == union)) {
+        foreach(i; 0 .. length) {
             import core.lifetime : emplace;
 
             emplace(&ret[i]);
         }
-    } else static if (!is(T == void)) {
-        foreach (ref v; ret)
+    } else static if(!is(T == void)) {
+        foreach(ref v; ret)
             v = T.init;
     }
 
@@ -371,13 +371,13 @@ T[] makeArray(T, Allocator)(auto ref Allocator alloc, size_t length) @trusted {
 T[] makeArray(T, Allocator)(auto ref Allocator alloc, const(T)[] initValues) @trusted {
     T[] ret = alloc.makeArray!T(initValues.length);
 
-    if (ret is null)
+    if(ret is null)
         return null;
-    else if (ret.length != initValues.length) {
+    else if(ret.length != initValues.length) {
         alloc.deallocate((cast(void*)ret.ptr)[0 .. T.sizeof * ret.length]);
         return null;
     } else {
-        foreach (i, ref v; initValues)
+        foreach(i, ref v; initValues)
             ret[i] = *cast(T*)&v;
         return ret;
     }
@@ -385,19 +385,19 @@ T[] makeArray(T, Allocator)(auto ref Allocator alloc, const(T)[] initValues) @tr
 
 /// Mostly a copy of the one in std.experimental.allocator.
 bool expandArray(T, Allocator)(scope auto ref Allocator alloc, scope ref T[] array, size_t delta) @trusted {
-    if (delta == 0)
+    if(delta == 0)
         return true;
-    if (array is null)
+    if(array is null)
         return false;
 
     size_t originalLength = array.length;
     void[] temp = (cast(void*)array.ptr)[0 .. T.sizeof * array.length];
 
-    if (!alloc.reallocate(temp, temp.length + (T.sizeof * delta))) {
+    if(!alloc.reallocate(temp, temp.length + (T.sizeof * delta))) {
         return false;
     }
 
-    foreach (ref v; array[originalLength .. $])
+    foreach(ref v; array[originalLength .. $])
         v = T.init;
 
     array = (cast(T*)temp.ptr)[0 .. originalLength + delta];
@@ -406,25 +406,25 @@ bool expandArray(T, Allocator)(scope auto ref Allocator alloc, scope ref T[] arr
 
 /// A subset of the std.experimental.allocator one, as that one can use exceptions.
 bool shrinkArray(T, Allocator)(scope auto ref Allocator alloc, scope ref T[] array, size_t delta) @trusted {
-    if (delta > array.length)
+    if(delta > array.length)
         return false;
 
-    version (D_BetterC) {
-        foreach (ref item; array[$ - delta .. $]) {
-            static if (__traits(hasMember, T, "__dtor"))
+    version(D_BetterC) {
+        foreach(ref item; array[$ - delta .. $]) {
+            static if(__traits(hasMember, T, "__dtor"))
                 item.__dtor;
             item = T.init;
         }
     } else {
-        foreach (ref item; array[$ - delta .. $]) {
+        foreach(ref item; array[$ - delta .. $]) {
             try {
                 item.destroy;
-            } catch (Exception) {
+            } catch(Exception) {
             }
         }
     }
 
-    if (delta == array.length) {
+    if(delta == array.length) {
         alloc.deallocate(array);
         array = null;
         return true;
@@ -449,10 +449,10 @@ void dispose(Type, Allocator)(auto ref Allocator alloc, scope auto ref Type* p) 
 /// Ditto
 void dispose(Type, Allocator)(auto ref Allocator alloc, scope auto ref Type p) @trusted
         if (is(Type == class) || is(Type == interface)) {
-    if (!p)
+    if(!p)
         return;
-    static if (is(Type == interface)) {
-        version (Windows) {
+    static if(is(Type == interface)) {
+        version(Windows) {
             import core.sys.windows.unknwn : IUnknown;
 
             static assert(!is(T : IUnknown), "COM interfaces can't be destroyed in " ~ __PRETTY_FUNCTION__);
@@ -468,8 +468,8 @@ void dispose(Type, Allocator)(auto ref Allocator alloc, scope auto ref Type p) @
 
 /// Ditto
 void dispose(Type, Allocator)(auto ref Allocator alloc, scope auto ref Type[] array) @trusted {
-    static if (!is(typeof(array[0]) == void)) {
-        foreach (ref e; array) {
+    static if(!is(typeof(array[0]) == void)) {
+        foreach(ref e; array) {
             destroy(cast()e);
         }
     }
@@ -484,8 +484,8 @@ import std.meta : AliasSeq;
 T* defaultInstanceForAllocator(T)() {
     import std.traits : isPointer;
 
-    static if (__traits(hasMember, T, "instance")) {
-        static if (isPointer!(typeof(__traits(getMember, T, "instance"))))
+    static if(__traits(hasMember, T, "instance")) {
+        static if(isPointer!(typeof(__traits(getMember, T, "instance"))))
             return T.instance;
         else
             return &T.instance;
@@ -496,7 +496,7 @@ T* defaultInstanceForAllocator(T)() {
 template MakeAllArray(Types...) {
     alias MakeAllArray = AliasSeq!();
 
-    static foreach (Type; Types) {
+    static foreach(Type; Types) {
         MakeAllArray = AliasSeq!(MakeAllArray, Type[]);
     }
 }

@@ -15,14 +15,14 @@ DateTime!GregorianDate accurateDateTime() @trusted {
     typeof(return) ret;
     TimeZone fixedUTC0 = TimeZone.from(0);
 
-    version (Windows) {
+    version(Windows) {
         FILETIME fileTime;
         GetSystemTimePreciseAsFileTime(&fileTime);
 
         SYSTEMTIME systemTime;
         auto got = FileTimeToSystemTime(&fileTime, &systemTime);
 
-        if (got) {
+        if(got) {
             // welp that was easy...
             ret = typeof(return)(GregorianDate(systemTime.wYear, cast(ubyte)systemTime.wMonth,
                     cast(ubyte)systemTime.wDay), TimeOfDay(cast(ubyte)systemTime.wHour, cast(ubyte)systemTime.wMinute,
@@ -30,12 +30,12 @@ DateTime!GregorianDate accurateDateTime() @trusted {
             // this is UTC+0
             needTimeZoneAdjustment = true;
         }
-    } else version (Posix) {
+    } else version(Posix) {
         import core.sys.posix.time;
 
         timespec ts;
 
-        if (clock_gettime(CLOCK_REALTIME, &ts) == 0) {
+        if(clock_gettime(CLOCK_REALTIME, &ts) == 0) {
             ret.advanceNanoSeconds(ts.tv_nsec);
             ret = ret.asTimeZone(fixedUTC0);
             // this is UTC+0
@@ -43,13 +43,13 @@ DateTime!GregorianDate accurateDateTime() @trusted {
         }
     }
 
-    if (!needTimeZoneAdjustment) {
+    if(!needTimeZoneAdjustment) {
         // if all we can do is get seconds from the libc, then I guess thats all we can do.
 
         time_t t = time(null);
         tm* utcT = gmtime(&t);
 
-        if (utcT !is null) {
+        if(utcT !is null) {
             // this is UTC+0
             ret = typeof(return)(GregorianDate(utcT.tm_year + 1900, cast(ubyte)utcT.tm_mon, cast(ubyte)utcT.tm_mday),
                     TimeOfDay(cast(ubyte)utcT.tm_hour, cast(ubyte)utcT.tm_min, cast(ubyte)utcT.tm_sec), fixedUTC0);
@@ -57,10 +57,10 @@ DateTime!GregorianDate accurateDateTime() @trusted {
         }
     }
 
-    if (needTimeZoneAdjustment) {
+    if(needTimeZoneAdjustment) {
         auto timeZone = TimeZone.local;
 
-        if (timeZone) {
+        if(timeZone) {
             assert(!timeZone.state.allocator.isNull);
             ret = ret.asTimeZone(timeZone.get);
         }
@@ -80,7 +80,7 @@ long currentYear() @trusted {
     return utcT.tm_year + 1900;
 }
 
-version (Windows) {
+version(Windows) {
     import core.sys.windows.winbase : FILETIME, SYSTEMTIME, FileTimeToSystemTime;
 
     extern (Windows) void GetSystemTimePreciseAsFileTime(FILETIME*) @safe nothrow @nogc;

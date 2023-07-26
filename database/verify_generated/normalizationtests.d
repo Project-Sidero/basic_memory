@@ -1,4 +1,4 @@
-﻿module verify_generated.normalizationtests;
+module verify_generated.normalizationtests;
 import sidero.base.text.unicode.normalization;
 import sidero.base.text.unicode.database;
 import sidero.base.allocators.api;
@@ -13,7 +13,7 @@ void normalizationTests() {
         writeln("============ NFD =============");
 
         // NFD
-        foreach (testId, nte; normalizationTestEntries) {
+        foreach(testId, nte; normalizationTestEntries) {
             writeln("Testing: ", testId, ": ", nte);
             // source; NFC; NFD; NFKC; NFKD
 
@@ -32,7 +32,7 @@ void normalizationTests() {
         writeln("============ NFKD =============");
 
         // NFKD
-        foreach (testId, nte; normalizationTestEntries) {
+        foreach(testId, nte; normalizationTestEntries) {
             writeln("Testing: ", testId, ": ", nte);
             // source; NFC; NFD; NFKC; NFKD
 
@@ -49,7 +49,7 @@ void normalizationTests() {
         writeln("============ NFC =============");
 
         // NFC
-        foreach (testId, nte; normalizationTestEntries) {
+        foreach(testId, nte; normalizationTestEntries) {
             writeln("Testing: ", testId, ": ", nte);
             // source; NFC; NFD; NFKC; NFKD
 
@@ -68,7 +68,7 @@ void normalizationTests() {
         writeln("============ NFKC =============");
 
         // NFKC
-        foreach (testId, nte; normalizationTestEntries) {
+        foreach(testId, nte; normalizationTestEntries) {
             writeln("Testing: ", testId, ": ", nte);
             // source; NFC; NFD; NFKC; NFKD
 
@@ -105,14 +105,14 @@ shared static this() {
 
     foreach(line; readText("unicode-14/NormalizationTest.txt").lineSplitter) {
         ptrdiff_t offset = line.countUntil('#');
-        if (offset >= 0)
+        if(offset >= 0)
             line = line[0 .. offset];
 
         line = line.strip;
 
         string[] splitValues = line.split(';');
 
-        if (splitValues.length < 5 || splitValues.length > 6)
+        if(splitValues.length < 5 || splitValues.length > 6)
             continue;
 
         NormalizationTestEntry entry;
@@ -130,4 +130,3 @@ shared static this() {
         normalizationTestEntries ~= entry;
     }
 }
-

@@ -2,7 +2,7 @@
 module sidero.base.attributes;
 export:
 
-version (LDC) {
+version(LDC) {
     public import core.attribute : hidden;
 } else {
     enum hidden;

@@ -11,25 +11,25 @@ import sidero.base.allocators;
 package(sidero.base.datetime) @safe nothrow @nogc:
 
 void reloadWindowsTimeZones(bool forceReload = true) @trusted {
-    version (Windows) {
+    version(Windows) {
         import sidero.base.datetime.cldr;
         import core.sys.windows.winreg;
         import core.stdc.wchar_ : wcslen;
 
-        if (!forceReload) {
+        if(!forceReload) {
             DWORD version_, version_size = DWORD.sizeof;
             LONG got = RegGetValueA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Time Zones",
                     "TzVersion", RRF_RT_REG_DWORD, null, &version_, &version_size);
 
-            if (got == ERROR_SUCCESS) {
+            if(got == ERROR_SUCCESS) {
                 // ok all good
-                if (windowsTZVersion == version_)
+                if(windowsTZVersion == version_)
                     return;
                 windowsTZVersion = version_;
             } else {
                 // didn't get the key we wanted, but thats ok
                 // we only need to reload if forced to or if our map is empty
-                if (windowsTimeZones.length > 0)
+                if(windowsTimeZones.length > 0)
                     return;
             }
         }
@@ -43,7 +43,7 @@ void reloadWindowsTimeZones(bool forceReload = true) @trusted {
             do {
                 dwResult = EnumDynamicTimeZoneInformation(offset++, &temp.dtzi);
 
-                if (dwResult == ERROR_SUCCESS) {
+                if(dwResult == ERROR_SUCCESS) {
                     wchar[] name16Standard = temp.dtzi.StandardName[0 .. wcslen(temp.dtzi.StandardName.ptr)],
                         name16Daylight = temp.dtzi.DaylightName[0 .. wcslen(temp.dtzi.DaylightName.ptr)];
 
@@ -51,13 +51,13 @@ void reloadWindowsTimeZones(bool forceReload = true) @trusted {
                     windowsTimeZones[String_UTF8(name16Daylight).dup] = temp;
                 }
             }
-            while (dwResult != ERROR_NO_MORE_ITEMS);
+            while(dwResult != ERROR_NO_MORE_ITEMS);
         }
     }
 }
 
 WindowsTimeZoneBase localWindowsTimeZone() @trusted {
-    version (Windows) {
+    version(Windows) {
         WindowsTimeZoneBase ret;
         DWORD got = GetDynamicTimeZoneInformation(&ret.dtzi);
         return ret;
@@ -68,17 +68,17 @@ WindowsTimeZoneBase localWindowsTimeZone() @trusted {
 Result!WindowsTimeZoneBase findWindowsTimeZone(scope String_UTF8 wantedName) @trusted {
     import sidero.base.datetime.cldr;
 
-    version (Windows) {
+    version(Windows) {
         reloadWindowsTimeZones(false);
 
-        if (wantedName.isEncodingChanged)
+        if(wantedName.isEncodingChanged)
             wantedName = wantedName.dup;
         wantedName.stripZeroTerminator;
 
         String_UTF8 ianaAsWindows = String_UTF8(ianaToWindows(cast(string)wantedName.unsafeGetLiteral()));
         auto got = ianaAsWindows.length > 0 ? windowsTimeZones[ianaAsWindows] : windowsTimeZones[wantedName];
 
-        if (got)
+        if(got)
             return typeof(return)(got.get);
     }
 
@@ -86,7 +86,7 @@ Result!WindowsTimeZoneBase findWindowsTimeZone(scope String_UTF8 wantedName) @tr
 }
 
 struct WindowsTimeZoneBase {
-    version (Windows) {
+    version(Windows) {
         DYNAMIC_TIME_ZONE_INFORMATION dtzi;
     } else {
         int _;
@@ -106,10 +106,10 @@ struct WindowsTimeZoneBase {
     }
 
     export int opCmp(scope const WindowsTimeZoneBase other) scope const @trusted {
-        static foreach (i; 1 .. this.tupleof.length) {
-            if ((cast(WindowsTimeZoneBase)this).tupleof[i] < (cast(WindowsTimeZoneBase)other).tupleof[i])
+        static foreach(i; 1 .. this.tupleof.length) {
+            if((cast(WindowsTimeZoneBase)this).tupleof[i] < (cast(WindowsTimeZoneBase)other).tupleof[i])
                 return -1;
-            else if ((cast(WindowsTimeZoneBase)this).tupleof[i] > (cast(WindowsTimeZoneBase)other).tupleof[i])
+            else if((cast(WindowsTimeZoneBase)this).tupleof[i] > (cast(WindowsTimeZoneBase)other).tupleof[i])
                 return 1;
         }
 
@@ -132,14 +132,14 @@ package(sidero.base.datetime):
         import sidero.base.datetime.cldr;
         import core.stdc.wchar_ : wcslen;
 
-        version (Windows) {
-            if (year < 0 || year > ushort.max)
+        version(Windows) {
+            if(year < 0 || year > ushort.max)
                 return typeof(return)(MalformedInputException("Windows timezone for year function only supports 0 .. 65536 range in year"));
 
             TIME_ZONE_INFORMATION tzi;
             BOOL got = GetTimeZoneInformationForYear(cast(ushort)year, &dtzi, &tzi);
 
-            if (got) {
+            if(got) {
                 TimeZone ret;
                 ret.initialize(allocator);
                 ret.state.windowsBase.dtzi = this.dtzi;
@@ -152,12 +152,12 @@ package(sidero.base.datetime):
                     String_UTF8 standardName = String_UTF8(tzi.StandardName[0 .. wcslen(tzi.StandardName.ptr)]).dup;
                     ret.state.windowsBase.stdName = standardName;
 
-                    if (ret.state.haveDaylightSavings)
+                    if(ret.state.haveDaylightSavings)
                         ret.state.windowsBase.dstName = String_UTF8(tzi.DaylightName[0 .. wcslen(tzi.DaylightName.ptr)]).dup;
 
                     standardName.stripZeroTerminator;
                     ret.state.name = String_UTF8(windowsToIANA(cast(string)standardName.unsafeGetLiteral));
-                    if (ret.state.name.length == 0) {
+                    if(ret.state.name.length == 0) {
                         // stuff it, just pick the standard name
                         ret.state.name = ret.state.windowsBase.stdName;
                     }
@@ -170,7 +170,7 @@ package(sidero.base.datetime):
                         cast(ubyte)tzi.StandardDate.wMinute, cast(ubyte)tzi.StandardDate.wSecond,
                         cast(uint)(tzi.StandardDate.wMilliseconds * 1000));
 
-                if (ret.state.haveDaylightSavings) {
+                if(ret.state.haveDaylightSavings) {
                     ret.state.windowsBase.daylightSavingsOffset.seconds = (-tzi.DaylightBias * 60) + baseLineBias;
                     ret.state.windowsBase.daylightSavingsOffset.appliesOnDate = GregorianDate(year,
                             cast(ubyte)tzi.DaylightDate.wMonth, cast(ubyte)tzi.DaylightDate.wDay);
@@ -199,19 +199,19 @@ package(sidero.base.datetime):
         }
 
         export int opCmp(ref const Bias other) scope const @trusted {
-            if (this.seconds < other.seconds)
+            if(this.seconds < other.seconds)
                 return -1;
-            else if (this.seconds > other.seconds)
+            else if(this.seconds > other.seconds)
                 return 1;
 
-            if (this.appliesOnDate < other.appliesOnDate)
+            if(this.appliesOnDate < other.appliesOnDate)
                 return -1;
-            else if (this.appliesOnDate > other.appliesOnDate)
+            else if(this.appliesOnDate > other.appliesOnDate)
                 return 1;
 
-            if (this.appliesOnTime < other.appliesOnTime)
+            if(this.appliesOnTime < other.appliesOnTime)
                 return -1;
-            else if (this.appliesOnTime > other.appliesOnTime)
+            else if(this.appliesOnTime > other.appliesOnTime)
                 return 1;
 
             return 0;
@@ -220,9 +220,9 @@ package(sidero.base.datetime):
 }
 
 bool isInDaylightSavings(scope ref WindowsTimeZoneBase self, scope DateTime!GregorianDate date) {
-    if (!self.haveDaylightSavings || self.daylightSavingsOffset.appliesOn < date)
+    if(!self.haveDaylightSavings || self.daylightSavingsOffset.appliesOn < date)
         return false;
-    else if (self.standardOffset.appliesOn > self.daylightSavingsOffset.appliesOn)
+    else if(self.standardOffset.appliesOn > self.daylightSavingsOffset.appliesOn)
         return self.standardOffset.appliesOn > date;
     else {
         auto next = self.forYear(self.standardOffset.appliesOn.year + 1);
@@ -238,7 +238,7 @@ __gshared {
     ConcurrentHashMap!(String_UTF8, WindowsTimeZoneBase) windowsTimeZones;
 }
 
-version (Windows) {
+version(Windows) {
     import core.sys.windows.windows : DWORD, LONG, WCHAR, SYSTEMTIME, BOOLEAN, BOOL, USHORT, ERROR_NO_MORE_ITEMS,
         ERROR_SUCCESS, TIME_ZONE_INFORMATION, GetTimeZoneInformation, GetSystemTime;
 

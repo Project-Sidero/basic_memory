@@ -12,7 +12,7 @@ export @safe nothrow @nogc pure:
 
 /// Get a bit mask for a given number of bits.
 Return bitMaskForNumberOfBits(Return = size_t, Arg)(Arg numberOfBits) if (isIntegral!Arg) {
-    if (numberOfBits >= Return.sizeof * 8)
+    if(numberOfBits >= Return.sizeof * 8)
         return Return.max;
 
     Return ret = 1;
@@ -22,12 +22,12 @@ Return bitMaskForNumberOfBits(Return = size_t, Arg)(Arg numberOfBits) if (isInte
 
 /// Reverse a specified number of LSB bits
 Return reverseBitsLSB(Return = size_t, Arg)(Return input, Arg numberOfBitsToReverse) if (isIntegral!Arg) {
-    if (numberOfBitsToReverse >= Return.sizeof * 8)
+    if(numberOfBitsToReverse >= Return.sizeof * 8)
         numberOfBitsToReverse = Return.sizeof * 8;
 
     Return result;
 
-    foreach (i; 0 .. numberOfBitsToReverse) {
+    foreach(i; 0 .. numberOfBitsToReverse) {
         result <<= 1;
         result |= input & 1;
         input >>= 1;
@@ -54,10 +54,10 @@ export @safe nothrow @nogc pure:
     this(Input)(Input input) {
         import std.traits : isNumeric;
 
-        static if (is(Input == enum)) {
+        static if(is(Input == enum)) {
             static assert(__traits(allMembers, Input).length <= typeof(this.flags).sizeof * 8);
             this.flags = flagForEnum(input);
-        } else static if (isNumeric!Input) {
+        } else static if(isNumeric!Input) {
             this.flags = input;
         } else
             static assert(0);
@@ -286,9 +286,9 @@ export @safe nothrow @nogc pure:
 
     ///
     int opCmp(const BitFlags other) const {
-        if (this.flags < other.flags)
+        if(this.flags < other.flags)
             return -1;
-        else if (this.flags > other.flags)
+        else if(this.flags > other.flags)
             return 1;
         else
             return 0;
@@ -324,11 +324,11 @@ export @safe nothrow @nogc pure:
         this(Input)(Input input) {
             import std.traits : isNumeric;
 
-            static if (is(Input == Enum)) {
+            static if(is(Input == Enum)) {
                 this.bitFlags.flags = flagForEnum(input);
-            } else static if (isNumeric!Input) {
+            } else static if(isNumeric!Input) {
                 this.bitFlags.flags = input;
-            } else static if (is(Input == BitFlags)) {
+            } else static if(is(Input == BitFlags)) {
                 this.bitFlags = input;
             } else
                 static assert(0);
@@ -436,8 +436,8 @@ export @safe nothrow @nogc pure:
 
 private:
     static uint flagForEnum(Enum)(Enum value) if (is(Enum == enum)) {
-        final switch (value) {
-            static foreach (i, m; __traits(allMembers, Enum)) {
+        final switch(value) {
+            static foreach(i, m; __traits(allMembers, Enum)) {
         case __traits(getMember, Enum, m):
                 return 1 << i;
             }
@@ -600,8 +600,8 @@ private:
 T swapEndianImpl(T)(T input) {
     T ret;
 
-    static foreach (I; 0 .. T.sizeof) {
-        static if (I > 0) {
+    static foreach(I; 0 .. T.sizeof) {
+        static if(I > 0) {
             ret <<= 8;
         }
 
@@ -615,8 +615,8 @@ T swapEndianImpl(T)(T input) {
 T littleEndianToNativeImpl(T)(ubyte[T.sizeof] input) {
     T ret;
 
-    static foreach (I; 1 .. T.sizeof + 1) {
-        static if (I > 1) {
+    static foreach(I; 1 .. T.sizeof + 1) {
+        static if(I > 1) {
             ret <<= 8;
         }
 
@@ -629,8 +629,8 @@ T littleEndianToNativeImpl(T)(ubyte[T.sizeof] input) {
 T bigEndianToNativeImpl(T)(ubyte[T.sizeof] input) {
     T ret;
 
-    static foreach (I; 0 .. T.sizeof) {
-        static if (I > 0) {
+    static foreach(I; 0 .. T.sizeof) {
+        static if(I > 0) {
             ret <<= 8;
         }
 
@@ -643,8 +643,8 @@ T bigEndianToNativeImpl(T)(ubyte[T.sizeof] input) {
 ubyte[T.sizeof] nativeToLittleEndianImpl(T)(T input) {
     ubyte[T.sizeof] ret;
 
-    static foreach (I; 0 .. T.sizeof) {
-        static if (I > 0) {
+    static foreach(I; 0 .. T.sizeof) {
+        static if(I > 0) {
             input >>= 8;
         }
 
@@ -657,8 +657,8 @@ ubyte[T.sizeof] nativeToLittleEndianImpl(T)(T input) {
 ubyte[T.sizeof] nativeToBigEndianImpl(T)(T input) {
     ubyte[T.sizeof] ret;
 
-    static foreach (I; 1 .. T.sizeof + 1) {
-        static if (I > 1) {
+    static foreach(I; 1 .. T.sizeof + 1) {
+        static if(I > 1) {
             input >>= 8;
         }
 

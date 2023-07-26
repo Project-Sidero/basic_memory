@@ -1,4 +1,4 @@
-﻿module sidero.base.text.unicode.characters.hangul;
+module sidero.base.text.unicode.characters.hangul;
 
 export @safe nothrow @nogc pure:
 
@@ -17,7 +17,7 @@ private enum {
 
 ///
 size_t decomposeHangulSyllable(dchar input, scope ref dchar[3] output) {
-    if (input < SBase || input >= SBase + SCount)
+    if(input < SBase || input >= SBase + SCount)
         return 0;
 
     uint SIndex = input - SBase;
@@ -33,7 +33,7 @@ size_t decomposeHangulSyllable(dchar input, scope ref dchar[3] output) {
 
 ///
 size_t composeHangulSyllable(dchar LPart, dchar VPart, out dchar output) {
-    if (LBase <= LPart && LPart < LBase + LCount && VBase <= VPart && VPart < VBase + VCount) {
+    if(LBase <= LPart && LPart < LBase + LCount && VBase <= VPart && VPart < VBase + VCount) {
         uint LIndex = LPart - LBase;
         uint VIndex = VPart - VBase;
         uint LVIndex = (LIndex * NCount) + (VIndex * TCount);
@@ -46,10 +46,10 @@ size_t composeHangulSyllable(dchar LPart, dchar VPart, out dchar output) {
 
 ///
 size_t composeHangulSyllable(dchar LPart, dchar VPart, dchar TPart, out dchar output) {
-    if (LBase <= LPart && LPart < LBase + LCount && VBase <= VPart && VPart < VBase + VCount) {
+    if(LBase <= LPart && LPart < LBase + LCount && VBase <= VPart && VPart < VBase + VCount) {
         uint LIndex = LPart - LBase, VIndex = VPart - VBase, LVIndex = (LIndex * NCount) + (VIndex * TCount), TIndex;
 
-        if (TBase <= TPart && TPart < TBase + TCount)
+        if(TBase <= TPart && TPart < TBase + TCount)
             TIndex = TPart - TBase;
 
         output = SBase + LVIndex + TIndex;

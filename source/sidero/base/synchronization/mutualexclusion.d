@@ -23,11 +23,11 @@ pure:
     void pureLock() scope {
         import core.atomic : cas, atomicFence, atomicLoad;
 
-        for (;;) {
-            if (atomicLoad(state))
+        for(;;) {
+            if(atomicLoad(state))
                 atomicFence();
 
-            if (cas(&state, false, true))
+            if(cas(&state, false, true))
                 return;
         }
     }

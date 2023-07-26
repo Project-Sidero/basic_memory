@@ -30,11 +30,11 @@ export:
     enum NeedsLocking = () {
         bool ret;
 
-        static if (__traits(hasMember, SmallAllocator, "NeedsLocking"))
-            if (SmallAllocator.NeedsLocking)
+        static if(__traits(hasMember, SmallAllocator, "NeedsLocking"))
+            if(SmallAllocator.NeedsLocking)
                 ret = true;
-        static if (__traits(hasMember, LargeAllocator, "NeedsLocking"))
-            if (LargeAllocator.NeedsLocking)
+        static if(__traits(hasMember, LargeAllocator, "NeedsLocking"))
+            if(LargeAllocator.NeedsLocking)
                 ret = true;
 
         return ret;
@@ -54,10 +54,10 @@ scope @safe @nogc pure nothrow:
 
     ///
     void[] allocate(size_t size, TypeInfo ti = null) {
-        if (isNull)
+        if(isNull)
             return null;
         else {
-            if (size <= threshold)
+            if(size <= threshold)
                 return smallAllocator.allocate(size, ti);
             else
                 return largeAllocator.allocate(size, ti);
@@ -66,9 +66,9 @@ scope @safe @nogc pure nothrow:
 
     ///
     bool reallocate(scope ref void[] array, size_t newSize) {
-        if (isNull)
+        if(isNull)
             return false;
-        else if (smallAllocator.owns(array) == Ternary.yes)
+        else if(smallAllocator.owns(array) == Ternary.yes)
             return smallAllocator.reallocate(array, newSize);
         else
             return largeAllocator.reallocate(array, newSize);
@@ -76,30 +76,30 @@ scope @safe @nogc pure nothrow:
 
     ///
     bool deallocate(scope void[] array) {
-        if (isNull)
+        if(isNull)
             return false;
-        else if (smallAllocator.owns(array) == Ternary.yes)
+        else if(smallAllocator.owns(array) == Ternary.yes)
             return smallAllocator.deallocate(array);
         else
             return largeAllocator.deallocate(array);
     }
 
-    static if (__traits(hasMember, SmallAllocator, "owns") && __traits(hasMember, LargeAllocator, "owns")) {
+    static if(__traits(hasMember, SmallAllocator, "owns") && __traits(hasMember, LargeAllocator, "owns")) {
         ///
         Ternary owns(scope void[] array) {
-            if (isNull)
+            if(isNull)
                 return Ternary.no;
-            else if (largeAllocator.owns(array) != Ternary.yes)
+            else if(largeAllocator.owns(array) != Ternary.yes)
                 return smallAllocator.owns(array);
             else
                 return largeAllocator.owns(array);
         }
     }
 
-    static if (__traits(hasMember, SmallAllocator, "deallocateAll") && __traits(hasMember, LargeAllocator, "deallocateAll")) {
+    static if(__traits(hasMember, SmallAllocator, "deallocateAll") && __traits(hasMember, LargeAllocator, "deallocateAll")) {
         ///
         bool deallocateAll() {
-            if (isNull)
+            if(isNull)
                 return false;
             else {
                 smallAllocator.deallocateAll();
@@ -109,7 +109,7 @@ scope @safe @nogc pure nothrow:
         }
     }
 
-    static if (__traits(hasMember, SmallAllocator, "empty") && __traits(hasMember, LargeAllocator, "empty")) {
+    static if(__traits(hasMember, SmallAllocator, "empty") && __traits(hasMember, LargeAllocator, "empty")) {
         ///
         bool empty() {
             return isNull || smallAllocator.empty() && largeAllocator.empty();

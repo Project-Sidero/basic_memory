@@ -14,7 +14,7 @@ private pragma(crt_destructor) extern (C) void deinitializeConsoleAutomatically(
     deinitializeConsoleImpl();
 }
 
-version (Windows) {
+version(Windows) {
     ///
     void initializeForWindows() {
         protect(() { initializeForWindowsImpl; });
@@ -42,11 +42,11 @@ bool enableRawMode() {
         // turn off output processing of \n to \r\n
         // clean up UTF-8 handling stuff
 
-        version (Windows) {
+        version(Windows) {
             import core.sys.windows.windows;
 
-            if (consoleSetup) {
-                if (hStdin != INVALID_HANDLE_VALUE && hStdout != INVALID_HANDLE_VALUE) {
+            if(consoleSetup) {
+                if(hStdin != INVALID_HANDLE_VALUE && hStdout != INVALID_HANDLE_VALUE) {
                     DWORD inputMode = originalConsoleInputMode, outputMode = originalConsoleOutputMode;
                     inputMode &= ~(ENABLE_LINE_INPUT | ENABLE_PROCESSED_INPUT | ENABLE_ECHO_INPUT);
                     outputMode &= ~(
@@ -54,7 +54,7 @@ bool enableRawMode() {
                     outputMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
 
                     ret = SetConsoleMode(hStdin, inputMode) != 0 && SetConsoleMode(hStdout, outputMode) != 0;
-                    if (!ret) {
+                    if(!ret) {
                         SetConsoleMode(hStdin, originalConsoleInputMode);
                         SetConsoleMode(hStdout, originalConsoleOutputMode);
                     }
@@ -62,8 +62,8 @@ bool enableRawMode() {
             }
         }
 
-        if (useStdio && stdioIn !is null) {
-            version (Posix) {
+        if(useStdio && stdioIn !is null) {
+            version(Posix) {
                 import core.sys.posix.termios;
 
                 termios settings;

@@ -21,23 +21,23 @@ mixin template StringBuilderOperations() {
 
     void rc(bool addRef) {
         blockList.mutex.pureLock;
-        if (this.rcInternal(addRef))
+        if(this.rcInternal(addRef))
             blockList.mutex.unlock;
     }
 
     void rcIterator(bool addRef, scope Iterator* iterator) {
         blockList.mutex.pureLock;
 
-        if (iterator !is null)
+        if(iterator !is null)
             iteratorList.rcIteratorInternal(addRef, iterator);
-        if (this.rcInternal(addRef))
+        if(this.rcInternal(addRef))
             blockList.mutex.unlock;
     }
 
     bool rcInternal(bool addRef) @trusted {
-        if (addRef)
+        if(addRef)
             blockList.refCount++;
-        else if (blockList.refCount == 1) {
+        else if(blockList.refCount == 1) {
             RCAllocator allocator = blockList.allocator;
             blockList.clear;
 
@@ -69,7 +69,7 @@ mixin template StringBuilderOperations() {
 
         size_t ret;
 
-        if (iterator is null)
+        if(iterator is null)
             ret = blockList.numberOfItems;
         else
             ret = iterator.backwards.offsetFromHead - iterator.forwards.offsetFromHead;
@@ -80,7 +80,7 @@ mixin template StringBuilderOperations() {
 
     void externalInsert(scope Iterator* iterator, ptrdiff_t offset, scope ref OtherStateAsTarget!Char other, bool clobber) @trusted {
         blockList.mutex.pureLock;
-        if (other.obj !is &this)
+        if(other.obj !is &this)
             other.mutex(true);
 
         assert(other.length() > 0);
@@ -95,7 +95,7 @@ mixin template StringBuilderOperations() {
         assert(other.length() > 0);
 
         blockList.mutex.unlock;
-        if (other.obj !is &this)
+        if(other.obj !is &this)
             other.mutex(false);
     }
 
@@ -103,10 +103,10 @@ mixin template StringBuilderOperations() {
         blockList.mutex.pureLock;
 
         auto errorInfo = changeIndexToOffset(iterator, offset);
-        if (iterator !is null)
+        if(iterator !is null)
             offset -= iterator.forwards.offsetFromHead;
 
-        if (!errorInfo.isSet) {
+        if(!errorInfo.isSet) {
             size_t maximumOffsetFromHead;
             Cursor cursor = cursorFor(iterator, maximumOffsetFromHead, offset);
             removeOperation(cursor, maximumOffsetFromHead, amount);
@@ -123,15 +123,15 @@ mixin template StringBuilderOperations() {
 
         size_t actualLength;
 
-        if (iterator !is null) {
+        if(iterator !is null) {
             actualLength = iterator.backwards.offsetFromHead - iterator.forwards.offsetFromHead;
-            if (a == ptrdiff_t.max)
+            if(a == ptrdiff_t.max)
                 a = actualLength;
         } else
             actualLength = blockList.numberOfItems;
 
-        if (a < 0) {
-            if (actualLength < -a) {
+        if(a < 0) {
+            if(actualLength < -a) {
                 a = actualLength;
                 return ErrorInfo(RangeException("First offset must be smaller than length"));
             }
@@ -139,7 +139,7 @@ mixin template StringBuilderOperations() {
             a = actualLength + a;
         }
 
-        if (iterator !is null)
+        if(iterator !is null)
             a += iterator.forwards.offsetFromHead;
 
         return ErrorInfo.init;
@@ -150,17 +150,17 @@ mixin template StringBuilderOperations() {
 
         size_t actualLength;
 
-        if (iterator !is null) {
+        if(iterator !is null) {
             actualLength = iterator.backwards.offsetFromHead - iterator.forwards.offsetFromHead;
-            if (a == ptrdiff_t.max)
+            if(a == ptrdiff_t.max)
                 a = iterator.backwards.offsetFromHead;
-            if (b == ptrdiff_t.max)
+            if(b == ptrdiff_t.max)
                 b = iterator.backwards.offsetFromHead;
         } else
             actualLength = blockList.numberOfItems;
 
-        if (a < 0) {
-            if (actualLength < -a) {
+        if(a < 0) {
+            if(actualLength < -a) {
                 a = actualLength;
                 b = actualLength;
                 return ErrorInfo(RangeException("First offset must be smaller than length"));
@@ -169,8 +169,8 @@ mixin template StringBuilderOperations() {
             a = actualLength + a;
         }
 
-        if (b < 0) {
-            if (actualLength < -b) {
+        if(b < 0) {
+            if(actualLength < -b) {
                 b = actualLength;
                 return ErrorInfo(RangeException("Second offset must be smaller than length"));
             }
@@ -178,16 +178,16 @@ mixin template StringBuilderOperations() {
             b = actualLength + b;
         }
 
-        if (b < a) {
+        if(b < a) {
             ptrdiff_t temp = a;
             a = b;
             b = temp;
         }
 
-        if (iterator !is null) {
+        if(iterator !is null) {
             a += iterator.forwards.offsetFromHead;
 
-            if (b + iterator.forwards.offsetFromHead <= iterator.backwards.offsetFromHead)
+            if(b + iterator.forwards.offsetFromHead <= iterator.backwards.offsetFromHead)
                 b += iterator.forwards.offsetFromHead;
         }
 
@@ -201,7 +201,7 @@ mixin template StringBuilderOperations() {
         Cursor.Block* a = opTest.blockList.insert(&opTest.blockList.head);
 
         a.length = Text1.length;
-        foreach (i, v; Text1)
+        foreach(i, v; Text1)
             a.get()[i] = v;
 
         opTest.blockList.numberOfItems = Text1.length;
@@ -228,7 +228,7 @@ mixin template StringBuilderOperations() {
     }
 
     Cursor cursorFor(scope Iterator* iterator, out size_t maximumOffsetFromHead, size_t offset = 0) scope @trusted {
-        if (iterator !is null) {
+        if(iterator !is null) {
             offset += iterator.forwards.offsetFromHead;
             maximumOffsetFromHead = iterator.backwards.offsetFromHead;
         } else
@@ -241,7 +241,7 @@ mixin template StringBuilderOperations() {
     }
 
     Cursor cursorFor(scope Iterator* iterator, out size_t minimumOffsetFromHead, out size_t maximumOffsetFromHead, size_t offset) scope @trusted {
-        if (iterator !is null) {
+        if(iterator !is null) {
             offset += iterator.forwards.offsetFromHead;
             maximumOffsetFromHead = iterator.backwards.offsetFromHead;
             minimumOffsetFromHead = iterator.forwards.offsetFromHead;
@@ -258,7 +258,7 @@ mixin template StringBuilderOperations() {
     void removeOperation(scope Iterator* iterator, scope ref Cursor cursor, size_t amount) scope {
         size_t maximumOffsetFromHead = blockList.numberOfItems;
 
-        if (iterator !is null) {
+        if(iterator !is null) {
             maximumOffsetFromHead = iterator.maximumOffsetFromHead;
         }
 
@@ -267,7 +267,7 @@ mixin template StringBuilderOperations() {
 
     // keeps position the same position
     void removeOperation(scope ref Cursor cursor, size_t maximumOffsetFromHead, size_t amount) scope @trusted {
-        if (amount > maximumOffsetFromHead || cursor.offsetFromHead + amount > maximumOffsetFromHead) {
+        if(amount > maximumOffsetFromHead || cursor.offsetFromHead + amount > maximumOffsetFromHead) {
             assert(cursor.offsetFromHead < maximumOffsetFromHead);
             amount = maximumOffsetFromHead - cursor.offsetFromHead;
         }
@@ -275,65 +275,65 @@ mixin template StringBuilderOperations() {
         size_t amountRemoved = amount;
 
         // nothing to do
-        if (cursor.offsetFromHead >= maximumOffsetFromHead || amount == 0)
+        if(cursor.offsetFromHead >= maximumOffsetFromHead || amount == 0)
             return;
 
         debug {
-            foreach (iterator; iteratorList) {
+            foreach(iterator; iteratorList) {
                 assert(iterator.forwards.offsetIntoBlock <= iterator.forwards.block.length);
                 assert(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length);
             }
         }
 
-        if (cursor.offsetIntoBlock == 0) {
+        if(cursor.offsetIntoBlock == 0) {
             cursor.advanceBackwards(0, cursor.offsetFromHead, maximumOffsetFromHead, false, false);
             assert(cursor.offsetIntoBlock == cursor.block.length);
             assert(cursor.block.next !is null);
         }
 
-        while (amount > 0) {
+        while(amount > 0) {
             Block* block = cursor.block;
             size_t offsetIntoBlock = cursor.offsetIntoBlock, offsetFromHead = cursor.offsetFromHead;
 
-            if (offsetIntoBlock == block.length) {
+            if(offsetIntoBlock == block.length) {
                 block = block.next;
                 offsetIntoBlock = 0;
 
-                if (block.next is null) {
+                if(block.next is null) {
                     // we are at tail block, done!
                     break;
                 }
             }
 
             size_t canDo = block.length - offsetIntoBlock;
-            if (canDo > amount)
+            if(canDo > amount)
                 canDo = amount;
             onRemove(block.get()[offsetIntoBlock .. offsetIntoBlock + canDo]);
 
             debug {
-                foreach (iterator; iteratorList) {
+                foreach(iterator; iteratorList) {
                     assert(iterator.forwards.offsetIntoBlock <= iterator.forwards.block.length);
                     assert(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length);
                 }
             }
 
-            if (canDo + offsetIntoBlock == block.length) {
+            if(canDo + offsetIntoBlock == block.length) {
                 // might have a prefix, no suffix, so this is either the first node or a middle node
                 // either way we at at the end of the block
                 amount -= canDo;
 
-                if (offsetIntoBlock == 0) {
+                if(offsetIntoBlock == 0) {
                     // nothing is left, ok so we will deallocate here
                     Block* toFree = block, next = block.next;
 
-                    foreach (iterator; iteratorList) {
+                    foreach(iterator; iteratorList) {
                         iterator.onRemoveDecreaseFromHead(toFree, offsetFromHead, canDo);
                     }
 
                     blockList.remove(toFree);
 
                     debug {
-                        foreach (iterator; iteratorList) {
+                        foreach(iterator; iteratorList) {
                             assert(iterator.forwards.block !is toFree);
                             assert(iterator.backwards.block !is toFree);
                         }
@@ -343,14 +343,14 @@ mixin template StringBuilderOperations() {
                 } else {
                     // we have a prefix, this is only applicable to the first block
 
-                    foreach (iterator; iteratorList) {
+                    foreach(iterator; iteratorList) {
                         iterator.onRemoveDecreaseFromHead(block, offsetFromHead, canDo);
                     }
 
                     block.length -= canDo;
 
                     debug {
-                        foreach (iterator; iteratorList) {
+                        foreach(iterator; iteratorList) {
                             assert(iterator.forwards.offsetIntoBlock <= iterator.forwards.block.length);
                             assert(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length);
                         }
@@ -367,10 +367,10 @@ mixin template StringBuilderOperations() {
                 size_t amountBeingMoved = block.length - (canDo + offsetIntoBlock), newOffset;
                 Block* intoBlock;
 
-                if (offsetIntoBlock == 0) {
+                if(offsetIntoBlock == 0) {
                     // we have no prefix
 
-                    if (block.previous.previous !is null && block.previous.length + (block.length - canDo) < BlockList.Count) {
+                    if(block.previous.previous !is null && block.previous.length + (block.length - canDo) < BlockList.Count) {
                         // merge into previous block
                         newOffset = block.previous.length;
                         intoBlock = block.previous;
@@ -387,7 +387,7 @@ mixin template StringBuilderOperations() {
                     newOffset = offsetIntoBlock;
                 }
 
-                if (intoBlock is block) {
+                if(intoBlock is block) {
                     iteratorList.opApply((scope iterator) @trusted {
                         iterator.onRemoveDecreaseFromHead(block, offsetFromHead, canDo);
                         return 0;
@@ -396,7 +396,7 @@ mixin template StringBuilderOperations() {
                     block.moveLeft(offsetIntoBlock + canDo, newOffset);
 
                     debug {
-                        foreach (iterator; iteratorList) {
+                        foreach(iterator; iteratorList) {
                             assert(iterator.forwards.offsetIntoBlock <= iterator.forwards.block.length);
                             assert(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length);
                         }
@@ -411,14 +411,14 @@ mixin template StringBuilderOperations() {
                     });
                 }
 
-                if (block.length == 0) {
+                if(block.length == 0) {
                     assert(cursor.block !is block);
 
-                    foreach (iterator; iteratorList) {
-                        if (iterator.forwards.block is block)
+                    foreach(iterator; iteratorList) {
+                        if(iterator.forwards.block is block)
                             iterator.forwards.advanceBackwards(0, iterator.minimumOffsetFromHead,
                                     iterator.maximumOffsetFromHead, false, false);
-                        if (iterator.backwards.block is block)
+                        if(iterator.backwards.block is block)
                             iterator.backwards.advanceBackwards(0, iterator.minimumOffsetFromHead,
                                     iterator.maximumOffsetFromHead, false, false);
                     }
@@ -427,7 +427,7 @@ mixin template StringBuilderOperations() {
                     blockList.remove(block);
 
                     debug {
-                        foreach (iterator; iteratorList) {
+                        foreach(iterator; iteratorList) {
                             assert(iterator.forwards.block !is block);
                             assert(iterator.backwards.block !is block);
                             assert(iterator.forwards.offsetIntoBlock <= iterator.forwards.block.length);
@@ -442,7 +442,7 @@ mixin template StringBuilderOperations() {
         blockList.numberOfItems -= amountRemoved;
 
         debug {
-            foreach (iterator; iteratorList) {
+            foreach(iterator; iteratorList) {
                 assert(iterator.forwards.offsetIntoBlock <= iterator.forwards.block.length);
                 assert(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length);
             }
@@ -453,8 +453,8 @@ mixin template StringBuilderOperations() {
         OpTest!Char opTest = OpTest!Char(globalAllocator());
 
         Char[BlockList.Count * 3] StartText;
-        foreach (i, ref c; StartText) {
-            if (i < BlockList.Count)
+        foreach(i, ref c; StartText) {
+            if(i < BlockList.Count)
                 c = 'A' + (i % 26);
             else
                 c = (i % 2 == 0 ? 'Z' : 'z') - ((i - BlockList.Count) % 26);
@@ -473,21 +473,21 @@ mixin template StringBuilderOperations() {
 
         {
             // ABCDEFGHIJ KLMNOPQRSTUVWXYZABCDEFGHIJKLMN
-            foreach (i, ref c; Expected[0]) {
+            foreach(i, ref c; Expected[0]) {
                 c = 'A' + (i % 26);
             }
 
             //KLMNOPQRSTUVWXYZABCDEFGHIJKLMN
-            foreach (i, ref c; Expected[1]) {
+            foreach(i, ref c; Expected[1]) {
                 size_t actual = i + sizeOf[1];
                 c = 'A' + (actual % 26);
             }
 
             //KLMNOPQRST UVWXYZABCD EFGHIJKLMN
-            foreach (i, ref c; Expected[2]) {
+            foreach(i, ref c; Expected[2]) {
                 size_t actual = i + sizeOf[1];
 
-                if (i >= sizeOf[2])
+                if(i >= sizeOf[2])
                     actual += sizeOf[2];
 
                 c = 'A' + (actual % 26);
@@ -503,15 +503,15 @@ mixin template StringBuilderOperations() {
             block2.length = BlockList.Count;
             block3.length = BlockList.Count;
 
-            foreach (i, ref c; block1.get())
+            foreach(i, ref c; block1.get())
                 c = todo[i];
             todo = todo[BlockList.Count .. $];
 
-            foreach (i, ref c; block2.get())
+            foreach(i, ref c; block2.get())
                 c = todo[i];
             todo = todo[BlockList.Count .. $];
 
-            foreach (i, ref c; block3.get())
+            foreach(i, ref c; block3.get())
                 c = todo[i];
 
             opTest.blockList.numberOfItems = BlockList.Count * 3;
@@ -545,13 +545,13 @@ mixin template StringBuilderOperations() {
                     iterator.forwards.block is &opTest.blockList.tail,
                 foundBlockBackwards = iterator.backwards.block is &opTest.blockList.head ||
                     iterator.backwards.block is &opTest.blockList.tail;
-                foreach (Block* block; opTest.blockList) {
-                    if (iterator.forwards.block is block) {
+                foreach(Block* block; opTest.blockList) {
+                    if(iterator.forwards.block is block) {
                         foundBlockForwards = true;
                         assert(iterator.forwards.offsetIntoBlock <= block.length);
                     }
 
-                    if (iterator.backwards.block is block) {
+                    if(iterator.backwards.block is block) {
                         foundBlockBackwards = true;
                         assert(iterator.backwards.offsetIntoBlock <= block.length);
                     }
@@ -584,7 +584,7 @@ mixin template StringBuilderOperations() {
 
         {
             // verify & cleanup iterators
-            foreach (iterator; [iterator1, iterator2, iterator3, iterator4, iterator5, iterator6]) {
+            foreach(iterator; [iterator1, iterator2, iterator3, iterator4, iterator5, iterator6]) {
                 assert(iterator.forwards.offsetIntoBlock == 0);
                 assert(iterator.forwards.offsetFromHead == 0);
                 assert(iterator.backwards.offsetIntoBlock == 0);
@@ -599,7 +599,7 @@ mixin template StringBuilderOperations() {
             bool clobber = false) {
         size_t maximumOffsetFromHead = blockList.numberOfItems;
 
-        if (iterator !is null)
+        if(iterator !is null)
             maximumOffsetFromHead = iterator.maximumOffsetFromHead;
 
         return insertOperation(cursor, maximumOffsetFromHead, toInsert, clobber);
@@ -611,9 +611,9 @@ mixin template StringBuilderOperations() {
         size_t amountInserted = toInsert.length(), amountToInsert = amountInserted, startOffsetFromHead = cursor.offsetFromHead;
 
         debug {
-            foreach (iterator; iteratorList) {
+            foreach(iterator; iteratorList) {
                 assert(iterator.forwards.offsetIntoBlock <= iterator.forwards.block.length);
-                if (!(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length)) {
+                if(!(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length)) {
                     assert(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length);
                 }
             }
@@ -622,18 +622,18 @@ mixin template StringBuilderOperations() {
         {
             // sanitize cursor locations (head/tail) to ensure we have a place to actually store stuff
 
-            if (cursor.block.next is null) {
+            if(cursor.block.next is null) {
                 // is tail oh noes...
                 cursor.moveFromTail;
                 // could be head, but we handle that in next statement.
                 assert(cursor.block.next !is null);
             }
 
-            if (cursor.block.previous is null) {
+            if(cursor.block.previous is null) {
                 // is head oh noes...
 
                 // don't forget to check if next is tail
-                if (cursor.block.next !is null && cursor.block.next.next !is null && cursor.block.next.length < BlockList.Count) {
+                if(cursor.block.next !is null && cursor.block.next.next !is null && cursor.block.next.length < BlockList.Count) {
                     // move into next block
                     cursor.advanceForward(0, maximumOffsetFromHead, true);
                     assert(cursor.block.length > 0);
@@ -654,25 +654,25 @@ mixin template StringBuilderOperations() {
             assert(cursor.block.next !is null);
         }
 
-        foreach (iterator; iteratorList) {
+        foreach(iterator; iteratorList) {
             // prevent all cursors from being at the tail node
             iterator.moveCursorsFromTail;
         }
 
         debug {
-            foreach (iterator; iteratorList) {
+            foreach(iterator; iteratorList) {
                 assert(iterator.forwards.offsetIntoBlock <= iterator.forwards.block.length);
-                if (!(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length)) {
+                if(!(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length)) {
                     assert(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length);
                 }
             }
         }
 
         void ensureNotInFullBlock() {
-            if (cursor.block.length == BlockList.Count) {
+            if(cursor.block.length == BlockList.Count) {
                 // we are maxed out, oh noes
 
-                if (cursor.offsetIntoBlock == BlockList.Count) {
+                if(cursor.offsetIntoBlock == BlockList.Count) {
                     // at end of the current block,
                     // new block time!
                     Block* newBlock = blockList.insert(cursor.block);
@@ -688,7 +688,7 @@ mixin template StringBuilderOperations() {
                     assert(cursor.offsetIntoBlock == cursor.block.length);
                     assert(splitInto.length == BlockList.Count - cursor.offsetIntoBlock);
 
-                    foreach (iterator; iteratorList) {
+                    foreach(iterator; iteratorList) {
                         iterator.moveRange(oldBlock, oldOffset, splitInto, 0, amount);
                     }
                 }
@@ -698,26 +698,26 @@ mixin template StringBuilderOperations() {
         toInsert.foreachContiguous((scope ref Char[] cA) @trusted {
             // clobbering only
             {
-                if (cursor.offsetFromHead >= maximumOffsetFromHead)
+                if(cursor.offsetFromHead >= maximumOffsetFromHead)
                     clobber = false;
 
-                if (clobber) {
+                if(clobber) {
                     size_t canDo = maximumOffsetFromHead - cursor.offsetFromHead;
-                    if (canDo > cA.length)
+                    if(canDo > cA.length)
                         canDo = cA.length;
 
-                    while (cA.length > 0 && canDo > 0) {
+                    while(cA.length > 0 && canDo > 0) {
                         size_t canDoBlock = canDo;
-                        if (canDoBlock > cursor.block.length - cursor.offsetIntoBlock)
+                        if(canDoBlock > cursor.block.length - cursor.offsetIntoBlock)
                             canDoBlock = cursor.block.length - cursor.offsetIntoBlock;
 
-                        if (canDoBlock == 0)
+                        if(canDoBlock == 0)
                             break;
 
                         Char[] got = cursor.block.get()[cursor.offsetIntoBlock .. $];
 
                         onRemove(got[0 .. canDoBlock]);
-                        foreach (i, c; cA[0 .. canDoBlock])
+                        foreach(i, c; cA[0 .. canDoBlock])
                             got[i] = c;
 
                         onInsert(cA[0 .. canDoBlock]);
@@ -732,7 +732,7 @@ mixin template StringBuilderOperations() {
                         startOffsetFromHead += canDoBlock;
                     }
 
-                    if (cA.length > 0)
+                    if(cA.length > 0)
                         clobber = false;
                 }
             }
@@ -741,16 +741,16 @@ mixin template StringBuilderOperations() {
             {
                 assert(cA.length == 0 || !clobber);
 
-                while (cA.length > 0) {
+                while(cA.length > 0) {
                     ensureNotInFullBlock;
 
                     {
                         size_t canDo = BlockList.Count - cursor.block.length;
-                        if (canDo > cA.length)
+                        if(canDo > cA.length)
                             canDo = cA.length;
                         assert(canDo > 0);
 
-                        if (cursor.offsetIntoBlock < cursor.block.length) {
+                        if(cursor.offsetIntoBlock < cursor.block.length) {
                             // oh noes, there stuff on the right!
                             const oldOffsetInBlock = cursor.offsetIntoBlock, newOffsetInBlock = cursor.offsetIntoBlock + canDo;
                             cursor.block.moveRight(oldOffsetInBlock, newOffsetInBlock);
@@ -763,7 +763,7 @@ mixin template StringBuilderOperations() {
                         assert(got.length >= canDo);
                         assert(cA.length >= canDo);
 
-                        foreach (i, c; cA[0 .. canDo])
+                        foreach(i, c; cA[0 .. canDo])
                             got[i] = c;
 
                         onInsert(cA[0 .. canDo]);
@@ -781,9 +781,9 @@ mixin template StringBuilderOperations() {
                     }
 
                     debug {
-                        foreach (iterator; iteratorList) {
+                        foreach(iterator; iteratorList) {
                             assert(iterator.forwards.offsetIntoBlock <= iterator.forwards.block.length);
-                            if (!(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length)) {
+                            if(!(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length)) {
                                 assert(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length);
                             }
                         }
@@ -794,8 +794,8 @@ mixin template StringBuilderOperations() {
             return 0;
         });
 
-        if (amountInserted > 0) {
-            foreach (iterator; iteratorList) {
+        if(amountInserted > 0) {
+            foreach(iterator; iteratorList) {
                 iterator.onInsertIncreaseFromHead(startOffsetFromHead, amountInserted);
             }
         }
@@ -812,45 +812,45 @@ mixin template StringBuilderOperations() {
         enum HalfCount = BlockList.Count / 2;
 
         Char[BlockList.Count] FullText1, HalfText1, HalfText2, FullText2;
-        foreach (i, ref c; FullText1)
+        foreach(i, ref c; FullText1)
             c = (i % 26) + 'A';
-        foreach (i, ref c; HalfText1)
+        foreach(i, ref c; HalfText1)
             c = (i % 13) + 'a';
-        foreach (i, ref c; HalfText2)
+        foreach(i, ref c; HalfText2)
             c = 'z' - (i % 13);
-        foreach (i, ref c; FullText2)
+        foreach(i, ref c; FullText2)
             c = 'Z' - (i % 26);
 
         Char[FullCount * 3] Against2, Against3, Against4;
 
-        foreach (i, ref c; Against2) {
-            if (i >= FullCount)
+        foreach(i, ref c; Against2) {
+            if(i >= FullCount)
                 c = ((i - HalfCount) % 26) + 'A';
-            else if (i >= HalfCount)
+            else if(i >= HalfCount)
                 c = ((i - HalfCount) % 13) + 'a';
             else
                 c = (i % 26) + 'A';
         }
 
-        foreach (i, ref c; Against3) {
-            if (i >= FullCount + HalfCount)
+        foreach(i, ref c; Against3) {
+            if(i >= FullCount + HalfCount)
                 c = 'z' - ((i - (FullCount + HalfCount)) % 13);
-            else if (i >= FullCount)
+            else if(i >= FullCount)
                 c = ((i - HalfCount) % 26) + 'A';
-            else if (i >= HalfCount)
+            else if(i >= HalfCount)
                 c = ((i - HalfCount) % 13) + 'a';
             else
                 c = (i % 26) + 'A';
         }
 
-        foreach (i, ref c; Against4) {
-            if (i >= FullCount * 2)
+        foreach(i, ref c; Against4) {
+            if(i >= FullCount * 2)
                 c = 'Z' - ((i - (FullCount * 2)) % 26);
-            else if (i >= FullCount + HalfCount)
+            else if(i >= FullCount + HalfCount)
                 c = 'z' - ((i - (FullCount + HalfCount)) % 13);
-            else if (i >= FullCount)
+            else if(i >= FullCount)
                 c = ((i - HalfCount) % 26) + 'A';
-            else if (i >= HalfCount)
+            else if(i >= HalfCount)
                 c = ((i - HalfCount) % 13) + 'a';
             else
                 c = (i % 26) + 'A';
@@ -952,22 +952,22 @@ mixin template StringBuilderOperations() {
             scope ref Cursor) @safe nothrow @nogc onMatch, bool doRemove = true, bool onceOnly = false) {
         size_t count, maximumOffsetFromHead = blockList.numberOfItems;
 
-        if (iterator !is null) {
+        if(iterator !is null) {
             maximumOffsetFromHead = iterator.maximumOffsetFromHead;
         }
 
-        while (!cursor.isOutOfRange(0, maximumOffsetFromHead)) {
+        while(!cursor.isOutOfRange(0, maximumOffsetFromHead)) {
             // Unfortunately this is required when doing insert then remove.
             // The remove does not guarantee that it'll point to data
-            if (doRemove)
+            if(doRemove)
                 cursor.advanceForward(0, maximumOffsetFromHead, true);
 
             size_t matchedAmount = isToFind(cursor, maximumOffsetFromHead);
-            if (matchedAmount > 0) {
+            if(matchedAmount > 0) {
                 count++;
 
                 debug {
-                    foreach (iterator; iteratorList) {
+                    foreach(iterator; iteratorList) {
                         assert(iterator.forwards.offsetIntoBlock <= iterator.forwards.block.length);
                         assert(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length);
                     }
@@ -978,30 +978,30 @@ mixin template StringBuilderOperations() {
                 //  effective range.
                 // By doing insert first you increase range, and only then decrease
                 //  to the desired range.
-                if (onMatch !is null) {
+                if(onMatch !is null) {
                     maximumOffsetFromHead += onMatch(iterator, cursor);
                 }
 
-                foreach (iterator; iteratorList) {
+                foreach(iterator; iteratorList) {
                     assert(iterator.forwards.offsetIntoBlock <= iterator.forwards.block.length);
-                    if (!(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length)) {
+                    if(!(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length)) {
                         assert(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length);
                     }
                 }
 
-                if (doRemove) {
+                if(doRemove) {
                     removeOperation(iterator, cursor, matchedAmount);
                     maximumOffsetFromHead -= matchedAmount;
 
                     debug {
-                        foreach (iterator; iteratorList) {
+                        foreach(iterator; iteratorList) {
                             assert(iterator.forwards.offsetIntoBlock <= iterator.forwards.block.length);
                             assert(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length);
                         }
                     }
                 }
 
-                if (onceOnly)
+                if(onceOnly)
                     return count;
             } else
                 cursor.advanceForward(1, maximumOffsetFromHead, true);
@@ -1155,9 +1155,9 @@ struct OpTest(Char) {
     }
 
     void debugPosition(scope Block* cursorBlock, size_t offsetIntoBlock) @trusted {
-        version (D_BetterC) {
+        version(D_BetterC) {
         } else {
-            version (unittest)
+            version(unittest)
                 debug {
                     try {
                         import std.stdio;
@@ -1167,11 +1167,11 @@ struct OpTest(Char) {
 
                         writeln("====================");
 
-                        while (block !is null) {
-                            if (block is cursorBlock)
+                        while(block !is null) {
+                            if(block is cursorBlock)
                                 write(">");
                             writef!"%s:%X@(%s)"(offsetFromHead, block, *block);
-                            if (block is cursorBlock)
+                            if(block is cursorBlock)
                                 writef!":%s<"(offsetIntoBlock);
                             write("    [[[", cast(char[])block.get(), "]]]\n");
 
@@ -1181,25 +1181,25 @@ struct OpTest(Char) {
 
                         writeln;
 
-                        foreach (iterator; iteratorList) {
+                        foreach(iterator; iteratorList) {
                             try {
                                 writef!"%X@"(iterator);
-                                foreach (v; (*iterator).tupleof)
+                                foreach(v; (*iterator).tupleof)
                                     write(" ", v);
                                 writeln;
-                            } catch (Exception) {
+                            } catch(Exception) {
                             }
                         }
-                    } catch (Exception) {
+                    } catch(Exception) {
                     }
                 }
         }
     }
 
     void debugPosition(scope Iterator* iterator) @trusted {
-        version (D_BetterC) {
+        version(D_BetterC) {
         } else {
-            version (unittest)
+            version(unittest)
                 debug {
                     try {
                         import std.stdio;
@@ -1209,11 +1209,11 @@ struct OpTest(Char) {
 
                         writeln("====================");
 
-                        while (block !is null) {
-                            if (iterator !is null && block is iterator.forwards.block)
+                        while(block !is null) {
+                            if(iterator !is null && block is iterator.forwards.block)
                                 write(iterator.forwards.offsetIntoBlock, ">");
                             writef!"%s:%X@(%s)"(offsetFromHead, block, *block);
-                            if (iterator !is null && block is iterator.backwards.block)
+                            if(iterator !is null && block is iterator.backwards.block)
                                 writef!":%s<"(iterator.backwards.offsetIntoBlock);
                             write("    [[[", cast(char[])block.get(), "]]]\n");
 
@@ -1223,16 +1223,16 @@ struct OpTest(Char) {
 
                         writeln;
 
-                        foreach (iterator; iteratorList) {
+                        foreach(iterator; iteratorList) {
                             try {
                                 writef!"%X@"(iterator);
-                                foreach (v; (*iterator).tupleof)
+                                foreach(v; (*iterator).tupleof)
                                     write(" ", v);
                                 writeln;
-                            } catch (Exception) {
+                            } catch(Exception) {
                             }
                         }
-                    } catch (Exception) {
+                    } catch(Exception) {
                     }
                 }
         }
@@ -1252,14 +1252,14 @@ struct OpTest(Char) {
         bool matches(scope Cursor cursor, size_t maximumOffsetFromHead) {
             auto temp = literal;
 
-            while (!cursor.isOutOfRange(0, maximumOffsetFromHead) && temp.length > 0) {
+            while(!cursor.isOutOfRange(0, maximumOffsetFromHead) && temp.length > 0) {
                 size_t canDo = cursor.block.length - cursor.offsetIntoBlock;
-                if (canDo > temp.length)
+                if(canDo > temp.length)
                     canDo = temp.length;
 
                 auto got = cursor.block.get()[cursor.offsetIntoBlock .. $];
-                foreach (i, c; temp[0 .. canDo])
-                    if (got[i] != c)
+                foreach(i, c; temp[0 .. canDo])
+                    if(got[i] != c)
                         return false;
 
                 temp = temp[canDo .. $];
@@ -1272,18 +1272,18 @@ struct OpTest(Char) {
         int compare(scope Cursor cursor, size_t maximumOffsetFromHead) {
             auto temp = literal;
 
-            while (!cursor.isOutOfRange(0, maximumOffsetFromHead) && temp.length > 0) {
+            while(!cursor.isOutOfRange(0, maximumOffsetFromHead) && temp.length > 0) {
                 size_t canDo = cursor.block.length - cursor.offsetIntoBlock;
-                if (canDo > temp.length)
+                if(canDo > temp.length)
                     canDo = temp.length;
 
                 auto got = cursor.block.get()[cursor.offsetIntoBlock .. $];
-                foreach (i, a; temp[0 .. canDo]) {
+                foreach(i, a; temp[0 .. canDo]) {
                     Char b = got[i];
 
-                    if (a < b)
+                    if(a < b)
                         return 1;
-                    else if (a > b)
+                    else if(a > b)
                         return -1;
                 }
 
@@ -1312,9 +1312,9 @@ struct OpTest(Char) {
         int foreachValue(scope int delegate(ref  /* ignore this */ Char) @safe @nogc nothrow del) @safe @nogc nothrow {
             int result;
 
-            foreach (Char c; literal) {
+            foreach(Char c; literal) {
                 result = del(c);
-                if (result)
+                if(result)
                     break;
             }
 

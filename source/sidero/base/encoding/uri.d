@@ -99,7 +99,7 @@ export @safe nothrow @nogc static:
 
     ///
     void encode(scope StringBuilder_ASCII output, scope String_UTF8.LiteralType input) {
-        if (output.isNull)
+        if(output.isNull)
             return;
 
         scope String_UTF32 temp;
@@ -109,7 +109,7 @@ export @safe nothrow @nogc static:
 
     ///
     void encode(scope StringBuilder_ASCII output, scope String_UTF16.LiteralType input) {
-        if (output.isNull)
+        if(output.isNull)
             return;
 
         scope String_UTF32 temp;
@@ -119,7 +119,7 @@ export @safe nothrow @nogc static:
 
     ///
     void encode(scope StringBuilder_ASCII output, scope String_UTF32.LiteralType input) {
-        if (output.isNull)
+        if(output.isNull)
             return;
 
         encodeImpl(output, input);
@@ -127,7 +127,7 @@ export @safe nothrow @nogc static:
 
     ///
     void encode(scope StringBuilder_ASCII output, scope String_ASCII input) {
-        if (output.isNull)
+        if(output.isNull)
             return;
 
         encodeImpl(output, input);
@@ -135,7 +135,7 @@ export @safe nothrow @nogc static:
 
     ///
     void encode(scope StringBuilder_ASCII output, scope String_UTF8 input) {
-        if (output.isNull)
+        if(output.isNull)
             return;
 
         encodeImpl(output, input.byUTF32);
@@ -143,7 +143,7 @@ export @safe nothrow @nogc static:
 
     ///
     void encode(scope StringBuilder_ASCII output, scope String_UTF16 input) {
-        if (output.isNull)
+        if(output.isNull)
             return;
 
         encodeImpl(output, input.byUTF32);
@@ -151,7 +151,7 @@ export @safe nothrow @nogc static:
 
     ///
     void encode(scope StringBuilder_ASCII output, scope String_UTF32 input) {
-        if (output.isNull)
+        if(output.isNull)
             return;
 
         encodeImpl(output, input);
@@ -159,7 +159,7 @@ export @safe nothrow @nogc static:
 
     ///
     void encode(scope StringBuilder_ASCII output, scope StringBuilder_ASCII input) {
-        if (output.isNull)
+        if(output.isNull)
             return;
 
         encodeImpl(output, input);
@@ -167,7 +167,7 @@ export @safe nothrow @nogc static:
 
     ///
     void encode(scope StringBuilder_ASCII output, scope StringBuilder_UTF8 input) {
-        if (output.isNull)
+        if(output.isNull)
             return;
 
         encodeImpl(output, input.byUTF32);
@@ -175,7 +175,7 @@ export @safe nothrow @nogc static:
 
     ///
     void encode(scope StringBuilder_ASCII output, scope StringBuilder_UTF16 input) {
-        if (output.isNull)
+        if(output.isNull)
             return;
 
         encodeImpl(output, input.byUTF32);
@@ -183,7 +183,7 @@ export @safe nothrow @nogc static:
 
     ///
     void encode(scope StringBuilder_ASCII output, scope StringBuilder_UTF32 input) {
-        if (output.isNull)
+        if(output.isNull)
             return;
 
         encodeImpl(output, input);
@@ -194,7 +194,7 @@ export @safe nothrow @nogc static:
         StringBuilder_UTF8 output = StringBuilder_UTF8(allocator);
         auto got = decodeImpl(output, input);
 
-        if (!got)
+        if(!got)
             return typeof(return)(got.getError);
         return typeof(return)(output);
     }
@@ -204,14 +204,14 @@ export @safe nothrow @nogc static:
         StringBuilder_UTF8 output = StringBuilder_UTF8(allocator);
         auto got = decodeImpl(output, input);
 
-        if (!got)
+        if(!got)
             return typeof(return)(got.getError);
         return typeof(return)(output);
     }
 
     ///
     ErrorResult decode(scope StringBuilder_UTF8 output, scope String_ASCII input) {
-        if (output.isNull)
+        if(output.isNull)
             return ErrorResult(NullPointerException);
 
         return decodeImpl(output, input);
@@ -219,7 +219,7 @@ export @safe nothrow @nogc static:
 
     ///
     ErrorResult decode(scope StringBuilder_UTF16 output, scope String_ASCII input) {
-        if (output.isNull)
+        if(output.isNull)
             return ErrorResult(NullPointerException);
 
         return decodeImpl(output.byUTF8, input);
@@ -227,7 +227,7 @@ export @safe nothrow @nogc static:
 
     ///
     ErrorResult decode(scope StringBuilder_UTF32 output, scope String_ASCII input) {
-        if (output.isNull)
+        if(output.isNull)
             return ErrorResult(NullPointerException);
 
         return decodeImpl(output.byUTF8, input);
@@ -235,7 +235,7 @@ export @safe nothrow @nogc static:
 
     ///
     ErrorResult decode(scope StringBuilder_UTF8 output, scope StringBuilder_ASCII input) {
-        if (output.isNull)
+        if(output.isNull)
             return ErrorResult(NullPointerException);
 
         return decodeImpl(output, input);
@@ -243,7 +243,7 @@ export @safe nothrow @nogc static:
 
     ///
     ErrorResult decode(scope StringBuilder_UTF16 output, scope StringBuilder_ASCII input) {
-        if (output.isNull)
+        if(output.isNull)
             return ErrorResult(NullPointerException);
 
         return decodeImpl(output.byUTF8, input);
@@ -251,7 +251,7 @@ export @safe nothrow @nogc static:
 
     ///
     ErrorResult decode(scope StringBuilder_UTF32 output, scope StringBuilder_ASCII input) {
-        if (output.isNull)
+        if(output.isNull)
             return ErrorResult(NullPointerException);
 
         return decodeImpl(output.byUTF8, input);
@@ -262,20 +262,20 @@ private:
         import sidero.base.text.ascii.characters : isGraphical;
         import sidero.base.encoding.utf : encodeUTF8;
 
-        foreach (c; input) {
+        foreach(c; input) {
             const needEncoding = c >= 128 || !isGraphical(cast(ubyte)c) || NeedsEncoding(c);
 
-            if (!needEncoding) {
+            if(!needEncoding) {
                 output ~= [cast(ubyte)c];
             } else {
                 char[4] buffer;
                 const amountEncoded = encodeUTF8(cast(dchar)c, buffer);
 
-                foreach (v; buffer[0 .. amountEncoded]) {
+                foreach(v; buffer[0 .. amountEncoded]) {
                     // %pct-encode
                     output ~= "%";
 
-                    version (none) {
+                    version(none) {
                         auto temp1 = v, temp2 = v;
                         temp1 >>= 4;
                         temp1 &= 0xF;
@@ -311,11 +311,11 @@ private:
             ubyte ret;
 
             ubyte temp = cast(ubyte)input[0];
-            if (temp >= '0' && temp <= '9')
+            if(temp >= '0' && temp <= '9')
                 ret = cast(ubyte)(temp - '0');
-            else if (temp >= 'A' && temp <= 'F')
+            else if(temp >= 'A' && temp <= 'F')
                 ret = cast(ubyte)((temp - 'A') + 10);
-            else if (temp >= 'a' && temp <= 'f')
+            else if(temp >= 'a' && temp <= 'f')
                 ret = cast(ubyte)((temp - 'a') + 10);
             else
                 return typeof(return)(MalformedInputException("Hex string in percentage encoding out of range"));
@@ -323,11 +323,11 @@ private:
             ret <<= 4;
 
             temp = cast(ubyte)input[1];
-            if (temp >= '0' && temp <= '9')
+            if(temp >= '0' && temp <= '9')
                 ret |= cast(ubyte)(temp - '0');
-            else if (temp >= 'A' && temp <= 'F')
+            else if(temp >= 'A' && temp <= 'F')
                 ret |= cast(ubyte)((temp - 'A') + 10);
-            else if (temp >= 'a' && temp <= 'f')
+            else if(temp >= 'a' && temp <= 'f')
                 ret |= cast(ubyte)((temp - 'a') + 10);
             else
                 return typeof(return)(MalformedInputException("Hex string in percentage encoding out of range"));
@@ -335,11 +335,11 @@ private:
             return typeof(return)(cast(char)ret);
         }
 
-        while (!input.empty) {
+        while(!input.empty) {
             ubyte triggerC = input.front;
             input.popFront;
 
-            if (triggerC != '%') {
+            if(triggerC != '%') {
                 // all good, copy straight
                 output ~= [cast(char)triggerC];
             } else {
@@ -348,43 +348,43 @@ private:
                 char[4] decodeBuffer;
 
                 {
-                    if (input.empty)
+                    if(input.empty)
                         return ErrorResult(MalformedInputException("Not enough bytes in percentage encoding of URI"));
                     encodedBuffer[0] = input.front;
                     input.popFront;
 
-                    if (input.empty)
+                    if(input.empty)
                         return ErrorResult(MalformedInputException("Not enough bytes in percentage encoding of URI"));
                     encodedBuffer[1] = input.front;
                     input.popFront;
 
                     auto got = decodeHex(encodedBuffer[0 .. 2]);
-                    if (!got)
+                    if(!got)
                         return ErrorResult(got.getError());
                     decodeBuffer[0] = got.get;
                 }
 
                 const numberNeeded = decodeLength(decodeBuffer[0]);
 
-                foreach (outputOffset; 1 .. numberNeeded) {
-                    if (input.empty)
+                foreach(outputOffset; 1 .. numberNeeded) {
+                    if(input.empty)
                         return ErrorResult(MalformedInputException("Not enough bytes in percentage encoding of URI"));
-                    else if (input.front != '%')
+                    else if(input.front != '%')
                         return ErrorResult(MalformedInputException("Percentage encoding is not UTF-8, not enough values"));
                     input.popFront;
 
-                    if (input.empty)
+                    if(input.empty)
                         return ErrorResult(MalformedInputException("Not enough bytes in percentage encoding of URI"));
                     encodedBuffer[outputOffset * 2] = input.front;
                     input.popFront;
 
-                    if (input.empty)
+                    if(input.empty)
                         return ErrorResult(MalformedInputException("Not enough bytes in percentage encoding of URI"));
                     encodedBuffer[(outputOffset * 2) + 1] = input.front;
                     input.popFront;
 
                     auto got = decodeHex(encodedBuffer[0 .. 2]);
-                    if (!got)
+                    if(!got)
                         return ErrorResult(got.getError());
                     decodeBuffer[outputOffset] = got.get;
                 }
@@ -392,7 +392,7 @@ private:
                 {
                     dchar decoded;
                     const amountDecoded = decode(decodeBuffer[0 .. numberNeeded], decoded, false);
-                    if (amountDecoded != numberNeeded)
+                    if(amountDecoded != numberNeeded)
                         return ErrorResult(MalformedInputException("Percentage encoding is not UTF-8"));
 
                     char[4] encodeAsBuffer;
@@ -409,7 +409,7 @@ private:
 
 ///
 alias URIUserInfoEncoding = URIEncoding!((c) {
-    switch (c) {
+    switch(c) {
     case '!':
     case '$':
     case '&': .. case '.':
@@ -437,7 +437,7 @@ unittest {
 
 /// You probably don't want this. Use Bootstring instead.
 alias URIHostEncoding = URIEncoding!((c) {
-    switch (c) {
+    switch(c) {
     case '!':
     case '$':
     case '&': .. case '.':
@@ -466,7 +466,7 @@ unittest {
 
 ///
 alias URIQueryFragmentEncoding = URIEncoding!((c) {
-    switch (c) {
+    switch(c) {
     case '!':
     case '$':
     case '&': .. case ';':

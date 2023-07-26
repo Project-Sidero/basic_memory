@@ -56,19 +56,19 @@ export @safe nothrow @nogc:
 
     ///
     int opCmp(const SpinCounterValue other) const {
-        if (this.value >= 0 && other.value < 0)
+        if(this.value >= 0 && other.value < 0)
             return -1;
-        else if (this.value < 0 && other.value >= 0)
+        else if(this.value < 0 && other.value >= 0)
             return 1;
-        else if (this.value == other.value)
+        else if(this.value == other.value)
             return 0;
-        else if (this.value >= 0 && other.value >= 0)
+        else if(this.value >= 0 && other.value >= 0)
             return this.value > other.value;
         else
             return -cast(int)(this.value < other.value);
     }
 
-    version (none) {
+    version(none) {
         ///
         void toString(scope ref StringBuilder_UTF8 writer) const {
             formattedWrite(writer, "{:s}", value);

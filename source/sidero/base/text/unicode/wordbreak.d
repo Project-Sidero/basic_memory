@@ -18,11 +18,11 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
     size_t offsetLengthLeft, consecutiveRI, amountSkipped1, amountSkipped2;
 
     void advanceLookAhead() {
-        if (lookahead.entriesForValue < size_t.max) {
+        if(lookahead.entriesForValue < size_t.max) {
             amountSkipped2 += lookahead.entriesForValue;
         }
 
-        if (wordBreaker.haveValueDel()) {
+        if(wordBreaker.haveValueDel()) {
             lookahead = wordBreaker.nextDel();
         } else {
             lookahead = eot;
@@ -30,7 +30,7 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
     }
 
     void advance() {
-        if (right.entriesForValue < size_t.max) {
+        if(right.entriesForValue < size_t.max) {
             offsetLengthLeft += right.entriesForValue;
         }
 
@@ -40,7 +40,7 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
 
         right = lookahead;
 
-        if (wordBreaker.haveValueDel()) {
+        if(wordBreaker.haveValueDel()) {
             lookahead = wordBreaker.nextDel();
         } else {
             lookahead = eot;
@@ -57,65 +57,65 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
     advance();
     advance();
 
-    Loop: for (;;) {
-        version (none) {
+    Loop: for(;;) {
+        version(none) {
             debugWritefln!"lastLeft: %d %X, left: %d %X, right: %d %X, lookahead: %d %X, amountSkipped: %s %s"(lastLeft.entriesForValue,
                     lastLeft.value, left.entriesForValue,
                     left.value, right.entriesForValue, right.value, lookahead.entriesForValue, lookahead.value,
                     amountSkipped1, amountSkipped2);
         }
 
-        if (left == sot) {
+        if(left == sot) {
             // WB1, but we ignore this as no-op
 
-            version (none) {
+            version(none) {
                 debugWriteln("WB1");
             }
 
             advanceAndMoveLeft();
             continue;
-        } else if (right == eot) {
+        } else if(right == eot) {
             // WB2, and we are done
-            version (none) {
+            version(none) {
                 debugWriteln("WB2");
             }
 
             return offsetLengthLeft + amountSkipped1 + amountSkipped2;
         }
 
-        if (left == '\r' && right == '\n') {
+        if(left == '\r' && right == '\n') {
             // WB3
-            version (none) {
+            version(none) {
                 debugWriteln("WB3");
             }
 
             advanceAndMoveLeft();
             continue;
-        } else if (left == '\r' || left == '\n' || isNewLine(left.value)) {
+        } else if(left == '\r' || left == '\n' || isNewLine(left.value)) {
             // WB3a
-            version (none) {
+            version(none) {
                 debugWriteln("WB3a");
             }
 
             return offsetLengthLeft;
-        } else if (right == '\r' || right == '\n' || isNewLine(right.value)) {
+        } else if(right == '\r' || right == '\n' || isNewLine(right.value)) {
             // WB3b
-            version (none) {
+            version(none) {
                 debugWriteln("WB3b");
             }
 
             return offsetLengthLeft;
-        } else if (left == 0x200D && sidero_utf_lut_isMemberOfExtended_Pictographic(right.value)) {
+        } else if(left == 0x200D && sidero_utf_lut_isMemberOfExtended_Pictographic(right.value)) {
             // WB3c
-            version (none) {
+            version(none) {
                 debugWriteln("WB3c");
             }
 
             advanceAndMoveLeft();
             continue;
-        } else if (isWSegSpace(left.value) && isWSegSpace(right.value)) {
+        } else if(isWSegSpace(left.value) && isWSegSpace(right.value)) {
             // WB3d
-            version (none) {
+            version(none) {
                 debugWriteln("WB3d");
             }
 
@@ -123,27 +123,27 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
             continue;
         }
 
-        version (none) {
+        version(none) {
             debugWritefln!"\tlastLeft: %d %X, left: %d %X, right: %d %X, lookahead: %d %X, amountSkipped: %s %s"(lastLeft.entriesForValue,
                     lastLeft.value, left.entriesForValue,
                     left.value, right.entriesForValue, right.value, lookahead.entriesForValue, lookahead.value,
                     amountSkipped1, amountSkipped2);
         }
 
-        for (;;) {
-            if (right == eot) {
+        for(;;) {
+            if(right == eot) {
                 // WB2
-                version (none) {
+                version(none) {
                     debugWriteln("WB2");
                 }
 
                 return offsetLengthLeft + amountSkipped1 + amountSkipped2;
-            } else if (!(isNewLine(left.value) || left == '\r' || left == '\n') && (right == 0x200D ||
+            } else if(!(isNewLine(left.value) || left == '\r' || left == '\n') && (right == 0x200D ||
                     isExtend(right.value) || isFormat(right.value))) {
                 // WB4
 
-                if (right == 0x200D && sidero_utf_lut_isMemberOfExtended_Pictographic(lookahead.value)) {
-                    version (none) {
+                if(right == 0x200D && sidero_utf_lut_isMemberOfExtended_Pictographic(lookahead.value)) {
+                    version(none) {
                         debugWriteln("WB4-1 -> WB3c");
                     }
 
@@ -151,7 +151,7 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
                     continue Loop;
                 }
 
-                version (none) {
+                version(none) {
                     debugWriteln("WB4-1");
                 }
 
@@ -160,17 +160,17 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
                 break;
         }
 
-        version (none) {
+        version(none) {
             debugWritefln!"\tlastLeft: %d %X, left: %d %X, right: %d %X, lookahead: %d %X, amountSkipped: %s %s"(lastLeft.entriesForValue,
                     lastLeft.value, left.entriesForValue,
                     left.value, right.entriesForValue, right.value, lookahead.entriesForValue, lookahead.value,
                     amountSkipped1, amountSkipped2);
         }
 
-        for (;;) {
-            if (lookahead == 0x200D || isExtend(lookahead.value) || isFormat(lookahead.value)) {
+        for(;;) {
+            if(lookahead == 0x200D || isExtend(lookahead.value) || isFormat(lookahead.value)) {
                 // WB4
-                version (none) {
+                version(none) {
                     debugWriteln("WB4-2");
                 }
 
@@ -179,148 +179,148 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
                 break;
         }
 
-        version (none) {
+        version(none) {
             debugWritefln!"\tlastLeft: %d %X, left: %d %X, right: %d %X, lookahead: %d %X, amountSkipped: %s %s"(lastLeft.entriesForValue,
                     lastLeft.value, left.entriesForValue,
                     left.value, right.entriesForValue, right.value, lookahead.entriesForValue, lookahead.value,
                     amountSkipped1, amountSkipped2);
         }
 
-        if (isAHLetter(left.value) && isAHLetter(right.value)) {
+        if(isAHLetter(left.value) && isAHLetter(right.value)) {
             // WB5
-            version (none) {
+            version(none) {
                 debugWriteln("WB5");
             }
 
             advanceAndMoveLeft();
             continue;
-        } else if (isAHLetter(left.value) && (isMidLetter(right.value) || isMidNumLetQ(right.value)) && isAHLetter(lookahead.value)) {
+        } else if(isAHLetter(left.value) && (isMidLetter(right.value) || isMidNumLetQ(right.value)) && isAHLetter(lookahead.value)) {
             // WB6
-            version (none) {
+            version(none) {
                 debugWriteln("WB6");
             }
 
             advance();
             advanceAndMoveLeft();
             continue;
-        } else if (isAHLetter(lastLeft.value) && (isMidLetter(left.value) || isMidNumLetQ(left.value)) && isAHLetter(right.value)) {
+        } else if(isAHLetter(lastLeft.value) && (isMidLetter(left.value) || isMidNumLetQ(left.value)) && isAHLetter(right.value)) {
             // WB7
-            version (none) {
+            version(none) {
                 debugWriteln("WB7");
             }
 
             advanceAndMoveLeft();
             continue;
-        } else if (isHebrewLetter(left.value) && right == 0x27) {
+        } else if(isHebrewLetter(left.value) && right == 0x27) {
             // WB7a
-            version (none) {
+            version(none) {
                 debugWriteln("WB7a");
             }
 
             advanceAndMoveLeft();
             continue;
-        } else if (isHebrewLetter(left.value) && right == 0x22 && isHebrewLetter(lookahead.value)) {
+        } else if(isHebrewLetter(left.value) && right == 0x22 && isHebrewLetter(lookahead.value)) {
             // WB7b
-            version (none) {
+            version(none) {
                 debugWriteln("WB7b");
             }
 
             advance();
             advanceAndMoveLeft();
             continue;
-        } else if (isHebrewLetter(lastLeft.value) && left == 0x22 && isHebrewLetter(right.value)) {
+        } else if(isHebrewLetter(lastLeft.value) && left == 0x22 && isHebrewLetter(right.value)) {
             // WB7c
-            version (none) {
+            version(none) {
                 debugWriteln("WB7c");
             }
 
             advanceAndMoveLeft();
             continue;
-        } else if (isNumeric(left.value) && isNumeric(right.value)) {
+        } else if(isNumeric(left.value) && isNumeric(right.value)) {
             // WB8
-            version (none) {
+            version(none) {
                 debugWriteln("WB8");
             }
 
             advanceAndMoveLeft();
             continue;
-        } else if (isAHLetter(left.value) && isNumeric(right.value)) {
+        } else if(isAHLetter(left.value) && isNumeric(right.value)) {
             // WB9
-            version (none) {
+            version(none) {
                 debugWriteln("WB9");
             }
 
             advanceAndMoveLeft();
             continue;
-        } else if (isNumeric(left.value) && isAHLetter(right.value)) {
+        } else if(isNumeric(left.value) && isAHLetter(right.value)) {
             // WB10
-            version (none) {
+            version(none) {
                 debugWriteln("WB10");
             }
 
             advanceAndMoveLeft();
             continue;
-        } else if (isNumeric(lastLeft.value) && (isMidNum(left.value) || isMidNumLetQ(left.value)) && isNumeric(right.value)) {
+        } else if(isNumeric(lastLeft.value) && (isMidNum(left.value) || isMidNumLetQ(left.value)) && isNumeric(right.value)) {
             // WB11
-            version (none) {
+            version(none) {
                 debugWriteln("WB11");
             }
 
             advanceAndMoveLeft();
             continue;
-        } else if (isNumeric(left.value) && (isMidNum(right.value) || isMidNumLetQ(right.value)) && isNumeric(lookahead.value)) {
+        } else if(isNumeric(left.value) && (isMidNum(right.value) || isMidNumLetQ(right.value)) && isNumeric(lookahead.value)) {
             // WB12
-            version (none) {
+            version(none) {
                 debugWriteln("WB12");
             }
 
             advance();
             advanceAndMoveLeft();
             continue;
-        } else if (isKatakana(left.value) && isKatakana(right.value)) {
+        } else if(isKatakana(left.value) && isKatakana(right.value)) {
             // WB13
-            version (none) {
+            version(none) {
                 debugWriteln("WB13");
             }
 
             advanceAndMoveLeft();
             continue;
-        } else if ((isAHLetter(left.value) || isNumeric(left.value) || isKatakana(left.value) || isExtendNumLet(left.value)) &&
+        } else if((isAHLetter(left.value) || isNumeric(left.value) || isKatakana(left.value) || isExtendNumLet(left.value)) &&
                 isExtendNumLet(right.value)) {
             // WB13a
-            version (none) {
+            version(none) {
                 debugWriteln("WB13a");
             }
 
             advanceAndMoveLeft;
             continue;
-        } else if (isExtendNumLet(left.value) && (isAHLetter(right.value) || isNumeric(right.value) || isKatakana(right.value))) {
+        } else if(isExtendNumLet(left.value) && (isAHLetter(right.value) || isNumeric(right.value) || isKatakana(right.value))) {
             // WB13b
-            version (none) {
+            version(none) {
                 debugWriteln("WB13b");
             }
 
             advanceAndMoveLeft;
             continue;
-        } else if (sidero_utf_lut_isMemberOfRegional_Indicator(left.value) && sidero_utf_lut_isMemberOfRegional_Indicator(right.value)) {
+        } else if(sidero_utf_lut_isMemberOfRegional_Indicator(left.value) && sidero_utf_lut_isMemberOfRegional_Indicator(right.value)) {
             // WB15 WB16
-            version (none) {
+            version(none) {
                 debugWriteln("WB15 W16");
             }
 
             consecutiveRI++;
             advanceAndMoveLeft();
 
-            if (offsetLengthLeft > 0) {
+            if(offsetLengthLeft > 0) {
                 return offsetLengthLeft + amountSkipped1 + amountSkipped2;
-            } else if ((consecutiveRI & 1) > 0) {
+            } else if((consecutiveRI & 1) > 0) {
                 continue;
             } else {
                 return offsetLengthLeft;
             }
         } else {
             // WB999
-            version (none) {
+            version(none) {
                 debugWriteln("WB999");
                 debugWritefln!"lastLeft: %d %X, left: %d %X, right: %d %X, lookahead: %d %X, amountSkipped: %s %s"(
                         lastLeft.entriesForValue, lastLeft.value,
@@ -328,7 +328,7 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
                         lookahead.entriesForValue, lookahead.value, amountSkipped1, amountSkipped2);
             }
 
-            if (left == sot)
+            if(left == sot)
                 advanceAndMoveLeft();
 
             return offsetLengthLeft;
@@ -340,14 +340,14 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
 
 @safe nothrow @nogc pure:
 
-version (none) {
+version(none) {
     void debugWritefln(string fmt, Args...)(scope Args args, int line = __LINE__) {
         try {
             import std.stdio;
 
             debug write("#", line, ": ");
             debug writefln!fmt(args);
-        } catch (Exception) {
+        } catch(Exception) {
         }
     }
 
@@ -356,7 +356,7 @@ version (none) {
             import std.stdio;
 
             debug writeln("#", line, ": ", args);
-        } catch (Exception) {
+        } catch(Exception) {
         }
     }
 }
@@ -368,7 +368,7 @@ bool isWSegSpace(dchar input) {
 
 ///
 bool isALetter(dchar input) {
-    switch (input) {
+    switch(input) {
     case 0x02C2: .. case 0x02C5:
     case 0x02D2: .. case 0x02D7:
     case 0x02DE:
@@ -392,7 +392,7 @@ bool isALetter(dchar input) {
         return true;
 
     default:
-        if (!input.isAlpha)
+        if(!input.isAlpha)
             return false;
 
         auto wbp = sidero_utf_lut_getWordBreakProperty(input);
@@ -414,7 +414,7 @@ bool isAHLetter(dchar input) {
 
 ///
 bool isMidLetter(dchar input) {
-    switch (input) {
+    switch(input) {
     case 0x3A:
     case 0xB7:
     case 0x0387:
@@ -432,7 +432,7 @@ bool isMidLetter(dchar input) {
 
 ///
 bool isMidNumLet(dchar input) {
-    switch (input) {
+    switch(input) {
     case 0x2E:
     case 0x2018:
     case 0x2019:
@@ -453,7 +453,7 @@ bool isMidNumLetQ(dchar input) {
 
 ///
 bool isMidNum(dchar input) {
-    switch (input) {
+    switch(input) {
     case 0x066C:
     case 0xFE50:
     case 0xFE54:
@@ -471,7 +471,7 @@ bool isMidNum(dchar input) {
 
 ///
 bool isKatakana(dchar input) {
-    switch (input) {
+    switch(input) {
     case 0x3031:
     case 0x3032:
     case 0x3033:
@@ -496,7 +496,7 @@ bool isExtendNumLet(dchar input) {
 
 ///
 bool isNumeric(dchar input) {
-    switch (input) {
+    switch(input) {
     case 0xFF10: .. case 0xFF19:
         return true;
     case 0x066C:
@@ -508,7 +508,7 @@ bool isNumeric(dchar input) {
 
 ///
 bool isExtend(dchar input) {
-    if (input == 0x200D)
+    if(input == 0x200D)
         return false;
     return isUnicodeGraphemeExtend(input) || sidero_utf_lut_getGeneralCategory(input) == GeneralCategory.Mc ||
         sidero_utf_lut_isMemberOfEmoji_Modifier(input);
@@ -516,7 +516,7 @@ bool isExtend(dchar input) {
 
 ///
 bool isFormat(dchar input) {
-    switch (input) {
+    switch(input) {
     case 0x200B:
     case 0x200C:
     case 0x200D:
@@ -528,7 +528,7 @@ bool isFormat(dchar input) {
 
 ///
 bool isNewLine(dchar input) {
-    switch (input) {
+    switch(input) {
     case 0xB:
     case 0xC:
     case 0x85:

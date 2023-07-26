@@ -14,17 +14,17 @@ void processEachLine(string inputText) {
 
     bool expectedRangeEnd, nextRangeEnd;
 
-    foreach (line; inputText.lineSplitter) {
+    foreach(line; inputText.lineSplitter) {
         ptrdiff_t offset;
 
         offset = line.countUntil('#');
-        if (offset >= 0)
+        if(offset >= 0)
             line = line[0 .. offset];
         line = line.strip;
 
         string[] fields = line.split(";");
 
-        foreach (ref field; fields) {
+        foreach(ref field; fields) {
             field = field.strip;
         }
 
@@ -34,29 +34,29 @@ How first field ranges are specified (the First, Last bit):
 4DBF;<CJK Ideograph Extension A, Last>;Lo;0;L;;;;;N;;;;;
 +/
 
-        if (fields.length == 0)
+        if(fields.length == 0)
             continue;
-        else if (fields.length != 15) {
+        else if(fields.length != 15) {
             continue;
         }
 
         uint character = parse!uint(fields[0], 16);
         string name;
 
-        if (fields[1].endsWith(">")) {
+        if(fields[1].endsWith(">")) {
             bool extractName;
 
-            if (fields[1].endsWith("First>")) {
+            if(fields[1].endsWith("First>")) {
                 nextRangeEnd = true;
                 extractName = true;
-            } else if (fields[1].endsWith("Last>")) {
+            } else if(fields[1].endsWith("Last>")) {
                 assert(nextRangeEnd);
                 nextRangeEnd = false;
                 expectedRangeEnd = true;
 
                 extractName = true;
-            } else if (fields[1] == "<control>") {
-                if (expectedRangeEnd) {
+            } else if(fields[1] == "<control>") {
+                if(expectedRangeEnd) {
                     nextRangeEnd = false;
                     expectedRangeEnd = false;
                     continue;
@@ -65,12 +65,12 @@ How first field ranges are specified (the First, Last bit):
                 continue;
             }
 
-            if (extractName) {
+            if(extractName) {
                 offset = fields[1].countUntil(',');
-                if (offset > 0)
+                if(offset > 0)
                     name = fields[1][1 .. offset];
             }
-        } else if (expectedRangeEnd) {
+        } else if(expectedRangeEnd) {
             continue;
         } else {
             name = fields[1];
@@ -78,7 +78,7 @@ How first field ranges are specified (the First, Last bit):
 
         int canonicalCombiningClass = parse!int(fields[3]);
 
-        if (expectedRangeEnd) {
+        if(expectedRangeEnd) {
             // use last entry
 
             state.entries[$ - 1].range.end = character;
@@ -91,22 +91,22 @@ How first field ranges are specified (the First, Last bit):
             entry.range.end = character;
             entry.name = name;
 
-            static foreach (GC; __traits(allMembers, GeneralCategory)) {
-                if (fields[2] == GC)
+            static foreach(GC; __traits(allMembers, GeneralCategory)) {
+                if(fields[2] == GC)
                     entry.generalCategory = __traits(getMember, GeneralCategory, GC);
             }
 
-            if (fields[2].length > 0 && entry.generalCategory == GeneralCategory.None)
+            if(fields[2].length > 0 && entry.generalCategory == GeneralCategory.None)
                 assert(0, "Unrecognized general category " ~ fields[2]);
 
             entry.canonicalCombiningClass = canonicalCombiningClass;
             entry.bidiClass = fields[4];
 
-            if (fields[5].length > 0) {
+            if(fields[5].length > 0) {
                 // fields[5];
                 string map = fields[5], tag = "<>";
 
-                if (map.startsWith('<')) {
+                if(map.startsWith('<')) {
                     offset = map.countUntil('>');
                     assert(offset > 0);
 
@@ -114,7 +114,7 @@ How first field ranges are specified (the First, Last bit):
                     map = map[offset + 1 .. $].strip;
                 }
 
-                switch (tag[1 .. $ - 1]) {
+                switch(tag[1 .. $ - 1]) {
                 case "font":
                     entry.compatibilityTag = CompatibilityFormattingTag.Font;
                     break;
@@ -169,43 +169,43 @@ How first field ranges are specified (the First, Last bit):
                     break;
                 }
 
-                foreach (v; map.splitter(" ")) {
+                foreach(v; map.splitter(" ")) {
                     v = v.strip;
                     entry.decompositionMapping ~= parse!uint(v, 16);
                     assert(v.length == 0);
                 }
             }
 
-            if (fields[6].length > 0) {
+            if(fields[6].length > 0) {
                 entry.isDecimal = true;
                 entry.numericValueNumerator = parse!int(fields[6]);
                 entry.numericValueDenominator = 1;
-            } else if (fields[7].length > 0) {
+            } else if(fields[7].length > 0) {
                 entry.isDigit = true;
                 entry.numericValueNumerator = parse!int(fields[7]);
                 entry.numericValueDenominator = 1;
-            } else if (fields[8].length > 0) {
+            } else if(fields[8].length > 0) {
                 entry.isNumeric = true;
                 string[] field8 = fields[8].split("/");
 
-                if (field8.length == 2) {
+                if(field8.length == 2) {
                     entry.numericValueNumerator = parse!int(field8[0]);
                     entry.numericValueDenominator = parse!int(field8[1]);
-                } else if (field8.length == 1) {
+                } else if(field8.length == 1) {
                     entry.numericValueNumerator = parse!long(field8[0]);
                     entry.numericValueDenominator = 1;
                 } else
                     assert(0);
             }
 
-            if (fields[9] == "Y")
+            if(fields[9] == "Y")
                 entry.bidiMirrored = true;
 
-            if (fields[12].length > 0)
+            if(fields[12].length > 0)
                 entry.simpleUppercaseMapping = parse!int(fields[12], 16);
-            if (fields[13].length > 0)
+            if(fields[13].length > 0)
                 entry.simpleLowercaseMapping = parse!int(fields[13], 16);
-            if (fields[14].length > 0)
+            if(fields[14].length > 0)
                 entry.simpleTitlecaseMapping = parse!int(fields[14], 16);
             else
                 entry.simpleTitlecaseMapping = entry.simpleUppercaseMapping;
@@ -217,10 +217,10 @@ How first field ranges are specified (the First, Last bit):
 }
 
 void fullyDecompose() {
-    foreach (entry; state.entries) {
-        if (entry.decompositionMapping.length > 0) {
-            foreach (v; entry.range.start .. entry.range.end + 1) {
-                if (entry.compatibilityTag == CompatibilityFormattingTag.None)
+    foreach(entry; state.entries) {
+        if(entry.decompositionMapping.length > 0) {
+            foreach(v; entry.range.start .. entry.range.end + 1) {
+                if(entry.compatibilityTag == CompatibilityFormattingTag.None)
                     state.decompositionMaps[v] = entry.decompositionMapping;
                 else
                     state.decompositionMapsCompatibility[v] = entry.decompositionMapping;
@@ -228,7 +228,7 @@ void fullyDecompose() {
         }
     }
 
-    foreach (entry; state.entries) {
+    foreach(entry; state.entries) {
         DecompositionMapping value;
         value.tag = entry.compatibilityTag;
         value.decomposed = entry.decompositionMapping;
@@ -238,21 +238,21 @@ void fullyDecompose() {
         {
             dstring last = value.decomposed;
 
-            for (;;) {
+            for(;;) {
                 dstring temp;
                 temp.reserve = last.length;
 
-                foreach (dchar c; last) {
-                    if (canonical) {
-                        if (c in state.decompositionMaps) {
+                foreach(dchar c; last) {
+                    if(canonical) {
+                        if(c in state.decompositionMaps) {
                             temp ~= state.decompositionMaps[c];
                             continue;
                         }
                     } else {
-                        if (c in state.decompositionMapsCompatibility) {
+                        if(c in state.decompositionMapsCompatibility) {
                             temp ~= state.decompositionMapsCompatibility[c];
                             continue;
-                        } else if (c in state.decompositionMaps) {
+                        } else if(c in state.decompositionMaps) {
                             temp ~= state.decompositionMaps[c];
                             continue;
                         }
@@ -261,7 +261,7 @@ void fullyDecompose() {
                     temp ~= c;
                 }
 
-                if (temp == last)
+                if(temp == last)
                     break;
 
                 value.fullyDecomposed = temp;
@@ -269,42 +269,42 @@ void fullyDecompose() {
             }
         }
 
-        if (value.fullyDecomposed.length == 0)
+        if(value.fullyDecomposed.length == 0)
             value.fullyDecomposed = value.decomposed;
 
-        if (canonical) {
+        if(canonical) {
             dstring last = value.decomposed;
 
-            for (;;) {
+            for(;;) {
                 dstring temp;
                 temp.reserve = last.length;
 
-                foreach (dchar c; last) {
-                    if (c in state.decompositionMapsCompatibility) {
+                foreach(dchar c; last) {
+                    if(c in state.decompositionMapsCompatibility) {
                         temp ~= state.decompositionMapsCompatibility[c];
                         continue;
-                    } else if (c in state.decompositionMaps) {
+                    } else if(c in state.decompositionMaps) {
                         temp ~= state.decompositionMaps[c];
                         continue;
                     } else
                         temp ~= c;
                 }
 
-                if (temp == last)
+                if(temp == last)
                     break;
 
                 value.fullyDecomposedCompatibility = temp;
                 last = temp;
             }
 
-            if (value.fullyDecomposedCompatibility.length == 0)
+            if(value.fullyDecomposedCompatibility.length == 0)
                 value.fullyDecomposedCompatibility = value.decomposed;
         } else {
             value.fullyDecomposedCompatibility = value.fullyDecomposed;
         }
 
-        if (value.decomposed.length > 0) {
-            foreach (dchar c; entry.range.start .. entry.range.end + 1)
+        if(value.decomposed.length > 0) {
+            foreach(dchar c; entry.range.start .. entry.range.end + 1)
                 state.decompositonMappings[c] = value;
         }
     }

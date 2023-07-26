@@ -32,7 +32,7 @@ pure:
     /// A limited lock method, that is pure.
     void pureReadLock() scope @trusted {
         readerLock.pureLock;
-        if (atomicOp!"+="(readers, 1) == 1)
+        if(atomicOp!"+="(readers, 1) == 1)
             globalLock.pureLock;
         readerLock.unlock;
     }
@@ -45,7 +45,7 @@ pure:
     /// A limited unlock method, that is pure.
     void pureReadUnlock() scope @trusted {
         readerLock.pureLock;
-        if (atomicOp!"-="(readers, 1) == 0)
+        if(atomicOp!"-="(readers, 1) == 0)
             globalLock.unlock;
         readerLock.unlock;
     }
@@ -53,7 +53,7 @@ pure:
     /// A limited conversion method, that is pure.
     void pureConvertReadToWrite() scope @trusted {
         readerLock.pureLock;
-        if (atomicOp!"-="(readers, 1) == 0)
+        if(atomicOp!"-="(readers, 1) == 0)
             globalLock.unlock;
         readerLock.unlock;
         globalLock.pureLock;
@@ -66,11 +66,11 @@ pure:
 
     ///
     bool tryReadLock() scope {
-        if (!readerLock.tryLock)
+        if(!readerLock.tryLock)
             return false;
 
-        if (atomicOp!"+="(readers, 1) == 1) {
-            if (!globalLock.tryLock) {
+        if(atomicOp!"+="(readers, 1) == 1) {
+            if(!globalLock.tryLock) {
                 atomicOp!"-="(readers, 1);
                 readerLock.unlock;
             }

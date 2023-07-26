@@ -32,7 +32,7 @@ scope @safe @nogc pure nothrow:
     ///
     this(return scope ref AllocatorLocking other) @trusted {
         other.mutex.pureLock;
-        scope (exit)
+        scope(exit)
             other.mutex.unlock;
 
         this.poolAllocator = other.poolAllocator;
@@ -47,7 +47,7 @@ scope @safe @nogc pure nothrow:
     ///
     void[] allocate(size_t size, TypeInfo ti = null) {
         mutex.pureLock;
-        scope (exit)
+        scope(exit)
             mutex.unlock;
 
         return poolAllocator.allocate(size, ti);
@@ -56,7 +56,7 @@ scope @safe @nogc pure nothrow:
     ///
     bool reallocate(scope ref void[] array, size_t newSize) {
         mutex.pureLock;
-        scope (exit)
+        scope(exit)
             mutex.unlock;
 
         return poolAllocator.reallocate(array, newSize);
@@ -64,43 +64,43 @@ scope @safe @nogc pure nothrow:
 
     ///
     bool deallocate(scope void[] array) {
-        if (array is null)
+        if(array is null)
             return false;
 
         mutex.pureLock;
-        scope (exit)
+        scope(exit)
             mutex.unlock;
 
         return poolAllocator.deallocate(array);
     }
 
-    static if (__traits(hasMember, PoolAllocator, "owns")) {
+    static if(__traits(hasMember, PoolAllocator, "owns")) {
         ///
         Ternary owns(scope void[] array) {
             mutex.pureLock;
-            scope (exit)
+            scope(exit)
                 mutex.unlock;
 
             return poolAllocator.owns(array);
         }
     }
 
-    static if (__traits(hasMember, PoolAllocator, "deallocateAll")) {
+    static if(__traits(hasMember, PoolAllocator, "deallocateAll")) {
         ///
         bool deallocateAll() {
             mutex.pureLock;
-            scope (exit)
+            scope(exit)
                 mutex.unlock;
 
             return poolAllocator.deallocateAll();
         }
     }
 
-    static if (__traits(hasMember, PoolAllocator, "empty")) {
+    static if(__traits(hasMember, PoolAllocator, "empty")) {
         ///
         bool empty() {
             mutex.pureLock;
-            scope (exit)
+            scope(exit)
                 mutex.unlock;
 
             return poolAllocator.empty();
@@ -129,7 +129,7 @@ scope @safe @nogc nothrow:
     ///
     this(return scope ref GCAllocatorLock other) @trusted {
         writeLockImpl;
-        scope (exit)
+        scope(exit)
             writeUnlockImpl;
 
         this.poolAllocator = other.poolAllocator;
@@ -141,7 +141,7 @@ scope @safe @nogc nothrow:
 
     ~this() {
         writeLockImpl;
-        scope (exit)
+        scope(exit)
             writeUnlockImpl;
 
         allocatedTree.deallocateAll((array) { removeRangeImpl(array); return true; });
@@ -157,12 +157,12 @@ pure:
     ///
     void[] allocate(size_t size, TypeInfo ti = null) {
         writeLockImpl;
-        scope (exit)
+        scope(exit)
             writeUnlockImpl;
 
         void[] got = poolAllocator.allocate(size, ti);
 
-        if (got !is null) {
+        if(got !is null) {
             allocatedTree.store(got);
             addRangeImpl(got, ti);
         }
@@ -173,17 +173,17 @@ pure:
     ///
     bool reallocate(scope ref void[] array, size_t newSize) {
         writeLockImpl;
-        scope (exit)
+        scope(exit)
             writeUnlockImpl;
 
         auto trueArray = allocatedTree.getTrueRegionOfMemory(array);
-        if (trueArray is null)
+        if(trueArray is null)
             return false;
         array = trueArray;
 
         const got = poolAllocator.reallocate(array, newSize);
 
-        if (got) {
+        if(got) {
             allocatedTree.remove(trueArray);
             removeRangeImpl(trueArray);
 
@@ -196,23 +196,23 @@ pure:
 
     ///
     bool deallocate(scope void[] array) {
-        if (array is null)
+        if(array is null)
             return false;
 
         writeLockImpl;
-        scope (exit)
+        scope(exit)
             writeUnlockImpl;
 
         debug {
             auto trueArray = allocatedTree.getTrueRegionOfMemory(array);
-            if (trueArray is null)
+            if(trueArray is null)
                 return false;
             assert(trueArray.ptr is array.ptr && trueArray.length == array.length);
         }
 
         const got = poolAllocator.deallocate(array);
 
-        if (got) {
+        if(got) {
             allocatedTree.remove(array);
             removeRangeImpl(array);
         }
@@ -220,22 +220,22 @@ pure:
         return got;
     }
 
-    static if (__traits(hasMember, PoolAllocator, "owns")) {
+    static if(__traits(hasMember, PoolAllocator, "owns")) {
         ///
         Ternary owns(scope void[] array) {
             readLockImpl;
-            scope (exit)
+            scope(exit)
                 readUnlockImpl;
 
             return poolAllocator.owns(array);
         }
     }
 
-    static if (__traits(hasMember, PoolAllocator, "deallocateAll")) {
+    static if(__traits(hasMember, PoolAllocator, "deallocateAll")) {
         ///
         bool deallocateAll() {
             writeLockImpl;
-            scope (exit)
+            scope(exit)
                 writeUnlockImpl;
 
             allocatedTree.deallocateAll((array) { removeRangeImpl(array); return true; });
@@ -243,11 +243,11 @@ pure:
         }
     }
 
-    static if (__traits(hasMember, PoolAllocator, "empty")) {
+    static if(__traits(hasMember, PoolAllocator, "empty")) {
         ///
         bool empty() {
             readLockImpl;
-            scope (exit)
+            scope(exit)
                 readUnlockImpl;
 
             return poolAllocator.empty();

@@ -45,13 +45,13 @@ uint fnv_32_1a(scope const(ubyte)[] data, uint start = FNV_Offset_Basis_32) @saf
         internal ~= "    uint territoryHash = fnv_32_1a(cast(ubyte[])territory);\n";
         internal ~= "    switch(windowsHash) {\n";
 
-        foreach (windows, territory; state.windowsToIANA) {
+        foreach(windows, territory; state.windowsToIANA) {
             uint windowsHash = fnv_32_1a(cast(ubyte[])windows);
 
             internal ~= "        case " ~ windowsHash.text ~ ":\n";
             internal ~= "            switch(territoryHash) {\n";
 
-            foreach (territoryName, iana; territory.values) {
+            foreach(territoryName, iana; territory.values) {
                 uint territoryHash = fnv_32_1a(cast(ubyte[])territoryName);
                 internal ~= "                case " ~ territoryHash.text ~ ":\n";
                 internal ~= "                    return `" ~ iana ~ "`;\n";
@@ -76,7 +76,7 @@ uint fnv_32_1a(scope const(ubyte)[] data, uint start = FNV_Offset_Basis_32) @saf
         internal ~= "    uint ianaHash = fnv_32_1a(cast(ubyte[])iana);\n";
         internal ~= "    switch(ianaHash) {\n";
 
-        foreach (iana, windows; state.ianaToWindows) {
+        foreach(iana, windows; state.ianaToWindows) {
             uint ianaHash = fnv_32_1a(cast(ubyte[])iana);
             internal ~= "        case " ~ ianaHash.text ~ ":\n";
             internal ~= "            return \"" ~ windows ~ "\";\n";
@@ -102,10 +102,10 @@ void processEachLine(string inputText, ref TotalState state) {
     enum Full = "other=\"" ~ Per ~ "\" territory=\"" ~ Per ~ "\" type=\"" ~ Per ~ "\"";
 
     auto r = regex(Full);
-    foreach (matches; matchAll(inputText, r)) {
+    foreach(matches; matchAll(inputText, r)) {
         string windows = matches[1], territory = matches[2], iana = matches[3];
 
-        if (windows !in state.windowsToIANA)
+        if(windows !in state.windowsToIANA)
             state.windowsToIANA[windows] = new Territories;
 
         state.windowsToIANA[windows].values[territory] = iana;
@@ -129,7 +129,7 @@ private enum {
 uint fnv_32_1a(const(ubyte)[] data, uint start = FNV_Offset_Basis_32) {
     uint hash = start;
 
-    foreach (b; data) {
+    foreach(b; data) {
         hash ^= b;
         hash *= FNV_Prime_32;
     }

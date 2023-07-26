@@ -43,7 +43,7 @@ private:
 
     static string TabPrefix = () {
         string ret;
-        foreach (i; 0 .. NumberOfLayers + 2)
+        foreach(i; 0 .. NumberOfLayers + 2)
             ret ~= "    ";
         return ret;
     }();
@@ -65,13 +65,13 @@ private:
         LUTCondition* evalLayer(scope size_t[] layerIndexes, ValueRange!KeyType datemVR, scope ValueRange!KeyType[] layerRanges) {
             LUTCondition* parent = &topCondition;
 
-            foreach (layerOffset, layer; layerIndexes) {
-                if (layer == 0)
+            foreach(layerOffset, layer; layerIndexes) {
+                if(layer == 0)
                     actualValueRanges[layerOffset] = layerRanges[layerOffset];
             }
 
-            foreach_reverse (layerOffset, layer; layerIndexes) {
-                if (layer == 0) {
+            foreach_reverse(layerOffset, layer; layerIndexes) {
+                if(layer == 0) {
                     parent.children ~= LUTCondition(parent);
                     parent = &parent.children[$ - 1];
                     parent.depth = parent.parent.depth + 1;
@@ -84,7 +84,7 @@ private:
             return parent;
         }
 
-        foreach (datem, layerIndex; sr) {
+        foreach(datem, layerIndex; sr) {
             LUTCondition* condition = evalLayer(layerIndex[], datem.range, datem.rangeOnLayer[]);
             condition.data ~= prepareDatem(datem, entriesSoFar);
         }
@@ -92,14 +92,14 @@ private:
         void updateDepth(LUTCondition* condition, size_t depth) {
             condition.depth = depth;
 
-            foreach (ref child; condition.children) {
+            foreach(ref child; condition.children) {
                 updateDepth(&child, depth + 1);
             }
         }
 
         void moveToParent(LUTCondition* condition) {
         Retry:
-            if (condition.children.length == 1) {
+            if(condition.children.length == 1) {
                 LUTCondition* child = &condition.children[0];
                 condition.range = child.range;
                 condition.children = child.children;
@@ -108,7 +108,7 @@ private:
                 updateDepth(condition, condition.depth);
                 goto Retry;
             } else {
-                foreach (ref child; condition.children) {
+                foreach(ref child; condition.children) {
                     moveToParent(&child);
                 }
             }
@@ -116,20 +116,20 @@ private:
 
         moveToParent(&topCondition);
 
-        version (none) {
+        version(none) {
             import std.stdio;
 
             void print(LUTCondition* condition, size_t depth) {
                 string prefix = TabPrefix[0 .. depth * 4];
 
-                foreach (i; 0 .. depth)
+                foreach(i; 0 .. depth)
                     write(" |");
                 write(" .");
 
                 write(prefix);
                 writefln!"if (input >= 0x%X && input <= 0x%X)"(condition.range.start, condition.range.end);
 
-                foreach (ref child; condition.children) {
+                foreach(ref child; condition.children) {
                     print(&child, depth + 1);
                 }
             }
@@ -143,7 +143,7 @@ private:
         lutDatem.datem = datem;
         lutDatem.entriesCount = datem.allTheSame ? 1 : datem.metadataEntries.length;
 
-        if (lutDatem.entriesCount > 1 || lutType[$ - 1] == '*') {
+        if(lutDatem.entriesCount > 1 || lutType[$ - 1] == '*') {
             lutDatem.entriesOffset = entriesSoFar;
             lutDatem.entriesInLUT = lutDatem.entriesCount;
             entriesSoFar += lutDatem.entriesInLUT;
@@ -154,8 +154,8 @@ private:
     }
 
     void emitSignature() {
-        sigAppender.formattedWrite!"export extern(C) immutable(%s) %s(%s input) @trusted nothrow @nogc pure;\n"(externType.length > 0
-                ? externType : lutType, name, KeyType.stringof);
+        sigAppender.formattedWrite!"export extern(C) immutable(%s) %s(%s input) @trusted nothrow @nogc pure;\n"(
+                externType.length > 0 ? externType : lutType, name, KeyType.stringof);
     }
 
     void emitFunction() {
@@ -167,18 +167,18 @@ private:
             string currentPrefixCondition = TabPrefix[0 .. depth * 4],
                 currentPrefixReturn = TabPrefix[0 .. (depth + cast(size_t)(haveMoreThanOne || forceCheck)) * 4];
 
-            foreach (i, lutDatem; data) {
-                if (haveMoreThanOne || forceCheck) {
+            foreach(i, lutDatem; data) {
+                if(haveMoreThanOne || forceCheck) {
                     resultAppender ~= currentPrefixCondition;
-                    if (i > 0)
+                    if(i > 0)
                         resultAppender ~= "else ";
 
                     resultAppender ~= "if (";
-                    if (lutDatem.datem.range.isSingle)
+                    if(lutDatem.datem.range.isSingle)
                         resultAppender.formattedWrite!"input == 0x%X"(lutDatem.datem.range.start);
-                    else if (i == 0 && NumberOfLayers > 0 && !forceCheck && depth > 1)
+                    else if(i == 0 && NumberOfLayers > 0 && !forceCheck && depth > 1)
                         resultAppender.formattedWrite!"input <= 0x%X"(lutDatem.datem.range.end);
-                    else if (i == data.length - 1 && NumberOfLayers > 0 && !forceCheck && depth > 1)
+                    else if(i == data.length - 1 && NumberOfLayers > 0 && !forceCheck && depth > 1)
                         resultAppender.formattedWrite!"input >= 0x%X"(lutDatem.datem.range.start);
                     else
                         resultAppender.formattedWrite!"input >= 0x%X && input <= 0x%X"(lutDatem.datem.range.start,
@@ -188,16 +188,16 @@ private:
 
                 resultAppender ~= currentPrefixReturn;
 
-                if (lutDatem.entriesOffset >= 0) {
+                if(lutDatem.entriesOffset >= 0) {
                     resultAppender ~= "return cast(" ~ lutType ~ ")";
-                    if (lutType[$ - 1] == '*')
+                    if(lutType[$ - 1] == '*')
                         resultAppender ~= "&";
 
-                    resultAppender.formattedWrite!"%s[cast(size_t)(%s + (input - 0x%X))]"(lutName, lutDatem.entriesOffset,
-                    cast(size_t)lutDatem.datem.range.start);
+                    resultAppender.formattedWrite!"%s[cast(size_t)(%s + (input - 0x%X))]"(lutName,
+                            lutDatem.entriesOffset, cast(size_t)lutDatem.datem.range.start);
                     resultAppender ~= ";\n";
                 } else {
-                    if (lutType == "long[]") {
+                    if(lutType == "long[]") {
                         resultAppender ~= "{ static immutable ret = ";
                         emitLiteral(resultAppender, lutDatem.datem.metadataEntries[0]);
                         resultAppender ~= ";\n";
@@ -218,38 +218,38 @@ private:
         void handleCondition(LUTCondition[] siblings, size_t depth) {
             string currentPrefix = TabPrefix[0 .. depth * 4];
 
-            foreach (i, sibling; siblings) {
+            foreach(i, sibling; siblings) {
                 resultAppender ~= currentPrefix;
-                if (i > 0)
+                if(i > 0)
                     resultAppender ~= "} else ";
 
                 resultAppender ~= "if (";
 
-                if (sibling.range.isSingle)
+                if(sibling.range.isSingle)
                     resultAppender.formattedWrite!"input == 0x%X"(sibling.range.start);
-                else if (i == 0 && depth > 1 && depth > 1)
+                else if(i == 0 && depth > 1 && depth > 1)
                     resultAppender.formattedWrite!"input <= 0x%X"(sibling.range.end);
-                else if (i == siblings.length - 1 && depth > 1)
+                else if(i == siblings.length - 1 && depth > 1)
                     resultAppender.formattedWrite!"input >= 0x%X"(sibling.range.start);
                 else
                     resultAppender.formattedWrite!"input >= 0x%X && input <= 0x%X"(sibling.range.start, sibling.range.end);
 
                 resultAppender ~= ") {\n";
 
-                if (sibling.children.length > 0) {
+                if(sibling.children.length > 0) {
                     handleCondition(sibling.children, depth + 1);
                 } else {
                     handleData(sibling.data, depth + 1);
                 }
             }
 
-            if (siblings.length > 0) {
+            if(siblings.length > 0) {
                 resultAppender ~= currentPrefix;
                 resultAppender ~= "}\n";
             }
         }
 
-        if (topCondition.data.length > 0)
+        if(topCondition.data.length > 0)
             handleData(topCondition.data, 1, true);
         else
             handleCondition(topCondition.children, 1);
@@ -259,12 +259,12 @@ private:
     }
 
     void emitReturn() {
-        if (defaultReturn) {
+        if(defaultReturn) {
             resultAppender ~= "    return " ~ defaultReturn ~ ";\n";
             return;
         }
 
-        switch (lutType) {
+        switch(lutType) {
         case "string":
         case "wstring":
         case "dstring":
@@ -284,54 +284,54 @@ private:
 
         emitLUT;
 
-        if (resultAppender.data.length == doneSoFar && (wipString.data.length + wipWString.data.length + wipDString.data.length > 0))
+        if(resultAppender.data.length == doneSoFar && (wipString.data.length + wipWString.data.length + wipDString.data.length > 0))
             resultAppender ~= "private {\n";
         emitStringTables;
 
-        if (resultAppender.data.length > doneSoFar)
+        if(resultAppender.data.length > doneSoFar)
             resultAppender ~= "}\n";
     }
 
     void emitLUT() {
         void handle(ref LUTDatem lutDatem) {
-            if (lutDatem.entriesInLUT == 0)
+            if(lutDatem.entriesInLUT == 0)
                 return;
 
-            version (none)
+            version(none)
                 resultAppender ~= "\t";
 
-            foreach (i, entry; lutDatem.datem.metadataEntries) {
+            foreach(i, entry; lutDatem.datem.metadataEntries) {
                 emitLiteral(resultAppender, entry);
                 resultAppender ~= ", ";
             }
 
-            version (none)
+            version(none)
                 resultAppender ~= "\n";
         }
 
         void recurse(ref LUTCondition condition) {
-            if (condition.data.length > 0) {
-                foreach (datem; condition.data) {
+            if(condition.data.length > 0) {
+                foreach(datem; condition.data) {
                     handle(datem);
                 }
             } else {
-                foreach (child; condition.children) {
+                foreach(child; condition.children) {
                     recurse(child);
                 }
             }
         }
 
         bool checkNeed(ref LUTCondition condition) {
-            if (condition.data.length > 0) {
-                foreach (lutDatem; condition.data) {
-                    if (lutDatem.entriesInLUT > 0)
+            if(condition.data.length > 0) {
+                foreach(lutDatem; condition.data) {
+                    if(lutDatem.entriesInLUT > 0)
                         return true;
                 }
 
                 return false;
             } else {
-                foreach (child; condition.children) {
-                    if (checkNeed(child))
+                foreach(child; condition.children) {
+                    if(checkNeed(child))
                         return true;
                 }
             }
@@ -339,7 +339,7 @@ private:
             return false;
         }
 
-        if (!checkNeed(topCondition))
+        if(!checkNeed(topCondition))
             return;
         resultAppender ~= "private {\n";
 
@@ -352,14 +352,14 @@ private:
 
     void emitLiteral(Type)(ref Appender!string into, Type entry) {
         size_t addString(string value) {
-            if (auto got = (value in stringToOffset))
+            if(auto got = (value in stringToOffset))
                 return *got;
 
             string sanitized;
             sanitized.reserve(value.length);
             size_t result = wipStringSoFar;
 
-            foreach (char c; value) {
+            foreach(char c; value) {
                 sanitized ~= format!"0x%.2X, "(c);
                 wipStringSoFar++;
             }
@@ -370,15 +370,15 @@ private:
         }
 
         size_t addWString(wstring value) {
-            if (auto got = (value in wstringToOffset))
+            if(auto got = (value in wstringToOffset))
                 return *got;
 
             wstring sanitized;
             sanitized.reserve(value.length);
             size_t result = wipWStringSoFar;
 
-            foreach (wchar c; value) {
-                if (c <= ubyte.max)
+            foreach(wchar c; value) {
+                if(c <= ubyte.max)
                     sanitized ~= format!"0x%.2X, "w(c);
                 else
                     sanitized ~= format!"0x%.4X, "w(c);
@@ -391,17 +391,17 @@ private:
         }
 
         size_t addDString(dstring value) {
-            if (auto got = (value in dstringToOffset))
+            if(auto got = (value in dstringToOffset))
                 return *got;
 
             dstring sanitized;
             sanitized.reserve(value.length);
             size_t result = wipDStringSoFar;
 
-            foreach (dchar c; value) {
-                if (c <= ubyte.max)
+            foreach(dchar c; value) {
+                if(c <= ubyte.max)
                     sanitized ~= format!"0x%.2X, "d(c);
-                else if (c <= ushort.max)
+                else if(c <= ushort.max)
                     sanitized ~= format!"0x%.4X, "d(c);
                 else
                     sanitized ~= format!"0x%.8X, "d(c);
@@ -413,62 +413,62 @@ private:
             return result;
         }
 
-        static if (is(Type == MetaDataEntry)) {
-            if (outputValueDel !is null) {
+        static if(is(Type == MetaDataEntry)) {
+            if(outputValueDel !is null) {
                 outputValueDel(into, entry);
                 return;
             }
         }
 
-        static if (is(Type == string)) {
-            if (entry.length == 0)
+        static if(is(Type == string)) {
+            if(entry.length == 0)
                 into ~= "null";
             else {
                 size_t offset = addString(entry);
                 into.formattedWrite!"%s_String[%s .. %s]"(lutName, offset, offset + entry.length);
             }
-        } else static if (is(Type == wstring)) {
-            if (entry.length == 0)
+        } else static if(is(Type == wstring)) {
+            if(entry.length == 0)
                 into ~= "null";
             else {
                 size_t offset = addWString(entry);
                 into.formattedWrite!"%s_WString[%s .. %s]"(lutName, offset, offset + entry.length);
             }
-        } else static if (is(Type == dstring)) {
-            if (entry.length == 0)
+        } else static if(is(Type == dstring)) {
+            if(entry.length == 0)
                 into ~= "null";
             else {
                 size_t offset = addDString(entry);
                 into.formattedWrite!"%s_DString[%s .. %s]"(lutName, offset, offset + entry.length);
             }
-        } else static if (is(Type == enum)) {
+        } else static if(is(Type == enum)) {
             into.formattedWrite!"%s.%s"(typeToReplacedName.get(__traits(identifier, Type), __traits(identifier, Type)), entry);
-        } else static if (isNumeric!Type) {
+        } else static if(isNumeric!Type) {
             into.formattedWrite!"%s"(entry);
 
-            static if (is(Type == long)) {
+            static if(is(Type == long)) {
                 into ~= "L";
             }
-        } else static if (isSomeChar!Type) {
+        } else static if(isSomeChar!Type) {
             into.formattedWrite!"0x%X"(entry);
-        } else static if (is(Type == bool)) {
+        } else static if(is(Type == bool)) {
             into.formattedWrite!"%s"(entry);
-        } else static if (is(Type == struct)) {
+        } else static if(is(Type == struct)) {
             into ~= typeToReplacedName.get(__traits(identifier, Type), __traits(identifier, Type));
             into ~= "(";
 
-            static foreach (i; 0 .. Type.tupleof.length) {
-                if (i > 0)
+            static foreach(i; 0 .. Type.tupleof.length) {
+                if(i > 0)
                     into ~= ", ";
                 emitLiteral(into, entry.tupleof[i]);
             }
 
             into ~= ")";
-        } else static if (isArray!Type) {
+        } else static if(isArray!Type) {
             into ~= "[";
 
             foreach(i, value; entry) {
-                if (i > 0)
+                if(i > 0)
                     into ~= ", ";
                 emitLiteral(into, value);
             }
@@ -480,21 +480,21 @@ private:
     void emitStringTables() {
         string currentPrefix = TabPrefix[0 .. 4];
 
-        if (wipString.data.length > 0) {
+        if(wipString.data.length > 0) {
             resultAppender ~= currentPrefix;
             resultAppender ~= "static immutable string " ~ lutName ~ "_String = cast(string)[cast(ubyte)";
             resultAppender ~= wipString.data;
             resultAppender ~= "];\n";
         }
 
-        if (wipWString.data.length > 0) {
+        if(wipWString.data.length > 0) {
             resultAppender ~= currentPrefix;
             resultAppender ~= "static immutable wstring " ~ lutName ~ "_WString = cast(wstring)[cast(ushort)";
             resultAppender ~= wipWString.data;
             resultAppender ~= "];\n";
         }
 
-        if (wipDString.data.length > 0) {
+        if(wipDString.data.length > 0) {
             resultAppender ~= currentPrefix;
             resultAppender ~= "static immutable dstring " ~ lutName ~ "_DString = cast(dstring)[cast(uint)";
             resultAppender ~= wipDString.data;

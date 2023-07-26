@@ -53,11 +53,11 @@ export @safe nothrow @nogc:
 
     ///
     void opCall(Args...)(scope StringBuilder_UTF8 builder, scope Args args) @trusted {
-        if (builder.length == 0 || builder.endsWith("\n"))
+        if(builder.length == 0 || builder.endsWith("\n"))
             this.handlePrefix(builder);
 
-        foreach (i, ref arg; args) {
-            if (i > 0 && !this.betweenArgumentDivider.isNull)
+        foreach(i, ref arg; args) {
+            if(i > 0 && !this.betweenArgumentDivider.isNull)
                 builder ~= this.betweenArgumentDivider;
 
             this.handle(builder, arg, useQuotes);
@@ -89,60 +89,61 @@ export @safe nothrow @nogc:
             }));
 
     void handlePrefix(scope StringBuilder_UTF8 builder, bool onlyRepeat = false, bool usePrefix = true, bool useSuffix = true) {
-        if (builder.length == 0 && this.startWithoutPrefix)
+        if(builder.length == 0 && this.startWithoutPrefix)
             return;
 
-        if (!onlyRepeat && usePrefix)
+        if(!onlyRepeat && usePrefix)
             builder ~= this.prefix;
 
-        if (!this.prefixToRepeat.isNull) {
-            foreach (i; 0 .. this.depth) {
+        if(!this.prefixToRepeat.isNull) {
+            foreach(i; 0 .. this.depth) {
                 builder ~= this.prefixToRepeat;
             }
         }
 
-        if (!onlyRepeat && useSuffix)
+        if(!onlyRepeat && useSuffix)
             builder ~= this.prefixSuffix;
     }
 
     void handle(Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useQuotes = true, bool useName = true,
             bool forcePrint = false) @trusted {
         import sidero.base.text.format.rawwrite;
+
         alias ActualType = Unqual!Type;
 
-        static if (is(ActualType == Type)) {
-            static if (__traits(compiles, hasUDA!(ActualType, PrettyPrintIgnore))) {
-                if (!forcePrint && hasUDA!(ActualType, PrettyPrintIgnore))
+        static if(is(ActualType == Type)) {
+            static if(__traits(compiles, hasUDA!(ActualType, PrettyPrintIgnore))) {
+                if(!forcePrint && hasUDA!(ActualType, PrettyPrintIgnore))
                     return;
             }
 
-            if (builder.endsWith(")") || builder.endsWith("]")) {
-                if (!this.betweenValueDivider.isNull)
+            if(builder.endsWith(")") || builder.endsWith("]")) {
+                if(!this.betweenValueDivider.isNull)
                     builder ~= this.betweenValueDivider;
             }
 
-            static if (isSomeString!ActualType) {
+            static if(isSomeString!ActualType) {
                 handleStringSlice(builder, input, useQuotes);
-            } else static if (isReadOnlyString!ActualType || isBuilderString!ActualType) {
+            } else static if(isReadOnlyString!ActualType || isBuilderString!ActualType) {
                 handleString(builder, input, useQuotes);
-            } else static if (isStaticArray!ActualType && (isSomeString!(typeof(ActualType.init[])))) {
+            } else static if(isStaticArray!ActualType && (isSomeString!(typeof(ActualType.init[])))) {
                 auto temp = input[];
                 this.handle(temp, true);
-            } else static if (isFunctionPointer!ActualType) {
+            } else static if(isFunctionPointer!ActualType) {
                 handleFunctionPointer(builder, input);
-            } else static if (isPointer!ActualType && __traits(compiles, typeof(*input))) {
+            } else static if(isPointer!ActualType && __traits(compiles, typeof(*input))) {
                 handlePointer(builder, input);
-            } else static if (is(ActualType : Result!WrappedType, WrappedType) || is(ActualType : ResultReference!WrappedType, WrappedType)) {
+            } else static if(is(ActualType : Result!WrappedType, WrappedType) || is(ActualType : ResultReference!WrappedType, WrappedType)) {
                 handleResult!WrappedType(builder, input, useQuotes, useName, forcePrint);
-            } else static if (is(ActualType == struct) || is(ActualType == class)) {
+            } else static if(is(ActualType == struct) || is(ActualType == class)) {
                 handleStructClass(builder, input, useQuotes, useName, forcePrint);
-            } else static if (isArray!ActualType) {
+            } else static if(isArray!ActualType) {
                 handleSlice(builder, input, useName);
-            } else static if (isAssociativeArray!ActualType) {
+            } else static if(isAssociativeArray!ActualType) {
                 handleAA(builder, input, useName);
-            } else static if (is(ActualType == enum)) {
+            } else static if(is(ActualType == enum)) {
                 handleEnum(builder, input, useQuotes, useName, forcePrint);
-            } else static if (is(ActualType == char) || is(ActualType == wchar) || is(ActualType == dchar)) {
+            } else static if(is(ActualType == char) || is(ActualType == wchar) || is(ActualType == dchar)) {
                 rawWrite(builder, input, FormatSpecifier.init, useQuotes);
             } else {
                 builder.formattedWrite(""c, input);
@@ -153,43 +154,43 @@ export @safe nothrow @nogc:
     }
 
     void handleStringSlice(Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useQuotes = true) {
-        if (input is null) {
+        if(input is null) {
             builder ~= "null"c;
             return;
         }
 
-        if (useQuotes)
+        if(useQuotes)
             builder ~= "\""c;
 
         size_t oldOffset = builder.length;
         builder ~= cast()input;
         builder[oldOffset .. $].escape(useQuotes ? '"' : 0);
 
-        if (useQuotes)
+        if(useQuotes)
             builder ~= "\""c;
     }
 
     void handleString(Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useQuotes = true) {
-        if (input.isNull) {
+        if(input.isNull) {
             builder ~= "null"c;
             return;
         }
 
-        if (useQuotes)
+        if(useQuotes)
             builder ~= "\""c;
 
         size_t oldOffset = builder.length;
         builder ~= cast()input;
         builder[oldOffset .. $].escape(useQuotes ? '"' : 0);
 
-        if (useQuotes)
+        if(useQuotes)
             builder ~= "\""c;
     }
 
     void handleFunctionPointer(Type)(scope StringBuilder_UTF8 builder, scope ref Type input) {
         builder ~= Type.stringof;
 
-        if (input is null)
+        if(input is null)
             builder ~= "@null"c;
         else
             builder.formattedWrite("@{:p}"c, cast(size_t)input);
@@ -198,36 +199,36 @@ export @safe nothrow @nogc:
     void handlePointer(Type)(scope StringBuilder_UTF8 builder, scope ref Type input) {
         alias SubType = typeof(*input);
 
-        static if (__traits(compiles, fullyQualifiedName!SubType))
+        static if(__traits(compiles, fullyQualifiedName!SubType))
             enum EntryName = fullyQualifiedName!SubType;
         else
             enum EntryName = SubType.stringof;
 
         builder ~= EntryName;
 
-        if (input !is null) {
-            static if (is(SubType == class) || isAssociativeArray!SubType || isDynamicArray!SubType) {
-                if (*input is null) {
+        if(input !is null) {
+            static if(is(SubType == class) || isAssociativeArray!SubType || isDynamicArray!SubType) {
+                if(*input is null) {
                     builder ~= "@null"c;
                 } else {
-                    static if (is(SubType == class) || isAssociativeArray!SubType) {
+                    static if(is(SubType == class) || isAssociativeArray!SubType) {
                         builder.formattedWrite("@{:p}", input);
-                    } else static if (isArray!SubType) {
+                    } else static if(isArray!SubType) {
                         builder.formattedWrite("@{:p}", input.ptr);
                     }
                 }
             }
         }
 
-        static if (!(is(SubType == struct) || isBasicType!SubType))
+        static if(!(is(SubType == struct) || isBasicType!SubType))
             builder ~= "*"c;
 
-        if (input is null)
+        if(input is null)
             builder ~= "@null"c;
         else {
             builder.formattedWrite("@{:p}", input);
 
-            static if (!is(SubType == void)) {
+            static if(!is(SubType == void)) {
                 this.handle(builder, *input, true, false);
             }
         }
@@ -235,11 +236,11 @@ export @safe nothrow @nogc:
 
     void handleResult(WrappedType, Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useQuotes,
             bool useName, bool forcePrint) {
-        if (input && !input.isNull) {
+        if(input && !input.isNull) {
             // ok print the thing
 
-            static if (!is(WrappedType == void)) {
-                if (input) {
+            static if(!is(WrappedType == void)) {
+                if(input) {
                     this.handle(builder, input.get(), true, useName, forcePrint);
                 }
                 return;
@@ -254,19 +255,19 @@ export @safe nothrow @nogc:
 
         static FQN = fullyQualifiedName!Type;
 
-        if (useName) {
+        if(useName) {
             builder ~= FQN;
 
-            static if (is(Type == class)) {
-                if (input is null)
+            static if(is(Type == class)) {
+                if(input is null)
                     builder ~= "@null"c;
                 else
                     builder.formattedWrite("@{:p}", cast(void*)input);
             }
         }
 
-        static if (is(Type == class)) {
-            if (input is null)
+        static if(is(Type == class)) {
+            if(input is null)
                 return;
         }
 
@@ -276,14 +277,14 @@ export @safe nothrow @nogc:
         {
             bool isFirst = true;
 
-            static foreach (name; FieldNameTuple!Type) {
+            static foreach(name; FieldNameTuple!Type) {
                 {
                     alias member = __traits(getMember, input, name);
                     enum accessible = __traits(getVisibility, member) != "private" && () {
                         bool ret = true;
 
-                        foreach (attr; __traits(getAttributes, member)) {
-                            if (is(attr == PrettyPrintIgnore))
+                        foreach(attr; __traits(getAttributes, member)) {
+                            if(is(attr == PrettyPrintIgnore))
                                 ret = false;
                         }
 
@@ -291,19 +292,19 @@ export @safe nothrow @nogc:
                     }();
                     bool ignore = !accessible;
 
-                    static foreach (name2; FieldNameTuple!Type) {
+                    static foreach(name2; FieldNameTuple!Type) {
                         {
                             alias member2 = __traits(getMember, input, name2);
 
-                            if (name != name2) {
+                            if(name != name2) {
                                 ignore = ignore || member.offsetof == member2.offsetof;
                             }
                         }
                     }
 
-                    static if (accessible) {
-                        if (!ignore) {
-                            if (!isFirst)
+                    static if(accessible) {
+                        if(!ignore) {
+                            if(!isFirst)
                                 builder ~= ", "c;
                             else
                                 isFirst = false;
@@ -319,22 +320,22 @@ export @safe nothrow @nogc:
                 }
             }
 
-            static if (is(Type == class)) {
-                static foreach (i, Base; BaseClassesTuple!Type) {
+            static if(is(Type == class)) {
+                static foreach(i, Base; BaseClassesTuple!Type) {
                     handlePrefix(builder, false, true, false);
                     builder ~= "---- "c;
                     builder ~= fullyQualifiedName!Base;
                     builder ~= " ----\n"c;
                     isFirst = true;
 
-                    static foreach (name; FieldNameTuple!Base) {
+                    static foreach(name; FieldNameTuple!Base) {
                         {
                             alias member = __traits(getMember, input, name);
                             enum accessible = __traits(getVisibility, member) != "private" && () {
                                 bool ret = true;
 
-                                foreach (attr; __traits(getAttributes, member)) {
-                                    if (is(attr == PrettyPrintIgnore))
+                                foreach(attr; __traits(getAttributes, member)) {
+                                    if(is(attr == PrettyPrintIgnore))
                                         ret = false;
                                 }
 
@@ -342,19 +343,19 @@ export @safe nothrow @nogc:
                             }();
                             bool ignore = !accessible;
 
-                            static foreach (name2; FieldNameTuple!Type) {
+                            static foreach(name2; FieldNameTuple!Type) {
                                 {
                                     alias member2 = __traits(getMember, input, name2);
 
-                                    if (name != name2) {
+                                    if(name != name2) {
                                         ignore = ignore || member.offsetof == member2.offsetof;
                                     }
                                 }
                             }
 
-                            static if (accessible) {
-                                if (!ignore) {
-                                    if (!isFirst)
+                            static if(accessible) {
+                                if(!ignore) {
+                                    if(!isFirst)
                                         builder ~= ", "c;
                                     else
                                         isFirst = false;
@@ -375,15 +376,15 @@ export @safe nothrow @nogc:
         {
             bool isFirst = true;
 
-            static foreach (name; FieldNameTuple!Type) {
+            static foreach(name; FieldNameTuple!Type) {
                 {
                     alias member = __traits(getMember, input, name);
                     enum accessible = __traits(getVisibility, member) != "private";
                     enum explicitIgnore = () {
                         bool ret = true;
 
-                        foreach (attr; __traits(getAttributes, member)) {
-                            if (is(attr == PrettyPrintIgnore))
+                        foreach(attr; __traits(getAttributes, member)) {
+                            if(is(attr == PrettyPrintIgnore))
                                 ret = false;
                         }
 
@@ -391,20 +392,20 @@ export @safe nothrow @nogc:
                     }();
                     bool ignore = !accessible, overload;
 
-                    static foreach (name2; FieldNameTuple!Type) {
+                    static foreach(name2; FieldNameTuple!Type) {
                         {
                             alias member2 = __traits(getMember, input, name2);
 
-                            if (name != name2) {
+                            if(name != name2) {
                                 ignore = ignore || member.offsetof == member2.offsetof;
                                 overload = overload || member.offsetof == member2.offsetof;
                             }
                         }
                     }
 
-                    static if (accessible && !explicitIgnore) {
-                        if (ignore) {
-                            if (isFirst) {
+                    static if(accessible && !explicitIgnore) {
+                        if(ignore) {
+                            if(isFirst) {
                                 isFirst = false;
                                 builder ~= "\n"c;
 
@@ -416,9 +417,9 @@ export @safe nothrow @nogc:
                             builder ~= "\n"c;
                             handlePrefix(builder, false, true, false);
 
-                            if (accessible)
+                            if(accessible)
                                 builder ~= "private "c;
-                            if (overload)
+                            if(overload)
                                 builder ~= "union "c;
 
                             builder ~= name;
@@ -427,23 +428,23 @@ export @safe nothrow @nogc:
                 }
             }
 
-            static if (is(Type == class)) {
-                static foreach (i, Base; BaseClassesTuple!ActualType) {
+            static if(is(Type == class)) {
+                static foreach(i, Base; BaseClassesTuple!ActualType) {
                     handlePrefix(builder, false, true, false);
                     builder ~= "---- "c;
                     builder ~= fullyQualifiedName!Base;
                     builder ~= " ----\n"c;
                     isFirst = true;
 
-                    static foreach (name; FieldNameTuple!Base) {
+                    static foreach(name; FieldNameTuple!Base) {
                         {
                             alias member = __traits(getMember, input, name);
                             enum accessible = __traits(getVisibility, member) != "private";
                             enum explicitIgnore = () {
                                 bool ret = true;
 
-                                foreach (attr; __traits(getAttributes, member)) {
-                                    if (is(attr == PrettyPrintIgnore))
+                                foreach(attr; __traits(getAttributes, member)) {
+                                    if(is(attr == PrettyPrintIgnore))
                                         ret = false;
                                 }
 
@@ -451,20 +452,20 @@ export @safe nothrow @nogc:
                             }();
                             bool ignore = !accessible, overload;
 
-                            static foreach (name2; FieldNameTuple!Type) {
+                            static foreach(name2; FieldNameTuple!Type) {
                                 {
                                     alias member2 = __traits(getMember, input, name2);
 
-                                    if (name != name2) {
+                                    if(name != name2) {
                                         ignore = ignore || member.offsetof == member2.offsetof;
                                         overload = overload || member.offsetof == member2.offsetof;
                                     }
                                 }
                             }
 
-                            static if (accessible && !explicitIgnore) {
-                                if (ignore) {
-                                    if (isFirst) {
+                            static if(accessible && !explicitIgnore) {
+                                if(ignore) {
+                                    if(isFirst) {
                                         isFirst = false;
                                         builder ~= "\n"c;
 
@@ -476,9 +477,9 @@ export @safe nothrow @nogc:
                                     builder ~= "\n"c;
                                     handlePrefix(builder, false, true, false);
 
-                                    if (accessible)
+                                    if(accessible)
                                         builder ~= "private "c;
-                                    if (overload)
+                                    if(overload)
                                         builder ~= "union "c;
 
                                     builder ~= name;
@@ -490,17 +491,17 @@ export @safe nothrow @nogc:
             }
         }
 
-        static if (isIterable!Type && (HaveNonStaticOpApply!Type || !__traits(hasMember, Type, "opApply"))) {
-            if (builder.endsWith("("c))
+        static if(isIterable!Type && (HaveNonStaticOpApply!Type || !__traits(hasMember, Type, "opApply"))) {
+            if(builder.endsWith("("c))
                 builder ~= "["c;
             else
                 builder ~= " ["c;
 
-            static if (__traits(compiles, {
-                    foreach (key, value; input) {
+            static if(__traits(compiles, {
+                    foreach(key, value; input) {
                     }
                 })) {
-                foreach (k, v; input) {
+                foreach(k, v; input) {
                     builder ~= "\n"c;
                     handlePrefix(builder);
 
@@ -510,11 +511,11 @@ export @safe nothrow @nogc:
                     handle(builder, v);
                     builder ~= ","c;
                 }
-            } else static if (__traits(compiles, {
-                    foreach (value; input) {
+            } else static if(__traits(compiles, {
+                    foreach(value; input) {
                     }
                 })) {
-                foreach (v; input) {
+                foreach(v; input) {
                     builder ~= "\n"c;
                     handlePrefix(builder);
                     handle(builder, v);
@@ -523,7 +524,7 @@ export @safe nothrow @nogc:
             } else
                 builder ~= "..."c;
 
-            if (builder.endsWith(","c))
+            if(builder.endsWith(","c))
                 builder.clobberInsert(builder.length - 1, "]"c);
             else
                 builder ~= "]"c;
@@ -532,42 +533,42 @@ export @safe nothrow @nogc:
         {
             bool hadToString;
 
-            static if (haveToStringPretty!Type) {
+            static if(haveToStringPretty!Type) {
                 {
                     alias Symbols = __traits(getOverloads, Type, "toStringPretty");
 
-                    static foreach (SymbolId; 0 .. Symbols.length) {
+                    static foreach(SymbolId; 0 .. Symbols.length) {
                         {
                             alias gotUDAs = Filter!(isDesiredUDA!PrettyPrintIgnore, __traits(getAttributes, Symbols[SymbolId]));
 
-                            if (!hadToString) {
-                                static if (gotUDAs.length == 0) {
+                            if(!hadToString) {
+                                static if(gotUDAs.length == 0) {
                                     size_t offsetForToString = builder.length;
 
-                                    static if (__traits(compiles, __traits(child, input, Symbols[SymbolId])(builder))) {
+                                    static if(__traits(compiles, __traits(child, input, Symbols[SymbolId])(builder))) {
                                         __traits(child, input, Symbols[SymbolId])(builder);
                                         hadToString = true;
-                                    } else static if (__traits(compiles, __traits(child, input, Symbols[SymbolId])(&builder.put))) {
+                                    } else static if(__traits(compiles, __traits(child, input, Symbols[SymbolId])(&builder.put))) {
                                         __traits(child, input, Symbols[SymbolId])(&builder.put);
                                         hadToString = true;
-                                    } else static if (__traits(compiles, builder ~= __traits(child, input, Symbols[SymbolId])())) {
+                                    } else static if(__traits(compiles, builder ~= __traits(child, input, Symbols[SymbolId])())) {
                                         builder ~= __traits(child, input, Symbols[SymbolId])();
                                         hadToString = true;
                                     }
 
-                                    if (hadToString && builder.length > offsetForToString) {
+                                    if(hadToString && builder.length > offsetForToString) {
                                         auto prior = builder[0 .. offsetForToString], subset = builder[offsetForToString .. $];
 
-                                        if (subset == FQN)
+                                        if(subset == FQN)
                                             builder.remove(offsetForToString, ptrdiff_t.max);
-                                        else if (subset.startsWith(", "c)) {
+                                        else if(subset.startsWith(", "c)) {
                                             builder.remove(offsetForToString, 1);
                                             builder.insert(offsetForToString + 1, "->\n"c);
-                                        } else if (subset.contains("\n") || subset.length > 40) {
+                                        } else if(subset.contains("\n") || subset.length > 40) {
                                             // forty was chosen mostly at random,
                                             // but its half a lot of max line lengths (80) so can't be too bad
                                             builder.insert(offsetForToString, "->\n"c);
-                                        } else if (!prior.endsWith("("c)) {
+                                        } else if(!prior.endsWith("("c)) {
                                             builder.insert(offsetForToString, " ->\n"c);
                                         }
                                     }
@@ -578,39 +579,39 @@ export @safe nothrow @nogc:
                 }
             }
 
-            static if (haveToString!Type) {
+            static if(haveToString!Type) {
                 {
                     alias Symbols = __traits(getOverloads, Type, "toString");
 
-                    static foreach (SymbolId; 0 .. Symbols.length) {
+                    static foreach(SymbolId; 0 .. Symbols.length) {
                         {
                             alias gotUDAs = Filter!(isDesiredUDA!PrettyPrintIgnore, __traits(getAttributes, Symbols[SymbolId]));
 
-                            if (!hadToString) {
-                                static if (gotUDAs.length == 0) {
+                            if(!hadToString) {
+                                static if(gotUDAs.length == 0) {
                                     size_t offsetForToString = builder.length;
 
-                                    static if (__traits(compiles, __traits(child, input, Symbols[SymbolId])(builder))) {
+                                    static if(__traits(compiles, __traits(child, input, Symbols[SymbolId])(builder))) {
                                         __traits(child, input, Symbols[SymbolId])(builder);
                                         hadToString = true;
-                                    } else static if (__traits(compiles, __traits(child, input, Symbols[SymbolId])(&builder.put))) {
+                                    } else static if(__traits(compiles, __traits(child, input, Symbols[SymbolId])(&builder.put))) {
                                         __traits(child, input, Symbols[SymbolId])(&builder.put);
                                         hadToString = true;
-                                    } else static if (__traits(compiles, builder ~= __traits(child, input, Symbols[SymbolId])())) {
+                                    } else static if(__traits(compiles, builder ~= __traits(child, input, Symbols[SymbolId])())) {
                                         builder ~= __traits(child, input, Symbols[SymbolId])();
                                         hadToString = true;
                                     }
 
-                                    if (hadToString && builder.length > offsetForToString) {
+                                    if(hadToString && builder.length > offsetForToString) {
                                         auto prior = builder[0 .. offsetForToString], subset = builder[offsetForToString .. $];
 
-                                        if (subset == FQN) {
+                                        if(subset == FQN) {
                                             builder.remove(offsetForToString, ptrdiff_t.max);
-                                        } else if (subset.contains("\n"c) || subset.length > 60) {
+                                        } else if(subset.contains("\n"c) || subset.length > 60) {
                                             // sixty was chosen mostly at random,
                                             // but its half a lot of max line lengths (80) so can't be too bad
                                             builder.insert(offsetForToString, "->\n"c);
-                                        } else if (!prior.endsWith("("c)) {
+                                        } else if(!prior.endsWith("("c)) {
                                             builder.insert(offsetForToString, " ->\n"c);
                                         }
                                     }
@@ -624,7 +625,7 @@ export @safe nothrow @nogc:
 
         this.depth--;
 
-        if (builder.endsWith(","c))
+        if(builder.endsWith(","c))
             builder.clobberInsert(builder.length - 1, ")"c);
         else
             builder ~= ")"c;
@@ -633,31 +634,31 @@ export @safe nothrow @nogc:
     void handleSlice(Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useName) @trusted {
         alias SubType = Unqual!(typeof(input[0]));
 
-        static if (__traits(compiles, fullyQualifiedName!SubType)) {
+        static if(__traits(compiles, fullyQualifiedName!SubType)) {
             enum EntryName = fullyQualifiedName!SubType;
         } else
             enum EntryName = __traits(identifier, SubType);
 
         bool handled;
 
-        static if (isBasicType!SubType) {
-            if (input.length <= 5) {
-                if (useName) {
+        static if(isBasicType!SubType) {
+            if(input.length <= 5) {
+                if(useName) {
                     builder ~= EntryName;
 
-                    static if (isDynamicArray!Type) {
-                        if (input is null)
+                    static if(isDynamicArray!Type) {
+                        if(input is null)
                             builder ~= "@null"c;
                         else
                             builder.formattedWrite("@{:p}", input.ptr);
                     }
                 }
 
-                static if (!is(SubType == void)) {
+                static if(!is(SubType == void)) {
                     builder ~= "["c;
 
-                    foreach (i, ref entry; input) {
-                        if (i > 0 && !this.betweenValueDivider.isNull)
+                    foreach(i, ref entry; input) {
+                        if(i > 0 && !this.betweenValueDivider.isNull)
                             builder ~= this.betweenValueDivider;
                         this.handle(builder, entry);
                     }
@@ -667,7 +668,7 @@ export @safe nothrow @nogc:
                     builder ~= "=0x["c;
                     auto temp = cast()input;
 
-                    while (temp.length > 0) {
+                    while(temp.length > 0) {
                         builder.formattedWrite("{:.2X}", *cast(const(ubyte)*)&temp[0]);
                         temp = temp[1 .. $];
                     }
@@ -679,23 +680,23 @@ export @safe nothrow @nogc:
             }
         }
 
-        if (!handled) {
-            if (useName) {
+        if(!handled) {
+            if(useName) {
                 builder ~= EntryName;
 
-                static if (isDynamicArray!Type) {
-                    if (input is null)
+                static if(isDynamicArray!Type) {
+                    if(input is null)
                         builder ~= "@null"c;
                     else
                         builder.formattedWrite("@{:p}", input.ptr);
                 }
             }
 
-            static if (!is(SubType == void)) {
+            static if(!is(SubType == void)) {
                 builder ~= "[\n"c;
                 this.depth++;
 
-                foreach (i, ref entry; input) {
+                foreach(i, ref entry; input) {
                     handlePrefix(builder);
                     this.handle(builder, entry, true, true, true);
                     builder ~= "\n"c;
@@ -707,7 +708,7 @@ export @safe nothrow @nogc:
                 builder ~= "=0x"c;
                 auto temp = cast()input;
 
-                while (temp.length > 0) {
+                while(temp.length > 0) {
                     builder.formattedWrite("{:.2X}", *cast(const(ubyte)*)&temp[0]);
                     temp = temp[1 .. $];
                 }
@@ -721,18 +722,18 @@ export @safe nothrow @nogc:
         alias Key = KeyType!Type;
         alias Value = ValueType!Type;
 
-        static if (__traits(compiles, fullyQualifiedName!Key))
+        static if(__traits(compiles, fullyQualifiedName!Key))
             enum KeyName = fullyQualifiedName!Key;
         else
             enum KeyName = Key.stringof;
-        static if (__traits(compiles, fullyQualifiedName!Value))
+        static if(__traits(compiles, fullyQualifiedName!Value))
             enum ValueName = fullyQualifiedName!Value;
         else
             enum ValueName = Value.stringof;
 
         enum EntryName = ValueName ~ "[" ~ KeyName ~ "]";
 
-        if (useName) {
+        if(useName) {
             builder ~= EntryName;
             builder.formattedWrite("@{:p}"c, cast(void*)input);
         }
@@ -740,10 +741,10 @@ export @safe nothrow @nogc:
         builder ~= "[\n"c;
         this.depth++;
 
-        version (D_BetterC) {
+        version(D_BetterC) {
         } else {
             try {
-                foreach (key, ref value; input) {
+                foreach(key, ref value; input) {
                     handlePrefix(builder);
                     this.handle(key, true, true, true);
                     builder ~= ": "c;
@@ -751,7 +752,7 @@ export @safe nothrow @nogc:
                     this.handle(value, true, true, true);
                     builder ~= "\n"c;
                 }
-            } catch (Exception) {
+            } catch(Exception) {
             }
         }
 
@@ -764,8 +765,8 @@ export @safe nothrow @nogc:
         builder ~= FQN;
         auto actualValue = cast(OriginalType!Type)input;
 
-        static foreach (m; __traits(allMembers, Type)) {
-            if (__traits(getMember, Type, m) == input) {
+        static foreach(m; __traits(allMembers, Type)) {
+            if(__traits(getMember, Type, m) == input) {
                 builder ~= "."c;
                 builder ~= m;
                 return;

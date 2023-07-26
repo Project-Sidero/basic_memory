@@ -18,8 +18,8 @@ void handleScripts() {
     {
         SequentialRanges!(ubyte, SequentialRangeSplitGroup, 2) sr;
 
-        foreach (range, value; state.values) {
-            foreach (c; range.start .. range.end + 1)
+        foreach(range, value; state.values) {
+            foreach(c; range.start .. range.end + 1)
                 sr.add(c, cast(ubyte)value);
         }
 
@@ -46,18 +46,18 @@ void handleScripts() {
         internal ~= gotDcode[1];
     }
 
-    static foreach (Sm; __traits(allMembers, Script)) {
+    static foreach(Sm; __traits(allMembers, Script)) {
         {
             SequentialRanges!(bool, SequentialRangeSplitGroup, 2) sr;
 
-            foreach (range, value; state.values) {
-                static if (__traits(getMember, Script, Sm) == Script.Unknown) {
+            foreach(range, value; state.values) {
+                static if(__traits(getMember, Script, Sm) == Script.Unknown) {
                     // inverse
-                    foreach (c; range.start .. range.end + 1)
+                    foreach(c; range.start .. range.end + 1)
                         sr.add(c, false);
                 } else {
-                    if (value == __traits(getMember, Script, Sm)) {
-                        foreach (c; range.start .. range.end + 1)
+                    if(value == __traits(getMember, Script, Sm)) {
+                        foreach(c; range.start .. range.end + 1)
                             sr.add(c, true);
                     }
                 }
@@ -65,7 +65,7 @@ void handleScripts() {
 
             sr.splitForSame;
             sr.calculateTrueSpread;
-            static if (__traits(getMember, Script, Sm) == Script.Unknown) {
+            static if(__traits(getMember, Script, Sm) == Script.Unknown) {
                 sr.joinWithDiff((dchar key) => true, 64);
             } else {
                 sr.joinWithDiff((dchar key) => false, 64);
@@ -79,7 +79,7 @@ void handleScripts() {
             lut.lutType = "bool";
             lut.name = "sidero_utf_lut_isScript" ~ Sm;
 
-            static if (__traits(getMember, Script, Sm) == Script.Unknown) {
+            static if(__traits(getMember, Script, Sm) == Script.Unknown) {
                 lut.defaultReturn = "true";
             }
 
@@ -111,7 +111,7 @@ void processEachLine(string inputText, ref TotalState state) {
         ValueRange!dchar ret;
 
         ptrdiff_t offsetOfSeperator = charRangeStr.countUntil("..");
-        if (offsetOfSeperator < 0) {
+        if(offsetOfSeperator < 0) {
             ret.start = parse!uint(charRangeStr, 16);
             ret.end = ret.start;
         } else {
@@ -127,13 +127,13 @@ void processEachLine(string inputText, ref TotalState state) {
         ptrdiff_t offset;
 
         offset = line.countUntil('#');
-        if (offset >= 0)
+        if(offset >= 0)
             line = line[0 .. offset];
         line = line.strip;
 
     SLB:
-        switch (line) {
-            static foreach (m; __traits(allMembers, Script)) {
+        switch(line) {
+            static foreach(m; __traits(allMembers, Script)) {
         case m:
                 state.values[range] = __traits(getMember, Script, m);
                 break SLB;
@@ -144,19 +144,19 @@ void processEachLine(string inputText, ref TotalState state) {
         }
     }
 
-    foreach (line; inputText.lineSplitter) {
+    foreach(line; inputText.lineSplitter) {
         ptrdiff_t offset;
 
         offset = line.countUntil('#');
-        if (offset >= 0)
+        if(offset >= 0)
             line = line[0 .. offset];
         line = line.strip;
 
-        if (line.length < 5) // anything that low can't represent a functional line
+        if(line.length < 5) // anything that low can't represent a functional line
             continue;
 
         offset = line.countUntil(';');
-        if (offset < 0) // no char range
+        if(offset < 0) // no char range
             continue;
         string charRangeStr = line[0 .. offset].strip;
         line = line[offset + 1 .. $].strip;

@@ -51,17 +51,17 @@ export:
         assert(alignedTo > 0);
         assert(anchor is null || !poolAllocator.isNull);
 
-        version (none) {
+        version(none) {
             void handle(Node* parent) {
                 assert(parent.length >= Node.sizeof);
 
-                if (parent.left !is null)
+                if(parent.left !is null)
                     handle(parent.left);
-                if (parent.right !is null)
+                if(parent.right !is null)
                     handle(parent.right);
             }
 
-            if (anchor !is null)
+            if(anchor !is null)
                 handle(cast(Node*)anchor);
         }
     }
@@ -69,7 +69,7 @@ export:
     private {
         Node* anchor;
 
-        static if (Strategy == FitsStrategy.NextFit) {
+        static if(Strategy == FitsStrategy.NextFit) {
             Node** previousAnchor;
         }
 
@@ -94,27 +94,27 @@ export:
         this.tupleof = other.tupleof;
 
         other.anchor = null;
-        static if (Strategy == FitsStrategy.NextFit)
+        static if(Strategy == FitsStrategy.NextFit)
             other.previousAnchor = null;
 
         other = FreeTree.init;
     }
 
-    static if (Strategy == FitsStrategy.FirstFit) {
+    static if(Strategy == FitsStrategy.FirstFit) {
         ///
         void[] allocate(size_t size, TypeInfo ti = null) {
             Node** parent = &anchor;
 
-            if (*parent is null) {
+            if(*parent is null) {
                 size_t toAllocateSize = size;
-                if (size < Node.sizeof)
+                if(size < Node.sizeof)
                     toAllocateSize = Node.sizeof;
 
                 auto ret = poolAllocator.allocate(toAllocateSize, ti);
-                if (ret is null)
+                if(ret is null)
                     return null;
 
-                if (ret.length < toAllocateSize) {
+                if(ret.length < toAllocateSize) {
                     poolAllocator.deallocate(ret);
                     return null;
                 }
@@ -127,7 +127,7 @@ export:
             Node** currentParent = parent;
             Node** left = &(*currentParent).left;
 
-            while (fitsAlignment(left, size, alignedTo)) {
+            while(fitsAlignment(left, size, alignedTo)) {
                 parent = currentParent;
                 currentParent = left;
                 left = &(*currentParent).left;
@@ -135,13 +135,13 @@ export:
 
             return allocateImpl(size, parent);
         }
-    } else static if (Strategy == FitsStrategy.NextFit) {
+    } else static if(Strategy == FitsStrategy.NextFit) {
         ///
         void[] allocate(size_t size, TypeInfo ti = null) {
             void[] perform(scope Node** parent) {
                 Node** currentParent = parent, left = &(*currentParent).left;
 
-                while (fitsAlignment(left, size, alignedTo)) {
+                while(fitsAlignment(left, size, alignedTo)) {
                     parent = currentParent;
                     currentParent = left;
                     left = &(*currentParent).left;
@@ -151,21 +151,21 @@ export:
                 return allocateImpl(size, parent);
             }
 
-            if (fitsAlignment(previousAnchor, size, alignedTo))
+            if(fitsAlignment(previousAnchor, size, alignedTo))
                 return perform(previousAnchor);
-            else if (fitsAlignment(&anchor, size, alignedTo))
+            else if(fitsAlignment(&anchor, size, alignedTo))
                 return perform(&anchor);
 
             {
                 size_t toAllocateSize = size;
-                if (size < Node.sizeof)
+                if(size < Node.sizeof)
                     toAllocateSize = Node.sizeof;
 
                 auto ret = poolAllocator.allocate(toAllocateSize, ti);
-                if (ret is null)
+                if(ret is null)
                     return null;
 
-                if (ret.length < toAllocateSize) {
+                if(ret.length < toAllocateSize) {
                     poolAllocator.deallocate(ret);
                     return null;
                 }
@@ -175,19 +175,19 @@ export:
                 return ret[0 .. size];
             }
         }
-    } else static if (Strategy == FitsStrategy.BestFit) {
+    } else static if(Strategy == FitsStrategy.BestFit) {
         ///
         void[] allocate(size_t size, TypeInfo ti = null) {
             Node** parent = &anchor, currentParent = parent;
 
-            if (*currentParent !is null) {
+            if(*currentParent !is null) {
                 Node** left = &(*currentParent).left, right = &(*currentParent).right;
                 bool leftFit = fitsAlignment(left, size, alignedTo), rightFit = fitsAlignment(right, size, alignedTo);
 
-                while (leftFit || rightFit) {
+                while(leftFit || rightFit) {
                     parent = currentParent;
 
-                    if (leftFit)
+                    if(leftFit)
                         currentParent = left;
                     else
                         currentParent = right;
@@ -198,20 +198,20 @@ export:
                     rightFit = fitsAlignment(right, size, alignedTo);
                 }
 
-                if (fitsAlignment(parent, size, alignedTo))
+                if(fitsAlignment(parent, size, alignedTo))
                     return allocateImpl(size, parent);
             }
 
             {
                 size_t toAllocateSize = size;
-                if (size < Node.sizeof)
+                if(size < Node.sizeof)
                     toAllocateSize = Node.sizeof;
 
                 auto ret = poolAllocator.allocate(toAllocateSize, ti);
-                if (ret is null)
+                if(ret is null)
                     return null;
 
-                if (ret.length < toAllocateSize) {
+                if(ret.length < toAllocateSize) {
                     poolAllocator.deallocate(ret);
                     return null;
                 }
@@ -221,22 +221,22 @@ export:
                 return ret[0 .. size];
             }
         }
-    } else static if (Strategy == FitsStrategy.WorstFit) {
+    } else static if(Strategy == FitsStrategy.WorstFit) {
         ///
         void[] allocate(size_t size, TypeInfo ti = null) {
-            if (anchor !is null && fitsAlignment(&anchor, size, alignedTo))
+            if(anchor !is null && fitsAlignment(&anchor, size, alignedTo))
                 return allocateImpl(size, &anchor);
 
             {
                 size_t toAllocateSize = size;
-                if (size < Node.sizeof)
+                if(size < Node.sizeof)
                     toAllocateSize = Node.sizeof;
 
                 auto ret = poolAllocator.allocate(toAllocateSize, ti);
-                if (ret is null)
+                if(ret is null)
                     return null;
 
-                if (ret.length < toAllocateSize) {
+                if(ret.length < toAllocateSize) {
                     poolAllocator.deallocate(ret);
                     return null;
                 }
@@ -251,11 +251,11 @@ export:
 
     ///
     bool reallocate(scope ref void[] array, size_t newSize) {
-        if (void[] actual = allocations.getTrueRegionOfMemory(array)) {
+        if(void[] actual = allocations.getTrueRegionOfMemory(array)) {
             size_t pointerDifference = array.ptr - actual.ptr;
             size_t amountLeft = actual.length - pointerDifference;
 
-            if (amountLeft >= newSize) {
+            if(amountLeft >= newSize) {
                 array = array.ptr[0 .. newSize];
                 return true;
             }
@@ -268,23 +268,23 @@ export:
     bool deallocate(void[] array) {
         void[] trueArray = allocations.getTrueRegionOfMemory(array);
 
-        if (trueArray !is null) {
+        if(trueArray !is null) {
             assert(trueArray.length >= Node.sizeof);
             allocations.remove(trueArray);
 
             Node** parent = &anchor;
             Node* current;
 
-            while ((current = *parent) !is null) {
+            while((current = *parent) !is null) {
                 void* currentPtr = cast(void*)current;
 
-                if (currentPtr + current.length is trueArray.ptr) {
+                if(currentPtr + current.length is trueArray.ptr) {
                     trueArray = currentPtr[0 .. current.length + trueArray.length];
                     delete_(parent);
-                } else if (trueArray.ptr + trueArray.length is currentPtr) {
+                } else if(trueArray.ptr + trueArray.length is currentPtr) {
                     trueArray = trueArray.ptr[0 .. trueArray.length + current.length];
                     delete_(parent);
-                } else if (trueArray.ptr < currentPtr)
+                } else if(trueArray.ptr < currentPtr)
                     parent = &current.left;
                 else
                     parent = &current.right;
@@ -293,7 +293,7 @@ export:
             assert(trueArray.length > 0);
             void[] trueArrayOrigin = fullAllocations.getTrueRegionOfMemory(trueArray);
 
-            if (trueArrayOrigin.ptr is trueArray.ptr && trueArrayOrigin.length == trueArray.length) {
+            if(trueArrayOrigin.ptr is trueArray.ptr && trueArrayOrigin.length == trueArray.length) {
                 fullAllocations.remove(trueArray);
                 poolAllocator.deallocate(trueArray);
             } else {
@@ -323,18 +323,18 @@ export:
 
         anchor = null;
 
-        static if (Strategy == FitsStrategy.NextFit) {
+        static if(Strategy == FitsStrategy.NextFit) {
             previousAnchor = null;
         }
 
-        static if (__traits(hasMember, PoolAllocator, "deallocateAll")) {
+        static if(__traits(hasMember, PoolAllocator, "deallocateAll")) {
             poolAllocator.deallocateAll();
         }
 
         return true;
     }
 
-    static if (__traits(hasMember, PoolAllocator, "empty")) {
+    static if(__traits(hasMember, PoolAllocator, "empty")) {
         ///
         bool empty() {
             return poolAllocator.empty();
@@ -348,7 +348,7 @@ private @hidden:
         assert(toInsert.left is null || toInsert.left.length >= Node.sizeof);
         assert(toInsert.right is null || toInsert.right.length >= Node.sizeof);
 
-        if (*parent !is null) {
+        if(*parent !is null) {
             assert((*parent).length > Node.sizeof);
             assert((*parent).left is null || (*parent).left.length >= Node.sizeof);
             assert((*parent).right is null || (*parent).right.length >= Node.sizeof);
@@ -358,8 +358,8 @@ private @hidden:
 
         // find parent to inject into
         {
-            while (weightOf(currentChild) >= toInsert.length) {
-                if (toInsert < currentChild)
+            while(weightOf(currentChild) >= toInsert.length) {
+                if(toInsert < currentChild)
                     parent = &currentChild.left;
                 else
                     parent = &currentChild.right;
@@ -374,8 +374,8 @@ private @hidden:
             Node** left_hook = &toInsert.left;
             Node** right_hook = &toInsert.right;
 
-            while (currentChild !is null) {
-                if (currentChild < toInsert) {
+            while(currentChild !is null) {
+                if(currentChild < toInsert) {
                     *left_hook = currentChild;
                     left_hook = &currentChild.right;
                     currentChild = currentChild.right;
@@ -400,8 +400,8 @@ private @hidden:
         Node* left = (*parent).left, right = (*parent).right;
         size_t weightOfLeft = weightOf(left), weightOfRight = weightOf(right);
 
-        while (left !is right) {
-            if (weightOfLeft >= weightOfRight) {
+        while(left !is right) {
+            if(weightOfLeft >= weightOfRight) {
                 *parent = left;
                 parent = &left.right;
 
@@ -431,8 +431,8 @@ private @hidden:
         {
             size_t childToPromoteWeight = weightOf(childToPromote);
 
-            while (weightOf(currentChild) >= childToPromoteWeight) {
-                if (childToPromote < currentChild)
+            while(weightOf(currentChild) >= childToPromoteWeight) {
+                if(childToPromote < currentChild)
                     parent = &currentChild.left;
                 else
                     parent = &currentChild.right;
@@ -449,8 +449,8 @@ private @hidden:
             Node** left_hook = &childToPromote.left;
             Node** right_hook = &childToPromote.right;
 
-            while (currentChild !is childToPromote) {
-                if (currentChild < childToPromote) {
+            while(currentChild !is childToPromote) {
+                if(currentChild < childToPromote) {
                     *left_hook = currentChild;
                     left_hook = &currentChild.right;
                     currentChild = currentChild.right;
@@ -478,8 +478,8 @@ private @hidden:
 
         size_t weightOfToDemote = weightOf(toDemote), weightOfLeft = weightOf(left), weightOfRight = weightOf(right);
 
-        while (weightOfLeft > weightOfToDemote || weightOfRight > weightOfToDemote) {
-            if (weightOfLeft >= weightOfRight) {
+        while(weightOfLeft > weightOfToDemote || weightOfRight > weightOfToDemote) {
+            if(weightOfLeft >= weightOfRight) {
                 *parent = left;
                 parent = &left.right;
 
@@ -517,18 +517,18 @@ private @hidden:
     }
 
     bool fitsAlignment(Node** node, size_t needed, size_t alignedTo) {
-        if (node is null || *node is null)
+        if(node is null || *node is null)
             return false;
 
         assert((*node).length >= Node.sizeof);
         assert((*node).left is null || (*node).left.length >= Node.sizeof);
         assert((*node).right is null || (*node).right.length >= Node.sizeof);
 
-        if (alignedTo == 0)
+        if(alignedTo == 0)
             return (*node).length >= needed;
 
         size_t padding = alignedTo - ((cast(size_t)*node) % alignedTo);
-        if (padding == alignedTo)
+        if(padding == alignedTo)
             padding = 0;
 
         return needed + padding <= (*node).length;
@@ -543,16 +543,16 @@ private @hidden:
 
         size_t toAddAlignment = alignedTo - ((cast(size_t)current) % alignedTo);
 
-        if (toAddAlignment == alignedTo)
+        if(toAddAlignment == alignedTo)
             toAddAlignment = 0;
 
         assert(current.length >= size + toAddAlignment);
 
         size_t actualAllocationSize = size;
-        if (actualAllocationSize < Node.sizeof)
+        if(actualAllocationSize < Node.sizeof)
             actualAllocationSize = Node.sizeof;
 
-        if (current.length <= actualAllocationSize + toAddAlignment + Node.sizeof + minimumStoredSize) {
+        if(current.length <= actualAllocationSize + toAddAlignment + Node.sizeof + minimumStoredSize) {
             allocations.store(current.recreate());
             delete_(parent);
         } else {
@@ -643,7 +643,7 @@ export:
     ///
     InternalAllocator internalAllocator;
 
-    static if (!is(PoolAllocator == void)) {
+    static if(!is(PoolAllocator == void)) {
         ///
         PoolAllocator poolAllocator;
     }
@@ -674,8 +674,8 @@ scope @safe @nogc pure nothrow:
 
     ///
      ~this() {
-        static if (!is(PoolAllocator == void)) {
-            if (!poolAllocator.isNull)
+        static if(!is(PoolAllocator == void)) {
+            if(!poolAllocator.isNull)
                 deallocateAll();
         }
 
@@ -695,7 +695,7 @@ scope @safe @nogc pure nothrow:
         other = AllocatedTree.init;
     }
 
-    static if (!is(PoolAllocator == void)) {
+    static if(!is(PoolAllocator == void)) {
         ///
         void deallocateAll() {
             deallocateAll(!poolAllocator.isNull ? &poolAllocator.deallocate : null);
@@ -705,17 +705,17 @@ scope @safe @nogc pure nothrow:
     ///
     void deallocateAll(scope bool delegate(scope void[] array) @trusted nothrow @nogc pure deallocator) {
         void handle(Node* current) {
-            if (current.left !is null)
+            if(current.left !is null)
                 handle(current.left);
-            if (current.right !is null)
+            if(current.right !is null)
                 handle(current.right);
 
-            if (deallocator !is null)
+            if(deallocator !is null)
                 deallocator(current.array);
             internalAllocator.deallocate((cast(void*)current)[0 .. Node.sizeof]);
         }
 
-        if (anchor !is null) {
+        if(anchor !is null) {
             handle(anchor);
             anchor = null;
         }
@@ -723,24 +723,24 @@ scope @safe @nogc pure nothrow:
 
     ///
     void store(scope void[] array) {
-        if (array is null)
+        if(array is null)
             return;
 
         Node** parent = findParentGivenArray(array);
         Node* current = *parent;
 
-        if (current !is null && current.matches(array.ptr)) {
+        if(current !is null && current.matches(array.ptr)) {
             void* actualStartPtr = current.array.ptr < array.ptr ? current.array.ptr : array.ptr,
                 actualEndPtr = (current.array.ptr + current.array.length) > (array.ptr + array.length) ? (
                         current.array.ptr + current.array.length) : (array.ptr + array.length);
             size_t actualLength = actualEndPtr - actualStartPtr;
 
-            if (current.array.ptr !is actualStartPtr) {
+            if(current.array.ptr !is actualStartPtr) {
                 delete_(parent);
 
                 current.array = actualStartPtr[0 .. actualLength];
                 insert(current, &anchor);
-            } else if (current.array.length != actualLength) {
+            } else if(current.array.length != actualLength) {
                 current.array = actualStartPtr[0 .. actualLength];
             }
         } else {
@@ -756,13 +756,13 @@ scope @safe @nogc pure nothrow:
 
     /// Caller is responsible for deallocation of memory
     void remove(scope void[] array) {
-        if (array is null)
+        if(array is null)
             return;
 
         Node** parent = findParentGivenArray(array);
         Node* current = *parent;
 
-        if (current !is null && current.matches(array.ptr)) {
+        if(current !is null && current.matches(array.ptr)) {
             delete_(parent);
             internalAllocator.deallocate(current[0 .. Node.sizeof]);
         }
@@ -770,7 +770,7 @@ scope @safe @nogc pure nothrow:
 
     ///
     bool owns(scope void[] array) {
-        if (array is null)
+        if(array is null)
             return false;
 
         Node** parent = findParentGivenArray(array);
@@ -784,19 +784,19 @@ scope @safe @nogc pure nothrow:
 
     /// If memory is stored by us, will return the true region of memory associated with it.
     void[] getTrueRegionOfMemory(scope void[] array) {
-        if (array is null)
+        if(array is null)
             return null;
 
         Node** parent = &anchor;
         void* weightOfArrayEnd = array.ptr + array.length;
 
-        while (*parent !is null) {
+        while(*parent !is null) {
             void* weightOfParentEnd = (*parent).array.ptr + (*parent).array.length;
             Node* left = (*parent).left, right = (*parent).right;
 
-            if (right !is null && weightOfParentEnd <= array.ptr)
+            if(right !is null && weightOfParentEnd <= array.ptr)
                 parent = &(*parent).right;
-            else if (left !is null && weightOfArrayEnd <= weightOf(*parent))
+            else if(left !is null && weightOfArrayEnd <= weightOf(*parent))
                 parent = &(*parent).left;
             else
                 break;
@@ -804,7 +804,7 @@ scope @safe @nogc pure nothrow:
 
         Node* current = *parent;
 
-        if (current !is null && current.matches(array.ptr))
+        if(current !is null && current.matches(array.ptr))
             return current.array;
         else
             return null;
@@ -821,13 +821,13 @@ private @hidden:
         {
             const weightOfToInsertEnd = weightOfToInsert + toInsert.array.length;
 
-            while (weightOf(currentChild) >= weightOfToInsertEnd) {
+            while(weightOf(currentChild) >= weightOfToInsertEnd) {
                 const parentArray = (*parent).array.ptr;
                 const endOfParentArray = parentArray + (*parent).array.length;
 
-                if (weightOfToInsert < parentArray)
+                if(weightOfToInsert < parentArray)
                     parent = &currentChild.left;
-                else if (weightOfToInsert > endOfParentArray)
+                else if(weightOfToInsert > endOfParentArray)
                     parent = &currentChild.right;
                 else
                     break;
@@ -843,8 +843,8 @@ private @hidden:
             Node** left_hook = &toInsert.left;
             Node** right_hook = &toInsert.right;
 
-            while (currentChild !is null) {
-                if (weightOf(currentChild) < weightOfToInsert) {
+            while(currentChild !is null) {
+                if(weightOf(currentChild) < weightOfToInsert) {
                     *left_hook = currentChild;
                     left_hook = &currentChild.right;
                     currentChild = currentChild.right;
@@ -863,8 +863,8 @@ private @hidden:
     void delete_(Node** parent) {
         Node* left = (*parent).left, right = (*parent).right;
 
-        while (left !is right) {
-            if (weightOf(left) >= weightOf(right)) {
+        while(left !is right) {
+            if(weightOf(left) >= weightOf(right)) {
                 *parent = left;
                 parent = &left.right;
                 left = left.right;
@@ -886,14 +886,14 @@ private @hidden:
         const endOfArray = array.ptr + array.length;
         Node** pointerToParent = &anchor;
 
-        while (*pointerToParent !is null) {
+        while(*pointerToParent !is null) {
             const parentArray = (*pointerToParent).array.ptr;
             const endOfParentArray = parentArray + (*pointerToParent).array.length;
             Node** left = &(*pointerToParent).left, right = &(*pointerToParent).right;
 
-            if (endOfArray <= parentArray && *left !is null)
+            if(endOfArray <= parentArray && *left !is null)
                 pointerToParent = left;
-            else if (endOfParentArray <= array.ptr && *right !is null)
+            else if(endOfParentArray <= array.ptr && *right !is null)
                 pointerToParent = right;
             else
                 break;
@@ -909,45 +909,45 @@ private @hidden:
         int reason;
 
         int perNode(Node* parent) {
-            if (parent.seenIntegrity < key)
+            if(parent.seenIntegrity < key)
                 parent.seenIntegrity = key;
             else
                 return 100;
 
-            if (parent.array.length == 0 || parent.array.ptr is null)
+            if(parent.array.length == 0 || parent.array.ptr is null)
                 return 150;
 
             int got;
 
-            if (parent.left !is null) {
-                if (parent.left.array.length == 0 || parent.left.array.ptr is null)
+            if(parent.left !is null) {
+                if(parent.left.array.length == 0 || parent.left.array.ptr is null)
                     return 200;
-                else if (parent.left.array.ptr + parent.left.array.length >= parent.array.ptr)
+                else if(parent.left.array.ptr + parent.left.array.length >= parent.array.ptr)
                     return 250;
 
                 got = perNode(parent.left);
-                if (got)
+                if(got)
                     return got;
             }
 
-            if (parent.right !is null) {
-                if (parent.right.array.length == 0 || parent.right.array.ptr is null)
+            if(parent.right !is null) {
+                if(parent.right.array.length == 0 || parent.right.array.ptr is null)
                     return 300;
-                else if (parent.array.ptr + parent.array.length >= parent.right.array.ptr)
+                else if(parent.array.ptr + parent.array.length >= parent.right.array.ptr)
                     return 350;
 
                 got = perNode(parent.right);
-                if (got)
+                if(got)
                     return got;
             }
 
             return 0;
         }
 
-        if (this.anchor !is null)
+        if(this.anchor !is null)
             reason = perNode(this.anchor);
 
-        if (reason != 0)
+        if(reason != 0)
             debug exit(reason);
     }
 }

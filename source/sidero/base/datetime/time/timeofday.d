@@ -151,7 +151,7 @@ export @safe nothrow @nogc:
         amount += this.nanoSeconds_;
         long rollDays, rollHours, rollMinutes, rollSeconds;
 
-        if (allowOverflow) {
+        if(allowOverflow) {
             enum DayToNano = 86_400_000_000_000;
             enum HourToNano = 3_600_000_000_000;
             enum MinuteToNano = 60_000_000_000;
@@ -172,12 +172,12 @@ export @safe nothrow @nogc:
             amount %= 1_000_000_000;
         }
 
-        if (amount < 0)
+        if(amount < 0)
             amount += 1_000_000_000;
 
         this.nanoSeconds_ += amount;
 
-        if (allowOverflow) {
+        if(allowOverflow) {
             return rollDays.days + this.advanceHours(rollHours) + this.advanceMinutes(rollMinutes) + this.advanceSeconds(rollSeconds);
         } else
             return Duration.zero;
@@ -199,19 +199,19 @@ export @safe nothrow @nogc:
         amount += this.second_;
         long rollMinutes;
 
-        if (allowOverflow) {
+        if(allowOverflow) {
             rollMinutes = amount / 60;
             amount -= rollMinutes * 60;
         } else {
             amount %= 60;
         }
 
-        if (amount < 0)
+        if(amount < 0)
             amount += 60;
 
         this.second_ = cast(ubyte)amount;
 
-        if (allowOverflow)
+        if(allowOverflow)
             return this.advanceMinutes(rollMinutes, allowOverflow);
         else
             return Duration.zero;
@@ -222,19 +222,19 @@ export @safe nothrow @nogc:
         amount += this.minute_;
         long rollHours;
 
-        if (allowOverflow) {
+        if(allowOverflow) {
             rollHours = amount / 60;
             amount -= rollHours * 60;
         } else {
             amount %= 60;
         }
 
-        if (amount < 0)
+        if(amount < 0)
             amount += 60;
 
         this.minute_ = cast(ubyte)amount;
 
-        if (allowOverflow)
+        if(allowOverflow)
             return this.advanceHours(rollHours, allowOverflow);
         else
             return Duration.zero;
@@ -245,14 +245,14 @@ export @safe nothrow @nogc:
         amount += this.hour_;
         long rollDays;
 
-        if (allowOverflow) {
+        if(allowOverflow) {
             rollDays = amount / 24;
             amount -= rollDays * 24;
         } else {
             amount %= 24;
         }
 
-        if (amount < 0)
+        if(amount < 0)
             amount += 24;
 
         this.hour_ = cast(ubyte)amount;
@@ -272,19 +272,19 @@ export @safe nothrow @nogc:
 
     ///
     int opCmp(const TimeOfDay other) scope const {
-        if (this.hour_ < other.hour_)
+        if(this.hour_ < other.hour_)
             return -1;
-        else if (this.hour_ > other.hour_)
+        else if(this.hour_ > other.hour_)
             return 1;
 
-        if (this.minute_ < other.minute_)
+        if(this.minute_ < other.minute_)
             return -1;
-        else if (this.minute_ > other.minute_)
+        else if(this.minute_ > other.minute_)
             return 1;
 
-        if (this.second_ < other.second_)
+        if(this.second_ < other.second_)
             return -1;
-        else if (this.second_ > other.second_)
+        else if(this.second_ > other.second_)
             return 1;
 
         return 0;
@@ -327,18 +327,18 @@ export @safe nothrow @nogc:
             if (isBuilderString!Builder && isReadOnlyString!Format) {
         import sidero.base.allocators;
 
-        if (builder.isNull)
+        if(builder.isNull)
             builder = typeof(builder)(globalAllocator());
 
         bool isEscaped;
 
-        if (usePercentageEscape) {
-            foreach (c; specification.byUTF32()) {
-                if (isEscaped) {
+        if(usePercentageEscape) {
+            foreach(c; specification.byUTF32()) {
+                if(isEscaped) {
                     isEscaped = false;
-                    if (this.formatValue(builder, c))
+                    if(this.formatValue(builder, c))
                         continue;
-                } else if (c == '%') {
+                } else if(c == '%') {
                     isEscaped = true;
                     continue;
                 }
@@ -346,13 +346,13 @@ export @safe nothrow @nogc:
                 builder ~= [c];
             }
         } else {
-            foreach (c; specification.byUTF32()) {
-                if (isEscaped) {
+            foreach(c; specification.byUTF32()) {
+                if(isEscaped) {
                     isEscaped = false;
-                } else if (c == '\\') {
+                } else if(c == '\\') {
                     isEscaped = true;
                     continue;
-                } else if (this.formatValue(builder, c)) {
+                } else if(this.formatValue(builder, c)) {
                     continue;
                 }
 
@@ -365,7 +365,7 @@ export @safe nothrow @nogc:
     bool formatValue(Builder)(scope ref Builder builder, dchar specification) scope const if (isBuilderString!Builder) {
         import writer = sidero.base.text.format.write;
 
-        switch (specification) {
+        switch(specification) {
         case 'a':
             builder ~= this.isAM() ? "am" : "pm";
             break;
@@ -387,25 +387,25 @@ export @safe nothrow @nogc:
 
         case 'h':
             auto actual = this.hour_ % 12;
-            if (actual < 10)
+            if(actual < 10)
                 builder ~= "0"c;
             writer.formattedWrite(builder, "{:s}", actual);
             break;
 
         case 'H':
-            if (this.hour_ < 10)
+            if(this.hour_ < 10)
                 builder ~= "0"c;
             writer.formattedWrite(builder, "{:s}", this.hour_);
             break;
 
         case 'i':
-            if (this.minute_ < 10)
+            if(this.minute_ < 10)
                 builder ~= "0"c;
             writer.formattedWrite(builder, "{:s}", this.minute_);
             break;
 
         case 's':
-            if (this.second_ < 10)
+            if(this.second_ < 10)
                 builder ~= "0"c;
             writer.formattedWrite(builder, "{:s}", this.second_);
             break;
@@ -414,15 +414,15 @@ export @safe nothrow @nogc:
             // micro seconds
             auto msec = this.nanoSeconds_ / 1_000;
 
-            if (msec < 10)
+            if(msec < 10)
                 builder ~= "00000"c;
-            else if (msec < 100)
+            else if(msec < 100)
                 builder ~= "0000";
-            else if (msec < 1000)
+            else if(msec < 1000)
                 builder ~= "000";
-            else if (msec < 10_000)
+            else if(msec < 10_000)
                 builder ~= "00";
-            else if (msec < 100_000)
+            else if(msec < 100_000)
                 builder ~= "0";
             writer.formattedWrite(builder, "{:s}", msec);
             break;
@@ -431,9 +431,9 @@ export @safe nothrow @nogc:
             // milli seconds
             const working = this.nanoSeconds_ / 1_000_000;
 
-            if (working < 10)
+            if(working < 10)
                 builder ~= "00"c;
-            else if (working < 100)
+            else if(working < 100)
                 builder ~= "0";
 
             writer.formattedWrite(builder, "{:s}", working);
@@ -457,7 +457,7 @@ export @safe nothrow @nogc:
 
     ///
     bool formattedWrite(scope ref StringBuilder_UTF8 builder, scope FormatSpecifier format) @safe nothrow @nogc {
-        if (format.fullFormatSpec.length == 0)
+        if(format.fullFormatSpec.length == 0)
             return false;
 
         this.format(builder, format.fullFormatSpec);
@@ -467,47 +467,47 @@ export @safe nothrow @nogc:
     ///
     static bool parse(Input)(scope ref Input input, scope ref Duration output, scope String_UTF8 specification,
             bool usePercentageEscape = true) {
-        if (specification.length == 0)
+        if(specification.length == 0)
             return false;
         bool isEscaped;
 
-        if (usePercentageEscape) {
-            foreach (c; specification.byUTF32()) {
-                if (isEscaped) {
+        if(usePercentageEscape) {
+            foreach(c; specification.byUTF32()) {
+                if(isEscaped) {
                     isEscaped = false;
-                    if (output.parseValue(input, c))
+                    if(output.parseValue(input, c))
                         continue;
-                } else if (c == '%') {
+                } else if(c == '%') {
                     isEscaped = true;
                     continue;
                 }
 
-                static if (isASCII!Input) {
-                    if (c >= 128 || !input.startsWith([c]))
+                static if(isASCII!Input) {
+                    if(c >= 128 || !input.startsWith([c]))
                         return false;
                 } else {
-                    if (!input.startsWith([c]))
+                    if(!input.startsWith([c]))
                         return false;
                 }
 
                 input.popFront;
             }
         } else {
-            foreach (c; specification.byUTF32()) {
-                if (isEscaped) {
+            foreach(c; specification.byUTF32()) {
+                if(isEscaped) {
                     isEscaped = false;
-                } else if (c == '\\') {
+                } else if(c == '\\') {
                     isEscaped = true;
                     continue;
-                } else if (output.parseValue(input, c)) {
+                } else if(output.parseValue(input, c)) {
                     continue;
                 }
 
-                static if (isASCII!Input) {
-                    if (c >= 128 || !input.startsWith([c]))
+                static if(isASCII!Input) {
+                    if(c >= 128 || !input.startsWith([c]))
                         return false;
                 } else {
-                    if (!input.startsWith([c]))
+                    if(!input.startsWith([c]))
                         return false;
                 }
 
@@ -526,28 +526,28 @@ export @safe nothrow @nogc:
         Input input2;
         long hour, minute, second, nanoSecs;
 
-        switch (specification) {
+        switch(specification) {
         case 'a':
-            if (input.startsWith("am")) {
-                if (this.hour_ >= 12)
+            if(input.startsWith("am")) {
+                if(this.hour_ >= 12)
                     this.hour_ -= 12;
                 input = input[2 .. $];
                 return true;
-            } else if (input.startsWith("pm")) {
-                if (this.hour_ < 12)
+            } else if(input.startsWith("pm")) {
+                if(this.hour_ < 12)
                     this.hour_ += 12;
                 input = input[2 .. $];
                 return true;
             } else
                 return false;
         case 'A':
-            if (input.startsWith("AM")) {
-                if (this.hour_ >= 12)
+            if(input.startsWith("AM")) {
+                if(this.hour_ >= 12)
                     this.hour_ -= 12;
                 input = input[2 .. $];
                 return true;
-            } else if (input.startsWith("PM")) {
-                if (this.hour_ < 12)
+            } else if(input.startsWith("PM")) {
+                if(this.hour_ < 12)
                     this.hour_ += 12;
                 input = input[2 .. $];
                 return true;
@@ -557,7 +557,7 @@ export @safe nothrow @nogc:
         case 'g':
         case 'h':
             input2 = input.save;
-            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), hour) && hour < 12 && hour >= 0) {
+            if(cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), hour) && hour < 12 && hour >= 0) {
                 input = input2;
                 this.hour_ = cast(ubyte)hour;
                 return true;
@@ -566,7 +566,7 @@ export @safe nothrow @nogc:
         case 'G':
         case 'H':
             input2 = input.save;
-            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), hour) && hour < 24 && hour >= 0) {
+            if(cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), hour) && hour < 24 && hour >= 0) {
                 input = input2;
                 this.hour_ = cast(ubyte)hour;
                 return true;
@@ -575,7 +575,7 @@ export @safe nothrow @nogc:
 
         case 'm':
             input2 = input.save;
-            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), minute) && minute < 60 && minute >= 0) {
+            if(cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), minute) && minute < 60 && minute >= 0) {
                 input = input2;
                 this.minute_ = cast(ubyte)minute;
                 return true;
@@ -584,7 +584,7 @@ export @safe nothrow @nogc:
 
         case 's':
             input2 = input.save;
-            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), second) && second < 60 && second >= 0) {
+            if(cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), second) && second < 60 && second >= 0) {
                 input = input2;
                 this.second_ = cast(ubyte)second;
                 return true;
@@ -593,7 +593,7 @@ export @safe nothrow @nogc:
 
         case 'u':
             input2 = input.save;
-            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), nanoSecs) && nanoSecs < 1_000_000 && nanoSecs >= 0) {
+            if(cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), nanoSecs) && nanoSecs < 1_000_000 && nanoSecs >= 0) {
                 input = input2;
                 this.advanceNanoSeconds(cast(uint)(nanoSecs * 1_000));
                 return true;
@@ -602,7 +602,7 @@ export @safe nothrow @nogc:
 
         case 'v':
             input2 = input.save;
-            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), nanoSecs) && nanoSecs < 1_000 && nanoSecs >= 0) {
+            if(cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), nanoSecs) && nanoSecs < 1_000 && nanoSecs >= 0) {
                 input = input2;
                 this.advanceNanoSeconds(nanoSecs * 1_000_000);
                 return true;
@@ -611,7 +611,7 @@ export @safe nothrow @nogc:
 
         case 'V':
             input2 = input.save;
-            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), nanoSecs) && nanoSecs < 100 && nanoSecs >= 0) {
+            if(cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), nanoSecs) && nanoSecs < 100 && nanoSecs >= 0) {
                 input = input2;
                 this.nanoSeconds_ = cast(uint)nanoSecs;
                 return true;

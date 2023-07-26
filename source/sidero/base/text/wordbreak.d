@@ -27,11 +27,11 @@ export:
     size_t findDecentSplitWithWordBreaksLast() {
         size_t previous, current;
 
-        while (current < length && current < capacity) {
+        while(current < length && current < capacity) {
             previous = current;
             const toBreak = findDecentSplitWithWordBreaks();
 
-            if (toBreak == 0)
+            if(toBreak == 0)
                 break;
 
             current += toBreak;
@@ -44,10 +44,10 @@ export:
     size_t findDecentSplitWithWordBreaks() {
         ptrdiff_t lastBreak, currentBreak;
 
-        while ((currentBreak = perform()) > 0) {
+        while((currentBreak = perform()) > 0) {
             currentBreak += lastBreak + peekDel().entriesForValue;
 
-            if (currentBreak >= capacity) {
+            if(currentBreak >= capacity) {
                 return lastBreak > 0 ? lastBreak : (length > capacity ? 0 : length);
             }
 

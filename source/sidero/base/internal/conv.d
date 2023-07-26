@@ -26,12 +26,12 @@ string intToString(int inputV)() {
         string ret;
         bool negate;
 
-        if (input < 0) {
+        if(input < 0) {
             input *= -1;
             negate = true;
         }
 
-        while (input != 0) {
+        while(input != 0) {
             int next = input / 10;
 
             auto v = input - (next * 10);
@@ -41,7 +41,7 @@ string intToString(int inputV)() {
             input = next;
         }
 
-        if (negate)
+        if(negate)
             ret = "-" ~ ret;
         return ret;
     }();

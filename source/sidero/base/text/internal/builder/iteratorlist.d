@@ -19,16 +19,16 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
         ret.refCount = 1;
         blockList.refCount++;
 
-        if (minimumOffsetFromHead > blockList.numberOfItems)
+        if(minimumOffsetFromHead > blockList.numberOfItems)
             minimumOffsetFromHead = blockList.numberOfItems;
-        if (maximumOffsetFromHead > blockList.numberOfItems)
+        if(maximumOffsetFromHead > blockList.numberOfItems)
             maximumOffsetFromHead = blockList.numberOfItems;
         assert(minimumOffsetFromHead <= maximumOffsetFromHead);
 
         ret.minimumOffsetFromHead = minimumOffsetFromHead;
         ret.maximumOffsetFromHead = maximumOffsetFromHead;
 
-        if (head !is null)
+        if(head !is null)
             head.previous = ret;
         head = ret;
 
@@ -51,9 +51,9 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
         a.length = 6;
         b.length = 6;
 
-        foreach (i, c; "hello ")
+        foreach(i, c; "hello ")
             a.get()[i] = c;
-        foreach (i, c; "world!")
+        foreach(i, c; "world!")
             b.get()[i] = c;
 
         ilt.blockList.numberOfItems = a.length + b.length;
@@ -65,12 +65,12 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
     void rcIteratorInternal(bool addRef, scope Iterator* iterator) @trusted {
         assert(iterator !is null);
 
-        if (addRef)
+        if(addRef)
             iterator.refCount++;
-        else if (iterator.refCount == 1) {
-            if (iterator.next !is null)
+        else if(iterator.refCount == 1) {
+            if(iterator.next !is null)
                 iterator.next.previous = iterator.previous;
-            if (iterator.previous !is null)
+            if(iterator.previous !is null)
                 iterator.previous.next = iterator.next;
             else
                 head = iterator.next;
@@ -88,10 +88,10 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
 
         int seenA, seenB;
 
-        foreach (iterator; ilt.iteratorList) {
-            if (iterator is a)
+        foreach(iterator; ilt.iteratorList) {
+            if(iterator is a)
                 seenA++;
-            else if (iterator is b)
+            else if(iterator is b)
                 seenB++;
             else
                 assert(0);
@@ -108,9 +108,9 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
         Iterator* current = head;
         int result;
 
-        while (current !is null) {
+        while(current !is null) {
             result = del(current);
-            if (result)
+            if(result)
                 return result;
 
             current = current.next;
@@ -129,7 +129,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
 
         bool primedBackwards;
 
-        static if (is(CustomIteratorContents == void)) {
+        static if(is(CustomIteratorContents == void)) {
         } else {
             mixin CustomIteratorContents;
         }
@@ -147,12 +147,12 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
 
         int opApply(Del)(scope Del del) @trusted {
             blockList.mutex.pureLock;
-            scope (exit)
+            scope(exit)
                 blockList.mutex.unlock;
 
             int result;
 
-            while (!emptyInternal()) {
+            while(!emptyInternal()) {
                 // front_ does extra house keeping working, so order to calculate offset is important!
                 Char value = frontInternal();
                 size_t offset = this.forwards.offsetFromHead - this.minimumOffsetFromHead;
@@ -161,7 +161,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
                 result = del(offset, value);
                 blockList.mutex.pureLock;
 
-                if (result)
+                if(result)
                     break;
                 popFrontInternal();
             }
@@ -181,19 +181,19 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
             Cursor.Block* b = ilt.blockList.insert(a);
 
             a.length = Text1.length;
-            foreach (i, v; Text1)
+            foreach(i, v; Text1)
                 a.get()[i] = v;
 
             b.length = Text2.length;
-            foreach (i, v; Text2)
+            foreach(i, v; Text2)
                 b.get()[i] = v;
 
             ilt.blockList.numberOfItems = Text1.length + Text2.length;
             auto iterator = ilt.iteratorList.newIterator(&ilt.blockList);
             ptrdiff_t lastOffset = -1;
 
-            foreach (i, v; &iterator.opApply!FET) {
-                if (i >= Text1.length)
+            foreach(i, v; &iterator.opApply!FET) {
+                if(i >= Text1.length)
                     assert(Text2[i - Text1.length] == v);
                 else
                     assert(Text1[i] == v);
@@ -208,12 +208,12 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
 
         int opApplyReverse(Del)(scope Del del) @trusted {
             blockList.mutex.pureLock;
-            scope (exit)
+            scope(exit)
                 blockList.mutex.unlock;
 
             int result;
 
-            while (!emptyInternal()) {
+            while(!emptyInternal()) {
                 Char value = backInternal();
                 size_t offset = this.backwards.offsetFromHead - (this.minimumOffsetFromHead + 1);
 
@@ -221,7 +221,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
                 result = del(offset, value);
                 blockList.mutex.pureLock;
 
-                if (result)
+                if(result)
                     break;
                 popBackInternal();
             }
@@ -241,24 +241,24 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
             Cursor.Block* b = ilt.blockList.insert(a);
 
             a.length = Text1.length;
-            foreach (i, v; Text1)
+            foreach(i, v; Text1)
                 a.get()[i] = v;
 
             b.length = Text2.length;
-            foreach (i, v; Text2)
+            foreach(i, v; Text2)
                 b.get()[i] = v;
 
             ilt.blockList.numberOfItems = Text1.length + Text2.length;
             auto iterator = ilt.iteratorList.newIterator(&ilt.blockList);
             size_t lastOffset = Text1.length + Text2.length, numberOfZero, count;
 
-            foreach (i, v; &iterator.opApplyReverse!FET) {
-                if (i >= Text1.length)
+            foreach(i, v; &iterator.opApplyReverse!FET) {
+                if(i >= Text1.length)
                     assert(Text2[i - Text1.length] == v);
                 else
                     assert(Text1[i] == v);
 
-                if (i == 0) {
+                if(i == 0) {
                     numberOfZero++;
                     assert(numberOfZero == 1);
                     assert(lastOffset - 1 == i);
@@ -280,7 +280,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
             Iterator* self = cast(Iterator*)&this;
 
             self.blockList.mutex.pureLock;
-            scope (exit)
+            scope(exit)
                 self.blockList.mutex.unlock;
 
             return self.emptyInternal();
@@ -288,7 +288,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
 
         Char front() {
             blockList.mutex.pureLock;
-            scope (exit)
+            scope(exit)
                 blockList.mutex.unlock;
 
             return frontInternal();
@@ -296,7 +296,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
 
         Char back() {
             blockList.mutex.pureLock;
-            scope (exit)
+            scope(exit)
                 blockList.mutex.unlock;
 
             return backInternal();
@@ -304,7 +304,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
 
         void popFront() {
             blockList.mutex.pureLock;
-            scope (exit)
+            scope(exit)
                 blockList.mutex.unlock;
 
             popFrontInternal();
@@ -312,7 +312,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
 
         void popBack() {
             blockList.mutex.pureLock;
-            scope (exit)
+            scope(exit)
                 blockList.mutex.unlock;
 
             popBackInternal();
@@ -326,17 +326,17 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
 
             int result;
 
-            while (current.next !is null && canDo > 0) {
+            while(current.next !is null && canDo > 0) {
                 size_t willDo = canDo;
                 auto slice = current.get()[offsetIntoB .. current.length];
 
-                if (willDo > slice.length)
+                if(willDo > slice.length)
                     willDo = slice.length;
-                if (slice.length > willDo)
+                if(slice.length > willDo)
                     slice = slice[0 .. willDo];
 
                 result = del(slice);
-                if (slice.length > 0 && result)
+                if(slice.length > 0 && result)
                     break;
 
                 offsetIntoB = 0;
@@ -359,11 +359,11 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
             Cursor.Block* b = ilt.blockList.insert(a);
 
             a.length = Text1.length;
-            foreach (i, v; Text1)
+            foreach(i, v; Text1)
                 a.get()[i] = v;
 
             b.length = Text2.length;
-            foreach (i, v; Text2)
+            foreach(i, v; Text2)
                 b.get()[i] = v;
 
             ilt.blockList.numberOfItems = Text1.length + Text2.length;
@@ -372,7 +372,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
                 size_t seen;
                 auto iterator = ilt.iteratorList.newIterator(&ilt.blockList);
 
-                foreach (data; &iterator.foreachBlocks) {
+                foreach(data; &iterator.foreachBlocks) {
                     seen += data.length;
                 }
 
@@ -386,7 +386,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
                 iterator.popFront;
                 iterator.popBack;
 
-                foreach (data; &iterator.foreachBlocks) {
+                foreach(data; &iterator.foreachBlocks) {
                     seen += data.length;
                 }
 
@@ -399,22 +399,22 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
             Cursor.Block* current = backwards.block;
             size_t offsetIntoB = backwards.offsetIntoBlock, canDo = size_t.max;
 
-            if (this.maximumOffsetFromHead != size_t.max)
+            if(this.maximumOffsetFromHead != size_t.max)
                 canDo = backwards.offsetFromHead - forwards.offsetFromHead;
 
             int result;
 
-            while (current.previous !is null && canDo > 0) {
+            while(current.previous !is null && canDo > 0) {
                 size_t willDo = canDo;
                 auto slice = current.get()[0 .. offsetIntoB];
 
-                if (willDo > slice.length)
+                if(willDo > slice.length)
                     willDo = slice.length;
-                if (slice.length > canDo)
+                if(slice.length > canDo)
                     slice = slice[$ - willDo .. $];
 
                 result = del(slice);
-                if (slice.length > 0 && result)
+                if(slice.length > 0 && result)
                     break;
 
                 canDo -= willDo;
@@ -437,11 +437,11 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
             Cursor.Block* b = ilt.blockList.insert(a);
 
             a.length = Text1.length;
-            foreach (i, v; Text1)
+            foreach(i, v; Text1)
                 a.get()[i] = v;
 
             b.length = Text2.length;
-            foreach (i, v; Text2)
+            foreach(i, v; Text2)
                 b.get()[i] = v;
 
             ilt.blockList.numberOfItems = Text1.length + Text2.length;
@@ -450,7 +450,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
                 size_t seen;
                 auto iterator = ilt.iteratorList.newIterator(&ilt.blockList);
 
-                foreach (data; &iterator.foreachReverseBlocks) {
+                foreach(data; &iterator.foreachReverseBlocks) {
                     seen += data.length;
                 }
 
@@ -464,7 +464,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
                 iterator.popFront;
                 iterator.popBack;
 
-                foreach (data; &iterator.foreachReverseBlocks) {
+                foreach(data; &iterator.foreachReverseBlocks) {
                     seen += data.length;
                 }
 
@@ -493,11 +493,11 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
             Cursor.Block* c = ilt.blockList.insert(a);
 
             a.length = Text1.length;
-            foreach (i, v; Text1)
+            foreach(i, v; Text1)
                 a.get()[i] = v;
 
             c.length = Text2.length;
-            foreach (i, v; Text2)
+            foreach(i, v; Text2)
                 c.get()[i] = v;
 
             ilt.blockList.numberOfItems = Text1.length + Text2.length;
@@ -551,7 +551,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
                     assert(into.length == amountIn);
 
                     size_t amountOfData;
-                    foreach (Char[] data; ilt.blockList) {
+                    foreach(Char[] data; ilt.blockList) {
                         amountOfData += data.length;
                     }
                     assert(amountOfData == Text1.length + Text2.length);
@@ -579,7 +579,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
                     assert(into.length == amountIn);
 
                     size_t amountOfData;
-                    foreach (Char[] data; ilt.blockList) {
+                    foreach(Char[] data; ilt.blockList) {
                         amountOfData += data.length;
                     }
                     assert(amountOfData == Text1.length + Text2.length);
@@ -623,10 +623,10 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
         }
 
         void onInsertIncreaseFromHead(size_t ifFromOffsetFromHead, size_t amount) {
-            if (this.maximumOffsetFromHead <= ifFromOffsetFromHead)
+            if(this.maximumOffsetFromHead <= ifFromOffsetFromHead)
                 return;
 
-            if (this.minimumOffsetFromHead >= ifFromOffsetFromHead)
+            if(this.minimumOffsetFromHead >= ifFromOffsetFromHead)
                 this.minimumOffsetFromHead += amount;
             this.maximumOffsetFromHead += amount;
 
@@ -648,7 +648,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
             Cursor.Block* a = ilt.blockList.insert(&ilt.blockList.head);
 
             a.length = Text1.length;
-            foreach (i, v; Text1)
+            foreach(i, v; Text1)
                 a.get()[i] = v;
 
             ilt.blockList.numberOfItems = Text1.length;
@@ -662,12 +662,12 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
                 iterator3.backInternal;
 
                 // move iterators around so that we can test that positions are correct regardless of initial configuration
-                foreach (i; 0 .. OffsetStart) {
+                foreach(i; 0 .. OffsetStart) {
                     iterator2.popFront;
                     iterator3.popFront;
                 }
 
-                foreach (i; 0 .. OffsetEnd) {
+                foreach(i; 0 .. OffsetEnd) {
                     iterator2.popBack;
                     iterator3.popBack;
                 }
@@ -696,7 +696,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
                 ilt.blockList.numberOfItems += Text2.length;
                 a.moveRight(OffsetStart, OffsetStart + Text2.length);
 
-                foreach (i, v; Text2)
+                foreach(i, v; Text2)
                     a.get()[i + OffsetStart] = v;
                 assert(a.get() == Text3);
 
@@ -725,13 +725,13 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
         }
 
         void onRemoveDecreaseFromHead(scope Cursor.Block* forBlock, size_t ifFromOffsetFromHead, size_t amount) {
-            if (this.maximumOffsetFromHead < ifFromOffsetFromHead)
+            if(this.maximumOffsetFromHead < ifFromOffsetFromHead)
                 return;
 
-            if (this.minimumOffsetFromHead > ifFromOffsetFromHead) {
+            if(this.minimumOffsetFromHead > ifFromOffsetFromHead) {
                 size_t amountToGoBackwards = this.minimumOffsetFromHead - ifFromOffsetFromHead;
 
-                if (amountToGoBackwards > amount)
+                if(amountToGoBackwards > amount)
                     amountToGoBackwards = amount;
 
                 this.minimumOffsetFromHead -= amountToGoBackwards;
@@ -742,7 +742,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
             {
                 size_t amountToGoBackwards = this.maximumOffsetFromHead - ifFromOffsetFromHead;
 
-                if (amountToGoBackwards > amount)
+                if(amountToGoBackwards > amount)
                     amountToGoBackwards = amount;
 
                 newMaximumOffsetFromHead -= amountToGoBackwards;
@@ -767,7 +767,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
             Cursor.Block* a = ilt.blockList.insert(&ilt.blockList.head);
 
             a.length = Text1.length;
-            foreach (i, v; Text1)
+            foreach(i, v; Text1)
                 a.get()[i] = v;
 
             ilt.blockList.numberOfItems = Text1.length;
@@ -781,12 +781,12 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
                 iterator3.backInternal;
 
                 // move iterators around so that we can test that positions are correct regardless of initial configuration
-                foreach (i; 0 .. OffsetStart) {
+                foreach(i; 0 .. OffsetStart) {
                     iterator2.popFront;
                     iterator3.popFront;
                 }
 
-                foreach (i; 0 .. OffsetEnd) {
+                foreach(i; 0 .. OffsetEnd) {
                     iterator2.popBack;
                     iterator3.popBack;
                 }
@@ -862,7 +862,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
         Char backInternal() {
             primeBackwardsInternal;
 
-            if (!backwards.inData)
+            if(!backwards.inData)
                 backwards.advanceBackwards(0, forwards.offsetFromHead, maximumOffsetFromHead, true, true);
 
             return backwards.get();
@@ -875,7 +875,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
         }
 
         void primeBackwardsInternal() {
-            if (!this.primedBackwards && backwards.inData) {
+            if(!this.primedBackwards && backwards.inData) {
                 backwards.advanceBackwards(1, forwards.offsetFromHead, maximumOffsetFromHead, true, true);
             }
 
@@ -899,11 +899,11 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
         Cursor.Block* b = ilt.blockList.insert(a);
 
         a.length = Text1.length;
-        foreach (i, v; Text1)
+        foreach(i, v; Text1)
             a.get()[i] = v;
 
         b.length = Text2.length;
-        foreach (i, v; Text2)
+        foreach(i, v; Text2)
             b.get()[i] = v;
 
         ilt.blockList.numberOfItems = Text1.length + Text2.length;
@@ -915,8 +915,8 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
 
             iterator1.popBack;
 
-            foreach (i, v; &iterator1.opApply!FET) {
-                if (i == 0)
+            foreach(i, v; &iterator1.opApply!FET) {
+                if(i == 0)
                     seenZero = true;
                 seen++;
             }
@@ -931,7 +931,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
             iterator2.popFront;
             iterator2.popBack;
 
-            foreach (i, v; &iterator2.opApplyReverse!FET) {
+            foreach(i, v; &iterator2.opApplyReverse!FET) {
                 seen++;
             }
 
@@ -955,13 +955,13 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
         }
 
         Char[] get(size_t maximumOffsetFromHead) scope {
-            if (block is null)
+            if(block is null)
                 return null;
 
             assert(offsetFromHead <= maximumOffsetFromHead);
             size_t canDo = maximumOffsetFromHead - offsetFromHead;
 
-            if (canDo > block.length - offsetIntoBlock)
+            if(canDo > block.length - offsetIntoBlock)
                 canDo = block.length - offsetIntoBlock;
 
             return block.get()[offsetIntoBlock .. offsetIntoBlock + canDo];
@@ -982,13 +982,13 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
         }
 
         void advanceToNextBlock() scope {
-            if (block is null)
+            if(block is null)
                 return;
 
             offsetFromHead += block.length - offsetIntoBlock;
             offsetIntoBlock = 0;
 
-            if (this.block.next !is null)
+            if(this.block.next !is null)
                 this.block = this.block.next;
         }
 
@@ -996,20 +996,20 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
             assert(block !is null);
 
             // if we are at the end of our current block, skip to the start of next
-            if (offsetIntoBlock == block.length && offsetFromHead < maximumOffsetFromHead && block.next !is null && block.next.next !is null) {
+            if(offsetIntoBlock == block.length && offsetFromHead < maximumOffsetFromHead && block.next !is null && block.next.next !is null) {
                 block = block.next;
                 offsetIntoBlock = 0;
             }
 
             // until currentBlock's next node is tailBlock
-            while (block.next !is null && amount > 0 && offsetFromHead + 1 <= maximumOffsetFromHead) {
+            while(block.next !is null && amount > 0 && offsetFromHead + 1 <= maximumOffsetFromHead) {
                 size_t canDo = block.length - offsetIntoBlock;
 
-                if (canDo > amount)
+                if(canDo > amount)
                     canDo = amount;
-                else if (canDo == 0) {
+                else if(canDo == 0) {
                     // don't go forward beyond the tail node
-                    if (block.next.next is null && limitToData)
+                    if(block.next.next is null && limitToData)
                         return;
 
                     block = block.next;
@@ -1017,10 +1017,10 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
                     continue;
                 }
 
-                if (offsetFromHead + canDo > maximumOffsetFromHead + 1)
+                if(offsetFromHead + canDo > maximumOffsetFromHead + 1)
                     canDo = maximumOffsetFromHead - (offsetFromHead + 1);
 
-                if (canDo == 0)
+                if(canDo == 0)
                     break;
 
                 offsetIntoBlock += canDo;
@@ -1028,7 +1028,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
                 amount -= canDo;
             }
 
-            if (offsetIntoBlock == block.length && block.next !is null && block.next.next !is null && limitToData) {
+            if(offsetIntoBlock == block.length && block.next !is null && block.next.next !is null && limitToData) {
                 block = block.next;
                 offsetIntoBlock = 0;
             }
@@ -1038,31 +1038,31 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
                 bool backwardsIterator) scope {
             assert(block !is null);
 
-            if (limitToData && offsetIntoBlock == this.block.length) {
-                if (offsetIntoBlock == 0) {
+            if(limitToData && offsetIntoBlock == this.block.length) {
+                if(offsetIntoBlock == 0) {
                     this.block = this.block.previous;
                     offsetIntoBlock = this.block.length;
                 }
 
-                if (offsetIntoBlock > 0) {
+                if(offsetIntoBlock > 0) {
                     offsetIntoBlock--;
                 }
             }
 
             // until currentBlock's previous node is headBlock
-            while (block.previous !is null && amount > 0 && (offsetFromHead + backwardsIterator) > minimumOffsetFromHead) {
+            while(block.previous !is null && amount > 0 && (offsetFromHead + backwardsIterator) > minimumOffsetFromHead) {
                 size_t canDo = offsetIntoBlock;
 
-                if (canDo > amount) {
+                if(canDo > amount) {
                     canDo = amount;
-                } else if (canDo == 0) {
+                } else if(canDo == 0) {
                     block = block.previous;
                     assert(block !is null);
 
-                    if (limitToData) {
+                    if(limitToData) {
                         amount--;
 
-                        if (block.length > 0) {
+                        if(block.length > 0) {
                             assert(offsetFromHead > 0);
 
                             offsetIntoBlock = block.length - 1;
@@ -1079,10 +1079,10 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
                     continue;
                 }
 
-                if (canDo > offsetFromHead - minimumOffsetFromHead)
+                if(canDo > offsetFromHead - minimumOffsetFromHead)
                     canDo = offsetFromHead - minimumOffsetFromHead;
 
-                if (canDo == 0)
+                if(canDo == 0)
                     break;
 
                 assert(offsetFromHead >= canDo);
@@ -1093,7 +1093,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
                 amount -= canDo;
             }
 
-            if (!limitToData && offsetIntoBlock == 0 && this.block.previous !is null) {
+            if(!limitToData && offsetIntoBlock == 0 && this.block.previous !is null) {
                 this.block = this.block.previous;
                 offsetIntoBlock = this.block.length;
             }
@@ -1101,7 +1101,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
             assert(amount == 0 || this.offsetFromHead == minimumOffsetFromHead, "WHAT?");
             assert(this.block !is null);
 
-            if (limitToData)
+            if(limitToData)
                 assert(this.offsetIntoBlock < this.block.length || this.block.previous is null);
         }
 
@@ -1120,9 +1120,9 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
         void moveRange(scope Block* ifThisBlock, size_t ifStartOffsetInBlock, scope Block* movedIntoBlock,
                 size_t movedIntoOffset, size_t amount) scope @trusted {
 
-            if (this.block is ifThisBlock) {
-                if (this.offsetIntoBlock >= ifStartOffsetInBlock) {
-                    if (this.offsetIntoBlock < ifStartOffsetInBlock + amount) {
+            if(this.block is ifThisBlock) {
+                if(this.offsetIntoBlock >= ifStartOffsetInBlock) {
+                    if(this.offsetIntoBlock < ifStartOffsetInBlock + amount) {
                         this.block = movedIntoBlock;
                         this.offsetIntoBlock = (this.offsetIntoBlock - ifStartOffsetInBlock) + movedIntoOffset;
                     } else {
@@ -1134,24 +1134,24 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
         }
 
         void onInsertIncreaseFromHead(size_t ifFromOffsetFromHead, size_t amount, size_t maximumOffsetFromHead) scope {
-            if (this.offsetFromHead >= ifFromOffsetFromHead) {
+            if(this.offsetFromHead >= ifFromOffsetFromHead) {
                 advanceForward(amount, maximumOffsetFromHead, offsetFromHead + amount < maximumOffsetFromHead);
             }
         }
 
         void onRemoveDecreaseFromHead(scope Block* forBlock, size_t ifFromOffsetFromHead, size_t amount,
                 size_t maximumOffsetFromHead, bool backwardsIterator) scope {
-            if (this.offsetFromHead >= ifFromOffsetFromHead && this.block is forBlock) {
+            if(this.offsetFromHead >= ifFromOffsetFromHead && this.block is forBlock) {
                 size_t canDo = this.offsetFromHead - ifFromOffsetFromHead;
-                if (canDo < amount)
+                if(canDo < amount)
                     amount = canDo;
 
                 advanceBackwards(amount, ifFromOffsetFromHead, maximumOffsetFromHead,
                         offsetFromHead + amount < maximumOffsetFromHead, backwardsIterator);
 
-                if (this.offsetFromHead == ifFromOffsetFromHead && this.offsetIntoBlock == 0)
+                if(this.offsetFromHead == ifFromOffsetFromHead && this.offsetIntoBlock == 0)
                     advanceBackwards(0, ifFromOffsetFromHead, maximumOffsetFromHead, false, backwardsIterator);
-            } else if (this.offsetFromHead >= ifFromOffsetFromHead + amount) {
+            } else if(this.offsetFromHead >= ifFromOffsetFromHead + amount) {
                 this.offsetFromHead -= amount;
             }
 
@@ -1184,7 +1184,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
         }
 
         void moveFromTail() {
-            if (block !is null && block.previous !is null && block.length == 0 && offsetIntoBlock == 0) {
+            if(block !is null && block.previous !is null && block.length == 0 && offsetIntoBlock == 0) {
                 block = block.previous;
                 offsetIntoBlock = block.length;
             }
@@ -1202,11 +1202,11 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
         Cursor.Block* b = ilt.blockList.insert(a);
 
         a.length = Text1.length;
-        foreach (i, v; Text1)
+        foreach(i, v; Text1)
             a.get()[i] = v;
 
         b.length = Text2.length;
-        foreach (i, v; Text2)
+        foreach(i, v; Text2)
             b.get()[i] = v;
 
         ilt.blockList.numberOfItems = Text1.length + Text2.length;
@@ -1218,11 +1218,11 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
             int opApply(Del)(scope Del del) {
                 int result;
 
-                while (!cursor.isOutOfRange(0, max)) {
+                while(!cursor.isOutOfRange(0, max)) {
                     Char c = cursor.get();
 
                     result = del(c);
-                    if (result)
+                    if(result)
                         return result;
 
                     cursor.advanceForward(1, max, true);
@@ -1240,12 +1240,12 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
         bool matches(CustomIterator iterator) {
             size_t count;
 
-            foreach (Char c; iterator) {
-                if (count == 0 && !(c == 't' || c == 'd'))
+            foreach(Char c; iterator) {
+                if(count == 0 && !(c == 't' || c == 'd'))
                     return false;
-                else if (count == 1 && c != 'o')
+                else if(count == 1 && c != 'o')
                     return false;
-                else if (count > 1)
+                else if(count > 1)
                     break;
 
                 count++;
@@ -1256,8 +1256,8 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
 
         size_t matched;
 
-        foreach (Char c; ci) {
-            if (matches(ci)) {
+        foreach(Char c; ci) {
+            if(matches(ci)) {
                 matched++;
             }
         }

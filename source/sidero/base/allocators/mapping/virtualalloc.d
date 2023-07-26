@@ -8,7 +8,7 @@ Copyright: 2022 Richard Andrew Cattermole
 module sidero.base.allocators.mapping.virtualalloc;
 export:
 
-version (Windows) {
+version(Windows) {
     /**
         Note: this is designed for 4k increments! It will do 4k increments regardless of what you want.
         It cannot reallocate, use HeapAllocMapper instead.
@@ -36,12 +36,12 @@ version (Windows) {
             enum FourKb = 4 * 1024 * 1024;
 
             size_t leftOver;
-            if ((leftOver = length % FourKb) != 0)
+            if((leftOver = length % FourKb) != 0)
                 length += FourKb - leftOver;
 
             void* ret = VirtualAlloc(null, length, MEM_COMMIT, PAGE_READWRITE);
 
-            if (ret !is null)
+            if(ret !is null)
                 return ret[0 .. length];
             else
                 return null;
@@ -99,13 +99,13 @@ version (Windows) {
 
         ///
         void[] allocate(size_t length, TypeInfo ti = null) {
-            if (heap == HANDLE.init)
+            if(heap == HANDLE.init)
                 heap = HeapCreate(0, 0, 0);
 
-            if (heap != HANDLE.init) {
+            if(heap != HANDLE.init) {
                 void* ret = HeapAlloc(heap, 0, length);
 
-                if (ret !is null)
+                if(ret !is null)
                     return ret[0 .. length];
             }
 
@@ -114,12 +114,12 @@ version (Windows) {
 
         ///
         bool reallocate(scope ref void[] array, size_t newSize) {
-            if (heap == HANDLE.init)
+            if(heap == HANDLE.init)
                 return false;
 
             void* ret = HeapReAlloc(heap, 0, array.ptr, newSize);
 
-            if (ret !is null) {
+            if(ret !is null) {
                 array = ret[0 .. newSize];
                 return true;
             } else
@@ -128,7 +128,7 @@ version (Windows) {
 
         ///
         bool deallocate(scope void[] data) {
-            if (heap == HANDLE.init)
+            if(heap == HANDLE.init)
                 return false;
 
             return HeapFree(heap, 0, data.ptr) != 0;
@@ -136,7 +136,7 @@ version (Windows) {
 
         ///
         bool deallocateAll() {
-            if (heap != HANDLE.init) {
+            if(heap != HANDLE.init) {
                 HeapDestroy(heap);
                 heap = HANDLE.init;
                 return true;

@@ -1,12 +1,12 @@
 module sidero.base.moduleinfostubs;
 
-version (DynamicSideroBase)
+version(DynamicSideroBase)
     version = NeedStubs;
-else version (D_BetterC)
+else version(D_BetterC)
     version = NeedStubs;
 
-version (NeedStubs) {
-    static foreach (ModuleName; [
+version(NeedStubs) {
+    static foreach(ModuleName; [
         "sidero.base.allocators.gc", "sidero.base.allocators", "sidero.base.allocators.api",
         "sidero.base.console", "sidero.base.traits",
         "sidero.base.text.format", "sidero.base.errors", "sidero.base.containers.readonlyslice",
@@ -24,7 +24,7 @@ version (NeedStubs) {
                 void emitLength(size_t amount) {
                     string ret;
 
-                    while (amount > 0) {
+                    while(amount > 0) {
                         size_t num = amount - ((amount / 10) * 10);
 
                         ret = "" ~ (cast(char)(num + '0')) ~ ret;
@@ -37,9 +37,9 @@ version (NeedStubs) {
 
                 string temp = ModuleName;
 
-                GetNextMP: while (temp.length > 0) {
-                    foreach (i, c; temp) {
-                        if (c == '.') {
+                GetNextMP: while(temp.length > 0) {
+                    foreach(i, c; temp) {
+                        if(c == '.') {
                             emitLength(i);
                             mangleName ~= temp[0 .. i];
                             temp = temp[i + 1 .. $];
@@ -61,13 +61,13 @@ version (NeedStubs) {
                 ret ~= "db 0x";
 
                 ubyte temp = b & 0xF;
-                if (temp > 9)
+                if(temp > 9)
                     ret ~= 'A' + (temp - 10);
                 else
                     ret ~= '0' + temp;
 
                 temp = (b >> 4) & 0xF;
-                if (temp > 9)
+                if(temp > 9)
                     ret ~= 'A' + (temp - 10);
                 else
                     ret ~= '0' + temp;
@@ -85,7 +85,7 @@ version (NeedStubs) {
             add(0);
             add(0);
 
-            foreach (c; ModuleName) {
+            foreach(c; ModuleName) {
                 add(c);
             }
             add(0);

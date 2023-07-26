@@ -11,7 +11,7 @@ struct GregorianDate {
         ubyte month_, day_;
     }
 
-    export @safe nothrow @nogc:
+export @safe nothrow @nogc:
 
     ///
     static immutable string DefaultFormat = "%j/%n/%Y", ISOFormat = "%Y%m%d", ISOExtFormat = "%Y-%m-%d", SimpleFormat = "%Y-%M-%d";
@@ -85,7 +85,7 @@ struct GregorianDate {
 
         long W = cast(long)((this.day_ + floor((2.6 * m) - 0.2) - (2 * c) + y + floor(y / 4f) + floor(c / 4f)) % 7);
 
-        if (W == 0)
+        if(W == 0)
             W = 6;
         else
             W--;
@@ -104,7 +104,7 @@ struct GregorianDate {
     long dayInYear() scope const {
         long soFar;
 
-        foreach (m; cast(ubyte)1 .. this.month_) {
+        foreach(m; cast(ubyte)1 .. this.month_) {
             soFar += GregorianDate(cast()this.year_, cast(ubyte)m, cast(ubyte)1).daysInMonth;
         }
 
@@ -147,7 +147,7 @@ struct GregorianDate {
 
         long W = cast(long)((1 + floor((2.6 * m) - 0.2) - (2 * c) + y + floor(y / 4f) + floor(c / 4f)) % 7);
 
-        if (W == 0)
+        if(W == 0)
             W = 6;
         else
             W--;
@@ -163,7 +163,7 @@ struct GregorianDate {
         // abs(0-6) + 1==7
 
         long temp = W - startingDay;
-        if (temp < 0)
+        if(temp < 0)
             temp *= -1;
 
         temp++;
@@ -174,7 +174,7 @@ struct GregorianDate {
     ubyte weekOfMonth(WeekDay startingDay = WeekDay.Monday) scope const {
         ubyte firstDayOfWeek = firstDayOfWeekOfMonth(startingDay);
 
-        if (this.day_ < firstDayOfWeek)
+        if(this.day_ < firstDayOfWeek)
             return 0;
 
         uint temp = this.day_;
@@ -188,7 +188,7 @@ struct GregorianDate {
         GregorianDate temp = GregorianDate(this.year_, 1, 1);
         ubyte dow = cast(ubyte)temp.dayInWeek();
 
-        if (dow == 0)
+        if(dow == 0)
             return 1;
 
         return cast(ubyte)(8 - dow);
@@ -215,41 +215,41 @@ struct GregorianDate {
 
     ///
     void advanceDays(long amount) scope {
-        while (amount < 0) {
+        while(amount < 0) {
             long canDo = this.day_ - 1;
 
-            if (canDo == 0) {
+            if(canDo == 0) {
                 this.month_--;
                 amount++;
 
-                if (this.month_ == 0) {
+                if(this.month_ == 0) {
                     this.year_--;
                     this.month_ = 12;
                 }
 
                 this.day_ = this.daysInMonth();
             } else {
-                if (canDo > -amount)
+                if(canDo > -amount)
                     canDo = -amount;
                 this.day_ -= canDo;
                 amount += canDo;
             }
         }
 
-        while (amount > 0) {
+        while(amount > 0) {
             long canDo = this.daysInMonth() - this.day_;
 
-            if (canDo == 0) {
+            if(canDo == 0) {
                 this.day_ = 1;
                 this.month_++;
                 amount--;
 
-                if (this.month_ == 13) {
+                if(this.month_ == 13) {
                     this.year_++;
                     this.month_ = 1;
                 }
             } else {
-                if (canDo > amount)
+                if(canDo > amount)
                     canDo = amount;
                 this.day_ += canDo;
                 amount -= canDo;
@@ -271,15 +271,15 @@ struct GregorianDate {
     ///
     void advanceMonths(long amount, bool allowOverflow = true) scope {
         auto newMonth = (this.month_ + amount) % 12;
-        if (newMonth <= 0)
+        if(newMonth <= 0)
             newMonth += 12;
 
         this.month_ = cast(ubyte)newMonth;
         auto max = this.daysInMonth();
         auto overflow = this.day_ - max;
 
-        if (overflow > 0) {
-            if (allowOverflow) {
+        if(overflow > 0) {
+            if(allowOverflow) {
                 this.month_++;
                 this.day_ = cast(ubyte)overflow;
             } else
@@ -291,8 +291,8 @@ struct GregorianDate {
     void advanceYears(long amount, bool allowOverflow = true) scope {
         this.year_ += amount;
 
-        if (this.month_ == 2 && this.day_ == 29 && !this.isLeapYear()) {
-            if (allowOverflow) {
+        if(this.month_ == 2 && this.day_ == 29 && !this.isLeapYear()) {
+            if(allowOverflow) {
                 this.month_++;
                 this.day_ = 1;
             } else
@@ -319,13 +319,13 @@ struct GregorianDate {
         GregorianDate temp = this;
         GregorianDate target = GregorianDate(2000, 1, 1);
 
-        while (temp < target) {
+        while(temp < target) {
             long canDo = temp.daysInYear() - (temp.dayInYear() - 1);
             temp.advanceDays(canDo);
             ret.amount -= canDo;
         }
 
-        while (temp > target) {
+        while(temp > target) {
             long canDo = temp.dayInYear();
             temp.advanceDays(-canDo);
             ret.amount += canDo;
@@ -348,19 +348,19 @@ struct GregorianDate {
 
     ///
     int opCmp(const GregorianDate other) scope const {
-        if (this.year_ < other.year_)
+        if(this.year_ < other.year_)
             return -1;
-        else if (this.year_ > other.year_)
+        else if(this.year_ > other.year_)
             return 1;
 
-        if (this.month_ < other.month_)
+        if(this.month_ < other.month_)
             return -1;
-        else if (this.month_ > other.month_)
+        else if(this.month_ > other.month_)
             return 1;
 
-        if (this.day_ < other.day_)
+        if(this.day_ < other.day_)
             return -1;
-        else if (this.day_ > other.day_)
+        else if(this.day_ > other.day_)
             return 1;
 
         return 0;
@@ -397,18 +397,18 @@ struct GregorianDate {
             if (isBuilderString!Builder && isReadOnlyString!Format) {
         import sidero.base.allocators;
 
-        if (builder.isNull)
+        if(builder.isNull)
             builder = typeof(builder)(globalAllocator());
 
         bool isEscaped;
 
-        if (usePercentageEscape) {
-            foreach (c; specification.byUTF32()) {
-                if (isEscaped) {
+        if(usePercentageEscape) {
+            foreach(c; specification.byUTF32()) {
+                if(isEscaped) {
                     isEscaped = false;
-                    if (this.formatValue(builder, c))
+                    if(this.formatValue(builder, c))
                         continue;
-                } else if (c == '%') {
+                } else if(c == '%') {
                     isEscaped = true;
                     continue;
                 }
@@ -416,13 +416,13 @@ struct GregorianDate {
                 builder ~= [c];
             }
         } else {
-            foreach (c; specification.byUTF32()) {
-                if (isEscaped) {
+            foreach(c; specification.byUTF32()) {
+                if(isEscaped) {
                     isEscaped = false;
-                } else if (c == '\\') {
+                } else if(c == '\\') {
                     isEscaped = true;
                     continue;
-                } else if (this.formatValue(builder, c)) {
+                } else if(this.formatValue(builder, c)) {
                     continue;
                 }
 
@@ -449,9 +449,9 @@ struct GregorianDate {
             `Jan`, `Feb`, `Mar`, `Apr`, `May`, `Jun`, `Jul`, `Aug`, `Sep`, `Oct`, `Nov`, `Dec`
         ];
 
-        switch (specification) {
+        switch(specification) {
         case 'd':
-            if (this.day_ < 10)
+            if(this.day_ < 10)
                 builder ~= "0"c;
             writer.formattedWrite(builder, "{:s}", this.day_);
             break;
@@ -478,7 +478,7 @@ struct GregorianDate {
 
         case 'w':
             auto adjusted = cast(ubyte)this.dayInWeek();
-            if (adjusted == 7)
+            if(adjusted == 7)
                 adjusted = 0;
             else
                 adjusted++;
@@ -499,7 +499,7 @@ struct GregorianDate {
             break;
 
         case 'm':
-            if (this.month_ < 10)
+            if(this.month_ < 10)
                 builder ~= "0"c;
             writer.formattedWrite(builder, "{:s}", this.month_);
             break;
@@ -521,21 +521,21 @@ struct GregorianDate {
             break;
 
         case 'o':
-            if (this.day_ < this.firstMondayOfYear()) {
+            if(this.day_ < this.firstMondayOfYear()) {
                 writer.formattedWrite(builder, "{:s}", this.year_ - 1);
             } else {
                 long temp = this.year_;
 
-                if (temp < 0) {
+                if(temp < 0) {
                     temp *= -1;
                     builder ~= "-";
                 }
 
-                if (temp < 10)
+                if(temp < 10)
                     builder ~= "000";
-                else if (temp < 100)
+                else if(temp < 100)
                     builder ~= "00";
-                else if (temp < 1000)
+                else if(temp < 1000)
                     builder ~= "0";
 
                 writer.formattedWrite(builder, "{:s}", temp);
@@ -545,18 +545,18 @@ struct GregorianDate {
         case 'X':
             long temp = this.year_;
 
-            if (temp < 0) {
+            if(temp < 0) {
                 temp *= -1;
                 builder ~= "-";
             } else {
                 builder ~= "+";
             }
 
-            if (temp < 10)
+            if(temp < 10)
                 builder ~= "000";
-            else if (temp < 100)
+            else if(temp < 100)
                 builder ~= "00";
-            else if (temp < 1000)
+            else if(temp < 1000)
                 builder ~= "0";
 
             writer.formattedWrite(builder, "{:s}", temp);
@@ -565,18 +565,18 @@ struct GregorianDate {
         case 'x':
             long temp = this.year_;
 
-            if (temp < 0) {
+            if(temp < 0) {
                 temp *= -1;
                 builder ~= "-";
-            } else if (temp >= 10000) {
+            } else if(temp >= 10000) {
                 builder ~= "+";
             }
 
-            if (temp < 10)
+            if(temp < 10)
                 builder ~= "000";
-            else if (temp < 100)
+            else if(temp < 100)
                 builder ~= "00";
-            else if (temp < 1000)
+            else if(temp < 1000)
                 builder ~= "0";
 
             writer.formattedWrite(builder, "{:s}", temp);
@@ -585,16 +585,16 @@ struct GregorianDate {
         case 'Y':
             long temp = this.year_;
 
-            if (temp < 0) {
+            if(temp < 0) {
                 temp *= -1;
                 builder ~= "-";
             }
 
-            if (temp < 10)
+            if(temp < 10)
                 builder ~= "000";
-            else if (temp < 100)
+            else if(temp < 100)
                 builder ~= "00";
-            else if (temp < 1000)
+            else if(temp < 1000)
                 builder ~= "0";
 
             writer.formattedWrite(builder, "{:s}", temp);
@@ -604,7 +604,7 @@ struct GregorianDate {
             long temp = this.year_;
             temp -= (temp / 100) * 100;
 
-            if (temp < 10)
+            if(temp < 10)
                 builder ~= "0";
             writer.formattedWrite(builder, "{:s}", temp);
             break;
@@ -623,7 +623,7 @@ struct GregorianDate {
 
     ///
     bool formattedWrite(scope ref StringBuilder_UTF8 builder, scope FormatSpecifier format) @safe nothrow @nogc {
-        if (format.fullFormatSpec.length == 0)
+        if(format.fullFormatSpec.length == 0)
             return false;
 
         this.format(builder, format.fullFormatSpec);
@@ -633,47 +633,47 @@ struct GregorianDate {
     ///
     static bool parse(Input)(scope ref Input input, scope ref Duration output, scope String_UTF8 specification,
             bool usePercentageEscape = true) {
-        if (specification.length == 0)
+        if(specification.length == 0)
             return false;
         bool isEscaped, negate;
 
-        if (usePercentageEscape) {
-            foreach (c; specification.byUTF32()) {
-                if (isEscaped) {
+        if(usePercentageEscape) {
+            foreach(c; specification.byUTF32()) {
+                if(isEscaped) {
                     isEscaped = false;
-                    if (output.parseValue(input, negate, c))
+                    if(output.parseValue(input, negate, c))
                         continue;
-                } else if (c == '%') {
+                } else if(c == '%') {
                     isEscaped = true;
                     continue;
                 }
 
-                static if (isASCII!Input) {
-                    if (c >= 128 || !input.startsWith([c]))
+                static if(isASCII!Input) {
+                    if(c >= 128 || !input.startsWith([c]))
                         return false;
                 } else {
-                    if (!input.startsWith([c]))
+                    if(!input.startsWith([c]))
                         return false;
                 }
 
                 input.popFront;
             }
         } else {
-            foreach (c; specification.byUTF32()) {
-                if (isEscaped) {
+            foreach(c; specification.byUTF32()) {
+                if(isEscaped) {
                     isEscaped = false;
-                } else if (c == '\\') {
+                } else if(c == '\\') {
                     isEscaped = true;
                     continue;
-                } else if (output.parseValue(input, negate, c)) {
+                } else if(output.parseValue(input, negate, c)) {
                     continue;
                 }
 
-                static if (isASCII!Input) {
-                    if (c >= 128 || !input.startsWith([c]))
+                static if(isASCII!Input) {
+                    if(c >= 128 || !input.startsWith([c]))
                         return false;
                 } else {
-                    if (!input.startsWith([c]))
+                    if(!input.startsWith([c]))
                         return false;
                 }
 
@@ -681,7 +681,7 @@ struct GregorianDate {
             }
         }
 
-        if (negate)
+        if(negate)
             output = -output;
         input = input.save;
         return true;
@@ -702,14 +702,14 @@ struct GregorianDate {
         Input input2;
         long days, month, year;
 
-        switch (specification) {
+        switch(specification) {
         case 'd':
         case 'j':
             input2 = input.save;
-            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), days)) {
+            if(cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), days)) {
                 input = input2;
 
-                if (days < 0)
+                if(days < 0)
                     days *= -1;
                 this.day_ = cast(ubyte)days;
                 return true;
@@ -718,7 +718,7 @@ struct GregorianDate {
 
         case 'F':
             foreach(i, str; FullMonth) {
-                if (input.ignoreCaseStartsWith(str)) {
+                if(input.ignoreCaseStartsWith(str)) {
                     this.month_ = cast(ubyte)i;
                     return true;
                 }
@@ -728,10 +728,10 @@ struct GregorianDate {
         case 'm':
         case 'n':
             input2 = input.save;
-            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), month)) {
+            if(cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), month)) {
                 input = input2;
 
-                if (month < 0)
+                if(month < 0)
                     month *= -1;
                 this.month_ = cast(ubyte)month;
                 return true;
@@ -740,7 +740,7 @@ struct GregorianDate {
 
         case 'M':
             foreach(i, str; ThreeLettersMonth) {
-                if (input.ignoreCaseStartsWith(str)) {
+                if(input.ignoreCaseStartsWith(str)) {
                     this.month_ = cast(ubyte)i;
                     return true;
                 }
@@ -751,10 +751,10 @@ struct GregorianDate {
         case 'x':
         case 'Y':
             input2 = input.save;
-            if (cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), year)) {
+            if(cast(bool)reader.formattedRead(input2, String_UTF8("{:d}"), year)) {
                 input = input2;
 
-                if (year < 0)
+                if(year < 0)
                     year *= -1;
                 this.year_ = year;
                 return true;

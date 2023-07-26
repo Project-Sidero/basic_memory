@@ -8,6 +8,7 @@ import std.array : appender;
 
 void decompositionMap() {
     import std.format : formattedWrite;
+
     auto internalDM = appender!string();
     internalDM ~= "module sidero.base.internal.unicode.unicodedataDM;\n\n";
     internalDM ~= "// Generated do not modify\n";
@@ -17,18 +18,18 @@ void decompositionMap() {
 
     {
 
-        foreach (character, entry; state.decompositonMappings) {
-            if (entry.decomposed !in decompositionDStringMap) {
+        foreach(character, entry; state.decompositonMappings) {
+            if(entry.decomposed !in decompositionDStringMap) {
                 decompositionDStringMap[entry.decomposed] = decompositionText.length;
                 decompositionText ~= entry.decomposed;
             }
 
-            if (entry.fullyDecomposed !in decompositionDStringMap) {
+            if(entry.fullyDecomposed !in decompositionDStringMap) {
                 decompositionDStringMap[entry.fullyDecomposed] = decompositionText.length;
                 decompositionText ~= entry.fullyDecomposed;
             }
 
-            if (entry.fullyDecomposedCompatibility !in decompositionDStringMap) {
+            if(entry.fullyDecomposedCompatibility !in decompositionDStringMap) {
                 decompositionDStringMap[entry.fullyDecomposedCompatibility] = decompositionText.length;
                 decompositionText ~= entry.fullyDecomposedCompatibility;
             }
@@ -38,7 +39,7 @@ void decompositionMap() {
     {
         SequentialRanges!(DMdiced, SequentialRangeSplitGroup, 2) sr;
 
-        foreach (character, entry; state.decompositonMappings) {
+        foreach(character, entry; state.decompositonMappings) {
             DMdiced diced;
             diced.tag = cast(ushort)entry.tag;
             diced.decomposedOffset = cast(ushort)decompositionDStringMap[entry.decomposed];
@@ -46,7 +47,8 @@ void decompositionMap() {
             diced.fullyDecomposedOffset = cast(ushort)decompositionDStringMap[entry.fullyDecomposed];
             diced.fullyDecomposedEnd = cast(ushort)(diced.fullyDecomposedOffset + entry.fullyDecomposed.length);
             diced.fullyDecomposedCompatibilityOffset = cast(ushort)decompositionDStringMap[entry.fullyDecomposedCompatibility];
-            diced.fullyDecomposedCompatibilityEnd = cast(ushort)(diced.fullyDecomposedCompatibilityOffset + entry.fullyDecomposedCompatibility.length);
+            diced.fullyDecomposedCompatibilityEnd = cast(ushort)(
+                    diced.fullyDecomposedCompatibilityOffset + entry.fullyDecomposedCompatibility.length);
 
             sr.add(character, diced);
         }
@@ -105,7 +107,7 @@ void decompositionMap() {
         internalDM ~= "static immutable dstring LUT_DecompositionDString = cast(dstring)[";
 
         foreach(i, dchar c; decompositionText) {
-            if (i > 0)
+            if(i > 0)
                 internalDM ~= ", ";
             internalDM.formattedWrite!"0x%X"(c);
         }
@@ -113,10 +115,10 @@ void decompositionMap() {
         internalDM ~= "];\n\n";
     }
 
-    version (none) {
+    version(none) {
         SequentialRanges!(DecompositionMapping, SequentialRangeSplitGroup, 2) sr;
 
-        foreach (character, entry; state.decompositonMappings)
+        foreach(character, entry; state.decompositonMappings)
             sr.add(character, entry);
 
         sr.splitForSame;
@@ -139,14 +141,14 @@ void decompositionMap() {
         auto gotDcode = lut.build();
 
         size_t foundIt;
-        foreach (entry, layerIndex; sr) {
-            if (entry.range.within(0xF96B)) {
-                version (none) {
+        foreach(entry, layerIndex; sr) {
+            if(entry.range.within(0xF96B)) {
+                version(none) {
                     import std.stdio;
 
                     writefln!"%X < input < %X"(entry.range.start, entry.range.end);
 
-                    foreach (c; entry.metadataEntries[0xF96B - entry.range.start].decomposed)
+                    foreach(c; entry.metadataEntries[0xF96B - entry.range.start].decomposed)
                         writef!"%X"(c);
                     writeln;
                     debug stdout.flush;
@@ -168,7 +170,7 @@ void decompositionMap() {
         apiOutput ~= "}\n";
         apiOutput ~= gotDcode[0];
 
-        version (none) {
+        version(none) {
             apiOutput ~= "shared static this() {\n";
             apiOutput ~= "    assert(sidero_utf_lut_getDecompositionMap(0xF96B).decomposed == \"\\u53C3\"d);\n";
             apiOutput ~= "}\n";

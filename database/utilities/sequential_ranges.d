@@ -39,17 +39,17 @@ struct SequentialRanges(MetaDataEntry, MetaDataGroup = SequentialRangeSplitGroup
         Datem** parent = &datems;
         Datem* datem = datems;
 
-        while (datem !is null && datem.range.start <= index) {
-            if (datem.range.within(index)) {
+        while(datem !is null && datem.range.start <= index) {
+            if(datem.range.within(index)) {
                 datem.metadataEntries[index - datem.range.start] = metadataEntry;
 
                 sanityCheck(index);
                 return;
-            } else if (datem.range.end + 1 == index && (datem.next is null || datem.next.range.start > index)) {
+            } else if(datem.range.end + 1 == index && (datem.next is null || datem.next.range.start > index)) {
                 datem.range.end = index;
                 datem.metadataEntries ~= metadataEntry;
 
-                if (datems.next !is null && datems.next.range.start == index + 1) {
+                if(datems.next !is null && datems.next.range.start == index + 1) {
                     datem.range.end = datem.next.range.end;
                     datem.metadataEntries ~= datem.next.metadataEntries;
                     datem.next = datem.next.next;
@@ -57,7 +57,7 @@ struct SequentialRanges(MetaDataEntry, MetaDataGroup = SequentialRangeSplitGroup
 
                 sanityCheck(index);
                 return;
-            } else if (datem.range.start == index + 1) {
+            } else if(datem.range.start == index + 1) {
                 datem.range.start = index;
                 datem.metadataEntries = [metadataEntry] ~ datem.metadataEntries;
 
@@ -76,7 +76,7 @@ struct SequentialRanges(MetaDataEntry, MetaDataGroup = SequentialRangeSplitGroup
     void splitFor(scope void delegate(Datem datem, out size_t splitForOffset, out size_t splitForLength,
             out MetaDataGroup[2] groupMetaData, out bool[2] allTheSame) @safe del) {
 
-        scope (exit)
+        scope(exit)
             sanityCheck;
 
         size_t splitForOffset, splitForLength;
@@ -84,13 +84,13 @@ struct SequentialRanges(MetaDataEntry, MetaDataGroup = SequentialRangeSplitGroup
         bool[2] allTheSame;
 
         Datem* datem = datems;
-        while (datem !is null) {
+        while(datem !is null) {
             del(*datem, splitForOffset, splitForLength, groupMetaData, allTheSame);
             assert(splitForLength == 0 || splitForOffset > 0);
 
-            if (splitForLength == 0) {
+            if(splitForLength == 0) {
                 datem = datem.next;
-            } else if (splitForOffset + splitForLength < (datem.range.end + 1) - datem.range.start) {
+            } else if(splitForOffset + splitForLength < (datem.range.end + 1) - datem.range.start) {
                 assert(splitForOffset + splitForLength <= (datem.range.end + 1) - datem.range.start);
                 Datem* middle = new Datem(null, ValueRange!KeyType(cast(KeyType)(datem.range.start + splitForOffset),
                         cast(KeyType)(datem.range.start + splitForOffset + splitForLength - 1)),
@@ -132,12 +132,12 @@ struct SequentialRanges(MetaDataEntry, MetaDataGroup = SequentialRangeSplitGroup
     void calculateTrueSpread() {
         Datem* datem = datems;
 
-        while (datem !is null) {
+        while(datem !is null) {
             datem.spread = (datem.range.end + 1) - datem.range.start;
 
             datem.allTheSame = true;
-            foreach (metadataEntry; datem.metadataEntries[1 .. $]) {
-                if (metadataEntry != datem.metadataEntries[0]) {
+            foreach(metadataEntry; datem.metadataEntries[1 .. $]) {
+                if(metadataEntry != datem.metadataEntries[0]) {
                     datem.allTheSame = false;
                     break;
                 }
@@ -151,12 +151,12 @@ struct SequentialRanges(MetaDataEntry, MetaDataGroup = SequentialRangeSplitGroup
     void joinFor(scope bool delegate(Datem first, Datem second) @safe del,
             MetaDataEntry delegate(KeyType) @safe defaultEntryDel = null, MetaDataGroup defaultGroup = MetaDataGroup.init) {
 
-        scope (exit)
+        scope(exit)
             sanityCheck;
 
         Datem* datem = datems;
 
-        while (datem !is null && datem.next !is null) {
+        while(datem !is null && datem.next !is null) {
             assert(datem.spread != 0);
             assert(datem.next.spread != 0);
             assert(datem.next.range.start > datem.range.end);
@@ -164,10 +164,10 @@ struct SequentialRanges(MetaDataEntry, MetaDataGroup = SequentialRangeSplitGroup
             bool join = del(*datem, *datem.next);
 
             KeyType diffReal = datem.next.range.start - (datem.range.end + 1);
-            if (diffReal > size_t.max)
+            if(diffReal > size_t.max)
                 join = false;
 
-            if (join) {
+            if(join) {
                 size_t diff = cast(size_t)diffReal;
                 size_t offsetOfExtended = datem.metadataEntries.length;
 
@@ -175,10 +175,10 @@ struct SequentialRanges(MetaDataEntry, MetaDataGroup = SequentialRangeSplitGroup
                 newEntries[0 .. offsetOfExtended][] = datem.metadataEntries[];
                 newEntries[offsetOfExtended + diff .. $][] = datem.next.metadataEntries[];
 
-                if (defaultEntryDel is null)
+                if(defaultEntryDel is null)
                     newEntries[offsetOfExtended .. offsetOfExtended + diff][] = MetaDataEntry.init;
                 else {
-                    foreach (i, ref v; newEntries[offsetOfExtended .. offsetOfExtended + diff]) {
+                    foreach(i, ref v; newEntries[offsetOfExtended .. offsetOfExtended + diff]) {
                         v = defaultEntryDel(cast(KeyType)(datem.range.start + i + offsetOfExtended));
                     }
                 }
@@ -203,13 +203,13 @@ struct SequentialRanges(MetaDataEntry, MetaDataGroup = SequentialRangeSplitGroup
             MetaDataEntry delegate(KeyType) @safe defaultEntryDel = null, MetaDataGroup defaultGroup = MetaDataGroup.init) {
         assert(layer < NumberOfLayers);
 
-        scope (exit)
+        scope(exit)
             sanityCheck;
 
         Datem* firstOnLayer = datems;
 
-        while (firstOnLayer !is null) {
-            if (firstOnLayer.nextOnLayer[layer] is null) {
+        while(firstOnLayer !is null) {
+            if(firstOnLayer.nextOnLayer[layer] is null) {
                 firstOnLayer.rangeOnLayer[layer] = firstOnLayer.range;
                 firstOnLayer.spreadOnLayer[layer] = firstOnLayer.spread;
             }
@@ -218,20 +218,20 @@ struct SequentialRanges(MetaDataEntry, MetaDataGroup = SequentialRangeSplitGroup
             Datem* lastInLayer = firstOnLayer;
             Datem** parentOfNextInLayer = &firstOnLayer.nextOnLayer[layer];
 
-            while (*parentOfNextInLayer !is null) {
+            while(*parentOfNextInLayer !is null) {
                 lastInLayer = *parentOfNextInLayer;
                 parentOfNextInLayer = &(*parentOfNextInLayer).nextOnLayer[layer];
             }
 
-            for (;;) {
+            for(;;) {
                 Datem* proposed = lastInLayer.next;
 
-                if (proposed is null || !del(*firstOnLayer, *proposed, layer))
+                if(proposed is null || !del(*firstOnLayer, *proposed, layer))
                     break;
 
                 *parentOfNextInLayer = proposed;
 
-                if (proposed.nextOnLayer[layer]!is null) {
+                if(proposed.nextOnLayer[layer]!is null) {
                     firstOnLayer.spreadOnLayer[layer] += proposed.spreadOnLayer[layer];
                     firstOnLayer.rangeOnLayer[layer].end = proposed.rangeOnLayer[layer].end;
                     goto OnMergeWhenOnLayer;
@@ -244,7 +244,7 @@ struct SequentialRanges(MetaDataEntry, MetaDataGroup = SequentialRangeSplitGroup
                 lastInLayer = proposed;
             }
 
-            if (lastInLayer is null)
+            if(lastInLayer is null)
                 firstOnLayer = firstOnLayer.next;
             else {
                 firstOnLayer = lastInLayer.next;
@@ -259,18 +259,18 @@ struct SequentialRanges(MetaDataEntry, MetaDataGroup = SequentialRangeSplitGroup
         size_t[NumberOfLayers] indexes;
         bool[NumberOfLayers] lastNull;
 
-        while (datem !is null) {
+        while(datem !is null) {
             result = del(*datem, indexes);
-            if (result)
+            if(result)
                 return result;
 
-            foreach (i; 0 .. NumberOfLayers)
+            foreach(i; 0 .. NumberOfLayers)
                 lastNull[i] = datem.nextOnLayer[i] is null;
 
             datem = datem.next;
 
-            foreach_reverse (i; 0 .. NumberOfLayers) {
-                if (lastNull[i]) {
+            foreach_reverse(i; 0 .. NumberOfLayers) {
+                if(lastNull[i]) {
                     indexes[0 .. i + 1] = 0;
                     break;
                 } else
@@ -287,17 +287,17 @@ struct SequentialRanges(MetaDataEntry, MetaDataGroup = SequentialRangeSplitGroup
 
         auto temp = appender!string();
 
-        foreach (datem, layerIndexes; this) {
-            foreach_reverse (index; layerIndexes)
+        foreach(datem, layerIndexes; this) {
+            foreach_reverse(index; layerIndexes)
                 temp ~= index == 0 ? "." : "|";
-            if (NumberOfLayers > 0)
+            if(NumberOfLayers > 0)
                 temp ~= "  ";
             temp.formattedWrite!"--- %s\n"(layerIndexes);
 
-            foreach (c, metadata; datem) {
-                foreach_reverse (index; layerIndexes)
+            foreach(c, metadata; datem) {
+                foreach_reverse(index; layerIndexes)
                     temp ~= "|";
-                if (NumberOfLayers > 0)
+                if(NumberOfLayers > 0)
                     temp ~= "    ";
 
                 temp.formattedWrite!"%s: %s\n"(c, metadata);
@@ -307,7 +307,7 @@ struct SequentialRanges(MetaDataEntry, MetaDataGroup = SequentialRangeSplitGroup
         return temp.data.dup;
     }
 
-    version (none) {
+    version(none) {
         void debugMe() {
             Datem* datem = datems;
 
@@ -315,9 +315,9 @@ struct SequentialRanges(MetaDataEntry, MetaDataGroup = SequentialRangeSplitGroup
 
             writeln("--------");
 
-            while (datem !is null) {
-                static if (is(KeyType == ulong)) {
-                    if (datem.range.within(0x30700000044)) {
+            while(datem !is null) {
+                static if(is(KeyType == ulong)) {
+                    if(datem.range.within(0x30700000044)) {
                         writefln!"0x%X <= input <= 0x%X"(datem.range.start, datem.range.end);
                         writefln!"%X"(datem.metadataEntries[0x30700000044 - datem.range.start]);
                         foreach(entry; datem.metadataEntries)
@@ -345,9 +345,9 @@ struct SequentialRanges(MetaDataEntry, MetaDataGroup = SequentialRangeSplitGroup
         int opApply(scope int delegate(KeyType, ref MetaDataEntry) @safe del) {
             int result;
 
-            foreach (KeyType index; range.start .. range.end + 1) {
+            foreach(KeyType index; range.start .. range.end + 1) {
                 result = del(index, metadataEntries[index - range.start]);
-                if (result)
+                if(result)
                     return result;
             }
 
@@ -361,14 +361,14 @@ private:
             import std.stdio : writeln, stdout;
 
             Datem* datem = datems;
-            if (datem is null)
+            if(datem is null)
                 return;
 
             KeyType lastEnd = datem.range.end;
             datem = datem.next;
 
-            while (datem !is null) {
-                if (lastEnd >= datem.range.start) {
+            while(datem !is null) {
+                if(lastEnd >= datem.range.start) {
                     writeln("Key ", index, " results in ", lastEnd, " and ", datem.range.start, " to equal.");
                     stdout.flush;
                     assert(0);
@@ -389,30 +389,30 @@ void splitForSame(MetaDataEntry, MetaDataGroup, size_t NumberOfLayers, KeyType)(
         allTheSame[0] = datem.allTheSame;
 
         size_t toSkip;
-        foreach (offset; 0 .. (datem.range.end + 1) - datem.range.start) {
+        foreach(offset; 0 .. (datem.range.end + 1) - datem.range.start) {
             size_t same = 1;
 
-            foreach (metadata; datem.metadataEntries[offset + 1 .. $]) {
-                if (metadata != datem.metadataEntries[offset])
+            foreach(metadata; datem.metadataEntries[offset + 1 .. $]) {
+                if(metadata != datem.metadataEntries[offset])
                     break;
                 same++;
             }
 
             toSkip = same;
-            if (same > 1)
+            if(same > 1)
                 break;
         }
 
-        foreach (offset; toSkip .. (datem.range.end + 1) - datem.range.start) {
+        foreach(offset; toSkip .. (datem.range.end + 1) - datem.range.start) {
             size_t same = 1;
 
-            foreach (metadata; datem.metadataEntries[offset + 1 .. $]) {
-                if (metadata != datem.metadataEntries[offset])
+            foreach(metadata; datem.metadataEntries[offset + 1 .. $]) {
+                if(metadata != datem.metadataEntries[offset])
                     break;
                 same++;
             }
 
-            if (same >= minimum) {
+            if(same >= minimum) {
                 splitForOffset = offset;
                 splitForLength = same;
                 allTheSame[1] = true;
@@ -424,17 +424,17 @@ void splitForSame(MetaDataEntry, MetaDataGroup, size_t NumberOfLayers, KeyType)(
 
 void joinWhenClose(MetaDataEntry, MetaDataGroup, size_t NumberOfLayers, KeyType)(SequentialRanges!(MetaDataEntry,
         MetaDataGroup, NumberOfLayers,
-        KeyType) sr, MetaDataEntry delegate(KeyType) @safe defaultEntryDel = null, KeyType ratioMultiplierBetweenFirst = 5,
-    KeyType limiter = 1024) {
+        KeyType) sr, MetaDataEntry delegate(KeyType) @safe defaultEntryDel = null,
+        KeyType ratioMultiplierBetweenFirst = 5, KeyType limiter = 1024) {
 
     sr.joinFor((sr.Datem first, sr.Datem second) {
         bool join = first.allTheSame == second.allTheSame;
-        if (join && first.allTheSame)
+        if(join && first.allTheSame)
             join = first.metadataEntries[0] == second.metadataEntries[0];
 
         size_t diffBetweenFirstAndSecond = second.range.start - (first.range.end + 1);
-        bool join2 = diffBetweenFirstAndSecond < ratioMultiplierBetweenFirst
-            || (diffBetweenFirstAndSecond * ratioMultiplierBetweenFirst) <= (first.range.end - first.range.start);
+        bool join2 = diffBetweenFirstAndSecond < ratioMultiplierBetweenFirst ||
+            (diffBetweenFirstAndSecond * ratioMultiplierBetweenFirst) <= (first.range.end - first.range.start);
         bool join3 = diffBetweenFirstAndSecond < limiter;
 
         return join && join2 && join3;

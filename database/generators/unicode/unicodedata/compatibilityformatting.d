@@ -17,8 +17,8 @@ void compatibilityFormatting() {
     dstring decompositionText;
 
     {
-        foreach (entry; state.entries) {
-            if (entry.decompositionMapping !in decompositionDStringMap) {
+        foreach(entry; state.entries) {
+            if(entry.decompositionMapping !in decompositionDStringMap) {
                 decompositionDStringMap[entry.decompositionMapping] = decompositionText.length;
                 decompositionText ~= entry.decompositionMapping;
             }
@@ -26,12 +26,12 @@ void compatibilityFormatting() {
     }
 
     {
-        foreach (tag; __traits(allMembers, CompatibilityFormattingTag)) {
+        foreach(tag; __traits(allMembers, CompatibilityFormattingTag)) {
             SequentialRanges!(SliceDiced, SequentialRangeSplitGroup, 2) sr;
 
-            foreach (entry; state.entries) {
-                if (entry.compatibilityTag == __traits(getMember, CompatibilityFormattingTag, tag) && entry.decompositionMapping.length > 0) {
-                    foreach (dchar c; entry.range.start .. entry.range.end + 1) {
+            foreach(entry; state.entries) {
+                if(entry.compatibilityTag == __traits(getMember, CompatibilityFormattingTag, tag) && entry.decompositionMapping.length > 0) {
+                    foreach(dchar c; entry.range.start .. entry.range.end + 1) {
                         SliceDiced diced;
                         diced.offset = cast(ushort)decompositionDStringMap[entry.decompositionMapping];
                         diced.end = cast(ushort)(diced.offset + entry.decompositionMapping.length);
@@ -59,7 +59,8 @@ void compatibilityFormatting() {
             auto gotDcode = lut.build();
             internalCF ~= gotDcode[1];
 
-            internalCF ~= "export extern(C) immutable(dstring) sidero_utf_lut_getDecompositionMapping" ~ tag ~ "(dchar input) @trusted nothrow @nogc pure {\n";
+            internalCF ~= "export extern(C) immutable(dstring) sidero_utf_lut_getDecompositionMapping" ~ tag ~
+                "(dchar input) @trusted nothrow @nogc pure {\n";
             internalCF ~= "    SliceDiced* got = cast(SliceDiced*)sidero_utf_lut_getDecompositionMapping2" ~ tag ~ "(input);\n";
             internalCF ~= "    if (got is null || got.end == 0)\n";
             internalCF ~= "        return null;\n";
@@ -68,16 +69,17 @@ void compatibilityFormatting() {
 
             apiOutput ~= "\n";
             apiOutput ~= "/// Lookup decomposition mapping for character if in compatibility formatting tag " ~ tag ~ ".\n";
-            apiOutput ~= "export extern(C) immutable(dstring) sidero_utf_lut_getDecompositionMapping" ~ tag ~ "(dchar input) @trusted nothrow @nogc pure;\n";
+            apiOutput ~= "export extern(C) immutable(dstring) sidero_utf_lut_getDecompositionMapping" ~ tag ~
+                "(dchar input) @trusted nothrow @nogc pure;\n";
         }
     }
 
     {
         SequentialRanges!(SliceDiced, SequentialRangeSplitGroup, 2) sr;
 
-        foreach (entry; state.entries) {
-            if (entry.compatibilityTag != CompatibilityFormattingTag.None) {
-                foreach (dchar c; entry.range.start .. entry.range.end + 1) {
+        foreach(entry; state.entries) {
+            if(entry.compatibilityTag != CompatibilityFormattingTag.None) {
+                foreach(dchar c; entry.range.start .. entry.range.end + 1) {
                     SliceDiced diced;
                     diced.offset = cast(ushort)decompositionDStringMap[entry.decompositionMapping];
                     diced.end = cast(ushort)(diced.offset + entry.decompositionMapping.length);
@@ -121,7 +123,7 @@ void compatibilityFormatting() {
         internalCF ~= "static immutable dstring LUT_DecompositionFMappingDString = cast(dstring)[";
 
         foreach(i, dchar c; decompositionText) {
-            if (i > 0)
+            if(i > 0)
                 internalCF ~= ", ";
             internalCF.formattedWrite!"0x%X"(c);
         }
@@ -131,12 +133,13 @@ void compatibilityFormatting() {
 
     version(none) {
         {
-            foreach (tag; __traits(allMembers, CompatibilityFormattingTag)) {
+            foreach(tag; __traits(allMembers, CompatibilityFormattingTag)) {
                 SequentialRanges!(dstring, SequentialRangeSplitGroup, 2) sr;
 
-                foreach (entry; state.entries) {
-                    if (entry.compatibilityTag == __traits(getMember, CompatibilityFormattingTag, tag) && entry.decompositionMapping.length > 0) {
-                        foreach (dchar c; entry.range.start .. entry.range.end + 1)
+                foreach(entry; state.entries) {
+                    if(entry.compatibilityTag == __traits(getMember, CompatibilityFormattingTag, tag) &&
+                            entry.decompositionMapping.length > 0) {
+                        foreach(dchar c; entry.range.start .. entry.range.end + 1)
                             sr.add(c, entry.decompositionMapping);
                     }
                 }
@@ -169,9 +172,9 @@ void compatibilityFormatting() {
         {
             SequentialRanges!(dstring, SequentialRangeSplitGroup, 2) sr;
 
-            foreach (entry; state.entries) {
-                if (entry.compatibilityTag != CompatibilityFormattingTag.None) {
-                    foreach (dchar c; entry.range.start .. entry.range.end + 1)
+            foreach(entry; state.entries) {
+                if(entry.compatibilityTag != CompatibilityFormattingTag.None) {
+                    foreach(dchar c; entry.range.start .. entry.range.end + 1)
                         sr.add(c, entry.decompositionMapping);
                 }
             }
@@ -201,12 +204,12 @@ void compatibilityFormatting() {
         }
     }
 
-    foreach (tag; __traits(allMembers, CompatibilityFormattingTag)) {
+    foreach(tag; __traits(allMembers, CompatibilityFormattingTag)) {
         SequentialRanges!(ubyte, SequentialRangeSplitGroup, 2) sr;
 
-        foreach (entry; state.entries) {
-            if (entry.compatibilityTag == __traits(getMember, CompatibilityFormattingTag, tag) && entry.decompositionMapping.length > 0) {
-                foreach (dchar c; entry.range.start .. entry.range.end + 1)
+        foreach(entry; state.entries) {
+            if(entry.compatibilityTag == __traits(getMember, CompatibilityFormattingTag, tag) && entry.decompositionMapping.length > 0) {
+                foreach(dchar c; entry.range.start .. entry.range.end + 1)
                     sr.add(c, cast(ubyte)entry.decompositionMapping.length);
             }
         }
@@ -238,9 +241,9 @@ void compatibilityFormatting() {
     {
         SequentialRanges!(ubyte, SequentialRangeSplitGroup, 2) sr;
 
-        foreach (entry; state.entries) {
-            if (entry.compatibilityTag != CompatibilityFormattingTag.None) {
-                foreach (dchar c; entry.range.start .. entry.range.end + 1)
+        foreach(entry; state.entries) {
+            if(entry.compatibilityTag != CompatibilityFormattingTag.None) {
+                foreach(dchar c; entry.range.start .. entry.range.end + 1)
                     sr.add(c, cast(ubyte)entry.decompositionMapping.length);
             }
         }

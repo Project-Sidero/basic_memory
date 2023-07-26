@@ -1,4 +1,4 @@
-﻿module generators.unicode.wordbreakproperty;
+module generators.unicode.wordbreakproperty;
 import generators.constants;
 
 void wordBreakProperty() {
@@ -17,12 +17,12 @@ void wordBreakProperty() {
     {
         SequentialRanges!(ubyte, SequentialRangeSplitGroup, 2) sr;
 
-        foreach (entry; state.range)
-            foreach (c; entry.range.start .. entry.range.end + 1)
+        foreach(entry; state.range)
+            foreach(c; entry.range.start .. entry.range.end + 1)
                 sr.add(c, cast(ubyte)entry.property);
 
-        foreach (entry; state.single) {
-            foreach (c; entry.range.start .. entry.range.end + 1)
+        foreach(entry; state.single) {
+            foreach(c; entry.range.start .. entry.range.end + 1)
                 sr.add(c, cast(ubyte)entry.property);
         }
 
@@ -66,7 +66,7 @@ void processEachLine(string inputText, ref TotalState state) {
         ValueRange!dchar ret;
 
         ptrdiff_t offsetOfSeperator = charRangeStr.countUntil("..");
-        if (offsetOfSeperator < 0) {
+        if(offsetOfSeperator < 0) {
             ret.start = parse!uint(charRangeStr, 16);
             ret.end = ret.start;
         } else {
@@ -81,7 +81,7 @@ void processEachLine(string inputText, ref TotalState state) {
     void handleLine(ValueRange!dchar valueRange, string propertyStr) {
         Property property;
 
-        switch (propertyStr) {
+        switch(propertyStr) {
         case "Double_Quote":
             property = Property.Double_Quote;
             break;
@@ -141,37 +141,37 @@ void processEachLine(string inputText, ref TotalState state) {
             assert(0, propertyStr);
         }
 
-        foreach (index; valueRange.start .. valueRange.end + 1) {
-            foreach (value; state.single) {
-                if (index == value.range.start)
+        foreach(index; valueRange.start .. valueRange.end + 1) {
+            foreach(value; state.single) {
+                if(index == value.range.start)
                     assert(0, propertyStr);
             }
 
-            foreach (value; state.single) {
-                if (index >= value.range.start && index <= value.range.end)
+            foreach(value; state.single) {
+                if(index >= value.range.start && index <= value.range.end)
                     assert(0, propertyStr);
             }
         }
 
-        if (valueRange.isSingle)
+        if(valueRange.isSingle)
             state.single ~= Entry(valueRange, property);
         else
             state.range ~= Entry(valueRange, property);
     }
 
-    foreach (line; inputText.lineSplitter) {
+    foreach(line; inputText.lineSplitter) {
         ptrdiff_t offset;
 
         offset = line.countUntil('#');
-        if (offset >= 0)
+        if(offset >= 0)
             line = line[0 .. offset];
         line = line.strip;
 
-        if (line.length < 5) // anything that low can't represent a functional line
+        if(line.length < 5) // anything that low can't represent a functional line
             continue;
 
         offset = line.countUntil(';');
-        if (offset < 0) // no char range
+        if(offset < 0) // no char range
             continue;
         string charRangeStr = line[0 .. offset].strip;
         line = line[offset + 1 .. $].strip;

@@ -13,45 +13,45 @@ bool rawWrite(Builder, Input)(return scope ref Builder output, scope Input input
         scope FormatSpecifier format = FormatSpecifier.init, bool quote = false) if (isBuilderString!Builder) {
     alias ActualType = Unqual!Input;
 
-    static if (!is(ActualType == Input)) {
+    static if(!is(ActualType == Input)) {
         return rawWrite(output, () @trusted { return cast(ActualType)input; }(), format);
     } else {
-        if (output.isNull)
+        if(output.isNull)
             output = Builder(globalAllocator());
 
         enum IsStaticArray = isStaticArray!ActualType;
         enum StaticArrayString = IsStaticArray && isSomeString!(typeof(ActualType.init[]));
 
-        static if (is(Input == enum)) {
+        static if(is(Input == enum)) {
             return writeEnum(output, input, format);
-        } else static if (is(Input == bool)) {
+        } else static if(is(Input == bool)) {
             return writeBool(output, input, format);
-        } else static if (is(Input == char) || (isUTF!Builder && (is(Input == wchar) || is(Input == dchar)))) {
+        } else static if(is(Input == char) || (isUTF!Builder && (is(Input == wchar) || is(Input == dchar)))) {
             return writeChar(output, input, format, quote);
-        } else static if (isPointer!Input || is(Input == function) || is(Input == delegate)) {
+        } else static if(isPointer!Input || is(Input == function) || is(Input == delegate)) {
             return writePointer(output, input, format);
-        } else static if (__traits(isIntegral, Input)) {
+        } else static if(__traits(isIntegral, Input)) {
             return writeIntegral(output, input, format);
-        } else static if (__traits(isFloating, Input)) {
+        } else static if(__traits(isFloating, Input)) {
             return writeFloat(output, input, format);
-        } else static if (isASCII!Input || (isUTFBuilder!Builder && (isUTF!Input || isSomeString!Input || StaticArrayString))) {
+        } else static if(isASCII!Input || (isUTFBuilder!Builder && (isUTF!Input || isSomeString!Input || StaticArrayString))) {
             return writeString(output, input, format, quote);
-        } else static if (is(Input : Result!WrappedType, WrappedType) || is(Input : ResultReference!WrappedType, WrappedType)) {
+        } else static if(is(Input : Result!WrappedType, WrappedType) || is(Input : ResultReference!WrappedType, WrappedType)) {
             return writeError!WrappedType(output, input, format, quote);
-        } else static if (is(Input == Expected)) {
+        } else static if(is(Input == Expected)) {
             return writeExpected(output, input.wanted, input.get);
-        } else static if (isAssociativeArray!Input) {
+        } else static if(isAssociativeArray!Input) {
             return writeAA(output, input);
-        } else static if (is(Input == struct) || is(Input == class)) {
+        } else static if(is(Input == struct) || is(Input == class)) {
             return writeStructClass(output, input, format);
-        } else static if (IsStaticArray) {
+        } else static if(IsStaticArray) {
             return writeIterable(output, input[]);
-        } else static if (isDynamicArray!Input || (isIterable!Input && !(HaveNonStaticOpApply!ActualType ||
+        } else static if(isDynamicArray!Input || (isIterable!Input && !(HaveNonStaticOpApply!ActualType ||
                 __traits(hasMember, ActualType, "opApply")))) {
             return writeIterable(output, input);
-        } else static if (is(Input == union)) {
+        } else static if(is(Input == union)) {
             return writeUnion(output, input);
-        } else static if (is(Input == interface)) {
+        } else static if(is(Input == interface)) {
             return writeInterface(output, input);
         } else {
             static assert(0, Input.stringof ~ " cannot be written.");
@@ -226,7 +226,7 @@ unittest {
         }
 
         bool formattedWrite(scope ref StringBuilder_UTF8 builder, scope FormatSpecifier format) @safe nothrow @nogc {
-            if (x == 0 || format.fullFormatSpec.length == 0)
+            if(x == 0 || format.fullFormatSpec.length == 0)
                 return false;
 
             builder ~= format.fullFormatSpec;
@@ -246,9 +246,9 @@ import sidero.base.text.format.write;
 import sidero.base.text.format.escaping;
 
 bool addSign(Builder)(scope ref Builder output, scope FormatSpecifier format, bool positive) {
-    final switch (format.sign) {
+    final switch(format.sign) {
     case FormatSpecifier.Sign.NegativeOnly:
-        if (!positive) {
+        if(!positive) {
             output ~= "-"c;
             return true;
         }
@@ -263,7 +263,7 @@ bool addSign(Builder)(scope ref Builder output, scope FormatSpecifier format, bo
 }
 
 void addPrefix(Builder)(scope ref Builder output, scope FormatSpecifier format) {
-    final switch (format.type) {
+    final switch(format.type) {
     case FormatSpecifier.Type.Default:
     case FormatSpecifier.Type.Decimal:
     case FormatSpecifier.Type.Float:
@@ -298,7 +298,7 @@ void addPrefix(Builder)(scope ref Builder output, scope FormatSpecifier format) 
 void handleFill(Builder)(scope ref Builder output, scope FormatSpecifier format,
         scope void delegate() @safe nothrow @nogc prefixDel, scope void delegate() @safe nothrow @nogc mainDel) {
 
-    final switch (format.alignment) {
+    final switch(format.alignment) {
     case FormatSpecifier.Alignment.None:
         prefixDel();
         mainDel();
@@ -313,8 +313,8 @@ void handleFill(Builder)(scope ref Builder output, scope FormatSpecifier format,
         const completeLength = output.length;
         const diff = completeLength - priorLength;
 
-        foreach (_; diff .. format.minimumWidth) {
-            static if (is(Builder == StringBuilder_ASCII)) {
+        foreach(_; diff .. format.minimumWidth) {
+            static if(is(Builder == StringBuilder_ASCII)) {
                 output.insert(priorLength, cast(ubyte)format.fillCharacter);
             } else {
                 output.insert(priorLength, format.fillCharacter);
@@ -331,8 +331,8 @@ void handleFill(Builder)(scope ref Builder output, scope FormatSpecifier format,
         const completeLength = output.length;
         const diff = completeLength - priorLength;
 
-        foreach (_; diff .. format.minimumWidth) {
-            static if (is(Builder == StringBuilder_ASCII)) {
+        foreach(_; diff .. format.minimumWidth) {
+            static if(is(Builder == StringBuilder_ASCII)) {
                 output ~= [cast(ubyte)format.fillCharacter];
             } else {
                 output ~= [format.fillCharacter];
@@ -349,16 +349,16 @@ void handleFill(Builder)(scope ref Builder output, scope FormatSpecifier format,
         const completeLength = output.length;
         const diff = completeLength - priorLength;
 
-        foreach (_; diff .. (format.minimumWidth + 1) / 2) {
-            static if (is(Builder == StringBuilder_ASCII)) {
+        foreach(_; diff .. (format.minimumWidth + 1) / 2) {
+            static if(is(Builder == StringBuilder_ASCII)) {
                 output.insert(priorLength, cast(ubyte)format.fillCharacter);
             } else {
                 output.insert(priorLength, format.fillCharacter);
             }
         }
 
-        foreach (_; diff .. (format.minimumWidth + 1) / 2) {
-            static if (is(Builder == StringBuilder_ASCII)) {
+        foreach(_; diff .. (format.minimumWidth + 1) / 2) {
+            static if(is(Builder == StringBuilder_ASCII)) {
                 output ~= [cast(ubyte)format.fillCharacter];
             } else {
                 output ~= [format.fillCharacter];
@@ -377,8 +377,8 @@ void handleFill(Builder)(scope ref Builder output, scope FormatSpecifier format,
         const completeLength = output.length;
         const diff = completeLength - priorLength;
 
-        foreach (_; diff .. format.minimumWidth) {
-            static if (is(Builder == StringBuilder_ASCII)) {
+        foreach(_; diff .. format.minimumWidth) {
+            static if(is(Builder == StringBuilder_ASCII)) {
                 output.insert(priorLength2, cast(ubyte)format.fillCharacter);
             } else {
                 output.insert(priorLength2, format.fillCharacter);
@@ -391,7 +391,7 @@ void handleFill(Builder)(scope ref Builder output, scope FormatSpecifier format,
 bool writeIntegral(Builder, Input)(scope ref Builder output, scope Input input, scope FormatSpecifier format) {
     import sidero.base.traits : isSigned;
 
-    if (format.alignment == FormatSpecifier.Alignment.None) {
+    if(format.alignment == FormatSpecifier.Alignment.None) {
         format.alignment = FormatSpecifier.Alignment.SignAwarePadding;
         format.fillCharacter = '0';
     }
@@ -399,7 +399,7 @@ bool writeIntegral(Builder, Input)(scope ref Builder output, scope Input input, 
     string alphabet = "0123456789ABCDEF";
     ubyte base;
 
-    final switch (format.type) {
+    final switch(format.type) {
     case FormatSpecifier.Type.Float:
     case FormatSpecifier.Type.FloatHex:
     case FormatSpecifier.Type.FloatHexCapital:
@@ -437,11 +437,11 @@ bool writeIntegral(Builder, Input)(scope ref Builder output, scope Input input, 
     handleFill(output, format, () {
         addSign(output, format, input >= 0);
 
-        if (format.useAlternativeForm) {
+        if(format.useAlternativeForm) {
             addPrefix(output, format);
         }
     }, () {
-       assert(base > 0);
+        assert(base > 0);
         assert(base < 17);
         assert(base <= alphabet.length);
         assert(alphabet.length >= base);
@@ -449,19 +449,19 @@ bool writeIntegral(Builder, Input)(scope ref Builder output, scope Input input, 
         const priorLength = output.length;
         bool doneOnce;
 
-        while (input != 0 || !doneOnce) {
+        while(input != 0 || !doneOnce) {
             auto digit = input % base;
 
-            static if (isSigned!Input) {
+            static if(isSigned!Input) {
                 // if we do this outside, Input.min won't work
-                if (digit < 0)
+                if(digit < 0)
                     digit = -digit;
             }
 
             assert(digit >= 0);
             assert(digit < base);
 
-            static if (is(Builder == StringBuilder_ASCII)) {
+            static if(is(Builder == StringBuilder_ASCII)) {
                 output.insert(cast(ptrdiff_t)priorLength, cast(ubyte)alphabet[digit]);
             } else {
                 output.insert(cast(ptrdiff_t)priorLength, cast(dchar)alphabet[digit]);
@@ -471,8 +471,8 @@ bool writeIntegral(Builder, Input)(scope ref Builder output, scope Input input, 
             doneOnce = true;
         }
 
-        if (format.type == FormatSpecifier.Type.Hex || format.type == FormatSpecifier.Type.HexCapital) {
-            if ((output.length - priorLength) % 2 == 1) {
+        if(format.type == FormatSpecifier.Type.Hex || format.type == FormatSpecifier.Type.HexCapital) {
+            if((output.length - priorLength) % 2 == 1) {
                 // make sure that we have at least mod 2 characters
                 output.insert(priorLength, "0"c);
             }
@@ -483,7 +483,7 @@ bool writeIntegral(Builder, Input)(scope ref Builder output, scope Input input, 
 }
 
 bool writeBool(Builder, Input)(scope ref Builder output, scope Input input, scope FormatSpecifier format) {
-    if (format.type == FormatSpecifier.Type.Default) {
+    if(format.type == FormatSpecifier.Type.Default) {
         // true/false
         handleFill(output, format, () {}, () { output ~= input ? "true"c : "false"c; });
     } else {
@@ -495,27 +495,27 @@ bool writeBool(Builder, Input)(scope ref Builder output, scope Input input, scop
 }
 
 bool writeChar(Builder, Input)(scope ref Builder output, scope Input input, scope FormatSpecifier format, bool quote) {
-    if (quote)
+    if(quote)
         output ~= "'"c;
 
-    static if (isASCII!Input) {
-        if (input >= 128)
+    static if(isASCII!Input) {
+        if(input >= 128)
             return false;
 
-        if (quote) {
+        if(quote) {
             handleFill(output, format, () {}, () { quoteChar(output, cast(ubyte)input); });
         } else {
             handleFill(output, format, () {}, () { output ~= [cast(ubyte)input]; });
         }
     } else {
-        if (quote) {
+        if(quote) {
             handleFill(output, format, () {}, () { quoteChar(output, input); });
         } else {
             handleFill(output, format, () {}, () { output ~= [input]; });
         }
     }
 
-    if (quote)
+    if(quote)
         output ~= "'"c;
     return true;
 }
@@ -523,12 +523,12 @@ bool writeChar(Builder, Input)(scope ref Builder output, scope Input input, scop
 bool writeFloat(Builder, Input)(scope ref Builder output, scope Input input, scope FormatSpecifier format) @trusted {
     import core.stdc.stdio : snprintf;
 
-    if (format.alignment == FormatSpecifier.Alignment.None) {
+    if(format.alignment == FormatSpecifier.Alignment.None) {
         format.alignment = FormatSpecifier.Alignment.SignAwarePadding;
         format.fillCharacter = '0';
     }
 
-    static if (is(Input == double) || is(Input == real)) {
+    static if(is(Input == double) || is(Input == real)) {
         enum FormatSize = "l";
     } else {
         enum FormatSize = "";
@@ -547,13 +547,13 @@ bool writeFloat(Builder, Input)(scope ref Builder output, scope Input input, sco
         size_t used = 1;
         formatText[0] = '%';
 
-        if (format.precision > 0 && format.precision < int.max) {
+        if(format.precision > 0 && format.precision < int.max) {
             auto did = snprintf(&formatText[used], formatText.length - (used + 2), ".%d", format.precision);
-            if (did > 0)
+            if(did > 0)
                 used += did;
         }
 
-        foreach (c; FormatSize) {
+        foreach(c; FormatSize) {
             formatText[used++] = c;
         }
 
@@ -561,13 +561,13 @@ bool writeFloat(Builder, Input)(scope ref Builder output, scope Input input, sco
         formatText[used++] = '\0';
     }
 
-    static if (is(Input == double) || is(Input == real)) {
+    static if(is(Input == double) || is(Input == real)) {
         auto did = snprintf(buffer.ptr, buffer.length, formatText.ptr, cast(double)input);
     } else {
         auto did = snprintf(buffer.ptr, buffer.length, formatText.ptr, cast(float)input);
     }
 
-    if (did <= 0)
+    if(did <= 0)
         return false;
 
     char[] prefix, bufferUsed = buffer[0 .. did];
@@ -576,15 +576,15 @@ bool writeFloat(Builder, Input)(scope ref Builder output, scope Input input, sco
     {
         size_t prefixLength;
 
-        if (did > 0) {
-            if (bufferUsed[0] == '-' || bufferUsed[0] == '+') {
+        if(did > 0) {
+            if(bufferUsed[0] == '-' || bufferUsed[0] == '+') {
                 haveSign = true;
                 prefixLength++;
             }
         }
 
-        if (did - prefixLength > 1 && (format.type == FormatSpecifier.Type.Hex || format.type == FormatSpecifier.Type.HexCapital)) {
-            if (bufferUsed[prefixLength] == '0' && bufferUsed[prefixLength + 1] == 'x') {
+        if(did - prefixLength > 1 && (format.type == FormatSpecifier.Type.Hex || format.type == FormatSpecifier.Type.HexCapital)) {
+            if(bufferUsed[prefixLength] == '0' && bufferUsed[prefixLength + 1] == 'x') {
                 prefixLength += 2;
             }
         }
@@ -594,7 +594,7 @@ bool writeFloat(Builder, Input)(scope ref Builder output, scope Input input, sco
     }
 
     handleFill(output, format, () {
-        if (!haveSign)
+        if(!haveSign)
             addSign(output, format, !(input < 0));
         output ~= prefix;
     }, () { output ~= bufferUsed; });
@@ -604,33 +604,33 @@ bool writeFloat(Builder, Input)(scope ref Builder output, scope Input input, sco
 bool writePointer(Builder, Input)(scope ref Builder output, scope Input input, scope FormatSpecifier format) @trusted {
     bool useNullText;
 
-    if (format.type == FormatSpecifier.Type.Default) {
+    if(format.type == FormatSpecifier.Type.Default) {
         format.type = FormatSpecifier.Type.HexCapital;
         format.useAlternativeForm = true;
         useNullText = true;
-    } else if (format.type == FormatSpecifier.Type.Pointer) {
+    } else if(format.type == FormatSpecifier.Type.Pointer) {
         format.type = FormatSpecifier.Type.HexCapital;
         useNullText = true;
     }
 
-    if (useNullText && input is null) {
+    if(useNullText && input is null) {
         output ~= "null"c;
         return true;
     }
 
-    static if (is(Input == delegate)) {
+    static if(is(Input == delegate)) {
         size_t pointer = cast(size_t)input.funcptr;
     } else {
         size_t pointer = cast(size_t)input;
     }
 
-    if (writeIntegral(output, pointer, format)) {
-        if (input !is null) {
-            static if (isFunctionPointer!Input) {
-                static if (is(Input == delegate)) {
+    if(writeIntegral(output, pointer, format)) {
+        if(input !is null) {
+            static if(isFunctionPointer!Input) {
+                static if(is(Input == delegate)) {
                     output ~= "("c;
 
-                    if (useNullText && input is null) {
+                    if(useNullText && input is null) {
                         output ~= "null"c;
                     } else {
                         writeIntegral(output, cast(size_t)input.ptr, format);
@@ -638,10 +638,10 @@ bool writePointer(Builder, Input)(scope ref Builder output, scope Input input, s
 
                     output ~= ")"c;
                 }
-            } else static if (__traits(compiles, typeof(*(Input.init)))) {
+            } else static if(__traits(compiles, typeof(*(Input.init)))) {
                 alias PointerAt = typeof(*(Input.init));
 
-                static if (isCopyable!PointerAt) {
+                static if(isCopyable!PointerAt) {
                     output ~= "("c;
                     formattedWriteImpl(output, String_UTF32.init, true, *input);
                     output ~= ")"c;
@@ -661,8 +661,8 @@ bool writeEnum(Builder, Input)(scope ref Builder output, scope Input input, scop
     {
         auto tempInput = cast(OriginalType!Input)input;
 
-        static foreach (m; __traits(allMembers, Input)) {
-            if (__traits(getMember, Input, m) == input) {
+        static foreach(m; __traits(allMembers, Input)) {
+            if(__traits(getMember, Input, m) == input) {
                 output ~= "."c;
                 output ~= m;
                 goto Done;
@@ -680,10 +680,10 @@ Done:
 }
 
 bool writeString(Builder, Input)(scope ref Builder output, scope Input input, scope FormatSpecifier format, bool quote) @trusted {
-    if (quote) {
+    if(quote) {
         output ~= "\""c;
 
-        foreach (c; input) {
+        foreach(c; input) {
             quoteChar(output, c);
         }
 
@@ -695,12 +695,12 @@ bool writeString(Builder, Input)(scope ref Builder output, scope Input input, sc
 }
 
 bool writeError(WrappedType, Builder, Input)(scope ref Builder output, scope Input input, scope FormatSpecifier format, bool quote) @trusted {
-    if (input) {
+    if(input) {
         // ok print the thing
 
-        if (input.isNull) {
+        if(input.isNull) {
             output ~= "no-error but null"c;
-        } else static if (is(WrappedType == void)) {
+        } else static if(is(WrappedType == void)) {
             output ~= "no-error"c;
         } else {
             WrappedType* wrapped = &input.assumeOkay();
@@ -724,7 +724,7 @@ bool writeError(WrappedType, Builder, Input)(scope ref Builder output, scope Inp
 }
 
 bool writeExpected(Builder)(scope ref Builder output, size_t wanted, size_t got) @trusted {
-    if (wanted != got) {
+    if(wanted != got) {
         output ~= "Expected(wanted: "c;
         writeIntegral(output, wanted, FormatSpecifier.init);
 
@@ -745,21 +745,21 @@ bool writeIterable(Builder, Input)(scope ref Builder output, scope Input input) 
     output ~= "["c;
     size_t i;
 
-    static if (isDynamicArray!Input) {
+    static if(isDynamicArray!Input) {
         alias SubType = Unqual!(typeof(input[0]));
 
-        static if (is(SubType == void)) {
+        static if(is(SubType == void)) {
         } else {
-            foreach (v; cast(SubType[])input[]) {
-                if (i++ > 0)
+            foreach(v; cast(SubType[])input[]) {
+                if(i++ > 0)
                     output ~= ", "c;
 
                 formattedWriteImpl(output, String_UTF32.init, true, v);
             }
         }
     } else {
-        foreach (v; input) {
-            if (i++ > 0)
+        foreach(v; input) {
+            if(i++ > 0)
                 output ~= ", "c;
 
             formattedWriteImpl(output, String_UTF32.init, true, v);
@@ -774,11 +774,11 @@ bool writeAA(Builder, Input)(scope ref Builder output, scope Input input) @trust
     output ~= "["c;
     bool isFirst = true;
 
-    version (D_BetterC) {
+    version(D_BetterC) {
     } else {
         try {
-            foreach (key, value; input) {
-                if (isFirst)
+            foreach(key, value; input) {
+                if(isFirst)
                     isFirst = false;
                 else
                     output ~= ", "c;
@@ -787,7 +787,7 @@ bool writeAA(Builder, Input)(scope ref Builder output, scope Input input) @trust
                 output ~= ": "c;
                 formattedWriteImpl(output, String_UTF32.init, true, value);
             }
-        } catch (Exception) {
+        } catch(Exception) {
         }
     }
 
@@ -804,7 +804,7 @@ bool writeUnion(Builder, Input)(scope ref Builder output, scope Input input) @tr
     output ~= "0x"c;
     FormatSpecifier format = FormatSpecifier.from(String_UTF8("{:X}"));
 
-    while (leftToGo > 0) {
+    while(leftToGo > 0) {
         writeIntegral(output, *ptr, format);
 
         ptr++;
@@ -818,7 +818,7 @@ bool writeUnion(Builder, Input)(scope ref Builder output, scope Input input) @tr
 bool writeInterface(Builder, Input)(scope ref Builder output, scope Input input) @trusted {
     output ~= __traits(identifier, Input) ~ "@"c;
 
-    if (input is null) {
+    if(input is null) {
         output ~= "null"c;
     } else {
         writePointer(output, cast(void*)input, FormatSpecifier.init);
@@ -847,8 +847,8 @@ bool writeStructClass(Builder, Input)(scope ref Builder output, scope Input inpu
 
     output ~= __traits(identifier, Input);
 
-    static if (is(Input == class)) {
-        if (input is null) {
+    static if(is(Input == class)) {
+        if(input is null) {
             output ~= "null"c;
         } else {
             writePointer(output, cast(void*)input, FormatSpecifier.init);
@@ -858,45 +858,45 @@ bool writeStructClass(Builder, Input)(scope ref Builder output, scope Input inpu
     output ~= "("c;
     bool isFirst = true, customPrinted;
 
-    static if (haveFormattedWrite) {
+    static if(haveFormattedWrite) {
         const priorLength = output.length;
 
-        static if (__traits(hasMember, Input, "DefaultFormat")) {
-            if (format.fullFormatSpec.length == 0)
+        static if(__traits(hasMember, Input, "DefaultFormat")) {
+            if(format.fullFormatSpec.length == 0)
                 format.fullFormatSpec = Input.DefaultFormat;
         }
 
-        if (input.formattedWrite(output, format)) {
+        if(input.formattedWrite(output, format)) {
             // ok
             customPrinted = true;
-        } else if (output.length > priorLength) {
+        } else if(output.length > priorLength) {
             // rollback
             output.remove(priorLength, ptrdiff_t.max);
         }
     }
 
-    if (!customPrinted) {
-        static foreach (name; FieldNameTuple!Input) {
+    if(!customPrinted) {
+        static foreach(name; FieldNameTuple!Input) {
             {
                 alias member = __traits(getMember, input, name);
                 bool ignore;
 
-                foreach (attr; __traits(getAttributes, member)) {
+                foreach(attr; __traits(getAttributes, member)) {
                     ignore = ignore || is(attr == PrintIgnore) || is(attr == PrettyPrintIgnore);
                 }
 
-                static foreach (name2; FieldNameTuple!Input) {
+                static foreach(name2; FieldNameTuple!Input) {
                     {
                         alias member2 = __traits(getMember, input, name2);
 
-                        if (name != name2) {
+                        if(name != name2) {
                             ignore = ignore || member.offsetof == member2.offsetof;
                         }
                     }
                 }
 
-                if (!ignore) {
-                    if (!isFirst)
+                if(!ignore) {
+                    if(!isFirst)
                         output ~= ", "c;
                     else
                         isFirst = false;
@@ -906,29 +906,29 @@ bool writeStructClass(Builder, Input)(scope ref Builder output, scope Input inpu
             }
         }
 
-        static if (is(Input == class)) {
-            static foreach_reverse (i, Base; BaseClassesTuple!Input) {
-                static foreach (name; FieldNameTuple!Base) {
+        static if(is(Input == class)) {
+            static foreach_reverse(i, Base; BaseClassesTuple!Input) {
+                static foreach(name; FieldNameTuple!Base) {
                     {
                         alias member = __traits(getMember, cast(Base)input, name);
                         bool ignore;
 
-                        foreach (attr; __traits(getAttributes, member)) {
+                        foreach(attr; __traits(getAttributes, member)) {
                             ignore = ignore || is(attr == PrintIgnore) || is(attr == PrettyPrintIgnore);
                         }
 
-                        static foreach (name2; FieldNameTuple!Base) {
+                        static foreach(name2; FieldNameTuple!Base) {
                             {
                                 alias member2 = __traits(getMember, cast(Base)input, name2);
 
-                                if (name != name2) {
+                                if(name != name2) {
                                     ignore = ignore || member.offsetof == member2.offsetof;
                                 }
                             }
                         }
 
-                        if (!ignore) {
-                            if (!isFirst)
+                        if(!ignore) {
+                            if(!isFirst)
                                 output ~= ", "c;
                             else
                                 isFirst = false;
@@ -940,39 +940,39 @@ bool writeStructClass(Builder, Input)(scope ref Builder output, scope Input inpu
             }
         }
 
-        static if (haveToString!Input) {
+        static if(haveToString!Input) {
             {
                 bool hadToString;
                 alias Symbols = __traits(getOverloads, Input, "toString");
 
-                static foreach (SymbolId; 0 .. Symbols.length) {
+                static foreach(SymbolId; 0 .. Symbols.length) {
                     {
                         alias gotUDAs = Filter!(isDesiredUDA!PrintIgnore, __traits(getAttributes, Symbols[SymbolId]));
                         alias gotUDAsPretty = Filter!(isDesiredUDA!PrettyPrintIgnore, __traits(getAttributes, Symbols[SymbolId]));
 
-                        if (!hadToString) {
-                            static if (gotUDAs.length == 0 && gotUDAsPretty.length == 0) {
+                        if(!hadToString) {
+                            static if(gotUDAs.length == 0 && gotUDAsPretty.length == 0) {
                                 const offsetForToString = output.length;
                                 const hadOpenBracket = output.endsWith("("c);
 
-                                static if (__traits(compiles, __traits(child, input, Symbols[SymbolId])(output))) {
+                                static if(__traits(compiles, __traits(child, input, Symbols[SymbolId])(output))) {
                                     __traits(child, input, Symbols[SymbolId])(output);
                                     hadToString = true;
-                                } else static if (__traits(compiles, __traits(child, input, Symbols[SymbolId])(&output.put))) {
+                                } else static if(__traits(compiles, __traits(child, input, Symbols[SymbolId])(&output.put))) {
                                     __traits(child, input, Symbols[SymbolId])(&output.put);
                                     hadToString = true;
-                                } else static if (__traits(compiles, output ~= __traits(child, input, Symbols[SymbolId])())) {
+                                } else static if(__traits(compiles, output ~= __traits(child, input, Symbols[SymbolId])())) {
                                     output ~= __traits(child, input, Symbols[SymbolId])();
                                     hadToString = true;
                                 }
 
-                                if (hadToString && output.length > offsetForToString) {
+                                if(hadToString && output.length > offsetForToString) {
                                     static FQN = fullyQualifiedName!Input;
                                     auto subset = output[offsetForToString .. $];
 
-                                    if (subset == FQN)
+                                    if(subset == FQN)
                                         output.remove(offsetForToString, FQN.length);
-                                    else if (!hadOpenBracket)
+                                    else if(!hadOpenBracket)
                                         output.insert(offsetForToString, " -> "c);
                                 }
                             }

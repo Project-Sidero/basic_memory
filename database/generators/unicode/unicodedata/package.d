@@ -18,24 +18,29 @@ void unicodeData() {
     internal ~= "// Generated do not modify\n";
 
     import generators.unicode.unicodedata.compatibilityformatting;
+
     compatibilityFormatting;
 
     import generators.unicode.unicodedata.decomposition;
+
     decompositionMap;
 
     import generators.unicode.unicodedata.ccc;
+
     CCC;
 
     import generators.unicode.unicodedata.composition;
+
     Composition;
 
     import generators.unicode.unicodedata.casing;
+
     Casing;
 
     {
         SequentialRanges!(size_t, SequentialRangeSplitGroup, 2) sr;
 
-        foreach (character, entry; state.decompositonMappings)
+        foreach(character, entry; state.decompositonMappings)
             sr.add(character, entry.fullyDecomposed.length);
 
         sr.splitForSame;
@@ -78,7 +83,7 @@ void unicodeData() {
         apiOutput ~= "/// Lookup decomposition mapping for character given the compatibility formatting tag.\n";
         apiOutput ~= "export dstring sidero_utf_lut_getDecompositionMapping(dchar input, CompatibilityFormattingTag tag) @safe nothrow @nogc pure {\n";
         apiOutput ~= "    final switch(tag) {\n";
-        foreach (tag; __traits(allMembers, CompatibilityFormattingTag)) {
+        foreach(tag; __traits(allMembers, CompatibilityFormattingTag)) {
             apiOutput ~= "        case CompatibilityFormattingTag." ~ tag ~ ":\n";
             apiOutput ~= "            return sidero_utf_lut_getDecompositionMapping" ~ tag ~ "(input);\n";
         }
@@ -91,7 +96,7 @@ void unicodeData() {
         apiOutput ~= "/// Lookup length of decomposition mapping for character given the compatibility formatting tag.\n";
         apiOutput ~= "export ubyte sidero_utf_lut_lengthOfDecompositionMapping(dchar input, CompatibilityFormattingTag tag) @safe nothrow @nogc pure {\n";
         apiOutput ~= "    final switch(tag) {\n";
-        foreach (tag; __traits(allMembers, CompatibilityFormattingTag)) {
+        foreach(tag; __traits(allMembers, CompatibilityFormattingTag)) {
             apiOutput ~= "        case CompatibilityFormattingTag." ~ tag ~ ":\n";
             apiOutput ~= "            return sidero_utf_lut_lengthOfDecompositionMapping" ~ tag ~ "(input);\n";
         }
@@ -102,9 +107,9 @@ void unicodeData() {
     {
         SequentialRanges!(long[], SequentialRangeSplitGroup, 2) sr;
 
-        foreach (entry; state.entries) {
-            foreach (c; entry.range.start .. entry.range.end + 1) {
-                if (entry.numericValueNumerator != 0 || entry.numericValueDenominator != 0)
+        foreach(entry; state.entries) {
+            foreach(c; entry.range.start .. entry.range.end + 1) {
+                if(entry.numericValueNumerator != 0 || entry.numericValueDenominator != 0)
                     sr.add(cast(dchar)c, [entry.numericValueNumerator, entry.numericValueDenominator]);
             }
         }
@@ -137,8 +142,8 @@ void unicodeData() {
     {
         SequentialRanges!(ubyte, SequentialRangeSplitGroup, 2) sr;
 
-        foreach (entry; state.entries) {
-            foreach (c; entry.range.start .. entry.range.end + 1)
+        foreach(entry; state.entries) {
+            foreach(c; entry.range.start .. entry.range.end + 1)
                 sr.add(cast(dchar)c, cast(ubyte)entry.generalCategory);
         }
 
@@ -304,4 +309,3 @@ If a decomposition mapping (codepoints) are empty or its the original codepoint,
 
 canonical mappings maybe have decomposition mappings
 */
-

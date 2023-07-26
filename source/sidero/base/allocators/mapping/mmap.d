@@ -10,7 +10,7 @@ import core.sys.posix.sys.mman;
 
 export:
 
-version (Posix) {
+version(Posix) {
     ///
     struct MMap {
     export:
@@ -32,12 +32,12 @@ version (Posix) {
 
         ///
         void[] allocate(size_t length, TypeInfo ti = null) {
-            if (length == 0)
+            if(length == 0)
                 return null;
 
             void* ret = assumeAllAttributes(&mmap)(null, length, PROT_READ | PROT_WRITE, MAP_PRIVATE, 0, 0);
 
-            if (ret is MAP_FAILED)
+            if(ret is MAP_FAILED)
                 return null;
             else
                 return ret[0 .. length];
@@ -50,7 +50,7 @@ version (Posix) {
 
         ///
         bool deallocate(scope void[] array) {
-            if (array.length > 0) {
+            if(array.length > 0) {
                 assumeAllAttributes(&munmap)(array.ptr, array.length);
                 return true;
             } else

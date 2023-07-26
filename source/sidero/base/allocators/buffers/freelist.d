@@ -46,7 +46,7 @@ export:
 
         version(none) {
             Node* current = cast(Node*)head.next;
-            while (current !is null)
+            while(current !is null)
                 current = current.next;
         }
     }
@@ -61,7 +61,7 @@ scope @safe @nogc pure nothrow:
      ~this() {
         Node* current = head.next;
 
-        while (current !is null) {
+        while(current !is null) {
             Node* next = current.next;
 
             poolAllocator.deallocate(current.recreate());
@@ -90,13 +90,13 @@ scope @safe @nogc pure nothrow:
     void[] allocate(size_t size, TypeInfo ti = null) {
         Node* current = head.next;
 
-        if (current !is null && current.available >= size)
+        if(current !is null && current.available >= size)
             return listAllocate(&head, current, size);
         else {
             size_t toAllocate = size < Node.sizeof ? Node.sizeof : size;
             void[] ret = poolAllocator.allocate(toAllocate, ti);
 
-            if (ret !is null)
+            if(ret !is null)
                 return ret[0 .. size];
             else
                 return null;
@@ -110,7 +110,7 @@ scope @safe @nogc pure nothrow:
 
     ///
     bool deallocate(scope void[] data) {
-        if (data is null)
+        if(data is null)
             return false;
 
         Node* node = cast(Node*)data.ptr;
@@ -121,17 +121,17 @@ scope @safe @nogc pure nothrow:
         return true;
     }
 
-    static if (__traits(hasMember, PoolAllocator, "owns")) {
+    static if(__traits(hasMember, PoolAllocator, "owns")) {
         ///
         Ternary owns(scope void[] array) {
             return poolAllocator.owns(array);
         }
     }
 
-    static if (__traits(hasMember, PoolAllocator, "deallocateAll")) {
+    static if(__traits(hasMember, PoolAllocator, "deallocateAll")) {
         ///
         bool deallocateAll() {
-            if (poolAllocator.deallocateAll()) {
+            if(poolAllocator.deallocateAll()) {
                 head.next = null;
                 return true;
             }
@@ -140,7 +140,7 @@ scope @safe @nogc pure nothrow:
         }
     }
 
-    static if (__traits(hasMember, PoolAllocator, "empty")) {
+    static if(__traits(hasMember, PoolAllocator, "empty")) {
         ///
         bool empty() {
             return poolAllocator.empty();
@@ -226,7 +226,7 @@ export:
     private {
         Node head;
 
-        static if (Strategy == FitsStrategy.NextFit) {
+        static if(Strategy == FitsStrategy.NextFit) {
             Node* previous;
         }
 
@@ -251,30 +251,30 @@ scope @safe @nogc pure nothrow:
     this(return scope ref FreeList other) {
         this.tupleof = other.tupleof;
         other.head = Node.init;
-        static if (Strategy == FitsStrategy.NextFit)
+        static if(Strategy == FitsStrategy.NextFit)
             other.previous = null;
         other = FreeList.init;
     }
 
-    static if (Strategy == FitsStrategy.FirstFit) {
+    static if(Strategy == FitsStrategy.FirstFit) {
         ///
         void[] allocate(size_t size, TypeInfo ti = null) {
             Node* previous = &head;
 
-            for (;;) {
+            for(;;) {
                 assert(previous !is null);
                 Node* current = previous.next;
 
-                if (current is null) {
+                if(current is null) {
                     size_t toAllocateSize = size;
-                    if (size < Node.sizeof)
+                    if(size < Node.sizeof)
                         toAllocateSize = Node.sizeof;
 
                     auto ret = poolAllocator.allocate(toAllocateSize, ti);
-                    if (ret is null)
+                    if(ret is null)
                         return null;
 
-                    if (ret.length < toAllocateSize) {
+                    if(ret.length < toAllocateSize) {
                         poolAllocator.deallocate(ret);
                         return null;
                     }
@@ -282,7 +282,7 @@ scope @safe @nogc pure nothrow:
                     allocations.store(ret);
                     fullAllocations.store(ret);
                     return ret[0 .. size];
-                } else if (!current.fitsAlignment(size, alignedTo))
+                } else if(!current.fitsAlignment(size, alignedTo))
                     previous = current.next;
                 else
                     return listAllocate(previous, current, size);
@@ -290,15 +290,15 @@ scope @safe @nogc pure nothrow:
 
             assert(0);
         }
-    } else static if (Strategy == FitsStrategy.NextFit) {
+    } else static if(Strategy == FitsStrategy.NextFit) {
         ///
         void[] allocate(size_t size, TypeInfo ti = null) {
             Node* start = previous;
 
-            for (;;) {
+            for(;;) {
                 Node* current;
 
-                if (start is null) {
+                if(start is null) {
                     head.next = &head;
 
                     previous = &head;
@@ -307,16 +307,16 @@ scope @safe @nogc pure nothrow:
                 } else
                     current = start.next;
 
-                if (previous is start) {
+                if(previous is start) {
                     size_t toAllocateSize = size;
-                    if (size < Node.sizeof)
+                    if(size < Node.sizeof)
                         toAllocateSize = Node.sizeof;
 
                     auto ret = poolAllocator.allocate(toAllocateSize, ti);
-                    if (ret is null)
+                    if(ret is null)
                         return null;
 
-                    if (ret.length < toAllocateSize) {
+                    if(ret.length < toAllocateSize) {
                         poolAllocator.deallocate(ret);
                         return null;
                     }
@@ -324,7 +324,7 @@ scope @safe @nogc pure nothrow:
                     allocations.store(ret);
                     fullAllocations.store(ret);
                     return ret[0 .. size];
-                } else if (!current.fitsAlignment(size, alignedTo))
+                } else if(!current.fitsAlignment(size, alignedTo))
                     previous = current.next;
                 else
                     return listAllocate(previous, current, size);
@@ -332,23 +332,23 @@ scope @safe @nogc pure nothrow:
 
             assert(0);
         }
-    } else static if (Strategy == FitsStrategy.BestFit) {
+    } else static if(Strategy == FitsStrategy.BestFit) {
         ///
         void[] allocate(size_t size, TypeInfo ti = null) {
             Node* best, previous = &head, bestPrevious;
             size_t bestSize = size_t.max;
 
-            while (previous !is null) {
+            while(previous !is null) {
                 Node* current = previous.next;
 
-                if (current is null || current.available == size) {
-                    if (current !is null) {
+                if(current is null || current.available == size) {
+                    if(current !is null) {
                         bestPrevious = previous;
                         best = current;
                     }
 
                     break;
-                } else if (current.fitsAlignment(size, alignedTo) && bestSize > current.available) {
+                } else if(current.fitsAlignment(size, alignedTo) && bestSize > current.available) {
                     assert(best !is current);
                     best = current;
                     bestPrevious = previous;
@@ -358,19 +358,19 @@ scope @safe @nogc pure nothrow:
                 previous = current.next;
             }
 
-            if (best !is null)
+            if(best !is null)
                 return listAllocate(bestPrevious, best, size);
 
             {
                 size_t toAllocateSize = size;
-                if (size < Node.sizeof)
+                if(size < Node.sizeof)
                     toAllocateSize = Node.sizeof;
 
                 auto ret = poolAllocator.allocate(toAllocateSize, ti);
-                if (ret is null)
+                if(ret is null)
                     return null;
 
-                if (ret.length < toAllocateSize) {
+                if(ret.length < toAllocateSize) {
                     poolAllocator.deallocate(ret);
                     return null;
                 }
@@ -380,16 +380,16 @@ scope @safe @nogc pure nothrow:
                 return ret[0 .. size];
             }
         }
-    } else static if (Strategy == FitsStrategy.WorstFit) {
+    } else static if(Strategy == FitsStrategy.WorstFit) {
         ///
         void[] allocate(size_t size, TypeInfo ti = null) {
             Node* previous = &head, largest, largestPrevious;
             size_t largestSize;
 
-            while (previous.next !is null) {
+            while(previous.next !is null) {
                 Node* current = previous.next;
 
-                if (current.available > largestSize) {
+                if(current.available > largestSize) {
                     largestSize = current.available;
                     largest = current;
                     largestPrevious = previous;
@@ -398,16 +398,16 @@ scope @safe @nogc pure nothrow:
                 previous = current;
             }
 
-            if (largestSize < size) {
+            if(largestSize < size) {
                 size_t toAllocateSize = size;
-                if (size < Node.sizeof)
+                if(size < Node.sizeof)
                     toAllocateSize = Node.sizeof;
 
                 auto ret = poolAllocator.allocate(toAllocateSize, ti);
-                if (ret is null)
+                if(ret is null)
                     return null;
 
-                if (ret.length < toAllocateSize) {
+                if(ret.length < toAllocateSize) {
                     poolAllocator.deallocate(ret);
                     return null;
                 }
@@ -423,11 +423,11 @@ scope @safe @nogc pure nothrow:
 
     ///
     bool reallocate(scope ref void[] array, size_t newSize) {
-        if (void[] actual = allocations.getTrueRegionOfMemory(array)) {
+        if(void[] actual = allocations.getTrueRegionOfMemory(array)) {
             size_t pointerDifference = array.ptr - actual.ptr;
             size_t amountLeft = actual.length - pointerDifference;
 
-            if (amountLeft >= newSize) {
+            if(amountLeft >= newSize) {
                 array = array.ptr[0 .. newSize];
                 return true;
             }
@@ -440,10 +440,10 @@ scope @safe @nogc pure nothrow:
     bool deallocate(scope void[] array) {
         void[] trueArray = allocations.getTrueRegionOfMemory(array);
 
-        if (trueArray !is null) {
+        if(trueArray !is null) {
             allocations.remove(trueArray);
 
-            if (trueArray.length >= Node.sizeof) {
+            if(trueArray.length >= Node.sizeof) {
                 Node* node = cast(Node*)trueArray.ptr;
                 node.available = trueArray.length;
 
@@ -470,19 +470,19 @@ scope @safe @nogc pure nothrow:
         {
             head.next = null;
 
-            static if (Strategy == FitsStrategy.NextFit) {
+            static if(Strategy == FitsStrategy.NextFit) {
                 previous = null;
             }
         }
 
-        static if (__traits(hasMember, PoolAllocator, "deallocateAll")) {
+        static if(__traits(hasMember, PoolAllocator, "deallocateAll")) {
             poolAllocator.deallocateAll();
         }
 
         return true;
     }
 
-    static if (__traits(hasMember, PoolAllocator, "empty")) {
+    static if(__traits(hasMember, PoolAllocator, "empty")) {
         ///
         bool empty() {
             return poolAllocator.empty();
@@ -501,11 +501,11 @@ private @hidden:
         }
 
         bool fitsAlignment(size_t needed, size_t alignedTo) @trusted {
-            if (alignedTo == 0)
+            if(alignedTo == 0)
                 return true;
 
             size_t padding = alignedTo - ((cast(size_t)&this) % alignedTo);
-            if (padding == alignedTo)
+            if(padding == alignedTo)
                 padding = 0;
 
             return needed + padding <= available;
@@ -517,12 +517,12 @@ private @hidden:
 
         size_t toAddAlignment = alignedTo - ((cast(size_t)result) % alignedTo);
 
-        if (toAddAlignment == alignedTo)
+        if(toAddAlignment == alignedTo)
             toAddAlignment = 0;
 
         size_t remainderAvailable = current.available - (toAddAlignment + size);
 
-        if (shouldSplit(current.available, size, alignedTo) && remainderAvailable >= minimumStoredSize) {
+        if(shouldSplit(current.available, size, alignedTo) && remainderAvailable >= minimumStoredSize) {
             allocations.store(result.recreate()[toAddAlignment .. toAddAlignment + size]);
             Node* remainder = cast(Node*)&result.recreate()[toAddAlignment + size];
 
@@ -608,7 +608,7 @@ export:
     ///
     InternalAllocator internalAllocator;
 
-    static if (!is(PoolAllocator == void)) {
+    static if(!is(PoolAllocator == void)) {
         ///
         PoolAllocator poolAllocator;
     }
@@ -637,8 +637,8 @@ scope @safe @nogc pure nothrow:
 
     ///
      ~this() {
-        static if (!is(PoolAllocator == void)) {
-            if (!poolAllocator.isNull)
+        static if(!is(PoolAllocator == void)) {
+            if(!poolAllocator.isNull)
                 deallocateAll();
         }
 
@@ -659,7 +659,7 @@ scope @safe @nogc pure nothrow:
         other = AllocatedList.init;
     }
 
-    static if (!is(PoolAllocator == void)) {
+    static if(!is(PoolAllocator == void)) {
         ///
         void deallocateAll() {
             deallocateAll(!poolAllocator.isNull ? &poolAllocator.deallocate : null);
@@ -670,10 +670,10 @@ scope @safe @nogc pure nothrow:
     void deallocateAll(scope bool delegate(scope void[] array) @trusted nothrow @nogc pure deallocator) {
         Node* current = head.next;
 
-        while (current !is null) {
+        while(current !is null) {
             Node* next = current.next;
 
-            if (deallocator !is null)
+            if(deallocator !is null)
                 deallocator(current.array);
             internalAllocator.deallocate((cast(void*)current)[0 .. Node.sizeof]);
 
@@ -685,33 +685,33 @@ scope @safe @nogc pure nothrow:
 
     ///
     void store(scope void[] array) {
-        if (array is null)
+        if(array is null)
             return;
 
         Node* previous = &head;
 
-        while (previous.next !is null && previous.next.array.ptr <= array.ptr) {
+        while(previous.next !is null && previous.next.array.ptr <= array.ptr) {
             Node* current = previous.next;
 
-            if (current.matches(array.ptr)) {
+            if(current.matches(array.ptr)) {
                 void* actualStartPtr = current.array.ptr < array.ptr ? current.array.ptr : array.ptr,
                     actualEndPtr = (current.array.ptr + current.array.length) > (array.ptr + array.length) ? (
                             current.array.ptr + current.array.length) : (array.ptr + array.length);
                 size_t actualLength = actualEndPtr - actualStartPtr;
 
-                if (current.array.ptr !is actualStartPtr) {
+                if(current.array.ptr !is actualStartPtr) {
                     previous.next = current.next;
                     current.array = actualStartPtr[0 .. actualLength];
 
                     previous = &head;
 
-                    while (previous.next !is null && previous.next.array.ptr <= array.ptr) {
+                    while(previous.next !is null && previous.next.array.ptr <= array.ptr) {
                         previous = previous.next;
                     }
 
                     current.next = previous.next;
                     previous.next = current;
-                } else if (current.array.length != actualLength) {
+                } else if(current.array.length != actualLength) {
                     current.array = actualStartPtr[0 .. actualLength];
                 }
 
@@ -731,15 +731,15 @@ scope @safe @nogc pure nothrow:
 
     /// Caller is responsible for deallocation of memory
     void remove(scope void[] array) {
-        if (array is null)
+        if(array is null)
             return;
 
         Node* previous = &head;
 
-        while (previous.next !is null && previous.next.array.ptr <= array.ptr) {
+        while(previous.next !is null && previous.next.array.ptr <= array.ptr) {
             Node* current = previous.next;
 
-            if (current.matches(array.ptr)) {
+            if(current.matches(array.ptr)) {
                 previous.next = current.next;
                 internalAllocator.deallocate((cast(void*)current)[0 .. Node.sizeof]);
                 return;
@@ -751,15 +751,15 @@ scope @safe @nogc pure nothrow:
 
     ///
     bool owns(scope void[] array) {
-        if (array is null)
+        if(array is null)
             return false;
 
         Node* previous = &head;
 
-        while (previous.next !is null && previous.next.array.ptr <= array.ptr) {
+        while(previous.next !is null && previous.next.array.ptr <= array.ptr) {
             Node* current = previous.next;
 
-            if (current.matches(array.ptr))
+            if(current.matches(array.ptr))
                 return true;
 
             previous = current;
@@ -775,15 +775,15 @@ scope @safe @nogc pure nothrow:
 
     /// If memory is stored by us, will return the true region of memory associated with it.
     void[] getTrueRegionOfMemory(scope void[] array) {
-        if (array is null)
+        if(array is null)
             return null;
 
         Node* previous = &head;
 
-        while (previous.next !is null && previous.next.array.ptr <= array.ptr) {
+        while(previous.next !is null && previous.next.array.ptr <= array.ptr) {
             Node* current = previous.next;
 
-            if (current.matches(array.ptr))
+            if(current.matches(array.ptr))
                 return current.array;
 
             previous = current;
@@ -829,7 +829,7 @@ unittest {
 private @hidden:
 
 bool shouldSplit()(size_t poolSize, size_t forSize, size_t alignment) @safe @nogc nothrow pure {
-    if (alignment == 0)
+    if(alignment == 0)
         alignment = (void*).sizeof * 2;
 
     forSize += (void*).sizeof * 4;

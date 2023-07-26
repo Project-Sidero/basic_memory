@@ -14,18 +14,18 @@ String_UTF8 getPosixLocalTimeZone() @trusted {
     // based upon https://stackoverflow.com/a/33881726
 
     // only available on *nix obviously
-    version (Posix) {
+    version(Posix) {
         String_UTF8 findField(scope DynamicArray!char input, scope string field) {
-            while (input.length > 0) {
+            while(input.length > 0) {
                 ptrdiff_t index = input.indexOf(field);
 
-                if (index < 0)
+                if(index < 0)
                     return typeof(return).init;
 
                 input = input[index .. $];
                 index = input.indexOf("=");
 
-                if (index < 0)
+                if(index < 0)
                     return typeof(return).init;
 
                 String_UTF8 key = String_UTF8(input[0 .. index].unsafeGetLiteral);
@@ -34,13 +34,13 @@ String_UTF8 getPosixLocalTimeZone() @trusted {
                 input = input[index + 1 .. $];
                 index = input.indexOf("\n");
 
-                if (index >= 0)
+                if(index >= 0)
                     input = input[0 .. index];
 
                 String_UTF8 value = String_UTF8(input.unsafeGetLiteral);
                 value.strip;
 
-                if (key == field)
+                if(key == field)
                     return value.dup;
             }
 
@@ -52,13 +52,13 @@ String_UTF8 getPosixLocalTimeZone() @trusted {
             // read first line, strip, return
             auto read = readFile!char("/etc/timezone\0", tzFileSize[0]);
 
-            if (read.length > 0) {
+            if(read.length > 0) {
                 tzFileSize[0] = read.length;
 
                 String_UTF8 temp = String_UTF8(read.unsafeGetLiteral);
 
                 ptrdiff_t index = temp.indexOf("\n");
-                if (index >= 0)
+                if(index >= 0)
                     temp = temp[0 .. index];
                 temp.strip;
 
@@ -66,7 +66,7 @@ String_UTF8 getPosixLocalTimeZone() @trusted {
                 return localOlsonName;
             }
 
-            if (tzFileSize[0] > 0)
+            if(tzFileSize[0] > 0)
                 return localOlsonName;
         }
 
@@ -76,12 +76,12 @@ String_UTF8 getPosixLocalTimeZone() @trusted {
             auto read = readFile!char("/etc/sysconfig/clock\0", tzFileSize[1]);
             auto field = findField(read, "ZONE");
 
-            if (field.length > 0) {
+            if(field.length > 0) {
                 tzFileSize[1] = read.length;
                 localOlsonName = field;
             }
 
-            if (tzFileSize[1] > 0)
+            if(tzFileSize[1] > 0)
                 return localOlsonName;
         }
 
@@ -91,12 +91,12 @@ String_UTF8 getPosixLocalTimeZone() @trusted {
             auto read = readFile!char("/etc/sysconfig/clock\0", tzFileSize[2]);
             auto field = findField(read, "TZ");
 
-            if (field.length > 0) {
+            if(field.length > 0) {
                 tzFileSize[2] = read.length;
                 localOlsonName = field;
             }
 
-            if (tzFileSize[2] > 0)
+            if(tzFileSize[2] > 0)
                 return localOlsonName;
         }
     }
@@ -112,10 +112,10 @@ Result!PosixTZBase parsePosixTZ(scope String_UTF8 spec) @trusted {
     // https://www.gnu.org/software/libc/manual/html_node/TZ-Variable.html
 
     // prevent runaway string -> integer conversions
-    if (spec.isEncodingChanged || !spec.isPtrNullTerminated)
+    if(spec.isEncodingChanged || !spec.isPtrNullTerminated)
         spec = spec.dup;
 
-    if (spec.startsWith("/")) {
+    if(spec.startsWith("/")) {
         // use a specific TZif file
         return typeof(return)(PosixTZBase(spec));
     } else {
@@ -128,8 +128,8 @@ Result!PosixTZBase parsePosixTZ(scope String_UTF8 spec) @trusted {
 
             size_t count;
 
-            foreach (c; spec) {
-                if (c.isAlpha)
+            foreach(c; spec) {
+                if(c.isAlpha)
                     count++;
                 else
                     break;
@@ -152,14 +152,14 @@ Result!PosixTZBase parsePosixTZ(scope String_UTF8 spec) @trusted {
 
             {
                 size_t count;
-                foreach (c; spec) {
-                    if ((c >= '0' && c <= '9'))
+                foreach(c; spec) {
+                    if((c >= '0' && c <= '9'))
                         count++;
                     else
                         break;
                 }
 
-                if (count == 0)
+                if(count == 0)
                     return typeof(return).init;
 
                 length += count;
@@ -167,38 +167,38 @@ Result!PosixTZBase parsePosixTZ(scope String_UTF8 spec) @trusted {
                 spec = spec[count .. $];
             }
 
-            if (spec.startsWith(":")) {
+            if(spec.startsWith(":")) {
                 spec = spec[1 .. $];
                 length++;
 
                 size_t count;
-                foreach (c; spec) {
-                    if ((c >= '0' && c <= '9'))
+                foreach(c; spec) {
+                    if((c >= '0' && c <= '9'))
                         count++;
                     else
                         break;
                 }
 
-                if (count > 0) {
+                if(count > 0) {
                     length += count;
                     minute = spec[0 .. count];
                     spec = spec[count .. $];
                 }
             }
 
-            if (spec.startsWith(":")) {
+            if(spec.startsWith(":")) {
                 spec = spec[1 .. $];
                 length++;
 
                 size_t count;
-                foreach (c; spec) {
-                    if ((c >= '0' && c <= '9'))
+                foreach(c; spec) {
+                    if((c >= '0' && c <= '9'))
                         count++;
                     else
                         break;
                 }
 
-                if (count > 0) {
+                if(count > 0) {
                     length += count;
                     second = spec[0 .. count];
                     spec = spec[count .. $];
@@ -210,12 +210,12 @@ Result!PosixTZBase parsePosixTZ(scope String_UTF8 spec) @trusted {
                 seconds = strtoll(literal.ptr, null, 10) * 60 * 60;
             }
 
-            if (minute.length > 0) {
+            if(minute.length > 0) {
                 auto literal = minute.unsafeGetLiteral;
                 seconds += strtoll(literal.ptr, null, 10) * 60;
             }
 
-            if (second.length > 0) {
+            if(second.length > 0) {
                 auto literal = second.unsafeGetLiteral;
                 seconds += strtoll(literal.ptr, null, 10);
             }
@@ -228,16 +228,16 @@ Result!PosixTZBase parsePosixTZ(scope String_UTF8 spec) @trusted {
 
             bool wasNegative;
 
-            if (spec.startsWith("+")) {
+            if(spec.startsWith("+")) {
                 spec = spec[1 .. $];
-            } else if (spec.startsWith("-")) {
+            } else if(spec.startsWith("-")) {
                 wasNegative = true;
                 spec = spec[1 .. $];
             }
 
             auto ret = timeOfDay(seconds);
 
-            if (wasNegative)
+            if(wasNegative)
                 seconds *= -1;
 
             return ret;
@@ -250,7 +250,7 @@ Result!PosixTZBase parsePosixTZ(scope String_UTF8 spec) @trusted {
             size_t matched;
 
             // rule: default 120s
-            if (spec.startsWith("J")) {
+            if(spec.startsWith("J")) {
                 //  J[1-365] ruleTime?
                 spec = spec[1 .. $];
                 matched = 1;
@@ -265,7 +265,7 @@ Result!PosixTZBase parsePosixTZ(scope String_UTF8 spec) @trusted {
                 const count = end - literal.ptr;
                 matched += count;
                 spec = spec[count .. $];
-            } else if (spec.startsWith("M")) {
+            } else if(spec.startsWith("M")) {
                 //  M[1-12].[1-5].[0-6] ruleTime?
                 spec = spec[1 .. $];
                 matched = 1;
@@ -282,7 +282,7 @@ Result!PosixTZBase parsePosixTZ(scope String_UTF8 spec) @trusted {
                     spec = spec[count .. $];
                 }
 
-                if (spec.startsWith(".")) {
+                if(spec.startsWith(".")) {
                     spec = spec[1 .. $];
                     matched++;
 
@@ -296,7 +296,7 @@ Result!PosixTZBase parsePosixTZ(scope String_UTF8 spec) @trusted {
                     spec = spec[count .. $];
                 }
 
-                if (spec.startsWith(".")) {
+                if(spec.startsWith(".")) {
                     spec = spec[1 .. $];
                     matched++;
 
@@ -324,16 +324,16 @@ Result!PosixTZBase parsePosixTZ(scope String_UTF8 spec) @trusted {
                 spec = spec[count .. $];
             }
 
-            if (matched == 0) {
+            if(matched == 0) {
                 return String_UTF8.init;
             }
 
-            if (spec.startsWith("/")) {
+            if(spec.startsWith("/")) {
                 spec = spec[1 .. $];
                 matched++;
 
                 auto found = timeDelta(output.secondsBias);
-                if (found.length == 0)
+                if(found.length == 0)
                     output.secondsBias = 7200;
                 else
                     matched += found.length;
@@ -345,10 +345,10 @@ Result!PosixTZBase parsePosixTZ(scope String_UTF8 spec) @trusted {
         }
 
         {
-            if (spec.startsWith("<")) {
+            if(spec.startsWith("<")) {
                 // < stdname >
                 ptrdiff_t index = spec.indexOf(">");
-                if (index < 0)
+                if(index < 0)
                     return typeof(return)(MalformedInputException("Standard name if in < ... > must have > after it"));
                 stdName = spec[1 .. index];
                 spec = spec[index + 1 .. $];
@@ -357,21 +357,21 @@ Result!PosixTZBase parsePosixTZ(scope String_UTF8 spec) @trusted {
                 stdName = zname();
             }
 
-            if (stdName.length < 3)
+            if(stdName.length < 3)
                 return typeof(return)(MalformedInputException("Standard name must be longer than 2 characters"));
         }
 
         {
             // stdoffset, timeDelta
-            if (spec.startsWith("/") || timeDelta(stdOffset).length == 0)
+            if(spec.startsWith("/") || timeDelta(stdOffset).length == 0)
                 return typeof(return)(MalformedInputException("Standard name must be followed by an offset"));
         }
 
         {
-            if (spec.startsWith("<")) {
+            if(spec.startsWith("<")) {
                 // < dstname >
                 ptrdiff_t index = spec.indexOf(">");
-                if (index < 0)
+                if(index < 0)
                     return typeof(return)(MalformedInputException("DST name if in < ... > must have > after it"));
                 dstName = spec[1 .. index];
                 spec = spec[index + 1 .. $];
@@ -380,11 +380,11 @@ Result!PosixTZBase parsePosixTZ(scope String_UTF8 spec) @trusted {
                 dstName = zname();
             }
 
-            if (dstName.length > 0 && dstName.length < 3)
+            if(dstName.length > 0 && dstName.length < 3)
                 return typeof(return)(MalformedInputException("DST name must be longer than 2 characters"));
         }
 
-        if (dstName.length > 0) {
+        if(dstName.length > 0) {
             // dstoffset, timeDelta
             timeDelta(dstOffset);
         } else {
@@ -393,24 +393,24 @@ Result!PosixTZBase parsePosixTZ(scope String_UTF8 spec) @trusted {
 
         {
             // [,;]
-            if (spec.startsWith(",") || spec.startsWith(";")) {
+            if(spec.startsWith(",") || spec.startsWith(";")) {
                 spec = spec[1 .. $];
 
                 // start, rule
                 rule(dstTransition);
 
-                if (dstTransition.type == PosixTZBaseRule.Type.DayInWeekOfMonth) {
-                    if (dstTransition.monthOfYear < 1 || dstTransition.monthOfYear > 12)
+                if(dstTransition.type == PosixTZBaseRule.Type.DayInWeekOfMonth) {
+                    if(dstTransition.monthOfYear < 1 || dstTransition.monthOfYear > 12)
                         return typeof(return)(MalformedInputException("DST Month must be between 1 and 12 inclusive"));
-                    else if (dstTransition.weekOfMonth < 1 || dstTransition.weekOfMonth > 5)
+                    else if(dstTransition.weekOfMonth < 1 || dstTransition.weekOfMonth > 5)
                         return typeof(return)(MalformedInputException("DST Week of month must be between 1 and 5 inclusive"));
-                    else if (dstTransition.dayOfWeek > 6)
+                    else if(dstTransition.dayOfWeek > 6)
                         return typeof(return)(MalformedInputException("DST Day of week must be between 0 and 6 inclusive"));
-                } else if (dstTransition.type == PosixTZBaseRule.Type.JulianDay) {
-                    if (dstTransition.julianDay < 1 || dstTransition.julianDay > 365)
+                } else if(dstTransition.type == PosixTZBaseRule.Type.JulianDay) {
+                    if(dstTransition.julianDay < 1 || dstTransition.julianDay > 365)
                         return typeof(return)(MalformedInputException("DST Julian day must be between 1 and 365 inclusive"));
-                } else if (dstTransition.type == PosixTZBaseRule.Type.DayOfYear) {
-                    if (dstTransition.dayOfYear > 365)
+                } else if(dstTransition.type == PosixTZBaseRule.Type.DayOfYear) {
+                    if(dstTransition.dayOfYear > 365)
                         return typeof(return)(MalformedInputException("DST day in year must be between 0 and 365 inclusive"));
                 }
             }
@@ -418,24 +418,24 @@ Result!PosixTZBase parsePosixTZ(scope String_UTF8 spec) @trusted {
 
         {
             // [,;]
-            if (spec.startsWith(",") || spec.startsWith(";")) {
+            if(spec.startsWith(",") || spec.startsWith(";")) {
                 spec = spec[1 .. $];
 
                 // end, rule
                 rule(stdTransition);
 
-                if (stdTransition.type == PosixTZBaseRule.Type.DayInWeekOfMonth) {
-                    if (stdTransition.monthOfYear < 1 || stdTransition.monthOfYear > 12)
+                if(stdTransition.type == PosixTZBaseRule.Type.DayInWeekOfMonth) {
+                    if(stdTransition.monthOfYear < 1 || stdTransition.monthOfYear > 12)
                         return typeof(return)(MalformedInputException("STD Month must be between 1 and 12 inclusive"));
-                    else if (stdTransition.weekOfMonth < 1 || stdTransition.weekOfMonth > 5)
+                    else if(stdTransition.weekOfMonth < 1 || stdTransition.weekOfMonth > 5)
                         return typeof(return)(MalformedInputException("STD Week of month must be between 1 and 5 inclusive"));
-                    else if (stdTransition.dayOfWeek > 6)
+                    else if(stdTransition.dayOfWeek > 6)
                         return typeof(return)(MalformedInputException("STD Day of week must be between 0 and 6 inclusive"));
-                } else if (stdTransition.type == PosixTZBaseRule.Type.JulianDay) {
-                    if (stdTransition.julianDay < 1 || stdTransition.julianDay > 365)
+                } else if(stdTransition.type == PosixTZBaseRule.Type.JulianDay) {
+                    if(stdTransition.julianDay < 1 || stdTransition.julianDay > 365)
                         return typeof(return)(MalformedInputException("STD Julian day must be between 1 and 365 inclusive"));
-                } else if (stdTransition.type == PosixTZBaseRule.Type.DayOfYear) {
-                    if (stdTransition.dayOfYear > 365)
+                } else if(stdTransition.type == PosixTZBaseRule.Type.DayOfYear) {
+                    if(stdTransition.dayOfYear > 365)
                         return typeof(return)(MalformedInputException("STD day in year must be between 0 and 365 inclusive"));
                 }
             }
@@ -470,39 +470,39 @@ struct PosixTZBase {
 }
 
 bool isInDaylightSavings(scope const ref PosixTZBase self, scope DateTime!GregorianDate date) {
-    if (self.transitionToStd.type == PosixTZBaseRule.Type.NoDST || self.transitionToDST.type == PosixTZBaseRule.Type.NoDST)
+    if(self.transitionToStd.type == PosixTZBaseRule.Type.NoDST || self.transitionToDST.type == PosixTZBaseRule.Type.NoDST)
         return false;
 
     long calculateDayOfYear(scope const ref PosixTZBaseRule rule) {
         long ret;
 
-        if (rule.type == PosixTZBaseRule.Type.JulianDay) {
+        if(rule.type == PosixTZBaseRule.Type.JulianDay) {
             ret = rule.dayOfYear;
 
             // add leap day if we're after it in the specification
-            if (date.isLeapYear && ret > 31 + 28)
+            if(date.isLeapYear && ret > 31 + 28)
                 ret++;
-        } else if (rule.type == PosixTZBaseRule.Type.DayOfYear) {
+        } else if(rule.type == PosixTZBaseRule.Type.DayOfYear) {
             ret = rule.dayOfYear;
 
             // remove leap day if we're after it in the specification
-            if (!date.isLeapYear && ret > 31 + 28)
+            if(!date.isLeapYear && ret > 31 + 28)
                 ret--;
-        } else if (rule.type == PosixTZBaseRule.Type.DayInWeekOfMonth) {
+        } else if(rule.type == PosixTZBaseRule.Type.DayInWeekOfMonth) {
             ubyte weekDay = cast(ubyte)date.dayInWeek;
             auto firstDayOfMonth = date.firstDayOfWeekOfMonth(GregorianDate.WeekDay.Sunday);
 
-            if (weekDay == 6)
+            if(weekDay == 6)
                 weekDay = 0;
             else
                 weekDay++;
 
-            if (self.transitionToDST.weekOfMonth == 5) {
+            if(self.transitionToDST.weekOfMonth == 5) {
                 ret = GregorianDate(date.year, date.month, cast(ubyte)(firstDayOfMonth + (7 * 3) + weekDay)).dayInYear;
             } else {
                 auto weekOfMonth = date.weekOfMonth(GregorianDate.WeekDay.Sunday);
 
-                if (weekOfMonth > 0)
+                if(weekOfMonth > 0)
                     weekOfMonth--;
 
                 ret = GregorianDate(date.year, date.month, cast(ubyte)(firstDayOfMonth + (7 * weekOfMonth) + weekDay)).dayInYear;
@@ -516,9 +516,9 @@ bool isInDaylightSavings(scope const ref PosixTZBase self, scope DateTime!Gregor
         startOfDaylight = calculateDayOfYear(self.transitionToDST);
     const isDayOf = startOfDaylight == dayOfYear;
 
-    if (dayOfYear < startOfDaylight || (startOfDaylight < startOfStandard && dayOfYear >= startOfStandard))
+    if(dayOfYear < startOfDaylight || (startOfDaylight < startOfStandard && dayOfYear >= startOfStandard))
         return false;
-    else if (isDayOf && date.time.totalSeconds < self.transitionToDST.secondsBias)
+    else if(isDayOf && date.time.totalSeconds < self.transitionToDST.secondsBias)
         return false;
 
     return true;
@@ -551,43 +551,43 @@ struct PosixTZBaseRule {
     }
 
     export int opCmp(scope const ref PosixTZBaseRule other) scope const {
-        if (this.type < other.type)
+        if(this.type < other.type)
             return -1;
-        else if (this.type > other.type)
+        else if(this.type > other.type)
             return 1;
 
-        final switch (this.type) {
+        final switch(this.type) {
         case Type.NoDST:
             break;
         case Type.JulianDay:
-            if (this.julianDay < other.julianDay)
+            if(this.julianDay < other.julianDay)
                 return -1;
-            else if (this.julianDay > other.julianDay)
+            else if(this.julianDay > other.julianDay)
                 return 1;
             else
                 break;
 
         case Type.DayOfYear:
-            if (this.dayOfYear < other.dayOfYear)
+            if(this.dayOfYear < other.dayOfYear)
                 return -1;
-            else if (this.dayOfYear > other.dayOfYear)
+            else if(this.dayOfYear > other.dayOfYear)
                 return 1;
             else
                 break;
 
         case Type.DayInWeekOfMonth:
-            if (this.monthOfYear < other.monthOfYear || this.weekOfMonth < other.weekOfMonth ||
+            if(this.monthOfYear < other.monthOfYear || this.weekOfMonth < other.weekOfMonth ||
                     this.dayOfWeek < other.dayOfWeek)
                 return -1;
-            else if (this.monthOfYear > other.monthOfYear || this.weekOfMonth > other.weekOfMonth || this.dayOfWeek > other.dayOfWeek)
+            else if(this.monthOfYear > other.monthOfYear || this.weekOfMonth > other.weekOfMonth || this.dayOfWeek > other.dayOfWeek)
                 return 1;
             else
                 break;
         }
 
-        if (this.secondsBias < other.secondsBias)
+        if(this.secondsBias < other.secondsBias)
             return -1;
-        else if (this.secondsBias > other.secondsBias)
+        else if(this.secondsBias > other.secondsBias)
             return 1;
 
         return 0;

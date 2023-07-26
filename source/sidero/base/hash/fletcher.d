@@ -22,7 +22,7 @@ Returns:
 ushort fletcher16BitChecksum(const(ubyte)[] data, ushort start = 0) {
     uint sum1 = start & 0xFF, sum2 = (start >> 8) & 0xFF;
 
-    foreach (v; data) {
+    foreach(v; data) {
         sum1 += v;
         sum1 %= ubyte.max;
 
@@ -46,7 +46,7 @@ Returns:
 uint fletcher32BitChecksum(const(ubyte)[] data, uint start = 0) {
     uint sum1 = start & 0xFFFF, sum2 = (start >> 16) & 0xFFFF;
 
-    foreach (v; data) {
+    foreach(v; data) {
         sum1 += v;
         sum1 %= ushort.max;
 
@@ -70,7 +70,7 @@ Returns:
 ulong fletcher64BitChecksum(const(ubyte)[] data, ulong start = 0) {
     ulong sum1 = start & 0xFFFFFFFF, sum2 = (start >> 32) & 0xFFFFFFFF;
 
-    foreach (v; data) {
+    foreach(v; data) {
         sum1 += v;
         sum1 %= uint.max;
 

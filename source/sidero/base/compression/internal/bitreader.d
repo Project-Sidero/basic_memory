@@ -3,6 +3,7 @@ import sidero.base.errors;
 
 struct BitReader {
     import sidero.base.bitmanip : littleEndianToNative, bigEndianToNative;
+
     const(ubyte)[] source, nextSource;
     size_t consumed;
 
@@ -12,7 +13,7 @@ struct BitReader {
 
 @safe nothrow @nogc:
     private void checkIfEmpty() scope {
-        if (source.length == 0) {
+        if(source.length == 0) {
             source = nextSource;
             nextSource = null;
         }
@@ -36,7 +37,7 @@ export:
 
     const(ubyte)[] consumeExact(size_t amount) scope @trusted {
         checkIfEmpty;
-        if (source.length < amount)
+        if(source.length < amount)
             return null;
 
         auto ret = source[0 .. amount];
@@ -53,7 +54,7 @@ export:
     Result!bool nextBit() scope {
         auto got = nextBits(1);
 
-        if (!got)
+        if(!got)
             return typeof(return)(got.getError());
         else
             return typeof(return)(got.get == 1);
@@ -68,10 +69,10 @@ export:
         uint numberOfBitsToGo = numberOfBits;
         ubyte ret;
 
-        while (numberOfBitsToGo > 0) {
-            if (bufferByteBitsLeft == 0) {
+        while(numberOfBitsToGo > 0) {
+            if(bufferByteBitsLeft == 0) {
                 checkIfEmpty;
-                if (source.length == 0)
+                if(source.length == 0)
                     return typeof(return)(MalformedInputException("Not enough input"));
 
                 bufferByte = source[0];
@@ -97,7 +98,7 @@ export:
 
     Result!uint nextIntBE() scope {
         checkIfEmpty;
-        if (source.length < 4)
+        if(source.length < 4)
             return typeof(return)(MalformedInputException("Not enough input"));
 
         const ubyte[4] temp = source[0 .. 4];
@@ -109,7 +110,7 @@ export:
 
     Result!ushort nextShort() scope {
         checkIfEmpty;
-        if (source.length < 2)
+        if(source.length < 2)
             return typeof(return)(MalformedInputException("Not enough input"));
 
         const ubyte[2] temp = source[0 .. 2];
@@ -121,7 +122,7 @@ export:
 
     Result!ubyte nextByte() scope {
         checkIfEmpty;
-        if (source.length == 0)
+        if(source.length == 0)
             return typeof(return)(MalformedInputException("Not enough input"));
 
         const temp = source[0];

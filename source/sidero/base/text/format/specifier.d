@@ -241,10 +241,10 @@ export @safe nothrow @nogc:
 private @hidden:
 
     static FormatSpecifier fromImpl(FormatString)(return scope ref FormatString format, bool alreadyInBrace = false) @trusted {
-        if (!alreadyInBrace) {
+        if(!alreadyInBrace) {
             ptrdiff_t index = format.indexOf("{");
 
-            if (index < 0) {
+            if(index < 0) {
                 format = FormatString.init;
                 return FormatSpecifier.init;
             } else {
@@ -261,20 +261,20 @@ private @hidden:
         // argId
         {
             ret.argId = 0;
-            if (!readInt(format, ret.argId) || ret.argId < 0) {
+            if(!readInt(format, ret.argId) || ret.argId < 0) {
                 ret.argId = -1;
             }
         }
 
         // ":" FormatSpec
-        if (!format.empty && format.front == ':') {
+        if(!format.empty && format.front == ':') {
             format.popFront;
         }
 
         format = format[];
 
         ptrdiff_t index = format.indexOf("}");
-        if (index < 0) {
+        if(index < 0) {
             ret.fullFormatSpec = format.byUTF8;
             format = FormatString.init;
         } else {
@@ -282,7 +282,7 @@ private @hidden:
             format = format[index + 1 .. $];
         }
 
-        if (!ret.fullFormatSpec.empty)
+        if(!ret.fullFormatSpec.empty)
             ret.parseSpec;
 
         return ret;
@@ -294,11 +294,11 @@ private @hidden:
         bool peekNext(out dchar next) {
             auto temp = format.save();
 
-            if (temp.empty)
+            if(temp.empty)
                 return false;
             temp.popFront;
 
-            if (temp.empty)
+            if(temp.empty)
                 return false;
 
             next = temp.front;
@@ -306,7 +306,7 @@ private @hidden:
         }
 
         Alignment parseAlignment(dchar c) {
-            switch (c) {
+            switch(c) {
             case '<':
                 return Alignment.Left;
             case '>':
@@ -325,14 +325,14 @@ private @hidden:
         //    ">"
         //    "="
         //    "^"
-        if (!format.empty) {
+        if(!format.empty) {
             dchar temp;
 
-            if (peekNext(temp) && (this.alignment = parseAlignment(temp)) != Alignment.None) {
+            if(peekNext(temp) && (this.alignment = parseAlignment(temp)) != Alignment.None) {
                 this.fillCharacter = format.front;
                 format.popFront;
                 format.popFront;
-            } else if ((this.alignment = parseAlignment(format.front)) != Alignment.None) {
+            } else if((this.alignment = parseAlignment(format.front)) != Alignment.None) {
                 // no fill
                 // ok all parsed out, nothing to do except pop.
                 format.popFront;
@@ -343,8 +343,8 @@ private @hidden:
         //    "+"
         //    "-"
         //    " "
-        if (!format.empty) {
-            switch (format.front) {
+        if(!format.empty) {
+            switch(format.front) {
             case '+':
                 this.sign = Sign.PositiveAndNegative;
                 format.popFront;
@@ -364,8 +364,8 @@ private @hidden:
 
         // AlternativeForm|opt
         //    "#"
-        if (!format.empty) {
-            if (format.front == '#') {
+        if(!format.empty) {
+            if(format.front == '#') {
                 this.useAlternativeForm = true;
                 format.popFront;
             }
@@ -374,26 +374,26 @@ private @hidden:
         // MinimumWidth|opt
         //    "0" Integer
         //    Integer
-        if (!format.empty) {
-            if (format.front == '0') {
+        if(!format.empty) {
+            if(format.front == '0') {
                 this.requireSignAwarePadding = true;
                 format.popFront;
             }
 
-            if (!readInt(format, this.minimumWidth) || this.minimumWidth < 0) {
+            if(!readInt(format, this.minimumWidth) || this.minimumWidth < 0) {
                 this.minimumWidth = 0;
             }
         }
 
         // Precision|opt
         //    "." Integer
-        if (!format.empty) {
+        if(!format.empty) {
             this.precision = 0;
 
-            if (format.front == '.') {
+            if(format.front == '.') {
                 format.popFront;
 
-                if (!readInt(format, this.precision) || this.precision < 0) {
+                if(!readInt(format, this.precision) || this.precision < 0) {
                     this.precision = int.max;
                 }
             } else {
@@ -402,8 +402,8 @@ private @hidden:
         }
 
         // Type|opt
-        if (!format.empty) {
-            switch (format.front) {
+        if(!format.empty) {
+            switch(format.front) {
             case 'b':
                 this.type = Type.Binary;
                 format.popFront;
@@ -476,15 +476,15 @@ bool readInt(Input)(scope ref Input input, scope ref int ret) {
     uint place = 1;
     bool negate;
 
-    if (!input.empty && input.front == '-') {
+    if(!input.empty && input.front == '-') {
         negate = true;
         input.popFront;
     }
 
-    Loop: while (!input.empty) {
+    Loop: while(!input.empty) {
         uint c = cast(uint)input.front;
 
-        switch (c) {
+        switch(c) {
         case '0': .. case '9':
             uint diff = c - '0';
 
@@ -498,7 +498,7 @@ bool readInt(Input)(scope ref Input input, scope ref int ret) {
         }
     }
 
-    if (negate)
+    if(negate)
         ret *= -1;
 
     return place > 1;

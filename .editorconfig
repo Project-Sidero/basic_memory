@@ -14,3 +14,4 @@ dfmt_space_after_cast = false
 dfmt_space_after_keywords = false
 dfmt_split_operator_at_line_end = true
 #dfmt_align_switch_statements = false
+dfmt_space_after_keywords = false

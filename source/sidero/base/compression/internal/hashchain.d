@@ -25,11 +25,11 @@ struct HashChain {
 @safe nothrow @nogc scope:
 
     this(size_t modulas, size_t maxLayers, size_t maxInLayer, size_t minMatchSize, size_t maxMatchSize, RCAllocator allocator) {
-        if (modulas == 0)
+        if(modulas == 0)
             modulas = 64;
-        if (maxLayers == 0)
+        if(maxLayers == 0)
             maxLayers = 1;
-        if (maxInLayer == 0)
+        if(maxInLayer == 0)
             maxInLayer = size_t.max;
 
         this.modulas = modulas;
@@ -40,7 +40,7 @@ struct HashChain {
     }
 
     ~this() {
-        if (headLayer !is null)
+        if(headLayer !is null)
             clear;
     }
 
@@ -55,16 +55,16 @@ struct HashChain {
         headLayer = layer;
 
         numberOfLayers++;
-        if (numberOfLayers >= maxLayers)
+        if(numberOfLayers >= maxLayers)
             clearOutLayers;
     }
 
     void addMatch(size_t offset, return scope const(ubyte)[] data) @trusted {
-        if (data.length < this.minMatchSize)
+        if(data.length < this.minMatchSize)
             return;
-        if (headLayer is null || headLayer.numberOfNodes == maxInLayer)
+        if(headLayer is null || headLayer.numberOfNodes == maxInLayer)
             addLayer;
-        if (data.length > this.maxMatchSize)
+        if(data.length > this.maxMatchSize)
             data = data[0 .. this.maxMatchSize];
 
         const keyHash = hashOf(cast(ubyte[3])data[0 .. 3]);
@@ -80,12 +80,12 @@ struct HashChain {
     }
 
     bool findLongestMatch(scope const(ubyte)[] data, out size_t offset, out size_t length) @trusted {
-        if (data.length < this.minMatchSize)
+        if(data.length < this.minMatchSize)
             return false;
 
         const keyHash = hashOf(cast(ubyte[3])data[0 .. 3]);
 
-        if (data.length > this.maxMatchSize)
+        if(data.length > this.maxMatchSize)
             data = data[0 .. this.maxMatchSize];
 
         ptrdiff_t longestOffset = -1;
@@ -102,12 +102,12 @@ struct HashChain {
                 foreach(i; 0 .. canDo) {
                     const b1 = data[i];
                     const b2 = currentNode.data[i];
-                    if (b1 != b2)
+                    if(b1 != b2)
                         break;
                     matched++;
                 }
 
-                if (matched > longestMatch) {
+                if(matched > longestMatch) {
                     longestMatch = matched;
                     longestOffset = currentNode.offset;
                 }
@@ -149,7 +149,7 @@ private:
         size_t layerId;
 
         while(*current !is null) {
-            if (layerId++ >= this.maxLayers) {
+            if(layerId++ >= this.maxLayers) {
                 Layer* next = (*current).next;
 
                 auto allocator = (*current).allocator;

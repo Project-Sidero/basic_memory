@@ -126,38 +126,38 @@ Result!size_t decompressZlib(scope ref BitReader source, scope out Slice!ubyte o
     ErrorInfo readHeader() @trusted {
         {
             auto CMFb = source.nextByte, FLGb = source.nextByte;
-            if (!CMFb)
+            if(!CMFb)
                 return CMFb.getError();
-            else if (!FLGb)
+            else if(!FLGb)
                 return FLGb.getError();
 
             header.CMF = CMFb.get;
             header.FLG = FLGb.get;
         }
 
-        if (!header.isValidFCHECK)
+        if(!header.isValidFCHECK)
             return ErrorInfo(MalformedInputException("Invalid FCHECK"));
-        else if (header.haveFDICT) {
+        else if(header.haveFDICT) {
             {
                 auto temp = source.consumeExact(4);
 
-                if (temp.length == 4)
+                if(temp.length == 4)
                     return ErrorInfo(MalformedInputException("Preset dictionary is required, no dictionary id"));
 
                 header.DICTID = temp[0 .. 4];
             }
 
-            if (presetDictionaryDel is null)
+            if(presetDictionaryDel is null)
                 return ErrorInfo(MalformedInputException("Preset dictionary is required, no callback"));
 
             presetDictionary = presetDictionaryDel(header.DICTID);
-            if (presetDictionary is null)
+            if(presetDictionary is null)
                 return ErrorInfo(MalformedInputException("Unknown preset dictionary"));
         }
 
         header.runningAdler32 = adler32Checksum(null);
 
-        if (header.compressionMethod == ZlibHeader.CompressionMethod.Error)
+        if(header.compressionMethod == ZlibHeader.CompressionMethod.Error)
             return ErrorInfo(MalformedInputException("Unknown compression method"));
 
         return ErrorInfo.init;
@@ -165,26 +165,26 @@ Result!size_t decompressZlib(scope ref BitReader source, scope out Slice!ubyte o
 
     {
         auto error = readHeader();
-        if (error.isSet)
+        if(error.isSet)
             return typeof(return)(error);
     }
 
     {
         Appender!ubyte result = Appender!ubyte(allocator);
-        if (presetDictionary.length > 0)
+        if(presetDictionary.length > 0)
             result ~= presetDictionary;
 
         auto didDecompress = decompressDeflate(source, result, allocator);
-        if (!didDecompress)
+        if(!didDecompress)
             return typeof(return)(didDecompress.getError());
 
         Slice!ubyte decompressed = result.asReadOnly(presetDictionary.length, size_t.max, allocator);
 
-        if (didDecompress.get > 0) {
+        if(didDecompress.get > 0) {
             header.runningAdler32 = adler32Checksum(decompressed.unsafeGetLiteral(), header.runningAdler32);
             auto expectedHash = source.nextIntBE;
 
-            if (!expectedHash || header.runningAdler32 != expectedHash.get) {
+            if(!expectedHash || header.runningAdler32 != expectedHash.get) {
                 return typeof(return)(MalformedInputException("Invalid hash"));
             }
         }
@@ -198,7 +198,7 @@ void compressZlib(scope ref BitReader source, scope ref BitWriter output, Deflat
         ubyte[4] dictionary, scope ZlibPresetDictionaryDelegate presetDictionaryDel, RCAllocator allocator = RCAllocator.init) @trusted {
 
     const(ubyte)[] presetDictionary;
-    if (presetDictionaryDel !is null)
+    if(presetDictionaryDel !is null)
         presetDictionary = presetDictionaryDel(dictionary);
 
     {
@@ -207,23 +207,23 @@ void compressZlib(scope ref BitReader source, scope ref BitWriter output, Deflat
 
         // FLG
         ubyte FLG = (presetDictionary.length > 0 ? 0x20 : 0);
-        if (compressionRate <= DeflateCompressionRate.Fastest) {
-        } else if (compressionRate <= DeflateCompressionRate.Fast)
+        if(compressionRate <= DeflateCompressionRate.Fastest) {
+        } else if(compressionRate <= DeflateCompressionRate.Fast)
             FLG |= 0x40;
-        else if (compressionRate <= DeflateCompressionRate.Default)
+        else if(compressionRate <= DeflateCompressionRate.Default)
             FLG |= 0x80;
         else
             FLG |= 0xC0;
 
         // 5 bits for FCHECK
         const FCHECK = ((256 * CMF) + FLG) % 31;
-        if (FCHECK > 0)
+        if(FCHECK > 0)
             FLG |= cast(ubyte)(31 - FCHECK);
 
         output.writeBytes(CMF, FLG);
     }
 
-    if (presetDictionary.length > 0) {
+    if(presetDictionary.length > 0) {
         output.writeBytes(dictionary[]);
     }
 
@@ -250,7 +250,7 @@ struct ZlibHeader {
 @safe nothrow @nogc:
 
     CompressionMethod compressionMethod() scope const {
-        if ((CMF & 0xF) == 8)
+        if((CMF & 0xF) == 8)
             return CompressionMethod.Deflate;
         else
             return CompressionMethod.Error;
@@ -293,13 +293,13 @@ struct ZlibHeader {
         Slice!ubyte output;
         auto consumed = decompressZlib(toDecompress, output);
 
-        if (!consumed || consumed.get != toDecompress.length || output.length != expected.length)
+        if(!consumed || consumed.get != toDecompress.length || output.length != expected.length)
             return false;
 
         size_t offset;
 
-        foreach (ubyte v; output) {
-            if (offset >= expected.length || expected[offset++] != v)
+        foreach(ubyte v; output) {
+            if(offset >= expected.length || expected[offset++] != v)
                 return false;
         }
 
@@ -315,17 +315,17 @@ struct ZlibHeader {
         Slice!ubyte compressed, decompressed;
 
         compressed = compressZlib(toCompress, rate);
-        if (compressed.length == 0)
+        if(compressed.length == 0)
             return false;
 
         auto consumed = decompressZlib(compressed, decompressed);
-        if (!consumed || consumed.get != compressed.length || decompressed.length != toCompress.length)
+        if(!consumed || consumed.get != compressed.length || decompressed.length != toCompress.length)
             return false;
 
         size_t offset;
 
-        foreach (ubyte v; decompressed) {
-            if (offset >= toCompress.length || toCompress[offset++] != v)
+        foreach(ubyte v; decompressed) {
+            if(offset >= toCompress.length || toCompress[offset++] != v)
                 return false;
         }
 

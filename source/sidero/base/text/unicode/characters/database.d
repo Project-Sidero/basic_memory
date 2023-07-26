@@ -16,12 +16,12 @@ alias UnicodeLanguageFlags = BitFlags.For!UnicodeLanguage;
 ///
 bool isTurkic(UnicodeLanguage input) {
     final switch(input) {
-        case UnicodeLanguage.Unknown:
-        case UnicodeLanguage.Lithuanian:
-            return false;
-        case UnicodeLanguage.Turkish:
-        case UnicodeLanguage.Azeri:
-            return true;
+    case UnicodeLanguage.Unknown:
+    case UnicodeLanguage.Lithuanian:
+        return false;
+    case UnicodeLanguage.Turkish:
+    case UnicodeLanguage.Azeri:
+        return true;
     }
 }
 
@@ -33,7 +33,7 @@ bool isLower(dchar input) {
 ///
 dchar toSimplifiedLower(dchar input) {
     auto got = unidb.sidero_utf_lut_getSimplifiedCasing(input);
-    if (got.lower.length == 1)
+    if(got.lower.length == 1)
         return got.lower[0];
     return input;
 }
@@ -46,7 +46,7 @@ bool isUpper(dchar input) {
 ///
 dchar toSimplifiedUpper(dchar input) {
     auto got = unidb.sidero_utf_lut_getSimplifiedCasing(input);
-    if (got.upper.length == 1)
+    if(got.upper.length == 1)
         return got.upper[0];
     return input;
 }
@@ -59,7 +59,7 @@ bool isTitle(dchar input) {
 ///
 dchar toSimplifiedTitle(dchar input) {
     auto got = unidb.sidero_utf_lut_getSimplifiedCasing(input);
-    if (got.title.length == 1)
+    if(got.title.length == 1)
         return got.title[0];
     return input;
 }
@@ -108,7 +108,7 @@ bool isCased(dchar input) {
 long[2] getNumericValue(dchar input) {
     auto got = unidb.sidero_utf_lut_getNumeric(input);
 
-    if (got is null)
+    if(got is null)
         return [0, 0];
 
     assert(got.length == 2);

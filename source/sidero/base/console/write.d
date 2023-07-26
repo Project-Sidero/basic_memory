@@ -37,84 +37,60 @@ void debugWriteln(Args...)(scope Args args) {
 
 /// Writes string data to console (ASCII/Unicode aware) and immediately flushes.
 void rawWrite(scope String_ASCII input, bool useError = false) @trusted {
-    protectWriteAction(() {
-        rawWriteImpl(input, useError);
-    });
+    protectWriteAction(() { rawWriteImpl(input, useError); });
 }
 
 /// Ditto
 void rawWrite(scope StringBuilder_ASCII input, bool useError = false) {
-    protectWriteAction(() {
-        rawWriteImpl(input, useError);
-    });
+    protectWriteAction(() { rawWriteImpl(input, useError); });
 }
 
 /// Ditto
 void rawWrite(scope const(char)[] input, bool useError = false) {
-    protectWriteAction(() @trusted {
-        rawWriteImpl(String_UTF8(input), useError);
-    });
+    protectWriteAction(() @trusted { rawWriteImpl(String_UTF8(input), useError); });
 }
 
 /// Ditto
 void rawWrite(scope const(wchar)[] input, bool useError = false) {
-    protectWriteAction(() @trusted {
-        rawWriteImpl(String_UTF8(input), useError);
-    });
+    protectWriteAction(() @trusted { rawWriteImpl(String_UTF8(input), useError); });
 }
 
 /// Ditto
 void rawWrite(scope const(dchar)[] input, bool useError = false) {
-    protectWriteAction(() @trusted {
-        rawWriteImpl(String_UTF8(input), useError);
-    });
+    protectWriteAction(() @trusted { rawWriteImpl(String_UTF8(input), useError); });
 }
 
 /// Ditto
 void rawWrite(scope String_UTF8 input, bool useError = false) {
-    protectWriteAction(() {
-        rawWriteImpl(input, useError);
-    });
+    protectWriteAction(() { rawWriteImpl(input, useError); });
 }
 
 /// Ditto
 void rawWrite(scope String_UTF16 input, bool useError = false) {
-    protectWriteAction(() {
-        rawWriteImpl(input.byUTF8(), useError);
-    });
+    protectWriteAction(() { rawWriteImpl(input.byUTF8(), useError); });
 }
 
 /// Ditto
 void rawWrite(scope String_UTF32 input, bool useError = false) {
-    protectWriteAction(() {
-        rawWriteImpl(input.byUTF8(), useError);
-    });
+    protectWriteAction(() { rawWriteImpl(input.byUTF8(), useError); });
 }
 
 /// Ditto
 void rawWrite(scope StringBuilder_UTF8 input, bool useError = false) {
-    protectWriteAction(() {
-        rawWriteImpl(input, useError);
-    });
+    protectWriteAction(() { rawWriteImpl(input, useError); });
 }
 
 /// Ditto
 void rawWrite(scope StringBuilder_UTF16 input, bool useError = false) {
-    protectWriteAction(() {
-        rawWriteImpl(input.byUTF8(), useError);
-    });
+    protectWriteAction(() { rawWriteImpl(input.byUTF8(), useError); });
 }
 
 /// Ditto
 void rawWrite(scope StringBuilder_UTF32 input, bool useError = false) {
-    protectWriteAction(() {
-        rawWriteImpl(input.byUTF8(), useError);
-    });
+    protectWriteAction(() { rawWriteImpl(input.byUTF8(), useError); });
 }
 
 /// Modifies the console settings (colors)
 void rawWrite(scope InBandInfo input, bool useError = false) {
-    protectWriteAction(() {
-        rawWriteImpl(input, useError);
-    });
+    protectWriteAction(() { rawWriteImpl(input, useError); });
 }

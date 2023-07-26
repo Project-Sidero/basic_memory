@@ -24,7 +24,7 @@ export:
     ///
     PoolAllocator poolAllocator;
 
-    static if (__traits(hasMember, PoolAllocator, "NeedsLocking")) {
+    static if(__traits(hasMember, PoolAllocator, "NeedsLocking")) {
         ///
         enum NeedsLocking = PoolAllocator.NeedsLocking;
     } else {
@@ -46,7 +46,7 @@ scope @safe @nogc pure nothrow:
 
     ///
     void[] allocate(size_t size, TypeInfo ti = null) {
-        if (isNull)
+        if(isNull)
             return null;
         else {
             void[] ret = poolAllocator.allocate(roundFunction(size), ti);
@@ -56,7 +56,7 @@ scope @safe @nogc pure nothrow:
 
     ///
     bool reallocate(scope ref void[] array, size_t newSize) {
-        if (!isNull && poolAllocator.reallocate(array, roundFunction(newSize))) {
+        if(!isNull && poolAllocator.reallocate(array, roundFunction(newSize))) {
             array = array[0 .. newSize];
             return true;
         } else
@@ -65,36 +65,36 @@ scope @safe @nogc pure nothrow:
 
     ///
     bool deallocate(scope void[] array) {
-        if (isNull)
+        if(isNull)
             return false;
         else
             return poolAllocator.deallocate(array);
     }
 
-    static if (__traits(hasMember, PoolAllocator, "owns")) {
+    static if(__traits(hasMember, PoolAllocator, "owns")) {
         ///
         Ternary owns(scope void[] array) {
-            if (isNull)
+            if(isNull)
                 return Ternary.no;
             else
                 return poolAllocator.owns(array);
         }
     }
 
-    static if (__traits(hasMember, PoolAllocator, "deallocateAll")) {
+    static if(__traits(hasMember, PoolAllocator, "deallocateAll")) {
         ///
         bool deallocateAll() {
-            if (isNull)
+            if(isNull)
                 return false;
             else
                 return poolAllocator.deallocateAll();
         }
     }
 
-    static if (__traits(hasMember, PoolAllocator, "empty")) {
+    static if(__traits(hasMember, PoolAllocator, "empty")) {
         ///
         bool empty() {
-            if (isNull)
+            if(isNull)
                 return true;
             else
                 return poolAllocator.empty();

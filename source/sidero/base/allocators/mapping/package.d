@@ -15,11 +15,13 @@ public import sidero.base.allocators.mapping.malloc;
 version(Windows) {
     ///
     public import sidero.base.allocators.mapping.virtualalloc;
+
     ///
     alias DefaultMapper = VirtualAllocMapper;
 } else version(Posix) {
     ///
     public import sidero.base.allocators.mapping.mmap;
+
     ///
     alias DefaultMapper = MMap;
 } else {

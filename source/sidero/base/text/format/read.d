@@ -89,7 +89,7 @@ Expected formattedReadImpl(Input, Args...)(scope ref Input input, scope String_U
 
         alias ArgType = Args[id];
 
-        static if (isASCII!ArgType || isUTF!ArgType) {
+        static if(isASCII!ArgType || isUTF!ArgType) {
             return formattedReadStringImpl(*&inputTemp, formatString, args[id]);
         } else
             return rawRead(*&inputTemp, args[id], format);
@@ -97,11 +97,11 @@ Expected formattedReadImpl(Input, Args...)(scope ref Input input, scope String_U
 
     bool[Args.length] areArgsHandled;
 
-    OuterLoop: while (successfullyHandled < Args.length || !formatString.empty) {
+    OuterLoop: while(successfullyHandled < Args.length || !formatString.empty) {
         size_t argId = size_t.max;
 
-        foreach (id, b; areArgsHandled) {
-            if (!b) {
+        foreach(id, b; areArgsHandled) {
+            if(!b) {
                 argId = id;
                 break;
             }
@@ -109,46 +109,46 @@ Expected formattedReadImpl(Input, Args...)(scope ref Input input, scope String_U
 
         {
             bool wasLeftBrace;
-            while (!inputTemp.empty && !formatString.empty) {
-                if (wasLeftBrace) {
-                    if (!formatString.startsWith("{"))
+            while(!inputTemp.empty && !formatString.empty) {
+                if(wasLeftBrace) {
+                    if(!formatString.startsWith("{"))
                         break;
 
                     wasLeftBrace = false;
                     formatString.popFront;
                     continue;
-                } else if (formatString.startsWith("{")) {
+                } else if(formatString.startsWith("{")) {
                     formatString.popFront;
                     wasLeftBrace = true;
                     continue;
                 }
 
-                static if (isASCII!Input) {
+                static if(isASCII!Input) {
                     auto c2 = formatString.front;
                     ubyte c;
-                    if (c2 >= 128)
+                    if(c2 >= 128)
                         goto FailStartsWith;
                     c = cast(ubyte)c2;
                 } else {
                     auto c = formatString.front;
                 }
 
-                if (inputTemp.startsWith([c])) {
+                if(inputTemp.startsWith([c])) {
                     inputTemp.popFront;
                     formatString.popFront;
                     continue;
                 }
 
             FailStartsWith:
-                if (successfullyHandled > 0) {
+                if(successfullyHandled > 0) {
                     successfullyHandled--;
                     break OuterLoop;
                 } else
                     break OuterLoop;
             }
 
-            if (inputTemp.empty && !formatString.empty) {
-                if (successfullyHandled > 0) {
+            if(inputTemp.empty && !formatString.empty) {
+                if(successfullyHandled > 0) {
                     successfullyHandled--;
                     break OuterLoop;
                 } else
@@ -157,18 +157,18 @@ Expected formattedReadImpl(Input, Args...)(scope ref Input input, scope String_U
         }
 
         FormatSpecifier format = !formatString.empty ? FormatSpecifier.from(formatString, true) : FormatSpecifier.init;
-        if (format.argId >= 0)
+        if(format.argId >= 0)
             argId = format.argId;
 
     ArgSwitch:
-        switch (argId) {
+        switch(argId) {
         case size_t.max:
             break ArgSwitch;
 
-            static foreach (I; 0 .. Args.length) {
+            static foreach(I; 0 .. Args.length) {
         case I:
-                if (handleArg!I(format)) {
-                    if (!areArgsHandled[argId]) {
+                if(handleArg!I(format)) {
+                    if(!areArgsHandled[argId]) {
                         areArgsHandled[argId] = true;
                         successfullyHandled++;
                     }
@@ -197,16 +197,16 @@ bool formattedReadStringImpl(Input, ArgType)(scope ref Input input, scope ref St
         String_UTF32 tempFormat = formatString.save;
         ptrdiff_t potentialLength = ptrdiff_t.max;
 
-        while (!tempFormat.empty) {
-            if (wasLeftBrace) {
-                if (!tempFormat.startsWith("{")) {
+        while(!tempFormat.empty) {
+            if(wasLeftBrace) {
+                if(!tempFormat.startsWith("{")) {
                     potentialLength = tempFormat.length;
                     break;
                 }
 
                 wasLeftBrace = false;
                 tempFormat.popFront;
-            } else if (tempFormat.startsWith("{")) {
+            } else if(tempFormat.startsWith("{")) {
                 tempFormat.popFront;
                 wasLeftBrace = true;
             } else
@@ -216,15 +216,15 @@ bool formattedReadStringImpl(Input, ArgType)(scope ref Input input, scope ref St
         possibleEndCondition = formatString[0 .. potentialLength];
     }
 
-    static if (isASCII!ArgType) {
+    static if(isASCII!ArgType) {
         // disallow any char above 128
 
         String_UTF32 tempPEC = possibleEndCondition.save;
 
-        while (!tempPEC.empty) {
+        while(!tempPEC.empty) {
             dchar c = tempPEC.front;
 
-            if (c >= 128) {
+            if(c >= 128) {
                 possibleEndCondition = possibleEndCondition[0 .. -tempPEC.length];
                 break;
             }
@@ -238,17 +238,17 @@ bool formattedReadStringImpl(Input, ArgType)(scope ref Input input, scope ref St
     {
         ptrdiff_t index = input.indexOf(possibleEndCondition);
 
-        static if (isASCII!ArgType) {
+        static if(isASCII!ArgType) {
             const canDo = index >= 0 ? index : input.length;
             size_t willDo;
 
-            foreach (c; input[0 .. canDo]) {
-                if (c >= 128)
+            foreach(c; input[0 .. canDo]) {
+                if(c >= 128)
                     break;
                 willDo++;
             }
 
-            if (willDo == input.length) {
+            if(willDo == input.length) {
                 toCopy = input;
                 input = Input.init;
             } else {
@@ -256,7 +256,7 @@ bool formattedReadStringImpl(Input, ArgType)(scope ref Input input, scope ref St
                 input = input[willDo .. $];
             }
         } else {
-            if (index < 0) {
+            if(index < 0) {
                 toCopy = input;
                 input = Input.init;
             } else {
@@ -266,28 +266,28 @@ bool formattedReadStringImpl(Input, ArgType)(scope ref Input input, scope ref St
         }
     }
 
-    static if (isASCII!ArgType) {
-        static if (is(ArgType == String_ASCII)) {
+    static if(isASCII!ArgType) {
+        static if(is(ArgType == String_ASCII)) {
             StringBuilder_ASCII builder = StringBuilder_ASCII();
         } else {
             StringBuilder_ASCII builder = output;
         }
 
-        foreach (c; toCopy) {
+        foreach(c; toCopy) {
             builder ~= [cast(ubyte)c];
         }
 
-        static if (is(ArgType == String_ASCII)) {
+        static if(is(ArgType == String_ASCII)) {
             output = builder.asReadOnly();
         }
 
         return true;
-    } else static if (isUTF!ArgType) {
-        static if (is(ArgType == String_UTF8)) {
+    } else static if(isUTF!ArgType) {
+        static if(is(ArgType == String_UTF8)) {
             auto builder = StringBuilder_UTF8();
-        } else static if (is(ArgType == String_UTF16)) {
+        } else static if(is(ArgType == String_UTF16)) {
             auto builder = StringBuilder_UTF16();
-        } else static if (is(ArgType == String_UTF32)) {
+        } else static if(is(ArgType == String_UTF32)) {
             auto builder = StringBuilder_UTF32();
         } else {
             auto builder = output;
@@ -296,9 +296,9 @@ bool formattedReadStringImpl(Input, ArgType)(scope ref Input input, scope ref St
         const assign = builder.isNull;
         builder ~= toCopy;
 
-        static if (isUTFReadOnly!ArgType) {
+        static if(isUTFReadOnly!ArgType) {
             output = builder.asReadOnly();
-        } else if (assign) {
+        } else if(assign) {
             output = builder;
         }
 

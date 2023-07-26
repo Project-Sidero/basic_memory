@@ -25,7 +25,7 @@ export:
     ///
     void[] memory;
 
-    static if (!is(PoolAllocator == void)) {
+    static if(!is(PoolAllocator == void)) {
         /// Automatically deallocation of memory using this allocator
         PoolAllocator poolAllocator;
     }
@@ -51,8 +51,8 @@ export:
 
     ///
     bool isNull() const {
-        static if (!is(PoolAllocator == void)) {
-            if (!poolAllocator.isNull)
+        static if(!is(PoolAllocator == void)) {
+            if(!poolAllocator.isNull)
                 return false;
             else
                 return memory is null;
@@ -62,7 +62,7 @@ export:
 
 @trusted:
 
-    static if (!is(PoolAllocator == void)) {
+    static if(!is(PoolAllocator == void)) {
         ///
         this(void[] memory, PoolAllocator poolAllocator, size_t alignedTo = DefaultAlignment, size_t defaultSize = DefaultSize) {
             this.memory = memory;
@@ -90,34 +90,34 @@ export:
     }
 
     private void[] allocate_(size_t size, TypeInfo ti = null) @system @hidden {
-        static if (!is(PoolAllocator == void)) {
-            if (memory is null) {
+        static if(!is(PoolAllocator == void)) {
+            if(memory is null) {
                 import sidero.base.allocators.mapping.vars : PAGESIZE;
 
-                if (defaultSize == 0)
+                if(defaultSize == 0)
                     defaultSize = PAGESIZE;
 
                 size_t toAllocateSize = defaultSize;
-                if (toAllocateSize < size + alignedTo)
+                if(toAllocateSize < size + alignedTo)
                     toAllocateSize = size + alignedTo;
 
                 memory = poolAllocator.allocate(toAllocateSize, null);
             }
         }
 
-        if (allocated + size > memory.length)
+        if(allocated + size > memory.length)
             return null;
 
         void[] toGo = memory[allocated .. $];
 
-        if (fitsAlignment(toGo, size, alignedTo)) {
+        if(fitsAlignment(toGo, size, alignedTo)) {
             size_t toAddAlignment = alignedTo > 0 ? (alignedTo - ((cast(size_t)toGo.ptr) % alignedTo)) : 0;
-            if (toAddAlignment == alignedTo)
+            if(toAddAlignment == alignedTo)
                 toAddAlignment = 0;
 
             allocated += toAddAlignment + size;
             auto toReturn = toGo[toAddAlignment .. toAddAlignment + size];
-            if (alignedTo > 0)
+            if(alignedTo > 0)
                 assert(cast(size_t)toReturn.ptr % alignedTo == 0);
             return toReturn;
         } else
@@ -126,12 +126,12 @@ export:
 
     ///
     bool reallocate(scope ref void[] array, size_t newSize) {
-        if (memory is null || (array.ptr + array.length !is &memory[allocated]) || (allocated + (newSize - array.length) > memory.length))
+        if(memory is null || (array.ptr + array.length !is &memory[allocated]) || (allocated + (newSize - array.length) > memory.length))
             return false;
-        else if (newSize < array.length) {
+        else if(newSize < array.length) {
             array = array[0 .. newSize];
             return true;
-        } else if (newSize > array.length) {
+        } else if(newSize > array.length) {
             size_t extra = newSize - array.length;
             allocated += extra;
             array = array.ptr[0 .. newSize];
@@ -142,7 +142,7 @@ export:
 
     ///
     bool deallocate(scope void[] array) {
-        if (array !is null && allocated >= array.length && array.ptr is memory.ptr + (allocated - array.length)) {
+        if(array !is null && allocated >= array.length && array.ptr is memory.ptr + (allocated - array.length)) {
             allocated -= array.length;
             return true;
         }
@@ -161,7 +161,7 @@ export:
         void[] temp = memory;
         memory = null;
 
-        static if (!is(PoolAllocator == void)) {
+        static if(!is(PoolAllocator == void)) {
             return temp is null || poolAllocator.deallocate(temp);
         } else
             return false;
@@ -169,7 +169,7 @@ export:
 
     ///
     bool empty() {
-        static if (!is(PoolAllocator == void) && __traits(hasMember, PoolAllocator, "empty")) {
+        static if(!is(PoolAllocator == void) && __traits(hasMember, PoolAllocator, "empty")) {
             return (memory is null || allocated == memory.length) && poolAllocator.empty;
         } else
             return memory is null || allocated == memory.length;
@@ -178,7 +178,7 @@ export:
     package(sidero.base.allocators) {
         bool isOnlyOneAllocationOfSize(size_t size) {
             size_t padding = alignedTo - ((cast(size_t)memory.ptr) % alignedTo);
-            if (padding == alignedTo)
+            if(padding == alignedTo)
                 padding = 0;
 
             return padding + size == allocated;
@@ -187,11 +187,11 @@ export:
 
 private @hidden:
     bool fitsAlignment(void[] into, size_t needed, size_t alignedTo) @trusted {
-        if (alignedTo == 0)
+        if(alignedTo == 0)
             return into.length >= needed;
 
         size_t padding = alignedTo - ((cast(size_t)into.ptr) % alignedTo);
-        if (padding == alignedTo)
+        if(padding == alignedTo)
             padding = 0;
 
         return needed + padding <= into.length;
@@ -222,7 +222,7 @@ unittest {
 
     void* rootGot = got.ptr;
     size_t alignmentCheck = region.alignedTo - (cast(size_t)region.memory.ptr % region.alignedTo);
-    if (alignmentCheck == region.alignedTo)
+    if(alignmentCheck == region.alignedTo)
         alignmentCheck = 0;
     assert(rootGot - alignmentCheck is region.memory.ptr);
 
@@ -261,7 +261,7 @@ unittest {
 
     void* rootGot = got.ptr;
     size_t alignmentCheck = region.alignedTo - (cast(size_t)region.memory.ptr % region.alignedTo);
-    if (alignmentCheck == region.alignedTo)
+    if(alignmentCheck == region.alignedTo)
         alignmentCheck = 0;
     assert(rootGot - alignmentCheck is region.memory.ptr);
 

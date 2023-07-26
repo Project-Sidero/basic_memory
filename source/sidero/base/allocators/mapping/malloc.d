@@ -39,7 +39,7 @@ export:
 
         void* ret = pureMalloc(length);
 
-        if (ret is null)
+        if(ret is null)
             return null;
         else
             return ret[0 .. length];
@@ -52,7 +52,7 @@ export:
 
         void* ret = pureRealloc(array.ptr, newSize);
 
-        if (ret !is null) {
+        if(ret !is null) {
             array = ret[0 .. newSize];
             return true;
         } else {
@@ -62,7 +62,7 @@ export:
 
     ///
     bool deallocate(scope void[] data) {
-        if (data.length > 0) {
+        if(data.length > 0) {
             pureFree(&data[0]);
             return true;
         } else
@@ -72,8 +72,7 @@ export:
 
 private:
 // copied from druntime
-extern (C) pure @system @nogc nothrow
-{
+extern (C) pure @system @nogc nothrow {
     pragma(mangle, "malloc") void* pureMalloc(size_t);
     pragma(mangle, "calloc") void* pureCalloc(size_t nmemb, size_t size);
     pragma(mangle, "realloc") void* pureRealloc(void* ptr, size_t size);

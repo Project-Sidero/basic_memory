@@ -58,7 +58,7 @@ struct TimeZone {
         void initialize(return scope RCAllocator allocator) scope @trusted nothrow @nogc {
             assert(this.state is null);
 
-            if (allocator.isNull)
+            if(allocator.isNull)
                 allocator = globalAllocator();
 
             this.state = allocator.make!State(1, allocator);
@@ -66,7 +66,7 @@ struct TimeZone {
         }
     }
 
-    export @safe nothrow @nogc:
+export @safe nothrow @nogc:
 
     ///
     static immutable string DefaultFormat = "%e";
@@ -77,7 +77,7 @@ struct TimeZone {
 
         this.tupleof = other.tupleof;
 
-        if (this.state !is null) {
+        if(this.state !is null) {
             atomicOp!"+="(this.state.refCount, 1);
             assert(!state.allocator.isNull);
         }
@@ -87,10 +87,10 @@ struct TimeZone {
     ~this() scope @trusted {
         import core.atomic : atomicOp;
 
-        if (this.state !is null) {
+        if(this.state !is null) {
             assert(!state.allocator.isNull);
 
-            if (atomicOp!"-="(state.refCount, 1) == 0) {
+            if(atomicOp!"-="(state.refCount, 1) == 0) {
                 RCAllocator allocator = state.allocator;
                 allocator.dispose(state);
             }
@@ -109,7 +109,7 @@ struct TimeZone {
 
     /// Either a Olson (IANA TZ) or platform specific name.
     String_UTF8 name() scope const return @trusted {
-        if (isNull)
+        if(isNull)
             return typeof(return).init;
         else
             return (cast(State*)state).name;
@@ -117,10 +117,10 @@ struct TimeZone {
 
     /// Get the name/abbreviation for a date/time, date aware
     String_UTF8 nameFor(scope DateTime!GregorianDate date) scope const @trusted {
-        if (isNull)
+        if(isNull)
             return String_UTF8("null");
 
-        final switch (state.source) {
+        final switch(state.source) {
         case Source.Fixed:
             return (cast(State*)state).name;
         case Source.Windows:
@@ -142,10 +142,10 @@ struct TimeZone {
 
     ///
     bool isInDaylightSavings(scope DateTime!GregorianDate date) scope const @trusted {
-        if (isNull)
+        if(isNull)
             return false;
 
-        final switch (state.source) {
+        final switch(state.source) {
         case Source.Fixed:
             return false;
         case Source.Windows:
@@ -156,7 +156,7 @@ struct TimeZone {
 
             return (cast(State*)state).ianaTZBase.isInDST(unixTime.get);
         case Source.PosixRule:
-            if (state.posixTZBase.dstName.isNull)
+            if(state.posixTZBase.dstName.isNull)
                 return false;
             else
                 return state.posixTZBase.isInDaylightSavings(date);
@@ -165,10 +165,10 @@ struct TimeZone {
 
     ///
     long currentSecondsBias(scope DateTime!GregorianDate date) scope const @trusted {
-        if (isNull)
+        if(isNull)
             return 0;
 
-        final switch (state.source) {
+        final switch(state.source) {
         case Source.Fixed:
             return state.fixedBias;
         case Source.Windows:
@@ -187,24 +187,24 @@ struct TimeZone {
     /// Get a version of this time zone for a given year, if available otherwise return this.
     TimeZone forYear(long year) scope @trusted {
         mutex.pureLock;
-        scope (exit)
+        scope(exit)
             mutex.unlock;
 
-        if (isNull)
+        if(isNull)
             return this;
 
-        final switch (state.source) {
+        final switch(state.source) {
         case Source.Fixed:
             return this;
         case Source.Windows:
             auto got = state.windowsBase.forYear(year);
-            if (got)
+            if(got)
                 return got;
             else
                 return this;
         case Source.IANA:
             auto got = (cast(State*)state).ianaTZBase.forYear(year);
-            if (got)
+            if(got)
                 return got.get;
             else
                 return this;
@@ -215,32 +215,32 @@ struct TimeZone {
 
     ///
     bool opEquals(const TimeZone other) scope const @trusted {
-        if (isNull)
+        if(isNull)
             return other.isNull;
-        else if (other.isNull)
+        else if(other.isNull)
             return false;
 
-        if (state.source != other.state.source)
+        if(state.source != other.state.source)
             return false;
 
-        final switch (state.source) {
+        final switch(state.source) {
         case Source.Fixed:
-            if (state.fixedBias != other.state.fixedBias)
+            if(state.fixedBias != other.state.fixedBias)
                 return false;
             break;
         case Source.Windows:
-            if (state.windowsBase.standardOffset != other.state.windowsBase.standardOffset ||
+            if(state.windowsBase.standardOffset != other.state.windowsBase.standardOffset ||
                     state.haveDaylightSavings != other.state.haveDaylightSavings)
                 return false;
-            else if (state.haveDaylightSavings && state.windowsBase.daylightSavingsOffset != other.state.windowsBase.daylightSavingsOffset)
+            else if(state.haveDaylightSavings && state.windowsBase.daylightSavingsOffset != other.state.windowsBase.daylightSavingsOffset)
                 return false;
             else
                 break;
         case Source.IANA:
-            if (state.ianaTZBase.startUnixTime != other.state.ianaTZBase.startUnixTime ||
+            if(state.ianaTZBase.startUnixTime != other.state.ianaTZBase.startUnixTime ||
                     state.ianaTZBase.endUnixTime != other.state.ianaTZBase.endUnixTime)
                 return false;
-            else if ((cast(State*)state).ianaTZBase.tzFile.region != (cast(State*)other.state).ianaTZBase.tzFile.region)
+            else if((cast(State*)state).ianaTZBase.tzFile.region != (cast(State*)other.state).ianaTZBase.tzFile.region)
                 return false;
             else
                 break;
@@ -258,63 +258,63 @@ struct TimeZone {
 
     ///
     int opCmp(const TimeZone other) scope const @trusted {
-        if (isNull)
+        if(isNull)
             return other.isNull ? 0 : -1;
-        else if (other.isNull)
+        else if(other.isNull)
             return 1;
 
-        if (state.source < other.state.source)
+        if(state.source < other.state.source)
             return -1;
-        else if (state.source > other.state.source)
+        else if(state.source > other.state.source)
             return 1;
 
-        final switch (state.source) {
+        final switch(state.source) {
         case Source.Fixed:
-            if (state.fixedBias < other.state.fixedBias)
+            if(state.fixedBias < other.state.fixedBias)
                 return -1;
-            else if (state.fixedBias > other.state.fixedBias)
+            else if(state.fixedBias > other.state.fixedBias)
                 return 1;
             break;
         case Source.Windows:
-            if (state.haveDaylightSavings && !other.state.haveDaylightSavings)
+            if(state.haveDaylightSavings && !other.state.haveDaylightSavings)
                 return 1;
-            else if (!state.haveDaylightSavings && other.state.haveDaylightSavings)
+            else if(!state.haveDaylightSavings && other.state.haveDaylightSavings)
                 return -1;
 
-            if (state.windowsBase.standardOffset < other.state.windowsBase.standardOffset)
+            if(state.windowsBase.standardOffset < other.state.windowsBase.standardOffset)
                 return -1;
-            else if (state.windowsBase.standardOffset > other.state.windowsBase.standardOffset)
+            else if(state.windowsBase.standardOffset > other.state.windowsBase.standardOffset)
                 return 1;
 
-            if (state.haveDaylightSavings) {
-                if (state.windowsBase.daylightSavingsOffset < other.state.windowsBase.daylightSavingsOffset)
+            if(state.haveDaylightSavings) {
+                if(state.windowsBase.daylightSavingsOffset < other.state.windowsBase.daylightSavingsOffset)
                     return -1;
-                else if (state.windowsBase.daylightSavingsOffset > other.state.windowsBase.daylightSavingsOffset)
+                else if(state.windowsBase.daylightSavingsOffset > other.state.windowsBase.daylightSavingsOffset)
                     return 1;
             }
 
             break;
         case Source.IANA:
-            if (state.ianaTZBase.startUnixTime < other.state.ianaTZBase.startUnixTime ||
+            if(state.ianaTZBase.startUnixTime < other.state.ianaTZBase.startUnixTime ||
                     state.ianaTZBase.endUnixTime < other.state.ianaTZBase.endUnixTime)
                 return -1;
-            else if (state.ianaTZBase.startUnixTime > other.state.ianaTZBase.startUnixTime ||
+            else if(state.ianaTZBase.startUnixTime > other.state.ianaTZBase.startUnixTime ||
                     state.ianaTZBase.endUnixTime > other.state.ianaTZBase.endUnixTime)
                 return 1;
             int temp = (cast(State*)state).ianaTZBase.tzFile.region.opCmp((cast(State*)other.state).ianaTZBase.tzFile.region);
-            if (temp != 0)
+            if(temp != 0)
                 return temp;
             else
                 break;
         case Source.PosixRule:
-            if (state.posixTZBase.stdOffset < other.state.posixTZBase.stdOffset ||
+            if(state.posixTZBase.stdOffset < other.state.posixTZBase.stdOffset ||
                     state.posixTZBase.dstOffset < other.state.posixTZBase.dstOffset ||
                     state.posixTZBase.transitionToStd < other.state.posixTZBase.transitionToStd ||
                     state.posixTZBase.transitionToDST < other.state.posixTZBase.transitionToDST || (cast(State*)state)
                         .posixTZBase.stdName < (cast(State*)other.state).posixTZBase.stdName || (cast(State*)state)
                         .posixTZBase.dstName < (cast(State*)other.state).posixTZBase.dstName)
                 return -1;
-            else if (state.posixTZBase.stdOffset > other.state.posixTZBase.stdOffset ||
+            else if(state.posixTZBase.stdOffset > other.state.posixTZBase.stdOffset ||
                     state.posixTZBase.dstOffset > other.state.posixTZBase.dstOffset ||
                     state.posixTZBase.transitionToStd > other.state.posixTZBase.transitionToStd ||
                     state.posixTZBase.transitionToDST > other.state.posixTZBase.transitionToDST || (cast(State*)state)
@@ -370,18 +370,18 @@ struct TimeZone {
             if (isBuilderString!Builder && isReadOnlyString!Format) {
         import sidero.base.allocators;
 
-        if (builder.isNull)
+        if(builder.isNull)
             builder = typeof(builder)(globalAllocator());
 
         bool isEscaped;
 
-        if (usePercentageEscape) {
-            foreach (c; specification.byUTF32()) {
-                if (isEscaped) {
+        if(usePercentageEscape) {
+            foreach(c; specification.byUTF32()) {
+                if(isEscaped) {
                     isEscaped = false;
-                    if (this.formatValue(builder, c))
+                    if(this.formatValue(builder, c))
                         continue;
-                } else if (c == '%') {
+                } else if(c == '%') {
                     isEscaped = true;
                     continue;
                 }
@@ -389,13 +389,13 @@ struct TimeZone {
                 builder ~= [c];
             }
         } else {
-            foreach (c; specification.byUTF32()) {
-                if (isEscaped) {
+            foreach(c; specification.byUTF32()) {
+                if(isEscaped) {
                     isEscaped = false;
-                } else if (c == '\\') {
+                } else if(c == '\\') {
                     isEscaped = true;
                     continue;
-                } else if (this.formatValue(builder, c)) {
+                } else if(this.formatValue(builder, c)) {
                     continue;
                 }
 
@@ -407,7 +407,7 @@ struct TimeZone {
     /// Ditto
     bool formatValue(Builder)(scope ref Builder builder, dchar specification) scope const @trusted
             if (isBuilderString!Builder) {
-        switch (specification) {
+        switch(specification) {
         case 'e':
             builder ~= this.name();
             break;
@@ -426,7 +426,7 @@ struct TimeZone {
 
     ///
     bool formattedWrite(scope ref StringBuilder_UTF8 builder, scope FormatSpecifier format, bool usePercentageEscape = true) @safe nothrow @nogc {
-        if (format.fullFormatSpec.length == 0)
+        if(format.fullFormatSpec.length == 0)
             return false;
 
         this.format(builder, format.fullFormatSpec);
@@ -436,47 +436,47 @@ struct TimeZone {
     ///
     static bool parse(Input)(scope ref Input input, scope ref TimeZone output, scope String_UTF8 specification,
             bool usePercentageEscape = true) {
-        if (specification.length == 0)
+        if(specification.length == 0)
             return false;
         bool isEscaped;
 
-        if (usePercentageEscape) {
-            foreach (c; specification.byUTF32()) {
-                if (isEscaped) {
+        if(usePercentageEscape) {
+            foreach(c; specification.byUTF32()) {
+                if(isEscaped) {
                     isEscaped = false;
-                    if (output.parseValue(input, c))
+                    if(output.parseValue(input, c))
                         continue;
-                } else if (c == '%') {
+                } else if(c == '%') {
                     isEscaped = true;
                     continue;
                 }
 
-                static if (isASCII!Input) {
-                    if (c >= 128 || !input.startsWith([c]))
+                static if(isASCII!Input) {
+                    if(c >= 128 || !input.startsWith([c]))
                         return false;
                 } else {
-                    if (!input.startsWith([c]))
+                    if(!input.startsWith([c]))
                         return false;
                 }
 
                 input.popFront;
             }
         } else {
-            foreach (c; specification.byUTF32()) {
-                if (isEscaped) {
+            foreach(c; specification.byUTF32()) {
+                if(isEscaped) {
                     isEscaped = false;
-                } else if (c == '\\') {
+                } else if(c == '\\') {
                     isEscaped = true;
                     continue;
-                } else if (output.parseValue(input, c)) {
+                } else if(output.parseValue(input, c)) {
                     continue;
                 }
 
-                static if (isASCII!Input) {
-                    if (c >= 128 || !input.startsWith([c]))
+                static if(isASCII!Input) {
+                    if(c >= 128 || !input.startsWith([c]))
                         return false;
                 } else {
-                    if (!input.startsWith([c]))
+                    if(!input.startsWith([c]))
                         return false;
                 }
 
@@ -490,7 +490,7 @@ struct TimeZone {
 
     ///
     bool parseValue(Input)(scope ref Input input, dchar specification) {
-        switch (specification) {
+        switch(specification) {
         case 'e':
             // Windows maxes out at 3 spaces, so we'll check up to 4
             // IANA has no spaces
@@ -498,11 +498,11 @@ struct TimeZone {
             size_t lastLength;
             bool gotIt;
 
-            foreach (_; 0 .. 4) {
+            foreach(_; 0 .. 4) {
                 ptrdiff_t index = input[lastLength .. $].indexOf(" "c);
 
                 Input sliced;
-                if (index < 0)
+                if(index < 0)
                     sliced = input.save;
                 else
                     sliced = input[0 .. index];
@@ -510,20 +510,20 @@ struct TimeZone {
                 lastLength = sliced.length + 1;
                 sliced = sliced.stripLeft;
 
-                if (sliced.length > 0) {
-                    static if (isBuilderString!Input) {
+                if(sliced.length > 0) {
+                    static if(isBuilderString!Input) {
                         auto got = TimeZone.from(sliced.asReadOnly());
                     } else {
                         auto got = TimeZone.from(sliced);
                     }
 
-                    if (got) {
+                    if(got) {
                         this = got.get;
                         gotIt = true;
                     }
                 }
 
-                if (lastLength >= input.length)
+                if(lastLength >= input.length)
                     break;
             }
 
@@ -549,11 +549,11 @@ struct TimeZone {
         {
             auto tzVar = EnvironmentVariables[String_UTF8("TZ\0")];
 
-            if (tzVar.length > 0) {
+            if(tzVar.length > 0) {
                 auto got = parsePosixTZ(tzVar);
 
-                if (got) {
-                    if (got.loadFromFile) {
+                if(got) {
+                    if(got.loadFromFile) {
                         // well... this is at least in theory easy
                         // we don't actually support loading from a specific file
                         //  since internally we need the Olson name, and guess what a TZif doesn't include?
@@ -572,7 +572,7 @@ struct TimeZone {
                     mutex.unlock;
 
                     auto got2 = TimeZone.from(tzVar, currentYear());
-                    if (got2)
+                    if(got2)
                         return got2;
                     else
                         mutex.pureLock;
@@ -580,21 +580,21 @@ struct TimeZone {
             }
         }
 
-        version (Windows) {
+        version(Windows) {
             auto got = localWindowsTimeZone();
 
             // if we are prefering IANA TZ database over Windows internal one,
             //  attempt to use it first.
-            if (useIANA) {
+            if(useIANA) {
                 auto stdName = got.stdName;
                 stdName.stripZeroTerminator;
 
                 auto ianaName = windowsToIANA(cast(string)stdName.unsafeGetLiteral);
 
-                if (ianaName.length > 0) {
+                if(ianaName.length > 0) {
                     auto got2 = findIANATimeZone(String_UTF8(ianaName));
 
-                    if (got2) {
+                    if(got2) {
                         auto got3 = got2.forYear(currentYear());
                         mutex.unlock;
                         return got3;
@@ -605,10 +605,10 @@ struct TimeZone {
             auto got2 = got.forYear(currentYear());
             mutex.unlock;
             return got2;
-        } else version (Posix) {
+        } else version(Posix) {
             auto got = findIANATimeZone(getPosixLocalTimeZone());
 
-            if (!got) {
+            if(!got) {
                 mutex.unlock;
                 return typeof(return)(got.getError);
             }
@@ -704,42 +704,42 @@ struct TimeZone {
 
         mutex.pureLock;
 
-        scope (exit)
+        scope(exit)
             mutex.unlock;
 
         {
             String_UTF8 ianaName = wantedName;
 
-            version (Windows) {
+            version(Windows) {
                 // if we are prefering IANA TZ database over Windows internal one,
                 //  attempt to use it first.
-                if (useIANA) {
+                if(useIANA) {
                     String_UTF8 stdName = wantedName;
-                    if (!stdName.isPtrNullTerminated)
+                    if(!stdName.isPtrNullTerminated)
                         stdName = stdName.dup;
 
                     stdName.stripZeroTerminator;
                     auto ianaName2 = windowsToIANA(cast(string)stdName.unsafeGetLiteral);
 
-                    if (ianaName2.length > 0)
+                    if(ianaName2.length > 0)
                         ianaName = String_UTF8(ianaName);
                 }
             }
 
             auto got = findIANATimeZone(ianaName);
-            if (got)
+            if(got)
                 return got.forYear(year);
-            else version (Posix) {
+            else version(Posix) {
                 return typeof(return)(got.getError);
             }
         }
 
-        version (Windows) {
+        version(Windows) {
             auto got = findWindowsTimeZone(wantedName);
-            if (!got)
+            if(!got)
                 return typeof(return)(got.getError);
             return got.forYear(year);
-        } else version (Posix) {
+        } else version(Posix) {
         } else
             static assert(0, "Getting local timezone unimplemented for platform");
     }
@@ -775,7 +775,7 @@ struct TimeZone {
 
             builder.formattedWrite("{:s}", tod.hour);
 
-            if (tod.minute > 0) {
+            if(tod.minute > 0) {
                 builder.formattedWrite("{:s}", tod.minute);
             }
 

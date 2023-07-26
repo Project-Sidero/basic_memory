@@ -11,14 +11,14 @@ public import sidero.base.text.unicode.builder_utf32;
 public import sidero.base.text.format;
 
 ///
-alias String_UTF(Char:char) = String_UTF8;
+alias String_UTF(Char : char) = String_UTF8;
 ///
-alias String_UTF(Char:wchar) = String_UTF16;
+alias String_UTF(Char : wchar) = String_UTF16;
 ///
-alias String_UTF(Char:dchar) = String_UTF32;
+alias String_UTF(Char : dchar) = String_UTF32;
 ///
-alias StringBuilder_UTF(Char:char) = StringBuilder_UTF8;
+alias StringBuilder_UTF(Char : char) = StringBuilder_UTF8;
 ///
-alias StringBuilder_UTF(Char:wchar) = StringBuilder_UTF16;
+alias StringBuilder_UTF(Char : wchar) = StringBuilder_UTF16;
 ///
-alias StringBuilder_UTF(Char:dchar) = StringBuilder_UTF32;
+alias StringBuilder_UTF(Char : dchar) = StringBuilder_UTF32;

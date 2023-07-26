@@ -24,16 +24,16 @@ export @safe nothrow @nogc:
 
     ///
     URIAddress dup(return scope RCAllocator allocator = RCAllocator.init) scope const @trusted {
-        if (isNull)
+        if(isNull)
             return URIAddress.init;
 
-        if (allocator.isNull)
+        if(allocator.isNull)
             allocator = globalAllocator();
 
         URIAddressState* state = cast(URIAddressState*)this.state;
 
         state.mutex.pureLock;
-        scope (exit)
+        scope(exit)
             state.mutex.unlock;
 
         URIAddress ret;
@@ -47,13 +47,13 @@ export @safe nothrow @nogc:
 
     ///
     URIAddressRelativeTo relativeTo() scope const @trusted {
-        if (isNull)
+        if(isNull)
             return typeof(return).init;
 
         URIAddressState* state = cast(URIAddressState*)this.state;
 
         state.mutex.pureLock;
-        scope (exit)
+        scope(exit)
             state.mutex.unlock;
 
         return state.relativeTo;
@@ -69,12 +69,12 @@ export @safe nothrow @nogc:
 
     ///
     String_ASCII scheme() scope const @trusted {
-        if (isNull || state.lengthOfScheme == 0)
+        if(isNull || state.lengthOfScheme == 0)
             return String_ASCII.init;
 
         URIAddressState* state = cast(URIAddressState*)this.state;
         state.mutex.pureLock;
-        scope (exit)
+        scope(exit)
             state.mutex.unlock;
 
         return state.storage[state.offsetOfScheme .. state.offsetOfScheme + state.lengthOfScheme].asReadOnly();
@@ -87,12 +87,12 @@ export @safe nothrow @nogc:
 
     ///
     String_ASCII userInfo() scope const @trusted {
-        if (isNull || state.lengthOfConnectionInfo == 0)
+        if(isNull || state.lengthOfConnectionInfo == 0)
             return String_ASCII.init;
 
         URIAddressState* state = cast(URIAddressState*)this.state;
         state.mutex.pureLock;
-        scope (exit)
+        scope(exit)
             state.mutex.unlock;
 
         return state.storage[state.offsetOfConnectionInfo .. state.offsetOfConnectionInfo + state.lengthOfConnectionInfo].asReadOnly();
@@ -107,18 +107,18 @@ export @safe nothrow @nogc:
     StringBuilder_UTF8 decodedUserInfo() scope const @trusted {
         import sidero.base.encoding.uri;
 
-        if (isNull || state.lengthOfConnectionInfo == 0)
+        if(isNull || state.lengthOfConnectionInfo == 0)
             return StringBuilder_UTF8.init;
 
         URIAddressState* state = cast(URIAddressState*)this.state;
         state.mutex.pureLock;
-        scope (exit)
+        scope(exit)
             state.mutex.unlock;
 
         auto sliced = state.storage[state.offsetOfConnectionInfo .. state.offsetOfConnectionInfo + state.lengthOfConnectionInfo];
         auto ret = URIUserInfoEncoding.decode(sliced);
 
-        if (ret)
+        if(ret)
             return ret.get;
         else
             return StringBuilder_UTF8.init;
@@ -126,12 +126,12 @@ export @safe nothrow @nogc:
 
     ///
     String_ASCII host() scope const @trusted {
-        if (isNull || state.lengthOfHost == 0)
+        if(isNull || state.lengthOfHost == 0)
             return String_ASCII.init;
 
         URIAddressState* state = cast(URIAddressState*)this.state;
         state.mutex.pureLock;
-        scope (exit)
+        scope(exit)
             state.mutex.unlock;
 
         return state.storage[state.offsetOfHost .. state.offsetOfHost + state.lengthOfHost].asReadOnly();
@@ -146,18 +146,18 @@ export @safe nothrow @nogc:
     StringBuilder_UTF8 decodedHost() scope const @trusted {
         import sidero.base.encoding.bootstring;
 
-        if (isNull || state.lengthOfHost == 0)
+        if(isNull || state.lengthOfHost == 0)
             return StringBuilder_UTF8.init;
 
         URIAddressState* state = cast(URIAddressState*)this.state;
         state.mutex.pureLock;
-        scope (exit)
+        scope(exit)
             state.mutex.unlock;
 
         auto sliced = state.storage[state.offsetOfHost .. state.offsetOfHost + state.lengthOfHost];
         auto ret = IDNAPunycode.decode(sliced);
 
-        if (ret)
+        if(ret)
             return ret.get.byUTF8;
         else
             return StringBuilder_UTF8.init;
@@ -165,18 +165,18 @@ export @safe nothrow @nogc:
 
     ///
     Optional!ushort port() scope const @trusted {
-        if (isNull || state.lengthOfPort == 0)
+        if(isNull || state.lengthOfPort == 0)
             return typeof(return).init;
 
         URIAddressState* state = cast(URIAddressState*)this.state;
         state.mutex.pureLock;
-        scope (exit)
+        scope(exit)
             state.mutex.unlock;
 
         auto sliced = state.storage[state.offsetOfPort() .. state.offsetOfPort() + state.lengthOfPort];
 
         ushort ret;
-        if (!formattedRead(sliced, String_ASCII("{:d}"), ret))
+        if(!formattedRead(sliced, String_ASCII("{:d}"), ret))
             return typeof(return).init;
         return typeof(return)(ret);
     }
@@ -193,12 +193,12 @@ export @safe nothrow @nogc:
 
     ///
     DynamicArray!String_ASCII segments(scope return RCAllocator allocator = RCAllocator.init) scope const @trusted {
-        if (isNull || state.lengthOfPath == 0)
+        if(isNull || state.lengthOfPath == 0)
             return typeof(return).init;
 
         URIAddressState* state = cast(URIAddressState*)this.state;
         state.mutex.pureLock;
-        scope (exit)
+        scope(exit)
             state.mutex.unlock;
 
         auto sliced = state.storage[state.offsetOfPath .. state.offsetOfPath + state.lengthOfPath].asReadOnly(allocator);
@@ -206,14 +206,14 @@ export @safe nothrow @nogc:
         DynamicArray!String_ASCII ret = DynamicArray!String_ASCII(0, allocator);
         ret.reserve(sliced.count("/") + 1);
 
-        while (!sliced.empty) {
+        while(!sliced.empty) {
             ptrdiff_t index = sliced.indexOf("/");
 
-            if (index < 0) {
+            if(index < 0) {
                 ret ~= sliced;
                 sliced = String_ASCII.init;
 
-            } else if (index == 0) {
+            } else if(index == 0) {
                 sliced = sliced[1 .. $];
             } else {
                 ret ~= sliced[0 .. index];
@@ -234,12 +234,12 @@ export @safe nothrow @nogc:
     DynamicArray!StringBuilder_UTF8 decodedSegments(scope return RCAllocator allocator = RCAllocator.init) scope const @trusted {
         import sidero.base.encoding.uri;
 
-        if (isNull || state.lengthOfPath == 0)
+        if(isNull || state.lengthOfPath == 0)
             return typeof(return).init;
 
         URIAddressState* state = cast(URIAddressState*)this.state;
         state.mutex.pureLock;
-        scope (exit)
+        scope(exit)
             state.mutex.unlock;
 
         auto sliced = state.storage[state.offsetOfPath .. state.offsetOfPath + state.lengthOfPath].asReadOnly(allocator);
@@ -249,15 +249,15 @@ export @safe nothrow @nogc:
         DynamicArray!StringBuilder_UTF8 ret = DynamicArray!StringBuilder_UTF8(0, allocator);
         ret.reserve(sliced.count("/") + 1);
 
-        while (!sliced.empty) {
+        while(!sliced.empty) {
             const oldLength = buffer.length;
             ptrdiff_t index = sliced.indexOf("/");
 
-            if (index < 0) {
+            if(index < 0) {
                 cast(void)URIQueryFragmentEncoding.decode(buffer, sliced);
                 sliced = String_ASCII.init;
                 ret ~= buffer[oldLength .. $];
-            } else if (index == 0) {
+            } else if(index == 0) {
                 sliced = sliced[1 .. $];
                 continue;
             } else {
@@ -280,7 +280,7 @@ export @safe nothrow @nogc:
 
     ///
     URIAddress removeSegments() return scope {
-        if (!isNull) {
+        if(!isNull) {
             state.mutex.pureLock;
 
             state.storage.remove(state.offsetOfPath(), state.lengthOfPath);
@@ -307,12 +307,12 @@ export @safe nothrow @nogc:
 
     ///
     DynamicArray!String_ASCII queries(scope return RCAllocator allocator = RCAllocator.init) scope const @trusted {
-        if (isNull || state.lengthOfQuery < 2)
+        if(isNull || state.lengthOfQuery < 2)
             return typeof(return).init;
 
         URIAddressState* state = cast(URIAddressState*)this.state;
         state.mutex.pureLock;
-        scope (exit)
+        scope(exit)
             state.mutex.unlock;
 
         auto sliced = state.storage[state.offsetOfQuery .. state.offsetOfQuery + state.lengthOfQuery].asReadOnly(allocator);
@@ -320,13 +320,13 @@ export @safe nothrow @nogc:
         DynamicArray!String_ASCII ret = DynamicArray!String_ASCII(0, allocator);
         ret.reserve(sliced.count("&") + 1);
 
-        while (!sliced.empty) {
+        while(!sliced.empty) {
             ptrdiff_t index = sliced.indexOf("&");
 
-            if (index < 0) {
+            if(index < 0) {
                 ret ~= sliced;
                 sliced = String_ASCII.init;
-            } else if (index == 0) {
+            } else if(index == 0) {
                 sliced = sliced[1 .. $];
             } else {
                 ret ~= sliced[0 .. index];
@@ -347,12 +347,12 @@ export @safe nothrow @nogc:
     DynamicArray!StringBuilder_UTF8 decodedQueries(scope return RCAllocator allocator = RCAllocator.init) scope const @trusted {
         import sidero.base.encoding.uri;
 
-        if (isNull || state.lengthOfQuery == 0)
+        if(isNull || state.lengthOfQuery == 0)
             return typeof(return).init;
 
         URIAddressState* state = cast(URIAddressState*)this.state;
         state.mutex.pureLock;
-        scope (exit)
+        scope(exit)
             state.mutex.unlock;
 
         auto sliced = state.storage[state.offsetOfQuery .. state.offsetOfQuery + state.lengthOfQuery].asReadOnly(allocator);
@@ -362,15 +362,15 @@ export @safe nothrow @nogc:
         DynamicArray!StringBuilder_UTF8 ret = DynamicArray!StringBuilder_UTF8(0, allocator);
         ret.reserve(sliced.count("&") + 1);
 
-        while (!sliced.empty) {
+        while(!sliced.empty) {
             const oldLength = buffer.length;
             ptrdiff_t index = sliced.indexOf("&");
 
-            if (index < 0) {
+            if(index < 0) {
                 cast(void)URIQueryFragmentEncoding.decode(buffer, sliced);
                 sliced = String_ASCII.init;
                 ret ~= buffer[oldLength .. $];
-            } else if (index == 0) {
+            } else if(index == 0) {
                 sliced = sliced[1 .. $];
                 continue;
             } else {
@@ -391,7 +391,7 @@ export @safe nothrow @nogc:
 
     ///
     URIAddress removeQueries() return scope {
-        if (!isNull) {
+        if(!isNull) {
             state.mutex.pureLock;
 
             state.storage.remove(state.offsetOfQuery() - state.lengthOfQueryPrefix, state.lengthOfQuery + state.lengthOfQueryPrefix);
@@ -419,12 +419,12 @@ export @safe nothrow @nogc:
 
     ///
     String_ASCII fragment() scope const @trusted {
-        if (isNull || state.lengthOfFragment == 0)
+        if(isNull || state.lengthOfFragment == 0)
             return String_ASCII.init;
 
         URIAddressState* state = cast(URIAddressState*)this.state;
         state.mutex.pureLock;
-        scope (exit)
+        scope(exit)
             state.mutex.unlock;
 
         return state.storage[state.offsetOfFragment .. state.offsetOfFragment + state.lengthOfFragment].asReadOnly();
@@ -440,18 +440,18 @@ export @safe nothrow @nogc:
         import sidero.base.encoding.uri;
         import sidero.base.encoding.bootstring;
 
-        if (isNull || state.lengthOfFragment == 0)
+        if(isNull || state.lengthOfFragment == 0)
             return StringBuilder_UTF8.init;
 
         URIAddressState* state = cast(URIAddressState*)this.state;
         state.mutex.pureLock;
-        scope (exit)
+        scope(exit)
             state.mutex.unlock;
 
         auto sliced = state.storage[state.offsetOfFragment .. state.offsetOfFragment + state.lengthOfFragment];
         auto ret = URIQueryFragmentEncoding.decode(sliced);
 
-        if (ret)
+        if(ret)
             return ret.get;
         else
             return StringBuilder_UTF8.init;
@@ -459,7 +459,7 @@ export @safe nothrow @nogc:
 
     ///
     URIAddress removeFragment() return scope {
-        if (!isNull) {
+        if(!isNull) {
             state.mutex.pureLock;
 
             state.storage.remove(state.offsetOfFragment() - state.lengthOfFragmentPrefix,
@@ -492,21 +492,21 @@ export @safe nothrow @nogc:
 
     ///
     ErrorResult makeAbsolute(scope URIAddress contextAddress = URIAddress.init) scope {
-        if (isNull)
+        if(isNull)
             return ErrorResult(NullPointerException);
-        else if (state is contextAddress.state)
+        else if(state is contextAddress.state)
             return ErrorResult(MalformedInputException("Context address is the same as the this instance"));
 
         URIAddressState* state = cast(URIAddressState*)this.state;
         state.mutex.pureLock;
-        scope (exit)
+        scope(exit)
             state.mutex.unlock;
 
         // do this twice if we are anything other than another context which will resolve path relativeness after we handle the form
-        foreach (_; 0 .. 2) {
+        foreach(_; 0 .. 2) {
             const allowedToTryAgain = state.relativeTo != URIAddressRelativeTo.AnotherContext;
 
-            final switch (state.relativeTo) {
+            final switch(state.relativeTo) {
             case URIAddressRelativeTo.Nothing:
                 return ErrorResult.init;
 
@@ -515,15 +515,15 @@ export @safe nothrow @nogc:
                 // so we need to take the path segments from context address, prepend them
                 // if there is enough new path segments, the result will be an absolute path
 
-                if (contextAddress.isNull)
+                if(contextAddress.isNull)
                     return ErrorResult(MalformedInputException("Missing context path"));
 
                 URIAddressState* cstate = cast(URIAddressState*)contextAddress.state;
                 cstate.mutex.pureLock;
-                scope (exit)
+                scope(exit)
                     cstate.mutex.unlock;
 
-                if (cstate.lengthOfPath == 0)
+                if(cstate.lengthOfPath == 0)
                     return ErrorResult(MalformedInputException(
                             "Need a path provided to make a another context relative address into a absolute one"));
 
@@ -533,15 +533,15 @@ export @safe nothrow @nogc:
                 state.lengthOfPath += sliced.length;
                 break;
             case URIAddressRelativeTo.Network:
-                if (contextAddress.isNull)
+                if(contextAddress.isNull)
                     return ErrorResult(MalformedInputException("Missing context path"));
 
                 URIAddressState* cstate = cast(URIAddressState*)contextAddress.state;
                 cstate.mutex.pureLock;
-                scope (exit)
+                scope(exit)
                     cstate.mutex.unlock;
 
-                if (cstate.lengthOfScheme == 0)
+                if(cstate.lengthOfScheme == 0)
                     return ErrorResult(MalformedInputException("Context address must contain a scheme to make a network path absolute"));
 
                 StringBuilder_ASCII sliced = cstate.storage[0 .. cstate.lengthOfScheme];
@@ -551,15 +551,15 @@ export @safe nothrow @nogc:
                 state.lengthOfSchemeSuffix++;
                 break;
             case URIAddressRelativeTo.Absolute:
-                if (contextAddress.isNull)
+                if(contextAddress.isNull)
                     return ErrorResult(MalformedInputException("Missing context path"));
 
                 URIAddressState* cstate = cast(URIAddressState*)contextAddress.state;
                 cstate.mutex.pureLock;
-                scope (exit)
+                scope(exit)
                     cstate.mutex.unlock;
 
-                if (cstate.relativeTo != URIAddressRelativeTo.Nothing)
+                if(cstate.relativeTo != URIAddressRelativeTo.Nothing)
                     return ErrorResult(MalformedInputException(
                             "To make a relative absolute path absolute it requires an absolute path and context address is not."));
 
@@ -575,15 +575,15 @@ export @safe nothrow @nogc:
                 state.lengthOfPortPrefix = cstate.lengthOfPortPrefix;
                 break;
             case URIAddressRelativeTo.Path:
-                if (contextAddress.isNull)
+                if(contextAddress.isNull)
                     return ErrorResult(MalformedInputException("Missing context path"));
 
                 URIAddressState* cstate = cast(URIAddressState*)contextAddress.state;
                 cstate.mutex.pureLock;
-                scope (exit)
+                scope(exit)
                     cstate.mutex.unlock;
 
-                if (cstate.relativeTo != URIAddressRelativeTo.Nothing)
+                if(cstate.relativeTo != URIAddressRelativeTo.Nothing)
                     return ErrorResult(MalformedInputException(
                             "To make a relative path absolute it requires an absolute path and context address is not."));
 
@@ -606,11 +606,11 @@ export @safe nothrow @nogc:
             state.relativeTo = URIAddressRelativeTo.AnotherContext;
             this.evaluateRelativeComponents;
 
-            if (!allowedToTryAgain)
+            if(!allowedToTryAgain)
                 break;
         }
 
-        if (state.relativeTo == URIAddressRelativeTo.AnotherContext) {
+        if(state.relativeTo == URIAddressRelativeTo.AnotherContext) {
             // we failed to make absolute, error
             return ErrorResult(MalformedInputException("Not enough path segments in context address to resolve relative segments"));
         } else
@@ -622,7 +622,7 @@ export @safe nothrow @nogc:
         URIAddress ret = this.dup(allocator);
         auto error = ret.makeAbsolute(contextAddress);
 
-        if (error)
+        if(error)
             return typeof(return)(ret);
         else
             return typeof(return)(error.getError());
@@ -674,13 +674,13 @@ export @safe nothrow @nogc:
 
     ///
     String_ASCII toString(return scope RCAllocator allocator = RCAllocator.init) scope const @trusted {
-        if (isNull)
+        if(isNull)
             return String_ASCII.init;
 
         URIAddressState* state = cast(URIAddressState*)this.state;
 
         state.mutex.pureLock;
-        scope (exit)
+        scope(exit)
             state.mutex.unlock;
 
         return state.storage.asReadOnly(allocator);
@@ -688,7 +688,7 @@ export @safe nothrow @nogc:
 
     ///
     ulong toHash() scope const {
-        if (this.isNull)
+        if(this.isNull)
             return StringBuilder_ASCII.init.toHash();
         return state.storage.toHash();
     }
@@ -822,11 +822,11 @@ private:
 
         bool isFirst = true, haveUnresolvedParent;
 
-        while (components.length > 0) {
+        while(components.length > 0) {
             StringBuilder_ASCII component, fullComponent;
             const indexOfSeparator = components.indexOf("/");
 
-            if (indexOfSeparator < 0) {
+            if(indexOfSeparator < 0) {
                 component = components;
                 fullComponent = component;
                 components = StringBuilder_ASCII.init;
@@ -837,26 +837,26 @@ private:
             }
             const lengthOfFullComponent = fullComponent.length;
 
-            if (component == "..") {
+            if(component == "..") {
                 // we want to remove the prior component, but first we need to figure out where that is!
                 StringBuilder_ASCII upUntilThis = allComponents[0 .. $ - (lengthOfFullComponent + components.length)];
                 // it is in the form of path/../ or path/..
 
-                if (upUntilThis.length == lengthOfFullComponent) {
+                if(upUntilThis.length == lengthOfFullComponent) {
                     // not legal if this is an absolute path, so swap it for AnotherContext
-                    if (state.relativeTo == URIAddressRelativeTo.Nothing)
+                    if(state.relativeTo == URIAddressRelativeTo.Nothing)
                         state.relativeTo = URIAddressRelativeTo.AnotherContext;
                     haveUnresolvedParent = true;
-                } else if (upUntilThis.length > lengthOfFullComponent) {
+                } else if(upUntilThis.length > lengthOfFullComponent) {
                     ptrdiff_t lastSeparatorIndex = upUntilThis[0 .. $ - 1].lastIndexOf("/");
 
-                    if (lastSeparatorIndex < 0) {
-                        if (!upUntilThis.endsWith("./") && upUntilThis != "../") {
+                    if(lastSeparatorIndex < 0) {
+                        if(!upUntilThis.endsWith("./") && upUntilThis != "../") {
                             upUntilThis.remove(0, upUntilThis.length);
                         } else {
                             haveUnresolvedParent = true;
                         }
-                    } else if (upUntilThis[lastSeparatorIndex + 1 .. $] != "../") {
+                    } else if(upUntilThis[lastSeparatorIndex + 1 .. $] != "../") {
                         allComponents[lastSeparatorIndex + 1 .. $ - components.length].remove(0, size_t.max);
                     } else {
                         haveUnresolvedParent = true;
@@ -864,7 +864,7 @@ private:
                 } else {
                     haveUnresolvedParent = true;
                 }
-            } else if (component == "." && !isFirst) {
+            } else if(component == "." && !isFirst) {
                 component.remove(-1, 1);
             }
 
@@ -875,13 +875,13 @@ private:
         allComponents.replace("//", "/");
 
         // remove a trailing slash
-        if (allComponents != "./" && allComponents.endsWith("/")) {
+        if(allComponents != "./" && allComponents.endsWith("/")) {
             allComponents.remove(-1, 1);
         }
 
-        if (!haveUnresolvedParent && state.relativeTo == URIAddressRelativeTo.AnotherContext)
+        if(!haveUnresolvedParent && state.relativeTo == URIAddressRelativeTo.AnotherContext)
             state.relativeTo = URIAddressRelativeTo.Nothing;
-        else if (haveUnresolvedParent && state.relativeTo == URIAddressRelativeTo.Nothing)
+        else if(haveUnresolvedParent && state.relativeTo == URIAddressRelativeTo.Nothing)
             state.relativeTo = URIAddressRelativeTo.AnotherContext;
 
         state.lengthOfPath = allComponents.length;
@@ -890,15 +890,15 @@ private:
     }
 
     int cmpImpl(Input)(scope Input other) scope const @trusted {
-        if (isNull)
+        if(isNull)
             return other.isNull ? 0 : -1;
-        else if (other.isNull)
+        else if(other.isNull)
             return 1;
 
         URIAddressState* state = cast(URIAddressState*)this.state;
 
         state.mutex.pureLock;
-        scope (exit)
+        scope(exit)
             state.mutex.unlock;
 
         return state.storage.compare(other);
@@ -942,7 +942,7 @@ struct URIAddressState {
 @safe nothrow @nogc:
 
     void opAssign(ref URIAddressState other) scope {
-        static foreach (i; 4 .. this.tupleof.length) {
+        static foreach(i; 4 .. this.tupleof.length) {
             this.tupleof[i] = other.tupleof[i];
         }
     }
@@ -988,7 +988,7 @@ Result!URIAddress parseURIFromString(Input)(scope Input input, bool encode, scop
     import sidero.base.encoding.uri;
     import sidero.base.encoding.bootstring;
 
-    if (allocator.isNull)
+    if(allocator.isNull)
         allocator = globalAllocator();
 
     const lengthOfScheme = calculateLengthOfScheme(input);
@@ -997,7 +997,7 @@ Result!URIAddress parseURIFromString(Input)(scope Input input, bool encode, scop
     auto lengthOfConnectionInfo = calculateLengthOfConnectionInfo(input, lengthOfScheme);
 
     // do not try to consume the hostname, if there is nothing to distringuish it from a relative path
-    if (!contextAddress.isNull && lengthOfScheme == 0 && lengthOfConnectionInfo[0] == 0 && lengthOfConnectionInfo[1] == 0 &&
+    if(!contextAddress.isNull && lengthOfScheme == 0 && lengthOfConnectionInfo[0] == 0 && lengthOfConnectionInfo[1] == 0 &&
             lengthOfConnectionInfo[3] == 0)
         lengthOfConnectionInfo[2] = 0;
 
@@ -1011,7 +1011,7 @@ Result!URIAddress parseURIFromString(Input)(scope Input input, bool encode, scop
     const lengthOfFragment = calculateLengthOfFragment(input[lengthOfScheme + lengthOfConnectionInfo[0] +
         lengthOfConnectionInfo[1] + lengthOfConnectionInfo[2] + lengthOfConnectionInfo[3] + lengthOfQuery[0] + lengthOfQuery[1] .. $]);
 
-    if (lengthOfSchemeOrConnectionInfo == 0 && (lengthOfQuery[0] == 0 && lengthOfQuery[1] == 0 && lengthOfFragment == 0))
+    if(lengthOfSchemeOrConnectionInfo == 0 && (lengthOfQuery[0] == 0 && lengthOfQuery[1] == 0 && lengthOfFragment == 0))
         return typeof(return).init;
 
     URIAddress ret;
@@ -1049,15 +1049,15 @@ Result!URIAddress parseURIFromString(Input)(scope Input input, bool encode, scop
 
         size_t previousLength;
 
-        if (lengthOfSchemeOrConnectionInfo == 0) {
+        if(lengthOfSchemeOrConnectionInfo == 0) {
             // some sort of relative path
 
-            if (segments.startsWith("/")) {
+            if(segments.startsWith("/")) {
                 ret.state.relativeTo = URIAddressRelativeTo.Absolute;
             } else {
                 ret.state.relativeTo = URIAddressRelativeTo.Path;
             }
-        } else if (lengthOfScheme == 0 && lengthOfConnectionInfo[0] == 2 && schemeSuffix == "//"c) {
+        } else if(lengthOfScheme == 0 && lengthOfConnectionInfo[0] == 2 && schemeSuffix == "//"c) {
             // a relative path, network
             ret.state.relativeTo = URIAddressRelativeTo.Network;
         }
@@ -1066,7 +1066,7 @@ Result!URIAddress parseURIFromString(Input)(scope Input input, bool encode, scop
             auto defaultScheme = contextAddress.scheme;
             bool needToAddSchemeSuffix;
 
-            if ((lengthOfScheme + lengthOfConnectionInfo[0]) == 0 && defaultScheme.length > 0) {
+            if((lengthOfScheme + lengthOfConnectionInfo[0]) == 0 && defaultScheme.length > 0) {
                 auto lowered = defaultScheme.toLower();
 
                 ret.state.storage ~= lowered;
@@ -1075,15 +1075,15 @@ Result!URIAddress parseURIFromString(Input)(scope Input input, bool encode, scop
             } else {
                 auto lowered = scheme.asMutable.toLower;
 
-                foreach (c; lowered) {
+                foreach(c; lowered) {
                     ret.state.storage ~= [cast(ubyte)c];
                 }
             }
 
             ret.state.lengthOfScheme = ret.state.storage.length - previousLength;
 
-            if (needToAddSchemeSuffix) {
-                if (lengthOfConnectionInfo[2] > 0) {
+            if(needToAddSchemeSuffix) {
+                if(lengthOfConnectionInfo[2] > 0) {
                     // ://
                     ret.state.storage ~= "://";
                     lengthOfConnectionInfo[0] = 3;
@@ -1094,8 +1094,8 @@ Result!URIAddress parseURIFromString(Input)(scope Input input, bool encode, scop
                 }
 
                 ret.state.lengthOfSchemeSuffix = lengthOfConnectionInfo[0];
-            } else if (lengthOfConnectionInfo[0] > 0) {
-                foreach (c; schemeSuffix) {
+            } else if(lengthOfConnectionInfo[0] > 0) {
+                foreach(c; schemeSuffix) {
                     ret.state.storage ~= [cast(ubyte)c];
                 }
                 ret.state.lengthOfSchemeSuffix = lengthOfConnectionInfo[0];
@@ -1104,12 +1104,12 @@ Result!URIAddress parseURIFromString(Input)(scope Input input, bool encode, scop
             previousLength = ret.state.storage.length;
         }
 
-        if (lengthOfConnectionInfo[1] > 1) {
-            if (encode) {
+        if(lengthOfConnectionInfo[1] > 1) {
+            if(encode) {
                 URIUserInfoEncoding.encode(ret.state.storage, connectionInfo[0 .. $ - 1]);
             } else {
-                foreach (c; connectionInfo[0 .. $ - 1]) {
-                    if (URIUserInfoEncoding.needsEncoding(c))
+                foreach(c; connectionInfo[0 .. $ - 1]) {
+                    if(URIUserInfoEncoding.needsEncoding(c))
                         return typeof(return)(MalformedInputException("URI connection info needs encoding"));
                     ret.state.storage ~= [cast(ubyte)c];
                 }
@@ -1129,13 +1129,13 @@ Result!URIAddress parseURIFromString(Input)(scope Input input, bool encode, scop
         {
             auto lowered = host.asMutable.toLower;
 
-            if (encode) {
+            if(encode) {
                 auto error = IDNAPunycode.encode(ret.state.storage, lowered);
-                if (!error)
+                if(!error)
                     return typeof(return)(error.getError());
             } else {
-                foreach (c; lowered) {
-                    if (IDNAPunycode.needsEncoding(c))
+                foreach(c; lowered) {
+                    if(IDNAPunycode.needsEncoding(c))
                         return typeof(return)(MalformedInputException("URI host needs encoding"));
                     ret.state.storage ~= [cast(ubyte)c];
                 }
@@ -1145,8 +1145,8 @@ Result!URIAddress parseURIFromString(Input)(scope Input input, bool encode, scop
             previousLength = ret.state.storage.length;
         }
 
-        if (lengthOfConnectionInfo[3] > 1) {
-            foreach (c; port) {
+        if(lengthOfConnectionInfo[3] > 1) {
+            foreach(c; port) {
                 ret.state.storage ~= [cast(ubyte)c];
             }
 
@@ -1162,11 +1162,11 @@ Result!URIAddress parseURIFromString(Input)(scope Input input, bool encode, scop
             auto deduped = segments.asMutable;
             deduped.replace("//", "/");
 
-            if (encode) {
+            if(encode) {
                 URIQueryFragmentEncoding.encode(ret.state.storage, deduped);
             } else {
-                foreach (c; deduped) {
-                    if (URIQueryFragmentEncoding.needsEncoding(c))
+                foreach(c; deduped) {
+                    if(URIQueryFragmentEncoding.needsEncoding(c))
                         return typeof(return)(MalformedInputException("URI path segments needs encoding"));
                     ret.state.storage ~= [cast(ubyte)c];
                 }
@@ -1176,12 +1176,12 @@ Result!URIAddress parseURIFromString(Input)(scope Input input, bool encode, scop
             previousLength = ret.state.storage.length;
         }
 
-        if (lengthOfQuery[1] > 0) {
-            if (encode) {
+        if(lengthOfQuery[1] > 0) {
+            if(encode) {
                 URIQueryFragmentEncoding.encode(ret.state.storage, query);
             } else {
-                foreach (c; query) {
-                    if (URIQueryFragmentEncoding.needsEncoding(c))
+                foreach(c; query) {
+                    if(URIQueryFragmentEncoding.needsEncoding(c))
                         return typeof(return)(MalformedInputException("URI query needs encoding"));
                     ret.state.storage ~= [cast(ubyte)c];
                 }
@@ -1195,14 +1195,14 @@ Result!URIAddress parseURIFromString(Input)(scope Input input, bool encode, scop
             ret.state.lengthOfQueryPrefix = 1;
         }
 
-        if (lengthOfFragment > 1) {
+        if(lengthOfFragment > 1) {
             ret.state.storage ~= "#";
 
-            if (encode) {
+            if(encode) {
                 URIQueryFragmentEncoding.encode(ret.state.storage, fragment[1 .. $]);
             } else {
-                foreach (c; fragment[1 .. $]) {
-                    if (URIQueryFragmentEncoding.needsEncoding(c))
+                foreach(c; fragment[1 .. $]) {
+                    if(URIQueryFragmentEncoding.needsEncoding(c))
                         return typeof(return)(MalformedInputException("URI fragment needs encoding"));
                     ret.state.storage ~= [cast(ubyte)c];
                 }
@@ -1217,13 +1217,13 @@ Result!URIAddress parseURIFromString(Input)(scope Input input, bool encode, scop
         }
     }
 
-    if (ret.state.relativeTo == URIAddressRelativeTo.Nothing || contextAddress.isNull) {
+    if(ret.state.relativeTo == URIAddressRelativeTo.Nothing || contextAddress.isNull) {
         auto got = ret.evaluateRelativeComponents;
-        if (got.isSet)
+        if(got.isSet)
             return typeof(return)(got);
     } else {
         auto got = ret.makeAbsolute(contextAddress);
-        if (!got)
+        if(!got)
             return typeof(return)(got.getError());
     }
 

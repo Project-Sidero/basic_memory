@@ -39,12 +39,12 @@ struct HuffManTree(size_t NumberOfLeafs) {
         }
 
         Node* transverseAddNode(return scope Node* parent, bool bit) scope @trusted {
-            if (bit) {
-                if (parent.right is null)
+            if(bit) {
+                if(parent.right is null)
                     parent.right = allocateNode();
                 return parent.right;
             } else {
-                if (parent.left is null)
+                if(parent.left is null)
                     parent.left = allocateNode();
                 return parent.left;
             }
@@ -61,19 +61,20 @@ export:
     }
 
     /// Ditto
-    ushort[NumberOfLeafs] buildFromData(MainType, SecondaryType)(scope const(MainType)[] input, scope const(SecondaryType)[] secondaryInput...) @trusted {
+    ushort[NumberOfLeafs] buildFromData(MainType, SecondaryType)(scope const(MainType)[] input,
+            scope const(SecondaryType)[] secondaryInput...) @trusted {
         clear;
 
         float[NumberOfLeafs] frequencies = void;
         const consumedFromInput = frequencyOfBytes(input, size_t.max, frequencies, secondaryInput);
-        if (consumedFromInput == 0)
+        if(consumedFromInput == 0)
             return typeof(return).init;
 
         size_t numberUnresolved;
         Node* firstUnresolved;
 
-        foreach (i, frequency; frequencies) {
-            if (frequency < 0)
+        foreach(i, frequency; frequencies) {
+            if(frequency < 0)
                 continue;
             Node* node = &buffer[nextNodeOffset++];
 
@@ -89,46 +90,46 @@ export:
 
         const originalNumberUnresolved = numberUnresolved;
 
-        if (numberUnresolved == 1) {
+        if(numberUnresolved == 1) {
             numberUnresolved = 0;
             Node* parent = allocateNode();
 
             parent.left = firstUnresolved;
             firstUnresolved = parent;
         } else {
-            while (numberUnresolved > 1) {
+            while(numberUnresolved > 1) {
                 Node** currentPointer = &firstUnresolved;
                 Node* lowest1, lowest2;
 
-                while (currentPointer !is null && *currentPointer !is null) {
+                while(currentPointer !is null && *currentPointer !is null) {
                     Node* self = *currentPointer, replaces;
 
-                    if (lowest1 is null) {
+                    if(lowest1 is null) {
                         replaces = lowest1;
                         lowest1 = self;
                         goto Consumed;
-                    } else if (lowest2 is null) {
+                    } else if(lowest2 is null) {
                         replaces = lowest2;
                         lowest2 = self;
                         goto Consumed;
                     }
 
-                    if (lowest1.cost > lowest2.cost && lowest1.cost > self.cost) {
+                    if(lowest1.cost > lowest2.cost && lowest1.cost > self.cost) {
                         replaces = lowest1;
                         lowest1 = self;
                         goto Consumed;
-                    } else if (lowest2.cost > self.cost) {
+                    } else if(lowest2.cost > self.cost) {
                         replaces = lowest2;
                         lowest2 = self;
                         goto Consumed;
                     }
 
-                    NotConsumed:
+                NotConsumed:
                     currentPointer = &self.nextUnresolved;
                     continue;
 
-                    Consumed:
-                    if (replaces !is null) {
+                Consumed:
+                    if(replaces !is null) {
                         replaces.nextUnresolved = self.nextUnresolved;
                         *currentPointer = replaces;
                     } else
@@ -146,13 +147,13 @@ export:
                 Node* parent = allocateNode();
                 parent.cost = lowest1.cost + lowest2.cost;
 
-                if (lowest2.cost < lowest1.cost) {
+                if(lowest2.cost < lowest1.cost) {
                     auto temp = lowest1;
                     lowest1 = lowest2;
                     lowest2 = temp;
                 }
 
-                if (lowest1.lowestValue < lowest2.lowestValue) {
+                if(lowest1.lowestValue < lowest2.lowestValue) {
                     parent.left = lowest1;
                     parent.right = lowest2;
                     parent.lowestValue = lowest1.lowestValue;
@@ -173,10 +174,10 @@ export:
         root = firstUnresolved;
 
         void resolvePath(scope Node* parent, size_t numberOfBits, ushort path) {
-            if (parent is null)
+            if(parent is null)
                 return;
 
-            if ((cast(size_t)parent.left | cast(size_t)parent.right) == 0) {
+            if((cast(size_t)parent.left | cast(size_t)parent.right) == 0) {
                 parent.path = path;
                 parent.numberOfBits = numberOfBits;
             } else {
@@ -189,7 +190,7 @@ export:
         resolvePath(root, 0, 0);
 
         ushort[NumberOfLeafs] ret;
-        foreach (ref node; buffer[0 .. originalNumberUnresolved]) {
+        foreach(ref node; buffer[0 .. originalNumberUnresolved]) {
             ret[node.value] = cast(ushort)node.numberOfBits;
         }
         return ret;
@@ -200,11 +201,11 @@ export:
         const shiftMSBLeftToMax = 16 - numberOfBits;
         uint tempPath = path << shiftMSBLeftToMax;
 
-        if (root is null)
+        if(root is null)
             root = allocateNode();
         Node* parent = root;
 
-        foreach (i; 0 .. numberOfBits) {
+        foreach(i; 0 .. numberOfBits) {
             const bit = (tempPath & 0x8000) > 0;
             tempPath <<= 1;
             parent = transverseAddNode(parent, bit);
@@ -223,8 +224,8 @@ export:
 
     ///
     bool pathForValue(size_t value, out ushort path, out size_t numberOfBits) scope const {
-        foreach (i; 0 .. nextNodeOffset) {
-            if (buffer[i].value == value) {
+        foreach(i; 0 .. nextNodeOffset) {
+            if(buffer[i].value == value) {
                 path = buffer[i].path;
                 numberOfBits = buffer[i].numberOfBits;
                 return true;
@@ -238,11 +239,11 @@ export:
     ushort[2][NumberOfLeafs] pathForValues() scope const @trusted {
         ushort[2][NumberOfLeafs] ret = void;
 
-        foreach (ref v; ret)
+        foreach(ref v; ret)
             v[1] = 0;
 
-        foreach (ref node; buffer[0 .. nextNodeOffset]) {
-            if ((cast(size_t)node.left | cast(size_t)node.right) == 0 && ret[node.value][1] == 0)
+        foreach(ref node; buffer[0 .. nextNodeOffset]) {
+            if((cast(size_t)node.left | cast(size_t)node.right) == 0 && ret[node.value][1] == 0)
                 ret[node.value] = [cast(ushort)node.path, cast(ushort)node.numberOfBits];
         }
 
@@ -252,24 +253,24 @@ export:
     ///
     Result!bool lookupValue(scope Result!bool delegate() @safe nothrow @nogc nextBit,
             scope bool delegate() @safe nothrow @nogc haveMoreBits, out size_t value) scope const @trusted {
-        if (root is null)
+        if(root is null)
             return typeof(return)(false);
 
         const(Node)* parent = root;
 
-        while (haveMoreBits()) {
+        while(haveMoreBits()) {
             auto bit = nextBit();
-            if (!bit)
+            if(!bit)
                 return typeof(return)(bit.getError());
 
-            if (bit.get)
+            if(bit.get)
                 parent = parent.right;
             else
                 parent = parent.left;
 
-            if (parent is null)
+            if(parent is null)
                 return typeof(return)(false);
-            else if ((cast(size_t)parent.left | cast(size_t)parent.right) == 0) {
+            else if((cast(size_t)parent.left | cast(size_t)parent.right) == 0) {
                 value = parent.value;
                 return typeof(return)(true);
             }
@@ -283,7 +284,7 @@ export:
     @disable int opCmp(scope const ref HuffManTree);
 
     string toString() scope const @trusted {
-        version (D_BetterC) {
+        version(D_BetterC) {
             return null;
         } else {
             debug {
@@ -293,17 +294,17 @@ export:
                 auto ret = appender!string;
                 ret ~= "digraph G {\n";
 
-                foreach (i, ref node; buffer[0 .. nextNodeOffset]) {
-                    if ((cast(size_t)node.left | cast(size_t)node.right) == 0)
+                foreach(i, ref node; buffer[0 .. nextNodeOffset]) {
+                    if((cast(size_t)node.left | cast(size_t)node.right) == 0)
                         ret.formattedWrite!"    N%X[label=\"%s | cost=%s | min=%s | max=%s\"];\n"(cast(size_t)&node,
                                 node.value, node.cost, node.lowestValue, node.highestValue);
                     else {
                         ret.formattedWrite!"    N%X[label=\"cost=%s | min=%s | max=%s\"];\n"(cast(size_t)&node,
                                 node.cost, node.lowestValue, node.highestValue);
 
-                        if (node.left !is null)
+                        if(node.left !is null)
                             ret.formattedWrite!"    N%X -> N%X[label=0];\n"(cast(size_t)&node, cast(size_t)node.left);
-                        if (node.right !is null)
+                        if(node.right !is null)
                             ret.formattedWrite!"    N%X -> N%X[label=1];\n"(cast(size_t)&node, cast(size_t)node.right);
                     }
                 }
@@ -345,12 +346,12 @@ size_t frequencyOfBytes(MainType, SecondaryType, size_t NumberOfPossibleValues)(
 
     size_t currentUniques, consumed;
 
-    foreach (ref v; frequencies)
+    foreach(ref v; frequencies)
         v = 0;
 
-    foreach (v; input) {
-        if (frequencies[v] == 0) {
-            if (limitUniques == currentUniques)
+    foreach(v; input) {
+        if(frequencies[v] == 0) {
+            if(limitUniques == currentUniques)
                 break;
             else
                 currentUniques++;
@@ -360,9 +361,9 @@ size_t frequencyOfBytes(MainType, SecondaryType, size_t NumberOfPossibleValues)(
         consumed++;
     }
 
-    foreach (v; secondaryInput) {
-        if (frequencies[v] == 0) {
-            if (limitUniques == currentUniques)
+    foreach(v; secondaryInput) {
+        if(frequencies[v] == 0) {
+            if(limitUniques == currentUniques)
                 break;
             else
                 currentUniques++;
@@ -375,10 +376,10 @@ size_t frequencyOfBytes(MainType, SecondaryType, size_t NumberOfPossibleValues)(
     {
         float minimum = cast(float)size_t.max;
 
-        foreach (ref v; frequencies) {
-            if (isClose(v, 0))
+        foreach(ref v; frequencies) {
+            if(isClose(v, 0))
                 v = -1;
-            else if (v < minimum)
+            else if(v < minimum)
                 minimum = v;
         }
 

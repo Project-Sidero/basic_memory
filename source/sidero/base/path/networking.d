@@ -34,7 +34,7 @@ export @safe nothrow @nogc:
 
     ///
     ushort port() scope const {
-        version (LittleEndian) {
+        version(LittleEndian) {
             return swapEndian(this.port_);
         } else
             return this.port_;
@@ -50,7 +50,7 @@ export @safe nothrow @nogc:
             scope void delegate(ushort[8] value) @safe nothrow @nogc on6, scope void delegate() @safe nothrow @nogc onAny4,
             scope void delegate() @safe nothrow @nogc onAny6, scope void delegate(
                 scope String_ASCII hostname) @safe nothrow @nogc onHostname, scope void delegate() @safe nothrow @nogc onNone) scope {
-        final switch (this.type_) {
+        final switch(this.type_) {
         case Type.Invalid:
             onNone();
             break;
@@ -77,7 +77,7 @@ export @safe nothrow @nogc:
             scope void delegate(ushort[8] value) @safe nothrow @nogc on6, scope void delegate() @safe nothrow @nogc onAny4,
             scope void delegate() @safe nothrow @nogc onAny6, scope void delegate(
                 scope String_ASCII hostname) @safe nothrow @nogc onHostname, scope void delegate() @safe nothrow @nogc onNone) scope {
-        final switch (this.type_) {
+        final switch(this.type_) {
         case Type.Invalid:
             onNone();
             break;
@@ -109,8 +109,8 @@ export @safe nothrow @nogc:
         ret.port_ = port;
         ret.ipv4_ = littleEndianToNative!uint([a, b, c, d]);
 
-        if (!isPortNetworkEndian) {
-            version (LittleEndian) {
+        if(!isPortNetworkEndian) {
+            version(LittleEndian) {
                 ret.port_ = swapEndian(ret.port_);
             }
         }
@@ -125,14 +125,14 @@ export @safe nothrow @nogc:
         ret.port_ = port;
         ret.ipv4_ = value;
 
-        if (!isPortNetworkEndian) {
-            version (LittleEndian) {
+        if(!isPortNetworkEndian) {
+            version(LittleEndian) {
                 ret.port_ = swapEndian(ret.port_);
             }
         }
 
-        if (!isIPNetworkEndian) {
-            version (LittleEndian) {
+        if(!isIPNetworkEndian) {
+            version(LittleEndian) {
                 ret.ipv4_ = swapEndian(ret.ipv4_);
             }
         }
@@ -153,14 +153,14 @@ export @safe nothrow @nogc:
         ret.port_ = port;
         ret.ipv6_ = segments;
 
-        if (!isPortNetworkEndian) {
-            version (LittleEndian) {
+        if(!isPortNetworkEndian) {
+            version(LittleEndian) {
                 ret.port_ = swapEndian(ret.port_);
             }
         }
 
-        if (!isIPNetworkEndian) {
-            version (LittleEndian) {
+        if(!isIPNetworkEndian) {
+            version(LittleEndian) {
                 ret.ipv6_ = [
                     swapEndian(ret.ipv6_[0]), swapEndian(ret.ipv6_[1]), swapEndian(ret.ipv6_[2]),
                     swapEndian(ret.ipv6_[3]), swapEndian(ret.ipv6_[4]), swapEndian(ret.ipv6_[5]),
@@ -178,8 +178,8 @@ export @safe nothrow @nogc:
         ret.type_ = Type.Any4;
         ret.port_ = port;
 
-        if (!isPortNetworkEndian) {
-            version (LittleEndian) {
+        if(!isPortNetworkEndian) {
+            version(LittleEndian) {
                 ret.port_ = swapEndian(ret.port_);
             }
         }
@@ -192,8 +192,8 @@ export @safe nothrow @nogc:
         ret.type_ = Type.Any6;
         ret.port_ = port;
 
-        if (!isPortNetworkEndian) {
-            version (LittleEndian) {
+        if(!isPortNetworkEndian) {
+            version(LittleEndian) {
                 ret.port_ = swapEndian(ret.port_);
             }
         }
@@ -203,7 +203,7 @@ export @safe nothrow @nogc:
     /// parse a URI compliant hostname/ip
     static NetworkAddress from(scope String_ASCII input, ushort port, bool isPortNetworkEndian = false) {
         auto got = URIAddress.from(input);
-        if (!got)
+        if(!got)
             return NetworkAddress.init;
 
         return NetworkAddress.fromURIHost(got.host, port, isPortNetworkEndian);
@@ -212,7 +212,7 @@ export @safe nothrow @nogc:
     /// Ditto
     static NetworkAddress from(scope StringBuilder_ASCII input, ushort port, bool isPortNetworkEndian = false) {
         auto got = URIAddress.from(input);
-        if (!got)
+        if(!got)
             return NetworkAddress.init;
 
         return NetworkAddress.fromURIHost(got.host, port, isPortNetworkEndian);
@@ -221,7 +221,7 @@ export @safe nothrow @nogc:
     /// Ditto
     static NetworkAddress from(scope String_UTF8.LiteralType input, ushort port, bool isPortNetworkEndian = false) {
         auto got = URIAddress.from(input);
-        if (!got)
+        if(!got)
             return NetworkAddress.init;
 
         return NetworkAddress.fromURIHost(got.host, port, isPortNetworkEndian);
@@ -230,7 +230,7 @@ export @safe nothrow @nogc:
     /// Ditto
     static NetworkAddress from(scope String_UTF16.LiteralType input, ushort port, bool isPortNetworkEndian = false) {
         auto got = URIAddress.from(input);
-        if (!got)
+        if(!got)
             return NetworkAddress.init;
 
         return NetworkAddress.fromURIHost(got.host, port, isPortNetworkEndian);
@@ -239,7 +239,7 @@ export @safe nothrow @nogc:
     /// Ditto
     static NetworkAddress from(scope String_UTF32.LiteralType input, ushort port, bool isPortNetworkEndian = false) {
         auto got = URIAddress.from(input);
-        if (!got)
+        if(!got)
             return NetworkAddress.init;
 
         return NetworkAddress.fromURIHost(got.host, port, isPortNetworkEndian);
@@ -248,7 +248,7 @@ export @safe nothrow @nogc:
     /// Ditto
     static NetworkAddress from(scope String_UTF8 input, ushort port, bool isPortNetworkEndian = false) {
         auto got = URIAddress.from(input);
-        if (!got)
+        if(!got)
             return NetworkAddress.init;
 
         return NetworkAddress.fromURIHost(got.host, port, isPortNetworkEndian);
@@ -257,7 +257,7 @@ export @safe nothrow @nogc:
     /// Ditto
     static NetworkAddress from(scope String_UTF16 input, ushort port, bool isPortNetworkEndian = false) {
         auto got = URIAddress.from(input);
-        if (!got)
+        if(!got)
             return NetworkAddress.init;
 
         return NetworkAddress.fromURIHost(got.host, port, isPortNetworkEndian);
@@ -266,7 +266,7 @@ export @safe nothrow @nogc:
     /// Ditto
     static NetworkAddress from(scope String_UTF32 input, ushort port, bool isPortNetworkEndian = false) {
         auto got = URIAddress.from(input);
-        if (!got)
+        if(!got)
             return NetworkAddress.init;
 
         return NetworkAddress.fromURIHost(got.host, port, isPortNetworkEndian);
@@ -275,7 +275,7 @@ export @safe nothrow @nogc:
     /// Ditto
     static NetworkAddress from(scope StringBuilder_UTF8 input, ushort port, bool isPortNetworkEndian = false) {
         auto got = URIAddress.from(input);
-        if (!got)
+        if(!got)
             return NetworkAddress.init;
 
         return NetworkAddress.fromURIHost(got.host, port, isPortNetworkEndian);
@@ -284,7 +284,7 @@ export @safe nothrow @nogc:
     /// Ditto
     static NetworkAddress from(scope StringBuilder_UTF16 input, ushort port, bool isPortNetworkEndian = false) {
         auto got = URIAddress.from(input);
-        if (!got)
+        if(!got)
             return NetworkAddress.init;
 
         return NetworkAddress.fromURIHost(got.host, port, isPortNetworkEndian);
@@ -293,7 +293,7 @@ export @safe nothrow @nogc:
     /// Ditto
     static NetworkAddress from(scope StringBuilder_UTF32 input, ushort port, bool isPortNetworkEndian = false) {
         auto got = URIAddress.from(input);
-        if (!got)
+        if(!got)
             return NetworkAddress.init;
 
         return NetworkAddress.fromURIHost(got.host, port, isPortNetworkEndian);
@@ -428,7 +428,7 @@ export @safe nothrow @nogc:
     DynamicArray!NetworkAddress resolve(scope return RCAllocator allocator = RCAllocator.init) scope @trusted {
         auto ret = DynamicArray!NetworkAddress(allocator);
 
-        final switch (this.type_) {
+        final switch(this.type_) {
         case Type.Invalid:
         case Type.Any4:
         case Type.Any6:
@@ -441,20 +441,20 @@ export @safe nothrow @nogc:
 
         case Type.Hostname:
             // this Windows specific version of function isn't required as ours is already encoded approprietely to ANSI
-            version (none) {
+            version(none) {
                 {
                     String_UTF16 hn16 = String_UTF16(cast(string)this.hostname_.unsafeGetLiteral).dup;
                     ADDRINFOW* result, current;
 
                     // use GetAddrInfoW https://learn.microsoft.com/en-us/windows/win32/api/ws2tcpip/nf-ws2tcpip-getaddrinfow
-                    if (GetAddrInfoW(hn16.ptr, null, null, &result) == 0) {
+                    if(GetAddrInfoW(hn16.ptr, null, null, &result) == 0) {
                         current = result;
 
-                        while (current !is null) {
-                            if (current.ai_addr.sa_family == AF_INET) {
+                        while(current !is null) {
+                            if(current.ai_addr.sa_family == AF_INET) {
                                 sockaddr_in* address = cast(sockaddr_in*)current.ai_addr;
                                 ret ~= NetworkAddress.fromIPv4(this.port_, address.sin_addr.s_addr, true, true);
-                            } else if (current.ai_addr.sa_family == AF_INET6) {
+                            } else if(current.ai_addr.sa_family == AF_INET6) {
                                 sockaddr_in6* address = cast(sockaddr_in6*)current.ai_addr;
                                 ret ~= NetworkAddress.fromIPv6(this.port_, address.sin6_addr.s6_addr16, true, true);
                             }
@@ -473,14 +473,14 @@ export @safe nothrow @nogc:
             {
                 addrinfo* result, current;
 
-                if (getaddrinfo(cast(char*)this.hostname_.ptr, null, null, &result) == 0) {
+                if(getaddrinfo(cast(char*)this.hostname_.ptr, null, null, &result) == 0) {
                     current = result;
 
-                    while (current !is null) {
-                        if (current.ai_addr.sa_family == AF_INET) {
+                    while(current !is null) {
+                        if(current.ai_addr.sa_family == AF_INET) {
                             sockaddr_in* address = cast(sockaddr_in*)current.ai_addr;
                             ret ~= NetworkAddress.fromIPv4(this.port_, address.sin_addr.s_addr, true, true);
-                        } else if (current.ai_addr.sa_family == AF_INET6) {
+                        } else if(current.ai_addr.sa_family == AF_INET6) {
                             sockaddr_in6* address = cast(sockaddr_in6*)current.ai_addr;
                             ret ~= NetworkAddress.fromIPv6(this.port_, address.sin6_addr.s6_addr16, true, true);
                         }
@@ -525,20 +525,21 @@ export @safe nothrow @nogc:
         }, (scope String_ASCII hostname) {
             import sidero.base.encoding.bootstring;
 
-            if (!IDNAPunycode.decode(sink, hostname))
+            if(!IDNAPunycode.decode(sink, hostname))
                 doPort = false;
         }, () {
             // invalid
             doPort = false;
         });
 
-        if (doPort)
+        if(doPort)
             sink.formattedWrite(":{:d}", this.port());
     }
 
     ///
     ulong toHash() scope const @trusted {
         import sidero.base.hash.utils;
+
         return hashOf(*cast(NetworkAddress*)&this);
     }
 
@@ -559,7 +560,7 @@ export @safe nothrow @nogc:
     }
 
     package(sidero.base.path) static NetworkAddress fromURIHost(scope return String_ASCII input, ushort port, bool isPortNetworkEndian) {
-        if (input.isNull) {
+        if(input.isNull) {
             return NetworkAddress.init;
         }
 
@@ -568,28 +569,28 @@ export @safe nothrow @nogc:
         NetworkAddress ret;
         ret.port_ = port;
 
-        if (!isPortNetworkEndian) {
-            version (LittleEndian) {
+        if(!isPortNetworkEndian) {
+            version(LittleEndian) {
                 ret.port_ = swapEndian(ret.port_);
             }
         }
 
         // fill in type + dns/ipv4/ipv6
-        if (!ret.fillInAddress(input)) {
+        if(!ret.fillInAddress(input)) {
             return NetworkAddress.init;
         }
 
         // handle conversion from any address to the right type
-        final switch (ret.type_) {
+        final switch(ret.type_) {
         case Type.IPv4:
             // ipv4 any: 0.0.0.0
-            if (ret.ipv4_ == 0)
+            if(ret.ipv4_ == 0)
                 ret.type_ = Type.Any4;
             break;
 
         case Type.IPv6:
             // ipv6 any: :: or 0000:0000:0000:0000:0000:0000:0000:0000
-            if (ret.ipv6_[0] == 0 && ret.ipv6_[1] == 0 && ret.ipv6_[2] == 0 && ret.ipv6_[3] == 0 && ret.ipv6_[4] == 0 &&
+            if(ret.ipv6_[0] == 0 && ret.ipv6_[1] == 0 && ret.ipv6_[2] == 0 && ret.ipv6_[3] == 0 && ret.ipv6_[4] == 0 &&
                     ret.ipv6_[5] == 0 && ret.ipv6_[6] == 0 && ret.ipv6_[7] == 0)
                 ret.type_ = Type.Any6;
             break;
@@ -608,14 +609,14 @@ export @safe nothrow @nogc:
 
 private:
     bool fillInAddress(scope return String_ASCII input) scope @trusted {
-        if (input.startsWith("[")) {
+        if(input.startsWith("[")) {
             const possibleLengthOfHost = input.indexOf("]");
 
-            if (possibleLengthOfHost < 0)
+            if(possibleLengthOfHost < 0)
                 return false;
             String_ASCII ipLiteral = input[1 .. possibleLengthOfHost];
 
-            if (ipLiteral.startsWith("v")) {
+            if(ipLiteral.startsWith("v")) {
                 // NOPE: we don't support future ip addresses since its gotta map something to actual system API's...
                 return false;
             } else {
@@ -626,7 +627,7 @@ private:
                     ptrdiff_t index;
 
                     index = ipLiteral.indexOf("::"c);
-                    if (index >= 0) {
+                    if(index >= 0) {
                         before = ipLiteral[0 .. index];
                         ipLiteral = ipLiteral[index + 2 .. $];
                     } else {
@@ -635,8 +636,8 @@ private:
                     }
 
                     index = ipLiteral.lastIndexOf(":"c);
-                    if (index >= 0) {
-                        if (ipLiteral[index + 1 .. $].contains("."c)) {
+                    if(index >= 0) {
+                        if(ipLiteral[index + 1 .. $].contains("."c)) {
                             after = ipLiteral[0 .. index];
                             ipv4 = ipLiteral[index + 1 .. $];
                             ipLiteral = String_ASCII.init;
@@ -650,8 +651,8 @@ private:
                     }
                 }
 
-                foreach (offset16; 0 .. 8) {
-                    if (before.empty)
+                foreach(offset16; 0 .. 8) {
+                    if(before.empty)
                         break;
 
                     ushort hexent;
@@ -661,9 +662,9 @@ private:
 
                 const readIPv4 = ipv4.length > 0;
 
-                if (readIPv4) {
-                    foreach (offset8; 0 .. 4) {
-                        if (ipv4.empty)
+                if(readIPv4) {
+                    foreach(offset8; 0 .. 4) {
+                        if(ipv4.empty)
                             break;
 
                         const offset16 = 6 + (offset8 / 2);
@@ -672,7 +673,7 @@ private:
                         ubyte octet;
                         cast(void)formattedRead(ipv4, String_ASCII("{:d}."), octet);
 
-                        if (isLower)
+                        if(isLower)
                             this.ipv6_[offset16] = octet;
                         else
                             this.ipv6_[offset16] |= (octet << 8) & 0xFFFF;
@@ -684,15 +685,15 @@ private:
                     uint used;
 
                     const max = readIPv4 ? 6 : 8;
-                    foreach (offset16; 0 .. 2) {
-                        if (after.empty)
+                    foreach(offset16; 0 .. 2) {
+                        if(after.empty)
                             break;
 
                         cast(void)formattedRead(after, String_ASCII("{:x}:"), temp[used]);
                         used++;
                     }
 
-                    foreach (i; 0 .. used) {
+                    foreach(i; 0 .. used) {
                         this.ipv6_[max - (used - i)] = (((temp[i] & 0xFF) << 8) | (temp[i] >> 8)) & 0xFFFF;
                     }
                 }
@@ -704,7 +705,7 @@ private:
             String_ASCII tryASCII = input.save;
             ubyte[4] octet;
 
-            if (formattedRead(tryASCII, String_ASCII("{:d}.{:d}.{:d}.{:d}"), octet[0], octet[1], octet[2], octet[3])) {
+            if(formattedRead(tryASCII, String_ASCII("{:d}.{:d}.{:d}.{:d}"), octet[0], octet[1], octet[2], octet[3])) {
                 // is ipv4
                 this.ipv4_ = littleEndianToNative!uint([octet[0], octet[1], octet[2], octet[3]]);
                 this.type_ = Type.IPv4;
@@ -721,7 +722,7 @@ private:
 
 private:
 
-version (Windows) {
+version(Windows) {
     import core.sys.windows.winsock2 : sockaddr, AF_INET, AF_INET6, sockaddr_in, sockaddr_in6, getaddrinfo, freeaddrinfo, addrinfo;
 
     enum {
@@ -743,7 +744,7 @@ version (Windows) {
         int GetAddrInfoW(const(wchar)*, wchar*, const ADDRINFOW*, ADDRINFOW**);
         void FreeAddrInfoW(ADDRINFOW*);
     }
-} else version (Posix) {
+} else version(Posix) {
     import core.sys.posix.sys.socket : sockaddr, AF_INET, AF_INET6;
     import core.sys.posix.netinet.in_ : sockaddr_in, sockaddr_in6;
     import core.sys.posix.netdb : getaddrinfo, freeaddrinfo, addrinfo;

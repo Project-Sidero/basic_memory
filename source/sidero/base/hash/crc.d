@@ -12,6 +12,7 @@ Copyright: 2022 Richard Andrew Cattermole
  */
 module sidero.base.hash.crc;
 import sidero.base.math.fixednum;
+
 export:
 
 /+
@@ -144,25 +145,26 @@ const @safe nothrow @nogc pure:
     ///
     this(CRCSpec!WorkingType specification) {
         import sidero.base.bitmanip : bitMaskForNumberOfBits, reverseBitsLSB;
+
         this.specification = specification;
 
         {
             const topBitMask = WorkingType(1) << (specification.width - 1);
             WorkingType[256] tempTable;
 
-            foreach (i, ref v; tempTable) {
+            foreach(i, ref v; tempTable) {
                 const inputWT = specification.reverseBitsIn ? WorkingType(reverseBitsLSB!ubyte(cast(ubyte)i, 8)) : WorkingType(cast(ubyte)i);
                 WorkingType intermediateValue = inputWT << (specification.width - 8);
 
-                foreach (_; 0 .. 8) {
+                foreach(_; 0 .. 8) {
                     const isTopBitSet = (intermediateValue & topBitMask) != 0;
                     intermediateValue <<= 1;
 
-                    if (isTopBitSet)
+                    if(isTopBitSet)
                         intermediateValue ^= specification.polynomial;
                 }
 
-                if (specification.reverseBitsIn)
+                if(specification.reverseBitsIn)
                     intermediateValue = reverseBitsLSB(intermediateValue, cast(uint)specification.width);
 
                 v = intermediateValue & bitMaskForNumberOfBits!WorkingType(cast(uint)specification.width);
@@ -194,7 +196,7 @@ const @safe nothrow @nogc pure:
 
         WorkingType ret = specification.initialValue;
 
-        if (this.haveTable && specification.reverseBitsIn)
+        if(this.haveTable && specification.reverseBitsIn)
             ret = reverseBitsLSB!WorkingType(ret, cast()specification.width);
 
         return ret;
@@ -209,9 +211,9 @@ const @safe nothrow @nogc pure:
         assert(this.haveTable);
         enum haveTable = true;
 
-        if (haveTable) {
+        if(haveTable) {
             ubyte firstByteIV() {
-                static if (isIntegral!WorkingType)
+                static if(isIntegral!WorkingType)
                     return intermediateValue & 0xFF;
                 else
                     return intermediateValue.getFirstByte();
@@ -221,19 +223,19 @@ const @safe nothrow @nogc pure:
                 auto temp = intermediateValue;
                 temp >>= rsh;
 
-                static if (isIntegral!WorkingType)
+                static if(isIntegral!WorkingType)
                     return temp & 0xFF;
                 else
                     return temp.getFirstByte();
             }
 
-            if (specification.reverseBitsIn) {
-                foreach (input; array) {
+            if(specification.reverseBitsIn) {
+                foreach(input; array) {
                     intermediateValue = table[firstByteIV() ^ input] ^ (intermediateValue >> 8);
                     intermediateValue &= mask;
                 }
             } else {
-                foreach (input; array) {
+                foreach(input; array) {
                     intermediateValue = table[shiftFirstByteIV(specification.width - 8) ^ input] ^ (intermediateValue << 8);
                     intermediateValue &= mask;
                 }
@@ -244,15 +246,15 @@ const @safe nothrow @nogc pure:
 
             const topBitMask = WorkingType(1) << (specification.width - 1);
 
-            foreach (input; array) {
+            foreach(input; array) {
                 const inputWT = specification.reverseBitsIn ? WorkingType(reverseBitsLSB!ubyte(input, 8)) : WorkingType(input);
                 intermediateValue ^= inputWT << (specification.width - 8);
 
-                foreach (i; 0 .. 8) {
+                foreach(i; 0 .. 8) {
                     const isTopBitSet = (intermediateValue & topBitMask) != 0;
                     intermediateValue <<= 1;
 
-                    if (isTopBitSet)
+                    if(isTopBitSet)
                         intermediateValue ^= specification.polynomial;
 
                     intermediateValue &= mask;
@@ -272,7 +274,7 @@ const @safe nothrow @nogc pure:
         // https://stackoverflow.com/questions/28656471/how-to-configure-calculation-of-crc-table/28661073#28661073
         const reflect = (haveTable ? (specification.reverseBitsIn ^ specification.reverseBitsOut) : specification.reverseBitsOut) > 0;
 
-        if (reflect)
+        if(reflect)
             intermediateValue = reverseBitsLSB(cast()intermediateValue, cast()specification.width);
 
         return intermediateValue ^ specification.xorOutput;
@@ -965,8 +967,8 @@ immutable {
     unittest {
         assert(crc32_ISO_HDLC(cast(ubyte[])"123456789") == crc32_ISO_HDLC.specification.check);
 
-
         import std.digest.crc : crc32Of;
+
         auto temp = crc32Of(cast(ubyte[])"123456789");
         assert(*cast(uint*)(&temp[0]) == crc32_ISO_HDLC.specification.check);
     }

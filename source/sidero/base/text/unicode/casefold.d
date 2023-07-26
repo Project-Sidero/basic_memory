@@ -29,38 +29,38 @@ considered to map to itself
         dstring got2;
         size_t len;
 
-        if (compatibility && decmap.fullyDecomposedCompatibility.length > 0)
+        if(compatibility && decmap.fullyDecomposedCompatibility.length > 0)
             got2 = decmap.fullyDecomposedCompatibility;
-        else if (decmap.fullyDecomposed.length > 0 && (compatibility || decmap.tag == CompatibilityFormattingTag.None))
+        else if(decmap.fullyDecomposed.length > 0 && (compatibility || decmap.tag == CompatibilityFormattingTag.None))
             got2 = decmap.fullyDecomposed;
-        else if ((len = decomposeHangulSyllable(c, hangulMap)) > 0)
+        else if((len = decomposeHangulSyllable(c, hangulMap)) > 0)
             got2 = cast(dstring)hangulMap[0 .. len];
 
         ret += got2.length;
         return got2.length > 0;
     }
 
-    foreach (dchar c; input) {
+    foreach(dchar c; input) {
         dstring got;
 
-        if (turkic)
+        if(turkic)
             got = sidero_utf_lut_getCaseFoldingTurkic(c);
-        if (got.length == 0)
+        if(got.length == 0)
             got = sidero_utf_lut_getCaseFolding(c);
 
-        if (got.length > 0) {
+        if(got.length > 0) {
             // we support decomposing here to prevent extra memory allocations or work elsewhere when normalizing.
-            if (decompose) {
-                foreach (dchar c2; got) {
-                    if (handleDecompose(c2))
+            if(decompose) {
+                foreach(dchar c2; got) {
+                    if(handleDecompose(c2))
                         return ret;
                     else
                         ret++;
                 }
             } else
                 ret++;
-        } else if (decompose) {
-            if (handleDecompose(c))
+        } else if(decompose) {
+            if(handleDecompose(c))
                 return ret;
             else
                 ret++;
@@ -86,37 +86,37 @@ bool isCasefolded(scope ForeachOverUTF32Delegate input, bool turkic = false, boo
         dstring got2;
         size_t len;
 
-        if (compatibility && decmap.fullyDecomposedCompatibility.length > 0)
+        if(compatibility && decmap.fullyDecomposedCompatibility.length > 0)
             got2 = decmap.fullyDecomposedCompatibility;
-        else if (decmap.fullyDecomposed.length > 0 && (compatibility || decmap.tag == CompatibilityFormattingTag.None))
+        else if(decmap.fullyDecomposed.length > 0 && (compatibility || decmap.tag == CompatibilityFormattingTag.None))
             got2 = decmap.fullyDecomposed;
-        else if ((len = decomposeHangulSyllable(c, hangulMap)) > 0)
+        else if((len = decomposeHangulSyllable(c, hangulMap)) > 0)
             got2 = cast(dstring)hangulMap[0 .. len];
 
-        if (got2.length > 0)
+        if(got2.length > 0)
             return true;
 
         return false;
     }
 
-    foreach (dchar c; input) {
+    foreach(dchar c; input) {
         dstring got;
 
-        if (turkic)
+        if(turkic)
             got = sidero_utf_lut_getCaseFoldingTurkic(c);
-        if (got.length == 0)
+        if(got.length == 0)
             got = sidero_utf_lut_getCaseFolding(c);
 
-        if (got.length > 0) {
+        if(got.length > 0) {
             // we support decomposing here to prevent extra memory allocations or work elsewhere when normalizing.
-            if (decompose) {
-                foreach (dchar c2; got) {
-                    if (handleDecompose(c2))
+            if(decompose) {
+                foreach(dchar c2; got) {
+                    if(handleDecompose(c2))
                         return false;
                 }
             }
-        } else if (decompose) {
-            if (handleDecompose(c))
+        } else if(decompose) {
+            if(handleDecompose(c))
                 return false;
         }
     }
@@ -139,7 +139,7 @@ dstring toCasefold(scope ForeachOverUTF32Delegate input, RCAllocator allocator, 
 
     size_t soFar;
     caseFold((scope const(dchar)[] got...) {
-        foreach (i, v; got)
+        foreach(i, v; got)
             ret[soFar + i] = v;
         soFar += got.length;
         return false;
@@ -167,40 +167,40 @@ considered to map to itself
         dstring got2;
         size_t len;
 
-        if (compatibility && decmap.fullyDecomposedCompatibility.length > 0)
+        if(compatibility && decmap.fullyDecomposedCompatibility.length > 0)
             got2 = decmap.fullyDecomposedCompatibility;
-        else if (decmap.fullyDecomposed.length > 0 && (compatibility || decmap.tag == CompatibilityFormattingTag.None))
+        else if(decmap.fullyDecomposed.length > 0 && (compatibility || decmap.tag == CompatibilityFormattingTag.None))
             got2 = decmap.fullyDecomposed;
-        else if ((len = decomposeHangulSyllable(c, hangulMap)) > 0)
+        else if((len = decomposeHangulSyllable(c, hangulMap)) > 0)
             got2 = cast(dstring)hangulMap[0 .. len];
 
-        if ((got2.length == 0 && handle(c)) || (got2.length > 0 && handle(got2)))
+        if((got2.length == 0 && handle(c)) || (got2.length > 0 && handle(got2)))
             return true;
 
         return false;
     }
 
-    foreach (dchar c; input) {
+    foreach(dchar c; input) {
         dstring got;
 
-        if (turkic)
+        if(turkic)
             got = sidero_utf_lut_getCaseFoldingTurkic(c);
-        if (got.length == 0)
+        if(got.length == 0)
             got = sidero_utf_lut_getCaseFolding(c);
 
-        if (got.length > 0) {
+        if(got.length > 0) {
             // we support decomposing here to prevent extra memory allocations or work elsewhere when normalizing.
-            if (decompose) {
-                foreach (dchar c2; got) {
-                    if (handleDecompose(c2))
+            if(decompose) {
+                foreach(dchar c2; got) {
+                    if(handleDecompose(c2))
                         return;
                 }
-            } else if (handle(got))
+            } else if(handle(got))
                 return;
-        } else if (decompose) {
-            if (handleDecompose(c))
+        } else if(decompose) {
+            if(handleDecompose(c))
                 return;
-        } else if (handle(c))
+        } else if(handle(c))
             return;
     }
 }

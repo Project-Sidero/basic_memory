@@ -1,4 +1,4 @@
-﻿module verify_generated.main;
+module verify_generated.main;
 import std.stdio;
 
 void main() {

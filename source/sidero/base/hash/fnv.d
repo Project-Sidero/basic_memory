@@ -1,4 +1,4 @@
-﻿/**
+/**
 Performs a Fowler Noll Vo hash algorithms
 
 Supports 0, 1 and 1a in the bit depths of 32, 64, 128 and 256.
@@ -40,7 +40,7 @@ Returns:
 uint fnv_32_0(const(ubyte)[] data, uint start = 0) {
     uint hash = start;
 
-    foreach (b; data) {
+    foreach(b; data) {
         hash *= FNV_Prime_32;
         hash ^= b;
     }
@@ -52,7 +52,7 @@ uint fnv_32_0(const(ubyte)[] data, uint start = 0) {
 ulong fnv_64_0(const(ubyte)[] data, ulong start = 0) {
     ulong hash = start;
 
-    foreach (b; data) {
+    foreach(b; data) {
         hash *= FNV_Prime_64;
         hash ^= b;
     }
@@ -64,7 +64,7 @@ ulong fnv_64_0(const(ubyte)[] data, ulong start = 0) {
 FixedUNum!16 fnv_128_0(const(ubyte)[] data, FixedUNum!16 start = FixedUNum!16(0)) {
     FixedUNum!16 hash = start;
 
-    foreach (b; data) {
+    foreach(b; data) {
         hash *= FNV_Prime_128;
         hash ^= FixedUNum!16(b);
     }
@@ -76,7 +76,7 @@ FixedUNum!16 fnv_128_0(const(ubyte)[] data, FixedUNum!16 start = FixedUNum!16(0)
 FixedUNum!32 fnv_256_0(const(ubyte)[] data, FixedUNum!32 start = FixedUNum!32(0)) {
     FixedUNum!32 hash = start;
 
-    foreach (b; data) {
+    foreach(b; data) {
         hash *= FNV_Prime_256;
         hash ^= FixedUNum!32(b);
     }
@@ -97,7 +97,7 @@ Returns:
 uint fnv_32_1(const(ubyte)[] data, uint start = FNV_Offset_Basis_32) {
     uint hash = start;
 
-    foreach (b; data) {
+    foreach(b; data) {
         hash *= FNV_Prime_32;
         hash ^= b;
     }
@@ -109,7 +109,7 @@ uint fnv_32_1(const(ubyte)[] data, uint start = FNV_Offset_Basis_32) {
 ulong fnv_64_1(const(ubyte)[] data, ulong start = FNV_Offset_Basis_64) {
     ulong hash = start;
 
-    foreach (b; data) {
+    foreach(b; data) {
         hash *= FNV_Prime_64;
         hash ^= b;
     }
@@ -121,7 +121,7 @@ ulong fnv_64_1(const(ubyte)[] data, ulong start = FNV_Offset_Basis_64) {
 FixedUNum!16 fnv_128_1(const(ubyte)[] data, FixedUNum!16 start = FNV_Offset_Basis_128) {
     FixedUNum!16 hash = start;
 
-    foreach (b; data) {
+    foreach(b; data) {
         hash *= FNV_Prime_128;
         hash ^= FixedUNum!16(b);
     }
@@ -133,7 +133,7 @@ FixedUNum!16 fnv_128_1(const(ubyte)[] data, FixedUNum!16 start = FNV_Offset_Basi
 FixedUNum!32 fnv_256_1(const(ubyte)[] data, FixedUNum!32 start = FNV_Offset_Basis_256) {
     FixedUNum!32 hash = start;
 
-    foreach (b; data) {
+    foreach(b; data) {
         hash *= FNV_Prime_256;
         hash ^= FixedUNum!32(b);
     }
@@ -154,7 +154,7 @@ Returns:
 uint fnv_32_1a(const(ubyte)[] data, uint start = FNV_Offset_Basis_32) {
     uint hash = start;
 
-    foreach (b; data) {
+    foreach(b; data) {
         hash ^= b;
         hash *= FNV_Prime_32;
     }
@@ -166,7 +166,7 @@ uint fnv_32_1a(const(ubyte)[] data, uint start = FNV_Offset_Basis_32) {
 ulong fnv_64_1a(const(ubyte)[] data, ulong start = FNV_Offset_Basis_64) {
     ulong hash = start;
 
-    foreach (b; data) {
+    foreach(b; data) {
         hash ^= b;
         hash *= FNV_Prime_64;
     }
@@ -178,7 +178,7 @@ ulong fnv_64_1a(const(ubyte)[] data, ulong start = FNV_Offset_Basis_64) {
 FixedUNum!16 fnv_128_1a(const(ubyte)[] data, FixedUNum!16 start = FNV_Offset_Basis_128) {
     FixedUNum!16 hash = start;
 
-    foreach (b; data) {
+    foreach(b; data) {
         hash ^= FixedUNum!16(b);
         hash *= FNV_Prime_128;
     }
@@ -190,7 +190,7 @@ FixedUNum!16 fnv_128_1a(const(ubyte)[] data, FixedUNum!16 start = FNV_Offset_Bas
 FixedUNum!32 fnv_256_1a(const(ubyte)[] data, FixedUNum!32 start = FNV_Offset_Basis_256) {
     FixedUNum!32 hash = start;
 
-    foreach (b; data) {
+    foreach(b; data) {
         hash ^= FixedUNum!32(b);
         hash *= FNV_Prime_256;
     }

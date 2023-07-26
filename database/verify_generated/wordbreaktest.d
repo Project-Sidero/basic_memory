@@ -13,14 +13,9 @@ void wordBreakTests() {
         bool findNext() @trusted {
             size_t offsetForIterator = currentOffset;
 
-            const temp = WBr(() {
-                return WBr.Entry(1, test.value[offsetForIterator++]);
-            }, () {
+            const temp = WBr(() { return WBr.Entry(1, test.value[offsetForIterator++]); }, () {
                 return offsetForIterator < test.value.length ? WBr.Entry(1, test.value[offsetForIterator]) : WBr.Entry(size_t.max);
-            }, () {
-                return offsetForIterator < test.value.length; },
-            test.value.length - offsetForIterator,
-            test.value.length).perform();
+            }, () { return offsetForIterator < test.value.length; }, test.value.length - offsetForIterator, test.value.length).perform();
 
             lastOffset = currentOffset;
             currentOffset += temp;
@@ -31,7 +26,7 @@ void wordBreakTests() {
         writeln("=== ", testId, ": ", test.comment);
 
         version(none) {
-            foreach (i; 0 .. test.value.length)
+            foreach(i; 0 .. test.value.length)
                 writefln!"%s: %X %s %s"(i, test.value[i], test.value[i], test.canBreak[i]);
         }
 
@@ -41,12 +36,14 @@ void wordBreakTests() {
             keepGoing = findNext();
 
             version(none) {
-                writeln(soFar, ": lastOffset: ", lastOffset, " currentOffset: ", currentOffset, " length: ", currentOffset - lastOffset, " expected length: ", test.lengths[soFar]);
+                writeln(soFar, ": lastOffset: ", lastOffset, " currentOffset: ", currentOffset, " length: ",
+                        currentOffset - lastOffset, " expected length: ", test.lengths[soFar]);
             }
 
             assert(currentOffset - lastOffset == test.lengths[soFar]);
             soFar++;
-        } while (keepGoing && currentOffset < test.value.length);
+        }
+        while(keepGoing && currentOffset < test.value.length);
     }
 }
 
@@ -66,7 +63,7 @@ void parseTestFile() {
         ptrdiff_t offset = line.countUntil('#');
         dstring comment;
 
-        if (offset >= 0) {
+        if(offset >= 0) {
             comment = line[offset + 1 .. $].strip;
             line = line[0 .. offset];
         }
@@ -75,7 +72,7 @@ void parseTestFile() {
 
         {
             offset = line.countUntil(' ');
-            if (offset < 0)
+            if(offset < 0)
                 continue;
 
             dstring operation = offset > 0 ? line[0 .. offset] : line;
@@ -106,13 +103,13 @@ void parseTestFile() {
             test.canBreak ~= operation == divide;
 
             length++;
-            if (operation == divide) {
+            if(operation == divide) {
                 test.lengths ~= length;
                 length = 0;
             }
         }
 
-        if (length > 0)
+        if(length > 0)
             test.lengths ~= length;
 
         assert(test.lengths.length > 0);

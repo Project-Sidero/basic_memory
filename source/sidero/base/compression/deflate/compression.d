@@ -86,16 +86,16 @@ struct DeflateCompressionImpl {
         const initialConsumed = source.consumed;
         bool isFirst = true;
 
-        for (;;) {
+        for(;;) {
             const startSourceLength = source.lengthOfSource;
-            if (startSourceLength == 0)
+            if(startSourceLength == 0)
                 break;
 
             const lengthForBlock = cast(ushort)(amountNeededInFirstBatch > 0 ? (amountNeededInFirstBatch > startSourceLength ?
         startSourceLength : amountNeededInFirstBatch) : (startSourceLength > BlockSizeToWalk ? BlockSizeToWalk : startSourceLength));
             const isLast = lengthForBlock == startSourceLength;
 
-            final switch (compressionRate) {
+            final switch(compressionRate) {
             case DeflateCompressionRate.None:
                 // no compression is pretty easy to implement
 
@@ -112,14 +112,14 @@ struct DeflateCompressionImpl {
                 // the goal of this one is to use the fixed huffman trees
                 // probably isn't worth it if lengthOfBlock <= 32
 
-                if (lengthForBlock <= 32)
+                if(lengthForBlock <= 32)
                     goto case DeflateCompressionRate.None;
 
                 emitBlockHeader(isLast, BTYPE.FixedHuffmanCodes);
                 auto toCompress = source.consumeExact(lengthForBlock);
                 assert(toCompress.length == lengthForBlock);
 
-                foreach (i; 0 .. lengthForBlock) {
+                foreach(i; 0 .. lengthForBlock) {
                     emitFixedSymbol(toCompress[i]);
                 }
 
@@ -132,7 +132,7 @@ struct DeflateCompressionImpl {
                 // probably isn't worth it if lengthOfBlock <= 64
                 // so we'll swap over to fixed huffman tree
 
-                if (lengthForBlock <= 64)
+                if(lengthForBlock <= 64)
                     goto case DeflateCompressionRate.FixedHuffManTree;
 
                 emitBlockHeader(isLast, BTYPE.DynamicHuffmanCodes);
@@ -155,7 +155,7 @@ struct DeflateCompressionImpl {
                     symbolValuePaths = symbolTree.pathForValues();
                 }
 
-                foreach (i; 0 .. lengthForBlock) {
+                foreach(i; 0 .. lengthForBlock) {
                     emitSymbolMSB(symbolValuePaths[toCompress[i]]);
                 }
 
@@ -168,7 +168,7 @@ struct DeflateCompressionImpl {
                 // probably isn't worth it if lengthOfBlock <= 32
                 // write out using fixed huffman tree
                 // probably isn't worth it if lengthOfBlock <= 64
-                if (lengthForBlock <= 64)
+                if(lengthForBlock <= 64)
                     goto case DeflateCompressionRate.FixedHuffManTree;
 
                 emitBlockHeader(isLast, BTYPE.FixedHuffmanCodes);
@@ -181,7 +181,7 @@ struct DeflateCompressionImpl {
                 // build hash chain, look for longest match
                 // create a dynamic huffman tree and write that out
                 // probably isn't worth it if lengthOfBlock <= 64
-                if (lengthForBlock <= 64)
+                if(lengthForBlock <= 64)
                     goto case DeflateCompressionRate.FixedHuffManTree;
 
                 emitBlockHeader(isLast, BTYPE.DynamicHuffmanCodes);
@@ -196,7 +196,7 @@ struct DeflateCompressionImpl {
                 // use literal symbols in between the two
                 // create a dynamic huffman tree and write that out
                 // probably isn't worth it if lengthOfBlock <= 64
-                if (lengthForBlock <= 64)
+                if(lengthForBlock <= 64)
                     goto case DeflateCompressionRate.FixedHuffManTree;
 
                 emitBlockHeader(isLast, BTYPE.DynamicHuffmanCodes);
@@ -207,7 +207,7 @@ struct DeflateCompressionImpl {
                 break;
             }
 
-            if (amountNeededInFirstBatch > 0) {
+            if(amountNeededInFirstBatch > 0) {
                 amountNeededInFirstBatch -= lengthForBlock;
                 amountInFirstBatch += result.output.length;
             }
@@ -237,7 +237,7 @@ struct DeflateCompressionImpl {
         assert(symbol[1] > 0);
 
         uint tempPath = symbol[0];
-        foreach (i; 0 .. symbol[1]) {
+        foreach(i; 0 .. symbol[1]) {
             const bit = (tempPath & 1) == 1;
             tempPath >>= 1;
             result.writeBit(bit);
@@ -249,7 +249,7 @@ struct DeflateCompressionImpl {
         uint tempPath = symbol[0] << shiftMSBLeftToMax;
         assert(symbol[1] > 0);
 
-        foreach (i; 0 .. symbol[1]) {
+        foreach(i; 0 .. symbol[1]) {
             const bit = (tempPath & 0x8000) > 0;
             tempPath <<= 1;
             result.writeBit(bit);
@@ -263,8 +263,8 @@ struct DeflateCompressionImpl {
             // HLIT - 257 as 5 bits, number of non-zero in depths
             // its ok for HLIT to be zero here.
 
-            foreach_reverse (depth; symbolDepths[$ - 31 .. $ - 2]) {
-                if (depth != 0)
+            foreach_reverse(depth; symbolDepths[$ - 31 .. $ - 2]) {
+                if(depth != 0)
                     break;
                 hlit--;
             }
@@ -274,7 +274,7 @@ struct DeflateCompressionImpl {
 
         {
             // HDIST - 1 as 5 bits
-            if (distanceDepths.length > 0)
+            if(distanceDepths.length > 0)
                 hdist = cast(ushort)(distanceDepths.length - 1);
             emitSymbol([cast(ushort)hdist, 5]);
         }
@@ -298,22 +298,22 @@ struct DeflateCompressionImpl {
             hclen = 19 - 4; // stuff it, we are not compressing this
             emitSymbol([hclen, 4]);
 
-            foreach (alphabet; codeLengthAlphabet) {
+            foreach(alphabet; codeLengthAlphabet) {
                 emitSymbol([depthsOfAnySymbol[alphabet], 3]);
             }
         }
 
         {
             // symbol + distance
-            foreach (depth; symbolDepths[0 .. hlit + 257]) {
+            foreach(depth; symbolDepths[0 .. hlit + 257]) {
                 emitSymbolMSB(symbolsForDepths[depth]);
             }
 
-            if (distanceDepths.length == 0) {
+            if(distanceDepths.length == 0) {
                 // emit as length 1, for value 0
                 emitSymbolMSB(symbolsForDepths[0]);
             } else {
-                foreach (depth; distanceDepths) {
+                foreach(depth; distanceDepths) {
                     emitSymbolMSB(symbolsForDepths[depth]);
                 }
             }
@@ -328,7 +328,7 @@ struct DeflateCompressionImpl {
             bool useDynamicHuffMan, int lookForBetter, size_t maxLayers, size_t maxInLayer) @trusted {
         import std.math : sqrt;
 
-        if (isFirst) {
+        if(isFirst) {
             hashChain = HashChain(cast(size_t)sqrt(cast(float)toCompress.length), maxLayers, 3, maxInLayer, 258, allocator);
         }
 
@@ -348,7 +348,7 @@ struct DeflateCompressionImpl {
 
             {
                 size_t offsetForLength;
-                while (lengthBase[offsetForLength++] < matchLength) {
+                while(lengthBase[offsetForLength++] < matchLength) {
                     assert(offsetForLength <= lengthBase.length);
                 }
                 offsetForLength--;
@@ -363,7 +363,7 @@ struct DeflateCompressionImpl {
 
             {
                 size_t offsetForDistance = 0;
-                while (distanceBase[offsetForDistance++] < matchOffset) {
+                while(distanceBase[offsetForDistance++] < matchOffset) {
                     assert(offsetForDistance <= distanceBase.length);
                 }
                 offsetForDistance--;
@@ -407,13 +407,13 @@ struct DeflateCompressionImpl {
             distanceExtras ~= [cast(ushort)0, cast(ushort)0];
         }
 
-        while (toCompress.length > 0) {
+        while(toCompress.length > 0) {
             size_t initialMatchOffset, initialMatchLength;
 
-            if (!hashChain.findLongestMatch(toCompress, initialMatchOffset, initialMatchLength)) {
+            if(!hashChain.findLongestMatch(toCompress, initialMatchOffset, initialMatchLength)) {
                 // if we didn't find a match, we need to emit first byte, add to chain and continue
 
-                if (useDynamicHuffMan) {
+                if(useDynamicHuffMan) {
                     emitDynamicSymbol(toCompress[0]);
                 } else {
                     emitFixedSymbol(toCompress[0]);
@@ -422,32 +422,31 @@ struct DeflateCompressionImpl {
                 hashChain.addMatch(offset, toCompress);
                 toCompress = toCompress[1 .. $];
                 offset++;
-            } else if (useDynamicHuffMan) {
+            } else if(useDynamicHuffMan) {
                 // needs to be stored in an Appender prior to creating the huffman tree
 
-                if (lookForBetter != 0) {
+                if(lookForBetter != 0) {
                     const howFarToLookForward = cast(size_t)(sqrt(sqrt(cast(float)toCompress.length)) * lookForBetter);
                     // look for a second match, if found redo first but slice shrink toCompress that was passed in
 
                     size_t proposedMatchOffset, proposedMatchLength;
 
-                    foreach (i; 1 .. howFarToLookForward + 1) {
+                    foreach(i; 1 .. howFarToLookForward + 1) {
                         const toCompress2 = toCompress[i .. $];
                         size_t tempMatchOffset, tempMatchLength;
 
-                        if (hashChain.findLongestMatch(toCompress2, tempMatchOffset, tempMatchLength) &&
-                                proposedMatchLength < tempMatchLength) {
+                        if(hashChain.findLongestMatch(toCompress2, tempMatchOffset, tempMatchLength) && proposedMatchLength < tempMatchLength) {
                             proposedMatchOffset = tempMatchOffset;
                             proposedMatchLength = tempMatchLength;
                         }
                     }
 
-                    if (proposedMatchLength > initialMatchLength) {
-                        while (offset < proposedMatchOffset) {
+                    if(proposedMatchLength > initialMatchLength) {
+                        while(offset < proposedMatchOffset) {
                             scope const(ubyte)[] matchable = toCompress[0 .. proposedMatchOffset - offset];
                             size_t tempMatchOffset, tempMatchLength;
 
-                            if (hashChain.findLongestMatch(matchable, tempMatchOffset, tempMatchLength)) {
+                            if(hashChain.findLongestMatch(matchable, tempMatchOffset, tempMatchLength)) {
                                 emitDynamicDistance(tempMatchOffset, tempMatchLength);
                                 hashChain.addMatch(offset, toCompress);
 
@@ -490,7 +489,7 @@ struct DeflateCompressionImpl {
             }
         }
 
-        if (useDynamicHuffMan) {
+        if(useDynamicHuffMan) {
             HuffManTree!288 symbolTree;
             HuffManTree!30 distanceTree;
             ushort[2][288] symbolValuePaths = void;
@@ -516,18 +515,18 @@ struct DeflateCompressionImpl {
                 distanceValuePaths = distanceTree.pathForValues();
             }
 
-            foreach (i; 0 .. dynamicHuffManSymbols.length) {
+            foreach(i; 0 .. dynamicHuffManSymbols.length) {
                 ushort symbol = dynamicHuffManSymbols[i].assumeOkay;
 
                 emitSymbolMSB(symbolValuePaths[symbol]);
-                if (symbolExtras[i].assumeOkay[1] > 0)
+                if(symbolExtras[i].assumeOkay[1] > 0)
                     emitSymbol(symbolExtras[i].assumeOkay);
 
-                if (symbol > 256) {
+                if(symbol > 256) {
                     ushort distance = dynamicHuffManDistances[i].assumeOkay;
 
                     emitSymbolMSB(distanceValuePaths[distance]);
-                    if (distanceExtras[i].assumeOkay[1] > 0)
+                    if(distanceExtras[i].assumeOkay[1] > 0)
                         emitSymbol(distanceExtras[i].assumeOkay);
                 }
             }
@@ -548,17 +547,17 @@ struct DeflateCompressionImpl {
         Slice!ubyte compressed, decompressed;
 
         compressed = compressDeflate(toCompress, rate);
-        if (compressed.length == 0)
+        if(compressed.length == 0)
             return false;
 
         auto consumed = decompressDeflate(compressed, decompressed);
-        if (!consumed || consumed.get != compressed.length || decompressed.length != toCompress.length)
+        if(!consumed || consumed.get != compressed.length || decompressed.length != toCompress.length)
             return false;
 
         size_t offset;
 
-        foreach (ubyte v; decompressed) {
-            if (offset >= toCompress.length || toCompress[offset++] != v)
+        foreach(ubyte v; decompressed) {
+            if(offset >= toCompress.length || toCompress[offset++] != v)
                 return false;
         }
 

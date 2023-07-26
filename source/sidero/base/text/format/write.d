@@ -124,11 +124,11 @@ Builder formattedWriteImpl(Builder, Args...)(return scope ref Builder output, sc
     size_t argsHandled;
     bool[Args.length] areArgsHandled;
 
-    OuterLoop: while (!formatString.empty || argsHandled < Args.length) {
+    OuterLoop: while(!formatString.empty || argsHandled < Args.length) {
         size_t argId = size_t.max;
 
-        foreach (id, b; areArgsHandled) {
-            if (!b) {
+        foreach(id, b; areArgsHandled) {
+            if(!b) {
                 argId = id;
                 break;
             }
@@ -145,15 +145,15 @@ Builder formattedWriteImpl(Builder, Args...)(return scope ref Builder output, sc
                 while(!temp.empty) {
                     dchar c = temp.front;
 
-                    if (wasLeftBrace) {
-                        if (c == '{') {
+                    if(wasLeftBrace) {
+                        if(c == '{') {
                             wasLeftBrace = false;
                             temp.popFront;
                             notConsumed = temp.length;
                         } else {
                             break;
                         }
-                    } else if (c == '{') {
+                    } else if(c == '{') {
                         notConsumed = temp.length;
                         temp.popFront;
                         wasLeftBrace = true;
@@ -163,39 +163,39 @@ Builder formattedWriteImpl(Builder, Args...)(return scope ref Builder output, sc
                     }
                 }
 
-                if (temp.empty && wasLeftBrace)
+                if(temp.empty && wasLeftBrace)
                     notConsumed = 0;
 
                 soFar = formatString.length - notConsumed;
             }
 
-            static if (is(Builder == StringBuilder_ASCII)) {
-                foreach (c; formatString[0 .. soFar]) {
+            static if(is(Builder == StringBuilder_ASCII)) {
+                foreach(c; formatString[0 .. soFar]) {
                     output ~= [cast(ubyte)c];
                 }
             } else {
                 output ~= formatString[0 .. soFar];
             }
 
-            if (formatString.length > soFar)
+            if(formatString.length > soFar)
                 formatString = formatString[soFar .. $];
             else
                 formatString = String_UTF32.init;
         }
 
         FormatSpecifier format = FormatSpecifier.from(formatString, false);
-        if (format.argId >= 0)
+        if(format.argId >= 0)
             argId = format.argId;
 
     ArgSwitch:
-        switch (argId) {
+        switch(argId) {
         case size_t.max:
             break ArgSwitch;
 
-            static foreach (I; 0 .. Args.length) {
+            static foreach(I; 0 .. Args.length) {
         case I:
-                if (rawWrite(output, cast(Unqual!(Args[I]))args[I], format, quote)) {
-                    if (!areArgsHandled[argId])
+                if(rawWrite(output, cast(Unqual!(Args[I]))args[I], format, quote)) {
+                    if(!areArgsHandled[argId])
                         argsHandled++;
                     areArgsHandled[argId] = true;
                     break ArgSwitch;

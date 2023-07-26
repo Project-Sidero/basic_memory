@@ -8,6 +8,7 @@ import std.array : appender;
 
 void Casing() {
     import std.format : formattedWrite;
+
     auto internalCa = appender!string();
     internalCa ~= "module sidero.base.internal.unicode.unicodedataCa;\n\n";
     internalCa ~= "// Generated do not modify\n";
@@ -17,18 +18,18 @@ void Casing() {
 
     {
 
-        foreach (character, entry; state.entries) {
-            if (entry.haveSimpleLowercaseMapping && (""d ~ entry.simpleLowercaseMapping) !in casingDStringMap) {
+        foreach(character, entry; state.entries) {
+            if(entry.haveSimpleLowercaseMapping && (""d ~ entry.simpleLowercaseMapping) !in casingDStringMap) {
                 casingDStringMap[""d ~ entry.simpleLowercaseMapping] = casingText.length;
                 casingText ~= entry.simpleLowercaseMapping;
             }
 
-            if (entry.haveSimpleTitlecaseMapping && (""d ~ entry.simpleTitlecaseMapping) !in casingDStringMap) {
+            if(entry.haveSimpleTitlecaseMapping && (""d ~ entry.simpleTitlecaseMapping) !in casingDStringMap) {
                 casingDStringMap[""d ~ entry.simpleTitlecaseMapping] = casingText.length;
                 casingText ~= entry.simpleTitlecaseMapping;
             }
 
-            if (entry.haveSimpleUppercaseMapping && (""d ~ entry.simpleUppercaseMapping) !in casingDStringMap) {
+            if(entry.haveSimpleUppercaseMapping && (""d ~ entry.simpleUppercaseMapping) !in casingDStringMap) {
                 casingDStringMap[""d ~ entry.simpleUppercaseMapping] = casingText.length;
                 casingText ~= entry.simpleUppercaseMapping;
             }
@@ -38,26 +39,26 @@ void Casing() {
     {
         SequentialRanges!(CasingDiced, SequentialRangeSplitGroup, 2) sr;
 
-        foreach (entry; state.entries) {
-            if (entry.haveSimpleLowercaseMapping || entry.haveSimpleTitlecaseMapping || entry.haveSimpleUppercaseMapping) {
+        foreach(entry; state.entries) {
+            if(entry.haveSimpleLowercaseMapping || entry.haveSimpleTitlecaseMapping || entry.haveSimpleUppercaseMapping) {
                 CasingDiced diced;
 
-                if (entry.haveSimpleLowercaseMapping) {
+                if(entry.haveSimpleLowercaseMapping) {
                     diced.lowerOffset = cast(ushort)casingDStringMap[""d ~ entry.simpleLowercaseMapping];
                     diced.lowerEnd = cast(ushort)(diced.lowerOffset + (""d ~ entry.simpleLowercaseMapping).length);
                 }
 
-                if (entry.haveSimpleTitlecaseMapping) {
+                if(entry.haveSimpleTitlecaseMapping) {
                     diced.titleOffset = cast(ushort)casingDStringMap[""d ~ entry.simpleTitlecaseMapping];
                     diced.titleEnd = cast(ushort)(diced.titleOffset + (""d ~ entry.simpleTitlecaseMapping).length);
                 }
 
-                if (entry.haveSimpleUppercaseMapping) {
+                if(entry.haveSimpleUppercaseMapping) {
                     diced.upperOffset = cast(ushort)casingDStringMap[""d ~ entry.simpleUppercaseMapping];
                     diced.upperEnd = cast(ushort)(diced.upperOffset + (""d ~ entry.simpleUppercaseMapping).length);
                 }
 
-                foreach (c; entry.range.start .. entry.range.end + 1)
+                foreach(c; entry.range.start .. entry.range.end + 1)
                     sr.add(cast(dchar)c, diced);
             }
         }
@@ -115,7 +116,7 @@ void Casing() {
         internalCa ~= "static immutable dstring LUT_CasingDString = cast(dstring)[";
 
         foreach(i, dchar c; casingText) {
-            if (i > 0)
+            if(i > 0)
                 internalCa ~= ", ";
             internalCa.formattedWrite!"0x%X"(c);
         }
@@ -143,18 +144,18 @@ struct CasingDiced {
     version(none) {
         SequentialRanges!(SimplifiedCasing, SequentialRangeSplitGroup, 2) sr;
 
-        foreach (entry; state.entries) {
+        foreach(entry; state.entries) {
             SimplifiedCasing casing;
 
-            if (entry.haveSimpleLowercaseMapping)
+            if(entry.haveSimpleLowercaseMapping)
                 casing.lowercase = ""d ~ entry.simpleLowercaseMapping;
-            if (entry.haveSimpleTitlecaseMapping)
+            if(entry.haveSimpleTitlecaseMapping)
                 casing.titlecase = ""d ~ entry.simpleTitlecaseMapping;
-            if (entry.haveSimpleUppercaseMapping)
+            if(entry.haveSimpleUppercaseMapping)
                 casing.uppercase = ""d ~ entry.simpleUppercaseMapping;
 
-            if (entry.haveSimpleLowercaseMapping || entry.haveSimpleTitlecaseMapping || entry.haveSimpleUppercaseMapping) {
-                foreach (c; entry.range.start .. entry.range.end + 1)
+            if(entry.haveSimpleLowercaseMapping || entry.haveSimpleTitlecaseMapping || entry.haveSimpleUppercaseMapping) {
+                foreach(c; entry.range.start .. entry.range.end + 1)
                     sr.add(cast(dchar)c, casing);
             }
         }

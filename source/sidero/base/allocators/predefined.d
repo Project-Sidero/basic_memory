@@ -29,8 +29,8 @@ alias HouseKeepingAllocator(MappingAllocator = DefaultMapper, size_t AlignedTo =
         AllocatorList!(MappingAllocator, (poolAllocator) => Region!(typeof(poolAllocator), AlignedTo)(null, poolAllocator)));
 
 /// Accumulator of memory regions that can be deallocated all at once, not thread safe.
-alias MemoryRegionsAllocator(size_t DefaultSize = 0, MappingAllocator = DefaultMapper) = AllocatorList!(Region!(MappingAllocator, GoodAlignment, DefaultSize),
-    () => Region!(MappingAllocator, GoodAlignment, DefaultSize)());
+alias MemoryRegionsAllocator(size_t DefaultSize = 0, MappingAllocator = DefaultMapper) = AllocatorList!(
+        Region!(MappingAllocator, GoodAlignment, DefaultSize), () => Region!(MappingAllocator, GoodAlignment, DefaultSize)());
 
 /**
 A house keeping allocator that will ensure there are LSB bits available for tags

@@ -8,12 +8,12 @@ import sidero.base.typecons : Optional;
 
 export @safe nothrow @nogc:
 
-version (Posix) {
+version(Posix) {
     ///
     enum PathSeparator = '/';
     ///
     enum DefaultPlatfromRule = FilePathPlatform.Posix;
-} else version (Windows) {
+} else version(Windows) {
     ///
     enum PathSeparator = '\\';
     ///
@@ -40,7 +40,7 @@ export @safe nothrow @nogc:
 
         this.state = other.state;
 
-        if (this.state !is null)
+        if(this.state !is null)
             atomicOp!"+="(this.state.refCount, 1);
     }
 
@@ -48,7 +48,7 @@ export @safe nothrow @nogc:
     ~this() scope @trusted {
         import core.atomic : atomicOp;
 
-        if (this.state !is null && atomicOp!"-="(this.state.refCount, 1) == 0) {
+        if(this.state !is null && atomicOp!"-="(this.state.refCount, 1) == 0) {
             RCAllocator allocator = state.allocator;
             allocator.dispose(state);
         }
@@ -62,16 +62,16 @@ export @safe nothrow @nogc:
 
     ///
     FilePath dup(return scope RCAllocator allocator = RCAllocator.init) scope const @trusted {
-        if (isNull)
+        if(isNull)
             return FilePath.init;
 
-        if (allocator.isNull)
+        if(allocator.isNull)
             allocator = globalAllocator();
 
         FilePathState* state = cast(FilePathState*)this.state;
 
         state.mutex.pureLock;
-        scope (exit)
+        scope(exit)
             state.mutex.unlock;
 
         FilePath ret;
@@ -85,7 +85,7 @@ export @safe nothrow @nogc:
 
     ///
     Result!FilePathPlatform activePlatformRule() scope const {
-        if (isNull)
+        if(isNull)
             return typeof(return)(NullPointerException);
         return typeof(return)(state.platformRule);
     }
@@ -98,13 +98,13 @@ export @safe nothrow @nogc:
 
     ///
     FilePathRelativeTo relativeTo() scope const @trusted {
-        if (isNull)
+        if(isNull)
             return typeof(return).init;
 
         FilePathState* state = cast(FilePathState*)this.state;
 
         state.mutex.pureLock;
-        scope (exit)
+        scope(exit)
             state.mutex.unlock;
 
         return state.relativeTo;
@@ -112,10 +112,10 @@ export @safe nothrow @nogc:
 
     ///
     Result!string platformSeparator() scope const {
-        if (isNull)
+        if(isNull)
             return typeof(return)(NullPointerException);
 
-        final switch (state.platformRule) {
+        final switch(state.platformRule) {
         case FilePathPlatform.Windows:
             return typeof(return)("\\");
         case FilePathPlatform.Posix:
@@ -125,7 +125,7 @@ export @safe nothrow @nogc:
 
     ///
     bool couldPointToEntry() scope const {
-        if (isNull)
+        if(isNull)
             return false;
         else
             return state.couldPointToEntry;
@@ -133,24 +133,24 @@ export @safe nothrow @nogc:
 
     ///
     String_UTF8 hostname(RCAllocator allocator = RCAllocator.init) scope const @trusted {
-        if (isNull || state.lengthOfHost == 0)
+        if(isNull || state.lengthOfHost == 0)
             return String_UTF8.init;
 
         FilePathState* state = cast(FilePathState*)this.state;
 
         state.mutex.pureLock;
-        scope (exit)
+        scope(exit)
             state.mutex.unlock;
 
         auto part = state.storage[state.lengthOfLeading .. state.lengthOfLeading + state.lengthOfHost];
 
-        final switch (state.platformRule) {
+        final switch(state.platformRule) {
         case FilePathPlatform.Windows:
-            if (part.endsWith("\\"))
+            if(part.endsWith("\\"))
                 part = part[0 .. $ - 1];
             break;
         case FilePathPlatform.Posix:
-            if (part.endsWith("/"))
+            if(part.endsWith("/"))
                 part = part[0 .. $ - 1];
             break;
         }
@@ -168,24 +168,24 @@ export @safe nothrow @nogc:
 
     ///
     String_UTF8 share(RCAllocator allocator = RCAllocator.init) scope const @trusted {
-        if (isNull || state.lengthOfShare == 0)
+        if(isNull || state.lengthOfShare == 0)
             return String_UTF8.init;
 
         FilePathState* state = cast(FilePathState*)this.state;
 
         state.mutex.pureLock;
-        scope (exit)
+        scope(exit)
             state.mutex.unlock;
         auto part = state
             .storage[state.lengthOfLeading + state.lengthOfHost .. state.lengthOfLeading + state.lengthOfHost + state.lengthOfShare];
 
-        final switch (state.platformRule) {
+        final switch(state.platformRule) {
         case FilePathPlatform.Windows:
-            if (part.endsWith("\\"))
+            if(part.endsWith("\\"))
                 part = part[0 .. $ - 1];
             break;
         case FilePathPlatform.Posix:
-            if (part.endsWith("/"))
+            if(part.endsWith("/"))
                 part = part[0 .. $ - 1];
             break;
         }
@@ -203,13 +203,13 @@ export @safe nothrow @nogc:
 
     ///
     Optional!char drive() scope const @trusted {
-        if (isNull || state.lengthOfWindowsDrive == 0)
+        if(isNull || state.lengthOfWindowsDrive == 0)
             return Optional!char.init;
 
         FilePathState* state = cast(FilePathState*)this.state;
 
         state.mutex.pureLock;
-        scope (exit)
+        scope(exit)
             state.mutex.unlock;
 
         auto part = state.storage[state.lengthOfLeading .. state.lengthOfLeading + state.lengthOfWindowsDrive];
@@ -229,13 +229,13 @@ export @safe nothrow @nogc:
 
     ///
     DynamicArray!String_UTF8 components(RCAllocator allocator = RCAllocator.init) scope const @trusted {
-        if (isNull)
+        if(isNull)
             return DynamicArray!String_UTF8.init;
 
         FilePathState* state = cast(FilePathState*)this.state;
 
         state.mutex.pureLock;
-        scope (exit)
+        scope(exit)
             state.mutex.unlock;
 
         const offset = state.offsetOfComponents();
@@ -248,10 +248,10 @@ export @safe nothrow @nogc:
         DynamicArray!String_UTF8 ret = DynamicArray!String_UTF8(0, allocator);
         ret.reserve(parts.count(sep) + 1);
 
-        while (parts.length > 0) {
+        while(parts.length > 0) {
             ptrdiff_t index = parts.indexOf(sep);
 
-            if (index < 0) {
+            if(index < 0) {
                 ret ~= parts;
                 parts = String_UTF8.init;
             } else {
@@ -283,7 +283,7 @@ export @safe nothrow @nogc:
 
     ///
     FilePath removeComponents() return scope {
-        if (!isNull) {
+        if(!isNull) {
             state.mutex.pureLock;
 
             state.storage.remove(state.offsetOfComponents(), ptrdiff_t.max);
@@ -312,7 +312,7 @@ export @safe nothrow @nogc:
     FilePath opBinary(string op : "~")(scope String_UTF8.LiteralType input) scope return {
         ErrorResult error = this ~= input;
 
-        if (error)
+        if(error)
             return this;
         else
             return FilePath.init;
@@ -322,7 +322,7 @@ export @safe nothrow @nogc:
     FilePath opBinary(string op : "~")(scope String_UTF16.LiteralType input) scope return {
         ErrorResult error = this ~= input;
 
-        if (error)
+        if(error)
             return this;
         else
             return FilePath.init;
@@ -332,7 +332,7 @@ export @safe nothrow @nogc:
     FilePath opBinary(string op : "~")(scope String_UTF32.LiteralType input) scope return {
         ErrorResult error = this ~= input;
 
-        if (error)
+        if(error)
             return this;
         else
             return FilePath.init;
@@ -342,7 +342,7 @@ export @safe nothrow @nogc:
     FilePath opBinary(string op : "~")(scope String_ASCII input) scope return {
         ErrorResult error = this ~= input;
 
-        if (error)
+        if(error)
             return this;
         else
             return FilePath.init;
@@ -352,7 +352,7 @@ export @safe nothrow @nogc:
     FilePath opBinary(string op : "~")(scope String_UTF8 input) scope return {
         ErrorResult error = this ~= input;
 
-        if (error)
+        if(error)
             return this;
         else
             return FilePath.init;
@@ -362,7 +362,7 @@ export @safe nothrow @nogc:
     FilePath opBinary(string op : "~")(scope String_UTF16 input) scope return {
         ErrorResult error = this ~= input;
 
-        if (error)
+        if(error)
             return this;
         else
             return FilePath.init;
@@ -372,7 +372,7 @@ export @safe nothrow @nogc:
     FilePath opBinary(string op : "~")(scope String_UTF32 input) scope return {
         ErrorResult error = this ~= input;
 
-        if (error)
+        if(error)
             return this;
         else
             return FilePath.init;
@@ -382,7 +382,7 @@ export @safe nothrow @nogc:
     FilePath opBinary(string op : "~")(scope StringBuilder_ASCII input) scope return {
         ErrorResult error = this ~= input;
 
-        if (error)
+        if(error)
             return this;
         else
             return FilePath.init;
@@ -392,7 +392,7 @@ export @safe nothrow @nogc:
     FilePath opBinary(string op : "~")(scope StringBuilder_UTF8 input) scope return {
         ErrorResult error = this ~= input;
 
-        if (error)
+        if(error)
             return this;
         else
             return FilePath.init;
@@ -402,7 +402,7 @@ export @safe nothrow @nogc:
     FilePath opBinary(string op : "~")(scope StringBuilder_UTF16 input) scope return {
         ErrorResult error = this ~= input;
 
-        if (error)
+        if(error)
             return this;
         else
             return FilePath.init;
@@ -412,7 +412,7 @@ export @safe nothrow @nogc:
     FilePath opBinary(string op : "~")(scope StringBuilder_UTF32 input) scope return {
         ErrorResult error = this ~= input;
 
-        if (error)
+        if(error)
             return this;
         else
             return FilePath.init;
@@ -422,7 +422,7 @@ export @safe nothrow @nogc:
     FilePath opBinary(string op : "~")(scope DynamicArray!String_UTF8 input) scope return {
         ErrorResult error = this ~= input;
 
-        if (error)
+        if(error)
             return this;
         else
             return FilePath.init;
@@ -491,9 +491,9 @@ export @safe nothrow @nogc:
 
     /// Ditto
     ErrorResult opOpAssign(string op : "~")(scope DynamicArray!String_UTF8 input) scope {
-        foreach (scope component; input) {
+        foreach(scope component; input) {
             auto got = appendComponent(component);
-            if (!got)
+            if(!got)
                 return ErrorResult(got.getError);
         }
 
@@ -518,27 +518,27 @@ export @safe nothrow @nogc:
     ErrorResult makeAbsolute(scope FilePath cwd = FilePath.init, scope FilePath home = FilePath.init) scope {
         import sidero.base.system : homeDirectory, currentWorkingDirectory;
 
-        if (isNull)
+        if(isNull)
             return ErrorResult(NullPointerException);
 
         state.mutex.pureLock;
-        scope (exit)
+        scope(exit)
             state.mutex.unlock;
 
-        final switch (state.platformRule) {
+        final switch(state.platformRule) {
         case FilePathPlatform.Windows:
-            final switch (state.relativeTo) {
+            final switch(state.relativeTo) {
             case FilePathRelativeTo.Nothing:
                 // ok already done!
                 break;
             case FilePathRelativeTo.Home:
                 // just need home
-                if (home.isNull)
+                if(home.isNull)
                     home = homeDirectory();
-                if (home.isNull || !home.isAbsolute || !home.state.couldPointToEntry)
+                if(home.isNull || !home.isAbsolute || !home.state.couldPointToEntry)
                     return ErrorResult(UnknownPlatformBehaviorException(
                             "Could not get an absolute home directory, so path could not be made absolute"));
-                else if (home.state is this.state)
+                else if(home.state is this.state)
                     return ErrorResult(MalformedInputException("Home path cannot have the same state as us"));
                 home.state.mutex.pureLock;
 
@@ -553,9 +553,9 @@ export @safe nothrow @nogc:
                 state.lengthOfHost = home.state.lengthOfHost;
                 state.lengthOfShare = home.state.lengthOfShare;
 
-                if (state.lengthOfShare > 0) // \\host\share \path
+                if(state.lengthOfShare > 0) // \\host\share \path
                     state.lengthOfShare++;
-                else if (state.lengthOfWindowsDrive == 3 && home.state.storage.length == home.state.offsetOfComponents()) { // C:\ \path
+                else if(state.lengthOfWindowsDrive == 3 && home.state.storage.length == home.state.offsetOfComponents()) { // C:\ \path
                     // lengths is correct, but there is an extra separator, so we'll remove it if there is storage after it
                     state.storage.remove(state.offsetOfComponents(), 1);
                 }
@@ -564,17 +564,17 @@ export @safe nothrow @nogc:
                 break;
             case FilePathRelativeTo.CurrentWorkingDirectory:
                 // just need cwd
-                if (cwd.isNull)
+                if(cwd.isNull)
                     cwd = currentWorkingDirectory();
-                if (cwd.isNull || !cwd.isAbsolute || !home.state.couldPointToEntry)
+                if(cwd.isNull || !cwd.isAbsolute || !home.state.couldPointToEntry)
                     return ErrorResult(UnknownPlatformBehaviorException(
                             "Could not get an absolute current working directory, so path could not be made absolute"));
-                else if (cwd.state is this.state)
+                else if(cwd.state is this.state)
                     return ErrorResult(MalformedInputException("Current working path cannot have the same state as us"));
                 cwd.state.mutex.pureLock;
 
                 // we are in the form of path
-                if (!cwd.state.storage.endsWith("\\"))
+                if(!cwd.state.storage.endsWith("\\"))
                     state.storage.prepend("\\");
 
                 state.storage.prepend(cwd.state.storage);
@@ -586,12 +586,12 @@ export @safe nothrow @nogc:
                 cwd.state.mutex.unlock;
                 break;
             case FilePathRelativeTo.DriveAndCWD:
-                if (cwd.isNull)
+                if(cwd.isNull)
                     cwd = currentWorkingDirectory();
-                if (cwd.isNull || !cwd.isAbsolute || !cwd.state.couldPointToEntry || cwd.state.lengthOfHost > 0)
+                if(cwd.isNull || !cwd.isAbsolute || !cwd.state.couldPointToEntry || cwd.state.lengthOfHost > 0)
                     return ErrorResult(UnknownPlatformBehaviorException(
                             "Could not get an absolute current working directory, so path could not be made absolute"));
-                else if (cwd.state is this.state)
+                else if(cwd.state is this.state)
                     return ErrorResult(MalformedInputException("Current working path cannot have the same state as us"));
                 cwd.state.mutex.pureLock;
 
@@ -608,12 +608,12 @@ export @safe nothrow @nogc:
                 cwd.state.mutex.unlock;
                 break;
             case FilePathRelativeTo.CurrentDrive:
-                if (cwd.isNull)
+                if(cwd.isNull)
                     cwd = currentWorkingDirectory();
-                if (cwd.isNull || !cwd.isAbsolute || !cwd.state.couldPointToEntry || cwd.state.lengthOfHost > 0)
+                if(cwd.isNull || !cwd.isAbsolute || !cwd.state.couldPointToEntry || cwd.state.lengthOfHost > 0)
                     return ErrorResult(UnknownPlatformBehaviorException(
                             "Could not get an absolute current working directory, so path could not be made absolute"));
-                else if (cwd.state is this.state)
+                else if(cwd.state is this.state)
                     return ErrorResult(MalformedInputException("Current working path cannot have the same state as us"));
                 cwd.state.mutex.pureLock;
 
@@ -628,18 +628,18 @@ export @safe nothrow @nogc:
             }
             break;
         case FilePathPlatform.Posix:
-            final switch (state.relativeTo) {
+            final switch(state.relativeTo) {
             case FilePathRelativeTo.Nothing:
                 // ok already done!
                 break;
             case FilePathRelativeTo.Home:
                 // just need home
-                if (home.isNull)
+                if(home.isNull)
                     home = homeDirectory();
-                if (home.isNull || !home.isAbsolute || !home.state.couldPointToEntry)
+                if(home.isNull || !home.isAbsolute || !home.state.couldPointToEntry)
                     return ErrorResult(UnknownPlatformBehaviorException(
                             "Could not get an absolute home directory, so path could not be made absolute"));
-                else if (home.state is this.state)
+                else if(home.state is this.state)
                     return ErrorResult(MalformedInputException("Home path cannot have the same state as us"));
                 home.state.mutex.pureLock;
 
@@ -655,12 +655,12 @@ export @safe nothrow @nogc:
                 break;
             case FilePathRelativeTo.CurrentWorkingDirectory:
                 // just need cwd
-                if (cwd.isNull)
+                if(cwd.isNull)
                     cwd = currentWorkingDirectory();
-                if (cwd.isNull || !cwd.isAbsolute || !home.state.couldPointToEntry)
+                if(cwd.isNull || !cwd.isAbsolute || !home.state.couldPointToEntry)
                     return ErrorResult(UnknownPlatformBehaviorException(
                             "Could not get an absolute current working directory, so path could not be made absolute"));
-                else if (cwd.state is this.state)
+                else if(cwd.state is this.state)
                     return ErrorResult(MalformedInputException("Current working path cannot have the same state as us"));
                 cwd.state.mutex.pureLock;
 
@@ -688,7 +688,7 @@ export @safe nothrow @nogc:
         // make sure to do this step in a different string builder, because we'll need to roll back if it didn't work :(
         {
             ErrorInfo error = this.evaluateRelativeComponents;
-            if (error.isSet)
+            if(error.isSet)
                 return typeof(return)(error);
         }
 
@@ -701,7 +701,7 @@ export @safe nothrow @nogc:
         FilePath ret = this.dup(allocator);
         auto error = ret.makeAbsolute(cwd, home);
 
-        if (error)
+        if(error)
             return typeof(return)(ret);
         else
             return typeof(return)(error.getError());
@@ -864,13 +864,13 @@ export @safe nothrow @nogc:
 
     ///
     String_UTF8 toString(return scope RCAllocator allocator = RCAllocator.init) scope const @trusted {
-        if (isNull)
+        if(isNull)
             return String_UTF8.init;
 
         FilePathState* state = cast(FilePathState*)this.state;
 
         state.mutex.pureLock;
-        scope (exit)
+        scope(exit)
             state.mutex.unlock;
 
         return state.storage.asReadOnly(allocator);
@@ -878,13 +878,13 @@ export @safe nothrow @nogc:
 
     ///
     String_UTF16 toStringUTF16(return scope RCAllocator allocator = RCAllocator.init) scope const @trusted {
-        if (isNull)
+        if(isNull)
             return String_UTF16.init;
 
         FilePathState* state = cast(FilePathState*)this.state;
 
         state.mutex.pureLock;
-        scope (exit)
+        scope(exit)
             state.mutex.unlock;
 
         return state.storage.byUTF16.asReadOnly(allocator);
@@ -892,7 +892,7 @@ export @safe nothrow @nogc:
 
     ///
     ulong toHash() scope const {
-        if (this.isNull)
+        if(this.isNull)
             return StringBuilder_UTF8.init.toHash();
         return state.storage.toHash();
     }
@@ -997,20 +997,20 @@ export @safe nothrow @nogc:
         }
     }
 
-/*private:*/
+    /*private:*/
 
     ErrorInfo evaluateRelativeComponents() scope {
         StringBuilder_UTF8 storage = state.storage.dup(state.allocator);
 
-        final switch (state.platformRule) {
+        final switch(state.platformRule) {
         case FilePathPlatform.Windows:
             StringBuilder_UTF8 allComponents = storage[state.offsetOfComponents() .. $], components = allComponents;
 
-            while (components.length > 0) {
+            while(components.length > 0) {
                 StringBuilder_UTF8 component;
                 const indexOfSeparator = components.indexOf("\\");
 
-                if (indexOfSeparator < 0) {
+                if(indexOfSeparator < 0) {
                     component = components;
                     components = StringBuilder_UTF8.init;
                 } else {
@@ -1018,18 +1018,18 @@ export @safe nothrow @nogc:
                     components = components[indexOfSeparator + 1 .. $];
                 }
 
-                if (component == "..") {
+                if(component == "..") {
                     // we want to remove the prior component, but first we need to figure out where that is!
                     StringBuilder_UTF8 upUntilThis = allComponents[0 .. $ - components.length];
                     // it is in the form of path\..\ or path\..
                     const amountToRemove = components.length > 0 ? 3 : 2;
 
-                    if (upUntilThis.length == amountToRemove) {
+                    if(upUntilThis.length == amountToRemove) {
                         // not legal if this is an absolute path
-                        if (state.relativeTo == FilePathRelativeTo.Nothing)
+                        if(state.relativeTo == FilePathRelativeTo.Nothing)
                             return typeof(return)(MalformedInputException("Found relative parent component in an absolute path"));
-                    } else if (upUntilThis.length > 0) {
-                        if (components.length > 0) {
+                    } else if(upUntilThis.length > 0) {
+                        if(components.length > 0) {
                             // there is another component following this, therefore there is a separator so we are in the form of
                             // path\..\
                             upUntilThis.remove(-3, 3);
@@ -1041,26 +1041,26 @@ export @safe nothrow @nogc:
                         }
 
                         ptrdiff_t lastSeparatorIndex = upUntilThis[0 .. $ - 1].lastIndexOf("\\");
-                        if (lastSeparatorIndex < 0) {
+                        if(lastSeparatorIndex < 0) {
                             upUntilThis.remove(0, upUntilThis.length);
                         } else {
                             upUntilThis.remove(lastSeparatorIndex, upUntilThis.length - (lastSeparatorIndex + 1));
                         }
                     }
-                } else if (components.isNull) {
+                } else if(components.isNull) {
                     ptrdiff_t amountToRemove;
 
-                    foreach_reverse (c; component) {
-                        if (c == ' ' || c == '.')
+                    foreach_reverse(c; component) {
+                        if(c == ' ' || c == '.')
                             amountToRemove++;
                         else
                             break;
                     }
 
-                    if (amountToRemove > 0)
+                    if(amountToRemove > 0)
                         component.remove(-amountToRemove, amountToRemove);
                 } else {
-                    if (component.endsWith("."))
+                    if(component.endsWith("."))
                         component.remove(-1, 1);
                 }
             }
@@ -1069,18 +1069,18 @@ export @safe nothrow @nogc:
             storage[state.lengthOfLeading .. $].replace("\\\\", "\\");
 
             // remove a trailing slash
-            if (storage[state.lengthOfLeading .. $].endsWith("\\")) {
+            if(storage[state.lengthOfLeading .. $].endsWith("\\")) {
                 storage.remove(-1, 1);
             }
             break;
         case FilePathPlatform.Posix:
             StringBuilder_UTF8 allComponents = storage[state.offsetOfComponents() .. $], components = allComponents;
 
-            while (components.length > 0) {
+            while(components.length > 0) {
                 StringBuilder_UTF8 component;
                 const indexOfSeparator = components.indexOf("/");
 
-                if (indexOfSeparator < 0) {
+                if(indexOfSeparator < 0) {
                     component = components;
                     components = StringBuilder_UTF8.init;
                 } else {
@@ -1088,27 +1088,27 @@ export @safe nothrow @nogc:
                     components = components[indexOfSeparator + 1 .. $];
                 }
 
-                if (component == "..") {
+                if(component == "..") {
                     // we want to remove the prior component, but first we need to figure out where that is!
                     StringBuilder_UTF8 upUntilThis = allComponents[0 .. $ - components.length];
                     // it is in the form of path/../ or path/..
                     const amountToRemove = components.length > 0 ? 3 : 2;
 
-                    if (upUntilThis.length == amountToRemove) {
+                    if(upUntilThis.length == amountToRemove) {
                         // not legal if this is an absolute path
-                        if (state.relativeTo == FilePathRelativeTo.Nothing)
+                        if(state.relativeTo == FilePathRelativeTo.Nothing)
                             return typeof(return)(MalformedInputException("Found relative parent component in an absolute path"));
-                    } else if (upUntilThis.length > 0) {
+                    } else if(upUntilThis.length > 0) {
                         upUntilThis.remove(-amountToRemove, amountToRemove);
 
                         ptrdiff_t lastSeparatorIndex = upUntilThis[0 .. $ - 1].lastIndexOf("/");
-                        if (lastSeparatorIndex < 0) {
+                        if(lastSeparatorIndex < 0) {
                             upUntilThis.remove(0, upUntilThis.length);
                         } else {
                             upUntilThis.remove(lastSeparatorIndex, upUntilThis.length - (lastSeparatorIndex + 1));
                         }
                     }
-                } else if (component == ".") {
+                } else if(component == ".") {
                     component.remove(-1, 1);
                 }
             }
@@ -1117,7 +1117,7 @@ export @safe nothrow @nogc:
             storage[state.lengthOfLeading .. $].replace("//", "/");
 
             // remove a trailing slash
-            if (storage[state.lengthOfLeading .. $].endsWith("/"))
+            if(storage[state.lengthOfLeading .. $].endsWith("/"))
                 storage.remove(-1, 1);
             break;
         }
@@ -1127,11 +1127,11 @@ export @safe nothrow @nogc:
     }
 
     ErrorResult appendComponent(Input)(scope Input input) scope {
-        if (input.length == 0)
+        if(input.length == 0)
             return ErrorResult.init;
-        else if (isNull) {
+        else if(isNull) {
             auto got = FilePath.from(input);
-            if (!got)
+            if(!got)
                 return ErrorResult(got.getError);
 
             FilePath fp = got.get;
@@ -1140,14 +1140,14 @@ export @safe nothrow @nogc:
 
             return ErrorResult.init;
         } else {
-            if (!state.couldPointToEntry) {
+            if(!state.couldPointToEntry) {
                 // oh noes, our path is not complete enough to be usable,
                 // therefore the input is useless
                 return ErrorResult(NonMatchingStateToArgumentException(
                         "The file path provided is incomplete and cannot have components added to it"));
             }
 
-            final switch (state.platformRule) {
+            final switch(state.platformRule) {
             case FilePathPlatform.Windows:
                 state.storage ~= "\\";
                 break;
@@ -1159,7 +1159,7 @@ export @safe nothrow @nogc:
             state.storage ~= input;
 
             auto error = this.evaluateRelativeComponents();
-            if (error.isSet)
+            if(error.isSet)
                 return ErrorResult(error);
             else
                 return ErrorResult.init;
@@ -1167,15 +1167,15 @@ export @safe nothrow @nogc:
     }
 
     int cmpImpl(Input)(scope Input other) scope const @trusted {
-        if (isNull)
+        if(isNull)
             return other.isNull ? 0 : -1;
-        else if (other.isNull)
+        else if(other.isNull)
             return 1;
 
         FilePathState* state = cast(FilePathState*)this.state;
 
         state.mutex.pureLock;
-        scope (exit)
+        scope(exit)
             state.mutex.unlock;
 
         return state.storage.compare(other);
@@ -1214,7 +1214,7 @@ static immutable LegacyWindowsDevices = [
 
 // there are others not supported, like number ranges but its not worth solving
 bool isValidWindowsComponentCharacter(dchar c) {
-    switch (c) {
+    switch(c) {
     case '<':
     case '>':
     case ':':
@@ -1232,8 +1232,8 @@ bool isValidWindowsComponentCharacter(dchar c) {
 }
 
 bool isLegacyWindowsDevice(Input)(scope Input input) {
-    foreach (lwd; LegacyWindowsDevices) {
-        if (input == lwd)
+    foreach(lwd; LegacyWindowsDevices) {
+        if(input == lwd)
             return true;
     }
 
@@ -1260,7 +1260,7 @@ struct FilePathState {
 @safe nothrow @nogc:
 
     void opAssign(ref FilePathState other) scope {
-        static foreach (i; 3 .. this.tupleof.length) {
+        static foreach(i; 3 .. this.tupleof.length) {
             this.tupleof[i] = other.tupleof[i];
         }
     }
@@ -1273,14 +1273,14 @@ struct FilePathState {
 Result!FilePath parseFilePathFromString(Input)(scope Input input, scope return RCAllocator allocator, FilePathPlatform platformRule) @trusted {
     import sidero.base.text.ascii.characters : isAlpha;
 
-    if (allocator.isNull)
+    if(allocator.isNull)
         allocator = globalAllocator();
 
-    static if (__traits(hasMember, Input, "stripZeroTerminator")) {
+    static if(__traits(hasMember, Input, "stripZeroTerminator")) {
         input.stripZeroTerminator;
     }
 
-    if (input.length == 0)
+    if(input.length == 0)
         return typeof(return).init;
 
     FilePath ret;
@@ -1289,7 +1289,7 @@ Result!FilePath parseFilePathFromString(Input)(scope Input input, scope return R
     ret.state.platformRule = platformRule;
     ret.state.storage = StringBuilder_UTF8(allocator);
 
-    final switch (platformRule) {
+    final switch(platformRule) {
     case FilePathPlatform.Windows:
         ret.state.storage ~= input;
         ret.state.storage.replace("/", "\\");
@@ -1303,10 +1303,10 @@ Result!FilePath parseFilePathFromString(Input)(scope Input input, scope return R
             const isAbsoluteDevicePath = !noProcessDevicePath && deviceLessInput.startsWith("\\\\.");
             const isDevicePath = noProcessDevicePath || isAbsoluteDevicePath;
 
-            if (isDevicePath) {
-                if (deviceLessInput.startsWith("\\\\?\\") || deviceLessInput.startsWith("\\\\.\\")) {
+            if(isDevicePath) {
+                if(deviceLessInput.startsWith("\\\\?\\") || deviceLessInput.startsWith("\\\\.\\")) {
                     deviceLessInput = deviceLessInput[4 .. $];
-                } else if (input.length > 3) {
+                } else if(input.length > 3) {
                     return typeof(return)(MalformedInputException(
                             "Error Windows device path must have separator after the leading device specifier"));
                 }
@@ -1346,33 +1346,33 @@ Result!FilePath parseFilePathFromString(Input)(scope Input input, scope return R
 
             // - otherwise they are relative to cwd
 
-            if (isRelativeToPathOnCurrentDrive)
+            if(isRelativeToPathOnCurrentDrive)
                 ret.state.relativeTo = FilePathRelativeTo.DriveAndCWD;
-            else if (isRelativeToCurrentDrive)
+            else if(isRelativeToCurrentDrive)
                 ret.state.relativeTo = FilePathRelativeTo.CurrentDrive;
-            else if (isRelativeToHome || isRelativeToHomeEnv)
+            else if(isRelativeToHome || isRelativeToHomeEnv)
                 ret.state.relativeTo = FilePathRelativeTo.Home;
-            else if (isDOSPath || isDevicePath)
+            else if(isDOSPath || isDevicePath)
                 ret.state.relativeTo = FilePathRelativeTo.Nothing;
-            else if (isUNCPath)
+            else if(isUNCPath)
                 ret.state.relativeTo = FilePathRelativeTo.Nothing;
-            else if (isLegacyDevice) {
+            else if(isLegacyDevice) {
                 ret.state.storage.prepend("\\\\.\\");
                 ret.state.relativeTo = FilePathRelativeTo.Nothing;
             } else
                 ret.state.relativeTo = FilePathRelativeTo.CurrentWorkingDirectory;
 
-            if ((isDevicePath && input.length > 3) || isLegacyDevice)
+            if((isDevicePath && input.length > 3) || isLegacyDevice)
                 ret.state.lengthOfLeading = 4;
-            else if (isDevicePath)
+            else if(isDevicePath)
                 ret.state.lengthOfLeading = 3;
-            else if (isUNCPath)
+            else if(isUNCPath)
                 ret.state.lengthOfLeading = 2;
-            else if (isRelativeToHome) {
+            else if(isRelativeToHome) {
                 ret.state.storage.remove(0, 1);
                 ret.state.storage.prepend("%USERPROFILE%");
                 ret.state.lengthOfLeading = 13 + isRelativeToHomeSep;
-            } else if (isRelativeToHomeEnv)
+            } else if(isRelativeToHomeEnv)
                 ret.state.lengthOfLeading = 13 + isRelativeToHomeEnvSep;
 
             // we want to know if this could point to an entry in the file system
@@ -1389,12 +1389,12 @@ Result!FilePath parseFilePathFromString(Input)(scope Input input, scope return R
             // Turn multiple back slahes into one
             ret.state.storage[ret.state.lengthOfLeading .. $].replace("\\\\", "\\");
 
-            if (isDOSPath)
+            if(isDOSPath)
                 ret.state.lengthOfWindowsDrive = 3;
-            else if (haveDOSDrive)
+            else if(haveDOSDrive)
                 ret.state.lengthOfWindowsDrive = 2;
 
-            if (isUNCPath) {
+            if(isUNCPath) {
                 // for UNC paths we are in particularly interested in length of the host/ip
                 // but we also want to know about the share
 
@@ -1402,32 +1402,32 @@ Result!FilePath parseFilePathFromString(Input)(scope Input input, scope return R
                 auto storage = ret.state.storage[2 .. $];
                 ptrdiff_t index = storage.indexOf("\\");
 
-                if (index > 0) {
+                if(index > 0) {
                     ret.state.lengthOfHost = index + 1;
-                } else if (index < 0) {
+                } else if(index < 0) {
                     ret.state.lengthOfHost = storage.length;
-                } else if (index == 0)
+                } else if(index == 0)
                     return typeof(return)(MalformedInputException("Expected UNC host, got separator instead"));
 
-                if (index >= 0) {
+                if(index >= 0) {
                     storage = storage[index + 1 .. $];
                     index = storage.indexOf("\\");
 
-                    if (index > 0) {
+                    if(index > 0) {
                         ret.state.lengthOfShare = index + 1;
-                    } else if (index < 0) {
+                    } else if(index < 0) {
                         ret.state.lengthOfShare = storage.length;
-                    } else if (index == 0)
+                    } else if(index == 0)
                         return typeof(return)(MalformedInputException("Expected UNC share, got separator instead"));
                 }
-            } else if (isDOSPath && !isDevicePath) {
+            } else if(isDOSPath && !isDevicePath) {
                 ret.state.lengthOfLeading += 4;
                 ret.state.storage.prepend("\\\\?\\");
             }
 
             {
                 ErrorInfo error = ret.evaluateRelativeComponents;
-                if (error.isSet)
+                if(error.isSet)
                     return typeof(return)(error);
             }
         }
@@ -1450,15 +1450,15 @@ Result!FilePath parseFilePathFromString(Input)(scope Input input, scope return R
         // 7. If a component does not have another component follow it (including at end have separator), remove all spaces and .
         return typeof(return)(ret);
     case FilePathPlatform.Posix:
-        if (input.contains(String_ASCII("\0\0"))) {
+        if(input.contains(String_ASCII("\0\0"))) {
             // pretty much the ONLY THING THAT IS INVALID!
             return typeof(return)(MalformedInputException("Posix path strings cannot contain null terminators"));
         }
 
-        if (input.startsWith("~")) {
+        if(input.startsWith("~")) {
             ret.state.relativeTo = FilePathRelativeTo.Home;
             ret.state.lengthOfLeading = input.startsWith("~/") ? 2 : 1;
-        } else if (!input.startsWith("/"))
+        } else if(!input.startsWith("/"))
             ret.state.relativeTo = FilePathRelativeTo.CurrentWorkingDirectory;
         else {
             ret.state.lengthOfLeading = input.length > 0;
@@ -1470,7 +1470,7 @@ Result!FilePath parseFilePathFromString(Input)(scope Input input, scope return R
 
         {
             ErrorInfo error = ret.evaluateRelativeComponents;
-            if (error.isSet)
+            if(error.isSet)
                 return typeof(return)(error);
         }
 

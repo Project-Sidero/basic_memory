@@ -17,7 +17,7 @@ enum GoodAlignment = 64;
 private {
     // Bug: https://issues.dlang.org/show_bug.cgi?id=22031
     size_t PAGESIZE_get() @safe {
-        if (PAGESIZE_ == 0)
+        if(PAGESIZE_ == 0)
             initializeMappingVariables();
         return PAGESIZE_;
     }
@@ -27,7 +27,7 @@ private {
 
 pragma(crt_constructor) extern (C) void initializeMappingVariables() {
     // COPIED FROM druntime core.thread.types
-    version (Windows) {
+    version(Windows) {
         import core.sys.windows.winbase;
 
         SYSTEM_INFO info;
@@ -35,7 +35,7 @@ pragma(crt_constructor) extern (C) void initializeMappingVariables() {
 
         PAGESIZE_ = info.dwPageSize;
         assert(PAGESIZE < int.max);
-    } else version (PAGESIZE_) {
+    } else version(PAGESIZE_) {
         import core.sys.posix.unistd;
 
         PAGESIZE_ = cast(size_t)sysconf(_SC_PAGESIZE);

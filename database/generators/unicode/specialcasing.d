@@ -1,4 +1,4 @@
-﻿module generators.unicode.specialcasing;
+module generators.unicode.specialcasing;
 import generators.constants;
 
 void specialCasing() {
@@ -14,31 +14,31 @@ void specialCasing() {
 
     auto api = appender!string();
 
-    static foreach (language; __traits(allMembers, Language)) {
+    static foreach(language; __traits(allMembers, Language)) {
         {
             SequentialRanges!(Casing, SequentialRangeSplitGroup, 2) sr;
 
-            foreach (entry; state.range[__traits(getMember, Language, language)]) {
-                foreach (c; entry.range.start .. entry.range.end + 1) {
+            foreach(entry; state.range[__traits(getMember, Language, language)]) {
+                foreach(c; entry.range.start .. entry.range.end + 1) {
                     Casing casing = entry.casing;
-                    if (casing.lowercase.length == 1 && casing.lowercase[0] == c)
+                    if(casing.lowercase.length == 1 && casing.lowercase[0] == c)
                         casing.lowercase = null;
-                    if (casing.titlecase.length == 1 && casing.titlecase[0] == c)
+                    if(casing.titlecase.length == 1 && casing.titlecase[0] == c)
                         casing.titlecase = null;
-                    if (casing.uppercase.length == 1 && casing.uppercase[0] == c)
+                    if(casing.uppercase.length == 1 && casing.uppercase[0] == c)
                         casing.uppercase = null;
                     sr.add(c, casing);
                 }
             }
 
-            foreach (entry; state.single[__traits(getMember, Language, language)]) {
-                foreach (c; entry.range.start .. entry.range.end + 1) {
+            foreach(entry; state.single[__traits(getMember, Language, language)]) {
+                foreach(c; entry.range.start .. entry.range.end + 1) {
                     Casing casing = entry.casing;
-                    if (casing.lowercase.length == 1 && casing.lowercase[0] == c)
+                    if(casing.lowercase.length == 1 && casing.lowercase[0] == c)
                         casing.lowercase = null;
-                    if (casing.titlecase.length == 1 && casing.titlecase[0] == c)
+                    if(casing.titlecase.length == 1 && casing.titlecase[0] == c)
                         casing.titlecase = null;
-                    if (casing.uppercase.length == 1 && casing.uppercase[0] == c)
+                    if(casing.uppercase.length == 1 && casing.uppercase[0] == c)
                         casing.uppercase = null;
                     sr.add(c, casing);
                 }
@@ -62,8 +62,8 @@ void specialCasing() {
             api ~= "\n";
             api ~= "/// Get special casing for character.\n";
             api ~= "/// Returns: non-null for a given entry if changed from input character.\n";
-            api ~= "export immutable(SpecialCasing) sidero_utf_lut_getSpecialCasing" ~ language
-                ~ "(dchar input) @trusted nothrow @nogc pure {\n";
+            api ~= "export immutable(SpecialCasing) sidero_utf_lut_getSpecialCasing" ~ language ~
+                "(dchar input) @trusted nothrow @nogc pure {\n";
             api ~= "    auto got = sidero_utf_lut_getSpecialCasing2" ~ language ~ "(input);\n";
             api ~= "    if (got is null) return typeof(return).init;\n";
             api ~= "    return *cast(immutable(SpecialCasing*)) got;\n";
@@ -146,7 +146,7 @@ void processEachLine(string inputText, ref TotalState state) {
         ValueRange!dchar ret;
 
         ptrdiff_t offsetOfSeperator = charRangeStr.countUntil("..");
-        if (offsetOfSeperator < 0) {
+        if(offsetOfSeperator < 0) {
             ret.start = parse!uint(charRangeStr, 16);
             ret.end = ret.start;
         } else {
@@ -162,9 +162,9 @@ void processEachLine(string inputText, ref TotalState state) {
         dchar[] replacements;
         replacements.reserve(4);
 
-        foreach (replacement; replacementsStr.splitter(' ')) {
+        foreach(replacement; replacementsStr.splitter(' ')) {
             replacement = replacement.strip;
-            if (replacement.length == 0)
+            if(replacement.length == 0)
                 continue;
 
             replacements ~= parse!uint(replacement, 16);
@@ -173,19 +173,19 @@ void processEachLine(string inputText, ref TotalState state) {
         return cast(dstring)replacements;
     }
 
-    foreach (line; inputText.lineSplitter) {
+    foreach(line; inputText.lineSplitter) {
         ptrdiff_t offset;
 
         offset = line.countUntil('#');
-        if (offset >= 0)
+        if(offset >= 0)
             line = line[0 .. offset];
         line = line.strip;
 
-        if (line.length < 5) // anything that low can't represent a functional line
+        if(line.length < 5) // anything that low can't represent a functional line
             continue;
 
         offset = line.countUntil(';');
-        if (offset < 0) // no char range
+        if(offset < 0) // no char range
             continue;
         string charRangeStr = line[0 .. offset].strip;
         line = line[offset + 1 .. $].strip;
@@ -193,41 +193,41 @@ void processEachLine(string inputText, ref TotalState state) {
         ValueRange!dchar valueRange = valueRangeFromString(charRangeStr);
 
         offset = line.countUntil(';');
-        if (offset < 0) // no lowercase
+        if(offset < 0) // no lowercase
             continue;
         string lowercaseStr = line[0 .. offset].strip;
         line = line[offset + 1 .. $].strip;
 
         offset = line.countUntil(';');
-        if (offset < 0) // no titlecase
+        if(offset < 0) // no titlecase
             continue;
         string titlecaseStr = line[0 .. offset].strip;
         line = line[offset + 1 .. $].strip;
 
         offset = line.countUntil(';');
-        if (offset < 0) // no uppercase
+        if(offset < 0) // no uppercase
             continue;
         string uppercaseStr = line[0 .. offset].strip;
         string conditionStr = line[offset + 1 .. $].strip;
 
-        if (conditionStr.endsWith(';'))
+        if(conditionStr.endsWith(';'))
             conditionStr = conditionStr[0 .. $ - 1].strip;
 
         Language language;
         Condition condition;
 
-        if (conditionStr.startsWith("lt")) {
+        if(conditionStr.startsWith("lt")) {
             language = Language.Lithuanian;
             conditionStr = conditionStr[2 .. $].strip;
-        } else if (conditionStr.startsWith("tr")) {
+        } else if(conditionStr.startsWith("tr")) {
             language = Language.Turkish;
             conditionStr = conditionStr[2 .. $].strip;
-        } else if (conditionStr.startsWith("az")) {
+        } else if(conditionStr.startsWith("az")) {
             language = Language.Azeri;
             conditionStr = conditionStr[2 .. $].strip;
         }
 
-        switch (conditionStr) {
+        switch(conditionStr) {
         case "Final_Sigma":
             condition = Condition.Final_Sigma;
             break;
@@ -252,7 +252,7 @@ void processEachLine(string inputText, ref TotalState state) {
             assert(0, conditionStr);
         }
 
-        if (valueRange.isSingle)
+        if(valueRange.isSingle)
             state.single[language] ~= Entry(valueRange, Casing(replacementsFromString(lowercaseStr),
                     replacementsFromString(titlecaseStr), replacementsFromString(uppercaseStr), condition));
         else

@@ -45,9 +45,9 @@ struct String_UTF16 {
         scope @nogc nothrow:
 
             void rc(bool add) @trusted @hidden {
-                if (add)
+                if(add)
                     atomicOp!"+="(refCount, 1);
-                else if (atomicOp!"-="(refCount, 1) == 0) {
+                else if(atomicOp!"-="(refCount, 1) == 0) {
                     RCAllocator allocator2 = this.allocator;
                     allocator2.dispose(&this);
                 }
@@ -74,7 +74,7 @@ struct String_UTF16 {
         import core.atomic : atomicOp;
 
         int opApplyImpl(Del)(scope Del del) @trusted scope {
-            if (isNull)
+            if(isNull)
                 return 0;
 
             Iterator* oldIterator = this.iterator;
@@ -83,13 +83,13 @@ struct String_UTF16 {
             this.iterator = null;
             setupIterator;
 
-            if (oldIterator !is null) {
-                foreach (i; 0 .. oldIterator.forwardItems.length) {
+            if(oldIterator !is null) {
+                foreach(i; 0 .. oldIterator.forwardItems.length) {
                     (cast(ubyte[])this.iterator.forwardBuffer)[i] = (cast(ubyte[])oldIterator.forwardItems)[i];
                 }
                 this.iterator.forwardItems = this.iterator.forwardBuffer[0 .. oldIterator.forwardItems.length];
 
-                foreach (i; 0 .. oldIterator.backwardItems.length) {
+                foreach(i; 0 .. oldIterator.backwardItems.length) {
                     (cast(ubyte[])this.iterator.backwardBuffer)[i] = (cast(ubyte[])oldIterator.backwardItems)[i];
                 }
                 this.iterator.backwardItems = this.iterator.backwardBuffer[0 .. oldIterator.backwardItems.length];
@@ -102,7 +102,7 @@ struct String_UTF16 {
                 this.iterator.primedBackwards = oldIterator.primedBackwards;
             }
 
-            scope (exit) {
+            scope(exit) {
                 this.iterator.rc(false);
                 this.iterator = oldIterator;
                 this.literal = oldLiteral;
@@ -110,11 +110,11 @@ struct String_UTF16 {
 
             int result;
 
-            while (!empty) {
+            while(!empty) {
                 Char temp = front();
 
                 result = del(temp);
-                if (result)
+                if(result)
                     return result;
 
                 popFront();
@@ -124,7 +124,7 @@ struct String_UTF16 {
         }
 
         int opApplyReverseImpl(Del)(scope Del del) @trusted scope {
-            if (isNull)
+            if(isNull)
                 return 0;
 
             Iterator* oldIterator = this.iterator;
@@ -133,13 +133,13 @@ struct String_UTF16 {
             this.iterator = null;
             setupIterator;
 
-            if (oldIterator !is null) {
-                foreach (i; 0 .. oldIterator.forwardItems.length) {
+            if(oldIterator !is null) {
+                foreach(i; 0 .. oldIterator.forwardItems.length) {
                     (cast(ubyte[])this.iterator.forwardBuffer)[i] = (cast(ubyte[])oldIterator.forwardItems)[i];
                 }
                 this.iterator.forwardItems = this.iterator.forwardBuffer[0 .. oldIterator.forwardItems.length];
 
-                foreach (i; 0 .. oldIterator.backwardItems.length) {
+                foreach(i; 0 .. oldIterator.backwardItems.length) {
                     (cast(ubyte[])this.iterator.backwardBuffer)[i] = (cast(ubyte[])oldIterator.backwardItems)[i];
                 }
                 this.iterator.backwardItems = this.iterator.backwardBuffer[0 .. oldIterator.backwardItems.length];
@@ -152,7 +152,7 @@ struct String_UTF16 {
                 this.iterator.primedBackwards = oldIterator.primedBackwards;
             }
 
-            scope (exit) {
+            scope(exit) {
                 this.iterator.rc(false);
                 this.iterator = oldIterator;
                 this.literal = oldLiteral;
@@ -161,11 +161,11 @@ struct String_UTF16 {
             Char temp;
             int result;
 
-            while (!empty) {
+            while(!empty) {
                 temp = back();
 
                 result = del(temp);
-                if (result)
+                if(result)
                     return result;
 
                 popBack();
@@ -191,7 +191,7 @@ export:
 
         size_t lastIndex;
 
-        foreach (c; text) {
+        foreach(c; text) {
             assert(Text[lastIndex] == c);
             lastIndex++;
         }
@@ -209,7 +209,7 @@ export:
 
         size_t lastIndex = Text.length;
 
-        foreach_reverse (c; text) {
+        foreach_reverse(c; text) {
             assert(lastIndex > 0);
             lastIndex--;
             assert(Text[lastIndex] == c);
@@ -226,7 +226,7 @@ nothrow @nogc:
         Will only return a pointer if the underlying memory is encoded approprietely.
      */
     const(Char)* ptr() @system {
-        if (UnicodeEncoding.For!Char != literalEncoding)
+        if(UnicodeEncoding.For!Char != literalEncoding)
             return null;
         else
             return cast(const(Char)*)this.literal.ptr;
@@ -237,21 +237,21 @@ nothrow @nogc:
         typeof(this) text;
         assert(text.ptr is null);
 
-        static if (is(Char == char)) {
+        static if(is(Char == char)) {
             text = typeof(this)("Me haz data!");
             assert(text.ptr !is null);
             text = typeof(this)("Me haz data!"w);
             assert(text.ptr is null);
             text = typeof(this)("Me haz data!"d);
             assert(text.ptr is null);
-        } else static if (is(Char == wchar)) {
+        } else static if(is(Char == wchar)) {
             text = typeof(this)("Me haz data!"w);
             assert(text.ptr !is null);
             text = typeof(this)("Me haz data!");
             assert(text.ptr is null);
             text = typeof(this)("Me haz data!"d);
             assert(text.ptr is null);
-        } else static if (is(Char == dchar)) {
+        } else static if(is(Char == dchar)) {
             text = typeof(this)("Me haz data!"d);
             assert(text.ptr !is null);
             text = typeof(this)("Me haz data!");
@@ -263,7 +263,7 @@ nothrow @nogc:
 
     ///
     const(Char)[] unsafeGetLiteral() @system {
-        if (UnicodeEncoding.For!Char != literalEncoding)
+        if(UnicodeEncoding.For!Char != literalEncoding)
             return null;
         else
             return cast(const(Char)[])this.literal;
@@ -274,21 +274,21 @@ nothrow @nogc:
         typeof(this) text;
         assert(text.unsafeGetLiteral is null);
 
-        static if (is(Char == char)) {
+        static if(is(Char == char)) {
             text = typeof(this)("Me haz data!");
             assert(text.unsafeGetLiteral !is null);
             text = typeof(this)("Me haz data!"w);
             assert(text.unsafeGetLiteral is null);
             text = typeof(this)("Me haz data!"d);
             assert(text.unsafeGetLiteral is null);
-        } else static if (is(Char == wchar)) {
+        } else static if(is(Char == wchar)) {
             text = typeof(this)("Me haz data!"w);
             assert(text.unsafeGetLiteral !is null);
             text = typeof(this)("Me haz data!");
             assert(text.unsafeGetLiteral is null);
             text = typeof(this)("Me haz data!"d);
             assert(text.unsafeGetLiteral is null);
-        } else static if (is(Char == dchar)) {
+        } else static if(is(Char == dchar)) {
             text = typeof(this)("Me haz data!"d);
             assert(text.unsafeGetLiteral !is null);
             text = typeof(this)("Me haz data!");
@@ -303,14 +303,14 @@ nothrow @nogc:
 
     ///
     typeof(this) opSlice() scope @trusted {
-        if (isNull)
+        if(isNull)
             return typeof(this)();
 
         typeof(this) ret;
 
         ret.lifeTime = this.lifeTime;
         ret.literalEncoding = this.literalEncoding;
-        if (ret.lifeTime !is null)
+        if(ret.lifeTime !is null)
             atomicOp!"+="(ret.lifeTime.refCount, 1);
 
         ret.literal = this.literal;
@@ -335,14 +335,14 @@ nothrow @nogc:
         changeIndexToOffset(start, end);
         assert(start <= end, "Start of slice must be before or equal to end.");
 
-        if (start == end)
+        if(start == end)
             return typeof(this)();
 
         typeof(this) ret;
 
         ret.lifeTime = this.lifeTime;
         ret.literalEncoding = this.literalEncoding;
-        if (ret.lifeTime !is null)
+        if(ret.lifeTime !is null)
             atomicOp!"+="(ret.lifeTime.refCount, 1);
 
         literalEncoding.handle(() @trusted {
@@ -364,19 +364,19 @@ nothrow @nogc:
 
     ///
     unittest {
-        static if (is(Char == char)) {
+        static if(is(Char == char)) {
             typeof(this) original = typeof(this)("split me here");
             typeof(this) split = original[6 .. 8];
 
             assert(split.length == 2);
             assert(split.ptr is original.ptr + 6);
-        } else static if (is(Char == wchar)) {
+        } else static if(is(Char == wchar)) {
             typeof(this) original = typeof(this)("split me here"w);
             typeof(this) split = original[6 .. 8];
 
             assert(split.length == 2);
             assert(split.ptr is original.ptr + 6);
-        } else static if (is(Char == dchar)) {
+        } else static if(is(Char == dchar)) {
             typeof(this) original = typeof(this)("split me here"d);
             typeof(this) split = original[6 .. 8];
 
@@ -392,7 +392,7 @@ nothrow @nogc:
         ret.literalEncoding = this.literalEncoding;
         ret.lifeTime = this.lifeTime;
 
-        if (this.lifeTime !is null)
+        if(this.lifeTime !is null)
             atomicOp!"+="(ret.lifeTime.refCount, 1);
 
         return ret;
@@ -456,10 +456,10 @@ nothrow @nogc:
     this(return scope ref typeof(this) other) @trusted scope {
         this.tupleof = other.tupleof;
 
-        if (haveIterator)
+        if(haveIterator)
             this.iterator.rc(true);
 
-        if (this.lifeTime !is null)
+        if(this.lifeTime !is null)
             atomicOp!"+="(this.lifeTime.refCount, 1);
     }
 
@@ -492,10 +492,10 @@ nothrow @nogc:
 
         private void initForLiteral(T, U)(return scope T input, return scope RCAllocator allocator, return scope U toDeallocate,
                 UnicodeLanguage language) {
-            if (input.length > 0 || (toDeallocate.length > 0 && !allocator.isNull)) {
-                version (D_BetterC) {
+            if(input.length > 0 || (toDeallocate.length > 0 && !allocator.isNull)) {
+                version(D_BetterC) {
                 } else {
-                    if (__ctfe && input[$ - 1] != '\0') {
+                    if(__ctfe && input[$ - 1] != '\0') {
                         static T justDoIt(T input) {
                             return input ~ '\0';
                         }
@@ -512,8 +512,8 @@ nothrow @nogc:
                 this.literalEncoding = UnicodeEncoding.For!T;
                 this.language = language;
 
-                if (!allocator.isNull) {
-                    if (toDeallocate is null)
+                if(!allocator.isNull) {
+                    if(toDeallocate is null)
                         toDeallocate = input;
 
                     lifeTime = allocator.make!LifeTime(1, allocator, toDeallocate);
@@ -524,12 +524,12 @@ nothrow @nogc:
 
         ///
         ~this() {
-            if (haveIterator) {
+            if(haveIterator) {
                 assert(this.iterator !is null);
                 this.iterator.rc(false);
             }
 
-            if (this.lifeTime !is null && atomicOp!"-="(lifeTime.refCount, 1) == 0) {
+            if(this.lifeTime !is null && atomicOp!"-="(lifeTime.refCount, 1) == 0) {
                 RCAllocator allocator = lifeTime.allocator;
                 allocator.dispose(cast(void[])lifeTime.original);
                 allocator.dispose(lifeTime);
@@ -574,15 +574,15 @@ nothrow @nogc:
     Returns: if ``ptr`` will return a null terminated const(char)[] or not
     */
     bool isPtrNullTerminated() scope {
-        if (isNull)
+        if(isNull)
             return false;
 
         return literalEncoding.handle(() @trusted {
             auto actual = cast(const(char)[])this.literal;
 
-            if (actual[$ - 1] == '\0')
+            if(actual[$ - 1] == '\0')
                 return true;
-            else if (this.lifeTime is null)
+            else if(this.lifeTime is null)
                 return actual[$ - 1] == '\0';
 
             auto actualOriginal = cast(const(char)[])this.lifeTime.original;
@@ -591,9 +591,9 @@ nothrow @nogc:
         }, () @trusted {
             auto actual = cast(const(wchar)[])this.literal;
 
-            if (actual[$ - 1] == '\0')
+            if(actual[$ - 1] == '\0')
                 return true;
-            else if (this.lifeTime is null)
+            else if(this.lifeTime is null)
                 return actual[$ - 1] == '\0';
 
             auto actualOriginal = cast(const(wchar)[])this.lifeTime.original;
@@ -602,9 +602,9 @@ nothrow @nogc:
         }, () @trusted {
             auto actual = cast(const(dchar)[])this.literal;
 
-            if (actual[$ - 1] == '\0')
+            if(actual[$ - 1] == '\0')
                 return true;
-            else if (this.lifeTime is null)
+            else if(this.lifeTime is null)
                 return actual[$ - 1] == '\0';
 
             auto actualOriginal = cast(const(dchar)[])this.lifeTime.original;
@@ -654,21 +654,21 @@ nothrow @nogc:
             auto actual = cast(const(char)[])this.literal;
 
             size_t ret = actual.length;
-            if (ret > 0 && actual[$ - 1] == '\0')
+            if(ret > 0 && actual[$ - 1] == '\0')
                 ret--;
             return ret;
         }, () {
             auto actual = cast(const(wchar)[])this.literal;
 
             size_t ret = actual.length;
-            if (ret > 0 && actual[$ - 1] == '\0')
+            if(ret > 0 && actual[$ - 1] == '\0')
                 ret--;
             return ret;
         }, () {
             auto actual = cast(const(dchar)[])this.literal;
 
             size_t ret = actual.length;
-            if (ret > 0 && actual[$ - 1] == '\0')
+            if(ret > 0 && actual[$ - 1] == '\0')
                 ret--;
             return ret;
         }, () { return size_t.init; });
@@ -690,14 +690,14 @@ nothrow @nogc:
         return literalEncoding.handle(() {
             auto actual = cast(const(char)[])this.literal[0 .. this.length];
 
-            static if (is(Char == char))
+            static if(is(Char == char))
                 return actual.length;
-            else static if (is(Char == wchar))
+            else static if(is(Char == wchar))
                 return reEncodeLength(actual);
             else {
                 size_t ret;
 
-                while (actual.length > 0) {
+                while(actual.length > 0) {
                     const amount = decodeLength(actual[0]);
                     actual = actual[amount .. $];
                     ret++;
@@ -708,14 +708,14 @@ nothrow @nogc:
         }, () {
             auto actual = (cast(const(wchar)[])this.literal)[0 .. this.length];
 
-            static if (is(Char == char))
+            static if(is(Char == char))
                 return reEncodeLength(actual);
-            else static if (is(Char == wchar))
+            else static if(is(Char == wchar))
                 return actual.length;
             else {
                 size_t ret;
 
-                while (actual.length > 0) {
+                while(actual.length > 0) {
                     const amount = decodeLength(actual[0]);
                     actual = actual[amount .. $];
                     ret++;
@@ -726,9 +726,9 @@ nothrow @nogc:
         }, () {
             auto actual = (cast(const(dchar)[])this.literal)[0 .. this.length];
 
-            static if (is(Char == char))
+            static if(is(Char == char))
                 return encodeLengthUTF8(actual);
-            else static if (is(Char == wchar))
+            else static if(is(Char == wchar))
                 return encodeLengthUTF16(actual);
             else
                 return actual.length;
@@ -740,17 +740,17 @@ nothrow @nogc:
         assert(typeof(this)("a\u9EDEz").byUTF32.encodingLength == 3);
     }
 
-    static if (is(Char == char)) {
+    static if(is(Char == char)) {
         ///
         StringBuilder_UTF8 asMutable(RCAllocator allocator = RCAllocator.init) scope const @trusted {
             return StringBuilder_UTF8(allocator, cast()this);
         }
-    } else static if (is(Char == wchar)) {
+    } else static if(is(Char == wchar)) {
         ///
         StringBuilder_UTF16 asMutable(RCAllocator allocator = RCAllocator.init) scope const @trusted {
             return StringBuilder_UTF16(allocator, cast()this);
         }
-    } else static if (is(Char == dchar)) {
+    } else static if(is(Char == dchar)) {
         ///
         StringBuilder_UTF32 asMutable(RCAllocator allocator = RCAllocator.init) scope const @trusted {
             return StringBuilder_UTF32(allocator, cast()this);
@@ -767,11 +767,11 @@ nothrow @nogc:
 
     ///
     typeof(this) dup(RCAllocator allocator = RCAllocator.init) scope @trusted {
-        if (isNull)
+        if(isNull)
             return typeof(this)();
 
-        if (allocator.isNull) {
-            if (lifeTime !is null)
+        if(allocator.isNull) {
+            if(lifeTime !is null)
                 allocator = lifeTime.allocator;
             else
                 allocator = globalAllocator();
@@ -781,7 +781,7 @@ nothrow @nogc:
         zliteral[$ - 1] = '\0';
 
         void copy(Source)(scope Source source) {
-            foreach (i, Char c; source)
+            foreach(i, Char c; source)
                 zliteral[i] = c;
         }
 
@@ -789,27 +789,27 @@ nothrow @nogc:
         literalEncoding.handle(() {
             auto actual = cast(const(char)[])this.literal[0 .. this.length];
 
-            static if (is(Char == char))
+            static if(is(Char == char))
                 copy(actual);
-            else static if (is(Char == wchar))
+            else static if(is(Char == wchar))
                 reEncode(actual, (wchar got) { zliteral[soFar++] = got; });
             else
                 decode(actual, (dchar got) { zliteral[soFar++] = got; });
         }, () {
             auto actual = (cast(const(wchar)[])this.literal)[0 .. this.length];
 
-            static if (is(Char == char))
+            static if(is(Char == char))
                 reEncode(actual, (char got) { zliteral[soFar++] = got; });
-            else static if (is(Char == wchar))
+            else static if(is(Char == wchar))
                 copy(actual);
             else
                 decode(actual, (dchar got) { zliteral[soFar++] = got; });
         }, () {
             auto actual = (cast(const(dchar)[])this.literal)[0 .. this.length];
 
-            static if (is(Char == char))
+            static if(is(Char == char))
                 encodeUTF8(actual, (char got) { zliteral[soFar++] = got; });
-            else static if (is(Char == wchar))
+            else static if(is(Char == wchar))
                 encodeUTF16(actual, (wchar got) { zliteral[soFar++] = got; });
             else
                 copy(actual);
@@ -1229,10 +1229,10 @@ nothrow @nogc:
     bool empty() scope nothrow @nogc {
         size_t actualLength = this.length;
 
-        if (haveIterator) {
-            if (iterator.forwardItems.length > 0)
+        if(haveIterator) {
+            if(iterator.forwardItems.length > 0)
                 actualLength += iterator.amountFromInputForwards;
-            if (iterator.backwardItems.length > 0)
+            if(iterator.backwardItems.length > 0)
                 actualLength += iterator.amountFromInputBackwards;
         }
 
@@ -1257,16 +1257,16 @@ nothrow @nogc:
         const needRefill = this.iterator.forwardItems.length == 0;
         const needToUseOtherBuffer = !canRefill && needRefill && this.iterator.backwardItems.length > 0;
 
-        if (needToUseOtherBuffer) {
+        if(needToUseOtherBuffer) {
             // take first in backwards buffer
             assert(this.iterator.backwardItems.length > 0);
             return (cast(Char[])this.iterator.backwardItems)[0];
-        } else if (!this.iterator.primedForwards) {
+        } else if(!this.iterator.primedForwards) {
             primeForwards();
         }
 
         // take first in forwards buffer
-        if (this.iterator.forwardItems.length == 0)
+        if(this.iterator.forwardItems.length == 0)
             assert(this.empty);
         return (cast(Char[])this.iterator.forwardItems)[0];
     }
@@ -1278,7 +1278,7 @@ nothrow @nogc:
         static Text32 = "walls can't talk"d;
 
         typeof(this) text = typeof(this)(Text8);
-        foreach (i, c; Text8) {
+        foreach(i, c; Text8) {
             auto got = text.front;
 
             assert(!text.empty);
@@ -1288,7 +1288,7 @@ nothrow @nogc:
         assert(text.empty);
 
         text = typeof(this)(Text16);
-        foreach (i, c; Text16) {
+        foreach(i, c; Text16) {
             auto got = text.front;
 
             assert(!text.empty);
@@ -1298,7 +1298,7 @@ nothrow @nogc:
         assert(text.empty);
 
         text = typeof(this)(Text32);
-        foreach (i, c; Text32) {
+        foreach(i, c; Text32) {
             auto got = text.front;
 
             assert(!text.empty);
@@ -1317,16 +1317,16 @@ nothrow @nogc:
         const needRefill = this.iterator.backwardItems.length == 0;
         const needToUseOtherBuffer = !canRefill && this.iterator.forwardItems.length > 0 && needRefill;
 
-        if (needToUseOtherBuffer) {
+        if(needToUseOtherBuffer) {
             // take first in backwards buffer
             assert(this.iterator.forwardItems.length > 0);
             return (cast(Char[])this.iterator.forwardItems)[$ - 1];
-        } else if (!this.iterator.primedBackwards) {
+        } else if(!this.iterator.primedBackwards) {
             primeBackwards();
         }
 
         // take first in forwards buffer
-        if (this.iterator.backwardItems.length == 0)
+        if(this.iterator.backwardItems.length == 0)
             assert(this.empty);
         return (cast(Char[])this.iterator.backwardItems)[$ - 1];
     }
@@ -1338,7 +1338,7 @@ nothrow @nogc:
         static Text32 = "walls can't talk"d;
 
         typeof(this) text = typeof(this)(Text8);
-        foreach_reverse (i, c; Text8) {
+        foreach_reverse(i, c; Text8) {
             auto got = text.back;
 
             assert(!text.empty);
@@ -1348,7 +1348,7 @@ nothrow @nogc:
         assert(text.empty);
 
         text = typeof(this)(Text16);
-        foreach_reverse (i, c; Text16) {
+        foreach_reverse(i, c; Text16) {
             auto got = text.back;
 
             assert(!text.empty);
@@ -1358,7 +1358,7 @@ nothrow @nogc:
         assert(text.empty);
 
         text = typeof(this)(Text32);
-        foreach_reverse (i, c; Text32) {
+        foreach_reverse(i, c; Text32) {
             auto got = text.back;
 
             assert(!text.empty);
@@ -1388,17 +1388,17 @@ nothrow @nogc:
         ret.literalEncoding = this.literalEncoding;
         ret.language = this.language;
 
-        if (this.lifeTime !is null)
+        if(this.lifeTime !is null)
             atomicOp!"+="(this.lifeTime.refCount, 1);
 
-        if (this.iterator !is null) {
+        if(this.iterator !is null) {
             ret.setupIterator;
 
-            while (ret.literal.ptr < this.literal.ptr) {
+            while(ret.literal.ptr < this.literal.ptr) {
                 ret.popFront;
             }
 
-            while (ret.literal.length > 0 && &ret.literal[$ - 1] > &this.literal[$ - 1]) {
+            while(ret.literal.length > 0 && &ret.literal[$ - 1] > &this.literal[$ - 1]) {
                 ret.popBack;
             }
         }
@@ -1430,17 +1430,17 @@ nothrow @nogc:
         ret.literalEncoding = this.literalEncoding;
         ret.language = this.language;
 
-        if (this.lifeTime !is null)
+        if(this.lifeTime !is null)
             atomicOp!"+="(this.lifeTime.refCount, 1);
 
-        if (this.iterator !is null) {
+        if(this.iterator !is null) {
             ret.setupIterator;
 
-            while (ret.literal.ptr < this.literal.ptr) {
+            while(ret.literal.ptr < this.literal.ptr) {
                 ret.popFront;
             }
 
-            while (ret.literal.length > 0 && &ret.literal[$ - 1] > &this.literal[$ - 1]) {
+            while(ret.literal.length > 0 && &ret.literal[$ - 1] > &this.literal[$ - 1]) {
                 ret.popBack;
             }
         }
@@ -1472,17 +1472,17 @@ nothrow @nogc:
         ret.literalEncoding = this.literalEncoding;
         ret.language = this.language;
 
-        if (this.lifeTime !is null)
+        if(this.lifeTime !is null)
             atomicOp!"+="(this.lifeTime.refCount, 1);
 
-        if (this.iterator !is null) {
+        if(this.iterator !is null) {
             ret.setupIterator;
 
-            while (ret.literal.ptr < this.literal.ptr) {
+            while(ret.literal.ptr < this.literal.ptr) {
                 ret.popFront;
             }
 
-            while (ret.literal.length > 0 && &ret.literal[$ - 1] > &this.literal[$ - 1]) {
+            while(ret.literal.length > 0 && &ret.literal[$ - 1] > &this.literal[$ - 1]) {
                 ret.popBack;
             }
         }
@@ -2744,11 +2744,11 @@ nothrow @nogc:
             auto actual = cast(const(char)[])this.literal;
             size_t amount;
 
-            while (amount < actual.length) {
+            while(amount < actual.length) {
                 dchar c;
                 size_t got = decode(actual[amount .. $], c);
 
-                if (!(isWhiteSpace(c) || isControl(c)))
+                if(!(isWhiteSpace(c) || isControl(c)))
                     break;
                 amount += got;
             }
@@ -2758,11 +2758,11 @@ nothrow @nogc:
             auto actual = cast(const(wchar)[])this.literal;
             size_t amount;
 
-            while (amount < actual.length) {
+            while(amount < actual.length) {
                 dchar c;
                 size_t got = decode(actual[amount .. $], c);
 
-                if (!(isWhiteSpace(c) || isControl(c)))
+                if(!(isWhiteSpace(c) || isControl(c)))
                     break;
                 amount += got;
             }
@@ -2772,8 +2772,8 @@ nothrow @nogc:
             auto actual = cast(const(dchar)[])this.literal;
             size_t amount;
 
-            foreach (c; actual) {
-                if (!(isWhiteSpace(c) || isControl(c)))
+            foreach(c; actual) {
+                if(!(isWhiteSpace(c) || isControl(c)))
                     break;
 
                 amount++;
@@ -2800,11 +2800,11 @@ nothrow @nogc:
             auto actual = cast(const(char)[])this.literal[0 .. this.length];
             size_t amount, soFar;
 
-            while (soFar < actual.length) {
+            while(soFar < actual.length) {
                 dchar c;
                 size_t got = decodeFromEnd(actual[0 .. $ - soFar], c);
 
-                if (isWhiteSpace(c) || isControl(c))
+                if(isWhiteSpace(c) || isControl(c))
                     amount += got;
                 else
                     break;
@@ -2812,17 +2812,17 @@ nothrow @nogc:
                 soFar += got;
             }
 
-            if (amount > 0)
+            if(amount > 0)
                 this.literal = actual[0 .. $ - amount];
         }, () @trusted {
             auto actual = (cast(const(wchar)[])this.literal)[0 .. this.length];
             size_t amount, soFar;
 
-            while (soFar < actual.length) {
+            while(soFar < actual.length) {
                 dchar c;
                 size_t got = decodeFromEnd(actual[0 .. $ - soFar], c);
 
-                if (isWhiteSpace(c) || isControl(c))
+                if(isWhiteSpace(c) || isControl(c))
                     amount += got;
                 else
                     break;
@@ -2830,21 +2830,21 @@ nothrow @nogc:
                 soFar += got;
             }
 
-            if (amount > 0)
+            if(amount > 0)
                 this.literal = actual[0 .. $ - amount];
         }, () @trusted {
             auto actual = (cast(const(dchar)[])this.literal)[0 .. this.length];
             size_t amount;
 
-            foreach_reverse (c; actual) {
-                if (!(isWhiteSpace(c) || isControl(c))) {
+            foreach_reverse(c; actual) {
+                if(!(isWhiteSpace(c) || isControl(c))) {
                     break;
                 }
 
                 amount++;
             }
 
-            if (amount > 0)
+            if(amount > 0)
                 this.literal = actual[0 .. $ - amount];
         });
 
@@ -2886,15 +2886,15 @@ nothrow @nogc:
     void stripZeroTerminator() scope {
         literalEncoding.handle(() @trusted {
             auto actual = cast(const(char)[])this.literal;
-            if (actual.length > 0 && actual[$ - 1] == 0)
+            if(actual.length > 0 && actual[$ - 1] == 0)
                 this.literal = actual[0 .. $ - 1];
         }, () @trusted {
             auto actual = cast(const(wchar)[])this.literal;
-            if (actual.length > 0 && actual[$ - 1] == 0)
+            if(actual.length > 0 && actual[$ - 1] == 0)
                 this.literal = actual[0 .. $ - 1];
         }, () @trusted {
             auto actual = cast(const(dchar)[])this.literal;
-            if (actual.length > 0 && actual[$ - 1] == 0)
+            if(actual.length > 0 && actual[$ - 1] == 0)
                 this.literal = actual[0 .. $ - 1];
         });
     }
@@ -2909,12 +2909,12 @@ nothrow @nogc:
 
 package(sidero.base.text) @hidden:
     void setupIterator()() scope @trusted {
-        if (isNull || haveIterator)
+        if(isNull || haveIterator)
             return;
 
         RCAllocator allocator;
 
-        if (lifeTime is null)
+        if(lifeTime is null)
             allocator = globalAllocator();
         else
             allocator = lifeTime.allocator;
@@ -2924,9 +2924,9 @@ package(sidero.base.text) @hidden:
     }
 
     RCAllocator pickAllocator(return scope RCAllocator given) scope const @trusted {
-        if (!given.isNull)
+        if(!given.isNull)
             return given;
-        if (this.lifeTime !is null)
+        if(this.lifeTime !is null)
             return cast()this.lifeTime.allocator;
         return globalAllocator();
     }
@@ -2934,9 +2934,9 @@ package(sidero.base.text) @hidden:
     UnicodeLanguage pickLanguage(UnicodeLanguage input = UnicodeLanguage.Unknown) const scope {
         import sidero.base.system : unicodeLanguage;
 
-        if (input != UnicodeLanguage.Unknown)
+        if(input != UnicodeLanguage.Unknown)
             return input;
-        else if (language != UnicodeLanguage.Unknown)
+        else if(language != UnicodeLanguage.Unknown)
             return language;
 
         return unicodeLanguage();
@@ -2952,7 +2952,7 @@ package(sidero.base.text) @hidden:
                 return actual.length;
             });
 
-            if (a < 0) {
+            if(a < 0) {
                 assert(actualLength >= -a, "First offset must be smaller than length");
                 a = actualLength + a;
             }
@@ -2967,17 +2967,17 @@ package(sidero.base.text) @hidden:
                 return actual.length;
             });
 
-            if (a < 0) {
+            if(a < 0) {
                 assert(actualLength >= -a, "First offset must be smaller than length");
                 a = actualLength + a;
             }
 
-            if (b < 0) {
+            if(b < 0) {
                 assert(actualLength >= -b, "First offset must be smaller than length");
                 b = actualLength + b;
             }
 
-            if (b < a) {
+            if(b < a) {
                 ptrdiff_t temp = a;
                 a = b;
                 b = temp;
@@ -3004,24 +3004,24 @@ package(sidero.base.text) @hidden:
         }
 
         int opCmpImplSlice(Char2)(scope const(Char2)[] other) {
-            if (other.length > 0 && other[$ - 1] == '\0')
+            if(other.length > 0 && other[$ - 1] == '\0')
                 other = other[0 .. $ - 1];
-            if (isNull)
+            if(isNull)
                 return other.length > 0 ? -1 : 0;
 
             int matches(Type)(Type us) {
-                if (us.length > 0 && us[$ - 1] == '\0')
+                if(us.length > 0 && us[$ - 1] == '\0')
                     us = us[0 .. $ - 1];
 
-                if (us.length < other.length)
+                if(us.length < other.length)
                     return -1;
-                else if (us.length > other.length)
+                else if(us.length > other.length)
                     return 1;
 
-                foreach (i; 0 .. us.length) {
-                    if (us[i] < other[i])
+                foreach(i; 0 .. us.length) {
+                    if(us[i] < other[i])
                         return -1;
-                    else if (us[i] > other[i])
+                    else if(us[i] > other[i])
                         return 1;
                 }
 
@@ -3029,31 +3029,31 @@ package(sidero.base.text) @hidden:
             }
 
             int needDecode(Type)(Type us) {
-                if (us.length > 0 && us[$ - 1] == '\0')
+                if(us.length > 0 && us[$ - 1] == '\0')
                     us = us[0 .. $ - 1];
 
-                while (us.length > 0 && other.length > 0) {
+                while(us.length > 0 && other.length > 0) {
                     dchar usC, otherC;
 
-                    static if (typeof(us[0]).sizeof == 4) {
+                    static if(typeof(us[0]).sizeof == 4) {
                         usC = us[0];
                         us = us[1 .. $];
                     } else
                         us = us[decode(us, usC) .. $];
 
-                    static if (typeof(other[0]).sizeof == 4) {
+                    static if(typeof(other[0]).sizeof == 4) {
                         otherC = other[0];
                         other = other[1 .. $];
                     } else
                         other = other[decode(other, otherC) .. $];
 
-                    if (usC < otherC)
+                    if(usC < otherC)
                         return -1;
-                    else if (usC > otherC)
+                    else if(usC > otherC)
                         return 1;
                 }
 
-                if (us.length == 0)
+                if(us.length == 0)
                     return other.length == 0 ? 0 : -1;
                 else
                     return 1;
@@ -3062,21 +3062,21 @@ package(sidero.base.text) @hidden:
             return literalEncoding.handle(() {
                 auto actual = cast(const(char)[])this.literal;
 
-                static if (typeof(other[0]).sizeof == char.sizeof) {
+                static if(typeof(other[0]).sizeof == char.sizeof) {
                     return matches(actual);
                 } else
                     return needDecode(actual);
             }, () {
                 auto actual = cast(const(wchar)[])this.literal;
 
-                static if (typeof(other[0]).sizeof == wchar.sizeof) {
+                static if(typeof(other[0]).sizeof == wchar.sizeof) {
                     return matches(actual);
                 } else
                     return needDecode(actual);
             }, () {
                 auto actual = cast(const(dchar)[])this.literal;
 
-                static if (typeof(other[0]).sizeof == dchar.sizeof) {
+                static if(typeof(other[0]).sizeof == dchar.sizeof) {
                     return matches(actual);
                 } else
                     return needDecode(actual);
@@ -3098,24 +3098,24 @@ package(sidero.base.text) @hidden:
         }
 
         int opCmpImplBuilder(scope StringBuilder_ASCII other) {
-            if (isNull)
+            if(isNull)
                 return other.length > 0 ? -1 : 0;
 
             int matches(Type)(Type us) {
-                if (us.length > 0 && us[$ - 1] == '\0')
+                if(us.length > 0 && us[$ - 1] == '\0')
                     us = us[0 .. $ - 1];
 
-                if (us.length < other.length)
+                if(us.length < other.length)
                     return -1;
-                else if (us.length > other.length)
+                else if(us.length > other.length)
                     return 1;
 
                 size_t i;
 
-                foreach (c; other) {
-                    if (us[i] < c)
+                foreach(c; other) {
+                    if(us[i] < c)
                         return -1;
-                    else if (us[i] > c)
+                    else if(us[i] > c)
                         return 1;
                     i++;
                 }
@@ -3124,25 +3124,25 @@ package(sidero.base.text) @hidden:
             }
 
             int needDecode(Type)(Type us) {
-                if (us.length > 0 && us[$ - 1] == '\0')
+                if(us.length > 0 && us[$ - 1] == '\0')
                     us = us[0 .. $ - 1];
 
-                foreach (otherC; other) {
+                foreach(otherC; other) {
                     dchar usC;
 
-                    static if (typeof(us[0]).sizeof == 4) {
+                    static if(typeof(us[0]).sizeof == 4) {
                         usC = us[0];
                         us = us[1 .. $];
                     } else
                         us = us[decode(us, usC) .. $];
 
-                    if (usC < otherC)
+                    if(usC < otherC)
                         return -1;
-                    else if (usC > otherC)
+                    else if(usC > otherC)
                         return 1;
                 }
 
-                if (us.length == 0)
+                if(us.length == 0)
                     return other.empty ? 0 : -1;
                 else
                     return 1;
@@ -3151,21 +3151,21 @@ package(sidero.base.text) @hidden:
             return literalEncoding.handle(() {
                 auto actual = cast(const(char)[])this.literal;
 
-                static if (typeof(other[0]).sizeof == char.sizeof) {
+                static if(typeof(other[0]).sizeof == char.sizeof) {
                     return matches(actual);
                 } else
                     return needDecode(actual);
             }, () {
                 auto actual = cast(const(wchar)[])this.literal;
 
-                static if (typeof(other[0]).sizeof == wchar.sizeof) {
+                static if(typeof(other[0]).sizeof == wchar.sizeof) {
                     return matches(actual);
                 } else
                     return needDecode(actual);
             }, () {
                 auto actual = cast(const(dchar)[])this.literal;
 
-                static if (typeof(other[0]).sizeof == dchar.sizeof) {
+                static if(typeof(other[0]).sizeof == dchar.sizeof) {
                     return matches(actual);
                 } else
                     return needDecode(actual);
@@ -3195,9 +3195,9 @@ package(sidero.base.text) @hidden:
                 UnicodeLanguage language = UnicodeLanguage.Unknown) @trusted {
             import sidero.base.text.unicode.comparison;
 
-            if (other.length > 0 && other[$ - 1] == '\0')
+            if(other.length > 0 && other[$ - 1] == '\0')
                 other = other[0 .. $ - 1];
-            if (isNull)
+            if(isNull)
                 return other.length > 0 ? -1 : 0;
 
             language = pickLanguage(language);
@@ -3207,21 +3207,21 @@ package(sidero.base.text) @hidden:
             literalEncoding.handle(() @trusted {
                 auto actual = cast(const(char)[])this.literal;
 
-                if (actual.length > 0 && actual[$ - 1] == '\0')
+                if(actual.length > 0 && actual[$ - 1] == '\0')
                     actual = actual[0 .. $ - 1];
 
                 usH = foreachOverAnyUTF(actual);
             }, () @trusted {
                 auto actual = cast(const(wchar)[])this.literal;
 
-                if (actual.length > 0 && actual[$ - 1] == '\0')
+                if(actual.length > 0 && actual[$ - 1] == '\0')
                     actual = actual[0 .. $ - 1];
 
                 usH = foreachOverAnyUTF(actual);
             }, () @trusted {
                 auto actual = cast(const(dchar)[])this.literal;
 
-                if (actual.length > 0 && actual[$ - 1] == '\0')
+                if(actual.length > 0 && actual[$ - 1] == '\0')
                     actual = actual[0 .. $ - 1];
 
                 usH = foreachOverAnyUTF(actual);
@@ -3235,7 +3235,7 @@ package(sidero.base.text) @hidden:
             import sidero.base.text.unicode.comparison;
             import sidero.base.text.unicode.internal.builder : ASCIIStateAsTarget;
 
-            if (isNull)
+            if(isNull)
                 return other.length > 0 ? -1 : 0;
 
             language = pickLanguage(language);
@@ -3247,21 +3247,21 @@ package(sidero.base.text) @hidden:
             literalEncoding.handle(() @trusted {
                 auto actual = cast(const(char)[])this.literal;
 
-                if (actual.length > 0 && actual[$ - 1] == '\0')
+                if(actual.length > 0 && actual[$ - 1] == '\0')
                     actual = actual[0 .. $ - 1];
 
                 usH = foreachOverAnyUTF(actual);
             }, () @trusted {
                 auto actual = cast(const(wchar)[])this.literal;
 
-                if (actual.length > 0 && actual[$ - 1] == '\0')
+                if(actual.length > 0 && actual[$ - 1] == '\0')
                     actual = actual[0 .. $ - 1];
 
                 usH = foreachOverAnyUTF(actual);
             }, () @trusted {
                 auto actual = cast(const(dchar)[])this.literal;
 
-                if (actual.length > 0 && actual[$ - 1] == '\0')
+                if(actual.length > 0 && actual[$ - 1] == '\0')
                     actual = actual[0 .. $ - 1];
 
                 usH = foreachOverAnyUTF(actual);
@@ -3277,9 +3277,9 @@ package(sidero.base.text) @hidden:
             language = pickLanguage(language);
             allocator = pickAllocator(allocator);
 
-            if (other.length > 0 && other[$ - 1] == '\0')
+            if(other.length > 0 && other[$ - 1] == '\0')
                 other = other[0 .. $ - 1];
-            if (isNull)
+            if(isNull)
                 return other.length == 0;
 
             scope ForeachOverAnyUTF inputOpApply = foreachOverAnyUTF(other);
@@ -3321,9 +3321,9 @@ package(sidero.base.text) @hidden:
                 bool caseSensitive = true, UnicodeLanguage language = UnicodeLanguage.Unknown) @trusted {
             import sidero.base.text.unicode.comparison : CaseAwareComparison;
 
-            if (other.length > 0 && other[$ - 1] == '\0')
+            if(other.length > 0 && other[$ - 1] == '\0')
                 other = other[0 .. $ - 1];
-            if (isNull)
+            if(isNull)
                 return false;
 
             language = pickLanguage(language);
@@ -3351,7 +3351,7 @@ package(sidero.base.text) @hidden:
                 return codePointsFromEnd(actual, numberOfCharactersNeeded);
             });
 
-            if (toConsumeLength == 0) {
+            if(toConsumeLength == 0) {
                 // we are smaller or equal in size
                 return toConsumeLength == other.length;
             }
@@ -3387,9 +3387,9 @@ package(sidero.base.text) @hidden:
                 bool caseSensitive = true, UnicodeLanguage language = UnicodeLanguage.Unknown) @trusted {
             import sidero.base.text.unicode.comparison : CaseAwareComparison;
 
-            if (other.length > 0 && other[$ - 1] == '\0')
+            if(other.length > 0 && other[$ - 1] == '\0')
                 other = other[0 .. $ - 1];
-            if (isNull)
+            if(isNull)
                 return 0;
 
             language = pickLanguage(language);
@@ -3404,17 +3404,17 @@ package(sidero.base.text) @hidden:
             typeof(this) us = this;
             us.stripZeroTerminator;
 
-            while (us.length > 0) {
+            while(us.length > 0) {
                 size_t toIncrease = 1;
                 scope tempUs = us.byUTF32();
 
-                if (comparison.compare(&tempUs.opApply, true) == 0) {
+                if(comparison.compare(&tempUs.opApply, true) == 0) {
                     // GOTCHA
                     toIncrease = lengthOfOther;
                     total++;
                 }
 
-                foreach (i; 0 .. toIncrease) {
+                foreach(i; 0 .. toIncrease) {
                     const characterLength = us.literalEncoding.handle(() {
                         return us.literal.length > 0 ? decodeLength((cast(const(char)[])us.literal)[0]) : 0;
                     }, () { return us.literal.length > 0 ? decodeLength((cast(const(wchar)[])us.literal)[0]) : 0; }, () {
@@ -3451,9 +3451,9 @@ package(sidero.base.text) @hidden:
                 bool caseSensitive = true, UnicodeLanguage language = UnicodeLanguage.Unknown) @trusted {
             import sidero.base.text.unicode.comparison : CaseAwareComparison;
 
-            if (other.length > 0 && other[$ - 1] == '\0')
+            if(other.length > 0 && other[$ - 1] == '\0')
                 other = other[0 .. $ - 1];
-            if (isNull)
+            if(isNull)
                 return false;
 
             language = pickLanguage(language);
@@ -3467,15 +3467,15 @@ package(sidero.base.text) @hidden:
             typeof(this) us = this;
             us.stripZeroTerminator;
 
-            while (us.length > 0) {
+            while(us.length > 0) {
                 size_t toIncrease = 1;
                 scope tempUs = us.byUTF32();
 
-                if (comparison.compare(&tempUs.opApply, true) == 0) {
+                if(comparison.compare(&tempUs.opApply, true) == 0) {
                     return true;
                 }
 
-                foreach (i; 0 .. toIncrease) {
+                foreach(i; 0 .. toIncrease) {
                     const characterLength = us.literalEncoding.handle(() {
                         return us.literal.length > 0 ? decodeLength((cast(const(char)[])us.literal)[0]) : 0;
                     }, () { return us.literal.length > 0 ? decodeLength((cast(const(wchar)[])us.literal)[0]) : 0; }, () {
@@ -3512,9 +3512,9 @@ package(sidero.base.text) @hidden:
                 bool caseSensitive = true, UnicodeLanguage language = UnicodeLanguage.Unknown) @trusted {
             import sidero.base.text.unicode.comparison : CaseAwareComparison;
 
-            if (other.length > 0 && other[$ - 1] == '\0')
+            if(other.length > 0 && other[$ - 1] == '\0')
                 other = other[0 .. $ - 1];
-            if (isNull)
+            if(isNull)
                 return -1;
 
             language = pickLanguage(language);
@@ -3529,15 +3529,15 @@ package(sidero.base.text) @hidden:
             typeof(this) us = this;
             us.stripZeroTerminator;
 
-            while (us.length > 0) {
+            while(us.length > 0) {
                 size_t toIncrease = 1;
                 scope tempUs = us.byUTF32();
 
-                if (comparison.compare(&tempUs.opApply, true) == 0) {
+                if(comparison.compare(&tempUs.opApply, true) == 0) {
                     return ret;
                 }
 
-                foreach (i; 0 .. toIncrease) {
+                foreach(i; 0 .. toIncrease) {
                     const characterLength = us.literalEncoding.handle(() {
                         return us.literal.length > 0 ? decodeLength((cast(const(char)[])us.literal)[0]) : 0;
                     }, () { return us.literal.length > 0 ? decodeLength((cast(const(wchar)[])us.literal)[0]) : 0; }, () {
@@ -3575,9 +3575,9 @@ package(sidero.base.text) @hidden:
                 bool caseSensitive = true, UnicodeLanguage language = UnicodeLanguage.Unknown) @trusted {
             import sidero.base.text.unicode.comparison : CaseAwareComparison;
 
-            if (other.length > 0 && other[$ - 1] == '\0')
+            if(other.length > 0 && other[$ - 1] == '\0')
                 other = other[0 .. $ - 1];
-            if (isNull)
+            if(isNull)
                 return -1;
 
             language = pickLanguage(language);
@@ -3592,16 +3592,16 @@ package(sidero.base.text) @hidden:
             typeof(this) us = this;
             us.stripZeroTerminator;
 
-            while (us.length > 0) {
+            while(us.length > 0) {
                 size_t toIncrease = 1;
                 scope tempUs = us.byUTF32();
 
-                if (comparison.compare(&tempUs.opApply, true) == 0) {
+                if(comparison.compare(&tempUs.opApply, true) == 0) {
                     ret = soFar;
                     toIncrease = lengthOfOther;
                 }
 
-                foreach (i; 0 .. toIncrease) {
+                foreach(i; 0 .. toIncrease) {
                     const characterLength = us.literalEncoding.handle(() {
                         return us.literal.length > 0 ? decodeLength((cast(const(char)[])us.literal)[0]) : 0;
                     }, () { return us.literal.length > 0 ? decodeLength((cast(const(wchar)[])us.literal)[0]) : 0; }, () {
@@ -3642,7 +3642,7 @@ package(sidero.base.text) @hidden:
             Char[4 / Char.sizeof] charBuffer = void;
 
             void copy(Destination, Source)(scope Destination destination, scope Source source) {
-                foreach (i, c; source)
+                foreach(i, c; source)
                     destination[i] = c;
             }
 
@@ -3651,21 +3651,21 @@ package(sidero.base.text) @hidden:
             literalEncoding.handle(() {
                 auto actual = cast(const(char)[])this.literal;
 
-                static if (is(Char == char)) {
+                static if(is(Char == char)) {
                     // copy straight
                     size_t canDo = 1;
-                    if (canDo > actual.length)
+                    if(canDo > actual.length)
                         canDo = actual.length;
 
                     copy(charBuffer[0 .. canDo], actual[0 .. canDo]);
                     iterator.amountFromInputForwards = canDo;
                     amountInOutput = canDo;
-                } else static if (is(Char == wchar)) {
+                } else static if(is(Char == wchar)) {
                     // need to reencode
                     const consumedGiven = reEncode(actual, charBuffer);
                     iterator.amountFromInputForwards = consumedGiven[0];
                     amountInOutput = consumedGiven[1];
-                } else static if (is(Char == dchar)) {
+                } else static if(is(Char == dchar)) {
                     // decode
                     const consumed = decode(actual, charBuffer[0]);
                     iterator.amountFromInputForwards = consumed;
@@ -3674,21 +3674,21 @@ package(sidero.base.text) @hidden:
             }, () {
                 auto actual = cast(const(wchar)[])this.literal;
 
-                static if (is(Char == char)) {
+                static if(is(Char == char)) {
                     // need to reencode
                     const consumedGiven = reEncode(actual, charBuffer);
                     iterator.amountFromInputForwards = consumedGiven[0];
                     amountInOutput = consumedGiven[1];
-                } else static if (is(Char == wchar)) {
+                } else static if(is(Char == wchar)) {
                     // copy straight
                     size_t canDo = 1;
-                    if (canDo > actual.length)
+                    if(canDo > actual.length)
                         canDo = actual.length;
 
                     copy(charBuffer[0 .. canDo], actual[0 .. canDo]);
                     iterator.amountFromInputForwards = canDo;
                     amountInOutput = canDo;
-                } else static if (is(Char == dchar)) {
+                } else static if(is(Char == dchar)) {
                     // decode
                     const consumed = decode(actual, charBuffer[0]);
                     iterator.amountFromInputForwards = consumed;
@@ -3697,16 +3697,16 @@ package(sidero.base.text) @hidden:
             }, () {
                 auto actual = cast(const(dchar)[])this.literal;
 
-                static if (is(Char == char)) {
+                static if(is(Char == char)) {
                     // encode
                     amountInOutput = encodeUTF8(actual[0], charBuffer);
-                } else static if (is(Char == wchar)) {
+                } else static if(is(Char == wchar)) {
                     // encode
                     amountInOutput = encodeUTF16(actual[0], charBuffer);
-                } else static if (is(Char == dchar)) {
+                } else static if(is(Char == dchar)) {
                     // copy straight
                     size_t canDo = 1;
-                    if (canDo > actual.length)
+                    if(canDo > actual.length)
                         canDo = actual.length;
 
                     copy(charBuffer[0 .. canDo], actual[0 .. canDo]);
@@ -3723,8 +3723,8 @@ package(sidero.base.text) @hidden:
         }
 
         void popFrontImpl() @trusted {
-            foreach (_; 0 .. 1 + !this.iterator.primedForwards) {
-                if (this.iterator.primedForwardsNeedPop) {
+            foreach(_; 0 .. 1 + !this.iterator.primedForwards) {
+                if(this.iterator.primedForwardsNeedPop) {
                     assert(this.iterator.forwardItems.length > 0);
 
                     literalEncoding.handle(() @trusted {
@@ -3745,16 +3745,16 @@ package(sidero.base.text) @hidden:
                 const needRefill = this.iterator.forwardItems.length < 2;
                 const needToUseOtherBuffer = !canRefill && needRefill && this.iterator.backwardItems.length > 0;
 
-                if (needToUseOtherBuffer) {
+                if(needToUseOtherBuffer) {
                     auto items = cast(Char[])this.iterator.backwardItems;
                     assert(items.length > 0);
                     this.iterator.backwardItems = cast(void[])items[1 .. $];
-                } else if (this.iterator.forwardItems.length > 0) {
+                } else if(this.iterator.forwardItems.length > 0) {
                     auto items = cast(Char[])this.iterator.forwardItems;
                     this.iterator.forwardItems = cast(void[])items[1 .. $];
                 }
 
-                if (this.iterator.forwardItems.length == 0 && canRefill) {
+                if(this.iterator.forwardItems.length == 0 && canRefill) {
                     primeForwards();
                 }
             }
@@ -3765,7 +3765,7 @@ package(sidero.base.text) @hidden:
             assert(canRefill);
 
             void copy(Destination, Source)(scope Destination destination, scope Source source) {
-                foreach (i, c; source)
+                foreach(i, c; source)
                     destination[i] = c;
             }
 
@@ -3775,21 +3775,21 @@ package(sidero.base.text) @hidden:
             literalEncoding.handle(() {
                 auto actual = cast(const(char)[])this.literal;
 
-                static if (is(Char == char)) {
+                static if(is(Char == char)) {
                     // copy straight
                     size_t canDo = charBuffer.length;
-                    if (canDo > actual.length)
+                    if(canDo > actual.length)
                         canDo = actual.length;
 
                     copy(charBuffer[0 .. canDo], actual[$ - canDo .. $]);
                     iterator.amountFromInputBackwards = canDo;
                     amountInOutput = canDo;
-                } else static if (is(Char == wchar)) {
+                } else static if(is(Char == wchar)) {
                     // need to reencode
                     const consumedGiven = reEncodeFromEnd(actual, charBuffer);
                     iterator.amountFromInputBackwards = consumedGiven[0];
                     amountInOutput = consumedGiven[1];
-                } else static if (is(Char == dchar)) {
+                } else static if(is(Char == dchar)) {
                     // decode
                     const consumed = decodeFromEnd(actual, charBuffer[0]);
                     iterator.amountFromInputBackwards = consumed;
@@ -3798,21 +3798,21 @@ package(sidero.base.text) @hidden:
             }, () {
                 auto actual = cast(const(wchar)[])this.literal;
 
-                static if (is(Char == char)) {
+                static if(is(Char == char)) {
                     // need to reencode
                     const consumedGiven = reEncodeFromEnd(actual, charBuffer);
                     iterator.amountFromInputBackwards = consumedGiven[0];
                     amountInOutput = consumedGiven[1];
-                } else static if (is(Char == wchar)) {
+                } else static if(is(Char == wchar)) {
                     // copy straight
                     size_t canDo = charBuffer.length;
-                    if (canDo > actual.length)
+                    if(canDo > actual.length)
                         canDo = actual.length;
 
                     copy(charBuffer[0 .. canDo], actual[$ - canDo .. $]);
                     iterator.amountFromInputBackwards = canDo;
                     amountInOutput = canDo;
-                } else static if (is(Char == dchar)) {
+                } else static if(is(Char == dchar)) {
                     // decode
                     const consumed = decodeFromEnd(actual, charBuffer[0]);
                     iterator.amountFromInputBackwards = consumed;
@@ -3821,16 +3821,16 @@ package(sidero.base.text) @hidden:
             }, () {
                 auto actual = cast(const(dchar)[])this.literal;
 
-                static if (is(Char == char)) {
+                static if(is(Char == char)) {
                     // encode
                     amountInOutput = encodeUTF8(actual[$ - 1], charBuffer);
-                } else static if (is(Char == wchar)) {
+                } else static if(is(Char == wchar)) {
                     // encode
                     amountInOutput = encodeUTF16(actual[$ - 1], charBuffer);
-                } else static if (is(Char == dchar)) {
+                } else static if(is(Char == dchar)) {
                     // copy straight
                     size_t canDo = charBuffer.length;
-                    if (canDo > actual.length)
+                    if(canDo > actual.length)
                         canDo = actual.length;
 
                     copy(charBuffer[0 .. canDo], actual[$ - canDo .. $]);
@@ -3847,8 +3847,8 @@ package(sidero.base.text) @hidden:
         }
 
         void popBackImpl() @trusted {
-            foreach (_; 0 .. 1 + !this.iterator.primedBackwards) {
-                if (this.iterator.primedBackwardsNeedPop) {
+            foreach(_; 0 .. 1 + !this.iterator.primedBackwards) {
+                if(this.iterator.primedBackwardsNeedPop) {
                     assert(this.iterator.backwardItems.length > 0);
 
                     literalEncoding.handle(() @trusted {
@@ -3869,16 +3869,16 @@ package(sidero.base.text) @hidden:
                 const needRefill = this.iterator.backwardItems.length < 2;
                 const needToUseOtherBuffer = !canRefill && this.iterator.forwardItems.length > 0 && needRefill;
 
-                if (needToUseOtherBuffer) {
+                if(needToUseOtherBuffer) {
                     auto items = cast(Char[])this.iterator.forwardItems;
                     assert(items.length > 0);
                     this.iterator.forwardItems = cast(void[])items[0 .. $ - 1];
-                } else if (this.iterator.backwardItems.length > 0) {
+                } else if(this.iterator.backwardItems.length > 0) {
                     auto items = cast(Char[])this.iterator.backwardItems;
                     this.iterator.backwardItems = cast(void[])items[0 .. $ - 1];
                 }
 
-                if (this.iterator.backwardItems.length == 0 && canRefill) {
+                if(this.iterator.backwardItems.length == 0 && canRefill) {
                     primeBackwards();
                 }
             }

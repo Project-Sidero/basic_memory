@@ -9,18 +9,18 @@ export @safe nothrow @nogc:
 ///
 bool rawRead(Input, Output)(scope ref Input input, scope out Output output, scope FormatSpecifier format = FormatSpecifier.init)
         if (isUTF!Input || isASCII!Input) {
-    if (input.empty)
+    if(input.empty)
         return false;
 
-    static if (is(Output == bool)) {
+    static if(is(Output == bool)) {
         return readBool(*&input, output, format);
-    } else static if (is(Output == char) || is(Output == wchar) || is(Output == dchar)) {
+    } else static if(is(Output == char) || is(Output == wchar) || is(Output == dchar)) {
         return readChar(*&input, output, format);
-    } else static if (__traits(isIntegral, Output)) {
+    } else static if(__traits(isIntegral, Output)) {
         return readIntegral(*&input, output, format);
-    } else static if (__traits(isFloating, Output)) {
+    } else static if(__traits(isFloating, Output)) {
         return readFloat(*&input, output, format);
-    } else static if (is(Output == struct) || is(Output == class)) {
+    } else static if(is(Output == struct) || is(Output == class)) {
         return readStructClass(*&input, output, format);
     } else
         static assert(0, Output.stringof ~ " cannot be read into.");
@@ -126,12 +126,12 @@ unittest {
 /*private:*/
 
 bool removeAlternativeFormPrefix(Input)(scope ref Input input, scope FormatSpecifier format) {
-    if (!format.useAlternativeForm)
+    if(!format.useAlternativeForm)
         return true;
 
     string needed;
 
-    final switch (format.type) {
+    final switch(format.type) {
     case FormatSpecifier.Type.Default:
     case FormatSpecifier.Type.Decimal:
     case FormatSpecifier.Type.Float:
@@ -165,10 +165,10 @@ bool removeAlternativeFormPrefix(Input)(scope ref Input input, scope FormatSpeci
         break;
     }
 
-    while (!input.empty && needed.length > 0) {
+    while(!input.empty && needed.length > 0) {
         auto c = input.front;
 
-        if (c != needed[0])
+        if(c != needed[0])
             return false;
 
         input.popFront;
@@ -183,15 +183,15 @@ bool readBool(Input)(scope ref Input input, scope ref bool output, scope FormatS
 
     inputTemp.stripLeft;
 
-    if (!removeAlternativeFormPrefix(inputTemp, format))
+    if(!removeAlternativeFormPrefix(inputTemp, format))
         return false;
 
-    if (format.type == FormatSpecifier.Type.Default) {
+    if(format.type == FormatSpecifier.Type.Default) {
         // true/false
         auto c = inputTemp.front;
         string toGo1, toGo2;
 
-        switch (c) {
+        switch(c) {
         case 't':
         case 'T':
             toGo1 = "rue";
@@ -212,14 +212,14 @@ bool readBool(Input)(scope ref Input input, scope ref bool output, scope FormatS
 
         inputTemp.popFront;
 
-        if (!inputTemp.empty) {
-            while (toGo1.length > 0) {
-                if (inputTemp.empty)
+        if(!inputTemp.empty) {
+            while(toGo1.length > 0) {
+                if(inputTemp.empty)
                     return false;
 
                 c = inputTemp.front;
 
-                if (!(c == toGo1[0] || c == toGo2[0]))
+                if(!(c == toGo1[0] || c == toGo2[0]))
                     return false;
 
                 inputTemp.popFront;
@@ -234,7 +234,7 @@ bool readBool(Input)(scope ref Input input, scope ref bool output, scope FormatS
         // 0/1
         auto c = input.front;
 
-        switch (c) {
+        switch(c) {
         case '0':
             output = false;
             break;
@@ -253,42 +253,42 @@ bool readBool(Input)(scope ref Input input, scope ref bool output, scope FormatS
 }
 
 bool readChar(Input, Output)(scope ref Input input, scope ref Output output, scope FormatSpecifier format) @trusted {
-    if (input.empty)
+    if(input.empty)
         return false;
 
-    static if (isASCII!Input) {
+    static if(isASCII!Input) {
         auto c = input.front;
 
-        if (c >= 128)
+        if(c >= 128)
             return false;
 
         output = cast(Output)c;
         input.popFront;
     } else {
-        static if (is(Output == char)) {
+        static if(is(Output == char)) {
             auto tempInput = input.byUTF8;
             output = tempInput.front;
-        } else static if (is(Output == wchar)) {
+        } else static if(is(Output == wchar)) {
             auto tempInput = input.byUTF16;
             output = tempInput.front;
-        } else static if (is(Output == dchar)) {
+        } else static if(is(Output == dchar)) {
             auto tempInput = input.byUTF32;
             output = tempInput.front;
         }
 
         tempInput.popFront;
 
-        static if (is(Input == String_UTF!char)) {
+        static if(is(Input == String_UTF!char)) {
             input = tempInput.byUTF8;
-        } else static if (is(Input == String_UTF!wchar)) {
+        } else static if(is(Input == String_UTF!wchar)) {
             input = tempInput.byUTF16;
-        } else static if (is(Input == String_UTF!dchar)) {
+        } else static if(is(Input == String_UTF!dchar)) {
             input = tempInput.byUTF32;
-        } else static if (is(Input == StringBuilder_UTF!char)) {
+        } else static if(is(Input == StringBuilder_UTF!char)) {
             input = tempInput.byUTF8;
-        } else static if (is(Input == StringBuilder_UTF!wchar)) {
+        } else static if(is(Input == StringBuilder_UTF!wchar)) {
             input = tempInput.byUTF16;
-        } else static if (is(Input == StringBuilder_UTF!dchar)) {
+        } else static if(is(Input == StringBuilder_UTF!dchar)) {
             input = tempInput.byUTF32;
         } else
             static assert(0);
@@ -300,12 +300,12 @@ bool readChar(Input, Output)(scope ref Input input, scope ref Output output, sco
 bool readIntegral(Input, Output)(scope ref Input input, scope ref Output output, scope FormatSpecifier format) @trusted {
     scope inputTemp = input.save;
 
-    if (!removeAlternativeFormPrefix(inputTemp, format))
+    if(!removeAlternativeFormPrefix(inputTemp, format))
         return false;
 
     ubyte base;
 
-    final switch (format.type) {
+    final switch(format.type) {
     case FormatSpecifier.Type.Float:
     case FormatSpecifier.Type.FloatHex:
     case FormatSpecifier.Type.FloatHexCapital:
@@ -336,7 +336,7 @@ bool readIntegral(Input, Output)(scope ref Input input, scope ref Output output,
         break;
     }
 
-    if (base == 0)
+    if(base == 0)
         return false;
 
     bool negate;
@@ -344,33 +344,33 @@ bool readIntegral(Input, Output)(scope ref Input input, scope ref Output output,
     {
         bool haveSign;
 
-        if (!inputTemp.empty) {
+        if(!inputTemp.empty) {
             auto c = inputTemp.front;
 
-            if (c == '-') {
+            if(c == '-') {
                 negate = true;
                 haveSign = true;
                 inputTemp.popFront;
-            } else if (c == '+') {
+            } else if(c == '+') {
                 haveSign = true;
                 inputTemp.popFront;
             }
         }
 
-        final switch (format.sign) {
+        final switch(format.sign) {
         case FormatSpecifier.Sign.NegativeOnly:
             break;
         case FormatSpecifier.Sign.PositiveAndNegative:
             // we require positve or negative sign
-            if (!haveSign)
+            if(!haveSign)
                 return false;
             break;
         case FormatSpecifier.Sign.SpaceForPositiveAndNegative:
-            if (!haveSign) {
+            if(!haveSign) {
                 const priorLength = inputTemp.length;
                 inputTemp.stripLeft;
 
-                if (priorLength != inputTemp.length) {
+                if(priorLength != inputTemp.length) {
                     haveSign = true;
                 } else
                     return false;
@@ -382,11 +382,11 @@ bool readIntegral(Input, Output)(scope ref Input input, scope ref Output output,
     {
         bool doneOne;
 
-        Loop: while (!inputTemp.empty) {
+        Loop: while(!inputTemp.empty) {
             auto c = inputTemp.front;
             uint digit;
 
-            switch (c) {
+            switch(c) {
             case '0': .. case '9':
                 digit = c - '0';
                 break;
@@ -400,7 +400,7 @@ bool readIntegral(Input, Output)(scope ref Input input, scope ref Output output,
                 break Loop;
             }
 
-            if (digit > base)
+            if(digit > base)
                 break Loop;
 
             output *= cast(Output)base;
@@ -409,11 +409,11 @@ bool readIntegral(Input, Output)(scope ref Input input, scope ref Output output,
             doneOne = true;
         }
 
-        if (!doneOne)
+        if(!doneOne)
             return false;
     }
 
-    if (negate)
+    if(negate)
         output *= -1;
 
     input = inputTemp.save;
@@ -429,24 +429,24 @@ bool readFloat(Input, Output)(scope ref Input input, scope ref Output output, sc
     const canDo = inputTemp.length;
     const shouldDo = canDo > 64 ? 64 : canDo;
 
-    if (shouldDo == 0)
+    if(shouldDo == 0)
         return false;
 
-    static if (is(Input == String_ASCII)) {
+    static if(is(Input == String_ASCII)) {
         String_ASCII input2 = inputTemp[0 .. shouldDo].dup;
-    } else static if (is(Input == String_UTF8)) {
+    } else static if(is(Input == String_UTF8)) {
         String_UTF8 input2 = inputTemp[0 .. shouldDo].dup;
-    } else static if (is(Input == String_UTF16)) {
+    } else static if(is(Input == String_UTF16)) {
         String_UTF8 input2 = inputTemp[0 .. shouldDo].byUTF8.dup;
-    } else static if (is(Input == String_UTF32)) {
+    } else static if(is(Input == String_UTF32)) {
         String_UTF8 input2 = inputTemp[0 .. shouldDo].byUTF8.dup;
-    } else static if (is(Input == StringBuilder_ASCII)) {
+    } else static if(is(Input == StringBuilder_ASCII)) {
         String_ASCII input2 = inputTemp[0 .. shouldDo].asReadOnly;
-    } else static if (is(Input == StringBuilder_UTF8)) {
+    } else static if(is(Input == StringBuilder_UTF8)) {
         String_UTF8 input2 = inputTemp[0 .. shouldDo].asReadOnly;
-    } else static if (is(Input == StringBuilder_UTF16)) {
+    } else static if(is(Input == StringBuilder_UTF16)) {
         String_UTF8 input2 = inputTemp[0 .. shouldDo].byUTF8.asReadOnly;
-    } else static if (is(Input == StringBuilder_UTF32)) {
+    } else static if(is(Input == StringBuilder_UTF32)) {
         String_UTF8 input2 = inputTemp[0 .. shouldDo].byUTF8.asReadOnly;
     }
 
@@ -465,49 +465,49 @@ bool readFloat(Input, Output)(scope ref Input input, scope ref Output output, sc
     size_t amountRead;
 
     auto got = sscanf(input2.ptr, formatText.ptr, &output2, &amountRead);
-    if (got != 1)
+    if(got != 1)
         return false;
 
     output = cast(Output)output2;
 
-    static if (is(Input == String_ASCII)) {
+    static if(is(Input == String_ASCII)) {
         String_ASCII input3 = inputTemp[0 .. shouldDo];
-    } else static if (is(Input == String_UTF8)) {
+    } else static if(is(Input == String_UTF8)) {
         String_UTF8 input3 = inputTemp[0 .. shouldDo];
-    } else static if (is(Input == String_UTF16)) {
+    } else static if(is(Input == String_UTF16)) {
         String_UTF8 input3 = inputTemp[0 .. shouldDo].byUTF8;
-    } else static if (is(Input == String_UTF32)) {
+    } else static if(is(Input == String_UTF32)) {
         String_UTF8 input3 = inputTemp[0 .. shouldDo].byUTF8;
-    } else static if (is(Input == StringBuilder_ASCII)) {
+    } else static if(is(Input == StringBuilder_ASCII)) {
         String_ASCII input3 = inputTemp[0 .. shouldDo];
-    } else static if (is(Input == StringBuilder_UTF8)) {
+    } else static if(is(Input == StringBuilder_UTF8)) {
         String_UTF8 input3 = inputTemp[0 .. shouldDo];
-    } else static if (is(Input == StringBuilder_UTF16)) {
+    } else static if(is(Input == StringBuilder_UTF16)) {
         String_UTF8 input3 = inputTemp[0 .. shouldDo].byUTF8;
-    } else static if (is(Input == StringBuilder_UTF32)) {
+    } else static if(is(Input == StringBuilder_UTF32)) {
         String_UTF8 input3 = inputTemp[0 .. shouldDo].byUTF8;
     }
 
-    while (!input3.empty && amountRead > 0) {
+    while(!input3.empty && amountRead > 0) {
         input3.popFront;
         amountRead--;
     }
 
-    static if (is(Input == String_ASCII)) {
+    static if(is(Input == String_ASCII)) {
         input = input3.save;
-    } else static if (is(Input == String_UTF8)) {
+    } else static if(is(Input == String_UTF8)) {
         input = input3.save;
-    } else static if (is(Input == String_UTF16)) {
+    } else static if(is(Input == String_UTF16)) {
         input = input3.byUTF16.save;
-    } else static if (is(Input == String_UTF32)) {
+    } else static if(is(Input == String_UTF32)) {
         input = input3.byUTF32.save;
-    } else static if (is(Input == StringBuilder_ASCII)) {
+    } else static if(is(Input == StringBuilder_ASCII)) {
         input = input3.save;
-    } else static if (is(Input == StringBuilder_UTF8)) {
+    } else static if(is(Input == StringBuilder_UTF8)) {
         input = input3.save;
-    } else static if (is(Input == StringBuilder_UTF16)) {
+    } else static if(is(Input == StringBuilder_UTF16)) {
         input = input3.byUTF16.save;
-    } else static if (is(Input == StringBuilder_UTF32)) {
+    } else static if(is(Input == StringBuilder_UTF32)) {
         input = input3.byUTF32.save;
     }
 
@@ -524,12 +524,12 @@ bool readStructClass(Input, Output)(scope ref Input input, scope ref Output outp
     //static if (haveFormattedRead) {
     Input input2 = input.save;
 
-    static if (__traits(hasMember, Output, "DefaultFormat")) {
-        if (format.fullFormatSpec.length == 0)
+    static if(__traits(hasMember, Output, "DefaultFormat")) {
+        if(format.fullFormatSpec.length == 0)
             format.fullFormatSpec = Output.DefaultFormat;
     }
 
-    if (Output.formattedRead(input2, output, format)) {
+    if(Output.formattedRead(input2, output, format)) {
         input = input2;
         return true;
     }

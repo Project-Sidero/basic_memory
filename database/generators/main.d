@@ -6,9 +6,9 @@ void main() {
     import std.file : remove, exists, mkdirRecurse, write;
 
     try {
-        if (exists("generated"))
+        if(exists("generated"))
             remove("generated");
-    } catch (Exception e) {
+    } catch(Exception e) {
     }
 
     mkdirRecurse(UnicodeLUTDirectory);

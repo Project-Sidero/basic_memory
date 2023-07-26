@@ -95,7 +95,7 @@ export @safe nothrow @nogc:
     }
 
     ~this() scope {
-        if (againstBuffer.length > againstInlineBuffer.length)
+        if(againstBuffer.length > againstInlineBuffer.length)
             allocator.dispose(againstBuffer);
     }
 
@@ -111,12 +111,12 @@ export @safe nothrow @nogc:
         this.isCaseSensitive = isCaseSensitive;
 
         void allocateAgainst(size_t length) {
-            if (againstBuffer.length < length) {
+            if(againstBuffer.length < length) {
                 dchar[] temp = allocator.makeArray!dchar(length);
-                foreach (i, v; againstBuffer)
+                foreach(i, v; againstBuffer)
                     temp[i] = v;
 
-                if (againstBuffer.length > againstInlineBuffer.length)
+                if(againstBuffer.length > againstInlineBuffer.length)
                     allocator.dispose(againstBuffer);
 
                 againstBuffer = temp;
@@ -125,12 +125,12 @@ export @safe nothrow @nogc:
             against = againstBuffer[0 .. length];
         }
 
-        if (isCaseSensitive) {
+        if(isCaseSensitive) {
             size_t inputLength;
 
-            foreach (c; input) {
+            foreach(c; input) {
                 size_t proposed = sidero_utf_lut_lengthOfFullyDecomposed(c);
-                if (proposed == 0)
+                if(proposed == 0)
                     proposed = 1;
                 inputLength += proposed;
             }
@@ -138,13 +138,13 @@ export @safe nothrow @nogc:
             allocateAgainst(inputLength);
 
             size_t soFar;
-            foreach (c; input) {
+            foreach(c; input) {
                 auto map = sidero_utf_lut_getDecompositionMap(c);
 
-                if (map.fullyDecomposed.length == 0)
+                if(map.fullyDecomposed.length == 0)
                     against[soFar++] = c;
                 else {
-                    foreach (i, v; map.fullyDecomposed)
+                    foreach(i, v; map.fullyDecomposed)
                         against[soFar + i] = v;
                     soFar += map.fullyDecomposed.length;
                 }
@@ -156,7 +156,7 @@ export @safe nothrow @nogc:
             {
                 size_t soFar;
                 caseFold((scope const(dchar)[] got...) {
-                    foreach (i, v; got)
+                    foreach(i, v; got)
                         against[soFar + i] = v;
                     soFar += got.length;
                     return false;
@@ -178,14 +178,14 @@ export @safe nothrow @nogc:
         rotate.partialReset;
 
         bool handleRotated(dchar value) @nogc @trusted {
-            if (processed >= against.length)
+            if(processed >= against.length)
                 return true;
 
-            if (against[processed] < value) {
+            if(against[processed] < value) {
                 ret = 1;
                 processed++;
                 return true;
-            } else if (against[processed] > value) {
+            } else if(against[processed] > value) {
                 ret = -1;
                 processed++;
                 return true;
@@ -195,41 +195,41 @@ export @safe nothrow @nogc:
             }
         }
 
-        if (isCaseSensitive) {
-            foreach (c; input) {
+        if(isCaseSensitive) {
+            foreach(c; input) {
                 auto map = sidero_utf_lut_getDecompositionMap(c);
                 received += map.fullyDecomposed.length > 0 ? map.fullyDecomposed.length : 1;
 
-                if (received > against.length) {
+                if(received > against.length) {
                     // we are longer
-                    if (!ignoreLonger)
+                    if(!ignoreLonger)
                         ret = 1;
                     break;
                 }
 
-                if (map.fullyDecomposed.length == 0)
+                if(map.fullyDecomposed.length == 0)
                     rotate.partial(&handleRotated, c);
                 else
                     rotate.partial(&handleRotated, map.fullyDecomposed);
 
-                if (ret != 0)
+                if(ret != 0)
                     break;
             }
         } else {
             caseFold((scope const(dchar)[] got...) {
                 size_t todo;
 
-                while (received < against.length && todo < got.length) {
+                while(received < against.length && todo < got.length) {
                     received++;
                     todo++;
                 }
 
-                if (todo > 0)
+                if(todo > 0)
                     rotate.partial(&handleRotated, got[0 .. todo]);
 
-                if (received > against.length) {
+                if(received > against.length) {
                     // we are longer
-                    if (!ignoreLonger)
+                    if(!ignoreLonger)
                         ret = 1;
                     return true;
                 }
@@ -238,11 +238,11 @@ export @safe nothrow @nogc:
             }, input, isTurkic, false, true);
         }
 
-        if (ret == 0)
+        if(ret == 0)
             rotate.partialFinish(&handleRotated);
 
         // we are shorter
-        if (ret == 0 && received < against.length)
+        if(ret == 0 && received < against.length)
             ret = -1;
         return ret;
     }
@@ -256,10 +256,10 @@ int icmpUTF32_(scope ForeachOverUTF32Delegate input1, scope ForeachOverUTF32Dele
             turkic, compatibility, true);
 
     // if we compose the lengths after case folding it won't have direct equivalence to the output
-    if (!composition) {
-        if (input1Dlength < input2Dlength)
+    if(!composition) {
+        if(input1Dlength < input2Dlength)
             return -1;
-        else if (input2Dlength < input1Dlength)
+        else if(input2Dlength < input1Dlength)
             return 1;
     }
 
@@ -268,7 +268,7 @@ int icmpUTF32_(scope ForeachOverUTF32Delegate input1, scope ForeachOverUTF32Dele
     {
         size_t soFarCaseFolded;
         caseFold((scope const(dchar)[] got...) {
-            foreach (i, v; got)
+            foreach(i, v; got)
                 array1[soFarCaseFolded + i] = v;
             soFarCaseFolded += got.length;
             return false;
@@ -276,7 +276,7 @@ int icmpUTF32_(scope ForeachOverUTF32Delegate input1, scope ForeachOverUTF32Dele
 
         soFarCaseFolded = 0;
         caseFold((scope const(dchar)[] got...) {
-            foreach (i, v; got)
+            foreach(i, v; got)
                 array2[soFarCaseFolded + i] = v;
             soFarCaseFolded += got.length;
             return false;
@@ -292,27 +292,27 @@ int icmpUTF32_(scope ForeachOverUTF32Delegate input1, scope ForeachOverUTF32Dele
 
     size_t trueSize1 = array1.length, trueSize2 = array2.length;
 
-    if (composition) {
+    if(composition) {
         trueSize1 = compose_(array1, allocator);
         trueSize2 = compose_(array2, allocator);
     }
 
     //
 
-    scope (exit) {
+    scope(exit) {
         allocator.dispose(array1);
         allocator.dispose(array2);
     }
 
-    if (trueSize1 < trueSize2)
+    if(trueSize1 < trueSize2)
         return -1;
-    else if (trueSize2 < trueSize1)
+    else if(trueSize2 < trueSize1)
         return 1;
 
-    foreach (i; 0 .. trueSize1) {
-        if (array1[i] < array2[i])
+    foreach(i; 0 .. trueSize1) {
+        if(array1[i] < array2[i])
             return -1;
-        else if (array2[i] < array1[i])
+        else if(array2[i] < array1[i])
             return 1;
     }
 

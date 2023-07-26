@@ -24,7 +24,7 @@ uint adler32Checksum(const(ubyte)[] data, uint start = 1) {
     uint sum1 = start & 0xffff;
     uint sum2 = (start >> 16) & 0xffff;
 
-    foreach (v; data) {
+    foreach(v; data) {
         sum1 += v;
         sum1 %= Base;
 

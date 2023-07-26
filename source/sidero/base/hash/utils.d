@@ -7,6 +7,7 @@ alias HashFunction(Type) = ulong function(scope ref Type);
 ///
 ulong hashOf() @trusted {
     import sidero.base.hash.fnv;
+
     return fnv_64_1a(null);
 }
 
@@ -23,14 +24,14 @@ ulong hashOf(Type)(scope ref Type value, ulong previousHash) @trusted {
 
     // probably not the best of algorith, but hey... it'll work (hopefully)
     void handle(Type2)(scope ref Type2 input) {
-        static if (__traits(hasMember, Type2, "toHash")) {
+        static if(__traits(hasMember, Type2, "toHash")) {
             auto got = input.toHash();
             handle(got);
         } else {
             import std.traits : isArray, isBasicType;
 
-            static if (isArray!Type2 && !isBasicType!(typeof(Type2.init[0]))) {
-                foreach (ref v; input) {
+            static if(isArray!Type2 && !isBasicType!(typeof(Type2.init[0]))) {
+                foreach(ref v; input) {
                     handle(v);
                 }
             } else {

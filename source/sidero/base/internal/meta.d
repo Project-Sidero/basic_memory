@@ -8,7 +8,7 @@ mixin template OpApplyCombos(string ValueType__, string KeyType__ = "size_t", st
         string ret;
         ptrdiff_t safeOffset = -1;
 
-        static if (KeyType__.length > 0) {
+        static if(KeyType__.length > 0) {
             string[] attributes = KeyType__ ~ Attributes;
             ptrdiff_t withKeyOffset = 0;
         } else {
@@ -19,11 +19,11 @@ mixin template OpApplyCombos(string ValueType__, string KeyType__ = "size_t", st
         bool[] active;
         active.length = attributes.length;
 
-        foreach (i, ref attribute; attributes) {
-            if (attribute == "@safe") {
+        foreach(i, ref attribute; attributes) {
+            if(attribute == "@safe") {
                 safeOffset = i;
                 break;
-            } else if (attribute == "@system") {
+            } else if(attribute == "@system") {
                 attribute = "@safe";
                 safeOffset = i;
                 break;
@@ -31,37 +31,37 @@ mixin template OpApplyCombos(string ValueType__, string KeyType__ = "size_t", st
         }
 
         void handle(size_t depth) {
-            if (depth == attributes.length) {
+            if(depth == attributes.length) {
                 ret ~= "int " ~ Name ~ "(";
 
                 ret ~= "scope int delegate(";
 
-                if (withKeyOffset >= 0 && active[withKeyOffset])
+                if(withKeyOffset >= 0 && active[withKeyOffset])
                     ret ~= "ref " ~ KeyType__ ~ ", ";
 
                 ret ~= "ref ";
                 ret ~= ValueType__ ~ ")";
 
-                foreach (i, attribute; attributes) {
-                    if (withKeyOffset == i)
+                foreach(i, attribute; attributes) {
+                    if(withKeyOffset == i)
                         continue;
-                    else if (active[i])
+                    else if(active[i])
                         ret ~= " " ~ attribute;
-                    else if (i == safeOffset)
+                    else if(i == safeOffset)
                         ret ~= " @system";
                 }
 
                 ret ~= " del)";
 
-                if (!isStatic)
+                if(!isStatic)
                     ret ~= " scope";
 
-                foreach (i, attribute; attributes) {
-                    if (withKeyOffset == i)
+                foreach(i, attribute; attributes) {
+                    if(withKeyOffset == i)
                         continue;
-                    else if (active[i])
+                    else if(active[i])
                         ret ~= " " ~ attribute;
-                    else if (i == safeOffset)
+                    else if(i == safeOffset)
                         ret ~= " @system";
                 }
 
@@ -90,7 +90,7 @@ mixin template OpApplyComboInterfaces(string ValueType, string KeyType = "size_t
         string ret;
         ptrdiff_t safeOffset = -1;
 
-        static if (KeyType.length > 0) {
+        static if(KeyType.length > 0) {
             string[] attributes = KeyType ~ Attributes;
             ptrdiff_t withKeyOffset = 0;
         } else {
@@ -101,11 +101,11 @@ mixin template OpApplyComboInterfaces(string ValueType, string KeyType = "size_t
         bool[] active;
         active.length = attributes.length;
 
-        foreach (i, ref attribute; attributes) {
-            if (attribute == "@safe") {
+        foreach(i, ref attribute; attributes) {
+            if(attribute == "@safe") {
                 safeOffset = i;
                 break;
-            } else if (attribute == "@system") {
+            } else if(attribute == "@system") {
                 attribute = "@safe";
                 safeOffset = i;
                 break;
@@ -113,37 +113,37 @@ mixin template OpApplyComboInterfaces(string ValueType, string KeyType = "size_t
         }
 
         void handle(size_t depth) {
-            if (depth == attributes.length) {
+            if(depth == attributes.length) {
                 ret ~= "int " ~ Name ~ "(";
 
                 ret ~= "scope int delegate(";
 
-                if (withKeyOffset >= 0 && active[withKeyOffset])
+                if(withKeyOffset >= 0 && active[withKeyOffset])
                     ret ~= "ref " ~ KeyType ~ ", ";
 
                 ret ~= "ref ";
                 ret ~= ValueType ~ ")";
 
-                foreach (i, attribute; attributes) {
-                    if (withKeyOffset == i)
+                foreach(i, attribute; attributes) {
+                    if(withKeyOffset == i)
                         continue;
-                    else if (active[i])
+                    else if(active[i])
                         ret ~= " " ~ attribute;
-                    else if (i == safeOffset)
+                    else if(i == safeOffset)
                         ret ~= " @system";
                 }
 
                 ret ~= " del)";
 
-                if (!isStatic)
+                if(!isStatic)
                     ret ~= " scope";
 
-                foreach (i, attribute; attributes) {
-                    if (withKeyOffset == i)
+                foreach(i, attribute; attributes) {
+                    if(withKeyOffset == i)
                         continue;
-                    else if (active[i])
+                    else if(active[i])
                         ret ~= " " ~ attribute;
-                    else if (i == safeOffset)
+                    else if(i == safeOffset)
                         ret ~= " @system";
                 }
 

@@ -1,7 +1,7 @@
 module sidero.base.console.internal.bindings;
 public import core.stdc.stdio : getc, EOF, FILE, fflush, fclose;
 
-version (Windows) {
+version(Windows) {
     public import core.sys.windows.windows : HANDLE, ULONG, WORD, BOOL, UINT, CHAR, COORD, WaitForSingleObject,
         PeekNamedPipe, ReadFile, WCHAR, DWORD, OVERLAPPED, GetStdHandle, GetFileType, FILE_TYPE_UNKNOWN, FILE_TYPE_CHAR,
         FILE_TYPE_PIPE, AllocConsole, CreateEvent, CloseHandle, GetConsoleMode, SetConsoleMode, STD_INPUT_HANDLE,

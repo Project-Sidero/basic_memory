@@ -40,11 +40,11 @@ export:
     invariant {
         assert(!poolAllocator.isNull);
 
-        version (none) {
-            foreach (offset; 0 .. NumberOfBlocks) {
+        version(none) {
+            foreach(offset; 0 .. NumberOfBlocks) {
                 Block* current = cast(Block*)blocks[offset];
 
-                while (current !is null) {
+                while(current !is null) {
                     current = current.next;
                 }
             }
@@ -92,7 +92,7 @@ scope @safe @nogc pure nothrow:
         void[] splitUntilSize(Block* current, size_t available, size_t blockOffset) {
             void* ret = cast(void*)current;
 
-            while (blockOffset > 0 && available / 2 >= size) {
+            while(blockOffset > 0 && available / 2 >= size) {
                 assert(blockOffset > 0);
                 blockOffset--;
                 available /= 2;
@@ -110,11 +110,11 @@ scope @safe @nogc pure nothrow:
         size_t[2] blockSizeAndOffsetSource = calculatePower2Size(size, minExponent);
         void[] ret;
 
-        if (blockSizeAndOffsetSource[1] < NumberOfBlocks) {
+        if(blockSizeAndOffsetSource[1] < NumberOfBlocks) {
             size_t[2] blockSizeAndOffset = blockSizeAndOffsetSource;
             Block** parent = &blocks[blockSizeAndOffset[1]];
 
-            while (blockSizeAndOffset[1] + 1 < NumberOfBlocks && *parent is null) {
+            while(blockSizeAndOffset[1] + 1 < NumberOfBlocks && *parent is null) {
                 parent++;
                 blockSizeAndOffset[0] *= 2;
                 blockSizeAndOffset[1]++;
@@ -122,30 +122,30 @@ scope @safe @nogc pure nothrow:
 
             assert(blockSizeAndOffset[0] < 2 ^^ maxExponent);
             assert(blockSizeAndOffset[1] < maxExponent);
-            if (blockSizeAndOffset[1] < NumberOfBlocks && *parent !is null) {
+            if(blockSizeAndOffset[1] < NumberOfBlocks && *parent !is null) {
                 Block* got = *parent;
                 *parent = got.next;
                 ret = splitUntilSize(got, blockSizeAndOffset[0], blockSizeAndOffset[1]);
             }
         }
 
-        if (ret is null) {
+        if(ret is null) {
             enum MaxShouldPower2 = 2 * 1024 * 1024 * 1024;
 
             size_t allocateSize = PAGESIZE();
-            if (allocateSize < size)
+            if(allocateSize < size)
                 allocateSize = size;
-            if (allocateSize < MaxShouldPower2 && allocateSize < blockSizeAndOffsetSource[0])
+            if(allocateSize < MaxShouldPower2 && allocateSize < blockSizeAndOffsetSource[0])
                 allocateSize = blockSizeAndOffsetSource[0];
 
             ret = poolAllocator.allocate(allocateSize, ti);
-            if (ret !is null)
+            if(ret !is null)
                 fullAllocations.store(ret);
             else
                 assert(0);
         }
 
-        if (ret !is null) {
+        if(ret !is null) {
             assert(ret.length >= size);
 
             allocations.store(ret);
@@ -156,8 +156,8 @@ scope @safe @nogc pure nothrow:
 
     ///
     bool reallocate(scope ref void[] array, size_t newSize) {
-        if (void[] trueArray = allocations.getTrueRegionOfMemory(array)) {
-            if (trueArray.length >= newSize) {
+        if(void[] trueArray = allocations.getTrueRegionOfMemory(array)) {
+            if(trueArray.length >= newSize) {
                 array = trueArray[0 .. newSize];
                 return true;
             }
@@ -168,11 +168,11 @@ scope @safe @nogc pure nothrow:
 
     ///
     bool deallocate(scope void[] array) {
-        if (void[] trueArray = allocations.getTrueRegionOfMemory(array)) {
+        if(void[] trueArray = allocations.getTrueRegionOfMemory(array)) {
             size_t[2] blockSizeAndOffset = calculatePower2Size(trueArray.length, minExponent);
             allocations.remove(trueArray);
 
-            if (blockSizeAndOffset[1] >= NumberOfBlocks) {
+            if(blockSizeAndOffset[1] >= NumberOfBlocks) {
                 fullAllocations.remove(trueArray);
                 poolAllocator.deallocate(trueArray);
             } else {
@@ -181,27 +181,27 @@ scope @safe @nogc pure nothrow:
                 Loop: do {
                     void* startOfPrevious, startOfNext;
 
-                    if (trueArray.ptr > fullSizeArray.ptr && cast(size_t)trueArray.ptr > trueArray.length)
+                    if(trueArray.ptr > fullSizeArray.ptr && cast(size_t)trueArray.ptr > trueArray.length)
                         startOfPrevious = trueArray.ptr - trueArray.length;
 
-                    if (trueArray.ptr + trueArray.length < fullSizeArray.ptr + fullSizeArray.length)
+                    if(trueArray.ptr + trueArray.length < fullSizeArray.ptr + fullSizeArray.length)
                         startOfNext = trueArray.ptr + trueArray.length;
 
                     Block** parent = &blocks[blockSizeAndOffset[1]];
                     const taL2 = trueArray.length * 2;
 
-                    for (;;) {
+                    for(;;) {
                         Block* current = *parent;
-                        if (current is null)
+                        if(current is null)
                             break Loop;
 
                         assert(current.next is null || current.next.next is null || current.next.next !is null);
 
-                        if (current is startOfPrevious) {
+                        if(current is startOfPrevious) {
                             trueArray = startOfPrevious[0 .. taL2];
                             *parent = current.next;
                             break;
-                        } else if (current is startOfNext) {
+                        } else if(current is startOfNext) {
                             trueArray = trueArray.ptr[0 .. taL2];
                             *parent = current.next;
                             break;
@@ -213,12 +213,12 @@ scope @safe @nogc pure nothrow:
                     blockSizeAndOffset[0] *= 2;
                     blockSizeAndOffset[1]++;
                 }
-                while (blockSizeAndOffset[1] + 1 < NumberOfBlocks);
+                while(blockSizeAndOffset[1] + 1 < NumberOfBlocks);
 
                 {
                     void[] trueArrayOrigin = fullAllocations.getTrueRegionOfMemory(trueArray);
 
-                    if (trueArrayOrigin.ptr is trueArray.ptr && trueArrayOrigin.length == trueArray.length) {
+                    if(trueArrayOrigin.ptr is trueArray.ptr && trueArrayOrigin.length == trueArray.length) {
                         fullAllocations.remove(trueArray);
                         poolAllocator.deallocate(trueArray);
                     } else {
@@ -249,7 +249,7 @@ scope @safe @nogc pure nothrow:
         return true;
     }
 
-    static if (__traits(hasMember, PoolAllocator, "empty")) {
+    static if(__traits(hasMember, PoolAllocator, "empty")) {
         ///
         bool empty() {
             return blocks[$ - 1] is null && poolAllocator.empty();
@@ -320,7 +320,7 @@ private @hidden:
 size_t[2] calculatePower2Size()(size_t requested, size_t minExponent) @safe nothrow @nogc pure {
     size_t value = 1, power;
 
-    while (value < requested || power < minExponent) {
+    while(value < requested || power < minExponent) {
         value <<= 1;
         power++;
     }

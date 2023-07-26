@@ -14,8 +14,8 @@ void CCC() {
     {
         SequentialRanges!(ubyte, SequentialRangeSplitGroup, 2) sr;
 
-        foreach (entry; state.entries) {
-            foreach (c; entry.range.start .. entry.range.end + 1)
+        foreach(entry; state.entries) {
+            foreach(c; entry.range.start .. entry.range.end + 1)
                 sr.add(cast(dchar)c, cast(ubyte)entry.canonicalCombiningClass);
         }
 

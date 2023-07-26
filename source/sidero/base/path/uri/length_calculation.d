@@ -587,7 +587,7 @@ size_t calculateLengthOfSchemeImpl(Input)(scope Input input, bool requireSuffix 
 
     // check for initial ALPHA
     // scheme        = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
-    if (input.empty || !checkIfAlpha(input.front))
+    if(input.empty || !checkIfAlpha(input.front))
         return 0;
     const lengthAtStart = input.length;
     input.popFront;
@@ -596,13 +596,13 @@ size_t calculateLengthOfSchemeImpl(Input)(scope Input input, bool requireSuffix 
     bool foundSuffix;
     size_t lengthBeforeEnd = input.length;
 
-    while (!input.empty) {
+    while(!input.empty) {
         auto c = input.front;
 
-        if (checkIfAlphaNum(c) || c == '+' || c == '-' || c == '.') {
+        if(checkIfAlphaNum(c) || c == '+' || c == '-' || c == '.') {
             input.popFront;
             continue;
-        } else if (requireSuffix && c == ':')
+        } else if(requireSuffix && c == ':')
             foundSuffix = true;
         lengthBeforeEnd = input.length;
         break;
@@ -611,7 +611,7 @@ size_t calculateLengthOfSchemeImpl(Input)(scope Input input, bool requireSuffix 
     // if scheme doesn't end with a ':' its not a URI
     // URI           = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
 
-    if (requireSuffix && !foundSuffix) {
+    if(requireSuffix && !foundSuffix) {
         // oh no didn't find the suffix and we need it
         return 0;
     }
@@ -634,10 +634,10 @@ size_t[3] calculateLengthOfUserInfoImpl(Input)(scope Input input, bool requireSu
 
     size_t prefix, length, suffix, suffixAt;
 
-    if (input.startsWith("//")) {
+    if(input.startsWith("//")) {
         input = input[2 .. $];
         prefix = 2;
-    } else if (input.startsWith("/"))
+    } else if(input.startsWith("/"))
         return typeof(return).init;
 
     // userinfo      = *( unreserved / pct-encoded / sub-delims / ":" )
@@ -645,34 +645,34 @@ size_t[3] calculateLengthOfUserInfoImpl(Input)(scope Input input, bool requireSu
     {
         ptrdiff_t atOffset = input.indexOf("@");
 
-        if (atOffset >= 0) {
+        if(atOffset >= 0) {
             input = input[0 .. atOffset];
             suffix = 1;
             suffixAt = prefix + atOffset;
         }
     }
 
-    if (requireSuffix && suffix == 0)
+    if(requireSuffix && suffix == 0)
         return typeof(return).init;
 
     {
         int inHex;
 
-        Loop: while (!input.empty) {
+        Loop: while(!input.empty) {
             const c = input.front;
             const priorLength = input.length;
 
-            if (inHex > 0) {
+            if(inHex > 0) {
                 // pct-encoded
-                if (checkIfNum(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
+                if(checkIfNum(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
                     inHex++;
 
-                    if (inHex == 3)
+                    if(inHex == 3)
                         inHex = 0;
                 } else
                     break Loop;
             } else {
-                switch (c) {
+                switch(c) {
                 case '!':
                 case '$':
                 case '&': .. case '.':
@@ -684,12 +684,12 @@ size_t[3] calculateLengthOfUserInfoImpl(Input)(scope Input input, bool requireSu
                     break;
                 case '%':
                     // pct-encoded
-                    if (inHex > 0)
+                    if(inHex > 0)
                         break Loop;
                     inHex = 1;
                     break;
                 default:
-                    if (checkIfAlphaNum(c) || c >= 128)
+                    if(checkIfAlphaNum(c) || c >= 128)
                         break;
                     break Loop;
                 }
@@ -699,11 +699,11 @@ size_t[3] calculateLengthOfUserInfoImpl(Input)(scope Input input, bool requireSu
             length += priorLength - input.length;
         }
 
-        if (suffix > 0 && !input.empty)
+        if(suffix > 0 && !input.empty)
             return typeof(return).init;
     }
 
-    if (suffix > 0 && suffixAt != prefix + length)
+    if(suffix > 0 && suffixAt != prefix + length)
         return typeof(return).init;
 
     return [prefix, length, suffix];
@@ -730,29 +730,29 @@ size_t calculateLengthOfHostImpl(Input)(scope Input input) @trusted {
         return input < 128 && isNumeric(cast(ubyte)input);
     }
 
-    if (input.startsWith("[")) {
+    if(input.startsWith("[")) {
         // IP-literal    = "[" ( IPv6address / IPvFuture  ) "]"
 
         ptrdiff_t possibleLengthOfHost = input.indexOf("]");
 
         // "[" ((v 1*HEXDIG) / (h16 ":"))
-        if (possibleLengthOfHost < 0)
+        if(possibleLengthOfHost < 0)
             return 0;
         Input ipLiteral = input[1 .. possibleLengthOfHost];
 
-        if (ipLiteral.startsWith("v")) {
+        if(ipLiteral.startsWith("v")) {
             // IPvFuture     = "v" 1*HEXDIG "." 1*( unreserved / sub-delims / ":" )
 
             ipLiteral = ipLiteral[1 .. $];
-            if (ipLiteral.empty)
+            if(ipLiteral.empty)
                 return 0;
 
             bool gotDot;
-            foreach (c; ipLiteral) {
-                if (gotDot) {
+            foreach(c; ipLiteral) {
+                if(gotDot) {
                     // 1*( unreserved / sub-delims / ":" )
 
-                    switch (c) {
+                    switch(c) {
                     case '!':
                     case '$':
                     case '&': .. case '.':
@@ -763,19 +763,19 @@ size_t calculateLengthOfHostImpl(Input)(scope Input input) @trusted {
                     case '~':
                         break;
                     default:
-                        if (checkIfAlphaNum(c) || c >= 128)
+                        if(checkIfAlphaNum(c) || c >= 128)
                             break;
                         return 0;
                     }
-                } else if (c == '.') {
+                } else if(c == '.') {
                     gotDot = true;
-                } else if (checkIfNum(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
+                } else if(checkIfNum(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
                     // 1*HEXDIG
                 } else
                     return 0;
             }
 
-            if (!gotDot) {
+            if(!gotDot) {
                 return 0;
             }
 
@@ -796,7 +796,7 @@ size_t calculateLengthOfHostImpl(Input)(scope Input input) @trusted {
                 ls32          = ( h16 ":" h16 ) / IPv4address
                 */
 
-            if (ipLiteral.empty)
+            if(ipLiteral.empty)
                 return 0;
 
             //lets slice and dice to produce three strings
@@ -804,8 +804,8 @@ size_t calculateLengthOfHostImpl(Input)(scope Input input) @trusted {
 
             {
                 ptrdiff_t index = ipLiteral.lastIndexOf(":"c);
-                if (index >= 0) {
-                    if (ipLiteral[index + 1 .. $].contains("."c)) {
+                if(index >= 0) {
+                    if(ipLiteral[index + 1 .. $].contains("."c)) {
                         ipv6 = ipLiteral[0 .. index + 1];
                         ipv4 = ipLiteral[index + 1 .. $];
                     } else {
@@ -824,12 +824,12 @@ size_t calculateLengthOfHostImpl(Input)(scope Input input) @trusted {
             size_t leftHexCount, rightHexCount;
             bool postColonColon;
 
-            while (!ipv6.empty) {
+            while(!ipv6.empty) {
                 const c = ipv6.front;
                 const lengthAtStart = ipv6.length;
 
-                if (postColonColon) {
-                    if (leftHexCount > 8)
+                if(postColonColon) {
+                    if(leftHexCount > 8)
                         return 0;
 
                     /*
@@ -843,21 +843,21 @@ size_t calculateLengthOfHostImpl(Input)(scope Input input) @trusted {
                         /              h16
                         */
 
-                    if (c == ':')
+                    if(c == ':')
                         inHexDigits = 0;
-                    else if (checkIfNum(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
-                        if (inHexDigits == 4 || rightHexCount == 8)
+                    else if(checkIfNum(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
+                        if(inHexDigits == 4 || rightHexCount == 8)
                             return 0;
 
-                        if (inHexDigits == 0)
+                        if(inHexDigits == 0)
                             rightHexCount++;
                         inHexDigits++;
                     } else {
                         length -= inHexDigits + 1;
                         break;
                     }
-                } else if (colonColonOffset >= 0 && startingLength - ipv6.length > colonColonOffset) {
-                    if (leftHexCount > 8)
+                } else if(colonColonOffset >= 0 && startingLength - ipv6.length > colonColonOffset) {
+                    if(leftHexCount > 8)
                         return 0;
 
                     postColonColon = startingLength - ipv6.length >= (colonColonOffset + 2);
@@ -873,13 +873,13 @@ size_t calculateLengthOfHostImpl(Input)(scope Input input) @trusted {
                          / [ *6( h16 ":" ) h16 ]
                         */
 
-                    if (c == ':')
+                    if(c == ':')
                         inHexDigits = 0;
-                    else if (checkIfNum(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
-                        if (inHexDigits == 4)
+                    else if(checkIfNum(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
+                        if(inHexDigits == 4)
                             return 0;
 
-                        if (inHexDigits == 0)
+                        if(inHexDigits == 0)
                             leftHexCount++;
                         inHexDigits++;
                     } else
@@ -890,23 +890,23 @@ size_t calculateLengthOfHostImpl(Input)(scope Input input) @trusted {
                 length += lengthAtStart - ipv6.length;
             }
 
-            if (ipv4.length > 0) {
+            if(ipv4.length > 0) {
                 doIPV4 = true;
                 wasIPV6 = true;
             }
 
             // ]
-            if (!doIPV4)
+            if(!doIPV4)
                 length++;
         }
     } else {
         doIPV4 = true;
     }
 
-    if (doIPV4) {
+    if(doIPV4) {
         // IPv4address   = dec-octet "." dec-octet "." dec-octet "." dec-octet
 
-        if (wasIPV6) {
+        if(wasIPV6) {
             // unfortunately we do care about the ipv4 exactness, so we'll do a seperate parse.
 
             /*
@@ -920,25 +920,25 @@ size_t calculateLengthOfHostImpl(Input)(scope Input input) @trusted {
             int inOctets, inDecOctet, octetValue;
 
             auto input2 = input[length .. $];
-            while (!input2.empty) {
+            while(!input2.empty) {
                 const c = input2.front;
                 const lengthAtStart = input2.length;
 
-                if (c == '.') {
+                if(c == '.') {
                     inDecOctet = 0;
                     inOctets++;
                     octetValue = 0;
                     length++;
-                } else if (c == ']')
+                } else if(c == ']')
                     break;
 
-                if (inOctets == 5)
+                if(inOctets == 5)
                     break;
 
                 input2.popFront;
 
-                if (c != '.') {
-                    if (inDecOctet > 2 || c < '0' || c > '9')
+                if(c != '.') {
+                    if(inDecOctet > 2 || c < '0' || c > '9')
                         break;
 
                     octetValue *= 10;
@@ -947,12 +947,12 @@ size_t calculateLengthOfHostImpl(Input)(scope Input input) @trusted {
                     length += lengthAtStart - input2.length;
                     inDecOctet++;
 
-                    if (inDecOctet == 3 && octetValue > 255)
+                    if(inDecOctet == 3 && octetValue > 255)
                         break;
                 }
             }
 
-            if (input.length < length + 1 || !input[length .. $].startsWith("]"))
+            if(input.length < length + 1 || !input[length .. $].startsWith("]"))
                 return 0;
 
             length++;
@@ -961,28 +961,28 @@ size_t calculateLengthOfHostImpl(Input)(scope Input input) @trusted {
             // IPv4address is a subset of reg-name so we won't bother to validate that.
             //  since we don't need that information here.
 
-            if (input.startsWith(".")) {
+            if(input.startsWith(".")) {
                 // yeahhhhh so certainly not a host name and certainly not an ipv4 address
             } else {
                 int inHex;
-                Loop: while (!input.empty) {
+                Loop: while(!input.empty) {
                     const c = input.front;
                     const lengthAtStart = input.length;
 
-                    if (c == ':' || c == '/')
+                    if(c == ':' || c == '/')
                         break;
 
-                    if (inHex > 0) {
+                    if(inHex > 0) {
                         // pct-encoded
-                        if (checkIfNum(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
+                        if(checkIfNum(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
                             inHex++;
 
-                            if (inHex == 3)
+                            if(inHex == 3)
                                 inHex = 0;
                         } else
                             break;
                     } else {
-                        switch (c) {
+                        switch(c) {
                         case '!':
                         case '$':
                         case '&': .. case '.':
@@ -994,13 +994,13 @@ size_t calculateLengthOfHostImpl(Input)(scope Input input) @trusted {
 
                         case '%':
                             // pct-encoded
-                            if (inHex > 0)
+                            if(inHex > 0)
                                 return 0;
                             inHex = 1;
                             break;
 
                         default:
-                            if (checkIfAlphaNum(c) || c >= 128)
+                            if(checkIfAlphaNum(c) || c >= 128)
                                 break;
                             break Loop;
                         }
@@ -1023,16 +1023,16 @@ size_t[2] calculateLengthOfPortImpl(Input)(scope Input input, bool requirePrefix
 
     // port          = *DIGIT
 
-    if (requirePrefix) {
-        if (input.startsWith(":")) {
+    if(requirePrefix) {
+        if(input.startsWith(":")) {
             prefix = 1;
             input = input[1 .. $];
         } else
             return typeof(return).init;
     }
 
-    foreach (c; input) {
-        if (c < 128 && isNumeric(cast(ubyte)c)) {
+    foreach(c; input) {
+        if(c < 128 && isNumeric(cast(ubyte)c)) {
             length++;
         } else
             break;
@@ -1053,16 +1053,16 @@ size_t[4] calculateLengthOfConnectionInfoImpl(Input)(scope Input input, ptrdiff_
 
     size_t lengthOfPrefix, lengthOfUser, lengthOfHost, lengthOfPort;
 
-    if (lengthOfScheme < 0)
+    if(lengthOfScheme < 0)
         lengthOfScheme = calculateLengthOfSchemeImpl(input);
 
-    if (lengthOfScheme > 0) {
+    if(lengthOfScheme > 0) {
         // :
         input = input[lengthOfScheme + 1 .. $];
         lengthOfPrefix = 1;
     }
 
-    if (lengthOfScheme > 0 && input.startsWith("/") && !input.startsWith("//")) {
+    if(lengthOfScheme > 0 && input.startsWith("/") && !input.startsWith("//")) {
         lengthOfPrefix += 1;
         /*
   / path-absolute
@@ -1072,7 +1072,7 @@ size_t[4] calculateLengthOfConnectionInfoImpl(Input)(scope Input input, ptrdiff_
     } else {
         bool haveSlashSlash;
 
-        if (input.startsWith("//")) {
+        if(input.startsWith("//")) {
             lengthOfPrefix += 2;
             haveSlashSlash = true;
         }
@@ -1083,16 +1083,16 @@ size_t[4] calculateLengthOfConnectionInfoImpl(Input)(scope Input input, ptrdiff_
         {
             size_t[3] userLengths = calculateLengthOfUserInfoImpl(input);
 
-            if (userLengths[2] > 0)
+            if(userLengths[2] > 0)
                 lengthOfUser = userLengths[1] + userLengths[2];
         }
 
-        if (haveSlashSlash)
+        if(haveSlashSlash)
             input = input[2 + lengthOfUser .. $];
-        else if (lengthOfUser > 0)
+        else if(lengthOfUser > 0)
             input = input[lengthOfUser .. $];
 
-        if (lengthOfScheme == 0 || haveSlashSlash || lengthOfUser > 0) {
+        if(lengthOfScheme == 0 || haveSlashSlash || lengthOfUser > 0) {
             lengthOfHost = calculateLengthOfHostImpl(input);
             input = input[lengthOfHost .. $];
         }
@@ -1101,7 +1101,7 @@ size_t[4] calculateLengthOfConnectionInfoImpl(Input)(scope Input input, ptrdiff_
             size_t[2] portLengths = calculateLengthOfPortImpl(input);
             lengthOfPort = portLengths[0] + portLengths[1];
 
-            if (lengthOfHost == 1 && lengthOfPort == 1) {
+            if(lengthOfHost == 1 && lengthOfPort == 1) {
                 lengthOfHost = 0;
                 lengthOfPort = 0;
             }
@@ -1129,28 +1129,28 @@ size_t[2] calculateLengthOfQueryImpl(Input)(scope Input input, bool requireFirst
         // query         = *( pchar / "/" / "?" )
         // pchar = unreserved / pct-encoded / sub-delims / ":" / "@"
 
-        if (requireFirstPrefix && !(input.startsWith("/") || input.startsWith("?") || input.startsWith("./"))) {
+        if(requireFirstPrefix && !(input.startsWith("/") || input.startsWith("?") || input.startsWith("./"))) {
             // oh noes
             return typeof(return).init;
         }
 
         int inHex;
 
-        Loop: while (!input.empty) {
+        Loop: while(!input.empty) {
             const c = input.front;
             const lengthAtStart = input.length;
 
-            if (inHex > 0) {
+            if(inHex > 0) {
                 // pct-encoded
-                if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
+                if((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
                     inHex++;
 
-                    if (inHex == 3)
+                    if(inHex == 3)
                         inHex = 0;
                 } else
                     break;
             } else {
-                switch (c) {
+                switch(c) {
                 case '!':
                 case '$':
                 case '&': .. case '/':
@@ -1164,7 +1164,7 @@ size_t[2] calculateLengthOfQueryImpl(Input)(scope Input input, bool requireFirst
 
                 case '%':
                     // pct-encoded
-                    if (inHex > 0)
+                    if(inHex > 0)
                         break Loop;
                     inHex = 1;
                     break;
@@ -1174,7 +1174,7 @@ size_t[2] calculateLengthOfQueryImpl(Input)(scope Input input, bool requireFirst
                     break;
 
                 default:
-                    if (checkIfAlphaNum(c) || c >= 128)
+                    if(checkIfAlphaNum(c) || c >= 128)
                         break;
                     break Loop;
                 }
@@ -1182,7 +1182,7 @@ size_t[2] calculateLengthOfQueryImpl(Input)(scope Input input, bool requireFirst
 
             input.popFront;
 
-            if (gotQuery)
+            if(gotQuery)
                 lengthOfQuery += lengthAtStart - input.length;
             else
                 lengthOfSegments += lengthAtStart - input.length;
@@ -1199,7 +1199,7 @@ size_t calculateLengthOfFragmentImpl(Input)(scope Input input) {
         return input < 128 && isAlphaNumeric(cast(ubyte)input);
     }
 
-    if (input.startsWith("#")) {
+    if(input.startsWith("#")) {
         // fragment      = *( pchar / "/" / "?" )
         // pchar = unreserved / pct-encoded / sub-delims / ":" / "@"
 
@@ -1208,21 +1208,21 @@ size_t calculateLengthOfFragmentImpl(Input)(scope Input input) {
 
         input.popFront;
 
-        Loop: while (!input.empty) {
+        Loop: while(!input.empty) {
             const c = input.front;
             const lengthAtStart = input.length;
 
-            if (inHex > 0) {
+            if(inHex > 0) {
                 // pct-encoded
-                if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
+                if((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
                     inHex++;
 
-                    if (inHex == 3)
+                    if(inHex == 3)
                         inHex = 0;
                 } else
                     break;
             } else {
-                switch (c) {
+                switch(c) {
                 case '!':
                 case '$':
                 case '&': .. case '/':
@@ -1237,13 +1237,13 @@ size_t calculateLengthOfFragmentImpl(Input)(scope Input input) {
 
                 case '%':
                     // pct-encoded
-                    if (inHex > 0)
+                    if(inHex > 0)
                         break Loop;
                     inHex = 1;
                     break;
 
                 default:
-                    if (checkIfAlphaNum(c) || c >= 128)
+                    if(checkIfAlphaNum(c) || c >= 128)
                         break;
                     break Loop;
                 }

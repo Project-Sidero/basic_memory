@@ -36,8 +36,8 @@ auto GetOpApply(ArgType, InType)(scope return ref InType input) @trusted nothrow
 
     alias Overloads = __traits(getOverloads, input, "opApply");
 
-    static foreach (i; 0 .. Overloads.length) {
-        static if (__traits(compiles, Overloads[i](&handle))) {
+    static foreach(i; 0 .. Overloads.length) {
+        static if(__traits(compiles, Overloads[i](&handle))) {
             return &Overloads[i];
         }
     }
@@ -51,8 +51,8 @@ enum HaveNonStaticOpApply(InType) = __traits(hasMember, InType, "opApply") && ()
 
     bool result;
 
-    static foreach (i; 0 .. Overloads.length) {
-        if (!__traits(isStaticFunction, Overloads[i])) {
+    static foreach(i; 0 .. Overloads.length) {
+        if(!__traits(isStaticFunction, Overloads[i])) {
             result = true;
         }
     }
@@ -69,20 +69,20 @@ enum fullyQualifiedName(alias T) = fqnSym!(T);
 /// originally from std.traits. License: Boost
 template isDesiredUDA(alias attribute) {
     template isDesiredUDA(alias toCheck) {
-        static if (is(typeof(attribute)) && !__traits(isTemplate, attribute)) {
-            static if (__traits(compiles, toCheck == attribute))
+        static if(is(typeof(attribute)) && !__traits(isTemplate, attribute)) {
+            static if(__traits(compiles, toCheck == attribute))
                 enum isDesiredUDA = toCheck == attribute;
             else
                 enum isDesiredUDA = false;
-        } else static if (is(typeof(toCheck))) {
-            static if (__traits(isTemplate, attribute))
+        } else static if(is(typeof(toCheck))) {
+            static if(__traits(isTemplate, attribute))
                 enum isDesiredUDA = isInstanceOf!(attribute, typeof(toCheck));
             else
                 enum isDesiredUDA = is(typeof(toCheck) == attribute);
-        } else static if (__traits(isTemplate, attribute))
-                enum isDesiredUDA = isInstanceOf!(attribute, toCheck);
-            else
-                enum isDesiredUDA = is(toCheck == attribute);
+        } else static if(__traits(isTemplate, attribute))
+            enum isDesiredUDA = isInstanceOf!(attribute, toCheck);
+        else
+            enum isDesiredUDA = is(toCheck == attribute);
     }
 }
 
@@ -90,10 +90,10 @@ private:
 
 template fqnSym(alias T : X!A, alias X, A...) {
     template fqnTuple(T...) {
-        static if (T.length == 0)
+        static if(T.length == 0)
             enum fqnTuple = "";
-        else static if (T.length == 1) {
-            static if (isExpressionTuple!T)
+        else static if(T.length == 1) {
+            static if(isExpressionTuple!T)
                 enum fqnTuple = T[0].stringof;
             else
                 enum fqnTuple = fullyQualifiedName!(T[0]);
@@ -105,7 +105,7 @@ template fqnSym(alias T : X!A, alias X, A...) {
 }
 
 template fqnSym(alias T) {
-    static if (__traits(compiles, __traits(parent, T)) && !__traits(isSame, T, __traits(parent, T)))
+    static if(__traits(compiles, __traits(parent, T)) && !__traits(isSame, T, __traits(parent, T)))
         enum parentPrefix = fqnSym!(__traits(parent, T)) ~ ".";
     else
         enum parentPrefix = null;
@@ -113,7 +113,7 @@ template fqnSym(alias T) {
     static string adjustIdent(string s) {
         import sidero.base.algorithm : skipOver, findSplit;
 
-        if (s.skipOver("package ") || s.skipOver("module "))
+        if(s.skipOver("package ") || s.skipOver("module "))
             return s;
         return s.findSplit("(")[0];
     }
@@ -149,18 +149,18 @@ template fqnType(T, bool alreadyConst, bool alreadyImmutable, bool alreadyShared
         alias parameterStC = ParameterStorageClassTuple!(T);
 
         enum variadic = variadicFunctionStyle!T;
-        static if (variadic == Variadic.no)
+        static if(variadic == Variadic.no)
             enum variadicStr = "";
-        else static if (variadic == Variadic.c)
+        else static if(variadic == Variadic.c)
             enum variadicStr = ", ...";
-        else static if (variadic == Variadic.d)
+        else static if(variadic == Variadic.d)
             enum variadicStr = parameters.length ? ", ..." : "...";
-        else static if (variadic == Variadic.typesafe)
+        else static if(variadic == Variadic.typesafe)
             enum variadicStr = " ...";
         else
             static assert(0, "New variadic style has been added, please update fullyQualifiedName implementation");
 
-        static if (parameters.length) {
+        static if(parameters.length) {
             import std.algorithm.iteration : map;
             import std.array : join;
             import std.meta : staticMap;
@@ -177,7 +177,7 @@ template fqnType(T, bool alreadyConst, bool alreadyImmutable, bool alreadyShared
     string linkageString(T)() @property {
         enum linkage = functionLinkage!T;
 
-        if (linkage != "D")
+        if(linkage != "D")
             return "extern(" ~ linkage ~ ") ";
         else
             return "";
@@ -187,7 +187,7 @@ template fqnType(T, bool alreadyConst, bool alreadyImmutable, bool alreadyShared
         alias FA = FunctionAttribute;
         enum attrs = functionAttributes!T;
 
-        static if (attrs == FA.none)
+        static if(attrs == FA.none)
             return "";
         else
             return (attrs & FA.pure_ ? " pure" : "") ~ (attrs & FA.nothrow_ ? " nothrow" : "") ~ (attrs & FA.ref_ ?
@@ -198,10 +198,10 @@ template fqnType(T, bool alreadyConst, bool alreadyImmutable, bool alreadyShared
 
     string addQualifiers(string typeString, bool addConst, bool addImmutable, bool addShared, bool addInout) {
         auto result = typeString;
-        if (addShared) {
+        if(addShared) {
             result = "shared(" ~ result ~ ")";
         }
-        if (addConst || addImmutable || addInout) {
+        if(addConst || addImmutable || addInout) {
             result = (addConst ? "const" : addImmutable ? "immutable" : "inout") ~ "(" ~ result ~ ")";
         }
         return result;
@@ -213,24 +213,24 @@ template fqnType(T, bool alreadyConst, bool alreadyImmutable, bool alreadyShared
                     !alreadyImmutable, qualifiers[_shared] && !alreadyShared, qualifiers[_inout] && !alreadyInout);
     }
 
-    static if (is(T == string)) {
+    static if(is(T == string)) {
         enum fqnType = "string";
-    } else static if (is(T == wstring)) {
+    } else static if(is(T == wstring)) {
         enum fqnType = "wstring";
-    } else static if (is(T == dstring)) {
+    } else static if(is(T == dstring)) {
         enum fqnType = "dstring";
-    } else static if (is(T == typeof(null))) {
+    } else static if(is(T == typeof(null))) {
         enum fqnType = "typeof(null)";
-    } else static if (isBasicType!T && !is(T == enum)) {
+    } else static if(isBasicType!T && !is(T == enum)) {
         enum fqnType = chain!((Unqual!T).stringof);
-    } else static if (isAggregateType!T || is(T == enum)) {
+    } else static if(isAggregateType!T || is(T == enum)) {
         enum fqnType = chain!(fqnSym!T);
-    } else static if (isStaticArray!T) {
+    } else static if(isStaticArray!T) {
         enum LengthText = () {
             size_t temp = T.length;
             string ret;
 
-            while (temp > 0) {
+            while(temp > 0) {
                 size_t next = temp / 10;
 
                 char c = cast(char)((temp - (next * 10)) + '0');
@@ -242,12 +242,12 @@ template fqnType(T, bool alreadyConst, bool alreadyImmutable, bool alreadyShared
             return ret;
         }();
         enum fqnType = chain!(fqnType!(typeof(T.init[0]), qualifiers) ~ "[" ~ LengthText ~ "]");
-    } else static if (isArray!T) {
+    } else static if(isArray!T) {
         enum fqnType = chain!(fqnType!(typeof(T.init[0]), qualifiers) ~ "[]");
-    } else static if (isAssociativeArray!T) {
+    } else static if(isAssociativeArray!T) {
         enum fqnType = chain!(fqnType!(ValueType!T, qualifiers) ~ '[' ~ fqnType!(KeyType!T, noQualifiers) ~ ']');
-    } else static if (isSomeFunction!T) {
-        static if (is(T F == delegate)) {
+    } else static if(isSomeFunction!T) {
+        static if(is(T F == delegate)) {
             enum qualifierString = (is(F == shared) ? " shared" : "") ~ (is(F == inout) ? " inout" :  is(F == immutable) ?
                         " immutable" :  is(F == const) ? " const" : "");
             enum fqnType = chain!(linkageString!T ~ fqnType!(ReturnType!T,
@@ -256,9 +256,9 @@ template fqnType(T, bool alreadyConst, bool alreadyImmutable, bool alreadyShared
             enum fqnType = chain!(linkageString!T ~ fqnType!(ReturnType!T, noQualifiers) ~ (isFunctionPointer!T ?
                         " function(" : "(") ~ parametersTypeString!(T) ~ ")" ~ functionAttributeString!T);
         }
-    } else static if (isPointer!T) {
+    } else static if(isPointer!T) {
         enum fqnType = chain!(fqnType!(PointerTarget!T, qualifiers) ~ "*");
-    } else static if (is(T : __vector(V[N]), V, size_t N)) {
+    } else static if(is(T : __vector(V[N]), V, size_t N)) {
         import std.conv : to;
 
         enum fqnType = chain!("__vector(" ~ fqnType!(V, qualifiers) ~ "[" ~ N.to!string ~ "])");

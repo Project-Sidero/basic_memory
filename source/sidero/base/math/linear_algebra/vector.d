@@ -32,7 +32,7 @@ export @safe nothrow @nogc:
     this(scope Type[] data...) scope {
         assert(data.length == this.data.length);
 
-        foreach (i, v; data)
+        foreach(i, v; data)
             this.data[i] = v;
     }
 
@@ -41,21 +41,21 @@ export @safe nothrow @nogc:
         return data[0];
     }
 
-    static if (Dimension > 1) {
+    static if(Dimension > 1) {
         ///
         ref Type y() scope {
             return data[1];
         }
     }
 
-    static if (Dimension > 2) {
+    static if(Dimension > 2) {
         ///
         ref Type z() scope {
             return data[2];
         }
     }
 
-    static if (Dimension > 3) {
+    static if(Dimension > 3) {
         ///
         ref Type w() scope {
             return data[3];
@@ -66,7 +66,7 @@ export @safe nothrow @nogc:
     static Vector zero() {
         Vector ret;
 
-        foreach (i; 0 .. Dimension)
+        foreach(i; 0 .. Dimension)
             ret.data[i] = 0;
 
         return ret;
@@ -76,7 +76,7 @@ export @safe nothrow @nogc:
     unittest {
         Vector vec = Vector.zero();
 
-        foreach (v; vec.data)
+        foreach(v; vec.data)
             assert(v.isClose(0));
     }
 
@@ -84,7 +84,7 @@ export @safe nothrow @nogc:
     static Vector one() {
         Vector ret;
 
-        foreach (i; 0 .. Dimension)
+        foreach(i; 0 .. Dimension)
             ret.data[i] = 1;
 
         return ret;
@@ -94,7 +94,7 @@ export @safe nothrow @nogc:
     unittest {
         Vector vec = Vector.one();
 
-        foreach (v; vec.data)
+        foreach(v; vec.data)
             assert(v.isClose(1));
     }
 
@@ -114,12 +114,12 @@ export @safe nothrow @nogc:
         auto v2 = cast(Vector!(float, Dimension))Vector.one;
     }
 
-    static if (isSigned!Type) {
+    static if(isSigned!Type) {
         ///
         Vector opUnary(string op : "-")() scope const {
             Vector ret;
 
-            foreach (i; 0 .. Dimension)
+            foreach(i; 0 .. Dimension)
                 ret.data[i] = -this.data[i];
 
             return ret;
@@ -161,10 +161,10 @@ export @safe nothrow @nogc:
 
     ///
     void opOpAssign(string op)(const Type other) scope {
-        static if (op == "^^") {
+        static if(op == "^^") {
             import core.stdc.math : pow;
 
-            foreach (i, ref v; this.data)
+            foreach(i, ref v; this.data)
                 v = pow(v, other);
         } else
             mixin("this.data[] " ~ op ~ "= other;");
@@ -179,10 +179,10 @@ export @safe nothrow @nogc:
 
     ///
     void opOpAssign(string op)(const Vector other) scope {
-        static if (op == "^^") {
+        static if(op == "^^") {
             import core.stdc.math : pow;
 
-            foreach (i, ref v; this.data)
+            foreach(i, ref v; this.data)
                 v = pow(v, other.data[i]);
         } else
             mixin("this.data[] " ~ op ~ "= other.data[];");
@@ -221,7 +221,7 @@ export @safe nothrow @nogc:
 
     ///
     void opAssign(const Type input) scope {
-        foreach (i; 0 .. Dimension)
+        foreach(i; 0 .. Dimension)
             this.data[i] = input;
     }
 
@@ -235,13 +235,13 @@ export @safe nothrow @nogc:
     ///
     void opAssign(scope const Type[] input...) scope {
         size_t canDo = Dimension;
-        if (input.length < canDo)
+        if(input.length < canDo)
             canDo = input.length;
 
-        foreach (i; 0 .. canDo)
+        foreach(i; 0 .. canDo)
             this.data[i] = input[i];
 
-        foreach (i; canDo .. Dimension)
+        foreach(i; canDo .. Dimension)
             this.data[i] = 0;
     }
 
@@ -259,9 +259,9 @@ export @safe nothrow @nogc:
 
         Vector!(Type, Dimension2) ret;
 
-        foreach (i; 0 .. overlap)
+        foreach(i; 0 .. overlap)
             ret.data[i] = this.data[offset + i];
-        foreach (i; overlap .. Dimension2)
+        foreach(i; overlap .. Dimension2)
             ret.data[i] = 0;
 
         return ret;
@@ -388,7 +388,7 @@ export @safe nothrow @nogc:
 
     ///
     unittest {
-        static if (isSigned!Type) {
+        static if(isSigned!Type) {
             assert((-Vector.one).abs == Vector.one);
         }
     }
@@ -403,8 +403,8 @@ export @safe nothrow @nogc:
 
     ///
     bool opEquals(scope const Vector other) scope const {
-        foreach (i; 0 .. Dimension) {
-            if (!this.data[i].isClose(other.data[i]))
+        foreach(i; 0 .. Dimension) {
+            if(!this.data[i].isClose(other.data[i]))
                 return false;
         }
 
@@ -413,8 +413,8 @@ export @safe nothrow @nogc:
 
     ///
     bool equals(scope const Vector other, Type maxRelativeDifference, Type maxAbsoluteDifference = 0) scope const {
-        foreach (i; 0 .. Dimension) {
-            if (!this.data[i].isClose(other.data[i], maxRelativeDifference, maxAbsoluteDifference))
+        foreach(i; 0 .. Dimension) {
+            if(!this.data[i].isClose(other.data[i], maxRelativeDifference, maxAbsoluteDifference))
                 return false;
         }
 
@@ -426,10 +426,10 @@ export @safe nothrow @nogc:
 
     ///
     int opCmp(scope const Vector other) scope const {
-        foreach (i; 0 .. Dimension) {
-            if (this.data[i] < other.data[i])
+        foreach(i; 0 .. Dimension) {
+            if(this.data[i] < other.data[i])
                 return -1;
-            else if (this.data[i] > other.data[i])
+            else if(this.data[i] > other.data[i])
                 return 1;
         }
 
@@ -445,7 +445,7 @@ Vector!(Type, Dimension) min(Type, size_t Dimension)(scope Vector!(Type, Dimensi
         v = Type.max;
 
         foreach(ref input; inputs) {
-            if (input.data[i] < v)
+            if(input.data[i] < v)
                 v = input.data[i];
         }
     }
@@ -456,17 +456,18 @@ Vector!(Type, Dimension) min(Type, size_t Dimension)(scope Vector!(Type, Dimensi
 ///
 Vector!(Type, Dimension) max(Type, size_t Dimension)(scope Vector!(Type, Dimension)[] inputs...) {
     import std.traits : isFloatingPoint;
+
     typeof(return) ret;
 
     foreach(i, ref v; ret.data) {
-        static if (isFloatingPoint!Type) {
+        static if(isFloatingPoint!Type) {
             v = Type.min_exp;
         } else {
             v = Type.min;
         }
 
         foreach(ref input; inputs) {
-            if (input.data[i] > v)
+            if(input.data[i] > v)
                 v = input.data[i];
         }
     }
@@ -509,12 +510,12 @@ unittest {
 
 ///
 ErrorResult normalize(A, B)(scope A[] output, scope const B[] input) if (isNumeric!A && isNumeric!B) {
-    if (output.length != input.length)
+    if(output.length != input.length)
         return ErrorResult(RangeException("Input lengths must match output"));
 
     const temp = cast(A)input.magnitude;
 
-    foreach (i; 0 .. input.length)
+    foreach(i; 0 .. input.length)
         output[i] = input[i] / temp;
 
     return ErrorResult();
@@ -539,7 +540,7 @@ Result!CommonType distance(A, B, CommonType = typeof(A.init + B.init))(scope con
     import std.algorithm.iteration : sum;
     import std.math : sqrt;
 
-    if (input1.length != input2.length)
+    if(input1.length != input2.length)
         return typeof(return)(RangeException("Input lengths must match"));
 
     static struct Handler {
@@ -580,15 +581,15 @@ unittest {
 ///
 Result!CommonType dotProduct(A, B, CommonType = typeof(A.init + B.init))(scope const A[] a, scope const B[] b)
         if (isNumeric!A && isNumeric!B) {
-    if (a.length != b.length)
+    if(a.length != b.length)
         return typeof(return)(RangeException("Input lengths must match"));
-    else if (a.length == 0)
+    else if(a.length == 0)
         return typeof(return)(RangeException("Input lengths must be non-zero"));
 
     assert(a.length == b.length);
     CommonType ret = 0;
 
-    foreach (i; 0 .. a.length) {
+    foreach(i; 0 .. a.length) {
         ret += a[i] * b[i];
     }
 
@@ -608,12 +609,12 @@ unittest {
 ErrorResult crossProduct(A, B, C)(scope A[] output, scope const B[] input1, scope const C[] input2)
         if (isNumeric!A && isNumeric!B && isNumeric!B) {
 
-    if (output.length != input1.length || input1.length != input2.length)
+    if(output.length != input1.length || input1.length != input2.length)
         return typeof(return)(RangeException("Input lengths must match output"));
-    else if (output.length != 3)
+    else if(output.length != 3)
         return typeof(return)(MalformedInputException("Only 3rd dimension is defined for vector cross product"));
 
-    if (output.length == 3) {
+    if(output.length == 3) {
         output[0] = (input1[1] * input2[2]) - (input1[2] * input2[1]);
         output[1] = (input1[2] * input2[0]) - (input1[0] * input2[2]);
         output[2] = (input1[0] * input2[1]) - (input1[1] * input2[0]);
@@ -674,7 +675,7 @@ unittest {
 bool isZeroVector(Type)(scope const Type[] values) if (isNumeric!Type) {
     uint ret;
 
-    foreach (v; values)
+    foreach(v; values)
         ret += cast(ubyte)isClose(v, 0);
 
     return ret == values.length;
@@ -692,7 +693,7 @@ unittest {
 bool isOnesVector(Type)(scope const Type[] values) if (isNumeric!Type) {
     uint ret;
 
-    foreach (v; values)
+    foreach(v; values)
         ret += cast(ubyte)isClose(v, 1);
 
     return ret == values.length;
@@ -710,7 +711,7 @@ unittest {
 bool isUnitVector(Type)(scope const Type[] values) if (isNumeric!Type) {
     uint ret0 = 1, ret1;
 
-    foreach (v; values) {
+    foreach(v; values) {
         ret0 += cast(ubyte)isClose(v, 0);
         ret1 += cast(ubyte)isClose(v, 1);
     }
@@ -729,7 +730,7 @@ unittest {
 bool isSparse(Type)(scope const Type[] values) if (isNumeric!Type) {
     uint ret;
 
-    foreach (v; values)
+    foreach(v; values)
         ret += cast(ubyte)isClose(v, 0);
 
     return ret >= values.length / 3;

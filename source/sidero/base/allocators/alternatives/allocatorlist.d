@@ -62,14 +62,14 @@ scope @safe @nogc pure nothrow:
     void[] allocate(size_t size, TypeInfo ti = null) {
         Node* current = head;
 
-        while (current !is null) {
+        while(current !is null) {
             Node* next = current.next;
 
             void[] ret = current.allocator.allocate(size, ti);
 
-            if (ret.length >= size) {
+            if(ret.length >= size) {
                 return ret;
-            } else if (ret.length > 0) {
+            } else if(ret.length > 0) {
                 current.allocator.deallocate(ret);
             }
 
@@ -79,12 +79,12 @@ scope @safe @nogc pure nothrow:
         expand(size);
         assert(head !is null);
 
-        if ((current = head) !is null) {
+        if((current = head) !is null) {
             void[] ret = current.allocator.allocate(size, ti);
 
-            if (ret.length >= size) {
+            if(ret.length >= size) {
                 return ret;
-            } else if (ret.length > 0) {
+            } else if(ret.length > 0) {
                 current.allocator.deallocate(ret);
             }
         }
@@ -96,10 +96,10 @@ scope @safe @nogc pure nothrow:
     bool reallocate(scope ref void[] array, size_t newSize) {
         Node* current = head;
 
-        while (current !is null) {
+        while(current !is null) {
             Node* next = current.next;
 
-            if (current.allocator.owns(array) == Ternary.yes)
+            if(current.allocator.owns(array) == Ternary.yes)
                 return current.allocator.reallocate(array, newSize);
 
             current = next;
@@ -113,15 +113,15 @@ scope @safe @nogc pure nothrow:
         Node** parent = &head;
         Node* current = head;
 
-        while (current !is null) {
+        while(current !is null) {
             Node* next = current.next;
 
-            if (current.allocator.owns(array) == Ternary.yes) {
+            if(current.allocator.owns(array) == Ternary.yes) {
                 bool got = current.allocator.deallocate(array);
 
-                if (got) {
-                    static if (__traits(hasMember, PoolAllocator, "isOnlyOneAllocationOfSize")) {
-                        if (current.allocator.isOnlyOneAllocationOfSize(Node.sizeof)) {
+                if(got) {
+                    static if(__traits(hasMember, PoolAllocator, "isOnlyOneAllocationOfSize")) {
+                        if(current.allocator.isOnlyOneAllocationOfSize(Node.sizeof)) {
                             PoolAllocator temp = current.allocator;
                             *parent = current.next;
                             temp.deallocateAll();
@@ -144,10 +144,10 @@ scope @safe @nogc pure nothrow:
     Ternary owns(scope void[] array) {
         Node* current = head;
 
-        while (current !is null) {
+        while(current !is null) {
             Node* next = current.next;
 
-            if (current.allocator.owns(array) == Ternary.yes)
+            if(current.allocator.owns(array) == Ternary.yes)
                 return Ternary.yes;
 
             current = next;
@@ -160,7 +160,7 @@ scope @safe @nogc pure nothrow:
     bool deallocateAll() {
         Node* current = head;
 
-        while (current !is null) {
+        while(current !is null) {
             Node* next = current.next;
 
             auto currentAllocator = current.allocator;
@@ -181,10 +181,10 @@ scope @safe @nogc pure nothrow:
 private @hidden:
     import std.traits : isPointer, ParameterStorageClassTuple, ParameterStorageClass;
 
-    static if (isPointer!PoolAllocator || (__traits(compiles, factory!PoolAllocator) &&
+    static if(isPointer!PoolAllocator || (__traits(compiles, factory!PoolAllocator) &&
             ParameterStorageClassTuple!(factory!PoolAllocator)[0] == ParameterStorageClass.ref_))
         alias TypeOfAllocator = typeof(factory(poolAllocator));
-    else static if (__traits(compiles, typeof(factory())))
+    else static if(__traits(compiles, typeof(factory())))
         alias TypeOfAllocator = typeof(factory());
     else
         alias TypeOfAllocator = typeof(factory({ typeof(poolAllocator)* ret; return ret; }()));
@@ -200,22 +200,22 @@ private @hidden:
 
         TypeOfAllocator current;
 
-        static if (isPointer!PoolAllocator || (__traits(compiles, factory!PoolAllocator) &&
+        static if(isPointer!PoolAllocator || (__traits(compiles, factory!PoolAllocator) &&
                 ParameterStorageClassTuple!(factory!PoolAllocator)[0] == ParameterStorageClass.ref_))
             current = factory(poolAllocator);
-        else static if (__traits(compiles, typeof(factory())))
+        else static if(__traits(compiles, typeof(factory())))
             current = factory();
         else
             current = factory(&poolAllocator);
 
-        if (requesting > 0)
+        if(requesting > 0)
             requesting += size_t.sizeof * 8;
 
         void[] got = current.allocate(Node.sizeof + requesting);
-        if (got is null)
+        if(got is null)
             return;
 
-        if (requesting > 0) {
+        if(requesting > 0) {
             current.deallocate(got);
             got = current.allocate(Node.sizeof);
         }

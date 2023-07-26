@@ -38,7 +38,7 @@ struct StateIterator {
     }
 
     int opApplyImpl(Char, Del)(scope Del del) scope @trusted {
-        if (isNull)
+        if(isNull)
             return 0;
 
         StateIterator oldState = this;
@@ -54,7 +54,7 @@ struct StateIterator {
             iterator = state.newIterator(iterator);
         });
 
-        scope (exit) {
+        scope(exit) {
             this.handle((StateIterator.S8 state, ref StateIterator.I8 iterator) {
                 assert(state !is null);
                 state.rcIterator(false, iterator);
@@ -71,11 +71,11 @@ struct StateIterator {
 
         int result;
 
-        while (!empty) {
+        while(!empty) {
             Char temp = front!Char();
 
             result = del(temp);
-            if (result)
+            if(result)
                 return result;
 
             popFront!Char();
@@ -85,7 +85,7 @@ struct StateIterator {
     }
 
     int opApplyReverseImpl(Char, Del)(scope Del del) scope @trusted {
-        if (isNull)
+        if(isNull)
             return 0;
 
         StateIterator oldState = this;
@@ -101,7 +101,7 @@ struct StateIterator {
             iterator = state.newIterator(iterator);
         });
 
-        scope (exit) {
+        scope(exit) {
             this.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
                 assert(state !is null);
                 state.rcIterator(false, iterator);
@@ -119,11 +119,11 @@ struct StateIterator {
         Char temp;
         int result;
 
-        while (!empty) {
+        while(!empty) {
             temp = back!Char();
 
             result = del(temp);
-            if (result)
+            if(result)
                 return result;
 
             popBack!Char();
@@ -140,13 +140,13 @@ scope nothrow @nogc @safe @hidden:
         assert(utf16Del !is null);
         assert(utf32Del !is null);
 
-        if (encoding.codepointSize == 8)
+        if(encoding.codepointSize == 8)
             return utf8Del(u8, i8);
-        else if (encoding.codepointSize == 16)
+        else if(encoding.codepointSize == 16)
             return utf16Del(u16, i16);
-        else if (encoding.codepointSize == 32)
+        else if(encoding.codepointSize == 32)
             return utf32Del(u32, i32);
-        else static if (!is(typeof(return) == void))
+        else static if(!is(typeof(return) == void))
             return typeof(return).init;
     }
 
@@ -158,16 +158,16 @@ scope nothrow @nogc @safe @hidden:
         assert(utf16Del !is null);
         assert(utf32Del !is null);
 
-        if (encoding.codepointSize == 8)
+        if(encoding.codepointSize == 8)
             return utf8Del(u8, i8);
-        else if (encoding.codepointSize == 16)
+        else if(encoding.codepointSize == 16)
             return utf16Del(u16, i16);
-        else if (encoding.codepointSize == 32)
+        else if(encoding.codepointSize == 32)
             return utf32Del(u32, i32);
         else {
-            static if (is(ReturnType!W == void)) {
+            static if(is(ReturnType!W == void)) {
                 nullDel();
-                static if (!is(typeof(return) == void))
+                static if(!is(typeof(return) == void))
                     return typeof(return).init;
             } else {
                 return nullDel();
@@ -176,27 +176,27 @@ scope nothrow @nogc @safe @hidden:
     }
 
     void setup(uint charSize, RCAllocator allocator = RCAllocator.init) @nogc {
-        if (allocator.isNull)
+        if(allocator.isNull)
             allocator = globalAllocator();
 
-        if (this.encoding.codepointSize == 0)
+        if(this.encoding.codepointSize == 0)
             this.encoding.codepointSize = charSize * 8;
 
         this.handle((ref StateIterator.S8 state, StateIterator.I8 iterator) @trusted {
-            if (state is null)
+            if(state is null)
                 state = allocator.make!(typeof(*state))(allocator);
         }, (ref StateIterator.S16 state, StateIterator.I16 iterator) @trusted {
-            if (state is null)
+            if(state is null)
                 state = allocator.make!(typeof(*state))(allocator);
         }, (ref StateIterator.S32 state, StateIterator.I32 iterator) @trusted {
-            if (state is null)
+            if(state is null)
                 state = allocator.make!(typeof(*state))(allocator);
         });
     }
 
     void construct(InputChar)(scope const(InputChar)[] input, RCAllocator allocator = RCAllocator.init,
             UnicodeLanguage language = UnicodeLanguage.init) {
-        if (input.length > 0) {
+        if(input.length > 0) {
             this.handle((StateIterator.S8 state, StateIterator.I8 iterator) @trusted {
                 assert(state !is null);
 
@@ -278,7 +278,7 @@ scope nothrow @nogc @safe @hidden:
 
         StateIterator* self = cast(StateIterator*)&this;
 
-        if (other.length == 0)
+        if(other.length == 0)
             return self.length == 0 ? 0 : 1;
 
         return self.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
@@ -291,7 +291,7 @@ scope nothrow @nogc @safe @hidden:
             assert(state !is null);
             return state.externalOpCmp(iterator, otherState.osat, caseSensitive, language);
         }, () {
-            if (other.length > 0)
+            if(other.length > 0)
                 return -1;
             else
                 return 0;
@@ -299,7 +299,7 @@ scope nothrow @nogc @safe @hidden:
     }
 
     void insertImpl(Other)(scope Other other, ptrdiff_t offset = 0, bool clobber = false) {
-        if (other.length == 0)
+        if(other.length == 0)
             return;
 
         this.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
@@ -349,7 +349,7 @@ scope nothrow @nogc @safe @hidden:
 
     size_t replaceImpl(ToFind, ToReplace)(scope ToFind toFind, scope ToReplace toReplace, bool caseSensitive, bool onlyOnce,
             UnicodeLanguage language) {
-        if (isNull)
+        if(isNull)
             return 0;
 
         scope toFindState = AnyAsTargetChar!dchar(toFind);
@@ -373,7 +373,7 @@ scope nothrow @nogc @safe @hidden:
     }
 
     size_t countImpl(ToFind)(scope ToFind toFind, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
-        if (isNull)
+        if(isNull)
             return 0;
 
         scope toFindState = AnyAsTargetChar!dchar(toFind);
@@ -391,7 +391,7 @@ scope nothrow @nogc @safe @hidden:
     }
 
     bool containsImpl(ToFind)(scope ToFind toFind, bool caseSensitive, UnicodeLanguage language = UnicodeLanguage.Unknown) {
-        if (isNull)
+        if(isNull)
             return false;
 
         scope toFindState = AnyAsTargetChar!dchar(toFind);
@@ -410,7 +410,7 @@ scope nothrow @nogc @safe @hidden:
 
     ptrdiff_t offsetOfImpl(ToFind)(scope ToFind toFind, bool caseSensitive, bool onlyOnce,
             UnicodeLanguage language = UnicodeLanguage.Unknown) {
-        if (isNull)
+        if(isNull)
             return -1;
 
         scope toFindState = AnyAsTargetChar!dchar(toFind);
@@ -520,7 +520,7 @@ scope nothrow @nogc @safe @hidden:
         return this.handle((StateIterator.S8 state, ref StateIterator.I8 iterator) {
             assert(state !is null);
 
-            if (iterator is null) {
+            if(iterator is null) {
                 iterator = state.newIterator();
                 state.rc(false);
             }
@@ -529,7 +529,7 @@ scope nothrow @nogc @safe @hidden:
         }, (StateIterator.S16 state, ref StateIterator.I16 iterator) {
             assert(state !is null);
 
-            if (iterator is null) {
+            if(iterator is null) {
                 iterator = state.newIterator();
                 state.rc(false);
             }
@@ -538,7 +538,7 @@ scope nothrow @nogc @safe @hidden:
         }, (StateIterator.S32 state, ref StateIterator.I32 iterator) {
             assert(state !is null);
 
-            if (iterator is null) {
+            if(iterator is null) {
                 iterator = state.newIterator();
                 state.rc(false);
             }
@@ -551,7 +551,7 @@ scope nothrow @nogc @safe @hidden:
         return this.handle((StateIterator.S8 state, ref StateIterator.I8 iterator) {
             assert(state !is null);
 
-            if (iterator is null) {
+            if(iterator is null) {
                 iterator = state.newIterator();
                 state.rc(false);
             }
@@ -560,7 +560,7 @@ scope nothrow @nogc @safe @hidden:
         }, (StateIterator.S16 state, ref StateIterator.I16 iterator) {
             assert(state !is null);
 
-            if (iterator is null) {
+            if(iterator is null) {
                 iterator = state.newIterator();
                 state.rc(false);
             }
@@ -569,7 +569,7 @@ scope nothrow @nogc @safe @hidden:
         }, (StateIterator.S32 state, ref StateIterator.I32 iterator) {
             assert(state !is null);
 
-            if (iterator is null) {
+            if(iterator is null) {
                 iterator = state.newIterator();
                 state.rc(false);
             }
@@ -582,7 +582,7 @@ scope nothrow @nogc @safe @hidden:
         this.handle((StateIterator.S8 state, ref StateIterator.I8 iterator) {
             assert(state !is null);
 
-            if (iterator is null) {
+            if(iterator is null) {
                 iterator = state.newIterator();
                 state.rc(false);
             }
@@ -591,7 +591,7 @@ scope nothrow @nogc @safe @hidden:
         }, (StateIterator.S16 state, ref StateIterator.I16 iterator) {
             assert(state !is null);
 
-            if (iterator is null) {
+            if(iterator is null) {
                 iterator = state.newIterator();
                 state.rc(false);
             }
@@ -600,7 +600,7 @@ scope nothrow @nogc @safe @hidden:
         }, (StateIterator.S32 state, ref StateIterator.I32 iterator) {
             assert(state !is null);
 
-            if (iterator is null) {
+            if(iterator is null) {
                 iterator = state.newIterator();
                 state.rc(false);
             }
@@ -613,7 +613,7 @@ scope nothrow @nogc @safe @hidden:
         this.handle((StateIterator.S8 state, ref StateIterator.I8 iterator) {
             assert(state !is null);
 
-            if (iterator is null) {
+            if(iterator is null) {
                 iterator = state.newIterator();
                 state.rc(false);
             }
@@ -622,7 +622,7 @@ scope nothrow @nogc @safe @hidden:
         }, (StateIterator.S16 state, ref StateIterator.I16 iterator) {
             assert(state !is null);
 
-            if (iterator is null) {
+            if(iterator is null) {
                 iterator = state.newIterator();
                 state.rc(false);
             }
@@ -631,7 +631,7 @@ scope nothrow @nogc @safe @hidden:
         }, (StateIterator.S32 state, ref StateIterator.I32 iterator) {
             assert(state !is null);
 
-            if (iterator is null) {
+            if(iterator is null) {
                 iterator = state.newIterator();
                 state.rc(false);
             }
@@ -656,7 +656,7 @@ struct UTF_State(Char) {
 
         bool emptyUTF() {
             blockList.mutex.pureLock;
-            scope (exit)
+            scope(exit)
                 blockList.mutex.unlock;
 
             return forwardItems.length == 0 && backwardItems.length == 0 && emptyInternal();
@@ -664,18 +664,18 @@ struct UTF_State(Char) {
 
         TargetChar frontUTF(TargetChar)() @trusted {
             blockList.mutex.pureLock;
-            scope (exit)
+            scope(exit)
                 blockList.mutex.unlock;
 
             const canRefill = !this.emptyInternal;
             const needRefill = this.forwardItems.length == 0;
             const needToUseOtherBuffer = !canRefill && needRefill && this.backwardItems.length > 0;
 
-            if (needToUseOtherBuffer) {
+            if(needToUseOtherBuffer) {
                 // take first in backwards buffer
                 assert(this.backwardItems.length > 0);
                 return (cast(TargetChar[])this.backwardItems)[0];
-            } else if (!this.primedForwards) {
+            } else if(!this.primedForwards) {
                 primeForwardsUTF!TargetChar;
             }
 
@@ -686,18 +686,18 @@ struct UTF_State(Char) {
 
         TargetChar backUTF(TargetChar)() @trusted {
             blockList.mutex.pureLock;
-            scope (exit)
+            scope(exit)
                 blockList.mutex.unlock;
 
             const canRefill = !this.emptyInternal;
             const needRefill = this.backwardItems.length == 0;
             const needToUseOtherBuffer = !canRefill && needRefill && this.forwardItems.length > 0;
 
-            if (needToUseOtherBuffer) {
+            if(needToUseOtherBuffer) {
                 // take first in backwards buffer
                 assert(this.forwardItems.length > 0);
                 return (cast(TargetChar[])this.forwardItems)[$ - 1];
-            } else if (!primedBackwardsUTF) {
+            } else if(!primedBackwardsUTF) {
                 primeBackwardsUTF!TargetChar;
             }
 
@@ -708,7 +708,7 @@ struct UTF_State(Char) {
 
         void popFrontUTF(TargetChar)() {
             blockList.mutex.pureLock;
-            scope (exit)
+            scope(exit)
                 blockList.mutex.unlock;
 
             popFrontInternalUTF!TargetChar;
@@ -716,7 +716,7 @@ struct UTF_State(Char) {
 
         void popBackUTF(TargetChar)() {
             blockList.mutex.pureLock;
-            scope (exit)
+            scope(exit)
                 blockList.mutex.unlock;
 
             popBackInternalUTF!TargetChar;
@@ -747,47 +747,47 @@ struct UTF_State(Char) {
                 forwardsTempDecodeCursor.advanceForward(1, min(backwards.offsetFromHead + 1, maximumOffsetFromHead), true);
             }
 
-            if (needToUseOtherBuffer) {
+            if(needToUseOtherBuffer) {
                 this.backwardItems = (cast(TargetChar[])this.backwardItems)[1 .. $];
-            } else if (needRefill) {
+            } else if(needRefill) {
                 assert(!this.emptyInternal);
 
                 TargetChar[4 / TargetChar.sizeof] charBuffer = void;
                 size_t amountFilled;
 
-                static if (is(Char == TargetChar)) {
+                static if(is(Char == TargetChar)) {
                     // copy straight
 
-                    if (!emptyInternal()) {
+                    if(!emptyInternal()) {
                         charBuffer[amountFilled++] = frontInternal();
                         popFrontInternal();
                         this.amountFromInputForwards = 1;
                     }
-                } else static if (is(Char == char)) {
+                } else static if(is(Char == char)) {
                     this.amountFromInputForwards = 0;
                     dchar decoded = decode(&emptyInternal, &frontInternal, &popFrontInternal, this.amountFromInputForwards);
 
-                    static if (is(TargetChar == wchar)) {
+                    static if(is(TargetChar == wchar)) {
                         amountFilled = encodeUTF16(decoded, charBuffer);
                     } else {
                         charBuffer[amountFilled++] = decoded;
                     }
-                } else static if (is(Char == wchar)) {
+                } else static if(is(Char == wchar)) {
                     this.amountFromInputForwards = 0;
                     dchar decoded = decode(&emptyInternal, &frontInternal, &popFrontInternal, this.amountFromInputForwards);
 
-                    static if (is(TargetChar == char)) {
+                    static if(is(TargetChar == char)) {
                         amountFilled = encodeUTF8(decoded, charBuffer);
                     } else {
                         charBuffer[amountFilled++] = decoded;
                     }
-                } else static if (is(Char == dchar)) {
+                } else static if(is(Char == dchar)) {
                     dchar decoded = this.frontInternal;
                     this.amountFromInputForwards = 1;
 
-                    static if (is(TargetChar == char)) {
+                    static if(is(TargetChar == char)) {
                         amountFilled = encodeUTF8(decoded, charBuffer);
-                    } else static if (is(TargetChar == wchar)) {
+                    } else static if(is(TargetChar == wchar)) {
                         amountFilled = encodeUTF16(decoded, charBuffer);
                     }
                 }
@@ -803,8 +803,8 @@ struct UTF_State(Char) {
         }
 
         void popFrontInternalUTF(TargetChar)() @trusted {
-            foreach (_; 0 .. 1 + !this.primedForwards) {
-                if (this.primedForwardsNeedPop) {
+            foreach(_; 0 .. 1 + !this.primedForwards) {
+                if(this.primedForwardsNeedPop) {
                     forwards.advanceForward(this.amountFromInputForwards, maximumOffsetFromHead, true);
                     this.primedForwardsNeedPop = false;
                 }
@@ -812,16 +812,16 @@ struct UTF_State(Char) {
                 const needRefill = this.forwardItems.length == 0;
                 const needToUseOtherBuffer = this.emptyInternal && this.forwardItems.length == 0 && this.backwardItems.length > 0;
 
-                if (needToUseOtherBuffer) {
+                if(needToUseOtherBuffer) {
                     auto items = cast(Char[])this.backwardItems;
                     assert(items.length > 0);
                     this.backwardItems = cast(void[])items[1 .. $];
-                } else if (this.forwardItems.length > 0) {
+                } else if(this.forwardItems.length > 0) {
                     auto items = cast(Char[])this.forwardItems;
                     this.forwardItems = cast(void[])items[1 .. $];
                 }
 
-                if (this.forwardItems.length == 0 && !this.emptyInternal) {
+                if(this.forwardItems.length == 0 && !this.emptyInternal) {
                     primeForwardsUTF!TargetChar();
                 }
             }
@@ -844,7 +844,7 @@ struct UTF_State(Char) {
             }
 
             Char backInternal() {
-                if (!backwardsTempDecodeCursor.inData)
+                if(!backwardsTempDecodeCursor.inData)
                     backwardsTempDecodeCursor.advanceBackwards(0, forwards.offsetFromHead, maximumOffsetFromHead, true, true);
                 return backwardsTempDecodeCursor.get();
             }
@@ -853,18 +853,18 @@ struct UTF_State(Char) {
                 backwardsTempDecodeCursor.advanceBackwards(1, forwards.offsetFromHead, maximumOffsetFromHead, true, true);
             }
 
-            if (needToUseOtherBuffer) {
+            if(needToUseOtherBuffer) {
                 this.forwardItems = (cast(TargetChar[])this.forwardItems)[0 .. $ - 1];
-            } else if (needRefill) {
+            } else if(needRefill) {
                 assert(!this.emptyInternal);
 
                 TargetChar[4 / TargetChar.sizeof] charBuffer = void;
                 size_t amountFilled, offsetFilled;
 
-                static if (is(Char == TargetChar)) {
+                static if(is(Char == TargetChar)) {
                     // copy straight
 
-                    if (!emptyInternal()) {
+                    if(!emptyInternal()) {
                         amountFilled++;
                         this.amountFromInputBackwards = 1;
 
@@ -874,31 +874,31 @@ struct UTF_State(Char) {
                     }
 
                     offsetFilled = charBuffer.length - amountFilled;
-                } else static if (is(Char == char)) {
+                } else static if(is(Char == char)) {
                     this.amountFromInputBackwards = 0;
                     dchar decoded = decodeFromEnd(&emptyInternal, &backInternal, &popBackInternal, this.amountFromInputBackwards);
 
-                    static if (is(TargetChar == wchar)) {
+                    static if(is(TargetChar == wchar)) {
                         amountFilled = encodeUTF16(decoded, charBuffer);
                     } else {
                         charBuffer[amountFilled++] = decoded;
                     }
-                } else static if (is(Char == wchar)) {
+                } else static if(is(Char == wchar)) {
                     this.amountFromInputBackwards = 0;
                     dchar decoded = decodeFromEnd(&emptyInternal, &backInternal, &popBackInternal, this.amountFromInputBackwards);
 
-                    static if (is(TargetChar == char)) {
+                    static if(is(TargetChar == char)) {
                         amountFilled = encodeUTF8(decoded, charBuffer);
                     } else {
                         charBuffer[amountFilled++] = decoded;
                     }
-                } else static if (is(Char == dchar)) {
+                } else static if(is(Char == dchar)) {
                     dchar decoded = backInternal();
                     this.amountFromInputBackwards = 1;
 
-                    static if (is(TargetChar == char)) {
+                    static if(is(TargetChar == char)) {
                         amountFilled = encodeUTF8(decoded, charBuffer);
-                    } else static if (is(TargetChar == wchar)) {
+                    } else static if(is(TargetChar == wchar)) {
                         amountFilled = encodeUTF16(decoded, charBuffer);
                     }
                 }
@@ -914,8 +914,8 @@ struct UTF_State(Char) {
         }
 
         void popBackInternalUTF(TargetChar)() @trusted {
-            foreach (_; 0 .. 1 + !this.primedBackwardsUTF) {
-                if (this.primedBackwardsNeedPop) {
+            foreach(_; 0 .. 1 + !this.primedBackwardsUTF) {
+                if(this.primedBackwardsNeedPop) {
                     backwards.advanceBackwards(this.amountFromInputBackwards, forwards.offsetFromHead, maximumOffsetFromHead, true, true);
                     this.primedBackwardsNeedPop = false;
                 }
@@ -924,16 +924,16 @@ struct UTF_State(Char) {
                 const needRefill = this.backwardItems.length == 0;
                 const needToUseOtherBuffer = !canRefill && needRefill && this.forwardItems.length > 0;
 
-                if (needToUseOtherBuffer) {
+                if(needToUseOtherBuffer) {
                     auto items = cast(Char[])this.forwardItems;
                     assert(items.length > 0);
                     this.forwardItems = cast(void[])items[0 .. $ - 1];
-                } else if (this.backwardItems.length > 0) {
+                } else if(this.backwardItems.length > 0) {
                     auto items = cast(Char[])this.backwardItems;
                     this.backwardItems = cast(void[])items[0 .. $ - 1];
                 }
 
-                if (this.backwardItems.length == 0 && !this.emptyInternal) {
+                if(this.backwardItems.length == 0 && !this.emptyInternal) {
                     primeBackwardsUTF!TargetChar();
                 }
             }
@@ -960,9 +960,9 @@ struct UTF_State(Char) {
     UnicodeLanguage pickLanguage(UnicodeLanguage input = UnicodeLanguage.Unknown) const scope {
         import sidero.base.system : unicodeLanguage;
 
-        if (input != UnicodeLanguage.Unknown)
+        if(input != UnicodeLanguage.Unknown)
             return input;
-        else if (language != UnicodeLanguage.Unknown)
+        else if(language != UnicodeLanguage.Unknown)
             return language;
 
         return unicodeLanguage();
@@ -982,14 +982,14 @@ struct UTF_State(Char) {
         bool matches(scope Cursor cursor, size_t maximumOffsetFromHead) {
             auto temp = literal;
 
-            while (!cursor.isOutOfRange(0, maximumOffsetFromHead) && temp.length > 0) {
+            while(!cursor.isOutOfRange(0, maximumOffsetFromHead) && temp.length > 0) {
                 size_t canDo = cursor.block.length - cursor.offsetIntoBlock;
-                if (canDo > temp.length)
+                if(canDo > temp.length)
                     canDo = temp.length;
 
                 auto got = cursor.block.get()[cursor.offsetIntoBlock .. $];
-                foreach (i, c; temp[0 .. canDo])
-                    if (got[i] != c)
+                foreach(i, c; temp[0 .. canDo])
+                    if(got[i] != c)
                         return false;
 
                 temp = temp[canDo .. $];
@@ -1002,18 +1002,18 @@ struct UTF_State(Char) {
         int compare(scope Cursor cursor, size_t maximumOffsetFromHead) {
             auto temp = literal;
 
-            while (!cursor.isOutOfRange(0, maximumOffsetFromHead) && temp.length > 0) {
+            while(!cursor.isOutOfRange(0, maximumOffsetFromHead) && temp.length > 0) {
                 size_t canDo = cursor.block.length - cursor.offsetIntoBlock;
-                if (canDo > temp.length)
+                if(canDo > temp.length)
                     canDo = temp.length;
 
                 auto got = cursor.block.get()[cursor.offsetIntoBlock .. $];
-                foreach (i, a; temp[0 .. canDo]) {
+                foreach(i, a; temp[0 .. canDo]) {
                     Char b = got[i];
 
-                    if (a < b)
+                    if(a < b)
                         return 1;
-                    else if (a > b)
+                    else if(a > b)
                         return -1;
                 }
 
@@ -1036,7 +1036,7 @@ struct UTF_State(Char) {
         void mutex(bool lock) {
             assert(state !is null);
 
-            if (lock)
+            if(lock)
                 state.blockList.mutex.pureLock;
             else
                 state.blockList.mutex.unlock;
@@ -1045,19 +1045,19 @@ struct UTF_State(Char) {
         int foreachContiguous(scope int delegate(scope ref  /* ignore this */ TargetChar[] data) @safe @nogc nothrow del) @trusted {
             int result;
 
-            static if (is(Char == TargetChar)) {
-                if (iterator !is null) {
+            static if(is(Char == TargetChar)) {
+                if(iterator !is null) {
                     iterator.foreachBlocks((scope TargetChar[] data) {
-                        if (data.length > 0)
+                        if(data.length > 0)
                             result = del(data);
                         return result;
                     });
                 } else {
-                    foreach (Char[] data; state.blockList) {
-                        if (data.length > 0)
+                    foreach(Char[] data; state.blockList) {
+                        if(data.length > 0)
                             result = del(data);
 
-                        if (result)
+                        if(result)
                             break;
                     }
                 }
@@ -1066,7 +1066,7 @@ struct UTF_State(Char) {
 
                 Cursor forwards;
 
-                if (iterator is null)
+                if(iterator is null)
                     forwards.setup(&state.blockList, 0);
                 else
                     forwards = iterator.forwards;
@@ -1088,16 +1088,16 @@ struct UTF_State(Char) {
                     forwards.advanceForward(1, maximum(), true);
                 }
 
-                while (!emptyInternal()) {
+                while(!emptyInternal()) {
                     size_t consumed;
                     dchar got = decode(&emptyInternal, &frontInternal, &popFrontInternal, consumed);
 
-                    static if (is(TargetChar == dchar)) {
+                    static if(is(TargetChar == dchar)) {
                         dchar[1] buffer = [got];
                         TargetChar[] temp = buffer[];
 
                         result = del(temp);
-                        if (result)
+                        if(result)
                             return result;
                     } else {
                         // encode
@@ -1105,7 +1105,7 @@ struct UTF_State(Char) {
                         TargetChar[] temp = buffer[0 .. encode(got, buffer)];
 
                         result = del(temp);
-                        if (result)
+                        if(result)
                             return result;
                     }
                 }
@@ -1117,22 +1117,22 @@ struct UTF_State(Char) {
         int foreachValue(scope int delegate(ref  /* ignore this */ TargetChar) @safe @nogc nothrow del) {
             int result;
 
-            static if (is(Char == TargetChar)) {
-                if (iterator !is null) {
-                    foreach (data; &iterator.foreachBlocks) {
-                        foreach (c; data) {
+            static if(is(Char == TargetChar)) {
+                if(iterator !is null) {
+                    foreach(data; &iterator.foreachBlocks) {
+                        foreach(c; data) {
                             result = del(c);
 
-                            if (result)
+                            if(result)
                                 return result;
                         }
                     }
                 } else {
-                    foreach (Char[] data; state.blockList) {
-                        foreach (c; data) {
+                    foreach(Char[] data; state.blockList) {
+                        foreach(c; data) {
                             result = del(c);
 
-                            if (result)
+                            if(result)
                                 return result;
                         }
                     }
@@ -1142,7 +1142,7 @@ struct UTF_State(Char) {
 
                 Cursor forwards;
 
-                if (iterator is null)
+                if(iterator is null)
                     forwards.setup(&state.blockList, 0);
                 else
                     forwards = iterator.forwards;
@@ -1164,22 +1164,22 @@ struct UTF_State(Char) {
                     forwards.advanceForward(1, maximum(), true);
                 }
 
-                while (!emptyInternal()) {
+                while(!emptyInternal()) {
                     size_t consumed;
                     dchar got = decode(&emptyInternal, &frontInternal, &popFrontInternal, consumed);
 
-                    static if (is(TargetChar == dchar)) {
+                    static if(is(TargetChar == dchar)) {
                         result = del(got);
-                        if (result)
+                        if(result)
                             return result;
                     } else {
                         // encode
                         TargetChar[4 / TargetChar.sizeof] buffer = void;
                         TargetChar[] temp = buffer[0 .. encode(got, buffer)];
 
-                        foreach (c; temp) {
+                        foreach(c; temp) {
                             result = del(c);
-                            if (result)
+                            if(result)
                                 return result;
                         }
                     }
@@ -1192,7 +1192,7 @@ struct UTF_State(Char) {
         size_t length() {
             Cursor forwards;
 
-            if (iterator is null)
+            if(iterator is null)
                 forwards.setup(&state.blockList, 0);
             else
                 forwards = iterator.forwards;
@@ -1214,7 +1214,7 @@ struct UTF_State(Char) {
                 forwards.advanceForward(1, maximum(), true);
             }
 
-            static if (is(Char == TargetChar)) {
+            static if(is(Char == TargetChar)) {
                 return iterator is null ? state.blockList.numberOfItems
                     : (iterator.backwards.offsetFromHead - iterator.forwards.offsetFromHead);
             } else {
@@ -1222,17 +1222,17 @@ struct UTF_State(Char) {
 
                 size_t ret;
 
-                while (!emptyInternal()) {
+                while(!emptyInternal()) {
                     size_t consumed;
                     dchar got = decode(&emptyInternal, &frontInternal, &popFrontInternal, consumed);
 
-                    static if (is(TargetChar == char)) {
+                    static if(is(TargetChar == char)) {
                         // decode then encode
                         ret += encodeLengthUTF8(got);
-                    } else static if (is(TargetChar == wchar)) {
+                    } else static if(is(TargetChar == wchar)) {
                         // decode then encode
                         ret += encodeLengthUTF16(got);
-                    } else static if (is(TargetChar == dchar)) {
+                    } else static if(is(TargetChar == dchar)) {
                         ret++;
                     }
                 }
@@ -1251,7 +1251,7 @@ struct UTF_State(Char) {
     }
 
     void debugPosition(scope Block* cursorBlock, size_t offsetIntoBlock) @trusted {
-        version (D_BetterC) {
+        version(D_BetterC) {
         } else {
             debug {
                 try {
@@ -1262,11 +1262,11 @@ struct UTF_State(Char) {
 
                     writeln("====================");
 
-                    while (block !is null) {
-                        if (block is cursorBlock)
+                    while(block !is null) {
+                        if(block is cursorBlock)
                             write(">");
                         writef!"%s:%X@(%s)"(offsetFromHead, block, *block);
-                        if (block is cursorBlock)
+                        if(block is cursorBlock)
                             writef!":%s<"(offsetIntoBlock);
                         write("    [[[", cast(char[])block.get(), "]]]\n");
 
@@ -1276,23 +1276,23 @@ struct UTF_State(Char) {
 
                     writeln;
 
-                    foreach (iterator; iteratorList) {
+                    foreach(iterator; iteratorList) {
                         try {
                             writef!"%X@"(iterator);
-                            foreach (v; (*iterator).tupleof)
+                            foreach(v; (*iterator).tupleof)
                                 write(" ", v);
                             writeln;
-                        } catch (Exception) {
+                        } catch(Exception) {
                         }
                     }
-                } catch (Exception) {
+                } catch(Exception) {
                 }
             }
         }
     }
 
     void debugPosition(scope Iterator* iterator) @trusted {
-        version (D_BetterC) {
+        version(D_BetterC) {
         } else {
             debug {
                 try {
@@ -1300,9 +1300,9 @@ struct UTF_State(Char) {
 
                     writeln("====================");
 
-                    if (iterator !is null) {
+                    if(iterator !is null) {
                         writef!">>%X@"(iterator);
-                        foreach (v; (*iterator).tupleof)
+                        foreach(v; (*iterator).tupleof)
                             write(" ", v);
                         writeln;
                     }
@@ -1310,11 +1310,11 @@ struct UTF_State(Char) {
                     Block* block = &blockList.head;
                     size_t offsetFromHead;
 
-                    while (block !is null) {
-                        if (iterator !is null && block is iterator.forwards.block)
+                    while(block !is null) {
+                        if(iterator !is null && block is iterator.forwards.block)
                             write(iterator.forwards.offsetIntoBlock, ">");
                         writef!"%s:%X@(%s)"(offsetFromHead, block, *block);
-                        if (iterator !is null && block is iterator.backwards.block)
+                        if(iterator !is null && block is iterator.backwards.block)
                             writef!":%s<"(iterator.backwards.offsetIntoBlock);
                         write("    [[[", cast(char[])block.get(), "]]]\n");
 
@@ -1324,18 +1324,18 @@ struct UTF_State(Char) {
 
                     writeln;
 
-                    foreach (iterator2; iteratorList) {
+                    foreach(iterator2; iteratorList) {
                         try {
-                            if (iterator is iterator2)
+                            if(iterator is iterator2)
                                 write(">>>");
                             writef!"%X@"(iterator2);
-                            foreach (v; (*iterator2).tupleof)
+                            foreach(v; (*iterator2).tupleof)
                                 write(" ", v);
                             writeln;
-                        } catch (Exception) {
+                        } catch(Exception) {
                         }
                     }
-                } catch (Exception) {
+                } catch(Exception) {
                 }
             }
         }
@@ -1355,11 +1355,11 @@ struct UTF_State(Char) {
         }
 
         this(scope ref UTF_State state, scope Iterator* iterator, size_t offset, bool fromHead) scope {
-            if (fromHead)
+            if(fromHead)
                 cursor = state.cursorFor(iterator, maximumOffsetFromHead, offset);
             else {
                 size_t offsetFromEnd = iterator is null ? state.blockList.numberOfItems : iterator.maximumOffsetFromHead;
-                if (offsetFromEnd <= offset)
+                if(offsetFromEnd <= offset)
                     offsetFromEnd = 0;
                 else
                     offsetFromEnd -= offset;
@@ -1392,8 +1392,8 @@ struct UTF_State(Char) {
                 forwardsTempDecodeCursor.advanceForward(1, maximumOffsetFromHead, true);
             }
 
-            while (!emptyInternal() && result == 0) {
-                static if (is(Char == dchar)) {
+            while(!emptyInternal() && result == 0) {
+                static if(is(Char == dchar)) {
                     dchar decoded = frontInternal();
                     popFrontInternal();
                     assert(advance == 1);
@@ -1404,7 +1404,7 @@ struct UTF_State(Char) {
                 }
 
                 result = del(decoded);
-                if (result == 0)
+                if(result == 0)
                     lastIteratedCount0 += advance;
             }
 
@@ -1418,7 +1418,7 @@ struct UTF_State(Char) {
                 cursor.advanceForward(1, maximumOffsetFromHead, true);
             }
 
-            static if (is(Char == dchar)) {
+            static if(is(Char == dchar)) {
                 popFrontInternal();
             } else {
                 import sidero.base.encoding.utf : decode;
@@ -1439,8 +1439,8 @@ struct UTF_State(Char) {
     }
 
     void checkForNullIterator() {
-        foreach (iterator; iteratorList) {
-            if (iterator.forwards.block is null && iterator.backwards.block is null) {
+        foreach(iterator; iteratorList) {
+            if(iterator.forwards.block is null && iterator.backwards.block is null) {
                 assert(0);
             }
         }
@@ -1454,7 +1454,7 @@ struct UTF_State(Char) {
         import sidero.base.text.unicode.characters.database : isTurkic;
 
         blockList.mutex.pureLock;
-        if (other.obj !is &this)
+        if(other.obj !is &this)
             other.mutex(true);
 
         debug checkForNullIterator;
@@ -1472,7 +1472,7 @@ struct UTF_State(Char) {
         result = cac.compare(osat.foreachValue, false);
 
         blockList.mutex.unlock;
-        if (other.obj !is &this)
+        if(other.obj !is &this)
             other.mutex(false);
 
         debug checkForNullIterator;
@@ -1493,7 +1493,7 @@ struct UTF_State(Char) {
         Cursor cursor;
         size_t lengthToRemove;
 
-        if (iterator !is null) {
+        if(iterator !is null) {
             cursor = iterator.forwards;
             lengthToRemove = iterator.maximumOffsetFromHead - iterator.minimumOffsetFromHead;
         } else {
@@ -1524,7 +1524,7 @@ struct UTF_State(Char) {
         import sidero.base.text.unicode.characters.database : isTurkic;
 
         blockList.mutex.pureLock;
-        if (other.obj !is &this)
+        if(other.obj !is &this)
             other.mutex(true);
         debug checkForNullIterator;
 
@@ -1541,7 +1541,7 @@ struct UTF_State(Char) {
         result = cac.compare(osat.foreachValue, true);
 
         blockList.mutex.unlock;
-        if (other.obj !is &this)
+        if(other.obj !is &this)
             other.mutex(false);
 
         debug checkForNullIterator;
@@ -1553,7 +1553,7 @@ struct UTF_State(Char) {
         import sidero.base.text.unicode.characters.database : isTurkic;
 
         blockList.mutex.pureLock;
-        if (other.obj !is &this)
+        if(other.obj !is &this)
             other.mutex(true);
         debug checkForNullIterator;
 
@@ -1564,15 +1564,15 @@ struct UTF_State(Char) {
         {
             size_t otherLength = other.length(), usLength;
 
-            if (iterator !is null)
+            if(iterator !is null)
                 usLength = iterator.backwards.offsetFromHead;
             else
                 usLength = blockList.numberOfItems;
 
-            if (otherLength > usLength) {
+            if(otherLength > usLength) {
                 debug checkForNullIterator;
                 blockList.mutex.unlock;
-                if (other.obj !is &this)
+                if(other.obj !is &this)
                     other.mutex(false);
 
                 return false;
@@ -1602,7 +1602,7 @@ struct UTF_State(Char) {
 
         debug checkForNullIterator;
         blockList.mutex.unlock;
-        if (other.obj !is &this)
+        if(other.obj !is &this)
             other.mutex(false);
 
         return result == 0;
@@ -1614,9 +1614,9 @@ struct UTF_State(Char) {
         import sidero.base.text.unicode.characters.database : isTurkic;
 
         blockList.mutex.pureLock;
-        if (toFind.obj !is &this)
+        if(toFind.obj !is &this)
             toFind.mutex(true);
-        if (toReplace.obj !is &this && toReplace.obj !is toFind.obj)
+        if(toReplace.obj !is &this && toReplace.obj !is toFind.obj)
             toReplace.mutex(true);
         debug checkForNullIterator;
 
@@ -1632,7 +1632,7 @@ struct UTF_State(Char) {
             ForeachUTF32 f32 = ForeachUTF32(cursor, maximumOffsetFromHead);
 
             auto got = cac.compare(&f32.opApply, true);
-            if (got != 0)
+            if(got != 0)
                 return 0;
 
             return f32.lastIteratedCount0;
@@ -1642,9 +1642,9 @@ struct UTF_State(Char) {
 
         debug checkForNullIterator;
         blockList.mutex.unlock;
-        if (toFind.obj !is &this)
+        if(toFind.obj !is &this)
             toFind.mutex(false);
-        if (toReplace.obj !is &this && toReplace.obj !is toFind.obj)
+        if(toReplace.obj !is &this && toReplace.obj !is toFind.obj)
             toReplace.mutex(false);
 
         return ret;
@@ -1656,7 +1656,7 @@ struct UTF_State(Char) {
         import sidero.base.text.unicode.characters.database : isTurkic;
 
         blockList.mutex.pureLock;
-        if (toFind.obj !is &this)
+        if(toFind.obj !is &this)
             toFind.mutex(true);
         debug checkForNullIterator;
 
@@ -1672,7 +1672,7 @@ struct UTF_State(Char) {
             ForeachUTF32 f32 = ForeachUTF32(cursor, maximumOffsetFromHead);
 
             auto got = cac.compare(&f32.opApply, true);
-            if (got != 0)
+            if(got != 0)
                 return 0;
 
             lastConsumed = f32.lastIteratedCount0;
@@ -1685,7 +1685,7 @@ struct UTF_State(Char) {
 
         debug checkForNullIterator;
         blockList.mutex.unlock;
-        if (toFind.obj !is &this)
+        if(toFind.obj !is &this)
             toFind.mutex(false);
 
         return ret;
@@ -1697,7 +1697,7 @@ struct UTF_State(Char) {
         import sidero.base.text.unicode.characters.database : isTurkic;
 
         blockList.mutex.pureLock;
-        if (toFind.obj !is &this)
+        if(toFind.obj !is &this)
             toFind.mutex(true);
         debug checkForNullIterator;
 
@@ -1715,7 +1715,7 @@ struct UTF_State(Char) {
             ForeachUTF32 f32 = ForeachUTF32(cursor, maximumOffsetFromHead);
 
             auto got = cac.compare(&f32.opApply, true);
-            if (got != 0)
+            if(got != 0)
                 return 0;
 
             lastConsumed = f32.lastIteratedCount0;
@@ -1729,10 +1729,10 @@ struct UTF_State(Char) {
 
         debug checkForNullIterator;
         blockList.mutex.unlock;
-        if (toFind.obj !is &this)
+        if(toFind.obj !is &this)
             toFind.mutex(false);
 
-        if (ret >= 0)
+        if(ret >= 0)
             ret -= startingOffset;
 
         return ret;
@@ -1755,12 +1755,12 @@ struct UTF_State(Char) {
         {
             ForeachUTF32 f32 = ForeachUTF32(toRemoveCursor, maximumOffsetFromHead);
 
-            foreach (dchar c; f32) {
-                if (!(isWhiteSpace(c) || isControl(c)))
+            foreach(dchar c; f32) {
+                if(!(isWhiteSpace(c) || isControl(c)))
                     break;
             }
 
-            if (f32.lastIteratedCount0 > 0)
+            if(f32.lastIteratedCount0 > 0)
                 removeOperation(toRemoveCursor, maximumOffsetFromHead, f32.lastIteratedCount0);
         }
 
@@ -1777,7 +1777,7 @@ struct UTF_State(Char) {
             auto result = changeIndexToOffset(iterator, endOffsetFromHead);
             assert(!result.isSet);
 
-            if (iterator !is null)
+            if(iterator !is null)
                 endOffsetFromHead -= iterator.minimumOffsetFromHead;
         }
 
@@ -1804,11 +1804,11 @@ struct UTF_State(Char) {
                 toRemoveCursor.advanceBackwards(1, minimumOffsetFromHead, maximumOffsetFromHead, false, false);
             }
 
-            while (!emptyInternal) {
+            while(!emptyInternal) {
                 Cursor currentLocation = toRemoveCursor;
                 size_t advance = 1;
 
-                static if (is(Char == dchar)) {
+                static if(is(Char == dchar)) {
                     dchar decoded = backInternal();
                     popBackInternal();
                 } else {
@@ -1817,13 +1817,13 @@ struct UTF_State(Char) {
                     dchar decoded = decodeFromEnd(&emptyInternal, &backInternal, &popBackInternal, advance);
                 }
 
-                if (!(isWhiteSpace(decoded) || isControl(decoded)))
+                if(!(isWhiteSpace(decoded) || isControl(decoded)))
                     break;
                 amount += advance;
                 lastSuccessRemove = currentLocation;
             }
 
-            if (amount > 0)
+            if(amount > 0)
                 removeOperation(lastSuccessRemove, maximumOffsetFromHead, amount);
         }
 
@@ -1862,8 +1862,8 @@ struct UTF_State(Char) {
                 cursor.advanceForward(1, maximumOffsetFromHead, true);
             }
 
-            while (ret == 0 && cursor.inData && !emptyInternal) {
-                static if (is(Char == dchar)) {
+            while(ret == 0 && cursor.inData && !emptyInternal) {
+                static if(is(Char == dchar)) {
                     dchar decoded = frontInternal();
                     assert(primaryAdvance == 1);
                 } else {
@@ -1877,8 +1877,8 @@ struct UTF_State(Char) {
 
                 ret = del(decoded);
 
-                if (!removedOrInserted) {
-                    static if (is(Char == dchar)) {
+                if(!removedOrInserted) {
+                    static if(is(Char == dchar)) {
                         popFrontInternal();
                     } else {
                         cursor = otherCursor;
@@ -1902,7 +1902,7 @@ struct UTF_State(Char) {
 
             Cursor backwardsCursor = cursor;
             backwardsCursor.advanceBackwards(1, minimumOffsetFromHead, maximumOffsetFromHead, false, false);
-            if (backwardsCursor.offsetFromHead >= cursor.offsetFromHead)
+            if(backwardsCursor.offsetFromHead >= cursor.offsetFromHead)
                 return 0;
 
             bool emptyInternal() {
@@ -1922,8 +1922,8 @@ struct UTF_State(Char) {
 
             int result;
 
-            while (result == 0 && !emptyInternal) {
-                static if (is(Char == dchar)) {
+            while(result == 0 && !emptyInternal) {
+                static if(is(Char == dchar)) {
                     dchar decoded = backInternal();
                     popBackInternal();
                 } else {
@@ -1968,10 +1968,10 @@ struct LiteralAsTargetChar(SourceChar, TargetChar) {
     }
 
     int foreachContiguous(scope int delegate(scope ref  /* ignore this */ TargetChar[] data) @safe @nogc nothrow del) @trusted @nogc nothrow {
-        static if (is(SourceChar == TargetChar)) {
+        static if(is(SourceChar == TargetChar)) {
             // don't mutate during testing
             TargetChar[] temp = cast(TargetChar[])literal;
-            if (temp.length > 0)
+            if(temp.length > 0)
                 return del(temp);
             else
                 return 0;
@@ -1989,39 +1989,39 @@ struct LiteralAsTargetChar(SourceChar, TargetChar) {
 
         int result;
 
-        static if (is(SourceChar == TargetChar) || is(SourceChar == dchar)) {
-            foreach (SourceChar c; literal) {
-                static if (is(SourceChar == TargetChar)) {
+        static if(is(SourceChar == TargetChar) || is(SourceChar == dchar)) {
+            foreach(SourceChar c; literal) {
+                static if(is(SourceChar == TargetChar)) {
                     result = del(c);
-                } else if (is(SourceChar == dchar)) {
+                } else if(is(SourceChar == dchar)) {
                     // just encode
                     TargetChar[4 / TargetChar.sizeof] buffer = void;
                     TargetChar[] temp = buffer[0 .. encode(c, buffer)];
 
-                    foreach (c2; temp) {
+                    foreach(c2; temp) {
                         result = del(c2);
-                        if (result)
+                        if(result)
                             break;
                     }
                 }
 
-                if (result)
+                if(result)
                     break;
             }
         } else {
             // decode then encode
             decode(literal, (dchar got) {
-                static if (is(TargetChar == dchar)) {
+                static if(is(TargetChar == dchar)) {
                     result = del(got);
-                    if (result)
+                    if(result)
                         return true;
                 } else {
                     TargetChar[4 / TargetChar.sizeof] buffer = void;
                     scope temp = buffer[0 .. encode(got, buffer)];
 
-                    foreach (TargetChar c; temp) {
+                    foreach(TargetChar c; temp) {
                         result = del(c);
-                        if (result)
+                        if(result)
                             return true;
                     }
                 }
@@ -2036,13 +2036,13 @@ struct LiteralAsTargetChar(SourceChar, TargetChar) {
     size_t length() {
         import sidero.base.encoding.utf : encodeLengthUTF8, encodeLengthUTF16, decode;
 
-        static if (is(SourceChar == TargetChar)) {
+        static if(is(SourceChar == TargetChar)) {
             return literal.length;
-        } else static if (is(SourceChar == dchar)) {
+        } else static if(is(SourceChar == dchar)) {
             // just encode
-            static if (is(TargetChar == char)) {
+            static if(is(TargetChar == char)) {
                 return encodeLengthUTF8(literal);
-            } else static if (is(TargetChar == wchar)) {
+            } else static if(is(TargetChar == wchar)) {
                 return encodeLengthUTF16(literal);
             }
         } else {
@@ -2050,9 +2050,9 @@ struct LiteralAsTargetChar(SourceChar, TargetChar) {
             size_t ret;
 
             decode(literal, (dchar got) {
-                static if (is(TargetChar == char)) {
+                static if(is(TargetChar == char)) {
                     ret += encodeLengthUTF8(got);
-                } else static if (is(TargetChar == wchar)) {
+                } else static if(is(TargetChar == wchar)) {
                     ret += encodeLengthUTF16(got);
                 } else
                     ret++;
@@ -2077,9 +2077,9 @@ struct ASCIILiteralAsTarget(TargetChar) {
 
     int foreachContiguous(scope int delegate(scope ref  /* ignore this */ TargetChar[] data) @safe @nogc nothrow del) @trusted {
         // don't mutate during testing
-        static if (is(TargetChar == char)) {
+        static if(is(TargetChar == char)) {
             TargetChar[] temp = cast(TargetChar[])literal;
-            if (temp.length > 0)
+            if(temp.length > 0)
                 return del(temp);
             else
                 return 0;
@@ -2088,13 +2088,13 @@ struct ASCIILiteralAsTarget(TargetChar) {
             TargetChar[] temp2;
             int result;
 
-            foreach (c; literal) {
+            foreach(c; literal) {
                 temp2 = temp1[];
                 temp1[0] = cast(TargetChar)c;
 
                 result = del(temp2);
 
-                if (result)
+                if(result)
                     break;
             }
 
@@ -2105,11 +2105,11 @@ struct ASCIILiteralAsTarget(TargetChar) {
     int foreachValue(scope int delegate(ref  /* ignore this */ TargetChar) @safe @nogc nothrow del) @safe {
         int result;
 
-        foreach (c; literal) {
+        foreach(c; literal) {
             TargetChar temp = cast(TargetChar)c;
             result = del(temp);
 
-            if (result)
+            if(result)
                 break;
         }
 
@@ -2135,7 +2135,7 @@ static struct ASCIIStateAsTarget(TargetChar) {
     void mutex(bool lock) {
         assert(state !is null);
 
-        if (lock)
+        if(lock)
             state.blockList.mutex.pureLock;
         else
             state.blockList.mutex.unlock;
@@ -2144,24 +2144,24 @@ static struct ASCIIStateAsTarget(TargetChar) {
     int foreachContiguous(scope int delegate(scope ref  /* ignore this */ TargetChar[] data) @safe @nogc nothrow del) @trusted {
         int result;
 
-        if (iterator !is null) {
+        if(iterator !is null) {
             iterator.foreachBlocks((scope data) {
-                if (data.length == 0)
+                if(data.length == 0)
                     return 0;
 
-                static if (is(TargetChar == char)) {
+                static if(is(TargetChar == char)) {
                     TargetChar[] temp = cast(TargetChar[])data;
                     result = del(temp);
                 } else {
                     TargetChar[1] temp1 = void;
                     TargetChar[] temp2;
 
-                    foreach (c; data) {
+                    foreach(c; data) {
                         temp2 = temp1[];
                         temp1[0] = cast(TargetChar)c;
 
                         result = del(temp2);
-                        if (result)
+                        if(result)
                             break;
                     }
                 }
@@ -2169,25 +2169,25 @@ static struct ASCIIStateAsTarget(TargetChar) {
                 return result;
             });
         } else {
-            foreach (ubyte[] data; state.blockList) {
-                static if (is(TargetChar == char)) {
+            foreach(ubyte[] data; state.blockList) {
+                static if(is(TargetChar == char)) {
                     TargetChar[] temp = cast(TargetChar[])data;
                     result = del(temp);
                 } else {
                     TargetChar[1] temp1 = void;
                     TargetChar[] temp2;
 
-                    foreach (c; data) {
+                    foreach(c; data) {
                         temp2 = temp1[];
                         temp1[0] = cast(TargetChar)c;
 
                         result = del(temp2);
-                        if (result)
+                        if(result)
                             break;
                     }
                 }
 
-                if (result)
+                if(result)
                     break;
             }
         }
@@ -2198,25 +2198,25 @@ static struct ASCIIStateAsTarget(TargetChar) {
     int foreachValue(scope int delegate(ref  /* ignore this */ TargetChar) @safe @nogc nothrow del) {
         int result;
 
-        if (iterator !is null) {
+        if(iterator !is null) {
             iterator.foreachBlocks((scope data) {
-                foreach (c; data) {
+                foreach(c; data) {
                     TargetChar temp = cast(TargetChar)c;
                     result = del(temp);
 
-                    if (result)
+                    if(result)
                         break;
                 }
 
                 return result;
             });
         } else {
-            foreach (ubyte[] data; state.blockList) {
-                foreach (c; data) {
+            foreach(ubyte[] data; state.blockList) {
+                foreach(c; data) {
                     TargetChar temp = cast(TargetChar)c;
                     result = del(temp);
 
-                    if (result)
+                    if(result)
                         return result;
                 }
             }
@@ -2253,18 +2253,18 @@ struct AnyAsTargetChar(TargetChar) {
 @safe nothrow @nogc @hidden:
 
     this(Input)(scope ref Input input) @trusted {
-        static if (is(Input == String_ASCII)) {
+        static if(is(Input == String_ASCII)) {
             input.stripZeroTerminator;
             scope actualInput = input.literal;
         } else {
             scope actualInput = input;
         }
 
-        static if (is(Input == StringBuilder_ASCII)) {
+        static if(is(Input == StringBuilder_ASCII)) {
             asat.state = input.state;
             asat.iterator = input.iterator;
             osat = asat.get();
-        } else static if (isUTFBuilder!Input) {
+        } else static if(isUTFBuilder!Input) {
             input.state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
                 assert(state !is null);
 
@@ -2284,23 +2284,23 @@ struct AnyAsTargetChar(TargetChar) {
                 osiu32.iterator = iterator;
                 osat = osiu32.get;
             }, () {});
-        } else static if (isUTFReadOnly!Input) {
+        } else static if(isUTFReadOnly!Input) {
             input.stripZeroTerminator;
 
             input.literalEncoding.handle(() @trusted { latc8.literal = cast(string)input.literal; osat = latc8.get(); }, () @trusted {
                 latc16.literal = cast(wstring)input.literal;
                 osat = latc16.get();
             }, () @trusted { latc32.literal = cast(dstring)input.literal; osat = latc32.get(); }, () @trusted {});
-        } else static if (is(typeof(actualInput) == const(char)[])) {
+        } else static if(is(typeof(actualInput) == const(char)[])) {
             latc8.literal = input;
             osat = latc8.get();
-        } else static if (is(typeof(actualInput) == const(wchar)[])) {
+        } else static if(is(typeof(actualInput) == const(wchar)[])) {
             latc16.literal = input;
             osat = latc16.get();
-        } else static if (is(typeof(actualInput) == const(dchar)[])) {
+        } else static if(is(typeof(actualInput) == const(dchar)[])) {
             latc32.literal = input;
             osat = latc32.get();
-        } else static if (is(typeof(actualInput) == const(ubyte)[])) {
+        } else static if(is(typeof(actualInput) == const(ubyte)[])) {
             alat.literal = cast(const(ubyte)[])actualInput;
             osat = alat.get();
         } else

@@ -5,6 +5,7 @@ import sidero.base.errors;
 
 struct BitWriter {
     import sidero.base.bitmanip : nativeToLittleEndian, nativeToBigEndian;
+
     Appender!ubyte output;
 
     uint bufferByteBits;
@@ -19,7 +20,7 @@ export:
     }
 
     void flushBits() scope {
-        if (bufferByteBits > 0) {
+        if(bufferByteBits > 0) {
             output ~= bufferByte;
 
             bufferByteBits = 0;
@@ -30,7 +31,7 @@ export:
     void writeBit(bool bit) scope {
         bufferByte |= bit << bufferByteBits;
 
-        if (bufferByteBits++ == 7)
+        if(bufferByteBits++ == 7)
             flushBits;
     }
 
@@ -42,7 +43,7 @@ export:
     void writeShorts(scope const(ushort)[] input...) scope {
         flushBits;
 
-        foreach (v; input) {
+        foreach(v; input) {
             auto got = nativeToLittleEndian(v);
             output ~= got[];
         }

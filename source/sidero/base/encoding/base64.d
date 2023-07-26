@@ -28,13 +28,13 @@ export @safe nothrow @nogc static:
     void encode(scope StringBuilder_ASCII builder, scope const(ubyte[]) input...) @trusted {
         const secondarySize = input.length % 3, initialSize = input.length - (secondarySize);
 
-        static if (maxLength > 0) {
+        static if(maxLength > 0) {
             size_t soFar;
         }
 
         void handleChar(char c) {
-            static if (maxLength > 0) {
-                if (soFar == maxLength) {
+            static if(maxLength > 0) {
+                if(soFar == maxLength) {
                     soFar = 1;
                     builder ~= eolSeperator;
                 } else
@@ -46,12 +46,12 @@ export @safe nothrow @nogc static:
         }
 
         const(ubyte)* bytePtr = input.ptr, bytePtrEnd = bytePtr + initialSize;
-        if (secondarySize > 0 || initialSize >= 3) {
-            if (secondarySize == 0) {
+        if(secondarySize > 0 || initialSize >= 3) {
+            if(secondarySize == 0) {
                 bytePtrEnd -= 3;
             }
 
-            while (bytePtr !is bytePtrEnd) {
+            while(bytePtr !is bytePtrEnd) {
                 uint temp = *(cast(uint*)bytePtr);
 
                 handleChar(Alphabet[(temp >> 2) & 0x3F]);
@@ -63,7 +63,7 @@ export @safe nothrow @nogc static:
             }
         }
 
-        if (secondarySize == 0 && initialSize >= 3) {
+        if(secondarySize == 0 && initialSize >= 3) {
             uint temp;
             temp = *bytePtr;
             temp |= (cast(uint)*(bytePtr + 1)) << 8;
@@ -73,23 +73,23 @@ export @safe nothrow @nogc static:
             handleChar(Alphabet[((temp & 0x3) << 4) | ((temp & 0xF000) >> 12)]);
             handleChar(Alphabet[((temp & 0xF00) >> 6) | ((temp & 0xC00000) >> 22)]);
             handleChar(Alphabet[(temp >> 16) & 0x3F]);
-        } else if (secondarySize == 2) {
+        } else if(secondarySize == 2) {
             ushort temp = *(cast(ushort*)bytePtr);
 
             handleChar(Alphabet[(temp >> 2) & 0x3F]);
             handleChar(Alphabet[((temp & 0x3) << 4) | ((temp & 0xF000) >> 12)]);
             handleChar(Alphabet[(temp & 0xF00) >> 6]);
 
-            static if (Alphabet.length == 65) {
+            static if(Alphabet.length == 65) {
                 handleChar(Alphabet[64]);
             }
-        } else if (secondarySize == 1) {
+        } else if(secondarySize == 1) {
             ubyte temp = *bytePtr;
 
             handleChar(Alphabet[(temp >> 2) & 0x3F]);
             handleChar(Alphabet[(temp & 0x3) << 4]);
 
-            static if (Alphabet.length == 65) {
+            static if(Alphabet.length == 65) {
                 handleChar(Alphabet[64]);
                 handleChar(Alphabet[64]);
             }
@@ -110,13 +110,13 @@ export @safe nothrow @nogc static:
     void encode(scope StringBuilder_UTF32 builder, scope const(ubyte[]) input...) @trusted {
         const secondarySize = input.length % 3, initialSize = input.length - (secondarySize);
 
-        static if (maxLength > 0) {
+        static if(maxLength > 0) {
             size_t soFar;
         }
 
         void handleChar(char c) {
-            static if (maxLength > 0) {
-                if (soFar == maxLength) {
+            static if(maxLength > 0) {
+                if(soFar == maxLength) {
                     soFar = 1;
                     builder ~= eolSeperator;
                 } else
@@ -128,12 +128,12 @@ export @safe nothrow @nogc static:
         }
 
         const(ubyte)* bytePtr = input.ptr, bytePtrEnd = bytePtr + initialSize;
-        if (secondarySize > 0 || initialSize >= 3) {
-            if (secondarySize == 0) {
+        if(secondarySize > 0 || initialSize >= 3) {
+            if(secondarySize == 0) {
                 bytePtrEnd -= 3;
             }
 
-            while (bytePtr !is bytePtrEnd) {
+            while(bytePtr !is bytePtrEnd) {
                 uint temp = *(cast(uint*)bytePtr);
 
                 handleChar(Alphabet[(temp >> 2) & 0x3F]);
@@ -145,7 +145,7 @@ export @safe nothrow @nogc static:
             }
         }
 
-        if (secondarySize == 0 && initialSize >= 3) {
+        if(secondarySize == 0 && initialSize >= 3) {
             uint temp;
             temp = *bytePtr;
             temp |= (cast(uint)*(bytePtr + 1)) << 8;
@@ -155,23 +155,23 @@ export @safe nothrow @nogc static:
             handleChar(Alphabet[((temp & 0x3) << 4) | ((temp & 0xF000) >> 12)]);
             handleChar(Alphabet[((temp & 0xF00) >> 6) | ((temp & 0xC00000) >> 22)]);
             handleChar(Alphabet[(temp >> 16) & 0x3F]);
-        } else if (secondarySize == 2) {
+        } else if(secondarySize == 2) {
             ushort temp = *(cast(ushort*)bytePtr);
 
             handleChar(Alphabet[(temp >> 2) & 0x3F]);
             handleChar(Alphabet[((temp & 0x3) << 4) | ((temp & 0xF000) >> 12)]);
             handleChar(Alphabet[(temp & 0xF00) >> 6]);
 
-            static if (Alphabet.length == 65) {
+            static if(Alphabet.length == 65) {
                 handleChar(Alphabet[64]);
             }
-        } else if (secondarySize == 1) {
+        } else if(secondarySize == 1) {
             ubyte temp = *bytePtr;
 
             handleChar(Alphabet[(temp >> 2) & 0x3F]);
             handleChar(Alphabet[(temp & 0x3) << 4]);
 
-            static if (Alphabet.length == 65) {
+            static if(Alphabet.length == 65) {
                 handleChar(Alphabet[64]);
                 handleChar(Alphabet[64]);
             }
@@ -239,8 +239,8 @@ private:
         enum MinimumInOffset = () {
             char lowestValue = char.max;
 
-            foreach (v; Alphabet) {
-                if (v < lowestValue)
+            foreach(v; Alphabet) {
+                if(v < lowestValue)
                     lowestValue = v;
             }
 
@@ -249,8 +249,8 @@ private:
         enum MaximumInOffset = () {
             char highestValue = 0;
 
-            foreach (v; Alphabet) {
-                if (v > highestValue)
+            foreach(v; Alphabet) {
+                if(v > highestValue)
                     highestValue = v;
             }
 
@@ -261,7 +261,7 @@ private:
             size_t[(MaximumInOffset + 1) - MinimumInOffset] ret;
             ret[] = size_t.max;
 
-            foreach (i, v; Alphabet) {
+            foreach(i, v; Alphabet) {
                 ret[v - MinimumInOffset] = i;
             }
 
@@ -281,13 +281,13 @@ private:
         uint lastSample;
 
         void outputDecodedSoFar() @safe nothrow @nogc {
-            if (lastSamplesStored >= 1)
+            if(lastSamplesStored >= 1)
                 storage ~= cast(ubyte)(lastSample & 0xFF);
-            if (lastSamplesStored >= 2)
+            if(lastSamplesStored >= 2)
                 storage ~= cast(ubyte)((lastSample >> 8) & 0xFF);
-            if (lastSamplesStored >= 3)
+            if(lastSamplesStored >= 3)
                 storage ~= cast(ubyte)((lastSample >> 16) & 0xFF);
-            if (lastSamplesStored == 4)
+            if(lastSamplesStored == 4)
                 storage ~= cast(ubyte)((lastSample >> 24) & 0xFF);
 
             lastSamplesStored = 0;
@@ -296,18 +296,18 @@ private:
         void processDecoded(uint decodedValue) @safe nothrow @nogc {
             assert(decodedValue <= 64);
 
-            if (lastSamplesStored == 0) {
+            if(lastSamplesStored == 0) {
                 // handleChar(Alphabet[(temp >> 2) & 0x3F]);
                 lastSample = (decodedValue & 0x3F) << 2;
 
                 lastSamplesStored = 1;
-            } else if (lastSamplesStored == 1) {
+            } else if(lastSamplesStored == 1) {
                 // handleChar(Alphabet[((temp & 0x3) << 4) | ((temp & 0xF000) >> 12)]);
                 lastSample |= (decodedValue >> 4) & 0x3;
                 lastSample |= (decodedValue << 12) & 0xF000;
 
                 lastSamplesStored = 2;
-            } else if (lastSamplesStored == 2) {
+            } else if(lastSamplesStored == 2) {
                 // handleChar(Alphabet[((temp & 0xF00) >> 6) | ((temp & 0xC00000) >> 22)]);
                 lastSample |= (decodedValue << 6) & 0xF00;
                 lastSample |= (decodedValue << 22) & 0xC00000;
@@ -326,15 +326,15 @@ private:
         }
 
         void handle() @safe nothrow @nogc {
-            if (count == 0) {
-                if (lastSamplesStored == 2 && (!HaveFiller || lastFillerSeq == 2)) {
+            if(count == 0) {
+                if(lastSamplesStored == 2 && (!HaveFiller || lastFillerSeq == 2)) {
                     // for 1 byte you need 2 samples + 2 filler
                     storage ~= cast(ubyte)(lastSample & 0xFF);
-                } else if (lastSamplesStored == 3 && (!HaveFiller || lastFillerSeq == 1)) {
+                } else if(lastSamplesStored == 3 && (!HaveFiller || lastFillerSeq == 1)) {
                     // for 2 bytes you need 3 samples + 1 filler
                     storage ~= cast(ubyte)(lastSample & 0xFF);
                     storage ~= cast(ubyte)((lastSample >> 8) & 0xFF);
-                } else if (lastSamplesStored == 4) {
+                } else if(lastSamplesStored == 4) {
                     // for 3 bytes you need 4 samples
                     storage ~= cast(ubyte)(lastSample & 0xFF);
                     storage ~= cast(ubyte)((lastSample >> 8) & 0xFF);
@@ -345,26 +345,26 @@ private:
                 return;
             }
 
-            foreach (v; samples) {
-                if (!(Alphabet.length == 65 && v == Alphabet[$ - 1]) && rejectUnknownData && (v < MinimumInOffset || v > MaximumInOffset)) {
+            foreach(v; samples) {
+                if(!(Alphabet.length == 65 && v == Alphabet[$ - 1]) && rejectUnknownData && (v < MinimumInOffset || v > MaximumInOffset)) {
                     ret = MalformedInputException("Input not part of base64 alphabet");
                     return;
                 }
             }
 
-            foreach (i, v; samples) {
+            foreach(i, v; samples) {
                 size_t decoded;
 
-                if (v < MinimumInOffset || v > MaximumInOffset || (decoded = DecodingAlphabet[v - MinimumInOffset]) == size_t.max) {
+                if(v < MinimumInOffset || v > MaximumInOffset || (decoded = DecodingAlphabet[v - MinimumInOffset]) == size_t.max) {
                     // raw
                     outputDecodedSoFar();
                     storage ~= cast(ubyte)v;
 
-                    static if (HaveFiller)
+                    static if(HaveFiller)
                         lastFillerSeq = 0;
                 } else {
-                    static if (HaveFiller) {
-                        if (v == Alphabet[$ - 1]) {
+                    static if(HaveFiller) {
+                        if(v == Alphabet[$ - 1]) {
                             lastFillerSeq++;
                             continue;
                         } else {
@@ -377,16 +377,16 @@ private:
             }
         }
 
-        while (input.length > 0) {
+        while(input.length > 0) {
             T inputToUse = input;
 
-            static if (eolSeperator !is null) {
+            static if(eolSeperator !is null) {
                 ptrdiff_t offset = input.indexOf(eolSeperator);
 
-                if (offset == 0) {
+                if(offset == 0) {
                     input = input[eolSeperator.length .. $];
                     continue;
-                } else if (offset > 0) {
+                } else if(offset > 0) {
                     inputToUse = input[0 .. offset];
                     input = input[offset + eolSeperator.length .. $];
                 } else
@@ -394,13 +394,13 @@ private:
             } else
                 input = T.init;
 
-            foreach (sample; inputToUse) {
+            foreach(sample; inputToUse) {
                 samples[count] = cast(uint)sample;
                 count++;
 
-                if (count == 4) {
+                if(count == 4) {
                     handle();
-                    if (!ret)
+                    if(!ret)
                         return ret;
                     count = 0;
                 }

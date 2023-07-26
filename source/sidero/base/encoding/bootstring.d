@@ -23,7 +23,7 @@ export @safe nothrow @nogc static:
         StringBuilder_ASCII ret = StringBuilder_ASCII(globalAllocator());
         auto result = encode(ret, input);
 
-        if (!result)
+        if(!result)
             return typeof(return)(result.getError);
         else
             return typeof(return)(ret);
@@ -34,7 +34,7 @@ export @safe nothrow @nogc static:
         StringBuilder_ASCII ret = StringBuilder_ASCII(globalAllocator());
         auto result = encode(ret, input);
 
-        if (!result)
+        if(!result)
             return typeof(return)(result.getError);
         else
             return typeof(return)(ret);
@@ -45,7 +45,7 @@ export @safe nothrow @nogc static:
         StringBuilder_ASCII ret = StringBuilder_ASCII(globalAllocator());
         auto result = encode(ret, input);
 
-        if (!result)
+        if(!result)
             return typeof(return)(result.getError);
         else
             return typeof(return)(ret);
@@ -56,7 +56,7 @@ export @safe nothrow @nogc static:
         StringBuilder_ASCII ret = StringBuilder_ASCII(globalAllocator());
         auto result = encode(ret, input);
 
-        if (!result)
+        if(!result)
             return typeof(return)(result.getError);
         else
             return typeof(return)(ret);
@@ -67,7 +67,7 @@ export @safe nothrow @nogc static:
         StringBuilder_ASCII ret = StringBuilder_ASCII(globalAllocator());
         auto result = encode(ret, input);
 
-        if (!result)
+        if(!result)
             return typeof(return)(result.getError);
         else
             return typeof(return)(ret);
@@ -78,7 +78,7 @@ export @safe nothrow @nogc static:
         StringBuilder_ASCII ret = StringBuilder_ASCII(globalAllocator());
         auto result = encode(ret, input);
 
-        if (!result)
+        if(!result)
             return typeof(return)(result.getError);
         else
             return typeof(return)(ret);
@@ -89,7 +89,7 @@ export @safe nothrow @nogc static:
         StringBuilder_ASCII ret = StringBuilder_ASCII(globalAllocator());
         auto result = encode(ret, input);
 
-        if (!result)
+        if(!result)
             return typeof(return)(result.getError);
         else
             return typeof(return)(ret);
@@ -100,7 +100,7 @@ export @safe nothrow @nogc static:
         StringBuilder_ASCII ret = StringBuilder_ASCII(globalAllocator());
         auto result = encode(ret, input);
 
-        if (!result)
+        if(!result)
             return typeof(return)(result.getError);
         else
             return typeof(return)(ret);
@@ -199,7 +199,7 @@ export @safe nothrow @nogc static:
         StringBuilder_UTF32 ret = StringBuilder_UTF32(globalAllocator());
         auto result = decode(ret, input);
 
-        if (!result)
+        if(!result)
             return typeof(return)(result.getError);
         else
             return typeof(return)(ret);
@@ -210,7 +210,7 @@ export @safe nothrow @nogc static:
         StringBuilder_UTF32 ret = StringBuilder_UTF32(globalAllocator());
         auto result = decode(ret, input);
 
-        if (!result)
+        if(!result)
             return typeof(return)(result.getError);
         else
             return typeof(return)(ret);
@@ -250,7 +250,7 @@ private:
     ErrorResult encode_(Input)(scope StringBuilder_ASCII output, scope Input input, out bool haveEncoded) @trusted {
         size_t n = InitialN, delta, bias = InitialBias, numberOfBasicCharacters;
 
-        if (input.length == 0)
+        if(input.length == 0)
             return ErrorResult.init;
 
         ubyte encodeDigit(uint c, int flag) {
@@ -260,17 +260,17 @@ private:
         {
             int inHex;
 
-            foreach (c; input) {
-                if (c == '%') {
-                    if (inHex > 0)
+            foreach(c; input) {
+                if(c == '%') {
+                    if(inHex > 0)
                         return ErrorResult(MalformedInputException("Error percentage while handling percentage encoding"));
 
                     output ~= [cast(ubyte)c];
                     numberOfBasicCharacters++;
 
                     inHex = 1;
-                } else if (inHex > 0) {
-                    switch (c) {
+                } else if(inHex > 0) {
+                    switch(c) {
                     case '0': .. case '9':
                     case 'A': .. case 'Z':
                         output ~= [cast(ubyte)c];
@@ -286,9 +286,9 @@ private:
                     numberOfBasicCharacters++;
 
                     inHex++;
-                    if (inHex == 3)
+                    if(inHex == 3)
                         inHex = 0;
-                } else if (c < 0x80) {
+                } else if(c < 0x80) {
                     // basic character
                     output ~= [cast(ubyte)c];
                     numberOfBasicCharacters++;
@@ -296,40 +296,40 @@ private:
             }
         }
 
-        if (numberOfBasicCharacters == input.length)
+        if(numberOfBasicCharacters == input.length)
             return ErrorResult.init;
         haveEncoded = true;
         output ~= [Deliminator];
 
         size_t amountConsumed = numberOfBasicCharacters;
 
-        while (amountConsumed < input.encodingLength) {
+        while(amountConsumed < input.encodingLength) {
             uint m = uint.max;
 
-            foreach (c; input) {
-                if (c >= n && c < m)
+            foreach(c; input) {
+                if(c >= n && c < m)
                     m = c;
             }
 
-            if (m - n > (uint.max - delta) / (amountConsumed + 1))
+            if(m - n > (uint.max - delta) / (amountConsumed + 1))
                 return ErrorResult(MalformedInputException("Error delta location calculation would overflow"));
             delta += (m - n) * (amountConsumed + 1);
             n = m;
 
-            foreach (c; input) {
-                if (c < n || c < 0x80) {
+            foreach(c; input) {
+                if(c < n || c < 0x80) {
                     delta++;
-                    if (delta == 0)
+                    if(delta == 0)
                         return ErrorResult(MalformedInputException("Error delta location calculation has overflown"));
                 }
 
-                if (c == n) {
+                if(c == n) {
                     uint q = cast(uint)delta;
 
-                    for (size_t k = Base;; k += Base) {
+                    for(size_t k = Base;; k += Base) {
                         const t = k <= bias ? Tmin : (k >= bias + Tmax) ? Tmax : (k - bias);
 
-                        if (q < t)
+                        if(q < t)
                             break;
 
                         output ~= [encodeDigit(cast(uint)(t + ((q - t) % (Base - t))), 0)];
@@ -357,8 +357,8 @@ private:
         bool isFirst = true;
 
         bool copyIfBasic(scope Input from) {
-            foreach (c; from) {
-                if (c > (2 ^^ Base) - 1)
+            foreach(c; from) {
+                if(c > (2 ^^ Base) - 1)
                     return false;
             }
 
@@ -368,7 +368,7 @@ private:
 
         // a-z,0-9
         ubyte decodeDigit(ubyte from) {
-            switch (from) {
+            switch(from) {
             case '0': .. case '9':
                 return cast(ubyte)(from - 22);
             case 'A': .. case 'Z':
@@ -382,15 +382,15 @@ private:
 
         {
             ptrdiff_t lastDelimIndex = input.lastIndexOf([Deliminator]);
-            if (lastDelimIndex < 0) {
-                if (copyIfBasic(input)) {
+            if(lastDelimIndex < 0) {
+                if(copyIfBasic(input)) {
                     input = Input.init;
                 } else {
                     return ErrorResult(MalformedInputException(
                             "Found non-basic character [0..(2^base)-1] inclusive before final deliminator."));
                 }
             } else {
-                if (copyIfBasic(input[0 .. lastDelimIndex])) {
+                if(copyIfBasic(input[0 .. lastDelimIndex])) {
                     input = input[lastDelimIndex + 1 .. $];
                 } else {
                     return ErrorResult(MalformedInputException(
@@ -399,12 +399,12 @@ private:
             }
         }
 
-        while (!input.empty) {
+        while(!input.empty) {
             size_t oldOutputPosition = outputPosition;
             size_t w = 1;
 
-            for (size_t k = Base;; k += Base) {
-                if (input.empty) {
+            for(size_t k = Base;; k += Base) {
+                if(input.empty) {
                     // nothing to consume, OH NOES
                     return ErrorResult(MalformedInputException("Expected input, but empty"));
                 }
@@ -412,23 +412,23 @@ private:
                 const digit = decodeDigit(input.front);
                 input.popFront;
 
-                if (digit >= Base)
+                if(digit >= Base)
                     return ErrorResult(MalformedInputException("Input is out of range of the valid basic characters"));
-                else if (digit > (size_t.max - outputPosition) / w)
+                else if(digit > (size_t.max - outputPosition) / w)
                     return ErrorResult(MalformedInputException("Could not add input character, would overflow"));
 
                 outputPosition += digit * w;
                 const t = k <= bias ? Tmin : (k >= bias + Tmax ? Tmax : (k - bias));
 
-                if (digit < t)
+                if(digit < t)
                     break;
-                else if (w > size_t.max / (Base - t))
+                else if(w > size_t.max / (Base - t))
                     return ErrorResult(MalformedInputException("Could not add input character, would overflow accumulator"));
 
                 w *= Base - t;
             }
 
-            if (outputPosition / (output.length + 1) > size_t.max - toInsert)
+            if(outputPosition / (output.length + 1) > size_t.max - toInsert)
                 return ErrorResult(MalformedInputException("Could not add input character, would overflow accumulator"));
             toInsert += outputPosition / (output.length + 1);
 
@@ -444,7 +444,7 @@ private:
     }
 
     size_t adapt(size_t delta, size_t numPoints, bool firstTime) {
-        if (firstTime)
+        if(firstTime)
             delta /= Damp;
         else
             delta /= 2;
@@ -452,7 +452,7 @@ private:
         delta += delta / numPoints;
         size_t k;
 
-        while (delta > ((Base - Tmin) * Tmax) / 2) {
+        while(delta > ((Base - Tmin) * Tmax) / 2) {
             delta /= Base - Tmin;
             k += Base;
         }
@@ -547,7 +547,7 @@ export @safe nothrow @nogc static:
         StringBuilder_ASCII ret = StringBuilder_ASCII(globalAllocator());
         auto result = encode(ret, input);
 
-        if (!result)
+        if(!result)
             return typeof(return)(result.getError);
         else
             return typeof(return)(ret);
@@ -558,7 +558,7 @@ export @safe nothrow @nogc static:
         StringBuilder_ASCII ret = StringBuilder_ASCII(globalAllocator());
         auto result = encode(ret, input);
 
-        if (!result)
+        if(!result)
             return typeof(return)(result.getError);
         else
             return typeof(return)(ret);
@@ -569,7 +569,7 @@ export @safe nothrow @nogc static:
         StringBuilder_ASCII ret = StringBuilder_ASCII(globalAllocator());
         auto result = encode(ret, input);
 
-        if (!result)
+        if(!result)
             return typeof(return)(result.getError);
         else
             return typeof(return)(ret);
@@ -580,7 +580,7 @@ export @safe nothrow @nogc static:
         StringBuilder_ASCII ret = StringBuilder_ASCII(globalAllocator());
         auto result = encode(ret, input);
 
-        if (!result)
+        if(!result)
             return typeof(return)(result.getError);
         else
             return typeof(return)(ret);
@@ -591,7 +591,7 @@ export @safe nothrow @nogc static:
         StringBuilder_ASCII ret = StringBuilder_ASCII(globalAllocator());
         auto result = encode(ret, input);
 
-        if (!result)
+        if(!result)
             return typeof(return)(result.getError);
         else
             return typeof(return)(ret);
@@ -602,7 +602,7 @@ export @safe nothrow @nogc static:
         StringBuilder_ASCII ret = StringBuilder_ASCII(globalAllocator());
         auto result = encode(ret, input);
 
-        if (!result)
+        if(!result)
             return typeof(return)(result.getError);
         else
             return typeof(return)(ret);
@@ -613,7 +613,7 @@ export @safe nothrow @nogc static:
         StringBuilder_ASCII ret = StringBuilder_ASCII(globalAllocator());
         auto result = encode(ret, input);
 
-        if (!result)
+        if(!result)
             return typeof(return)(result.getError);
         else
             return typeof(return)(ret);
@@ -624,7 +624,7 @@ export @safe nothrow @nogc static:
         StringBuilder_ASCII ret = StringBuilder_ASCII(globalAllocator());
         auto result = encode(ret, input);
 
-        if (!result)
+        if(!result)
             return typeof(return)(result.getError);
         else
             return typeof(return)(ret);
@@ -675,7 +675,7 @@ export @safe nothrow @nogc static:
         StringBuilder_UTF32 ret = StringBuilder_UTF32(globalAllocator());
         auto result = decode(ret, input);
 
-        if (!result)
+        if(!result)
             return typeof(return)(result.getError);
         else
             return typeof(return)(ret);
@@ -686,7 +686,7 @@ export @safe nothrow @nogc static:
         StringBuilder_UTF32 ret = StringBuilder_UTF32(globalAllocator());
         auto result = decode(ret, input);
 
-        if (!result)
+        if(!result)
             return typeof(return)(result.getError);
         else
             return typeof(return)(ret);
@@ -728,11 +728,11 @@ private:
 
         bool haveEncoded;
         auto result = Punycode.encode(output, input, haveEncoded);
-        if (!result)
+        if(!result)
             return result;
 
-        if (haveEncoded) {
-            if (output[originalLength .. $].lastIndexOf(['-']) != 0)
+        if(haveEncoded) {
+            if(output[originalLength .. $].lastIndexOf(['-']) != 0)
                 output.insert(originalLength, "xn--");
             else
                 output.insert(originalLength, "xn-");
@@ -742,9 +742,9 @@ private:
     }
 
     ErrorResult decode_(Input)(scope StringBuilder_UTF32 output, scope Input input) @trusted {
-        if (input.startsWith("xn--")) {
+        if(input.startsWith("xn--")) {
             // got a prefix, but do we have a deliminator?
-            if (input.lastIndexOf(['-']) == 3) {
+            if(input.lastIndexOf(['-']) == 3) {
                 // dangit, we need to keep one from ACE prefix!
                 input = input[3 .. $];
             } else {

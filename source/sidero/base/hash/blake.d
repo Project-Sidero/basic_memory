@@ -46,13 +46,13 @@ struct BlakeHash224 {
         size_t left = buflen;
         size_t fill = 64 - left;
 
-        if (left > 0 && data.length >= fill) {
-            foreach (i, ref v; buf[left .. left + fill])
+        if(left > 0 && data.length >= fill) {
+            foreach(i, ref v; buf[left .. left + fill])
                 v = data[i];
             //buf[left .. left + fill][] = data[0 .. fill][];
             t[0] += 512;
 
-            if (t[0] == 0)
+            if(t[0] == 0)
                 t[1]++;
 
             compress(buf[0 .. 64]);
@@ -61,10 +61,10 @@ struct BlakeHash224 {
             left = 0;
         }
 
-        while (data.length >= 64) {
+        while(data.length >= 64) {
             t[0] += 512;
 
-            if (t[0] == 0)
+            if(t[0] == 0)
                 t[1]++;
 
             compress(data[0 .. 64]);
@@ -72,8 +72,8 @@ struct BlakeHash224 {
             data = data[64 .. $];
         }
 
-        if (data.length > 0) {
-            foreach (i, ref v; buf[left .. left + data.length])
+        if(data.length > 0) {
+            foreach(i, ref v; buf[left .. left + data.length])
                 v = data[i];
             //buf[left .. left + data.length][] = data[];
             buflen = left + data.length;
@@ -86,18 +86,18 @@ struct BlakeHash224 {
         ubyte[8] msglen;
         uint lo = t[0] + cast(uint)(buflen << 3), hi = t[1];
 
-        if (lo < buflen << 3)
+        if(lo < buflen << 3)
             hi++;
 
         msglen[0 .. 4] = nativeToBigEndian(hi)[];
         msglen[4 .. 8] = nativeToBigEndian(lo)[];
 
-        if (buflen == 55) {
+        if(buflen == 55) {
             t[0] -= 8;
             addData(0x80);
         } else {
-            if (buflen < 55) {
-                if (buflen == 0)
+            if(buflen < 55) {
+                if(buflen == 0)
                     nullt = true;
 
                 t[0] -= 440 - (buflen << 3);
@@ -120,7 +120,7 @@ struct BlakeHash224 {
 
         ubyte[28] ret;
 
-        static foreach (i; 0 .. 7)
+        static foreach(i; 0 .. 7)
             ret[i * 4 .. (i + 1) * 4] = nativeToBigEndian(h[i]);
 
         return ret;
@@ -175,23 +175,23 @@ private:
             v[b] = ROT(v[b] ^ v[c], 7);
         }
 
-        static foreach (i; 0 .. 16)
+        static foreach(i; 0 .. 16)
             m[i] = bigEndianToNative!uint(block[i * 4 .. (i + 1) * 4]);
         v[0 .. 8] = h[0 .. 8];
 
-        static foreach (i; 0 .. 4)
+        static foreach(i; 0 .. 4)
             v[8 + i] = s[i] ^ u256[i];
-        static foreach (i; 4 .. 8)
+        static foreach(i; 4 .. 8)
             v[8 + i] = u256[i];
 
-        if (!nullt) {
+        if(!nullt) {
             v[12] ^= t[0];
             v[13] ^= t[0];
             v[14] ^= t[1];
             v[15] ^= t[1];
         }
 
-        foreach (i; 0 .. 14) {
+        foreach(i; 0 .. 14) {
             G(0, 4, 8, 12, 0, i);
             G(1, 5, 9, 13, 2, i);
             G(2, 6, 10, 14, 4, i);
@@ -203,9 +203,9 @@ private:
             G(3, 4, 9, 14, 14, i);
         }
 
-        static foreach (i; 0 .. 16)
+        static foreach(i; 0 .. 16)
             h[i % 8] ^= v[i];
-        static foreach (i; 0 .. 8)
+        static foreach(i; 0 .. 8)
             h[i] ^= s[i % 4];
     }
 }
@@ -222,13 +222,13 @@ struct BlakeHash256 {
         size_t left = buflen;
         size_t fill = 64 - left;
 
-        if (left > 0 && data.length >= fill) {
-            foreach (i, ref v; buf[left .. left + fill])
+        if(left > 0 && data.length >= fill) {
+            foreach(i, ref v; buf[left .. left + fill])
                 v = data[i];
             //buf[left .. left + fill][] = data[0 .. fill][];
             t[0] += 512;
 
-            if (t[0] == 0)
+            if(t[0] == 0)
                 t[1]++;
 
             compress(buf[0 .. 64]);
@@ -237,10 +237,10 @@ struct BlakeHash256 {
             left = 0;
         }
 
-        while (data.length >= 64) {
+        while(data.length >= 64) {
             t[0] += 512;
 
-            if (t[0] == 0)
+            if(t[0] == 0)
                 t[1]++;
 
             compress(data[0 .. 64]);
@@ -248,8 +248,8 @@ struct BlakeHash256 {
             data = data[64 .. $];
         }
 
-        if (data.length > 0) {
-            foreach (i, ref v; buf[left .. left + data.length])
+        if(data.length > 0) {
+            foreach(i, ref v; buf[left .. left + data.length])
                 v = data[i];
             //buf[left .. left + data.length][] = data[];
             buflen = left + data.length;
@@ -262,18 +262,18 @@ struct BlakeHash256 {
         ubyte[8] msglen;
         uint lo = t[0] + cast(uint)(buflen << 3), hi = t[1];
 
-        if (lo < buflen << 3)
+        if(lo < buflen << 3)
             hi++;
 
         msglen[0 .. 4] = nativeToBigEndian(hi)[];
         msglen[4 .. 8] = nativeToBigEndian(lo)[];
 
-        if (buflen == 55) {
+        if(buflen == 55) {
             t[0] -= 8;
             addData(0x81);
         } else {
-            if (buflen < 55) {
-                if (buflen == 0)
+            if(buflen < 55) {
+                if(buflen == 0)
                     nullt = true;
 
                 t[0] -= 440 - (buflen << 3);
@@ -296,7 +296,7 @@ struct BlakeHash256 {
 
         ubyte[32] ret;
 
-        static foreach (i; 0 .. 8)
+        static foreach(i; 0 .. 8)
             ret[i * 4 .. (i + 1) * 4] = nativeToBigEndian(h[i]);
 
         return ret;
@@ -351,23 +351,23 @@ private:
             v[b] = ROT(v[b] ^ v[c], 7);
         }
 
-        static foreach (i; 0 .. 16)
+        static foreach(i; 0 .. 16)
             m[i] = bigEndianToNative!uint(block[i * 4 .. (i + 1) * 4]);
         v[0 .. 8] = h[0 .. 8];
 
-        static foreach (i; 0 .. 4)
+        static foreach(i; 0 .. 4)
             v[8 + i] = s[i] ^ u256[i];
-        static foreach (i; 4 .. 8)
+        static foreach(i; 4 .. 8)
             v[8 + i] = u256[i];
 
-        if (!nullt) {
+        if(!nullt) {
             v[12] ^= t[0];
             v[13] ^= t[0];
             v[14] ^= t[1];
             v[15] ^= t[1];
         }
 
-        foreach (i; 0 .. 14) {
+        foreach(i; 0 .. 14) {
             G(0, 4, 8, 12, 0, i);
             G(1, 5, 9, 13, 2, i);
             G(2, 6, 10, 14, 4, i);
@@ -379,9 +379,9 @@ private:
             G(3, 4, 9, 14, 14, i);
         }
 
-        static foreach (i; 0 .. 16)
+        static foreach(i; 0 .. 16)
             h[i % 8] ^= v[i];
-        static foreach (i; 0 .. 8)
+        static foreach(i; 0 .. 8)
             h[i] ^= s[i % 4];
     }
 }
@@ -398,13 +398,13 @@ struct BlakeHash384 {
         size_t left = buflen;
         size_t fill = 128 - left;
 
-        if (left > 0 && data.length >= fill) {
-            foreach (i, ref v; buf[left .. left + fill])
+        if(left > 0 && data.length >= fill) {
+            foreach(i, ref v; buf[left .. left + fill])
                 v = data[i];
             //buf[left .. left + fill][] = data[0 .. fill][];
             t[0] += 1024;
 
-            if (t[0] == 0)
+            if(t[0] == 0)
                 t[1]++;
 
             compress(buf[0 .. 128]);
@@ -413,10 +413,10 @@ struct BlakeHash384 {
             left = 0;
         }
 
-        while (data.length >= 128) {
+        while(data.length >= 128) {
             t[0] += 1024;
 
-            if (t[0] == 0)
+            if(t[0] == 0)
                 t[1]++;
 
             compress(data[0 .. 128]);
@@ -424,8 +424,8 @@ struct BlakeHash384 {
             data = data[128 .. $];
         }
 
-        if (data.length > 0) {
-            foreach (i, ref v; buf[left .. left + data.length])
+        if(data.length > 0) {
+            foreach(i, ref v; buf[left .. left + data.length])
                 v = data[i];
             //buf[left .. left + data.length][] = data[];
             buflen = left + data.length;
@@ -438,18 +438,18 @@ struct BlakeHash384 {
         ubyte[16] msglen;
         ulong lo = t[0] + cast(ulong)(buflen << 3), hi = t[1];
 
-        if (lo < buflen << 3)
+        if(lo < buflen << 3)
             hi++;
 
         msglen[0 .. 8] = nativeToBigEndian(hi)[];
         msglen[8 .. 16] = nativeToBigEndian(lo)[];
 
-        if (buflen == 111) {
+        if(buflen == 111) {
             t[0] -= 8;
             addData(0x80);
         } else {
-            if (buflen < 111) {
-                if (buflen == 0)
+            if(buflen < 111) {
+                if(buflen == 0)
                     nullt = true;
 
                 t[0] -= 888 - (buflen << 3);
@@ -472,7 +472,7 @@ struct BlakeHash384 {
 
         ubyte[48] ret;
 
-        static foreach (i; 0 .. 6)
+        static foreach(i; 0 .. 6)
             ret[i * 8 .. (i + 1) * 8] = nativeToBigEndian(h[i]);
 
         return ret;
@@ -533,23 +533,23 @@ private:
             v[b] = ROT(v[b] ^ v[c], 11);
         }
 
-        static foreach (i; 0 .. 16)
+        static foreach(i; 0 .. 16)
             m[i] = bigEndianToNative!ulong(block[i * 8 .. (i + 1) * 8]);
         v[0 .. 8] = h[0 .. 8];
 
-        static foreach (i; 0 .. 4)
+        static foreach(i; 0 .. 4)
             v[8 + i] = s[i] ^ u512[i];
-        static foreach (i; 4 .. 8)
+        static foreach(i; 4 .. 8)
             v[8 + i] = u512[i];
 
-        if (!nullt) {
+        if(!nullt) {
             v[12] ^= t[0];
             v[13] ^= t[0];
             v[14] ^= t[1];
             v[15] ^= t[1];
         }
 
-        foreach (i; 0 .. 16) {
+        foreach(i; 0 .. 16) {
             G(0, 4, 8, 12, 0, i);
             G(1, 5, 9, 13, 2, i);
             G(2, 6, 10, 14, 4, i);
@@ -561,9 +561,9 @@ private:
             G(3, 4, 9, 14, 14, i);
         }
 
-        static foreach (i; 0 .. 16)
+        static foreach(i; 0 .. 16)
             h[i % 8] ^= v[i];
-        static foreach (i; 0 .. 8)
+        static foreach(i; 0 .. 8)
             h[i] ^= s[i % 4];
     }
 }
@@ -580,14 +580,14 @@ struct BlakeHash512 {
         size_t left = buflen;
         size_t fill = 128 - left;
 
-        if (left > 0 && data.length >= fill) {
-            foreach (i, ref v; buf[left .. left + fill])
+        if(left > 0 && data.length >= fill) {
+            foreach(i, ref v; buf[left .. left + fill])
                 v = data[i];
             //buf[left .. left + fill][] = data[0 .. fill][];
 
             t[0] += 1024;
 
-            if (t[0] == 0)
+            if(t[0] == 0)
                 t[1]++;
 
             compress(buf[0 .. 128]);
@@ -596,10 +596,10 @@ struct BlakeHash512 {
             left = 0;
         }
 
-        while (data.length >= 128) {
+        while(data.length >= 128) {
             t[0] += 1024;
 
-            if (t[0] == 0)
+            if(t[0] == 0)
                 t[1]++;
 
             compress(data[0 .. 128]);
@@ -607,8 +607,8 @@ struct BlakeHash512 {
             data = data[128 .. $];
         }
 
-        if (data.length > 0) {
-            foreach (i, ref v; buf[left .. left + data.length])
+        if(data.length > 0) {
+            foreach(i, ref v; buf[left .. left + data.length])
                 v = data[i];
             //buf[left .. left + data.length][] = data[];
 
@@ -622,18 +622,18 @@ struct BlakeHash512 {
         ubyte[16] msglen;
         ulong lo = t[0] + cast(ulong)(buflen << 3), hi = t[1];
 
-        if (lo < buflen << 3)
+        if(lo < buflen << 3)
             hi++;
 
         msglen[0 .. 8] = nativeToBigEndian(hi)[];
         msglen[8 .. 16] = nativeToBigEndian(lo)[];
 
-        if (buflen == 111) {
+        if(buflen == 111) {
             t[0] -= 8;
             addData(0x81);
         } else {
-            if (buflen < 111) {
-                if (buflen == 0)
+            if(buflen < 111) {
+                if(buflen == 0)
                     nullt = true;
 
                 t[0] -= 888 - (buflen << 3);
@@ -656,7 +656,7 @@ struct BlakeHash512 {
 
         ubyte[64] ret;
 
-        static foreach (i; 0 .. 8)
+        static foreach(i; 0 .. 8)
             ret[i * 8 .. (i + 1) * 8] = nativeToBigEndian(h[i]);
 
         return ret;
@@ -719,23 +719,23 @@ private:
             v[b] = ROT(v[b] ^ v[c], 11);
         }
 
-        static foreach (i; 0 .. 16)
+        static foreach(i; 0 .. 16)
             m[i] = bigEndianToNative!ulong(block[i * 8 .. (i + 1) * 8]);
         v[0 .. 8] = h[0 .. 8];
 
-        static foreach (i; 0 .. 4)
+        static foreach(i; 0 .. 4)
             v[8 + i] = s[i] ^ u512[i];
-        static foreach (i; 4 .. 8)
+        static foreach(i; 4 .. 8)
             v[8 + i] = u512[i];
 
-        if (!nullt) {
+        if(!nullt) {
             v[12] ^= t[0];
             v[13] ^= t[0];
             v[14] ^= t[1];
             v[15] ^= t[1];
         }
 
-        foreach (i; 0 .. 16) {
+        foreach(i; 0 .. 16) {
             G(0, 4, 8, 12, 0, i);
             G(1, 5, 9, 13, 2, i);
             G(2, 6, 10, 14, 4, i);
@@ -747,9 +747,9 @@ private:
             G(3, 4, 9, 14, 14, i);
         }
 
-        static foreach (i; 0 .. 16)
+        static foreach(i; 0 .. 16)
             h[i % 8] ^= v[i];
-        static foreach (i; 0 .. 8)
+        static foreach(i; 0 .. 8)
             h[i] ^= s[i % 4];
     }
 }
@@ -776,8 +776,8 @@ static immutable uint[16] u256 = [
 static immutable ulong[16] u512 = [
     0x243f6a8885a308d3, 0x13198a2e03707344, 0xa4093822299f31d0, 0x082efa98ec4e6c89, 0x452821e638d01377,
     0xbe5466cf34e90c6c, 0xc0ac29b7c97c50dd, 0x3f84d5b5b5470917, 0x9216d5d98979fb1b,
-    0xd1310ba698dfb5ac, 0x2ffd72dbd01adfb7, 0xb8e1afed6a267e96, 0xba7c9045f12c7f99, 0x24a19947b3916cf7,
-    0x0801f2e2858efc16, 0x636920d871574e69
+    0xd1310ba698dfb5ac, 0x2ffd72dbd01adfb7,
+    0xb8e1afed6a267e96, 0xba7c9045f12c7f99, 0x24a19947b3916cf7, 0x0801f2e2858efc16, 0x636920d871574e69
 ];
 
 static immutable ubyte[129] padding = [

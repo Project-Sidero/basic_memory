@@ -91,7 +91,7 @@ __gshared {
 }
 
 void initGlobalTrees() @trusted {
-    if (isGlobalTreesSetup)
+    if(isGlobalTreesSetup)
         return;
 
     initTreeLock.pureLock;
@@ -120,11 +120,11 @@ void initGlobalTrees() @trusted {
 }
 
 ErrorInfo getDeflateHuffmanBits(DepthType)(scope const(DepthType)[] lengths, scope void delegate(ushort, size_t,
-    size_t) @safe nothrow @nogc gotValue) {
+        size_t) @safe nothrow @nogc gotValue) {
     size_t[16] bl_count;
 
-    foreach (v; lengths[0 .. lengths.length]) {
-        if (v > 15)
+    foreach(v; lengths[0 .. lengths.length]) {
+        if(v > 15)
             return ErrorInfo(MalformedInputException("Invalid huffman length"));
         bl_count[v]++;
     }
@@ -136,15 +136,15 @@ ErrorInfo getDeflateHuffmanBits(DepthType)(scope const(DepthType)[] lengths, sco
     next_code[1] = 0;
 
     // skip first entry which will be zero.
-    foreach (bits; 2 .. 16) {
+    foreach(bits; 2 .. 16) {
         code += bl_count[bits - 1];
         code <<= 1;
 
         next_code[bits] = code;
     }
 
-    foreach (offset, length; lengths) {
-        if (length == 0)
+    foreach(offset, length; lengths) {
+        if(length == 0)
             continue;
 
         gotValue(cast(ushort)(next_code[length]++), length, offset);

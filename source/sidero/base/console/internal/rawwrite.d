@@ -6,10 +6,10 @@ import sidero.base.text;
 export @safe nothrow @nogc:
 
 void rawWriteImpl(scope InBandInfo input, bool useError = false) @trusted {
-    version (Windows) {
+    version(Windows) {
         import core.sys.windows.windows;
 
-        if (useWindows) {
+        if(useWindows) {
             HANDLE hOut = useError ? hStdError : hStdout;
 
             CONSOLE_SCREEN_BUFFER_INFO currentInfo;
@@ -17,7 +17,7 @@ void rawWriteImpl(scope InBandInfo input, bool useError = false) @trusted {
 
             WORD attributes;
 
-            final switch (input.foregroundColor) {
+            final switch(input.foregroundColor) {
             case ConsoleColor.Black:
                 break;
             case ConsoleColor.Red:
@@ -49,14 +49,14 @@ void rawWriteImpl(scope InBandInfo input, bool useError = false) @trusted {
             case ConsoleColor.Unknown:
                 enum FRGB = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
 
-                if (input.resetDefaults)
+                if(input.resetDefaults)
                     attributes |= FRGB;
                 else
                     attributes |= currentInfo.wAttributes & FRGB;
                 break;
             }
 
-            final switch (input.backgroundColor) {
+            final switch(input.backgroundColor) {
             case ConsoleColor.Black:
                 break;
             case ConsoleColor.Red:
@@ -87,7 +87,7 @@ void rawWriteImpl(scope InBandInfo input, bool useError = false) @trusted {
                 break;
             case ConsoleColor.Unknown:
                 enum BRGB = BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE;
-                if (!input.resetDefaults)
+                if(!input.resetDefaults)
                     attributes |= currentInfo.wAttributes & BRGB;
                 break;
             }
@@ -97,13 +97,13 @@ void rawWriteImpl(scope InBandInfo input, bool useError = false) @trusted {
         }
     }
 
-    if (useANSI) {
-        if (input.resetDefaults)
+    if(useANSI) {
+        if(input.resetDefaults)
             rawWriteImpl(String_UTF8(ANSI_Reset), useError);
 
         string fg, bg;
 
-        final switch (input.foregroundColor) {
+        final switch(input.foregroundColor) {
         case ConsoleColor.Black:
             fg = ANSI_ESC ~ "30m";
             break;
@@ -132,7 +132,7 @@ void rawWriteImpl(scope InBandInfo input, bool useError = false) @trusted {
             break;
         }
 
-        final switch (input.backgroundColor) {
+        final switch(input.backgroundColor) {
         case ConsoleColor.Black:
             bg = ANSI_ESC ~ "40m";
             break;
@@ -161,9 +161,9 @@ void rawWriteImpl(scope InBandInfo input, bool useError = false) @trusted {
             break;
         }
 
-        if (fg !is null)
+        if(fg !is null)
             rawWriteImpl(String_UTF8(fg), useError);
-        if (bg !is null)
+        if(bg !is null)
             rawWriteImpl(String_UTF8(bg), useError);
     }
 }
@@ -171,26 +171,26 @@ void rawWriteImpl(scope InBandInfo input, bool useError = false) @trusted {
 void rawWriteImpl(scope String_ASCII input, bool useError = false) @trusted {
     import core.stdc.stdio : fwrite, fflush;
 
-    if (!input.isPtrNullTerminated())
+    if(!input.isPtrNullTerminated())
         input = input.dup;
     input.stripZeroTerminator;
 
     uint useLength = cast(uint)input.length;
-    if (input.length == 0)
+    if(input.length == 0)
         return;
 
-    version (Windows) {
-        if (useWindows) {
+    version(Windows) {
+        if(useWindows) {
             import core.sys.windows.windows : WriteConsoleA;
 
-            if (WriteConsoleA(useError ? hStdError : hStdout, cast(void*)input.ptr, useLength, null, null))
+            if(WriteConsoleA(useError ? hStdError : hStdout, cast(void*)input.ptr, useLength, null, null))
                 return;
 
             initializeForStdioImpl(null, null, null, false, true);
         }
     }
 
-    if (useStdio) {
+    if(useStdio) {
         fwrite(input.ptr, char.sizeof, useLength, useError ? stdioError : stdioOut);
         fflush(useError ? stdioError : stdioOut);
     }
@@ -203,21 +203,21 @@ void rawWriteImpl(scope StringBuilder_ASCII input, bool useError = false) @trust
     inputA.stripZeroTerminator;
 
     uint useLength = cast(uint)inputA.length;
-    if (inputA.length == 0)
+    if(inputA.length == 0)
         return;
 
-    version (Windows) {
-        if (useWindows) {
+    version(Windows) {
+        if(useWindows) {
             import core.sys.windows.windows : WriteConsoleA;
 
-            if (WriteConsoleA(useError ? hStdError : hStdout, cast(void*)inputA.ptr, useLength, null, null))
+            if(WriteConsoleA(useError ? hStdError : hStdout, cast(void*)inputA.ptr, useLength, null, null))
                 return;
 
             initializeForStdioImpl(null, null, null, false, true);
         }
     }
 
-    if (useStdio) {
+    if(useStdio) {
         fwrite(inputA.ptr, char.sizeof, useLength, useError ? stdioError : stdioOut);
         fflush(useError ? stdioError : stdioOut);
     }
@@ -228,39 +228,39 @@ void rawWriteImpl(scope String_UTF8 input, bool useError = false) @trusted {
 
     uint useLength;
 
-    version (Windows) {
-        if (useWindows) {
+    version(Windows) {
+        if(useWindows) {
             import core.sys.windows.windows : WriteConsoleW;
 
             String_UTF16 input16 = input.byUTF16();
 
             {
-                if (!input16.isPtrNullTerminated())
+                if(!input16.isPtrNullTerminated())
                     input16 = input16.dup;
 
                 input16.stripZeroTerminator;
 
                 useLength = cast(uint)input16.length;
-                if (input16.length == 0)
+                if(input16.length == 0)
                     return;
             }
 
-            if (WriteConsoleW(useError ? hStdError : hStdout, cast(void*)input16.ptr, useLength, null, null))
+            if(WriteConsoleW(useError ? hStdError : hStdout, cast(void*)input16.ptr, useLength, null, null))
                 return;
 
             initializeForStdioImpl(null, null, null, false, true);
         }
     }
 
-    if (useStdio) {
+    if(useStdio) {
         {
-            if (!input.isPtrNullTerminated())
+            if(!input.isPtrNullTerminated())
                 input = input.dup;
 
             input.stripZeroTerminator;
 
             useLength = cast(uint)input.length;
-            if (input.length == 0)
+            if(input.length == 0)
                 return;
         }
 
@@ -274,8 +274,8 @@ void rawWriteImpl(scope StringBuilder_UTF8 input, bool useError = false) @truste
 
     uint useLength;
 
-    version (Windows) {
-        if (useWindows) {
+    version(Windows) {
+        if(useWindows) {
             import core.sys.windows.windows : WriteConsoleW;
 
             String_UTF16 input16 = input.byUTF16().asReadOnly();
@@ -284,25 +284,25 @@ void rawWriteImpl(scope StringBuilder_UTF8 input, bool useError = false) @truste
                 input16.stripZeroTerminator;
 
                 useLength = cast(uint)input16.length;
-                if (input16.length == 0)
+                if(input16.length == 0)
                     return;
             }
 
-            if (WriteConsoleW(useError ? hStdError : hStdout, cast(void*)input16.ptr, useLength, null, null))
+            if(WriteConsoleW(useError ? hStdError : hStdout, cast(void*)input16.ptr, useLength, null, null))
                 return;
 
             initializeForStdioImpl(null, null, null, false, true);
         }
     }
 
-    if (useStdio) {
+    if(useStdio) {
         String_UTF8 input8 = input.asReadOnly();
 
         {
             input8.stripZeroTerminator;
 
             useLength = cast(uint)input8.length;
-            if (input8.length == 0)
+            if(input8.length == 0)
                 return;
         }
 

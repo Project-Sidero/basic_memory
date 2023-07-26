@@ -17,19 +17,19 @@ size_t decomposeLength(scope ForeachOverUTF32Delegate input, bool compatibility 
     size_t len;
     dchar[3] hangulMap = void;
 
-    foreach (dchar c; input) {
+    foreach(dchar c; input) {
         auto decmap = sidero_utf_lut_getDecompositionMap(c);
         dstring got2;
         size_t len2;
 
-        if (compatibility && decmap.fullyDecomposedCompatibility.length > 0)
+        if(compatibility && decmap.fullyDecomposedCompatibility.length > 0)
             got2 = decmap.fullyDecomposedCompatibility;
-        else if (decmap.fullyDecomposed.length > 0 && (compatibility || decmap.tag == CompatibilityFormattingTag.None))
+        else if(decmap.fullyDecomposed.length > 0 && (compatibility || decmap.tag == CompatibilityFormattingTag.None))
             got2 = decmap.fullyDecomposed;
-        else if ((len2 = decomposeHangulSyllable(c, hangulMap)) > 0)
+        else if((len2 = decomposeHangulSyllable(c, hangulMap)) > 0)
             got2 = cast(dstring)hangulMap[0 .. len2];
 
-        if (got2.length > 0)
+        if(got2.length > 0)
             len += got2.length;
         else
             len++;
@@ -48,19 +48,19 @@ bool isDecomposed(scope dstring input, bool compatibility = false) @trusted {
 bool isDecomposed(scope ForeachOverUTF32Delegate input, bool compatibility = false,) @trusted {
     dchar[3] hangulMap = void;
 
-    foreach (dchar c; input) {
+    foreach(dchar c; input) {
         auto decmap = sidero_utf_lut_getDecompositionMap(c);
         dstring got;
         size_t len2;
 
-        if (compatibility && decmap.fullyDecomposedCompatibility.length > 0)
+        if(compatibility && decmap.fullyDecomposedCompatibility.length > 0)
             got = decmap.fullyDecomposedCompatibility;
-        else if (decmap.fullyDecomposed.length > 0 && (compatibility || decmap.tag == CompatibilityFormattingTag.None))
+        else if(decmap.fullyDecomposed.length > 0 && (compatibility || decmap.tag == CompatibilityFormattingTag.None))
             got = decmap.fullyDecomposed;
-        else if ((len2 = decomposeHangulSyllable(c, hangulMap)) > 0)
+        else if((len2 = decomposeHangulSyllable(c, hangulMap)) > 0)
             got = cast(dstring)hangulMap[0 .. len2];
 
-        if (got.length > 0)
+        if(got.length > 0)
             return false;
     }
 
@@ -87,19 +87,19 @@ void decompose(scope dchar[] array, scope ForeachOverUTF32Delegate input, bool c
     size_t soFar;
     dchar[3] hangulMap = void;
 
-    foreach (dchar c; input) {
+    foreach(dchar c; input) {
         auto decmap = sidero_utf_lut_getDecompositionMap(c);
         dstring got;
         size_t len;
 
-        if (compatibility && decmap.fullyDecomposedCompatibility.length > 0)
+        if(compatibility && decmap.fullyDecomposedCompatibility.length > 0)
             got = decmap.fullyDecomposedCompatibility;
-        else if (decmap.fullyDecomposed.length > 0 && (compatibility || decmap.tag == CompatibilityFormattingTag.None))
+        else if(decmap.fullyDecomposed.length > 0 && (compatibility || decmap.tag == CompatibilityFormattingTag.None))
             got = decmap.fullyDecomposed;
-        else if ((len = decomposeHangulSyllable(c, hangulMap)) > 0)
+        else if((len = decomposeHangulSyllable(c, hangulMap)) > 0)
             got = cast(dstring)hangulMap[0 .. len];
 
-        if (got.length > 0) {
+        if(got.length > 0) {
             foreach(i, v; got)
                 array[soFar + i] = v;
             soFar += got.length;

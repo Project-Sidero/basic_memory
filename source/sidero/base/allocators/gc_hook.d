@@ -2,7 +2,7 @@
 module sidero.base.allocators.gc_hook;
 import sidero.base.allocators.gc;
 
-version (D_BetterC) {
+version(D_BetterC) {
 } else {
     import core.memory : GC;
 

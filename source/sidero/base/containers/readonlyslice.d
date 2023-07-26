@@ -25,7 +25,7 @@ struct Slice(Type) {
         int opApplyImpl(Del)(scope Del del) @trusted scope {
             bool deallocateAllocator;
 
-            if (isNull)
+            if(isNull)
                 return 0;
 
             Iterator* oldIterator = this.iterator;
@@ -33,10 +33,10 @@ struct Slice(Type) {
             this.iterator = null;
             setupIterator;
 
-            if (oldIterator !is null)
+            if(oldIterator !is null)
                 this.iterator.literal = oldIterator.literal;
 
-            scope (exit) {
+            scope(exit) {
                 this.iterator.rc(false);
                 this.iterator = oldIterator;
             }
@@ -44,21 +44,21 @@ struct Slice(Type) {
             size_t offset;
             int result;
 
-            while (!empty) {
+            while(!empty) {
                 Result!Type temp = front();
-                if (!temp)
+                if(!temp)
                     return result;
 
                 Type got = temp;
 
-                static if (__traits(compiles, del(offset, got)))
+                static if(__traits(compiles, del(offset, got)))
                     result = del(offset, got);
-                else static if (__traits(compiles, del(got)))
+                else static if(__traits(compiles, del(got)))
                     result = del(got);
                 else
                     static assert(0);
 
-                if (result)
+                if(result)
                     return result;
 
                 offset++;
@@ -69,7 +69,7 @@ struct Slice(Type) {
         }
 
         int opApplyReverseImpl(Del)(scope Del del) @trusted scope {
-            if (isNull)
+            if(isNull)
                 return 0;
 
             Iterator* oldIterator = this.iterator;
@@ -77,10 +77,10 @@ struct Slice(Type) {
             this.iterator = null;
             setupIterator;
 
-            if (oldIterator !is null)
+            if(oldIterator !is null)
                 this.iterator.literal = oldIterator.literal;
 
-            scope (exit) {
+            scope(exit) {
                 this.iterator.rc(false);
                 this.iterator = oldIterator;
             }
@@ -88,21 +88,21 @@ struct Slice(Type) {
             size_t offset = this.length - 1;
             int result;
 
-            while (!empty) {
+            while(!empty) {
                 Result!Type temp = back();
-                if (!temp)
+                if(!temp)
                     return result;
 
                 Type got = temp;
 
-                static if (__traits(compiles, del(offset, got)))
+                static if(__traits(compiles, del(offset, got)))
                     result = del(offset, got);
-                else static if (__traits(compiles, del(got)))
+                else static if(__traits(compiles, del(got)))
                     result = del(got);
                 else
                     static assert(0);
 
-                if (result)
+                if(result)
                     return result;
 
                 offset--;
@@ -129,7 +129,7 @@ export:
 
         size_t lastIndex;
 
-        foreach (c; literal) {
+        foreach(c; literal) {
             assert(Literal[lastIndex] == c);
             lastIndex++;
         }
@@ -147,7 +147,7 @@ export:
 
         size_t lastIndex = Literal.length;
 
-        foreach_reverse (c; literal) {
+        foreach_reverse(c; literal) {
             lastIndex--;
             assert(Literal[lastIndex] == c);
         }
@@ -157,7 +157,7 @@ export:
 
 nothrow @nogc:
     const(ElementType)* ptr() @system {
-        if (this.lifeTime !is null)
+        if(this.lifeTime !is null)
             return this.lifeTime.original.ptr;
         else
             return this.literal.ptr;
@@ -170,13 +170,13 @@ nothrow @nogc:
 
     ///
     Slice opSlice() scope @trusted {
-        if (isNull)
+        if(isNull)
             return Slice();
 
         Slice ret;
 
         ret.lifeTime = this.lifeTime;
-        if (ret.lifeTime !is null)
+        if(ret.lifeTime !is null)
             atomicOp!"+="(ret.lifeTime.refCount, 1);
 
         ret.literal = this.literal;
@@ -187,15 +187,15 @@ nothrow @nogc:
     ///
     Result!Slice opSlice(ptrdiff_t startIndex, ptrdiff_t endIndex) scope @trusted {
         ErrorInfo errorInfo = changeIndexToOffset(startIndex, endIndex);
-        if (errorInfo.isSet)
+        if(errorInfo.isSet)
             return typeof(return)(errorInfo);
-        if (startIndex == endIndex)
+        if(startIndex == endIndex)
             return Result!Slice();
 
         Slice ret;
 
         ret.lifeTime = this.lifeTime;
-        if (ret.lifeTime !is null)
+        if(ret.lifeTime !is null)
             atomicOp!"+="(ret.lifeTime.refCount, 1);
 
         ret.literal = this.literal[startIndex .. endIndex];
@@ -208,7 +208,7 @@ nothrow @nogc:
         ret.literal = this.literal;
         ret.lifeTime = this.lifeTime;
 
-        if (this.lifeTime !is null)
+        if(this.lifeTime !is null)
             atomicOp!"+="(ret.lifeTime.refCount, 1);
 
         return ret;
@@ -240,9 +240,9 @@ nothrow @nogc:
     this(return scope ref Slice other) scope @trusted {
         this.tupleof = other.tupleof;
 
-        if (haveIterator)
+        if(haveIterator)
             this.iterator.rc(true);
-        if (this.lifeTime !is null)
+        if(this.lifeTime !is null)
             atomicOp!"+="(this.lifeTime.refCount, 1);
     }
 
@@ -259,11 +259,11 @@ nothrow @nogc:
         ///
         this(return scope LiteralType literal, return scope RCAllocator allocator = RCAllocator.init,
                 return scope LiteralType toDeallocate = null) scope {
-            if (literal.length > 0 || (toDeallocate.length > 0 && !allocator.isNull)) {
+            if(literal.length > 0 || (toDeallocate.length > 0 && !allocator.isNull)) {
                 this.literal = literal;
 
-                if (!allocator.isNull) {
-                    if (toDeallocate is null)
+                if(!allocator.isNull) {
+                    if(toDeallocate is null)
                         toDeallocate = literal;
 
                     lifeTime = allocator.make!LifeTime(1, allocator, toDeallocate);
@@ -283,10 +283,10 @@ nothrow @nogc:
     }
 
     ~this() scope @trusted {
-        if (haveIterator)
+        if(haveIterator)
             this.iterator.rc(false);
 
-        if (this.lifeTime !is null && atomicOp!"-="(lifeTime.refCount, 1) == 0) {
+        if(this.lifeTime !is null && atomicOp!"-="(lifeTime.refCount, 1) == 0) {
             RCAllocator allocator = lifeTime.allocator;
             allocator.dispose(cast(void[])lifeTime.original);
             allocator.dispose(lifeTime);
@@ -344,10 +344,10 @@ nothrow @nogc:
 
     ///
     Slice dup(RCAllocator allocator = RCAllocator.init) scope @trusted {
-        if (isNull)
+        if(isNull)
             return Slice();
 
-        if (allocator.isNull) {
+        if(allocator.isNull) {
             allocator = globalAllocator();
         }
 
@@ -380,7 +380,7 @@ nothrow @nogc:
     ///
     Result!Type opIndex(ptrdiff_t index) scope @trusted {
         ErrorInfo errorInfo = changeIndexToOffset(index);
-        if (errorInfo.isSet)
+        if(errorInfo.isSet)
             return typeof(return)(errorInfo);
 
         return Result!Type(*cast(Type*)&this.literal[index]);
@@ -433,7 +433,7 @@ nothrow @nogc:
 
         ulong ret = hashOf();
 
-        foreach (ref v; this.literal) {
+        foreach(ref v; this.literal) {
             ret = hashOf(v);
         }
 
@@ -451,7 +451,7 @@ nothrow @nogc:
             assert(!isNull);
             setupIterator;
 
-            if (empty)
+            if(empty)
                 return typeof(return)(RangeException);
 
             return typeof(return)(*cast(ElementType*)&this.iterator.literal[0]);
@@ -462,7 +462,7 @@ nothrow @nogc:
             assert(!isNull);
             setupIterator;
 
-            if (empty)
+            if(empty)
                 return typeof(return)(RangeException);
 
             return typeof(return)(*cast(ElementType*)&this.iterator.literal[$ - 1]);
@@ -499,7 +499,7 @@ nothrow @nogc:
     bool startsWith(scope LiteralType other...) scope @trusted {
         LiteralType us = this.literal;
 
-        if (other.length == 0 || other.length == 0 || other.length > us.length)
+        if(other.length == 0 || other.length == 0 || other.length > us.length)
             return false;
         return cast(Type[])us[0 .. other.length] == cast(Type[])other;
     }
@@ -518,7 +518,7 @@ nothrow @nogc:
     bool endsWith(scope LiteralType other...) scope @trusted {
         LiteralType us = this.literal;
 
-        if (us.length == 0 || other.length == 0 || us.length < other.length)
+        if(us.length == 0 || other.length == 0 || us.length < other.length)
             return false;
         return cast(Type[])us[$ - other.length .. $] == cast(Type[])other;
     }
@@ -537,11 +537,11 @@ nothrow @nogc:
     ptrdiff_t indexOf(scope LiteralType other...) scope @trusted {
         LiteralType us = this.literal;
 
-        if (other.length > us.length)
+        if(other.length > us.length)
             return -1;
 
-        foreach (i; 0 .. (us.length + 1) - other.length) {
-            if (cast(Type[])us[i .. i + other.length] == cast(Type[])other)
+        foreach(i; 0 .. (us.length + 1) - other.length) {
+            if(cast(Type[])us[i .. i + other.length] == cast(Type[])other)
                 return i;
         }
 
@@ -562,11 +562,11 @@ nothrow @nogc:
     ptrdiff_t lastIndexOf(scope LiteralType other...) scope @trusted {
         LiteralType us = this.literal;
 
-        if (other.length > us.length)
+        if(other.length > us.length)
             return -1;
 
-        foreach_reverse (i; 0 .. (us.length + 1) - other.length) {
-            if (cast(Type[])us[i .. i + other.length] == cast(Type[])other)
+        foreach_reverse(i; 0 .. (us.length + 1) - other.length) {
+            if(cast(Type[])us[i .. i + other.length] == cast(Type[])other)
                 return i;
         }
 
@@ -587,13 +587,13 @@ nothrow @nogc:
     size_t count(scope LiteralType other...) scope @trusted {
         LiteralType us = this.literal;
 
-        if (other.length > us.length)
+        if(other.length > us.length)
             return 0;
 
         size_t got;
 
-        while (us.length >= other.length) {
-            if (cast(Type[])us[0 .. other.length] == cast(Type[])other) {
+        while(us.length >= other.length) {
+            if(cast(Type[])us[0 .. other.length] == cast(Type[])other) {
                 got++;
                 us = us[other.length .. $];
             } else
@@ -605,21 +605,21 @@ nothrow @nogc:
 
     ///
     bool contains(scope DynamicArray!Type other) scope {
-        if (other.isNull)
+        if(other.isNull)
             return 0;
         return indexOf(other) >= 0;
     }
 
     ///
     bool contains(scope Slice!Type other) scope {
-        if (other.isNull)
+        if(other.isNull)
             return 0;
         return indexOf(other) >= 0;
     }
 
     ///
     bool contains(scope LiteralType other...) scope {
-        if (other is null)
+        if(other is null)
             return 0;
         return indexOf(other) >= 0;
     }
@@ -668,24 +668,25 @@ private:
     export scope @nogc nothrow:
 
         void rc(bool add) @trusted {
-            if (add)
+            if(add)
                 atomicOp!"+="(refCount, 1);
-            else if (atomicOp!"-="(refCount, 1) == 0) {
+            else if(atomicOp!"-="(refCount, 1) == 0) {
                 RCAllocator allocator2 = this.allocator;
                 allocator2.dispose(&this);
             }
 
         }
+
         @disable bool opEquals(ref const Iterator other) const;
     }
 
     void setupIterator() @trusted scope {
-        if (isNull || haveIterator)
+        if(isNull || haveIterator)
             return;
 
         RCAllocator allocator;
 
-        if (lifeTime is null)
+        if(lifeTime is null)
             allocator = globalAllocator();
         else
             allocator = lifeTime.allocator;
@@ -697,8 +698,8 @@ private:
     ErrorInfo changeIndexToOffset(ref ptrdiff_t a) scope {
         size_t actualLength = literal.length;
 
-        if (a < 0) {
-            if (actualLength < -a)
+        if(a < 0) {
+            if(actualLength < -a)
                 return ErrorInfo(RangeException("First offset must be smaller than length"));
             a = actualLength + a;
         }
@@ -709,19 +710,19 @@ private:
     ErrorInfo changeIndexToOffset(ref ptrdiff_t a, ref ptrdiff_t b) scope {
         size_t actualLength = literal.length;
 
-        if (a < 0) {
-            if (actualLength < -a)
+        if(a < 0) {
+            if(actualLength < -a)
                 return ErrorInfo(RangeException("First offset must be smaller than length"));
             a = actualLength + a;
         }
 
-        if (b < 0) {
-            if (actualLength < -b)
+        if(b < 0) {
+            if(actualLength < -b)
                 return ErrorInfo(RangeException("Second offset must be smaller than length"));
             b = actualLength + b;
         }
 
-        if (b < a) {
+        if(b < a) {
             ptrdiff_t temp = a;
             a = b;
             b = temp;

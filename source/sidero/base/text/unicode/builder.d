@@ -36,7 +36,7 @@ export:
 
         size_t lastIndex;
 
-        foreach (c; text) {
+        foreach(c; text) {
             assert(Text[lastIndex] == c);
             lastIndex++;
         }
@@ -53,7 +53,7 @@ export:
 
         size_t lastIndex = Text.length;
 
-        foreach_reverse (c; text) {
+        foreach_reverse(c; text) {
             assert(lastIndex > 0);
             lastIndex--;
             assert(Text[lastIndex] == c);
@@ -128,22 +128,22 @@ nothrow @safe:
         ];
         dstring[] literal32 = ["\u0041\u2262\u0391\u002E"d, "\uD55C\uAD6D\uC5B4"d, "\U000233B4"d];
 
-        static if (is(Char == char)) {
+        static if(is(Char == char)) {
             auto expected = literal8;
-        } else static if (is(Char == wchar)) {
+        } else static if(is(Char == wchar)) {
             auto expected = literal16;
-        } else static if (is(Char == dchar)) {
+        } else static if(is(Char == dchar)) {
             auto expected = literal32;
         }
 
         {
-            foreach (entry; 0 .. literal8.length) {
+            foreach(entry; 0 .. literal8.length) {
                 auto input = literal8[entry];
                 auto output = expected[entry];
 
                 typeof(this) builder = typeof(this)(RCAllocator.init, input);
 
-                foreach (c; builder) {
+                foreach(c; builder) {
                     assert(c == output[0]);
                     output = output[1 .. $];
                 }
@@ -153,13 +153,13 @@ nothrow @safe:
         }
 
         {
-            foreach (entry; 0 .. literal16.length) {
+            foreach(entry; 0 .. literal16.length) {
                 auto input = literal16[entry];
                 auto output = expected[entry];
 
                 typeof(this) builder = typeof(this)(RCAllocator.init, input);
 
-                foreach (c; builder) {
+                foreach(c; builder) {
                     assert(c == output[0]);
                     output = output[1 .. $];
                 }
@@ -169,13 +169,13 @@ nothrow @safe:
         }
 
         {
-            foreach (entry; 0 .. literal32.length) {
+            foreach(entry; 0 .. literal32.length) {
                 auto input = literal32[entry];
                 auto output = expected[entry];
 
                 typeof(this) builder = typeof(this)(RCAllocator.init, input);
 
-                foreach (c; builder) {
+                foreach(c; builder) {
                     assert(c == output[0]);
                     output = output[1 .. $];
                 }
@@ -245,22 +245,22 @@ nothrow @safe:
         ];
         dstring[] literal32 = ["\u0041\u2262\u0391\u002E"d, "\uD55C\uAD6D\uC5B4"d, "\U000233B4"d];
 
-        static if (is(Char == char)) {
+        static if(is(Char == char)) {
             auto expected = literal8;
-        } else static if (is(Char == wchar)) {
+        } else static if(is(Char == wchar)) {
             auto expected = literal16;
-        } else static if (is(Char == dchar)) {
+        } else static if(is(Char == dchar)) {
             auto expected = literal32;
         }
 
         {
-            foreach (entry; 0 .. literal8.length) {
+            foreach(entry; 0 .. literal8.length) {
                 auto input = literal8[entry];
                 auto output = expected[entry];
 
                 typeof(this) builder = typeof(this)(input);
 
-                foreach (c; builder) {
+                foreach(c; builder) {
                     assert(c == output[0]);
                     output = output[1 .. $];
                 }
@@ -270,13 +270,13 @@ nothrow @safe:
         }
 
         {
-            foreach (entry; 0 .. literal16.length) {
+            foreach(entry; 0 .. literal16.length) {
                 auto input = literal16[entry];
                 auto output = expected[entry];
 
                 typeof(this) builder = typeof(this)(input);
 
-                foreach (c; builder) {
+                foreach(c; builder) {
                     assert(c == output[0]);
                     output = output[1 .. $];
                 }
@@ -286,13 +286,13 @@ nothrow @safe:
         }
 
         {
-            foreach (entry; 0 .. literal32.length) {
+            foreach(entry; 0 .. literal32.length) {
                 auto input = literal32[entry];
                 auto output = expected[entry];
 
                 typeof(this) builder = typeof(this)(input);
 
-                foreach (c; builder) {
+                foreach(c; builder) {
                     assert(c == output[0]);
                     output = output[1 .. $];
                 }
@@ -454,7 +454,7 @@ nothrow @safe:
 
     ///
     typeof(this) save() scope @trusted @nogc {
-        if (isNull)
+        if(isNull)
             return typeof(this)();
 
         typeof(this) ret;
@@ -536,17 +536,17 @@ nothrow @safe:
 
     ///
     unittest {
-        static if (is(Char == char)) {
+        static if(is(Char == char)) {
             typeof(this) original = typeof(this)("split me here");
             typeof(this) split = original[6 .. 8];
 
             assert(split.length == 2);
-        } else static if (is(Char == wchar)) {
+        } else static if(is(Char == wchar)) {
             typeof(this) original = typeof(this)("split me here"w);
             typeof(this) split = original[6 .. 8];
 
             assert(split.length == 2);
-        } else static if (is(Char == dchar)) {
+        } else static if(is(Char == dchar)) {
             typeof(this) original = typeof(this)("split me here"d);
             typeof(this) split = original[6 .. 8];
 
@@ -599,7 +599,7 @@ nothrow @safe:
 
     ///
     String_UTF!Char asReadOnly(RCAllocator allocator = RCAllocator.init) scope @nogc {
-        if (allocator.isNull)
+        if(allocator.isNull)
             allocator = globalAllocator();
 
         Char[] array;
@@ -608,14 +608,14 @@ nothrow @safe:
         this.foreachContiguous((scope ref Char[] data) {
             assert(array.length > soFar + data.length, "Encoding length < Encoded");
 
-            foreach (i, Char c; data)
+            foreach(i, Char c; data)
                 array[soFar + i] = c;
 
             soFar += data.length;
             return 0;
         }, (length) { array = allocator.makeArray!Char(length + 1); });
 
-        if (array.length == 0)
+        if(array.length == 0)
             return typeof(return).init;
 
         assert(array.length == soFar + 1, "Encoding length != Encoded");
@@ -1082,7 +1082,7 @@ nothrow @safe:
         static Text32 = "walls can't talk"d;
 
         typeof(this) text = typeof(this)(Text8);
-        foreach (i, c; Text8) {
+        foreach(i, c; Text8) {
             auto got = text.front;
 
             assert(!text.empty);
@@ -1092,7 +1092,7 @@ nothrow @safe:
         assert(text.empty);
 
         text = typeof(this)(Text16);
-        foreach (i, c; Text16) {
+        foreach(i, c; Text16) {
             auto got = text.front;
 
             assert(!text.empty);
@@ -1102,7 +1102,7 @@ nothrow @safe:
         assert(text.empty);
 
         text = typeof(this)(Text32);
-        foreach (i, c; Text32) {
+        foreach(i, c; Text32) {
             auto got = text.front;
 
             assert(!text.empty);
@@ -1125,7 +1125,7 @@ nothrow @safe:
 
         typeof(this) text = typeof(this)(Text8);
 
-        foreach_reverse (i, c; Text8) {
+        foreach_reverse(i, c; Text8) {
             auto got = text.back;
 
             assert(!text.empty);
@@ -1135,7 +1135,7 @@ nothrow @safe:
         assert(text.empty);
 
         text = typeof(this)(Text16);
-        foreach_reverse (i, c; Text16) {
+        foreach_reverse(i, c; Text16) {
             auto got = text.back;
 
             assert(!text.empty);
@@ -1145,7 +1145,7 @@ nothrow @safe:
         assert(text.empty);
 
         text = typeof(this)(Text32);
-        foreach_reverse (i, c; Text32) {
+        foreach_reverse(i, c; Text32) {
             auto got = text.back;
 
             assert(!text.empty);
@@ -1173,21 +1173,21 @@ nothrow @safe:
         ret.state.handle((StateIterator.S8 state, ref StateIterator.I8 iterator) {
             assert(state !is null);
 
-            if (iterator !is null)
+            if(iterator !is null)
                 iterator = state.newIterator(iterator);
             else
                 state.rc(true);
         }, (StateIterator.S16 state, ref StateIterator.I16 iterator) {
             assert(state !is null);
 
-            if (iterator !is null)
+            if(iterator !is null)
                 iterator = state.newIterator(iterator);
             else
                 state.rc(true);
         }, (StateIterator.S32 state, ref StateIterator.I32 iterator) {
             assert(state !is null);
 
-            if (iterator !is null)
+            if(iterator !is null)
                 iterator = state.newIterator(iterator);
             else
                 state.rc(true);
@@ -1220,21 +1220,21 @@ nothrow @safe:
         ret.state.handle((StateIterator.S8 state, ref StateIterator.I8 iterator) {
             assert(state !is null);
 
-            if (iterator !is null)
+            if(iterator !is null)
                 iterator = state.newIterator(iterator);
             else
                 state.rc(true);
         }, (StateIterator.S16 state, ref StateIterator.I16 iterator) {
             assert(state !is null);
 
-            if (iterator !is null)
+            if(iterator !is null)
                 iterator = state.newIterator(iterator);
             else
                 state.rc(true);
         }, (StateIterator.S32 state, ref StateIterator.I32 iterator) {
             assert(state !is null);
 
-            if (iterator !is null)
+            if(iterator !is null)
                 iterator = state.newIterator(iterator);
             else
                 state.rc(true);
@@ -1267,21 +1267,21 @@ nothrow @safe:
         ret.state.handle((StateIterator.S8 state, ref StateIterator.I8 iterator) {
             assert(state !is null);
 
-            if (iterator !is null)
+            if(iterator !is null)
                 iterator = state.newIterator(iterator);
             else
                 state.rc(true);
         }, (StateIterator.S16 state, ref StateIterator.I16 iterator) {
             assert(state !is null);
 
-            if (iterator !is null)
+            if(iterator !is null)
                 iterator = state.newIterator(iterator);
             else
                 state.rc(true);
         }, (StateIterator.S32 state, ref StateIterator.I32 iterator) {
             assert(state !is null);
 
-            if (iterator !is null)
+            if(iterator !is null)
                 iterator = state.newIterator(iterator);
             else
                 state.rc(true);
@@ -4299,9 +4299,9 @@ package(sidero.base.text.unicode):
             osiu.mutex(true);
             int result;
 
-            if (lengthDel !is null)
+            if(lengthDel !is null)
                 lengthDel(osiu.length());
-            if (del !is null)
+            if(del !is null)
                 result = osiu.foreachContiguous(del);
 
             osiu.mutex(false);
@@ -4316,9 +4316,9 @@ package(sidero.base.text.unicode):
             osiu.mutex(true);
             int result;
 
-            if (lengthDel !is null)
+            if(lengthDel !is null)
                 lengthDel(osiu.length());
-            if (del !is null)
+            if(del !is null)
                 result = osiu.foreachContiguous(del);
 
             osiu.mutex(false);
@@ -4333,9 +4333,9 @@ package(sidero.base.text.unicode):
             osiu.mutex(true);
             int result;
 
-            if (lengthDel !is null)
+            if(lengthDel !is null)
                 lengthDel(osiu.length());
-            if (del !is null)
+            if(del !is null)
                 result = osiu.foreachContiguous(del);
 
             osiu.mutex(false);
