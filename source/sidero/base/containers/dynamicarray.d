@@ -4,6 +4,7 @@ import sidero.base.allocators;
 import sidero.base.errors;
 import sidero.base.text;
 import sidero.base.attributes;
+import sidero.base.internal.atomic;
 
 export:
 
@@ -15,7 +16,6 @@ private {
 struct DynamicArray(Type) {
     private @PrettyPrintIgnore {
         import sidero.base.internal.meta : OpApplyCombos;
-        import core.atomic : atomicOp;
 
         struct State {
             shared(ptrdiff_t) refCount;
@@ -184,14 +184,14 @@ scope nothrow @nogc:
 
             if(this.state !is null) {
                 assert(!this.state.allocator.isNull);
-                atomicOp!"+="(this.state.refCount, 1);
+                atomicIncrementAndLoad(this.state.refCount, 1);
             }
         }
 
         @disable this(return scope ref const DynamicArray other) const;
 
         ~this() {
-            if(state !is null && atomicOp!"-="(state.refCount, 1) == 0) {
+            if(state !is null && atomicDecrementAndLoad(state.refCount, 1) == 0) {
                 RCAllocator allocator = state.allocator;
                 assert(!allocator.isNull);
 

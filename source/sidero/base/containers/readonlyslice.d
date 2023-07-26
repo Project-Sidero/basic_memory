@@ -17,7 +17,7 @@ struct Slice(Type) {
 
     private @PrettyPrintIgnore {
         import sidero.base.internal.meta : OpApplyCombos;
-        import core.atomic : atomicOp;
+        import sidero.base.internal.atomic;
 
         LifeTime* lifeTime;
         Iterator* iterator;
@@ -177,7 +177,7 @@ nothrow @nogc:
 
         ret.lifeTime = this.lifeTime;
         if(ret.lifeTime !is null)
-            atomicOp!"+="(ret.lifeTime.refCount, 1);
+            atomicIncrementAndLoad(ret.lifeTime.refCount, 1);
 
         ret.literal = this.literal;
         ret.setupIterator();
@@ -196,7 +196,7 @@ nothrow @nogc:
 
         ret.lifeTime = this.lifeTime;
         if(ret.lifeTime !is null)
-            atomicOp!"+="(ret.lifeTime.refCount, 1);
+            atomicIncrementAndLoad(ret.lifeTime.refCount, 1);
 
         ret.literal = this.literal[startIndex .. endIndex];
         return Result!Slice(ret);
@@ -209,7 +209,7 @@ nothrow @nogc:
         ret.lifeTime = this.lifeTime;
 
         if(this.lifeTime !is null)
-            atomicOp!"+="(ret.lifeTime.refCount, 1);
+            atomicIncrementAndLoad(ret.lifeTime.refCount, 1);
 
         return ret;
     }
@@ -243,7 +243,7 @@ nothrow @nogc:
         if(haveIterator)
             this.iterator.rc(true);
         if(this.lifeTime !is null)
-            atomicOp!"+="(this.lifeTime.refCount, 1);
+            atomicIncrementAndLoad(this.lifeTime.refCount, 1);
     }
 
     ///
@@ -286,7 +286,7 @@ nothrow @nogc:
         if(haveIterator)
             this.iterator.rc(false);
 
-        if(this.lifeTime !is null && atomicOp!"-="(lifeTime.refCount, 1) == 0) {
+        if(this.lifeTime !is null && atomicDecrementAndLoad(lifeTime.refCount, 1) == 0) {
             RCAllocator allocator = lifeTime.allocator;
             allocator.dispose(cast(void[])lifeTime.original);
             allocator.dispose(lifeTime);
@@ -669,8 +669,8 @@ private:
 
         void rc(bool add) @trusted {
             if(add)
-                atomicOp!"+="(refCount, 1);
-            else if(atomicOp!"-="(refCount, 1) == 0) {
+                atomicIncrementAndLoad(refCount, 1);
+            else if(atomicDecrementAndLoad(refCount, 1) == 0) {
                 RCAllocator allocator2 = this.allocator;
                 allocator2.dispose(&this);
             }

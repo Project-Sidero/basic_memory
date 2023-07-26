@@ -11,7 +11,7 @@ struct String_ASCII {
 
     private @hidden {
         import sidero.base.internal.meta : OpApplyCombos;
-        import core.atomic : atomicOp;
+        import sidero.base.internal.atomic;
 
         LifeTime* lifeTime;
         Iterator* iterator;
@@ -19,7 +19,7 @@ struct String_ASCII {
         int opApplyImpl(Del)(scope Del del) @trusted scope {
             bool deallocateAllocator;
 
-            if (isNull)
+            if(isNull)
                 return 0;
 
             Iterator* oldIterator = this.iterator;
@@ -27,21 +27,21 @@ struct String_ASCII {
             this.iterator = null;
             setupIterator;
 
-            if (oldIterator !is null)
+            if(oldIterator !is null)
                 this.iterator.literal = oldIterator.literal;
 
-            scope (exit) {
+            scope(exit) {
                 this.iterator.rc(false);
                 this.iterator = oldIterator;
             }
 
             int result;
 
-            while (!empty) {
+            while(!empty) {
                 Char temp = front();
 
                 result = del(temp);
-                if (result)
+                if(result)
                     return result;
 
                 popFront();
@@ -51,7 +51,7 @@ struct String_ASCII {
         }
 
         int opApplyReverseImpl(Del)(scope Del del) @trusted scope {
-            if (isNull)
+            if(isNull)
                 return 0;
 
             Iterator* oldIterator = this.iterator;
@@ -59,21 +59,21 @@ struct String_ASCII {
             this.iterator = null;
             setupIterator;
 
-            if (oldIterator !is null)
+            if(oldIterator !is null)
                 this.iterator.literal = oldIterator.literal;
 
-            scope (exit) {
+            scope(exit) {
                 this.iterator.rc(false);
                 this.iterator = oldIterator;
             }
 
             int result;
 
-            while (!empty) {
+            while(!empty) {
                 Char temp = back();
 
                 result = del(temp);
-                if (result)
+                if(result)
                     return result;
 
                 popBack();
@@ -100,7 +100,7 @@ export:
 
         size_t lastIndex;
 
-        foreach (c; text) {
+        foreach(c; text) {
             assert(Text[lastIndex] == c);
             lastIndex++;
         }
@@ -118,7 +118,7 @@ export:
 
         size_t lastIndex = Text.length;
 
-        foreach_reverse (c; text) {
+        foreach_reverse(c; text) {
             assert(lastIndex > 0);
             lastIndex--;
             assert(Text[lastIndex] == c);
@@ -131,7 +131,7 @@ nothrow @nogc:
 
     /// Makes no guarantee that the string is actually null terminated. Unsafe!!!
     const(ubyte)* ptr() @system {
-        if (this.lifeTime !is null)
+        if(this.lifeTime !is null)
             return this.lifeTime.original.ptr;
         else
             return this.literal.ptr;
@@ -165,16 +165,16 @@ nothrow @nogc:
 
     ///
     String_ASCII opSlice() scope @trusted {
-        if (isNull)
+        if(isNull)
             return String_ASCII();
 
         String_ASCII ret;
 
         ret.lifeTime = this.lifeTime;
-        if (ret.lifeTime !is null)
-            atomicOp!"+="(ret.lifeTime.refCount, 1);
+        if(ret.lifeTime !is null)
+            atomicIncrementAndLoad(ret.lifeTime.refCount, 1);
 
-        if (this.iterator !is null)
+        if(this.iterator !is null)
             ret.literal = this.iterator.literal;
         else
             ret.literal = this.literal;
@@ -201,14 +201,14 @@ nothrow @nogc:
         assert(start <= end, "Start of slice must be before or equal to end.");
         assert(end <= this.literal.length, "End of slice must be before or equal to length.");
 
-        if (start == end)
+        if(start == end)
             return String_ASCII();
 
         String_ASCII ret;
 
         ret.lifeTime = this.lifeTime;
-        if (ret.lifeTime !is null)
-            atomicOp!"+="(ret.lifeTime.refCount, 1);
+        if(ret.lifeTime !is null)
+            atomicIncrementAndLoad(ret.lifeTime.refCount, 1);
 
         ret.literal = this.literal[start .. end];
         return ret;
@@ -228,8 +228,8 @@ nothrow @nogc:
         ret.literal = this.literal;
         ret.lifeTime = this.lifeTime;
 
-        if (this.lifeTime !is null)
-            atomicOp!"+="(ret.lifeTime.refCount, 1);
+        if(this.lifeTime !is null)
+            atomicIncrementAndLoad(ret.lifeTime.refCount, 1);
 
         return ret;
     }
@@ -275,14 +275,12 @@ nothrow @nogc:
 
     ///
     this(return scope ref String_ASCII other) scope @trusted {
-        import core.atomic : atomicOp;
-
         this.tupleof = other.tupleof;
 
-        if (haveIterator)
+        if(haveIterator)
             this.iterator.rc(true);
-        if (this.lifeTime !is null)
-            atomicOp!"+="(this.lifeTime.refCount, 1);
+        if(this.lifeTime !is null)
+            atomicIncrementAndLoad(this.lifeTime.refCount, 1);
     }
 
     ///
@@ -307,11 +305,11 @@ nothrow @nogc:
         ///
         this(return scope LiteralType literal, return scope RCAllocator allocator = RCAllocator.init,
                 return scope LiteralType toDeallocate = null) scope {
-            if (literal.length > 0 || (toDeallocate.length > 0 && !allocator.isNull)) {
+            if(literal.length > 0 || (toDeallocate.length > 0 && !allocator.isNull)) {
                 this.literal = literal;
 
-                if (!allocator.isNull) {
-                    if (toDeallocate is null)
+                if(!allocator.isNull) {
+                    if(toDeallocate is null)
                         toDeallocate = literal;
 
                     lifeTime = allocator.make!LifeTime(1, allocator, toDeallocate);
@@ -332,10 +330,10 @@ nothrow @nogc:
     }
 
     ~this() scope @trusted {
-        if (haveIterator)
+        if(haveIterator)
             this.iterator.rc(false);
 
-        if (this.lifeTime !is null && atomicOp!"-="(lifeTime.refCount, 1) == 0) {
+        if(this.lifeTime !is null && atomicDecrementAndLoad(lifeTime.refCount, 1) == 0) {
             RCAllocator allocator = lifeTime.allocator;
             allocator.dispose(cast(void[])lifeTime.original);
             allocator.dispose(lifeTime);
@@ -379,11 +377,11 @@ nothrow @nogc:
     Returns: if ``ptr`` will return a null terminated string or not
     */
     bool isPtrNullTerminated() scope @trusted {
-        if (isNull)
+        if(isNull)
             return false;
-        else if (this.literal[$ - 1] == '\0')
+        else if(this.literal[$ - 1] == '\0')
             return true;
-        else if (this.lifeTime is null)
+        else if(this.lifeTime is null)
             return this.literal[$ - 1] == '\0';
 
         return this.lifeTime.original[$ - 1] == '\0' &&
@@ -414,7 +412,7 @@ nothrow @nogc:
         auto literal = this.iterator !is null ? this.iterator.literal : this.literal;
 
         size_t ret = literal.length;
-        if (ret > 0 && literal[$ - 1] == '\0')
+        if(ret > 0 && literal[$ - 1] == '\0')
             ret--;
         return ret;
     }
@@ -443,11 +441,11 @@ nothrow @nogc:
 
     ///
     String_ASCII dup(RCAllocator allocator = RCAllocator.init) scope @trusted {
-        if (isNull)
+        if(isNull)
             return String_ASCII();
 
-        if (allocator.isNull) {
-            if (lifeTime !is null)
+        if(allocator.isNull) {
+            if(lifeTime !is null)
                 allocator = lifeTime.allocator;
             else
                 allocator = globalAllocator();
@@ -455,9 +453,9 @@ nothrow @nogc:
 
         ubyte[] zliteral;
 
-        if (this.literal[$ - 1] == '\0')
+        if(this.literal[$ - 1] == '\0')
             zliteral = allocator.makeArray!ubyte(this.literal);
-        else if (this.lifeTime !is null && this.lifeTime.original.length >= this.literal.length &&
+        else if(this.lifeTime !is null && this.lifeTime.original.length >= this.literal.length &&
                 this.lifeTime.original[$ - 1] == '\0' &&
                 (this.lifeTime.original.ptr + this.lifeTime.original.length) - this.literal.length is this.literal.ptr)
             zliteral = allocator.makeArray!ubyte(cast(ubyte[])(this.literal.ptr[0 .. this.literal.length + 1]));
@@ -465,7 +463,7 @@ nothrow @nogc:
             zliteral = allocator.makeArray!ubyte(this.literal.length + 1);
             zliteral[$ - 1] = 0;
 
-            foreach (i, v; this.literal) {
+            foreach(i, v; this.literal) {
                 zliteral[i] = v;
             }
         }
@@ -605,14 +603,14 @@ nothrow @nogc:
     ///
     int opCmp(scope LiteralType other) scope const {
         LiteralType us = this.literal;
-        if (us.length > 0 && us[$ - 1] == '\0')
+        if(us.length > 0 && us[$ - 1] == '\0')
             us = us[0 .. $ - 1];
-        if (other.length > 0 && other[$ - 1] == '\0')
+        if(other.length > 0 && other[$ - 1] == '\0')
             other = other[0 .. $ - 1];
 
-        if (us < other)
+        if(us < other)
             return -1;
-        else if (us > other)
+        else if(us > other)
             return 1;
         else {
             assert(us == other);
@@ -658,22 +656,22 @@ nothrow @nogc:
         import sidero.base.text.ascii.characters : toLower;
 
         LiteralType us = this.literal;
-        if (us.length > 0 && us[$ - 1] == '\0')
+        if(us.length > 0 && us[$ - 1] == '\0')
             us = us[0 .. $ - 1];
-        if (other.length > 0 && other[$ - 1] == '\0')
+        if(other.length > 0 && other[$ - 1] == '\0')
             other = other[0 .. $ - 1];
 
-        if (us.length < other.length)
+        if(us.length < other.length)
             return -1;
-        else if (us.length > other.length)
+        else if(us.length > other.length)
             return 1;
 
-        foreach (i; 0 .. us.length) {
+        foreach(i; 0 .. us.length) {
             ubyte a = us[i].toLower, b = other[i].toLower;
 
-            if (a < b) {
+            if(a < b) {
                 return -1;
-            } else if (a > b) {
+            } else if(a > b) {
                 return 1;
             }
         }
@@ -739,7 +737,7 @@ nothrow @nogc:
             static Text = "ok";
             String_ASCII text = String_ASCII(Text);
 
-            foreach (i, c; Text) {
+            foreach(i, c; Text) {
                 assert(!text.empty);
                 assert(text.front == c);
                 text.popFront;
@@ -761,7 +759,7 @@ nothrow @nogc:
             static Text = "yea nah";
             String_ASCII text = String_ASCII(Text);
 
-            foreach_reverse (i, c; Text) {
+            foreach_reverse(i, c; Text) {
                 assert(!text.empty);
                 assert(text.back == c);
                 text.popBack;
@@ -919,7 +917,7 @@ nothrow @nogc:
     StringBuilder_ASCII insert(ptrdiff_t offset, scope LiteralType other...) scope @trusted {
         StringBuilder_ASCII ret;
 
-        if (this.lifeTime !is null)
+        if(this.lifeTime !is null)
             ret = StringBuilder_ASCII(this.lifeTime.allocator);
 
         ret ~= this;
@@ -937,7 +935,7 @@ nothrow @nogc:
     StringBuilder_ASCII insert(ptrdiff_t offset, scope StringBuilder_ASCII other) scope @trusted {
         StringBuilder_ASCII ret;
 
-        if (this.lifeTime !is null)
+        if(this.lifeTime !is null)
             ret = StringBuilder_ASCII(this.lifeTime.allocator);
 
         ret ~= this;
@@ -1055,7 +1053,7 @@ nothrow @nogc:
     StringBuilder_ASCII clobberInsert(size_t offset, scope LiteralType other...) @trusted {
         StringBuilder_ASCII ret;
 
-        if (this.lifeTime !is null)
+        if(this.lifeTime !is null)
             ret = StringBuilder_ASCII(this.lifeTime.allocator);
 
         ret ~= this;
@@ -1073,7 +1071,7 @@ nothrow @nogc:
     StringBuilder_ASCII clobberInsert(size_t offset, scope StringBuilder_ASCII other) @trusted {
         StringBuilder_ASCII ret;
 
-        if (this.lifeTime !is null)
+        if(this.lifeTime !is null)
             ret = StringBuilder_ASCII(this.lifeTime.allocator);
 
         ret ~= this;
@@ -1336,12 +1334,12 @@ nothrow @nogc:
     ///
     bool startsWith(scope LiteralType other...) scope {
         LiteralType us = this.literal;
-        if (us.length > 0 && us[$ - 1] == '\0')
+        if(us.length > 0 && us[$ - 1] == '\0')
             us = us[0 .. $ - 1];
-        if (other.length > 0 && other[$ - 1] == '\0')
+        if(other.length > 0 && other[$ - 1] == '\0')
             other = other[0 .. $ - 1];
 
-        if (other.length == 0 || other.length == 0 || other.length > us.length)
+        if(other.length == 0 || other.length == 0 || other.length > us.length)
             return false;
         return this.literal[0 .. other.length] == other;
     }
@@ -1379,16 +1377,16 @@ nothrow @nogc:
         import sidero.base.text.ascii.characters : toLower;
 
         LiteralType us = this.literal;
-        if (us.length > 0 && us[$ - 1] == '\0')
+        if(us.length > 0 && us[$ - 1] == '\0')
             us = us[0 .. $ - 1];
-        if (other.length > 0 && other[$ - 1] == '\0')
+        if(other.length > 0 && other[$ - 1] == '\0')
             other = other[0 .. $ - 1];
 
-        if (other.length == 0 || other.length == 0 || other.length > us.length)
+        if(other.length == 0 || other.length == 0 || other.length > us.length)
             return false;
 
-        foreach (i; 0 .. other.length) {
-            if (other[i].toLower != us[i].toLower)
+        foreach(i; 0 .. other.length) {
+            if(other[i].toLower != us[i].toLower)
                 return false;
         }
 
@@ -1415,17 +1413,17 @@ nothrow @nogc:
     ///
     bool startsWith(scope StringBuilder_ASCII other) scope {
         LiteralType us = this.literal;
-        if (us.length > 0 && us[$ - 1] == '\0')
+        if(us.length > 0 && us[$ - 1] == '\0')
             us = us[0 .. $ - 1];
 
-        if (us.length == 0 || other.isNull)
+        if(us.length == 0 || other.isNull)
             return false;
 
         size_t offsetForUs;
         bool ret = true;
 
         other.foreachContiguous((scope ref ubyte[] data) {
-            if (offsetForUs + data.length > us.length || us[offsetForUs .. offsetForUs + data.length] != data) {
+            if(offsetForUs + data.length > us.length || us[offsetForUs .. offsetForUs + data.length] != data) {
                 ret = false;
                 return 1;
             }
@@ -1448,19 +1446,19 @@ nothrow @nogc:
         import sidero.base.text.ascii.characters : toLower;
 
         LiteralType us = this.literal;
-        if (us.length > 0 && us[$ - 1] == '\0')
+        if(us.length > 0 && us[$ - 1] == '\0')
             us = us[0 .. $ - 1];
 
-        if (us.length == 0 || other.isNull)
+        if(us.length == 0 || other.isNull)
             return false;
 
         size_t offsetForUs;
         bool ret = true;
 
         other.foreachContiguous((scope ref ubyte[] data) {
-            if (offsetForUs + data.length <= us.length) {
-                foreach (i; 0 .. data.length) {
-                    if (data[i].toLower != us[offsetForUs + i].toLower) {
+            if(offsetForUs + data.length <= us.length) {
+                foreach(i; 0 .. data.length) {
+                    if(data[i].toLower != us[offsetForUs + i].toLower) {
                         ret = false;
                         return 1;
                     }
@@ -1497,12 +1495,12 @@ nothrow @nogc:
     ///
     bool endsWith(scope LiteralType other...) scope {
         LiteralType us = this.literal;
-        if (us.length > 0 && us[$ - 1] == '\0')
+        if(us.length > 0 && us[$ - 1] == '\0')
             us = us[0 .. $ - 1];
-        if (other.length > 0 && other[$ - 1] == '\0')
+        if(other.length > 0 && other[$ - 1] == '\0')
             other = other[0 .. $ - 1];
 
-        if (us.length == 0 || other.length == 0 || us.length < other.length)
+        if(us.length == 0 || other.length == 0 || us.length < other.length)
             return false;
         return us[$ - other.length .. $] == other;
     }
@@ -1540,17 +1538,17 @@ nothrow @nogc:
         import sidero.base.text.ascii.characters : toLower;
 
         LiteralType us = this.literal;
-        if (us.length > 0 && us[$ - 1] == '\0')
+        if(us.length > 0 && us[$ - 1] == '\0')
             us = us[0 .. $ - 1];
-        if (other.length > 0 && other[$ - 1] == '\0')
+        if(other.length > 0 && other[$ - 1] == '\0')
             other = other[0 .. $ - 1];
 
-        if (us.length == 0 || other.length == 0 || us.length < other.length)
+        if(us.length == 0 || other.length == 0 || us.length < other.length)
             return false;
 
         size_t ourOffset = us.length - other.length;
-        foreach (i; 0 .. other.length) {
-            if (other[i].toLower != us[ourOffset++].toLower)
+        foreach(i; 0 .. other.length) {
+            if(other[i].toLower != us[ourOffset++].toLower)
                 return false;
         }
 
@@ -1577,18 +1575,18 @@ nothrow @nogc:
     ///
     bool endsWith(scope StringBuilder_ASCII other) scope {
         LiteralType us = this.literal;
-        if (us.length > 0 && us[$ - 1] == '\0')
+        if(us.length > 0 && us[$ - 1] == '\0')
             us = us[0 .. $ - 1];
 
-        if (us.length == 0 || other.isNull)
+        if(us.length == 0 || other.isNull)
             return false;
 
         size_t offsetForUs = size_t.max, otherLength;
         bool ret = true;
 
         other.foreachContiguous((scope ref ubyte[] data) {
-            if (offsetForUs == size_t.max) {
-                if (otherLength > us.length) {
+            if(offsetForUs == size_t.max) {
+                if(otherLength > us.length) {
                     ret = false;
                     return 1;
                 }
@@ -1596,7 +1594,7 @@ nothrow @nogc:
                 offsetForUs = us.length - otherLength;
             }
 
-            if (us[offsetForUs .. offsetForUs + data.length] != data) {
+            if(us[offsetForUs .. offsetForUs + data.length] != data) {
                 ret = false;
                 return 1;
             }
@@ -1619,18 +1617,18 @@ nothrow @nogc:
         import sidero.base.text.ascii.characters : toLower;
 
         LiteralType us = this.literal;
-        if (us.length > 0 && us[$ - 1] == '\0')
+        if(us.length > 0 && us[$ - 1] == '\0')
             us = us[0 .. $ - 1];
 
-        if (us.length == 0 || other.isNull)
+        if(us.length == 0 || other.isNull)
             return false;
 
         size_t offsetForUs = size_t.max, otherLength;
         bool ret = true;
 
         other.foreachContiguous((scope ref ubyte[] data) {
-            if (offsetForUs == size_t.max) {
-                if (otherLength > us.length) {
+            if(offsetForUs == size_t.max) {
+                if(otherLength > us.length) {
                     ret = false;
                     return 1;
                 }
@@ -1638,8 +1636,8 @@ nothrow @nogc:
                 offsetForUs = us.length - otherLength;
             }
 
-            foreach (i; 0 .. data.length) {
-                if (data[i].toLower != us[offsetForUs + i].toLower) {
+            foreach(i; 0 .. data.length) {
+                if(data[i].toLower != us[offsetForUs + i].toLower) {
                     ret = false;
                     return 1;
                 }
@@ -1674,16 +1672,16 @@ nothrow @nogc:
     ///
     ptrdiff_t indexOf(scope LiteralType other...) scope {
         LiteralType us = this.literal;
-        if (us.length > 0 && us[$ - 1] == '\0')
+        if(us.length > 0 && us[$ - 1] == '\0')
             us = us[0 .. $ - 1];
-        if (other.length > 0 && other[$ - 1] == '\0')
+        if(other.length > 0 && other[$ - 1] == '\0')
             other = other[0 .. $ - 1];
 
-        if (other.length > us.length)
+        if(other.length > us.length)
             return -1;
 
-        foreach (i; 0 .. (us.length + 1) - other.length) {
-            if (us[i .. i + other.length] == other)
+        foreach(i; 0 .. (us.length + 1) - other.length) {
+            if(us[i .. i + other.length] == other)
                 return i;
         }
 
@@ -1723,17 +1721,17 @@ nothrow @nogc:
         import sidero.base.text.ascii.characters : toLower;
 
         LiteralType us = this.literal;
-        if (us.length > 0 && us[$ - 1] == '\0')
+        if(us.length > 0 && us[$ - 1] == '\0')
             us = us[0 .. $ - 1];
-        if (other.length > 0 && other[$ - 1] == '\0')
+        if(other.length > 0 && other[$ - 1] == '\0')
             other = other[0 .. $ - 1];
 
-        if (other.length > us.length)
+        if(other.length > us.length)
             return -1;
 
-        Loop: foreach (i; 0 .. (us.length + 1) - other.length) {
-            foreach (j; 0 .. other.length) {
-                if (us[i + j].toLower != other[j].toLower)
+        Loop: foreach(i; 0 .. (us.length + 1) - other.length) {
+            foreach(j; 0 .. other.length) {
+                if(us[i + j].toLower != other[j].toLower)
                     continue Loop;
             }
 
@@ -1763,16 +1761,16 @@ nothrow @nogc:
     ///
     ptrdiff_t indexOf(scope StringBuilder_ASCII other) scope {
         LiteralType us = this.literal;
-        if (us.length > 0 && us[$ - 1] == '\0')
+        if(us.length > 0 && us[$ - 1] == '\0')
             us = us[0 .. $ - 1];
 
-        if (other.length > 0) {
-            while (us.length >= other.length) {
+        if(other.length > 0) {
+            while(us.length >= other.length) {
                 size_t offsetIntoUs, otherLength;
                 bool matched = true;
 
                 other.foreachContiguous((scope ref ubyte[] data) {
-                    if (data.length > us.length - offsetIntoUs || data != us[offsetIntoUs .. offsetIntoUs + data.length]) {
+                    if(data.length > us.length - offsetIntoUs || data != us[offsetIntoUs .. offsetIntoUs + data.length]) {
                         matched = false;
                         return 1;
                     }
@@ -1781,7 +1779,7 @@ nothrow @nogc:
                     return 0;
                 }, (size_t otherLength2) { otherLength = otherLength2; });
 
-                if (matched)
+                if(matched)
                     return &us[0] - &this.literal[0];
                 else
                     us = us[1 .. $];
@@ -1802,18 +1800,18 @@ nothrow @nogc:
         import sidero.base.text.ascii.characters : toLower;
 
         LiteralType us = this.literal;
-        if (us.length > 0 && us[$ - 1] == '\0')
+        if(us.length > 0 && us[$ - 1] == '\0')
             us = us[0 .. $ - 1];
 
-        if (other.length > 0) {
-            while (us.length >= other.length) {
+        if(other.length > 0) {
+            while(us.length >= other.length) {
                 size_t offsetIntoUs, otherLength;
                 bool matched = true;
 
                 other.foreachContiguous((scope ref ubyte[] data) {
-                    if (data.length <= us.length - offsetIntoUs) {
-                        foreach (i; 0 .. data.length) {
-                            if (data[i].toLower != us[offsetIntoUs + i].toLower) {
+                    if(data.length <= us.length - offsetIntoUs) {
+                        foreach(i; 0 .. data.length) {
+                            if(data[i].toLower != us[offsetIntoUs + i].toLower) {
                                 matched = false;
                                 return 1;
                             }
@@ -1827,7 +1825,7 @@ nothrow @nogc:
                     return 0;
                 }, (size_t otherLength2) { otherLength = otherLength2; });
 
-                if (matched)
+                if(matched)
                     return &us[0] - &this.literal[0];
                 else
                     us = us[1 .. $];
@@ -1857,16 +1855,16 @@ nothrow @nogc:
     ///
     ptrdiff_t lastIndexOf(scope LiteralType other...) scope {
         LiteralType us = this.literal;
-        if (us.length > 0 && us[$ - 1] == '\0')
+        if(us.length > 0 && us[$ - 1] == '\0')
             us = us[0 .. $ - 1];
-        if (other.length > 0 && other[$ - 1] == '\0')
+        if(other.length > 0 && other[$ - 1] == '\0')
             other = other[0 .. $ - 1];
 
-        if (other.length > us.length)
+        if(other.length > us.length)
             return -1;
 
-        foreach_reverse (i; 0 .. (us.length + 1) - other.length) {
-            if (us[i .. i + other.length] == other)
+        foreach_reverse(i; 0 .. (us.length + 1) - other.length) {
+            if(us[i .. i + other.length] == other)
                 return i;
         }
 
@@ -1906,17 +1904,17 @@ nothrow @nogc:
         import sidero.base.text.ascii.characters : toLower;
 
         LiteralType us = this.literal;
-        if (us.length > 0 && us[$ - 1] == '\0')
+        if(us.length > 0 && us[$ - 1] == '\0')
             us = us[0 .. $ - 1];
-        if (other.length > 0 && other[$ - 1] == '\0')
+        if(other.length > 0 && other[$ - 1] == '\0')
             other = other[0 .. $ - 1];
 
-        if (other.length > us.length)
+        if(other.length > us.length)
             return -1;
 
-        Loop: foreach_reverse (i; 0 .. (us.length + 1) - other.length) {
-            foreach (j; 0 .. other.length) {
-                if (us[i + j].toLower != other[j].toLower)
+        Loop: foreach_reverse(i; 0 .. (us.length + 1) - other.length) {
+            foreach(j; 0 .. other.length) {
+                if(us[i + j].toLower != other[j].toLower)
                     continue Loop;
             }
 
@@ -1946,21 +1944,21 @@ nothrow @nogc:
     ///
     ptrdiff_t lastIndexOf(scope StringBuilder_ASCII other) scope {
         LiteralType us = this.literal;
-        if (us.length > 0 && us[$ - 1] == '\0')
+        if(us.length > 0 && us[$ - 1] == '\0')
             us = us[0 .. $ - 1];
 
-        if (us.length == 0 || other.isNull)
+        if(us.length == 0 || other.isNull)
             return -1;
 
         ptrdiff_t possibleValue = -1;
 
-        if (other.length > 0) {
-            while (us.length >= other.length) {
+        if(other.length > 0) {
+            while(us.length >= other.length) {
                 size_t offsetIntoUs, otherLength;
                 bool matched = true;
 
                 other.foreachContiguous((scope ref ubyte[] data) {
-                    if (data.length > us.length - offsetIntoUs || data != us[offsetIntoUs .. offsetIntoUs + data.length]) {
+                    if(data.length > us.length - offsetIntoUs || data != us[offsetIntoUs .. offsetIntoUs + data.length]) {
                         matched = false;
                         return 1;
                     }
@@ -1969,7 +1967,7 @@ nothrow @nogc:
                     return 0;
                 }, (size_t otherLength2) { otherLength = otherLength2; });
 
-                if (matched) {
+                if(matched) {
                     possibleValue = &us[0] - &this.literal[0];
                     us = us[other.length .. $];
                 } else
@@ -1991,23 +1989,23 @@ nothrow @nogc:
         import sidero.base.text.ascii.characters : toLower;
 
         LiteralType us = this.literal;
-        if (us.length > 0 && us[$ - 1] == '\0')
+        if(us.length > 0 && us[$ - 1] == '\0')
             us = us[0 .. $ - 1];
 
-        if (us.length == 0 || other.isNull)
+        if(us.length == 0 || other.isNull)
             return -1;
 
         ptrdiff_t possibleValue = -1;
 
-        if (other.length > 0) {
-            while (us.length >= other.length) {
+        if(other.length > 0) {
+            while(us.length >= other.length) {
                 size_t offsetIntoUs, otherLength;
                 bool matched = true;
 
                 other.foreachContiguous((scope ref ubyte[] data) {
-                    if (data.length <= us.length - offsetIntoUs) {
-                        foreach (i; 0 .. data.length) {
-                            if (data[i].toLower != us[offsetIntoUs + i].toLower) {
+                    if(data.length <= us.length - offsetIntoUs) {
+                        foreach(i; 0 .. data.length) {
+                            if(data[i].toLower != us[offsetIntoUs + i].toLower) {
                                 matched = false;
                                 return 1;
                             }
@@ -2021,7 +2019,7 @@ nothrow @nogc:
                     return 0;
                 }, (size_t otherLength2) { otherLength = otherLength2; });
 
-                if (matched) {
+                if(matched) {
                     possibleValue = &us[0] - &this.literal[0];
                     us = us[other.length .. $];
                 } else
@@ -2054,18 +2052,18 @@ nothrow @nogc:
     ///
     size_t count(scope LiteralType other...) scope {
         LiteralType us = this.literal;
-        if (us.length > 0 && us[$ - 1] == '\0')
+        if(us.length > 0 && us[$ - 1] == '\0')
             us = us[0 .. $ - 1];
-        if (other.length > 0 && other[$ - 1] == '\0')
+        if(other.length > 0 && other[$ - 1] == '\0')
             other = other[0 .. $ - 1];
 
-        if (other.length > us.length)
+        if(other.length > us.length)
             return 0;
 
         size_t got;
 
-        while (us.length >= other.length) {
-            if (us[0 .. other.length] == other) {
+        while(us.length >= other.length) {
+            if(us[0 .. other.length] == other) {
                 got++;
                 us = us[other.length .. $];
             } else
@@ -2108,19 +2106,19 @@ nothrow @nogc:
         import sidero.base.text.ascii.characters : toLower;
 
         LiteralType us = this.literal;
-        if (us.length > 0 && us[$ - 1] == '\0')
+        if(us.length > 0 && us[$ - 1] == '\0')
             us = us[0 .. $ - 1];
-        if (other.length > 0 && other[$ - 1] == '\0')
+        if(other.length > 0 && other[$ - 1] == '\0')
             other = other[0 .. $ - 1];
 
-        if (other.length > us.length)
+        if(other.length > us.length)
             return 0;
 
         size_t got;
 
-        Loop: while (us.length >= other.length) {
-            foreach (i; 0 .. other.length) {
-                if (us[i].toLower != other[i].toLower) {
+        Loop: while(us.length >= other.length) {
+            foreach(i; 0 .. other.length) {
+                if(us[i].toLower != other[i].toLower) {
                     us = us[1 .. $];
                     continue Loop;
                 }
@@ -2153,20 +2151,20 @@ nothrow @nogc:
     ///
     size_t count(scope StringBuilder_ASCII other) scope {
         LiteralType us = this.literal;
-        if (us.length > 0 && us[$ - 1] == '\0')
+        if(us.length > 0 && us[$ - 1] == '\0')
             us = us[0 .. $ - 1];
 
-        if (other.length == 0)
+        if(other.length == 0)
             return 0;
 
         size_t got;
 
-        while (us.length >= other.length) {
+        while(us.length >= other.length) {
             size_t offsetIntoUs, otherLength;
             bool matched = true;
 
             other.foreachContiguous((scope ref ubyte[] data) {
-                if (data.length > us.length - offsetIntoUs || data != us[offsetIntoUs .. offsetIntoUs + data.length]) {
+                if(data.length > us.length - offsetIntoUs || data != us[offsetIntoUs .. offsetIntoUs + data.length]) {
                     matched = false;
                     return 1;
                 }
@@ -2175,7 +2173,7 @@ nothrow @nogc:
                 return 0;
             }, (size_t otherLength2) { otherLength = otherLength2; });
 
-            if (matched) {
+            if(matched) {
                 got++;
                 us = us[other.length .. $];
             } else
@@ -2196,22 +2194,22 @@ nothrow @nogc:
         import sidero.base.text.ascii.characters : toLower;
 
         LiteralType us = this.literal;
-        if (us.length > 0 && us[$ - 1] == '\0')
+        if(us.length > 0 && us[$ - 1] == '\0')
             us = us[0 .. $ - 1];
 
-        if (other.length == 0)
+        if(other.length == 0)
             return 0;
 
         size_t got;
 
-        while (us.length >= other.length) {
+        while(us.length >= other.length) {
             size_t offsetIntoUs, otherLength;
             bool matched = true;
 
             other.foreachContiguous((scope ref ubyte[] data) {
-                if (data.length <= us.length - offsetIntoUs) {
-                    foreach (i; 0 .. data.length) {
-                        if (data[i].toLower != us[offsetIntoUs + i].toLower) {
+                if(data.length <= us.length - offsetIntoUs) {
+                    foreach(i; 0 .. data.length) {
+                        if(data[i].toLower != us[offsetIntoUs + i].toLower) {
                             matched = false;
                             return 1;
                         }
@@ -2225,7 +2223,7 @@ nothrow @nogc:
                 return 0;
             }, (size_t otherLength2) { otherLength = otherLength2; });
 
-            if (matched) {
+            if(matched) {
                 got++;
                 us = us[other.length .. $];
             } else
@@ -2245,7 +2243,7 @@ nothrow @nogc:
 
     ///
     bool contains(scope const(char)[] other...) scope {
-        if (other is null)
+        if(other is null)
             return 0;
         return indexOf(other) >= 0;
     }
@@ -2258,7 +2256,7 @@ nothrow @nogc:
 
     ///
     bool contains(scope LiteralType other...) scope {
-        if (other is null)
+        if(other is null)
             return 0;
         return indexOf(other) >= 0;
     }
@@ -2271,7 +2269,7 @@ nothrow @nogc:
 
     ///
     bool contains(scope String_ASCII other) scope {
-        if (other.isNull)
+        if(other.isNull)
             return 0;
         return indexOf(other.literal) >= 0;
     }
@@ -2284,7 +2282,7 @@ nothrow @nogc:
 
     ///
     bool ignoreCaseContains(scope const(char)[] other...) scope {
-        if (other is null)
+        if(other is null)
             return 0;
         return ignoreCaseIndexOf(other) >= 0;
     }
@@ -2297,7 +2295,7 @@ nothrow @nogc:
 
     ///
     bool ignoreCaseContains(scope LiteralType other...) scope {
-        if (other is null)
+        if(other is null)
             return 0;
         return ignoreCaseIndexOf(other) >= 0;
     }
@@ -2310,7 +2308,7 @@ nothrow @nogc:
 
     ///
     bool ignoreCaseContains(scope String_ASCII other) scope {
-        if (other.isNull)
+        if(other.isNull)
             return 0;
         return ignoreCaseIndexOf(other.literal) >= 0;
     }
@@ -2323,7 +2321,7 @@ nothrow @nogc:
 
     ///
     bool contains(scope StringBuilder_ASCII other) scope {
-        if (other.isNull)
+        if(other.isNull)
             return 0;
         return indexOf(other) >= 0;
     }
@@ -2336,7 +2334,7 @@ nothrow @nogc:
 
     ///
     bool ignoreCaseContains(scope StringBuilder_ASCII other) scope {
-        if (other.isNull)
+        if(other.isNull)
             return 0;
         return ignoreCaseIndexOf(other) >= 0;
     }
@@ -2370,13 +2368,13 @@ nothrow @nogc:
         import sidero.base.text.ascii.characters : isWhiteSpace;
 
         LiteralType us = this.literal;
-        if (us.length > 0 && us[$ - 1] == '\0')
+        if(us.length > 0 && us[$ - 1] == '\0')
             us = us[0 .. $ - 1];
 
         size_t amount;
 
-        foreach (c; us) {
-            if (!c.isWhiteSpace && c != '\0')
+        foreach(c; us) {
+            if(!c.isWhiteSpace && c != '\0')
                 break;
             amount++;
         }
@@ -2400,8 +2398,8 @@ nothrow @nogc:
 
         size_t amount;
 
-        foreach_reverse (c; this.literal) {
-            if (!c.isWhiteSpace && c != '\0')
+        foreach_reverse(c; this.literal) {
+            if(!c.isWhiteSpace && c != '\0')
                 break;
             amount++;
         }
@@ -2421,7 +2419,7 @@ nothrow @nogc:
 
     ///
     void stripZeroTerminator() scope {
-        if (this.literal.length > 0 && this.literal[$ - 1] == 0)
+        if(this.literal.length > 0 && this.literal[$ - 1] == 0)
             this.literal = this.literal[0 .. $ - 1];
     }
 
@@ -2462,11 +2460,9 @@ private @hidden:
     scope @nogc nothrow @hidden:
 
         void rc(bool add) @trusted {
-            import core.atomic : atomicOp;
-
-            if (add)
-                atomicOp!"+="(refCount, 1);
-            else if (atomicOp!"-="(refCount, 1) == 0) {
+            if(add)
+                atomicIncrementAndLoad(refCount, 1);
+            else if(atomicDecrementAndLoad(refCount, 1) == 0) {
                 RCAllocator allocator2 = this.allocator;
                 allocator2.dispose(&this);
             }
@@ -2474,18 +2470,18 @@ private @hidden:
     }
 
     void setupIterator() @trusted scope {
-        if (isNull || haveIterator)
+        if(isNull || haveIterator)
             return;
 
         RCAllocator allocator;
 
-        if (lifeTime is null)
+        if(lifeTime is null)
             allocator = globalAllocator();
         else
             allocator = lifeTime.allocator;
 
         LiteralType us = this.literal;
-        if (us.length > 0 && us[$ - 1] == '\0')
+        if(us.length > 0 && us[$ - 1] == '\0')
             us = us[0 .. $ - 1];
 
         this.iterator = allocator.make!Iterator(1, allocator, us);
@@ -2495,7 +2491,7 @@ private @hidden:
     void changeIndexToOffset(ref ptrdiff_t a) scope {
         size_t actualLength = literal.length;
 
-        if (a < 0) {
+        if(a < 0) {
             assert(actualLength >= -a, "First offset must be smaller than length");
             a = actualLength + a;
         }
@@ -2504,17 +2500,17 @@ private @hidden:
     void changeIndexToOffset(ref ptrdiff_t a, ref ptrdiff_t b) scope {
         size_t actualLength = literal.length;
 
-        if (a < 0) {
+        if(a < 0) {
             assert(actualLength >= -a, "First offset must be smaller than length");
             a = actualLength + a;
         }
 
-        if (b < 0) {
+        if(b < 0) {
             assert(actualLength >= -b, "Second offset must be smaller than length");
             b = actualLength + b;
         }
 
-        if (b < a) {
+        if(b < a) {
             ptrdiff_t temp = a;
             a = b;
             b = temp;
@@ -2528,9 +2524,9 @@ unittest {
 
     size_t seen;
 
-    foreach (c; str) {
+    foreach(c; str) {
         bool matched;
-        foreach (c2; str[seen]) {
+        foreach(c2; str[seen]) {
             matched = c2 == c;
             break;
         }
@@ -2542,14 +2538,14 @@ unittest {
     assert(seen == SomeText.length);
     seen = 0;
 
-    foreach (c; str) {
+    foreach(c; str) {
         assert(SomeText[seen++] == cast(char)c);
     }
 
     assert(seen == SomeText.length);
     seen = 0;
 
-    foreach_reverse (ubyte c; str) {
+    foreach_reverse(ubyte c; str) {
         assert(seen < SomeText.length);
         assert(SomeText[$ - (seen + 1)] == cast(char)c);
         seen++;
@@ -2586,7 +2582,7 @@ unittest {
 // verify that iteration doesn't change state of another copy of a string
 unittest {
     void aFunction(String_ASCII input) {
-        foreach (c; input) {
+        foreach(c; input) {
             assert(c != '\0');
         }
     }

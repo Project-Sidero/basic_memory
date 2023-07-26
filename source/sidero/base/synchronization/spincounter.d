@@ -7,6 +7,7 @@ Copyright: 2022 Richard Andrew Cattermole
 */
 module sidero.base.synchronization.spincounter;
 import sidero.base.attributes;
+import sidero.base.internal.atomic;
 
 export:
 
@@ -20,22 +21,16 @@ export @safe nothrow @nogc pure:
 
     ///
     SpinCounterValue get() {
-        import core.atomic : atomicLoad;
-
         return SpinCounterValue(atomicLoad(current));
     }
 
     ///
     SpinCounterValue getAndIncrement() {
-        import core.atomic : atomicOp;
-
-        return SpinCounterValue(atomicOp!"+="(current, 1));
+        return SpinCounterValue(atomicIncrementAndLoad(current, 1));
     }
 
     void increment() {
-        import core.atomic : atomicOp;
-
-        atomicOp!"+="(current, 1);
+        atomicIncrementAndLoad(current, 1);
     }
 }
 

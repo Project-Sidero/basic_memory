@@ -36,19 +36,19 @@ export @safe nothrow @nogc:
 
     ///
     this(scope ref FilePath other) scope @trusted {
-        import core.atomic : atomicOp;
+        import sidero.base.internal.atomic;
 
         this.state = other.state;
 
         if(this.state !is null)
-            atomicOp!"+="(this.state.refCount, 1);
+            atomicIncrementAndLoad(this.state.refCount, 1);
     }
 
     ///
     ~this() scope @trusted {
-        import core.atomic : atomicOp;
+        import sidero.base.internal.atomic;
 
-        if(this.state !is null && atomicOp!"-="(this.state.refCount, 1) == 0) {
+        if(this.state !is null && atomicDecrementAndLoad(this.state.refCount, 1) == 0) {
             RCAllocator allocator = state.allocator;
             allocator.dispose(state);
         }

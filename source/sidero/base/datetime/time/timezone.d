@@ -73,24 +73,24 @@ export @safe nothrow @nogc:
 
     ///
     this(return scope ref TimeZone other) scope @trusted {
-        import core.atomic : atomicOp;
+        import sidero.base.internal.atomic;
 
         this.tupleof = other.tupleof;
 
         if(this.state !is null) {
-            atomicOp!"+="(this.state.refCount, 1);
+            atomicIncrementAndLoad(this.state.refCount, 1);
             assert(!state.allocator.isNull);
         }
     }
 
     ///
     ~this() scope @trusted {
-        import core.atomic : atomicOp;
+        import sidero.base.internal.atomic;
 
         if(this.state !is null) {
             assert(!state.allocator.isNull);
 
-            if(atomicOp!"-="(state.refCount, 1) == 0) {
+            if(atomicDecrementAndLoad(state.refCount, 1) == 0) {
                 RCAllocator allocator = state.allocator;
                 allocator.dispose(state);
             }

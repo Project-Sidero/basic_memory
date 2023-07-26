@@ -7,6 +7,7 @@ import sidero.base.allocators;
 import sidero.base.errors;
 import sidero.base.traits : isUTFReadOnly;
 import sidero.base.attributes : hidden;
+import sidero.base.internal.atomic;
 
 export:
 
@@ -46,8 +47,8 @@ struct String_UTF {
 
             void rc(bool add) @trusted @hidden {
                 if(add)
-                    atomicOp!"+="(refCount, 1);
-                else if(atomicOp!"-="(refCount, 1) == 0) {
+                    atomicIncrementAndLoad(refCount, 1);
+                else if(atomicDecrementAndLoad(refCount, 1) == 0) {
                     RCAllocator allocator2 = this.allocator;
                     allocator2.dispose(&this);
                 }
@@ -71,7 +72,6 @@ struct String_UTF {
 
     private @hidden {
         import sidero.base.internal.meta : OpApplyCombos;
-        import core.atomic : atomicOp;
 
         int opApplyImpl(Del)(scope Del del) @trusted scope {
             if(isNull)
@@ -311,7 +311,7 @@ nothrow @nogc:
         ret.lifeTime = this.lifeTime;
         ret.literalEncoding = this.literalEncoding;
         if(ret.lifeTime !is null)
-            atomicOp!"+="(ret.lifeTime.refCount, 1);
+            atomicIncrementAndLoad(ret.lifeTime.refCount, 1);
 
         ret.literal = this.literal;
         ret.setupIterator();
@@ -343,7 +343,7 @@ nothrow @nogc:
         ret.lifeTime = this.lifeTime;
         ret.literalEncoding = this.literalEncoding;
         if(ret.lifeTime !is null)
-            atomicOp!"+="(ret.lifeTime.refCount, 1);
+            atomicIncrementAndLoad(ret.lifeTime.refCount, 1);
 
         literalEncoding.handle(() @trusted {
             auto actual = cast(const(char)[])this.literal;
@@ -393,7 +393,7 @@ nothrow @nogc:
         ret.lifeTime = this.lifeTime;
 
         if(this.lifeTime !is null)
-            atomicOp!"+="(ret.lifeTime.refCount, 1);
+            atomicIncrementAndLoad(ret.lifeTime.refCount, 1);
 
         return ret;
     }
@@ -460,7 +460,7 @@ nothrow @nogc:
             this.iterator.rc(true);
 
         if(this.lifeTime !is null)
-            atomicOp!"+="(this.lifeTime.refCount, 1);
+            atomicIncrementAndLoad(this.lifeTime.refCount, 1);
     }
 
     ///
@@ -529,7 +529,7 @@ nothrow @nogc:
                 this.iterator.rc(false);
             }
 
-            if(this.lifeTime !is null && atomicOp!"-="(lifeTime.refCount, 1) == 0) {
+            if(this.lifeTime !is null && atomicDecrementAndLoad(lifeTime.refCount, 1) == 0) {
                 RCAllocator allocator = lifeTime.allocator;
                 allocator.dispose(cast(void[])lifeTime.original);
                 allocator.dispose(lifeTime);
@@ -1389,7 +1389,7 @@ nothrow @nogc:
         ret.language = this.language;
 
         if(this.lifeTime !is null)
-            atomicOp!"+="(this.lifeTime.refCount, 1);
+            atomicIncrementAndLoad(this.lifeTime.refCount, 1);
 
         if(this.iterator !is null) {
             ret.setupIterator;
@@ -1431,7 +1431,7 @@ nothrow @nogc:
         ret.language = this.language;
 
         if(this.lifeTime !is null)
-            atomicOp!"+="(this.lifeTime.refCount, 1);
+            atomicIncrementAndLoad(this.lifeTime.refCount, 1);
 
         if(this.iterator !is null) {
             ret.setupIterator;
@@ -1473,7 +1473,7 @@ nothrow @nogc:
         ret.language = this.language;
 
         if(this.lifeTime !is null)
-            atomicOp!"+="(this.lifeTime.refCount, 1);
+            atomicIncrementAndLoad(this.lifeTime.refCount, 1);
 
         if(this.iterator !is null) {
             ret.setupIterator;

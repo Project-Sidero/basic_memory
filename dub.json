@@ -83,7 +83,6 @@
             "dflags-windows-ldc": [
                 "--fvisibility=public",
                 "--linkonce-templates",
-                "-preview=dip25",
                 "--link-internally"
             ],
             "dflags": [
