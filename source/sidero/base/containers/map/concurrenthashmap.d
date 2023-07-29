@@ -273,8 +273,8 @@ export:
         auto got = map[RealKeyType.init];
 
         map.remove(RealKeyType.init);
-        assert(map.length == 0);
         assert(RealKeyType.init !in map);
+        assert(map.length == 0);
     }
 
     ///
@@ -1025,36 +1025,36 @@ struct ConcurrentHashMapNode(RealKeyType, ValueType) {
     }
 
     void removeNode(scope Node* node) scope @trusted {
-        /+assert(node !is null);
+        assert(node !is null);
         assert(node.previous !is null);
         assert(node.next !is null);
 
-        if (node.previous !is null)
+        if(node.previous !is null)
             node.previous.next = node.next;
 
-        if (node.next.previousReadyToBeDeleted is node)
+        if(node.next.previousReadyToBeDeleted is node)
             node.next.previousReadyToBeDeleted = node.previous;
         else {
             node.next.previous = node.previous;
 
-            if (node.previousReadyToBeDeleted !is null)
+            if(node.previousReadyToBeDeleted !is null)
                 mergeDeletedListToNewParent(node, node.next);
         }
 
-        if (!node.isDeleted)
+        if(!node.isDeleted)
             this.aliveNodes--;
 
-        if (node.refCount > 0) {
+        if(node.refCount > 0) {
             node.isDeleted = true;
         } else {
-            static if (isAnyPointer!ValueType) {
-                if (!valueAllocator.isNull)
+            static if(isAnyPointer!ValueType) {
+                if(!valueAllocator.isNull)
                     valueAllocator.dispose(node.value);
             }
 
             this.allNodes--;
             allocator.dispose(node);
-        }+/
+        }
     }
 
     Node* nodeFor(ulong hash) scope @trusted {
