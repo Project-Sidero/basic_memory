@@ -18,7 +18,11 @@ enum {
     ///
     TimeOutException = ErrorMessage("TOE", "Timeout exception"),
     ///
-    PlatformNotImplementedException = ErrorMessage("PNIE", "Platform is not implemented"),
+    PlatformNotImplementedException = ErrorMessage("PNIE",
+            "Platform is not implemented"),
     ///
-    UnknownPlatformBehaviorException = ErrorMessage("UPBE", "Platform behavior is unexpected"),
+    UnknownPlatformBehaviorException = ErrorMessage("UPBE",
+            "Platform behavior is unexpected"),
+    ///
+    DuplicateValueException = ErrorMessage("DVE", "Duplicate value received"),
 }

@@ -81,6 +81,7 @@ enum LogLevel {
     It allows documenting the cause of a recoverable situation that ends a given library logic.
     */
     Error,
+
     /**
     A critical log level, will only output for trace to critical inclusive.
     This will be printed to standard error not standard output.
@@ -89,6 +90,7 @@ enum LogLevel {
     It allows for documenting the cause of a unrecoverable situation that ends a given programs logic.
     */
     Critical,
+
     /**
     Fatal log level, will always be printed.
     This will be printed to standard error not standard output.

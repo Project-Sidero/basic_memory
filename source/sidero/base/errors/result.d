@@ -31,11 +31,17 @@ export:
             Type value;
         }
 
+        void opAssign(return scope Type arg) scope @trusted nothrow @nogc {
+            this.error__ = ErrorInfo.init;
+            this.value = arg;
+        }
+
         static if(__traits(hasMember, Type, "opAssign")) {
             ///
             auto opAssign(Args...)(return scope Args args) {
                 if(isNull)
                     assert(0);
+                this.error__ = ErrorInfo.init;
                 return value.opAssign(args);
             }
         }
