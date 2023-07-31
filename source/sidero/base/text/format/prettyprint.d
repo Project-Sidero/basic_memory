@@ -193,7 +193,7 @@ export @safe nothrow @nogc:
         if(input is null)
             builder ~= "@null"c;
         else
-            builder.formattedWrite("@{:p}"c, cast(size_t)input);
+            builder.formattedWrite("@{:p}"c, cast(void*)input);
     }
 
     void handlePointer(Type)(scope StringBuilder_UTF8 builder, scope ref Type input) {
@@ -212,9 +212,9 @@ export @safe nothrow @nogc:
                     builder ~= "@null"c;
                 } else {
                     static if(is(SubType == class) || isAssociativeArray!SubType) {
-                        builder.formattedWrite("@{:p}", input);
+                        builder.formattedWrite("@{:p}", cast(void*)input);
                     } else static if(isArray!SubType) {
-                        builder.formattedWrite("@{:p}", input.ptr);
+                        builder.formattedWrite("@{:p}", cast(void*)input.ptr);
                     }
                 }
             }
@@ -226,10 +226,12 @@ export @safe nothrow @nogc:
         if(input is null)
             builder ~= "@null"c;
         else {
-            builder.formattedWrite("@{:p}", input);
+            builder.formattedWrite("@{:p}", cast(void*)input);
 
             static if(!is(SubType == void)) {
+                builder ~= "("c;
                 this.handle(builder, *input, true, false);
+                builder ~= ")"c;
             }
         }
     }
@@ -650,7 +652,7 @@ export @safe nothrow @nogc:
                         if(input is null)
                             builder ~= "@null"c;
                         else
-                            builder.formattedWrite("@{:p}", input.ptr);
+                            builder.formattedWrite("@{:p}", cast(void*)input.ptr);
                     }
                 }
 
@@ -688,7 +690,7 @@ export @safe nothrow @nogc:
                     if(input is null)
                         builder ~= "@null"c;
                     else
-                        builder.formattedWrite("@{:p}", input.ptr);
+                        builder.formattedWrite("@{:p}", cast(void*)input.ptr);
                 }
             }
 
