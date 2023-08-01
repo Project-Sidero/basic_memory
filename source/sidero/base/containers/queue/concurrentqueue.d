@@ -73,7 +73,19 @@ export @safe nothrow @nogc:
     }
 
     ///
-    void push(return scope Type value) scope {
+    size_t count() scope {
+        if(isNull)
+            return 0;
+
+        state.mutex.pureLock;
+        scope(exit)
+            state.mutex.unlock;
+
+        return state.count;
+    }
+
+    ///
+    void push(scope return Type value) scope @trusted {
         checkInit;
 
         state.mutex.pureLock;
@@ -113,12 +125,15 @@ unittest {
     FiFoConcurrentQueue!int queue;
     assert(queue.isNull);
     assert(queue.empty);
+    assert(queue.count == 0);
 
     queue.push(1);
     assert(!queue.empty);
+    assert(queue.count == 1);
 
     queue.push(2);
     queue.push(3);
+    assert(queue.count == 3);
 
     auto value = queue.pop;
     assert(value);
@@ -134,6 +149,9 @@ unittest {
 
     value = queue.pop;
     assert(!value);
+
+    assert(queue.empty);
+    assert(queue.count == 0);
 }
 
 private:
@@ -145,6 +163,8 @@ struct State(Type) {
     TestTestSetLockInline mutex;
 
     Node* head, tail;
+    size_t count;
+
 export @safe nothrow @nogc:
 
     void clear() scope @trusted {
@@ -166,6 +186,8 @@ export @safe nothrow @nogc:
             tail = head;
         else if(head.next !is null)
             head.next.previous = head;
+
+        count++;
     }
 
     Result!Type pop(bool fiFo) return scope @trusted {
@@ -197,6 +219,7 @@ export @safe nothrow @nogc:
             allocator.dispose(toDeallocate);
         }
 
+        count--;
         return typeof(return)(ret);
     }
 
