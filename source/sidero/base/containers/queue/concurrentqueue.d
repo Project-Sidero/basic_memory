@@ -108,6 +108,35 @@ export @safe nothrow @nogc:
         return state.pop(fiFo);
     }
 
+    @disable auto opCast(T)();
+
+
+    ///
+    ulong toHash() scope const @trusted {
+        return cast(ulong)this.state;
+    }
+
+    ///
+    alias equals = opEquals;
+
+    ///
+    bool opEquals(scope ConcurrentQueue other) scope const {
+        return this.opCmp(other) == 0;
+    }
+
+    ///
+    alias compare = opCmp;
+
+    ///
+    int opCmp(scope ConcurrentQueue other) scope const @trusted {
+        if(this.state < other.state)
+            return -1;
+        else if(this.state > other.state)
+            return 1;
+        else
+            return 0;
+    }
+
 private:
 
     void checkInit() scope @trusted {

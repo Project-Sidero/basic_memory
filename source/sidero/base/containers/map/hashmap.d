@@ -158,7 +158,7 @@ export:
     }
 
     ///
-    void opIndexAssign(scope ValueType value, scope RealKeyType key) scope {
+    void opIndexAssign(return scope ValueType value, return scope RealKeyType key) scope {
         setupState;
         willModify;
 
@@ -282,19 +282,9 @@ export:
             state.clearExternal;
     }
 
-    ///
-    ulong toHash() scope const @trusted {
-        import sidero.base.hash.utils : hashOf;
-
-        if(isNull)
-            return toHash();
-
-        return (cast(HashMapImpl!(RealKeyType, ValueType)*)state).hashExternal;
-    }
-
     static if(!is(KeyType == RealKeyType)) {
         ///
-        void opIndexAssign(scope ValueType value, scope KeyType key) scope {
+        void opIndexAssign(return scope ValueType value, return scope KeyType key) scope {
             setupState;
             willModify;
 
@@ -344,6 +334,16 @@ export:
     }
 
     @disable auto opCast(T)();
+
+    ///
+    ulong toHash() scope const @trusted {
+        import sidero.base.hash.utils : hashOf;
+
+        if(isNull)
+            return hashOf();
+
+        return (cast(HashMapImpl!(RealKeyType, ValueType)*)state).hashExternal;
+    }
 
     ///
     alias equals = opEquals;
@@ -505,7 +505,7 @@ struct HashMapImpl(RealKeyType, ValueType) {
         this.clearAllInternal();
     }
 
-    bool insertExternal(scope KeyType key, scope ValueType value, bool canUpdate = true) scope {
+    bool insertExternal(scope KeyType key, return scope ValueType value, bool canUpdate = true) scope {
         bool ret = tryInsertInternal(key, value, canUpdate);
         return ret;
     }
@@ -610,7 +610,7 @@ struct HashMapImpl(RealKeyType, ValueType) {
         }
     }
 
-    bool tryInsertInternal(scope KeyType key, scope ValueType value, bool canUpdate = true) scope @trusted {
+    bool tryInsertInternal(scope KeyType key, return scope ValueType value, bool canUpdate = true) scope @trusted {
         const hash = nodeList.getHash(key);
         Node* prior = nodeList.priorNodeFor(hash);
 
