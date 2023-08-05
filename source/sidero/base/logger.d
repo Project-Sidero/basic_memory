@@ -529,7 +529,7 @@ export:
                     filename ~= "."c;
                 filename ~= fileTarget.fileExtension;
 
-                fp ~= filename;
+                cast(void)(fp ~= filename);
 
                 auto filePath = FilePath.from(filename);
                 if(filePath)

@@ -115,6 +115,9 @@ scope nothrow @nogc @safe:
         this.error__.checked = false;
     }
 
+    ~this() @trusted {
+    }
+
     ///
     ErrorInfo getError() const {
         return cast(ErrorInfo)this.error__;

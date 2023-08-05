@@ -591,7 +591,7 @@ void loadTZ(scope DynamicArray!ubyte rawFileRead, return scope String_UTF8 regio
                 assert(got);
 
                 got.postTransitionInfoOffset = readValue!ubyte;
-                tzFile.transitions[i] = got;
+                cast(void)(tzFile.transitions[i] = got);
             }
         }
 
@@ -661,7 +661,7 @@ void loadTZ(scope DynamicArray!ubyte rawFileRead, return scope String_UTF8 regio
                         pti.designator = designator;
 
                         if(designator.length > 0)
-                            tzFile.postTransitionInfo[offset] = pti;
+                            cast(void)(tzFile.postTransitionInfo[offset] = pti);
                     }
                 }
             }
@@ -709,7 +709,7 @@ void loadTZ(scope DynamicArray!ubyte rawFileRead, return scope String_UTF8 regio
                 assert(got);
 
                 got.standardOrWallClockTime = readValue!bool;
-                tzFile.transitions[i] = got;
+                cast(void)(tzFile.transitions[i] = got);
             }
         }
 
@@ -719,7 +719,7 @@ void loadTZ(scope DynamicArray!ubyte rawFileRead, return scope String_UTF8 regio
                 assert(got);
 
                 got.localTimeInUTCOrLocal = readValue!bool;
-                tzFile.transitions[i] = got;
+                cast(void)(tzFile.transitions[i] = got);
             }
         }
     }
