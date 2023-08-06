@@ -25,7 +25,7 @@ export @safe nothrow @nogc:
     }
 
     ///
-    String_ASCII get() scope return {
+    String_ASCII get() return scope {
         return this.text;
     }
 

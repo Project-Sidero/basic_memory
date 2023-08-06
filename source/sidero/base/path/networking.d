@@ -1,5 +1,6 @@
 module sidero.base.path.networking;
 import sidero.base.path.uri;
+import sidero.base.path.hostname;
 import sidero.base.attributes;
 import sidero.base.text;
 import sidero.base.containers.dynamicarray;
@@ -48,8 +49,8 @@ export @safe nothrow @nogc:
     ///
     void onNetworkOrder(scope void delegate(uint value) @safe nothrow @nogc on4,
             scope void delegate(ushort[8] value) @safe nothrow @nogc on6, scope void delegate() @safe nothrow @nogc onAny4,
-            scope void delegate() @safe nothrow @nogc onAny6, scope void delegate(
-                scope String_ASCII hostname) @safe nothrow @nogc onHostname, scope void delegate() @safe nothrow @nogc onNone) scope {
+            scope void delegate() @safe nothrow @nogc onAny6,
+            scope void delegate(scope Hostname hostname) @safe nothrow @nogc onHostname, scope void delegate() @safe nothrow @nogc onNone) scope {
         final switch(this.type_) {
         case Type.Invalid:
             onNone();
@@ -67,7 +68,7 @@ export @safe nothrow @nogc:
             onAny6();
             break;
         case Type.Hostname:
-            onHostname(this.hostname_);
+            onHostname(Hostname.fromEncoded(this.hostname_));
             break;
         }
     }
@@ -75,8 +76,8 @@ export @safe nothrow @nogc:
     ///
     void onSystemOrder(scope void delegate(uint value) @safe nothrow @nogc on4,
             scope void delegate(ushort[8] value) @safe nothrow @nogc on6, scope void delegate() @safe nothrow @nogc onAny4,
-            scope void delegate() @safe nothrow @nogc onAny6, scope void delegate(
-                scope String_ASCII hostname) @safe nothrow @nogc onHostname, scope void delegate() @safe nothrow @nogc onNone) scope {
+            scope void delegate() @safe nothrow @nogc onAny6,
+            scope void delegate(scope Hostname hostname) @safe nothrow @nogc onHostname, scope void delegate() @safe nothrow @nogc onNone) scope {
         final switch(this.type_) {
         case Type.Invalid:
             onNone();
@@ -97,7 +98,7 @@ export @safe nothrow @nogc:
             onAny6();
             break;
         case Type.Hostname:
-            onHostname(this.hostname_);
+            onHostname(Hostname.fromEncoded(this.hostname_));
             break;
         }
     }
@@ -201,107 +202,13 @@ export @safe nothrow @nogc:
     }
 
     /// parse a URI compliant hostname/ip
-    static NetworkAddress from(scope String_ASCII input, ushort port, bool isPortNetworkEndian = false) {
-        auto got = URIAddress.from(input);
-        if(!got)
-            return NetworkAddress.init;
-
-        return NetworkAddress.fromURIHost(got.host, port, isPortNetworkEndian);
-    }
-
-    /// Ditto
-    static NetworkAddress from(scope StringBuilder_ASCII input, ushort port, bool isPortNetworkEndian = false) {
-        auto got = URIAddress.from(input);
-        if(!got)
-            return NetworkAddress.init;
-
-        return NetworkAddress.fromURIHost(got.host, port, isPortNetworkEndian);
-    }
-
-    /// Ditto
-    static NetworkAddress from(scope String_UTF8.LiteralType input, ushort port, bool isPortNetworkEndian = false) {
-        auto got = URIAddress.from(input);
-        if(!got)
-            return NetworkAddress.init;
-
-        return NetworkAddress.fromURIHost(got.host, port, isPortNetworkEndian);
-    }
-
-    /// Ditto
-    static NetworkAddress from(scope String_UTF16.LiteralType input, ushort port, bool isPortNetworkEndian = false) {
-        auto got = URIAddress.from(input);
-        if(!got)
-            return NetworkAddress.init;
-
-        return NetworkAddress.fromURIHost(got.host, port, isPortNetworkEndian);
-    }
-
-    /// Ditto
-    static NetworkAddress from(scope String_UTF32.LiteralType input, ushort port, bool isPortNetworkEndian = false) {
-        auto got = URIAddress.from(input);
-        if(!got)
-            return NetworkAddress.init;
-
-        return NetworkAddress.fromURIHost(got.host, port, isPortNetworkEndian);
-    }
-
-    /// Ditto
-    static NetworkAddress from(scope String_UTF8 input, ushort port, bool isPortNetworkEndian = false) {
-        auto got = URIAddress.from(input);
-        if(!got)
-            return NetworkAddress.init;
-
-        return NetworkAddress.fromURIHost(got.host, port, isPortNetworkEndian);
-    }
-
-    /// Ditto
-    static NetworkAddress from(scope String_UTF16 input, ushort port, bool isPortNetworkEndian = false) {
-        auto got = URIAddress.from(input);
-        if(!got)
-            return NetworkAddress.init;
-
-        return NetworkAddress.fromURIHost(got.host, port, isPortNetworkEndian);
-    }
-
-    /// Ditto
-    static NetworkAddress from(scope String_UTF32 input, ushort port, bool isPortNetworkEndian = false) {
-        auto got = URIAddress.from(input);
-        if(!got)
-            return NetworkAddress.init;
-
-        return NetworkAddress.fromURIHost(got.host, port, isPortNetworkEndian);
-    }
-
-    /// Ditto
-    static NetworkAddress from(scope StringBuilder_UTF8 input, ushort port, bool isPortNetworkEndian = false) {
-        auto got = URIAddress.from(input);
-        if(!got)
-            return NetworkAddress.init;
-
-        return NetworkAddress.fromURIHost(got.host, port, isPortNetworkEndian);
-    }
-
-    /// Ditto
-    static NetworkAddress from(scope StringBuilder_UTF16 input, ushort port, bool isPortNetworkEndian = false) {
-        auto got = URIAddress.from(input);
-        if(!got)
-            return NetworkAddress.init;
-
-        return NetworkAddress.fromURIHost(got.host, port, isPortNetworkEndian);
-    }
-
-    /// Ditto
-    static NetworkAddress from(scope StringBuilder_UTF32 input, ushort port, bool isPortNetworkEndian = false) {
-        auto got = URIAddress.from(input);
-        if(!got)
-            return NetworkAddress.init;
-
-        return NetworkAddress.fromURIHost(got.host, port, isPortNetworkEndian);
+    static NetworkAddress from(return scope Hostname input, ushort port, bool isPortNetworkEndian = false) @trusted {
+        return NetworkAddress.fromURIHost(input.get, port, isPortNetworkEndian);
     }
 
     ///
     unittest {
-        NetworkAddress.from("127.0.0.1"c, 0).onNetworkOrder((uint address) {
+        NetworkAddress.from(Hostname.from("127.0.0.1"), 0).onNetworkOrder((uint address) {
             // ipv4
             assert(address == 0x100007F);
         }, (ushort[8] address) {
@@ -313,12 +220,12 @@ export @safe nothrow @nogc:
         }, () {
             // any ipv6
             assert(0);
-        }, (scope String_ASCII hostname) { assert(0); }, () {
+        }, (scope Hostname hostname) { assert(0); }, () {
             // invalid
             assert(0);
         });
 
-        NetworkAddress.from("0.0.0.0"c, 0).onNetworkOrder((uint address) {
+        NetworkAddress.from(Hostname.from("0.0.0.0"), 0).onNetworkOrder((uint address) {
             // ipv4
             assert(0);
         }, (ushort[8] address) {
@@ -330,12 +237,12 @@ export @safe nothrow @nogc:
         }, () {
             // any ipv6
             assert(0);
-        }, (scope String_ASCII hostname) { assert(0); }, () {
+        }, (scope Hostname hostname) { assert(0); }, () {
             // invalid
             assert(0);
         });
 
-        NetworkAddress.from("[CDEF::1234:127.0.0.1]"c, 0).onNetworkOrder((uint address) {
+        NetworkAddress.from(Hostname.from("[CDEF::1234:127.0.0.1]"), 0).onNetworkOrder((uint address) {
             // ipv4
             assert(0);
         }, (ushort[8] address) {
@@ -347,12 +254,12 @@ export @safe nothrow @nogc:
         }, () {
             // any ipv6
             assert(0);
-        }, (scope String_ASCII hostname) { assert(0); }, () {
+        }, (scope Hostname hostname) { assert(0); }, () {
             // invalid
             assert(0);
         });
 
-        NetworkAddress.from("[::]"c, 0).onNetworkOrder((uint address) {
+        NetworkAddress.from(Hostname.from("[::]"), 0).onNetworkOrder((uint address) {
             // ipv4
             assert(0);
         }, (ushort[8] address) {
@@ -364,12 +271,12 @@ export @safe nothrow @nogc:
         }, () {
             // any ipv6
             assert(true);
-        }, (scope String_ASCII hostname) { assert(0); }, () {
+        }, (scope Hostname hostname) { assert(0); }, () {
             // invalid
             assert(0);
         });
 
-        NetworkAddress.from("host.name"c, 0).onNetworkOrder((uint address) {
+        NetworkAddress.from(Hostname.from("host.name"), 0).onNetworkOrder((uint address) {
             // ipv4
             assert(0);
         }, (ushort[8] address) {
@@ -381,7 +288,7 @@ export @safe nothrow @nogc:
         }, () {
             // any ipv6
             assert(0);
-        }, (scope String_ASCII hostname) { assert(hostname == "host.name"); }, () {
+        }, (scope Hostname hostname) { assert(hostname.get == "host.name"); }, () {
             // invalid
             assert(0);
         });
@@ -389,7 +296,7 @@ export @safe nothrow @nogc:
 
     ///
     unittest {
-        NetworkAddress.from("127.0.0.1"c, 0).onSystemOrder((uint address) {
+        NetworkAddress.from(Hostname.from("127.0.0.1"), 0).onSystemOrder((uint address) {
             // ipv4
             assert(address == 0x7F_00_00_01);
         }, (ushort[8] address) {
@@ -401,12 +308,12 @@ export @safe nothrow @nogc:
         }, () {
             // any ipv6
             assert(0);
-        }, (scope String_ASCII hostname) { assert(0); }, () {
+        }, (scope Hostname hostname) { assert(0); }, () {
             // invalid
             assert(0);
         });
 
-        NetworkAddress.from("[CDEF::1234:127.0.0.1]"c, 0).onSystemOrder((uint address) {
+        NetworkAddress.from(Hostname.from("[CDEF::1234:127.0.0.1]"), 0).onSystemOrder((uint address) {
             // ipv4
             assert(0);
         }, (ushort[8] address) {
@@ -418,7 +325,7 @@ export @safe nothrow @nogc:
         }, () {
             // any ipv6
             assert(0);
-        }, (scope String_ASCII hostname) { assert(0); }, () {
+        }, (scope Hostname hostname) { assert(0); }, () {
             // invalid
             assert(0);
         });
@@ -522,10 +429,10 @@ export @safe nothrow @nogc:
         }, () {
             // any ipv6
             sink ~= "[::]"c;
-        }, (scope String_ASCII hostname) {
+        }, (scope Hostname hostname) {
             import sidero.base.encoding.bootstring;
 
-            if(!IDNAPunycode.decode(sink, hostname))
+            if(!IDNAPunycode.decode(sink, hostname.get))
                 doPort = false;
         }, () {
             // invalid

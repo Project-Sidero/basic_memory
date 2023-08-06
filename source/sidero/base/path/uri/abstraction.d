@@ -1,5 +1,6 @@
 module sidero.base.path.uri.abstraction;
 import sidero.base.path.networking;
+import sidero.base.path.hostname;
 import sidero.base.allocators;
 import sidero.base.attributes;
 import sidero.base.errors;
@@ -125,42 +126,21 @@ export @safe nothrow @nogc:
     }
 
     ///
-    String_ASCII host() scope const @trusted {
+    Hostname host() scope const @trusted {
         if(isNull || state.lengthOfHost == 0)
-            return String_ASCII.init;
+            return Hostname.init;
 
         URIAddressState* state = cast(URIAddressState*)this.state;
         state.mutex.pureLock;
         scope(exit)
             state.mutex.unlock;
 
-        return state.storage[state.offsetOfHost .. state.offsetOfHost + state.lengthOfHost].asReadOnly();
+        return Hostname.fromEncoded(state.storage[state.offsetOfHost .. state.offsetOfHost + state.lengthOfHost].asReadOnly());
     }
 
     ///
     @trusted unittest {
-        assert(URIAddress.from("myscheme://user:pass@host/path?query#fragment").assumeOkay.host == "host");
-    }
-
-    ///
-    StringBuilder_UTF8 decodedHost() scope const @trusted {
-        import sidero.base.encoding.bootstring;
-
-        if(isNull || state.lengthOfHost == 0)
-            return StringBuilder_UTF8.init;
-
-        URIAddressState* state = cast(URIAddressState*)this.state;
-        state.mutex.pureLock;
-        scope(exit)
-            state.mutex.unlock;
-
-        auto sliced = state.storage[state.offsetOfHost .. state.offsetOfHost + state.lengthOfHost];
-        auto ret = IDNAPunycode.decode(sliced);
-
-        if(ret)
-            return ret.get.byUTF8;
-        else
-            return StringBuilder_UTF8.init;
+        assert(URIAddress.from("myscheme://user:pass@host/path?query#fragment").assumeOkay.host == Hostname.from("host"));
     }
 
     ///
@@ -697,7 +677,7 @@ export @safe nothrow @nogc:
     NetworkAddress toNetworkAddress() scope const {
         auto gotPort = this.port;
         const portValue = gotPort ? gotPort.get : 0;
-        return NetworkAddress.fromURIHost(this.host, portValue, false);
+        return NetworkAddress.fromURIHost(this.host.get, portValue, false);
     }
 
     ///
@@ -714,7 +694,7 @@ export @safe nothrow @nogc:
         }, () {
             // any ipv6
             assert(0);
-        }, (scope String_ASCII hostname) { assert(hostname == "host"); }, () {
+        }, (scope Hostname hostname) { assert(hostname.get == "host"); }, () {
             // invalid
             assert(0);
         });
