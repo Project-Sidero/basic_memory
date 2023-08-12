@@ -596,7 +596,7 @@ void setLogProcessName(String_UTF8 name) @trusted {
         return;
     }
 
-    if(name.isPtrNullTerminated)
+    if(name.isPtrNullTerminated && !name.isEncodingChanged)
         processName = name;
     else
         processName = name.dup;

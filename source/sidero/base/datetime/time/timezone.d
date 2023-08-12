@@ -715,7 +715,7 @@ export @safe nothrow @nogc:
                 //  attempt to use it first.
                 if(useIANA) {
                     String_UTF8 stdName = wantedName;
-                    if(!stdName.isPtrNullTerminated)
+                    if(!stdName.isPtrNullTerminated || stdName.isEncodingChanged)
                         stdName = stdName.dup;
 
                     stdName.stripZeroTerminator;

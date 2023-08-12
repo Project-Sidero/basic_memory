@@ -79,18 +79,21 @@ export @safe nothrow @nogc:
     }
 
     ///
-    static Hostname from(return scope String_UTF8.LiteralType input) {
-        return Hostname.from(String_UTF8(input));
+    static Hostname from(return scope String_UTF8.LiteralType input) @trusted {
+        auto temp = String_UTF8(input);
+        return Hostname.from(temp);
     }
 
     ///
-    static Hostname from(return scope String_UTF16.LiteralType input) {
-        return Hostname.from(String_UTF8(input));
+    static Hostname from(return scope String_UTF16.LiteralType input) @trusted {
+        auto temp = String_UTF8(input);
+        return Hostname.from(temp);
     }
 
     ///
-    static Hostname from(return scope String_UTF32.LiteralType input) {
-        return Hostname.from(String_UTF8(input));
+    static Hostname from(return scope String_UTF32.LiteralType input) @trusted {
+        auto temp = String_UTF8(input);
+        return Hostname.from(temp);
     }
 
     ///

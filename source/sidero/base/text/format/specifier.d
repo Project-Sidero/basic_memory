@@ -25,8 +25,14 @@ ArgId:
     Integer
 
 FormatSpec:
+    "(" StandardFormat|opt ")" IterationCharacters|opt
+    "(" Format|opt ")" IterationCharacters|opt
     StandardFormat
     String
+
+IterationCharacters:
+    Character
+    Character Character Character
 
 StandardFormat:
     Alignment|opt Sign|opt AlternativeForm|opt MinimumWidth|opt Precision|opt Type|opt
@@ -81,7 +87,7 @@ struct FormatSpecifier {
     ///
     int argId = -1;
     ///
-    String_UTF8 fullFormatSpec;
+    String_UTF8 fullFormatSpec, innerFormatSpec;
 
     ///
     dchar fillCharacter = notACharacter;
@@ -104,6 +110,15 @@ struct FormatSpecifier {
 
     ///
     Type type;
+
+    ///
+    bool useIterableCharacters;
+    ///
+    dchar iterableDividerCharacter = notACharacter;
+    ///
+    dchar iterableStartCharacter = notACharacter;
+    ///
+    dchar iterableEndCharacter = notACharacter;
 
 export @safe nothrow @nogc:
 
@@ -177,10 +192,12 @@ export @safe nothrow @nogc:
         fs = FormatSpecifier.from(String_UTF8(""));
         assert(fs == FormatSpecifier.init);
 
-        String_UTF8 todo = String_UTF8("pre{9:*^ #02.3d}post{}error");
+        String_UTF8 todo = String_UTF8("pre{9:({:*^ #02.3d}),[}post{}error");
         fs = FormatSpecifier.from(todo);
+
         assert(todo == "post{}error");
-        assert(fs.fullFormatSpec == "*^ #02.3d");
+        assert(fs.fullFormatSpec == "({:*^ #02.3d}),[");
+        assert(fs.innerFormatSpec == "{:*^ #02.3d}");
         assert(fs.fillCharacter == '*');
         assert(fs.alignment == Alignment.Center);
         assert(fs.sign == Sign.SpaceForPositiveAndNegative);
@@ -189,6 +206,10 @@ export @safe nothrow @nogc:
         assert(fs.minimumWidth == 2);
         assert(fs.precision == 3);
         assert(fs.type == Type.Decimal);
+        assert(fs.useIterableCharacters);
+        assert(fs.iterableDividerCharacter == ',');
+        assert(fs.iterableStartCharacter == '[');
+        assert(fs.iterableEndCharacter == notACharacter);
     }
 
     ///
@@ -254,10 +275,6 @@ private @hidden:
 
         FormatSpecifier ret = void;
 
-        foreach(ref b; (cast(ubyte*)&ret)[0 .. FormatSpecifier.sizeof]) {
-            b = 0;
-        }
-
         // argId
         {
             ret.argId = 0;
@@ -273,23 +290,64 @@ private @hidden:
 
         format = format[];
 
-        ptrdiff_t index = format.indexOf("}");
-        if(index < 0) {
-            ret.fullFormatSpec = format.byUTF8;
-            format = FormatString.init;
-        } else {
-            ret.fullFormatSpec = format[0 .. index].byUTF8;
-            format = format[index + 1 .. $];
+        size_t amountInInner, amountLeft;
+        ret.fullFormatSpec = format.save.byUTF8;
+        ret.parseSpec(amountInInner, amountLeft);
+
+        import sidero.base.console;
+        {
+            int countBracketPairs = 1;
+
+            auto leftOver = format.save;
+            while(!leftOver.empty) {
+                ptrdiff_t index = leftOver.indexOf("}"c);
+
+                if (index > 0) {
+                    countBracketPairs += leftOver[0 .. index].count("{"c);
+
+                    auto prev = leftOver[index - 1];
+                    leftOver = leftOver[index + 1 .. $];
+
+                    if (prev.startsWith("\\"c) || prev.startsWith("}"c)) {
+                    } else if (countBracketPairs > 1) {
+                        countBracketPairs--;
+                    } else {
+                        break;
+                    }
+                } else {
+                    leftOver = leftOver[1 .. $];
+
+                    if (countBracketPairs > 1) {
+                        countBracketPairs--;
+                    } else {
+                        break;
+                    }
+                }
+            }
+
+            ret.fullFormatSpec = format[0 .. $ - leftOver.length].byUTF8;
+            format = leftOver;
+
+            if (ret.fullFormatSpec.endsWith("}"c))
+                ret.fullFormatSpec = ret.fullFormatSpec[0 .. $-1];
         }
 
-        if(!ret.fullFormatSpec.empty)
-            ret.parseSpec;
+        if(ret.useIterableCharacters)
+            ret.innerFormatSpec = ret.fullFormatSpec[1 .. $ - (amountInInner + 1)];
 
         return ret;
     }
 
-    void parseSpec() scope {
+    void parseSpec(out size_t amountInInner, out size_t amountLeft) scope {
+        {
+            // argId and fullFormatSpec are already initialized
+            this.tupleof[2 .. $] = FormatSpecifier.init.tupleof[2 .. $];
+        }
+
         String_UTF32 format = this.fullFormatSpec.save.byUTF32;
+        scope(exit) {
+            amountLeft = format.save.length;
+        }
 
         bool peekNext(out dchar next) {
             auto temp = format.save();
@@ -317,6 +375,31 @@ private @hidden:
                 return Alignment.Center;
             default:
                 return Alignment.None;
+            }
+        }
+
+        bool expectingCloseBrace;
+
+        // "({:" StandardFormat "})" IterationCharacters|opt
+        if(!format.empty && format.front == '(') {
+            dchar temp;
+
+            if(peekNext(temp) && (this.alignment = parseAlignment(temp)) == Alignment.None) {
+                format.popFront;
+
+                if(!format.empty && format.front == '{') {
+                    expectingCloseBrace = true;
+                    format.popFront;
+
+                    while(!format.empty) {
+                        dchar was = format.front;
+                        format.popFront;
+                        if(was == ':')
+                            break;
+                    }
+                }
+
+                useIterableCharacters = true;
             }
         }
 
@@ -463,8 +546,53 @@ private @hidden:
                 format.popFront;
                 break;
 
+            case 's':
+                // default
+                format.popFront;
+                break;
+
             default:
                 break;
+            }
+        }
+
+        {
+            // "})" IterationCharacters|opt
+            // IterationCharacters:
+            //     Character
+            //     Character Character Character
+            bool wantIterableCharacters = useIterableCharacters;
+
+            if (expectingCloseBrace) {
+                if (!format.empty && format.front == '}') {
+                    format.popFront;
+                } else
+                    wantIterableCharacters = false;
+            }
+
+            if(wantIterableCharacters && !format.empty && format.front == ')') {
+                format.popFront;
+            } else
+                wantIterableCharacters = false;
+
+            if(wantIterableCharacters) {
+                if(!format.empty && format.front != '}') {
+                    this.iterableDividerCharacter = format.front;
+                    format.popFront;
+                    amountInInner++;
+                }
+
+                if(!format.empty && format.front != '}') {
+                    this.iterableStartCharacter = format.front;
+                    format.popFront;
+                    amountInInner++;
+                }
+
+                if(!format.empty && format.front != '}') {
+                    this.iterableEndCharacter = format.front;
+                    format.popFront;
+                    amountInInner++;
+                }
             }
         }
     }

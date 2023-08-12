@@ -1,5 +1,6 @@
 module sidero.base.text.format.rawwrite;
 import sidero.base.text.format.specifier;
+import sidero.base.text.unicode.characters.defs;
 import sidero.base.text;
 import sidero.base.attributes;
 import sidero.base.traits;
@@ -10,7 +11,7 @@ export @safe nothrow @nogc:
 
 ///
 bool rawWrite(Builder, Input)(return scope ref Builder output, scope Input input,
-        scope FormatSpecifier format = FormatSpecifier.init, bool quote = false) if (isBuilderString!Builder) {
+        scope FormatSpecifier format = FormatSpecifier.init, bool quote = false) @trusted if (isBuilderString!Builder) {
     alias ActualType = Unqual!Input;
 
     static if(!is(ActualType == Input)) {
@@ -41,14 +42,14 @@ bool rawWrite(Builder, Input)(return scope ref Builder output, scope Input input
         } else static if(is(Input == Expected)) {
             return writeExpected(output, input.wanted, input.get);
         } else static if(isAssociativeArray!Input) {
-            return writeAA(output, input);
+            return writeAA(output, input, format);
         } else static if(is(Input == struct) || is(Input == class)) {
             return writeStructClass(output, input, format);
         } else static if(IsStaticArray) {
-            return writeIterable(output, input[]);
+            return writeIterable(output, input[], format);
         } else static if(isDynamicArray!Input || (isIterable!Input && !(HaveNonStaticOpApply!ActualType ||
                 __traits(hasMember, ActualType, "opApply")))) {
-            return writeIterable(output, input);
+            return writeIterable(output, input, format);
         } else static if(is(Input == union)) {
             return writeUnion(output, input);
         } else static if(is(Input == interface)) {
@@ -741,8 +742,13 @@ bool writeExpected(Builder)(scope ref Builder output, size_t wanted, size_t got)
     return true;
 }
 
-bool writeIterable(Builder, Input)(scope ref Builder output, scope Input input) @trusted {
-    output ~= "["c;
+bool writeIterable(Builder, Input)(scope ref Builder output, scope Input input, scope FormatSpecifier format) @trusted {
+    if(format.useIterableCharacters) {
+        if(format.iterableStartCharacter != notACharacter)
+            output ~= [format.iterableStartCharacter];
+    } else
+        output ~= "["c;
+
     size_t i;
 
     static if(isDynamicArray!Input) {
@@ -751,27 +757,50 @@ bool writeIterable(Builder, Input)(scope ref Builder output, scope Input input) 
         static if(is(SubType == void)) {
         } else {
             foreach(v; cast(SubType[])input[]) {
-                if(i++ > 0)
-                    output ~= ", "c;
+                if(i++ > 0) {
+                    if(format.useIterableCharacters) {
+                        if(format.iterableDividerCharacter != notACharacter)
+                            output ~= [format.iterableDividerCharacter];
+                    } else
+                        output ~= ","c;
 
-                formattedWriteImpl(output, String_UTF32.init, true, v);
+                    output ~= " "c;
+                }
+
+                formattedWriteImpl(output, format.innerFormatSpec, true, v);
             }
         }
     } else {
         foreach(v; input) {
-            if(i++ > 0)
-                output ~= ", "c;
+            if(i++ > 0) {
+                if(format.useIterableCharacters) {
+                    if(format.iterableDividerCharacter != notACharacter)
+                        output ~= [format.iterableDividerCharacter];
+                } else
+                    output ~= ","c;
 
-            formattedWriteImpl(output, String_UTF32.init, true, v);
+                output ~= " "c;
+            }
+
+            formattedWriteImpl(output, format.innerFormatSpec, true, v);
         }
     }
 
-    output ~= "]"c;
+    if(format.useIterableCharacters) {
+        if(format.iterableEndCharacter != notACharacter)
+            output ~= [format.iterableEndCharacter];
+    } else
+        output ~= "]"c;
     return true;
 }
 
-bool writeAA(Builder, Input)(scope ref Builder output, scope Input input) @trusted {
-    output ~= "["c;
+bool writeAA(Builder, Input)(scope ref Builder output, scope Input input, scope FormatSpecifier format) @trusted {
+    if(format.useIterableCharacters) {
+        if(format.iterableStartCharacter != notACharacter)
+            output ~= [format.iterableStartCharacter];
+    } else
+        output ~= "["c;
+
     bool isFirst = true;
 
     version(D_BetterC) {
@@ -780,8 +809,15 @@ bool writeAA(Builder, Input)(scope ref Builder output, scope Input input) @trust
             foreach(key, value; input) {
                 if(isFirst)
                     isFirst = false;
-                else
-                    output ~= ", "c;
+                else {
+                    if(format.useIterableCharacters) {
+                        if(format.iterableDividerCharacter != notACharacter)
+                            output ~= [format.iterableDividerCharacter];
+                    } else
+                        output ~= ","c;
+
+                    output ~= " "c;
+                }
 
                 formattedWriteImpl(output, String_UTF32.init, true, key);
                 output ~= ": "c;
@@ -791,7 +827,11 @@ bool writeAA(Builder, Input)(scope ref Builder output, scope Input input) @trust
         }
     }
 
-    output ~= "]"c;
+    if(format.useIterableCharacters) {
+        if(format.iterableEndCharacter != notACharacter)
+            output ~= [format.iterableEndCharacter];
+    } else
+        output ~= "]"c;
     return true;
 }
 

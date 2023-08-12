@@ -62,7 +62,7 @@ void handleOneWrite(Type)(scope ref Writer writer, size_t argumentId, scope ref 
             rawWriteImpl(String_UTF8(`"`), writer.useErrorStream);
 
         static if(isReadOnlyString!Type || isBuilderString!Type) {
-            rawWriteImpl(arg, writer.useErrorStream);
+            rawWriteImpl(arg.byUTF8, writer.useErrorStream);
         } else {
             rawWriteImpl(String_UTF8(arg), writer.useErrorStream);
         }

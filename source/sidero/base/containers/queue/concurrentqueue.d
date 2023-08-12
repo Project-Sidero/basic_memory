@@ -108,6 +108,21 @@ export @safe nothrow @nogc:
         return state.pop(fiFo);
     }
 
+    ///
+    Result!Type peek(bool fiFo = FiFo) return scope {
+        if(isNull)
+            return typeof(return)(NullPointerException);
+
+        state.mutex.pureLock;
+        scope(exit)
+        state.mutex.unlock;
+
+        if(state.head is null)
+            return typeof(return)(RangeException("Nothing to pop off of stack"));
+
+        return state.peek(fiFo);
+    }
+
     @disable auto opCast(T)();
 
 
@@ -249,6 +264,18 @@ export @safe nothrow @nogc:
         }
 
         count--;
+        return typeof(return)(ret);
+    }
+
+    Result!Type peek(bool fiFo) return scope @trusted {
+        Type ret;
+
+        if(fiFo) {
+            ret = tail.value;
+        } else {
+            ret = head.value;
+        }
+
         return typeof(return)(ret);
     }
 

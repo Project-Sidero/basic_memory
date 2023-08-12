@@ -235,7 +235,7 @@ void rawWriteImpl(scope String_UTF8 input, bool useError = false) @trusted {
             String_UTF16 input16 = input.byUTF16();
 
             {
-                if(!input16.isPtrNullTerminated())
+                if(!input16.isPtrNullTerminated() || input16.isEncodingChanged)
                     input16 = input16.dup;
 
                 input16.stripZeroTerminator;
@@ -254,7 +254,7 @@ void rawWriteImpl(scope String_UTF8 input, bool useError = false) @trusted {
 
     if(useStdio) {
         {
-            if(!input.isPtrNullTerminated())
+            if(!input.isPtrNullTerminated() || input.isEncodingChanged)
                 input = input.dup;
 
             input.stripZeroTerminator;
@@ -263,6 +263,9 @@ void rawWriteImpl(scope String_UTF8 input, bool useError = false) @trusted {
             if(input.length == 0)
                 return;
         }
+
+        assert(input.length > 0);
+        assert(input.ptr !is null);
 
         fwrite(input.ptr, char.sizeof, useLength, useError ? stdioError : stdioOut);
         fflush(useError ? stdioError : stdioOut);

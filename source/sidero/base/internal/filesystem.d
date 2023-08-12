@@ -152,7 +152,7 @@ export @safe nothrow @nogc:
         if(isNull || input.length == 0)
             return;
 
-        if(!input.isPtrNullTerminated)
+        if(!input.isPtrNullTerminated || input.isEncodingChanged)
             input = input.dup;
 
         size_t writtenSoFar, written, failedAttempt;

@@ -590,7 +590,7 @@ pragma(crt_constructor) extern (C) void initializeSystemInfo() @trusted {
         }
 
         void handle(String_UTF8 arg) {
-            if(!arg.isPtrNullTerminated)
+            if(!arg.isPtrNullTerminated || arg.isEncodingChanged)
                 arg = arg.dup;
 
             ret ~= arg;
