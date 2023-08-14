@@ -6,7 +6,7 @@ Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
  */
 module sidero.base.allocators.alternatives.fallback;
-import std.typecons : Ternary;
+import sidero.base.typecons : Ternary;
 
 private {
     import sidero.base.allocators.api;
@@ -70,7 +70,7 @@ scope @safe @nogc pure nothrow:
     bool reallocate(scope ref void[] array, size_t newSize) {
         if(isNull)
             return false;
-        else if(primary.owns(array) == Ternary.yes || secondary.owns(array) == Ternary.no)
+        else if(primary.owns(array) == Ternary.Yes || secondary.owns(array) == Ternary.No)
             return primary.reallocate(array, newSize);
         else
             return secondary.reallocate(array, newSize);
@@ -80,7 +80,7 @@ scope @safe @nogc pure nothrow:
     bool deallocate(scope void[] array) {
         if(isNull)
             return false;
-        else if(primary.owns(array) == Ternary.yes || secondary.owns(array) == Ternary.no)
+        else if(primary.owns(array) == Ternary.Yes || secondary.owns(array) == Ternary.No)
             return primary.deallocate(array);
         else
             return secondary.deallocate(array);
@@ -89,9 +89,9 @@ scope @safe @nogc pure nothrow:
     ///
     Ternary owns(scope void[] array) {
         if(isNull)
-            return Ternary.no;
+            return Ternary.No;
         else
-            return primary.owns(array) == Ternary.yes ? Ternary.yes : secondary.owns(array);
+            return primary.owns(array) == Ternary.Yes ? Ternary.Yes : secondary.owns(array);
     }
 
     static if(__traits(hasMember, Primary, "deallocateAll") && __traits(hasMember, Secondary, "deallocateAll")) {

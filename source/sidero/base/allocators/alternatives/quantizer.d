@@ -6,7 +6,7 @@ Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
  */
 module sidero.base.allocators.alternatives.quantizer;
-import std.typecons : Ternary;
+import sidero.base.typecons : Ternary;
 
 private {
     import sidero.base.allocators.api;
@@ -75,7 +75,7 @@ scope @safe @nogc pure nothrow:
         ///
         Ternary owns(scope void[] array) {
             if(isNull)
-                return Ternary.no;
+                return Ternary.No;
             else
                 return poolAllocator.owns(array);
         }

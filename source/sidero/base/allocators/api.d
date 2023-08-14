@@ -7,7 +7,7 @@ Copyright: 2022 Richard Andrew Cattermole
  */
 module sidero.base.allocators.api;
 import sidero.base.attributes;
-import std.typecons : Ternary;
+import sidero.base.typecons : Ternary;
 
 ///
 private {
@@ -184,7 +184,7 @@ scope:
     ///
     Ternary owns(scope void[] array) {
         if(owns_ is null)
-            return Ternary.unknown;
+            return Ternary.Unknown;
         return owns_(array);
     }
 

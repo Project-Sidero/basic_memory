@@ -10,7 +10,7 @@ import sidero.base.allocators.mapping : GoodAlignment;
 public import sidero.base.allocators.buffers.defs : FitsStrategy;
 public import sidero.base.allocators.predefined : HouseKeepingAllocator;
 import sidero.base.attributes : hidden;
-import std.typecons : Ternary;
+import sidero.base.typecons : Ternary;
 
 private {
     import sidero.base.allocators.api;
@@ -313,7 +313,7 @@ export:
 
     ///
     Ternary owns(scope void[] array) {
-        return fullAllocations.owns(array) ? Ternary.yes : Ternary.no;
+        return fullAllocations.owns(array) ? Ternary.Yes : Ternary.No;
     }
 
     ///
@@ -589,29 +589,29 @@ unittest {
         void[] got1 = ft.allocate(1024);
         assert(got1 !is null);
         assert(got1.length == 1024);
-        assert(ft.owns(null) == Ternary.no);
-        assert(ft.owns(got1) == Ternary.yes);
-        assert(ft.owns(got1[10 .. 20]) == Ternary.yes);
+        assert(ft.owns(null) == Ternary.No);
+        assert(ft.owns(got1) == Ternary.Yes);
+        assert(ft.owns(got1[10 .. 20]) == Ternary.Yes);
 
         void[] got2 = ft.allocate(512);
         assert(got2 !is null);
         assert(got2.length == 512);
-        assert(ft.owns(null) == Ternary.no);
-        assert(ft.owns(got2) == Ternary.yes);
-        assert(ft.owns(got2[10 .. 20]) == Ternary.yes);
+        assert(ft.owns(null) == Ternary.No);
+        assert(ft.owns(got2) == Ternary.Yes);
+        assert(ft.owns(got2[10 .. 20]) == Ternary.Yes);
 
         void[] got3 = ft.allocate(1024);
         assert(got3 !is null);
         assert(got3.length == 1024);
-        assert(ft.owns(null) == Ternary.no);
-        assert(ft.owns(got3) == Ternary.yes);
-        assert(ft.owns(got3[10 .. 20]) == Ternary.yes);
+        assert(ft.owns(null) == Ternary.No);
+        assert(ft.owns(got3) == Ternary.Yes);
+        assert(ft.owns(got3[10 .. 20]) == Ternary.Yes);
 
         bool success = ft.reallocate(got1, 2048);
         assert(!success);
         assert(got1.length == 1024);
 
-        assert(ft.owns(got1) == Ternary.yes);
+        assert(ft.owns(got1) == Ternary.Yes);
         success = ft.deallocate(got1);
         assert(success);
         success = ft.deallocate(got2);
@@ -622,9 +622,9 @@ unittest {
         got1 = ft.allocate(512);
         assert(got1 !is null);
         assert(got1.length == 512);
-        assert(ft.owns(null) == Ternary.no);
-        assert(ft.owns(got1) == Ternary.yes);
-        assert(ft.owns(got1[10 .. 20]) == Ternary.yes);
+        assert(ft.owns(null) == Ternary.No);
+        assert(ft.owns(got1) == Ternary.Yes);
+        assert(ft.owns(got1[10 .. 20]) == Ternary.Yes);
     }
 
     perform!(FreeTree!(Region!Mallocator, FitsStrategy.FirstFit));

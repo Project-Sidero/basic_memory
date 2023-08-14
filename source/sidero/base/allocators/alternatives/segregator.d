@@ -6,7 +6,7 @@ Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
  */
 module sidero.base.allocators.alternatives.segregator;
-import std.typecons : Ternary;
+import sidero.base.typecons : Ternary;
 
 private {
     import sidero.base.allocators.api;
@@ -68,7 +68,7 @@ scope @safe @nogc pure nothrow:
     bool reallocate(scope ref void[] array, size_t newSize) {
         if(isNull)
             return false;
-        else if(smallAllocator.owns(array) == Ternary.yes)
+        else if(smallAllocator.owns(array) == Ternary.Yes)
             return smallAllocator.reallocate(array, newSize);
         else
             return largeAllocator.reallocate(array, newSize);
@@ -78,7 +78,7 @@ scope @safe @nogc pure nothrow:
     bool deallocate(scope void[] array) {
         if(isNull)
             return false;
-        else if(smallAllocator.owns(array) == Ternary.yes)
+        else if(smallAllocator.owns(array) == Ternary.Yes)
             return smallAllocator.deallocate(array);
         else
             return largeAllocator.deallocate(array);
@@ -88,8 +88,8 @@ scope @safe @nogc pure nothrow:
         ///
         Ternary owns(scope void[] array) {
             if(isNull)
-                return Ternary.no;
-            else if(largeAllocator.owns(array) != Ternary.yes)
+                return Ternary.No;
+            else if(largeAllocator.owns(array) != Ternary.Yes)
                 return smallAllocator.owns(array);
             else
                 return largeAllocator.owns(array);

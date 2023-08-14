@@ -124,3 +124,13 @@ export @safe nothrow @nogc:
         }
     }
 }
+
+/// A ternary type
+enum Ternary {
+    ///
+    Unknown,
+    ///
+    Yes,
+    ///
+    No
+}

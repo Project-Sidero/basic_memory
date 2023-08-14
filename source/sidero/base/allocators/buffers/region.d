@@ -9,7 +9,7 @@ Copyright: 2022 Richard Andrew Cattermole
 module sidero.base.allocators.buffers.region;
 import sidero.base.allocators.mapping : GoodAlignment;
 import sidero.base.attributes : hidden;
-import std.typecons : Ternary;
+import sidero.base.typecons : Ternary;
 
 private {
     import sidero.base.allocators.api;
@@ -152,7 +152,7 @@ export:
 
     ///
     Ternary owns(scope void[] array) {
-        return (memory.ptr <= array.ptr && (array.ptr < memory.ptr + memory.length)) ? Ternary.yes : Ternary.no;
+        return (memory.ptr <= array.ptr && (array.ptr < memory.ptr + memory.length)) ? Ternary.Yes : Ternary.No;
     }
 
     ///
@@ -214,8 +214,8 @@ unittest {
     void[] got = region.allocate(1024);
     assert(got !is null);
     assert(got.length == 1024);
-    assert(region.owns(got) == Ternary.yes);
-    assert(region.owns(got[10 .. 20]) == Ternary.yes);
+    assert(region.owns(got) == Ternary.Yes);
+    assert(region.owns(got[10 .. 20]) == Ternary.Yes);
 
     R region2 = region;
     region = region2;
@@ -231,9 +231,9 @@ unittest {
     assert(got.length == 2048);
     assert(got.ptr is rootGot);
 
-    assert(region.owns(null) == Ternary.no);
-    assert(region.owns(got) == Ternary.yes);
-    assert(region.owns(got[10 .. 20]) == Ternary.yes);
+    assert(region.owns(null) == Ternary.No);
+    assert(region.owns(got) == Ternary.Yes);
+    assert(region.owns(got[10 .. 20]) == Ternary.Yes);
 
     success = region.deallocate(got);
     assert(success);
@@ -256,8 +256,8 @@ unittest {
     void[] got = region.allocate(1024);
     assert(got !is null);
     assert(got.length == 1024);
-    assert(region.owns(got) == Ternary.yes);
-    assert(region.owns(got[10 .. 20]) == Ternary.yes);
+    assert(region.owns(got) == Ternary.Yes);
+    assert(region.owns(got[10 .. 20]) == Ternary.Yes);
 
     void* rootGot = got.ptr;
     size_t alignmentCheck = region.alignedTo - (cast(size_t)region.memory.ptr % region.alignedTo);
@@ -270,9 +270,9 @@ unittest {
     assert(got.length == 2048);
     assert(got.ptr is rootGot);
 
-    assert(region.owns(null) == Ternary.no);
-    assert(region.owns(got) == Ternary.yes);
-    assert(region.owns(got[10 .. 20]) == Ternary.yes);
+    assert(region.owns(null) == Ternary.No);
+    assert(region.owns(got) == Ternary.Yes);
+    assert(region.owns(got[10 .. 20]) == Ternary.Yes);
 
     success = region.deallocate(got);
     assert(success);

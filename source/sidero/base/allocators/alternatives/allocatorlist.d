@@ -7,7 +7,7 @@ Copyright: 2022 Richard Andrew Cattermole
  */
 module sidero.base.allocators.alternatives.allocatorlist;
 import sidero.base.attributes : hidden;
-import std.typecons : Ternary;
+import sidero.base.typecons : Ternary;
 
 private {
     import sidero.base.allocators.api;
@@ -99,7 +99,7 @@ scope @safe @nogc pure nothrow:
         while(current !is null) {
             Node* next = current.next;
 
-            if(current.allocator.owns(array) == Ternary.yes)
+            if(current.allocator.owns(array) == Ternary.Yes)
                 return current.allocator.reallocate(array, newSize);
 
             current = next;
@@ -116,7 +116,7 @@ scope @safe @nogc pure nothrow:
         while(current !is null) {
             Node* next = current.next;
 
-            if(current.allocator.owns(array) == Ternary.yes) {
+            if(current.allocator.owns(array) == Ternary.Yes) {
                 bool got = current.allocator.deallocate(array);
 
                 if(got) {
@@ -147,13 +147,13 @@ scope @safe @nogc pure nothrow:
         while(current !is null) {
             Node* next = current.next;
 
-            if(current.allocator.owns(array) == Ternary.yes)
-                return Ternary.yes;
+            if(current.allocator.owns(array) == Ternary.Yes)
+                return Ternary.Yes;
 
             current = next;
         }
 
-        return Ternary.no;
+        return Ternary.No;
     }
 
     ///
@@ -247,8 +247,8 @@ unittest {
     void[] got = al.allocate(1024);
     assert(got !is null);
     assert(got.length == 1024);
-    assert(al.owns(got) == Ternary.yes);
-    assert(al.owns(got[10 .. 20]) == Ternary.yes);
+    assert(al.owns(got) == Ternary.Yes);
+    assert(al.owns(got[10 .. 20]) == Ternary.Yes);
 
     AL al2 = al;
     al = al2;
@@ -257,9 +257,9 @@ unittest {
     assert(success);
     assert(got.length == 2048);
 
-    assert(al.owns(null) == Ternary.no);
-    assert(al.owns(got) == Ternary.yes);
-    assert(al.owns(got[10 .. 20]) == Ternary.yes);
+    assert(al.owns(null) == Ternary.No);
+    assert(al.owns(got) == Ternary.Yes);
+    assert(al.owns(got[10 .. 20]) == Ternary.Yes);
 
     success = al.deallocate(got);
     assert(success);

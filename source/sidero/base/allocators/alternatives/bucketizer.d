@@ -7,7 +7,7 @@ Copyright: 2022 Richard Andrew Cattermole
  */
 module sidero.base.allocators.alternatives.bucketizer;
 import sidero.base.attributes : hidden;
-import std.typecons : Ternary;
+import sidero.base.typecons : Ternary;
 
 private {
     import sidero.base.allocators.api;
@@ -87,15 +87,15 @@ scope @trusted @nogc pure nothrow:
         ///
         Ternary owns(scope void[] array) {
             if(isNull)
-                return Ternary.no;
+                return Ternary.No;
             else {
-                if(bucketFor(array.length).owns(array) == Ternary.yes)
-                    return Ternary.yes;
+                if(bucketFor(array.length).owns(array) == Ternary.Yes)
+                    return Ternary.Yes;
 
                 foreach(ref bucket; poolAllocators)
-                    if(bucket.owns(array) == Ternary.yes)
-                        return Ternary.yes;
-                return Ternary.no;
+                    if(bucket.owns(array) == Ternary.Yes)
+                        return Ternary.Yes;
+                return Ternary.No;
             }
         }
     }

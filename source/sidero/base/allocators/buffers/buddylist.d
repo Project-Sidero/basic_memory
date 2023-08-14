@@ -7,7 +7,7 @@ Copyright: 2022 Richard Andrew Cattermole
  */
 module sidero.base.allocators.buffers.buddylist;
 import sidero.base.attributes : hidden;
-import std.typecons : Ternary;
+import sidero.base.typecons : Ternary;
 
 private {
     import sidero.base.allocators.api;
@@ -238,7 +238,7 @@ scope @safe @nogc pure nothrow:
 
     ///
     Ternary owns(scope void[] array) {
-        return allocations.owns(array) ? Ternary.yes : Ternary.no;
+        return allocations.owns(array) ? Ternary.Yes : Ternary.No;
     }
 
     ///
@@ -278,23 +278,23 @@ unittest {
     void[] got1 = bl.allocate(1024);
     assert(got1 !is null);
     assert(got1.length == 1024);
-    assert(bl.owns(null) == Ternary.no);
-    assert(bl.owns(got1) == Ternary.yes);
-    assert(bl.owns(got1[10 .. 20]) == Ternary.yes);
+    assert(bl.owns(null) == Ternary.No);
+    assert(bl.owns(got1) == Ternary.Yes);
+    assert(bl.owns(got1[10 .. 20]) == Ternary.Yes);
 
     void[] got2 = bl.allocate(512);
     assert(got2 !is null);
     assert(got2.length == 512);
-    assert(bl.owns(null) == Ternary.no);
-    assert(bl.owns(got2) == Ternary.yes);
-    assert(bl.owns(got2[10 .. 20]) == Ternary.yes);
+    assert(bl.owns(null) == Ternary.No);
+    assert(bl.owns(got2) == Ternary.Yes);
+    assert(bl.owns(got2[10 .. 20]) == Ternary.Yes);
 
     void[] got3 = bl.allocate(1024);
     assert(got3 !is null);
     assert(got3.length == 1024);
-    assert(bl.owns(null) == Ternary.no);
-    assert(bl.owns(got3) == Ternary.yes);
-    assert(bl.owns(got3[10 .. 20]) == Ternary.yes);
+    assert(bl.owns(null) == Ternary.No);
+    assert(bl.owns(got3) == Ternary.Yes);
+    assert(bl.owns(got3[10 .. 20]) == Ternary.Yes);
 
     bool success = bl.reallocate(got1, 2048);
     assert(success);
@@ -310,9 +310,9 @@ unittest {
     got1 = bl.allocate(512);
     assert(got1 !is null);
     assert(got1.length == 512);
-    assert(bl.owns(null) == Ternary.no);
-    assert(bl.owns(got1) == Ternary.yes);
-    assert(bl.owns(got1[10 .. 20]) == Ternary.yes);
+    assert(bl.owns(null) == Ternary.No);
+    assert(bl.owns(got1) == Ternary.Yes);
+    assert(bl.owns(got1[10 .. 20]) == Ternary.Yes);
 }
 
 private @hidden:

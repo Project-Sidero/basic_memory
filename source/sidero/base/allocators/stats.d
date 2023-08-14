@@ -7,7 +7,7 @@ Copyright: 2022 Richard Andrew Cattermole
  */
 module sidero.base.allocators.stats;
 import sidero.base.attributes;
-import std.typecons : Ternary;
+import sidero.base.typecons : Ternary;
 import sidero.base.internal.atomic;
 
 private {
