@@ -55,14 +55,22 @@ template TaggedPointerHouseKeepingAllocator(MappingAllocator = DefaultMapper, in
 /// Aligns all memory returned to GoodAlignment.
 struct GeneralPurposeAllocator {
     import sidero.base.allocators.buffers.buddylist : BuddyList;
+    import sidero.base.allocators.buffers.freetree : FreeTree;
     import sidero.base.allocators.mapping.malloc;
-    import sidero.base.allocators.alternatives.bucketizer;
-    import sidero.base.allocators.alternatives.segregator;
     import sidero.base.allocators.locking : GCAllocatorLock;
 
     // this will automatically bump up to the next power 2 size, and will always be a good size allocated based upon the PAGESIZE.
     // it'll hold up to 4gb of blocks quite happily. If you need more... yeah you're gonna have a problem anyway.
-    alias GeneralPurposeAllocatorImpl = GCAllocatorLock!(BuddyList!(MemoryRegionsAllocator!(0), 6, 22, false));
+    version(none) {
+        alias GeneralPurposeAllocatorImpl = GCAllocatorLock!(BuddyList!(MemoryRegionsAllocator!(0), 6, 22, false));
+    }
+
+    // This is the best possible use of a free tree, which should be more efficient than a buddylist.
+    version(all) {
+        alias GeneralPurposeAllocatorImpl = GCAllocatorLock!(FreeTree!(MemoryRegionsAllocator!(0),
+                FitsStrategy.BestFit, GoodAlignment, 0, false));
+    }
+
     GeneralPurposeAllocatorImpl impl;
 
     alias impl this;

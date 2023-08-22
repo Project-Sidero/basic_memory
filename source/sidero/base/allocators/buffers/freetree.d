@@ -35,7 +35,8 @@ export:
 
     See_Also: FreeList
 */
-struct FreeTree(PoolAllocator, FitsStrategy Strategy, size_t DefaultAlignment = GoodAlignment, size_t DefaultMinimumStoredSize = 0) {
+struct FreeTree(PoolAllocator, FitsStrategy Strategy, size_t DefaultAlignment = GoodAlignment,
+        size_t DefaultMinimumStoredSize = 0, bool storeAllocated = true) {
 export:
     /// Source for all memory
     PoolAllocator poolAllocator;
@@ -73,7 +74,9 @@ export:
             Node** previousAnchor;
         }
 
-        AllocatedTree!() allocations, fullAllocations;
+        static if(storeAllocated) {
+            AllocatedTree!() allocations, fullAllocations;
+        }
     }
 
 @safe @nogc scope pure nothrow:
@@ -103,76 +106,77 @@ export:
     static if(Strategy == FitsStrategy.FirstFit) {
         ///
         void[] allocate(size_t size, TypeInfo ti = null) {
+            const actualSizeNeeded = size >= Node.sizeof ? size : Node.sizeof;
             Node** parent = &anchor;
 
             if(*parent is null) {
-                size_t toAllocateSize = size;
-                if(size < Node.sizeof)
-                    toAllocateSize = Node.sizeof;
-
-                auto ret = poolAllocator.allocate(toAllocateSize, ti);
+                auto ret = poolAllocator.allocate(actualSizeNeeded, ti);
                 if(ret is null)
                     return null;
 
-                if(ret.length < toAllocateSize) {
+                if(ret.length < actualSizeNeeded) {
                     poolAllocator.deallocate(ret);
                     return null;
                 }
 
-                allocations.store(ret);
-                fullAllocations.store(ret);
-                return ret[0 .. size];
+                static if(storeAllocated) {
+                    allocations.store(ret);
+                    fullAllocations.store(ret);
+                    return ret[0 .. size];
+                } else
+                    return ret;
             }
 
             Node** currentParent = parent;
             Node** left = &(*currentParent).left;
 
-            while(fitsAlignment(left, size, alignedTo)) {
+            while(fitsAlignment(left, actualSizeNeeded, alignedTo)) {
                 parent = currentParent;
                 currentParent = left;
                 left = &(*currentParent).left;
             }
 
-            return allocateImpl(size, parent);
+            return allocateImpl(actualSizeNeeded, parent);
         }
     } else static if(Strategy == FitsStrategy.NextFit) {
         ///
         void[] allocate(size_t size, TypeInfo ti = null) {
+            const actualSizeNeeded = size >= Node.sizeof ? size : Node.sizeof;
+
             void[] perform(scope Node** parent) {
                 Node** currentParent = parent, left = &(*currentParent).left;
 
-                while(fitsAlignment(left, size, alignedTo)) {
+                while(fitsAlignment(left, actualSizeNeeded, alignedTo)) {
                     parent = currentParent;
                     currentParent = left;
                     left = &(*currentParent).left;
                 }
 
                 previousAnchor = parent;
-                return allocateImpl(size, parent);
+                return allocateImpl(actualSizeNeeded, parent);
             }
 
-            if(fitsAlignment(previousAnchor, size, alignedTo))
+            if(fitsAlignment(previousAnchor, actualSizeNeeded, alignedTo))
                 return perform(previousAnchor);
-            else if(fitsAlignment(&anchor, size, alignedTo))
+            else if(fitsAlignment(&anchor, actualSizeNeeded, alignedTo))
                 return perform(&anchor);
 
             {
-                size_t toAllocateSize = size;
-                if(size < Node.sizeof)
-                    toAllocateSize = Node.sizeof;
-
-                auto ret = poolAllocator.allocate(toAllocateSize, ti);
+                auto ret = poolAllocator.allocate(actualSizeNeeded, ti);
                 if(ret is null)
                     return null;
 
-                if(ret.length < toAllocateSize) {
+                if(ret.length < actualSizeNeeded) {
                     poolAllocator.deallocate(ret);
                     return null;
                 }
 
-                allocations.store(ret);
-                fullAllocations.store(ret);
-                return ret[0 .. size];
+                static if(storeAllocated) {
+                    allocations.store(ret);
+                    fullAllocations.store(ret);
+                    return ret[0 .. size];
+                } else
+                    return ret;
             }
         }
     } else static if(Strategy == FitsStrategy.BestFit) {
@@ -180,9 +184,11 @@ export:
         void[] allocate(size_t size, TypeInfo ti = null) {
             Node** parent = &anchor, currentParent = parent;
 
+            const actualSizeNeeded = size >= Node.sizeof ? size : Node.sizeof;
+
             if(*currentParent !is null) {
                 Node** left = &(*currentParent).left, right = &(*currentParent).right;
-                bool leftFit = fitsAlignment(left, size, alignedTo), rightFit = fitsAlignment(right, size, alignedTo);
+                bool leftFit = fitsAlignment(left, actualSizeNeeded, alignedTo), rightFit = fitsAlignment(right, actualSizeNeeded, alignedTo);
 
                 while(leftFit || rightFit) {
                     parent = currentParent;
@@ -194,56 +200,61 @@ export:
 
                     left = &(*currentParent).left;
                     right = &(*currentParent).right;
-                    leftFit = fitsAlignment(left, size, alignedTo);
-                    rightFit = fitsAlignment(right, size, alignedTo);
+                    leftFit = fitsAlignment(left, actualSizeNeeded, alignedTo);
+                    rightFit = fitsAlignment(right, actualSizeNeeded, alignedTo);
                 }
 
-                if(fitsAlignment(parent, size, alignedTo))
-                    return allocateImpl(size, parent);
+                if(fitsAlignment(parent, actualSizeNeeded, alignedTo)) {
+                    auto ret = allocateImpl(actualSizeNeeded, parent);
+                    assert(ret.length >= actualSizeNeeded);
+                    return ret;
+                }
             }
 
             {
-                size_t toAllocateSize = size;
-                if(size < Node.sizeof)
-                    toAllocateSize = Node.sizeof;
-
-                auto ret = poolAllocator.allocate(toAllocateSize, ti);
+                auto ret = poolAllocator.allocate(actualSizeNeeded, ti);
                 if(ret is null)
                     return null;
 
-                if(ret.length < toAllocateSize) {
+                if(ret.length < actualSizeNeeded) {
                     poolAllocator.deallocate(ret);
                     return null;
                 }
 
-                allocations.store(ret);
-                fullAllocations.store(ret);
-                return ret[0 .. size];
+                assert(ret.length >= actualSizeNeeded);
+
+                static if(storeAllocated) {
+                    allocations.store(ret);
+                    fullAllocations.store(ret);
+                    return ret[0 .. size];
+                } else
+                    return ret;
             }
         }
     } else static if(Strategy == FitsStrategy.WorstFit) {
         ///
         void[] allocate(size_t size, TypeInfo ti = null) {
-            if(anchor !is null && fitsAlignment(&anchor, size, alignedTo))
-                return allocateImpl(size, &anchor);
+            const actualSizeNeeded = size >= Node.sizeof ? size : Node.sizeof;
+
+            if(anchor !is null && fitsAlignment(&anchor, actualSizeNeeded, alignedTo))
+                return allocateImpl(actualSizeNeeded, &anchor);
 
             {
-                size_t toAllocateSize = size;
-                if(size < Node.sizeof)
-                    toAllocateSize = Node.sizeof;
-
-                auto ret = poolAllocator.allocate(toAllocateSize, ti);
+                auto ret = poolAllocator.allocate(actualSizeNeeded, ti);
                 if(ret is null)
                     return null;
 
-                if(ret.length < toAllocateSize) {
+                if(ret.length < actualSizeNeeded) {
                     poolAllocator.deallocate(ret);
                     return null;
                 }
 
-                allocations.store(ret);
-                fullAllocations.store(ret);
-                return ret[0 .. size];
+                static if(storeAllocated) {
+                    allocations.store(ret);
+                    fullAllocations.store(ret);
+                    return ret[0 .. size];
+                } else
+                    return ret;
             }
         }
     } else
@@ -251,13 +262,17 @@ export:
 
     ///
     bool reallocate(scope ref void[] array, size_t newSize) {
-        if(void[] actual = allocations.getTrueRegionOfMemory(array)) {
-            size_t pointerDifference = array.ptr - actual.ptr;
-            size_t amountLeft = actual.length - pointerDifference;
+        static if(storeAllocated) {
+            void[] actual = allocations.getTrueRegionOfMemory(array);
 
-            if(amountLeft >= newSize) {
-                array = array.ptr[0 .. newSize];
-                return true;
+            if(actual) {
+                size_t pointerDifference = array.ptr - actual.ptr;
+                size_t amountLeft = actual.length - pointerDifference;
+
+                if(amountLeft >= newSize) {
+                    array = array.ptr[0 .. newSize];
+                    return true;
+                }
             }
         }
 
@@ -266,11 +281,18 @@ export:
 
     ///
     bool deallocate(void[] array) {
-        void[] trueArray = allocations.getTrueRegionOfMemory(array);
+        scope trueArray = array;
+
+        static if(storeAllocated) {
+            trueArray = allocations.getTrueRegionOfMemory(array);
+        }
 
         if(trueArray !is null) {
             assert(trueArray.length >= Node.sizeof);
-            allocations.remove(trueArray);
+
+            static if(storeAllocated) {
+                allocations.remove(trueArray);
+            }
 
             Node** parent = &anchor;
             Node* current;
@@ -291,10 +313,17 @@ export:
             }
 
             assert(trueArray.length > 0);
-            void[] trueArrayOrigin = fullAllocations.getTrueRegionOfMemory(trueArray);
+            void[] trueArrayOrigin = trueArray;
+
+            static if(storeAllocated) {
+                trueArrayOrigin = fullAllocations.getTrueRegionOfMemory(trueArray);
+            }
 
             if(trueArrayOrigin.ptr is trueArray.ptr && trueArrayOrigin.length == trueArray.length) {
-                fullAllocations.remove(trueArray);
+                static if(storeAllocated) {
+                    fullAllocations.remove(trueArray);
+                }
+
                 poolAllocator.deallocate(trueArray);
             } else {
                 Node* nodeToInsert = cast(Node*)trueArray.ptr;
@@ -313,13 +342,18 @@ export:
 
     ///
     Ternary owns(scope void[] array) {
-        return fullAllocations.owns(array) ? Ternary.Yes : Ternary.No;
+        static if(storeAllocated) {
+            return fullAllocations.owns(array) ? Ternary.Yes : Ternary.No;
+        } else
+            return poolAllocator.owns(array);
     }
 
     ///
     bool deallocateAll() {
-        allocations.deallocateAll(null);
-        fullAllocations.deallocateAll(&poolAllocator.deallocate);
+        static if(storeAllocated) {
+            allocations.deallocateAll(null);
+            fullAllocations.deallocateAll(&poolAllocator.deallocate);
+        }
 
         anchor = null;
 
@@ -553,11 +587,17 @@ private @hidden:
             actualAllocationSize = Node.sizeof;
 
         if(current.length <= actualAllocationSize + toAddAlignment + Node.sizeof + minimumStoredSize) {
-            allocations.store(current.recreate());
+            static if(storeAllocated) {
+                allocations.store(current.recreate());
+            }
+
             delete_(parent);
         } else {
             assert(current.length >= actualAllocationSize + toAddAlignment + Node.sizeof);
-            allocations.store(current.recreate()[0 .. actualAllocationSize + toAddAlignment]);
+
+            static if(storeAllocated) {
+                allocations.store(current.recreate()[0 .. actualAllocationSize + toAddAlignment]);
+            }
 
             Node* temp = cast(Node*)((cast(size_t)current) + actualAllocationSize + toAddAlignment);
             temp.left = current.left;
@@ -568,7 +608,7 @@ private @hidden:
             demote(parent);
         }
 
-        return current.recreate()[toAddAlignment .. toAddAlignment + size];
+        return current.recreate()[toAddAlignment .. toAddAlignment + actualAllocationSize];
     }
 }
 

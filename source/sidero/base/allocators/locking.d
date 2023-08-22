@@ -206,20 +206,18 @@ pure:
         scope(exit)
             writeUnlockImpl;
 
-        debug {
-            auto trueArray = allocatedTree.getTrueRegionOfMemory(array);
-            if(trueArray is null)
-                return false;
+        auto trueArray = allocatedTree.getTrueRegionOfMemory(array);
+        if(trueArray is null)
+            return false;
 
-            assert(trueArray.ptr is array.ptr);
-            assert(trueArray.length >= array.length);
-        }
+        assert(trueArray.ptr is array.ptr);
+        assert(trueArray.length >= array.length);
 
-        const got = poolAllocator.deallocate(array);
+        const got = poolAllocator.deallocate(trueArray);
 
         if(got) {
-            allocatedTree.remove(array);
-            removeRangeImpl(array);
+            allocatedTree.remove(trueArray);
+            removeRangeImpl(trueArray);
         }
 
         return got;
