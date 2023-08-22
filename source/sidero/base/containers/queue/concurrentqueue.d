@@ -105,7 +105,7 @@ export @safe nothrow @nogc:
         if(state.head is null)
             return typeof(return)(RangeException("Nothing to pop off of stack"));
 
-        return state.pop(fiFo);
+        return Result!Type(state.pop(fiFo));
     }
 
     ///
@@ -234,7 +234,7 @@ export @safe nothrow @nogc:
         count++;
     }
 
-    Result!Type pop(bool fiFo) return scope @trusted {
+    Type pop(bool fiFo) return scope @trusted {
         Type ret;
 
         if(fiFo) {
@@ -264,7 +264,7 @@ export @safe nothrow @nogc:
         }
 
         count--;
-        return typeof(return)(ret);
+        return ret;
     }
 
     Result!Type peek(bool fiFo) return scope @trusted {
