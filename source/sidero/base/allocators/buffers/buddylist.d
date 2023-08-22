@@ -26,7 +26,7 @@ export:
 
     https://en.wikipedia.org/wiki/Buddy_memory_allocation
  */
-struct BuddyList(PoolAllocator, size_t minExponent = 3, size_t maxExponent = 20) {
+struct BuddyList(PoolAllocator, size_t minExponent = 3, size_t maxExponent = 20, bool storeAllocated = true) {
 export:
     static assert(minExponent >= calculatePower2Size((void*).sizeof, 0)[1], "Minimum exponent must be large enough to fit a pointer in.");
     static assert(minExponent < maxExponent, "Maxinum exponent must be larger than minimum exponent.");
@@ -57,7 +57,10 @@ export:
         enum NumberOfBlocks = maxExponent - minExponent;
 
         Block*[NumberOfBlocks] blocks;
-        AllocatedTree!() allocations, fullAllocations;
+
+        static if(storeAllocated) {
+            AllocatedTree!() allocations, fullAllocations;
+        }
 
         static struct Block {
             Block* next;
@@ -139,27 +142,35 @@ scope @safe @nogc pure nothrow:
                 allocateSize = blockSizeAndOffsetSource[0];
 
             ret = poolAllocator.allocate(allocateSize, ti);
-            if(ret !is null)
-                fullAllocations.store(ret);
-            else
+
+            if(ret !is null) {
+                static if(storeAllocated) {
+                    fullAllocations.store(ret);
+                }
+            } else
                 assert(0);
         }
 
         if(ret !is null) {
             assert(ret.length >= size);
 
-            allocations.store(ret);
-            return ret[0 .. size];
+            static if(storeAllocated) {
+                allocations.store(ret);
+            }
+
+            return ret;
         } else
             return null;
     }
 
     ///
     bool reallocate(scope ref void[] array, size_t newSize) {
-        if(void[] trueArray = allocations.getTrueRegionOfMemory(array)) {
-            if(trueArray.length >= newSize) {
-                array = trueArray[0 .. newSize];
-                return true;
+        static if(storeAllocated) {
+            if(void[] trueArray = allocations.getTrueRegionOfMemory(array)) {
+                if(trueArray.length >= newSize) {
+                    array = trueArray[0 .. newSize];
+                    return true;
+                }
             }
         }
 
@@ -168,15 +179,31 @@ scope @safe @nogc pure nothrow:
 
     ///
     bool deallocate(scope void[] array) {
-        if(void[] trueArray = allocations.getTrueRegionOfMemory(array)) {
+        void[] trueArray = array;
+
+        static if(storeAllocated) {
+            trueArray = allocations.getTrueRegionOfMemory(array);
+        }
+
+        if(trueArray) {
             size_t[2] blockSizeAndOffset = calculatePower2Size(trueArray.length, minExponent);
-            allocations.remove(trueArray);
+
+            static if(storeAllocated) {
+                allocations.remove(trueArray);
+            }
 
             if(blockSizeAndOffset[1] >= NumberOfBlocks) {
-                fullAllocations.remove(trueArray);
+                static if(storeAllocated) {
+                    fullAllocations.remove(trueArray);
+                }
+
                 poolAllocator.deallocate(trueArray);
             } else {
-                void[] fullSizeArray = fullAllocations.getTrueRegionOfMemory(trueArray);
+                void[] fullSizeArray = trueArray;
+
+                static if(storeAllocated) {
+                    fullSizeArray = fullAllocations.getTrueRegionOfMemory(trueArray);
+                }
 
                 Loop: do {
                     void* startOfPrevious, startOfNext;
@@ -216,10 +243,17 @@ scope @safe @nogc pure nothrow:
                 while(blockSizeAndOffset[1] + 1 < NumberOfBlocks);
 
                 {
-                    void[] trueArrayOrigin = fullAllocations.getTrueRegionOfMemory(trueArray);
+                    void[] trueArrayOrigin = trueArray;
+
+                    static if(storeAllocated) {
+                        trueArrayOrigin = fullAllocations.getTrueRegionOfMemory(trueArray);
+                    }
 
                     if(trueArrayOrigin.ptr is trueArray.ptr && trueArrayOrigin.length == trueArray.length) {
-                        fullAllocations.remove(trueArray);
+                        static if(storeAllocated) {
+                            fullAllocations.remove(trueArray);
+                        }
+
                         poolAllocator.deallocate(trueArray);
                     } else {
                         Block* blockToAdd = cast(Block*)trueArray.ptr;
@@ -238,13 +272,22 @@ scope @safe @nogc pure nothrow:
 
     ///
     Ternary owns(scope void[] array) {
-        return allocations.owns(array) ? Ternary.Yes : Ternary.No;
+        static if(storeAllocated) {
+            return allocations.owns(array) ? Ternary.Yes : Ternary.No;
+        } else {
+            return poolAllocator.owns(array);
+        }
     }
 
     ///
     bool deallocateAll() {
-        allocations.deallocateAll(null);
-        fullAllocations.deallocateAll(&poolAllocator.deallocate);
+        static if(storeAllocated) {
+            allocations.deallocateAll(null);
+            fullAllocations.deallocateAll(&poolAllocator.deallocate);
+        } else {
+            poolAllocator.deallocateAll();
+        }
+
         blocks = typeof(blocks).init;
         return true;
     }

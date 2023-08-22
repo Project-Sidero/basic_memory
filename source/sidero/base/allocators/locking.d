@@ -165,9 +165,10 @@ pure:
         if(got !is null) {
             allocatedTree.store(got);
             addRangeImpl(got, ti);
+            return got[0 .. size];
         }
 
-        return got;
+        return null;
     }
 
     ///
@@ -189,6 +190,8 @@ pure:
 
             allocatedTree.store(array);
             addRangeImpl(array);
+
+            array = array[0 .. newSize];
         }
 
         return got;
@@ -207,7 +210,9 @@ pure:
             auto trueArray = allocatedTree.getTrueRegionOfMemory(array);
             if(trueArray is null)
                 return false;
-            assert(trueArray.ptr is array.ptr && trueArray.length == array.length);
+
+            assert(trueArray.ptr is array.ptr);
+            assert(trueArray.length >= array.length);
         }
 
         const got = poolAllocator.deallocate(array);

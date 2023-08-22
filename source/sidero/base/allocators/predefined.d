@@ -62,7 +62,7 @@ struct GeneralPurposeAllocator {
 
     // this will automatically bump up to the next power 2 size, and will always be a good size allocated based upon the PAGESIZE.
     // it'll hold up to 4gb of blocks quite happily. If you need more... yeah you're gonna have a problem anyway.
-    alias GeneralPurposeAllocatorImpl = GCAllocatorLock!(BuddyList!(MemoryRegionsAllocator!(0), 6, 22));
+    alias GeneralPurposeAllocatorImpl = GCAllocatorLock!(BuddyList!(MemoryRegionsAllocator!(0), 6, 22, false));
     GeneralPurposeAllocatorImpl impl;
 
     alias impl this;
