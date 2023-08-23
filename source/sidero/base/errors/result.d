@@ -107,6 +107,14 @@ scope nothrow @nogc @safe:
         cast(void)this.__ctor(other);
     }
 
+    /// Will check and only error if there is an error.
+    Type assumeOkay(string moduleName = __MODULE__, int line = __LINE__) return @system {
+        logAssert(!error__.isSet(), null, this.error__, moduleName, line);
+        static if (HaveValue) {
+            return value;
+        }
+    }
+
     ///
     this(return scope ref Result other) @trusted {
         static foreach(i; 0 .. this.tupleof.length)
