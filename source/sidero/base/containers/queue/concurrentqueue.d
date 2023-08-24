@@ -105,7 +105,8 @@ export @safe nothrow @nogc:
         if(state.head is null)
             return typeof(return)(RangeException("Nothing to pop off of stack"));
 
-        return Result!Type(state.pop(fiFo));
+        auto temp = state.pop(fiFo);
+        return Result!Type(temp);
     }
 
     ///
@@ -120,7 +121,8 @@ export @safe nothrow @nogc:
         if(state.head is null)
             return typeof(return)(RangeException("Nothing to pop off of stack"));
 
-        return state.peek(fiFo);
+        auto temp = state.peek(fiFo);
+        return temp;
     }
 
     @disable auto opCast(T)();

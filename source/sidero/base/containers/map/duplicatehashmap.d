@@ -253,6 +253,13 @@ export:
 
     export:
 
+        this(return scope ref DuplicateHashMapByKey other) scope {
+            this.tupleof = other.tupleof;
+        }
+
+        ~this() scope {
+        }
+
         ///
         mixin OpApplyCombos!("ValueType", null, ["@safe", "nothrow", "@nogc"]);
 
@@ -611,8 +618,10 @@ struct DuplicativeHashMapNode(RealKeyType, ValueType) {
         } else
             current = prior.next;
 
-        current.head = allocator.make!ValueNode(current.head);
-        current.head.value = value;
+        auto newNode = allocator.make!ValueNode(current.head);
+        newNode.value = value;
+
+        current.head = newNode;
         this.allNodes++;
     }
 
@@ -626,20 +635,20 @@ struct DuplicativeHashMapNode(RealKeyType, ValueType) {
 
         keyNode.next.previous = keyNode.previous;
 
-        static if(isAnyPointer!ValueType) {
-            ValueNode* currentValueNode = keyNode.head;
+        ValueNode* currentValueNode = keyNode.head;
 
-            while(currentValueNode !is null) {
-                ValueNode* next = currentValueNode.next;
+        while(currentValueNode !is null) {
+            ValueNode* next = currentValueNode.next;
 
+            static if(isAnyPointer!ValueType) {
                 if(!valueAllocator.isNull)
                     valueAllocator.dispose(currentValueNode.value);
-
-                this.allNodes--;
-                allocator.dispose(currentValueNode);
-
-                currentValueNode = next;
             }
+
+            this.allNodes--;
+            allocator.dispose(currentValueNode);
+
+            currentValueNode = next;
         }
 
         allocator.dispose(keyNode);
