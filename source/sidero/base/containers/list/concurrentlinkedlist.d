@@ -1607,7 +1607,7 @@ struct ConcurrentLinkedListIteratorList(Type) {
 
 @safe nothrow @nogc:
 
-    @disable this(this);
+    //@disable this(this);
 
     Iterator* createIterator(return scope ref NodeList nodeList, size_t minimumOffsetFromHead = 0, size_t maximumOffsetFromHead = size_t
             .max) scope @trusted {
@@ -1812,7 +1812,7 @@ struct ConcurrentLinkedListNodeList(Type) {
     size_t allNodes, aliveNodes;
     ptrdiff_t refCount;
 
-    @disable this(this);
+    //@disable this(this);
 
 @safe nothrow @nogc:
 

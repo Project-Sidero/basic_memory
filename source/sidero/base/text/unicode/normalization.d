@@ -225,7 +225,7 @@ alias RotatePartialHandlerDelegate = bool delegate(dchar) @safe nothrow @nogc;
 
 struct Rotate {
 export @safe nothrow @nogc:
-    @disable this(this);
+    //@disable this(this);
 
     this(scope RCAllocator allocator) scope @trusted {
         this.allocator = allocator;

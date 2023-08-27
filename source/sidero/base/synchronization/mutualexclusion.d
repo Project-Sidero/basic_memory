@@ -15,7 +15,7 @@ export:
 struct TestTestSetLockInline {
     private @PrettyPrintIgnore shared(bool) state;
 
-    @disable this(this);
+    //@disable this(this);
 
 export @safe @nogc nothrow:
 pure:

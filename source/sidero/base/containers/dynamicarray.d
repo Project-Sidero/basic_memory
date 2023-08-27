@@ -291,7 +291,7 @@ scope nothrow @nogc:
                 assert(this.state.slice.length == newLength + amount);
 
                 this.minimumOffset = 0;
-                this.maximumOffset = newLength;
+                this.maximumOffset = size_t.max;
 
                 assert(old.state.slice.length >= old.minimumOffset + newLength);
                 this = old.state.slice[old.minimumOffset .. old.minimumOffset + newLength];
@@ -525,6 +525,8 @@ scope nothrow @nogc:
 
         ret ~= this;
         ret ~= other;
+
+        ret.maximumOffset = size_t.max;
         return ret;
     }
 
@@ -543,6 +545,8 @@ scope nothrow @nogc:
 
         ret ~= this;
         ret ~= other;
+
+        ret.maximumOffset = size_t.max;
         return ret;
     }
 
@@ -954,9 +958,12 @@ unittest {
         assert(da4b.length == 10);
         assert(da4c.length == 20);
 
+        // we don't want state to be duplicated for these tests
+        da4c.reserve(34);
+
         assert(da4a.capacity == 10);
         assert(da4b.capacity == 10);
-        assert(da4c.capacity == 20);
+        assert(da4c.capacity >= 34);
         assert(da4c == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]);
 
         Result!DAint da4cslice = da4c[-1 .. -2];
@@ -965,8 +972,11 @@ unittest {
         assert(da4cslice.assumeOkay == [18]);
 
         assert(da4c[-4 .. -2].assumeOkay == [16, 17]);
+        assert(da4c.length == 20);
+        assert(da4c.state is da4cslice.state);
 
         da4cslice ~= 42;
+        assert(da4c.state is da4cslice.state);
         assert(da4cslice.length == 2);
         assert(da4c.length == 21);
 

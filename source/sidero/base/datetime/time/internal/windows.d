@@ -234,7 +234,9 @@ private @hidden:
 import sidero.base.containers.map.concurrenthashmap;
 
 __gshared {
-    DWORD windowsTZVersion;
+    version(Windows) {
+        DWORD windowsTZVersion;
+    }
     ConcurrentHashMap!(String_UTF8, WindowsTimeZoneBase) windowsTimeZones;
 }
 

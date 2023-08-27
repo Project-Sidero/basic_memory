@@ -21,7 +21,7 @@ struct BitReader {
 
 export:
 
-    @disable this(this);
+    //@disable this(this);
 
     size_t lengthOfSource() scope const {
         return source.length + nextSource.length;

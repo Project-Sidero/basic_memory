@@ -95,7 +95,7 @@ nothrow @safe:
     @disable this(ref return scope typeof(this) other) @safe scope const;
 
     @disable this(ref const typeof(this) other) const;
-    @disable this(this);
+    //@disable this(this);
 
     ///
     this(RCAllocator allocator) scope @nogc {
@@ -2794,6 +2794,18 @@ nothrow @safe:
         builder.remove(2, 2);
 
         assert(builder == "heo world");
+    }
+
+    ///
+    void clear() scope @nogc {
+        this.remove(0, size_t.max);
+    }
+
+    ///
+    unittest {
+        typeof(this) builder = "hello world!";
+        builder.clear;
+        assert(builder.length == 0);
     }
 
     @nogc {

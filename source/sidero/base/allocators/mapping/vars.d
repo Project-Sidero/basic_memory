@@ -35,7 +35,7 @@ pragma(crt_constructor) extern (C) void initializeMappingVariables() {
 
         PAGESIZE_ = info.dwPageSize;
         assert(PAGESIZE < int.max);
-    } else version(PAGESIZE_) {
+    } else version(Posix) {
         import core.sys.posix.unistd;
 
         PAGESIZE_ = cast(size_t)sysconf(_SC_PAGESIZE);

@@ -154,6 +154,7 @@ void initializeForWindowsImpl() @trusted {
 
 void initializeForStdioImpl(FILE* useIn = null, FILE* useOut = null, FILE* useError = null, bool autoClose = false, bool keepState = false) @trusted {
     import sidero.base.system : EnvironmentVariables;
+    import core.sys.posix.stdio : fileno;
 
     if(useStdio)
         return;
@@ -185,7 +186,8 @@ void initializeForStdioImpl(FILE* useIn = null, FILE* useOut = null, FILE* useEr
         import core.sys.posix.termios;
 
         if(useIn is null) {
-            resetOriginalTermios = tcgetattr(stdioIn, &originalTermiosSettings) == 0;
+            const fnum = fileno(stdioIn);
+            resetOriginalTermios = tcgetattr(fnum, &originalTermiosSettings) == 0;
         }
     }
 
@@ -244,9 +246,11 @@ void deinitializeConsoleImpl() @trusted {
             }
         } else version(Posix) {
             import core.sys.posix.termios;
+            import core.sys.posix.stdio : fileno;
 
             if(resetOriginalTermios) {
-                tcsetattr(stdioIn, TCSAFLUSH, &originalTermiosSettings);
+                const fnum = fileno(stdioIn);
+                tcsetattr(fnum, TCSAFLUSH, &originalTermiosSettings);
             }
         }
 

@@ -53,7 +53,7 @@ struct HuffManTree(size_t NumberOfLeafs) {
 
 export:
 
-    @disable this(this);
+    //@disable this(this);
 
     /// Given data create a huffman tree, returns the depth for a given leaf value
     ushort[NumberOfLeafs] buildFromData(MainType)(scope const(MainType)[] input) @trusted {

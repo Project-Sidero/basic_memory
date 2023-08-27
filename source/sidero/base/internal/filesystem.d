@@ -109,7 +109,7 @@ export @safe nothrow @nogc:
         descriptor = fopen(cast(char*)this.filename.ptr, "a");
     }
 
-    @disable this(this);
+    //@disable this(this);
 
     ~this() scope @trusted {
         if(descriptor !is null) {

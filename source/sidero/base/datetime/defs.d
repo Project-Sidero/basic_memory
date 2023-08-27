@@ -147,6 +147,14 @@ export @safe nothrow @nogc:
     }
 
     ///
+    void advanceNanoSeconds(long amount) scope {
+        timezoneCheck(() {
+            auto dateInterval = this.time_.advanceNanoSeconds(amount, true);
+            this.date_.advanceDays(dateInterval.days);
+        });
+    }
+
+    ///
     void advanceMicroSeconds(long amount) scope {
         timezoneCheck(() {
             auto dateInterval = this.time_.advanceMicroSeconds(amount, true);

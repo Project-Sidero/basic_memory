@@ -15,7 +15,7 @@ export:
 struct SpinCounter {
     private @PrettyPrintIgnore shared(int) current;
 
-    @disable this(this);
+    //@disable this(this);
 
 export @safe nothrow @nogc pure:
 

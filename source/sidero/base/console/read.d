@@ -25,6 +25,10 @@ Result!dchar readChar(Duration timeout = Duration.min) @trusted {
                 ret = handleWindowsReadChar(timeout);
                 return;
             }
+        } else version(Posix) {
+            import core.sys.posix.stdio : fileno;
+
+            const fnum = fileno(stdioIn);
         }
 
         if(useStdio && stdioIn !is null) {
@@ -34,7 +38,7 @@ Result!dchar readChar(Duration timeout = Duration.min) @trusted {
                 termios originalTermios;
 
                 if(!block) {
-                    tcgetattr(stdioIn, &originalTermios);
+                    tcgetattr(fnum, &originalTermios);
 
                     termios toSetTermios;
                     toSetTermios.c_cc[VMIN] = 0;
@@ -43,7 +47,7 @@ Result!dchar readChar(Duration timeout = Duration.min) @trusted {
                     if(toSetTermios.c_cc[VTIME] == 0)
                         toSetTermios.c_cc[VTIME] = 10;
 
-                    tcsetattr(stdioIn, TCSANOW, &toSetTermios);
+                    tcsetattr(fnum, TCSANOW, &toSetTermios);
                 }
             }
 
@@ -61,7 +65,7 @@ Result!dchar readChar(Duration timeout = Duration.min) @trusted {
 
             version(Posix) {
                 if(!block)
-                    tcsetattr(stdioIn, TCSANOW, &originalTermios);
+                    tcsetattr(fnum, TCSANOW, &originalTermios);
             }
 
             if(outputBufferCount > 0) {
@@ -93,6 +97,10 @@ Result!StringBuilder_ASCII readLine(return scope ref StringBuilder_ASCII builder
                 ret = handleWindowsReadLine(builder, timeout);
                 return;
             }
+        } else version(Posix) {
+            import core.sys.posix.stdio : fileno;
+
+            const fnum = fileno(stdioIn);
         }
 
         if(useStdio && stdioIn !is null) {
@@ -102,7 +110,7 @@ Result!StringBuilder_ASCII readLine(return scope ref StringBuilder_ASCII builder
                 termios originalTermios;
 
                 if(!block) {
-                    tcgetattr(stdioIn, &originalTermios);
+                    tcgetattr(fnum, &originalTermios);
 
                     termios toSetTermios;
                     toSetTermios.c_cc[VMIN] = 0;
@@ -111,7 +119,7 @@ Result!StringBuilder_ASCII readLine(return scope ref StringBuilder_ASCII builder
                     if(toSetTermios.c_cc[VTIME] == 0)
                         toSetTermios.c_cc[VTIME] = 10;
 
-                    tcsetattr(stdioIn, TCSANOW, &toSetTermios);
+                    tcsetattr(fnum, TCSANOW, &toSetTermios);
                 }
             }
 
@@ -130,7 +138,7 @@ Result!StringBuilder_ASCII readLine(return scope ref StringBuilder_ASCII builder
 
             version(Posix) {
                 if(!block)
-                    tcsetattr(stdioIn, TCSANOW, &originalTermios);
+                    tcsetattr(fnum, TCSANOW, &originalTermios);
             }
 
             ret = typeof(ret)(builder);
@@ -163,6 +171,10 @@ Result!StringBuilder_UTF8 readLine(return scope ref StringBuilder_UTF8 builder, 
                 ret = handleWindowsReadLine(builder, timeout);
                 return;
             }
+        } else version(Posix) {
+            import core.sys.posix.stdio : fileno;
+
+            const fnum = fileno(stdioIn);
         }
 
         if(useStdio && stdioIn !is null) {
@@ -172,7 +184,7 @@ Result!StringBuilder_UTF8 readLine(return scope ref StringBuilder_UTF8 builder, 
                 termios originalTermios;
 
                 if(!block) {
-                    tcgetattr(stdioIn, &originalTermios);
+                    tcgetattr(fnum, &originalTermios);
 
                     termios toSetTermios;
                     toSetTermios.c_cc[VMIN] = 0;
@@ -181,7 +193,7 @@ Result!StringBuilder_UTF8 readLine(return scope ref StringBuilder_UTF8 builder, 
                     if(toSetTermios.c_cc[VTIME] == 0)
                         toSetTermios.c_cc[VTIME] = 10;
 
-                    tcsetattr(stdioIn, TCSANOW, &toSetTermios);
+                    tcsetattr(fnum, TCSANOW, &toSetTermios);
                 }
             }
 
@@ -200,7 +212,7 @@ Result!StringBuilder_UTF8 readLine(return scope ref StringBuilder_UTF8 builder, 
 
             version(Posix) {
                 if(!block)
-                    tcsetattr(stdioIn, TCSANOW, &originalTermios);
+                    tcsetattr(fnum, TCSANOW, &originalTermios);
             }
 
             ret = typeof(ret)(builder);

@@ -99,7 +99,7 @@ export @safe nothrow @nogc:
             allocator.dispose(againstBuffer);
     }
 
-    @disable this(this);
+    //@disable this(this);
 
     ///
     size_t againstLength() scope {

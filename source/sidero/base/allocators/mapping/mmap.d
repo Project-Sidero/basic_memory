@@ -35,7 +35,7 @@ version(Posix) {
             if(length == 0)
                 return null;
 
-            void* ret = assumeAllAttributes(&mmap)(null, length, PROT_READ | PROT_WRITE, MAP_PRIVATE, 0, 0);
+            void* ret = assumeAllAttributes(&mmap)(null, length, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
 
             if(ret is MAP_FAILED)
                 return null;

@@ -4,6 +4,7 @@ import sidero.base.datetime.calendars.gregorian;
 import sidero.base.datetime.time.timeofday;
 import sidero.base.text;
 import sidero.base.errors;
+import sidero.base.path.file;
 
 package(sidero.base.datetime) @safe nothrow @nogc:
 
@@ -50,7 +51,7 @@ String_UTF8 getPosixLocalTimeZone() @trusted {
         {
             // /etc/timezone
             // read first line, strip, return
-            auto read = readFile!char("/etc/timezone\0", tzFileSize[0]);
+            auto read = readFile!char(FilePath.from("/etc/timezone\0"), tzFileSize[0]);
 
             if(read.length > 0) {
                 tzFileSize[0] = read.length;
@@ -73,7 +74,7 @@ String_UTF8 getPosixLocalTimeZone() @trusted {
         {
             // /etc/sysconfig/clock
             // read, find ZONE field, strip, remove quotes, return
-            auto read = readFile!char("/etc/sysconfig/clock\0", tzFileSize[1]);
+            auto read = readFile!char(FilePath.from("/etc/sysconfig/clock\0"), tzFileSize[1]);
             auto field = findField(read, "ZONE");
 
             if(field.length > 0) {
@@ -88,7 +89,7 @@ String_UTF8 getPosixLocalTimeZone() @trusted {
         {
             // /etc/TIMEZONE
             // read, find TZ field, strip, remove quotes, return
-            auto read = readFile!char("/etc/sysconfig/clock\0", tzFileSize[2]);
+            auto read = readFile!char(FilePath.from("/etc/sysconfig/clock\0"), tzFileSize[2]);
             auto field = findField(read, "TZ");
 
             if(field.length > 0) {

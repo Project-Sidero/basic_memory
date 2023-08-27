@@ -133,7 +133,7 @@ nothrow @safe:
     @disable this(ref return scope StringBuilder_ASCII other) @safe scope const;
 
     @disable this(ref const StringBuilder_ASCII other) const;
-    @disable this(this);
+    //@disable this(this);
 
     ///
     this(RCAllocator allocator) scope @nogc {
@@ -1409,6 +1409,18 @@ nothrow @safe:
         assert(builder == "heo world");
     }
 
+    ///
+    void clear() scope @nogc {
+        this.remove(0, size_t.max);
+    }
+
+    ///
+    unittest {
+        StringBuilder_ASCII builder = "hello world!";
+        builder.clear;
+        assert(builder.length == 0);
+    }
+
     @nogc {
         ///
         StringBuilder_ASCII insert(ptrdiff_t index, scope const(char)[] input...) scope return {
@@ -2156,7 +2168,7 @@ struct ASCII_State {
         this.blockList = BlockList(allocator);
     }
 
-    @disable this(this);
+    //@disable this(this);
 
     ~this() {
         blockList.clear;

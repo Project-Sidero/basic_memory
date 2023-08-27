@@ -10,7 +10,7 @@ alias BLId = BlockListImpl!dchar;
 
 struct BlockListImpl(Char) {
     alias LiteralType = const(Char)[];
-    @disable this(this);
+    //@disable this(this);
 
     RCAllocator allocator;
     TestTestSetLockInline mutex;

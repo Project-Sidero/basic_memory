@@ -13,7 +13,7 @@ private {
     import sidero.base.allocators.api;
 
     // guarantee tha each strategy has been initialized
-    alias ALRC = AllocatorList!(RCAllocator, (ref poolAllocator) => poolAllocator);
+    alias ALRC = AllocatorList!(RCAllocator, (RCAllocator* poolAllocator) => poolAllocator);
 }
 
 export:

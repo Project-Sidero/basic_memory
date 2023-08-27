@@ -14,7 +14,7 @@ private pragma(crt_destructor) extern (C) void deinitializeConsoleAutomatically(
     deinitializeConsoleImpl();
 }
 
-version(Windows) {
+version (Windows) {
     ///
     void initializeForWindows() {
         protect(() { initializeForWindowsImpl; });
@@ -42,11 +42,11 @@ bool enableRawMode() {
         // turn off output processing of \n to \r\n
         // clean up UTF-8 handling stuff
 
-        version(Windows) {
+        version (Windows) {
             import core.sys.windows.windows;
 
-            if(consoleSetup) {
-                if(hStdin != INVALID_HANDLE_VALUE && hStdout != INVALID_HANDLE_VALUE) {
+            if (consoleSetup) {
+                if (hStdin != INVALID_HANDLE_VALUE && hStdout != INVALID_HANDLE_VALUE) {
                     DWORD inputMode = originalConsoleInputMode, outputMode = originalConsoleOutputMode;
                     inputMode &= ~(ENABLE_LINE_INPUT | ENABLE_PROCESSED_INPUT | ENABLE_ECHO_INPUT);
                     outputMode &= ~(
@@ -54,7 +54,7 @@ bool enableRawMode() {
                     outputMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
 
                     ret = SetConsoleMode(hStdin, inputMode) != 0 && SetConsoleMode(hStdout, outputMode) != 0;
-                    if(!ret) {
+                    if (!ret) {
                         SetConsoleMode(hStdin, originalConsoleInputMode);
                         SetConsoleMode(hStdout, originalConsoleOutputMode);
                     }
@@ -62,12 +62,15 @@ bool enableRawMode() {
             }
         }
 
-        if(useStdio && stdioIn !is null) {
-            version(Posix) {
+        if (useStdio && stdioIn !is null) {
+            version (Posix) {
                 import core.sys.posix.termios;
+                import core.sys.posix.stdio : fileno;
+
+                const fnum = fileno(stdioIn);
 
                 termios settings;
-                tcgetattr(stdioIn, &settings);
+                tcgetattr(fnum, &settings);
 
                 // ISTRIP is 8th bit stripped so turns it off, for UTF-8 support
                 settings.c_iflag &= ~(BRKINT | ICRNL | ISTRIP | IXON);
@@ -75,7 +78,7 @@ bool enableRawMode() {
                 settings.c_cflag |= (CS8); // 8bits, UTF-8
                 settings.c_lflag &= ~(ECHO | ICANON | IEXTEN | ISIG);
 
-                ret = tcsetattr(stdioIn, TCSAFLUSH, &settings) == 0;
+                ret = tcsetattr(fnum, TCSAFLUSH, &settings) == 0;
             }
         }
     });

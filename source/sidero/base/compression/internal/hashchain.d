@@ -20,7 +20,7 @@ struct HashChain {
         size_t offset;
     }
 
-    @disable this(this);
+    //@disable this(this);
 
 @safe nothrow @nogc scope:
 

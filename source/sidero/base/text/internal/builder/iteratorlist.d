@@ -1287,7 +1287,7 @@ struct IteratorListTest(Char) {
         this.blockList = BlockList(allocator);
     }
 
-    @disable this(this);
+    //@disable this(this);
 
 @safe nothrow @nogc:
 

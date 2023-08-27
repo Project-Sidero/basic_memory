@@ -47,7 +47,7 @@ struct ForeachOverAnyUTF {
         int size;
     }
 
-    @disable this(this);
+    //@disable this(this);
 
 export @safe nothrow @nogc scope:
 
@@ -100,7 +100,7 @@ struct ForeachOverUTF(Type) if (isSomeString!Type) {
     ///
     size_t limitCharacters = size_t.max;
 
-    @disable this(this);
+    //@disable this(this);
 
 export @safe nothrow @nogc:
 

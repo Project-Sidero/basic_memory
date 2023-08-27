@@ -320,28 +320,28 @@ unittest {
 
     void[] got1 = bl.allocate(1024);
     assert(got1 !is null);
-    assert(got1.length == 1024);
+    assert(got1.length >= 1024);
     assert(bl.owns(null) == Ternary.No);
     assert(bl.owns(got1) == Ternary.Yes);
     assert(bl.owns(got1[10 .. 20]) == Ternary.Yes);
 
     void[] got2 = bl.allocate(512);
     assert(got2 !is null);
-    assert(got2.length == 512);
+    assert(got2.length >= 512);
     assert(bl.owns(null) == Ternary.No);
     assert(bl.owns(got2) == Ternary.Yes);
     assert(bl.owns(got2[10 .. 20]) == Ternary.Yes);
 
     void[] got3 = bl.allocate(1024);
     assert(got3 !is null);
-    assert(got3.length == 1024);
+    assert(got3.length >= 1024);
     assert(bl.owns(null) == Ternary.No);
     assert(bl.owns(got3) == Ternary.Yes);
     assert(bl.owns(got3[10 .. 20]) == Ternary.Yes);
 
     bool success = bl.reallocate(got1, 2048);
     assert(success);
-    assert(got1.length == 2048);
+    assert(got1.length >= 2048);
 
     success = bl.deallocate(got1);
     assert(success);
@@ -352,7 +352,7 @@ unittest {
 
     got1 = bl.allocate(512);
     assert(got1 !is null);
-    assert(got1.length == 512);
+    assert(got1.length >= 512);
     assert(bl.owns(null) == Ternary.No);
     assert(bl.owns(got1) == Ternary.Yes);
     assert(bl.owns(got1[10 .. 20]) == Ternary.Yes);

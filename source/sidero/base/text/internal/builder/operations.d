@@ -1143,7 +1143,7 @@ struct OpTest(Char) {
         this.blockList = BlockList(allocator);
     }
 
-    @disable this(this);
+    //@disable this(this);
 
     ~this() {
         blockList.clear;

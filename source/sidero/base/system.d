@@ -163,7 +163,7 @@ export @safe nothrow @nogc:
             import core.sys.posix.stdlib : setenv, unsetenv;
 
             if(!value.isNull)
-                setenv(cast(char*)key.ptr, cast(char*)value.ptr);
+                setenv(cast(char*)key.ptr, cast(char*)value.ptr, 1);
             else
                 unsetenv(cast(char*)key.ptr);
         } else
@@ -219,7 +219,7 @@ export @safe nothrow @nogc:
                 toUseV = toUseV.dup();
 
             if(!value.isNull)
-                setenv(cast(char*)toUseK.ptr, cast(char*)toUseV.ptr);
+                setenv(cast(char*)toUseK.ptr, cast(char*)toUseV.ptr, 1);
             else
                 unsetenv(cast(char*)toUseK.ptr);
         } else
@@ -276,7 +276,7 @@ export @safe nothrow @nogc:
             import core.stdc.string : strlen;
             import core.sys.posix.unistd : environ;
 
-            char** envir = environ;
+            char** envir = cast(char**)environ;
 
             while(*envir !is null && !result) {
                 size_t length = strlen(*envir);
@@ -365,7 +365,7 @@ FilePath currentWorkingDirectory() @trusted {
             if(got is null) {
                 bufferLength += 256;
 
-                if(allocator.reallocate(buffer, bufferLength - 2))
+                if(allocator.expandArray(buffer, 256))
                     continue;
 
                 allocator.dispose(buffer);
@@ -381,13 +381,10 @@ FilePath currentWorkingDirectory() @trusted {
                 got[length] = '\0';
             }
 
-            auto fp = String_UTF8(got[0 .. length], allocator, buffer);
-            if(fp)
+            auto fp = FilePath.from(String_UTF8(got[0 .. length], allocator, buffer));
+            if (fp)
                 return fp.get;
-            break;
         }
-
-        return FilePath.init;
     } else
         static assert(0, "Unimplemented");
 }
@@ -448,8 +445,10 @@ FilePath homeDirectory() @trusted {
 
             CloseHandle(userToken);
         } else version(Posix) {
+            import sidero.base.containers.dynamicarray;
             import core.sys.posix.unistd : sysconf, _SC_GETPW_R_SIZE_MAX, getuid;
             import core.sys.posix.pwd : getpwuid_r, passwd;
+            import core.stdc.string : strlen;
 
             String_UTF8 attemptedEV = EnvironmentVariables[String_UTF8("HOME")];
             if(attemptedEV.length > 0) {
@@ -463,7 +462,7 @@ FilePath homeDirectory() @trusted {
                 passwd pwdBuffer;
                 passwd* pwdResult;
 
-                int result = getpwuid_r(getuid(), &pwdBuffer, buffer.ptr, buffer.length, &pwdResult);
+                int result = getpwuid_r(getuid(), &pwdBuffer, cast(char*)buffer.ptr, buffer.length, &pwdResult);
 
                 if(result != 0 || pwdResult is null) {
                     // do nothing, well this is odd... *sigh*
@@ -603,13 +602,13 @@ pragma(crt_constructor) extern (C) void initializeSystemInfo() @trusted {
             FILE* file = fopen(FilePath, "rb");
 
             if(file !is null) {
-                StringBuilder_UTF8 temp = StringBuilder_UTF8(globalAllocator());
+                StringBuilder_UTF8 temp;
 
                 size_t length, length2;
                 char[100] buffer;
 
                 while((length = fread(buffer.ptr, 1, buffer.length, file)) > 0) {
-                    char[] wasRead = buffer[length];
+                    char[] wasRead = buffer[0 .. length];
 
                     while((length2 = strlen(wasRead.ptr)) > 0) {
                         char[] current = wasRead[0 .. length2];
@@ -693,8 +692,8 @@ pragma(crt_constructor) extern (C) void initializeSystemInfo() @trusted {
 
             FILE* cpuinfo = fopen("/proc/cpuinfo", "r");
 
-            while(cpuinfo !is null && !fscanf(cpuinfo, "siblings\t: %u", &cpuCount_)) {
-                fscanf(cpuinfo, "%*[^c]");
+            while(!fscanf(cpuinfo, "siblings\t: %u", &cpuCount_)) {
+                fscanf(cpuinfo, "%*[^s]");
             }
 
             fclose(cpuinfo);

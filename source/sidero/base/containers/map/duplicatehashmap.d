@@ -529,7 +529,7 @@ struct DuplicativeHashMapNode(RealKeyType, ValueType) {
 
 @safe nothrow @nogc:
 
-    @disable this(this);
+    //@disable this(this);
 
     this(return scope RCAllocator allocator, return scope RCAllocator valueAllocator) scope @trusted {
         this.allocator = allocator;
