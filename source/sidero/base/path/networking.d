@@ -651,6 +651,21 @@ version(Windows) {
         int GetAddrInfoW(const(wchar)*, wchar*, const ADDRINFOW*, ADDRINFOW**);
         void FreeAddrInfoW(ADDRINFOW*);
     }
+
+    pragma(crt_constructor) extern (C) void initializePathNetworkingWSA() {
+        import core.sys.windows.windows : WSAStartup, WSADATA, MAKEWORD;
+
+        enum ver = MAKEWORD(2, 2);
+
+        WSADATA wsaData;
+        WSAStartup(ver, &wsaData);
+    }
+
+    pragma(crt_destructor) extern (C) void deinitializePathNetworkingWSA() {
+        import core.sys.windows.windows : WSACleanup;
+
+        WSACleanup();
+    }
 } else version(Posix) {
     import core.sys.posix.sys.socket : sockaddr, AF_INET, AF_INET6;
     import core.sys.posix.netinet.in_ : sockaddr_in, sockaddr_in6;
