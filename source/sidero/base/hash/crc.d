@@ -11,7 +11,6 @@ Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
  */
 module sidero.base.hash.crc;
-import sidero.base.math.fixednum;
 
 export:
 

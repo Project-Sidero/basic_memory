@@ -34,29 +34,21 @@ enum {
 ///
 alias BigInteger_Bit = BigInteger!1;
 ///
-alias BigInteger_u8 = BigInteger!3;
+alias BigInteger_8 = BigInteger!3;
 ///
-alias BigInteger_s8 = BigInteger!3;
+alias BigInteger_16 = BigInteger!5;
 ///
-alias BigInteger_u16 = BigInteger!5;
+alias BigInteger_32 = BigInteger!10;
 ///
-alias BigInteger_s16 = BigInteger!5;
+alias BigInteger_64 = BigInteger!20;
 ///
-alias BigInteger_u32 = BigInteger!10;
+alias BigInteger_128 = BigInteger!40;
 ///
-alias BigInteger_s32 = BigInteger!10;
-///
-alias BigInteger_u64 = BigInteger!20;
-///
-alias BigInteger_s64 = BigInteger!19;
-///
-alias BigInteger_u128 = BigInteger!40;
-///
-alias BigInteger_s128 = BigInteger!40;
+alias BigInteger_256 = BigInteger!80;
 
 /// Number of digits is base 10, internally the base is target dependent
 struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
-    PerIntegerType[(NumberOfDigits + MaxDigitsPerInteger - 1) / MaxPerInteger] storage;
+    PerIntegerType[(NumberOfDigits + MaxDigitsPerInteger - 1) / MaxDigitsPerInteger] storage;
     bool isNegative;
     bool wasOverflown;
 
@@ -70,7 +62,7 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
             }
         }
 
-        static BigInteger parseImpl(String_UTF32 input, out bool truncated, out size_t used) @safe nothrow @nogc {
+        static BigInteger parseImpl(Str)(Str input, out bool truncated, out size_t used) @safe nothrow @nogc {
             import sidero.base.algorithm : reverse;
 
             BigInteger ret;
@@ -95,7 +87,7 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
                     temp += cast(PerIntegerType)(c - '0');
                     count++;
 
-                    if(count == 4) {
+                    if(count == MaxDigitsPerInteger) {
                         ret.storage[offset++] = temp;
                         count = 0;
                     }
@@ -510,6 +502,48 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
         }
 
         ///
+        static BigInteger parse(scope String_UTF8.LiteralType text) {
+            bool truncated;
+            return parse(text, truncated);
+        }
+
+        ///
+        static BigInteger parse(scope ref String_UTF8.LiteralType text, out bool truncated) {
+            size_t used;
+            return parseImpl(text, truncated, used);
+        }
+
+        ///
+        static BigInteger parse(scope String_UTF16.LiteralType text) {
+            bool truncated;
+            return parse(text, truncated);
+        }
+
+        ///
+        static BigInteger parse(scope ref String_UTF16.LiteralType text, out bool truncated) {
+            size_t used;
+            return parseImpl(text, truncated, used);
+        }
+
+        ///
+        static BigInteger parse(scope String_UTF32.LiteralType text) {
+            bool truncated;
+            return parse(text, truncated);
+        }
+
+        ///
+        static BigInteger parse(scope ref String_UTF32.LiteralType text, out bool truncated) {
+            size_t used;
+            return parseImpl(text, truncated, used);
+        }
+
+        ///
+        static BigInteger parse(scope String_UTF8 text) {
+            bool truncated;
+            return parse(text, truncated);
+        }
+
+        ///
         static BigInteger parse(scope ref String_UTF8 text, out bool truncated) {
             String_UTF32 s32 = text.byUTF32;
             size_t used;
@@ -521,6 +555,12 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
         }
 
         ///
+        static BigInteger parse(scope String_UTF16 text) {
+            bool truncated;
+            return parse(text, truncated);
+        }
+
+        ///
         static BigInteger parse(scope ref String_UTF16 text, out bool truncated) {
             String_UTF32 s32 = text.byUTF32;
             size_t used;
@@ -529,6 +569,12 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
 
             text = text[used .. $];
             return ret;
+        }
+
+        ///
+        static BigInteger parse(scope String_UTF32 text) {
+            bool truncated;
+            return parse(text, truncated);
         }
 
         ///
