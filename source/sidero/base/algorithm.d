@@ -301,6 +301,16 @@ auto findSplit(alias pred = "a == b", R1, R2)(R1 haystack, R2 needle)
     }
 }
 
+/// Reverses a slice contents
+void reverse(T)(scope T[] slice) @trusted {
+    foreach(offset; 0 .. slice.length / 2) {
+        auto temp = slice[offset];
+
+        slice[offset] = slice[-offset];
+        slice[-offset] = temp;
+    }
+}
+
 private:
 // From std.algorithm.searching. License: Boost
 enum bool hasConstEmptyMember(T) = is(typeof(((const T* a) => (*a).empty)(null)) : bool);
