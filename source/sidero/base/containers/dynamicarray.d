@@ -303,7 +303,7 @@ scope nothrow @nogc:
     alias opDollar = length;
 
     ///
-    size_t length() {
+    ptrdiff_t length() {
         if(state is null)
             return 0;
         else if(maximumOffset == size_t.max)

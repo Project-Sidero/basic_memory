@@ -408,7 +408,7 @@ nothrow @nogc:
     alias encodingLength = length;
 
     /// Removes null terminator at the end if it has one
-    size_t length() const scope {
+    ptrdiff_t length() const scope {
         auto literal = this.iterator !is null ? this.iterator.literal : this.literal;
 
         size_t ret = literal.length;

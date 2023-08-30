@@ -144,7 +144,7 @@ export @safe nothrow @nogc:
     }
 
     ///
-    size_t length() scope const {
+    ptrdiff_t length() scope const {
         return count;
     }
 

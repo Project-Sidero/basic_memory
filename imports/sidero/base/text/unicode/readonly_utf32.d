@@ -649,7 +649,7 @@ nothrow @nogc:
 
         Removes null terminator at the end if it has one.
      */
-    size_t length() const scope {
+    ptrdiff_t length() const scope {
         return literalEncoding.handle(() {
             auto actual = cast(const(char)[])this.literal;
 

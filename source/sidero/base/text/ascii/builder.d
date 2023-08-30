@@ -359,7 +359,7 @@ nothrow @safe:
     alias encodingLength = length;
 
     ///
-    size_t length() scope const @nogc @trusted {
+    ptrdiff_t length() scope const @nogc @trusted {
         auto state = cast(ASCII_State*)state;
         return state !is null ? state.externalLength(cast(ASCII_State.Iterator*)iterator) : 0;
     }
@@ -2258,7 +2258,7 @@ struct ASCII_State {
             return result;
         }
 
-        size_t length() scope {
+        ptrdiff_t length() scope {
             // we are not mixing types during testing so meh
             return literal.length;
         }
@@ -2331,7 +2331,7 @@ struct ASCII_State {
             return result;
         }
 
-        size_t length() scope {
+        ptrdiff_t length() scope {
             return iterator is null ? state.blockList.numberOfItems : (iterator.backwards.offsetFromHead - iterator.forwards.offsetFromHead);
         }
 

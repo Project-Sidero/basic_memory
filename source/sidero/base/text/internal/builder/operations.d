@@ -1121,7 +1121,7 @@ struct OtherStateAsTarget(TargetChar) {
     void delegate(bool lockNotUnlock) @safe @nogc nothrow mutex;
     int delegate(scope int delegate(scope ref  /* ignore this */ TargetChar[] data) @safe @nogc nothrow del) @safe @nogc nothrow foreachContiguous;
     int delegate(scope int delegate(ref  /* ignore this */ TargetChar) @safe @nogc nothrow del) @safe @nogc nothrow foreachValue;
-    size_t delegate() @safe nothrow @nogc length;
+    ptrdiff_t delegate() @safe nothrow @nogc length;
 
     bool isNull() @safe nothrow @nogc {
         return obj is null;
@@ -1321,7 +1321,7 @@ struct OpTest(Char) {
             return result;
         }
 
-        size_t length() {
+        ptrdiff_t length() {
             // we are not mixing types during testing so meh
             return literal.length;
         }

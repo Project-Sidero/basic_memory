@@ -331,7 +331,7 @@ nothrow @nogc:
     alias opDollar = length;
 
     ///
-    size_t length() const scope nothrow @nogc {
+    ptrdiff_t length() const scope nothrow @nogc {
         return this.literal.length;
     }
 

@@ -262,7 +262,7 @@ nothrow @nogc:
     alias opDollar = length;
 
     ///
-    size_t length() scope {
+    ptrdiff_t length() scope {
         if(isNull)
             return 0;
         else

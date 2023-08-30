@@ -260,7 +260,7 @@ scope nothrow @nogc @safe @hidden:
         });
     }
 
-    size_t length() scope @nogc {
+    ptrdiff_t length() scope @nogc {
         return this.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
             assert(state !is null);
             return state.externalLength(iterator);
@@ -1189,7 +1189,7 @@ struct UTF_State(Char) {
             return result;
         }
 
-        size_t length() {
+        ptrdiff_t length() {
             Cursor forwards;
 
             if(iterator is null)
@@ -2033,7 +2033,7 @@ struct LiteralAsTargetChar(SourceChar, TargetChar) {
         return result;
     }
 
-    size_t length() {
+    ptrdiff_t length() {
         import sidero.base.encoding.utf : encodeLengthUTF8, encodeLengthUTF16, decode;
 
         static if(is(SourceChar == TargetChar)) {
@@ -2116,7 +2116,7 @@ struct ASCIILiteralAsTarget(TargetChar) {
         return result;
     }
 
-    size_t length() {
+    ptrdiff_t length() {
         // we are not mixing types during testing so meh
         return literal.length;
     }
@@ -2225,7 +2225,7 @@ static struct ASCIIStateAsTarget(TargetChar) {
         return result;
     }
 
-    size_t length() {
+    ptrdiff_t length() {
         return iterator is null ? state.blockList.numberOfItems : (iterator.backwards.offsetFromHead - iterator.forwards.offsetFromHead);
     }
 
