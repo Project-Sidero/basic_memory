@@ -8,7 +8,7 @@ Copyright: 2022 Richard Andrew Cattermole
 module sidero.base.bitmanip;
 import std.traits : isIntegral;
 
-export @safe nothrow @nogc pure:
+export @safe nothrow @nogc:
 
 /// Get a bit mask for a given number of bits.
 Return bitMaskForNumberOfBits(Return = size_t, Arg)(Arg numberOfBits) if (isIntegral!Arg) {

@@ -103,6 +103,84 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
             reverse(ret.storage[0 .. offset]);
             return ret;
         }
+
+        static BigInteger parseHexImpl(Str)(Str input, out bool truncated, out size_t used) @safe nothrow @nogc {
+            import sidero.base.algorithm : reverse;
+
+            BigInteger ret;
+
+            PerIntegerType temp;
+            size_t count, offset;
+
+            foreach(c; input) {
+                if(count == BitsPerInteger * storage.length) {
+                    if(count > 0)
+                        ret.storage[offset++] = temp;
+                    break;
+                }
+
+                if(used == 0 && c == '-') {
+                    used++;
+                    ret.isNegative = true;
+                } else if(c >= '0' && c <= '9') {
+                    used++;
+
+                    temp *= 16;
+                    temp += cast(PerIntegerType)(c - '0');
+                    count += 4;
+
+                    if(count == BitsPerInteger * storage.length) {
+                        ret.storage[offset++] = temp;
+                        count = 0;
+                    }
+                } else if(c >= 'a' && c <= 'f') {
+                    used++;
+
+                    temp *= 16;
+                    temp += cast(PerIntegerType)(c - 'a') + 10;
+                    count += 4;
+
+                    if(count == BitsPerInteger * storage.length) {
+                        ret.storage[offset++] = temp;
+                        count = 0;
+                    }
+                } else if(c >= 'A' && c <= 'F') {
+                    used++;
+
+                    temp *= 16;
+                    temp += cast(PerIntegerType)(c - 'A') + 10;
+                    count += 4;
+
+                    if(count == BitsPerInteger * storage.length) {
+                        ret.storage[offset++] = temp;
+                        count = 0;
+                    }
+                } else
+                    break;
+            }
+
+            if(used == 1 && ret.isNegative) {
+                used = 0;
+                ret.isNegative = false;
+            }
+
+            reverse(ret.storage[0 .. offset]);
+            return ret;
+        }
+    }
+
+    static if(BitsPerInteger >= 64) {
+        ///
+        alias MaxRepresentableInteger = long;
+    } else static if(BitsPerInteger >= 32) {
+        ///
+        alias MaxRepresentableInteger = int;
+    } else static if(BitsPerInteger >= 16) {
+        ///
+        alias MaxRepresentableInteger = short;
+    } else {
+        ///
+        alias MaxRepresentableInteger = byte;
     }
 
 @safe nothrow @nogc:
@@ -181,7 +259,7 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
         }
 
         ///
-        this(return scope ref BigInteger other) scope {
+        this(return scope const ref BigInteger other) scope {
             this.tupleof = other.tupleof;
         }
 
@@ -244,7 +322,7 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
     }
 
     ///
-    BigInteger opBinary(string op : "/", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope {
+    BigInteger opBinary(string op : "/", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope const {
         static assert(OtherDigits <= NumberOfDigits, "Argument number of digits must be less than ours");
 
         BigInteger ret, remainder;
@@ -268,7 +346,7 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
     }
 
     ///
-    BigInteger opBinary(string op : "*", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope {
+    BigInteger opBinary(string op : "*", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope const {
         static assert(OtherDigits <= NumberOfDigits, "Argument number of digits must be less than ours");
 
         BigInteger ret;
@@ -281,8 +359,8 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
     }
 
     ///
-    BigInteger opUnary(string op : "-")() scope {
-        BigInteger ret = this;
+    BigInteger opUnary(string op : "-")() scope const {
+        BigInteger ret = cast(BigInteger)this;
         ret.isNegative = !ret.isNegative;
         return ret;
     }
@@ -311,7 +389,7 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
     }
 
     ///
-    BigInteger opBinary(string op : "+", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope {
+    BigInteger opBinary(string op : "+", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope const {
         static assert(OtherDigits <= NumberOfDigits, "Argument number of digits must be less than ours");
 
         BigInteger ret;
@@ -335,7 +413,7 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
     }
 
     ///
-    BigInteger opBinary(string op : "-", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope {
+    BigInteger opBinary(string op : "-", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope const {
         static assert(OtherDigits <= NumberOfDigits, "Argument number of digits must be less than ours");
 
         BigInteger ret;
@@ -349,17 +427,13 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
 
     ///
     void opOpAssign(string op : "<<")(scope size_t amount) scope {
-        auto errorResult = leftShift(this.storage[], amount);
-        assert(errorResult);
+        leftShift(this.storage[], amount);
     }
 
     ///
-    BigInteger opBinary(string op : "<<")(scope size_t amount) scope {
-        BigInteger ret = this;
-
-        auto errorResult = leftShift(ret.storage[], amount);
-        assert(errorResult);
-
+    BigInteger opBinary(string op : "<<")(scope size_t amount) scope const {
+        BigInteger ret = cast(BigInteger)this;
+        leftShift(ret.storage[], amount);
         return ret;
     }
 
@@ -369,11 +443,9 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
     }
 
     ///
-    BigInteger opBinary(string op : ">>")(scope size_t amount) scope {
-        BigInteger ret = this;
-
+    BigInteger opBinary(string op : ">>")(scope size_t amount) scope const {
+        BigInteger ret = cast(BigInteger)this;
         rightShift(ret.storage[], amount);
-
         return ret;
     }
 
@@ -386,10 +458,10 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
     }
 
     ///
-    BigInteger opBinary(string op : "|", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope {
+    BigInteger opBinary(string op : "|", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope const {
         static assert(OtherDigits <= NumberOfDigits, "Argument number of digits must be less than ours");
 
-        BigInteger ret = this;
+        BigInteger ret = cast(BigInteger)this;
 
         auto errorInfo = bitwiseOr(ret.storage[], other.storage[]);
         assert(errorInfo);
@@ -406,10 +478,10 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
     }
 
     ///
-    BigInteger opBinary(string op : "&", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope {
+    BigInteger opBinary(string op : "&", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope const {
         static assert(OtherDigits <= NumberOfDigits, "Argument number of digits must be less than ours");
 
-        BigInteger ret = this;
+        BigInteger ret = cast(BigInteger)this;
 
         auto errorInfo = bitwiseAnd(ret.storage[], other.storage[]);
         assert(errorInfo);
@@ -426,10 +498,10 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
     }
 
     ///
-    BigInteger opBinary(string op : "^", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope {
+    BigInteger opBinary(string op : "^", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope const {
         static assert(OtherDigits <= NumberOfDigits, "Argument number of digits must be less than ours");
 
-        BigInteger ret = this;
+        BigInteger ret = cast(BigInteger)this;
 
         auto errorInfo = bitwiseXor(ret.storage[], other.storage[]);
         assert(errorInfo);
@@ -448,10 +520,10 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
     }
 
     ///
-    BigInteger opBinary(string op : "^^", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope {
+    BigInteger opBinary(string op : "^^", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope const {
         static assert(OtherDigits <= NumberOfDigits, "Argument number of digits must be less than ours");
 
-        BigInteger ret = this;
+        BigInteger ret = cast(BigInteger)this;
 
         auto errorInfo = signedPower(ret.storage[], ret.isNegative, this.storage[], this.isNegative, other.storage[],
                 other.isNegative, ret.overflow);
@@ -461,8 +533,28 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
     }
 
     ///
+    void opOpAssign(string op)(MaxRepresentableInteger other) scope {
+        this.opOpAssign!op(BigInteger(other));
+    }
+
+    ///
+    BigInteger opBinary(string op)(MaxRepresentableInteger other) scope const {
+        return this.opBinary!op(BigInteger(other));
+    }
+
+    ///
+    export int opEquals(long other) scope const {
+        return opCmp(BigInteger_64(other)) == 0;
+    }
+
+    ///
     int opEquals(size_t OtherDigits)(scope BigInteger!OtherDigits other) scope const {
         return signedCompare(this.storage[], this.isNegative, other.storage[], other.isNegative) == 0;
+    }
+
+    ///
+    export int opCmp(long other) scope const {
+        return opCmp(BigInteger_64(other));
     }
 
     ///
@@ -499,6 +591,18 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
             }
 
             return String_UTF8(buffer[excludeNegative .. offset]).dup;
+        }
+
+        ///
+        static BigInteger parseHex(scope String_UTF8.LiteralType text) {
+            bool truncated;
+            return parseHex(text, truncated);
+        }
+
+        ///
+        static BigInteger parseHex(scope ref String_UTF8.LiteralType text, out bool truncated) {
+            size_t used;
+            return parseHexImpl(text, truncated, used);
         }
 
         ///

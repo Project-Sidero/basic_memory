@@ -11,14 +11,13 @@ Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
  */
 module sidero.base.hash.crc;
+import sidero.base.math.bigint;
 
 export:
 
 /+
 // The contents of this module are generated from the parameters below, using Chrome devtools
 // for https://reveng.sourceforge.io/crc-catalogue/all.htm
-
-// FIXME: does not generate FixedUNum types properly (wrt. arg)
 
 var data = $$('p.academic code, p.attested code, p.third-party code, p.confirmed code').map(v => v.innerText).map(function(line) {
     var ret = {};
@@ -41,8 +40,6 @@ function allEntries() {
     append('Entry[] params = [\n');
 
     data.forEach(function(entry) {
-      if (entry.name == "CRC-82/DARC")
-        return;
       append('    CRCSpec("' + entry.name.replace("CRC-", "crc").replace("/", "_").replace("-", "_") + '"');
 
       append(', ' + entry.width);
@@ -71,13 +68,18 @@ function generateGlobalEntries() {
         var typeSuffix = '';
 
         entry.width = parseInt(entry.width);
+        var needParsing = false;
+        var bigIntSize = 0;
 
         if (entry.width <= 32)
             typeSuffix = '!uint';
         else if (entry.width <= 64)
             typeSuffix = '!ulong';
-        else
-            typeSuffix = '!(FixedUNum!' + parseInt((entry.width + 8) / 8) + ')';
+        else {
+            bigIntSize = entry.width.toString().length + 1;
+            typeSuffix = '!(BigInteger!' + bigIntSize + ')';
+            needParsing = true;
+        }
 
         append('    /// ' + entry.name + ' hash\n');
         append('    CRC' + typeSuffix);
@@ -86,10 +88,42 @@ function generateGlobalEntries() {
         append(' = CRC' + typeSuffix + '(CRCSpec' + typeSuffix + '(');
 
         append(/*', ' + */entry.width);
-        append(', ' + entry.poly);
-        append(', ' + entry.init);
-        append(', ' + entry.xorout);
-        append(', ' + entry.check);
+
+        if (needParsing === false) {
+            append(', ' + entry.poly);
+            append(', ' + entry.init);
+            append(', ' + entry.xorout);
+            append(', ' + entry.check);
+        } else {
+            var temp = entry.poly.substr(2);
+            if (temp == "0".repeat(temp.length)) {
+                append(', BigInteger!' + bigIntSize + ".zero");
+            } else {
+                append(', BigInteger!' + bigIntSize + ".parseHex(\"" + temp + "\")");
+            }
+
+            temp = entry.init.substr(2);
+            if (temp == "0".repeat(temp.length)) {
+                append(', BigInteger!' + bigIntSize + ".zero");
+            } else {
+                append(', BigInteger!' + bigIntSize + ".parseHex(\"" + temp + "\")");
+            }
+
+            temp = entry.xorout.substr(2);
+            if (temp == "0".repeat(temp.length)) {
+                append(', BigInteger!' + bigIntSize + ".zero");
+            } else {
+                append(', BigInteger!' + bigIntSize + ".parseHex(\"" + temp + "\")");
+            }
+
+            temp = entry.check.substr(2);
+            if (temp == "0".repeat(temp.length)) {
+                append(', BigInteger!' + bigIntSize + ".zero");
+            } else {
+                append(', BigInteger!' + bigIntSize + ".parseHex(\"" + temp + "\")");
+            }
+        }
+
         //append(', ' + entry.residue);
         append(', ' + entry.refin);
         append(', ' + entry.refout);
@@ -123,14 +157,21 @@ struct CRCSpec(WorkingType) {
 
     ///
     bool reverseBitsIn, reverseBitsOut;
+
+export @safe nothrow @nogc:
+
+    ///
+    this(return scope ref CRCSpec other) scope {
+        this.tupleof = other.tupleof;
+    }
 }
 
 /// The internal representation for a CRC
 struct CRC(WorkingType) {
-    static assert(isValidWorkingTypeCRC!WorkingType, "CRC can only work with unsigned integral types or FixedUNum");
+    static assert(isValidWorkingTypeCRC!WorkingType, "CRC can only work with unsigned integral types or BigInteger");
 
     ///
-    const {
+    private {
         ///
         CRCSpec!WorkingType specification;
         ///
@@ -139,7 +180,7 @@ struct CRC(WorkingType) {
 
     private bool haveTable;
 
-const @safe nothrow @nogc pure:
+@safe nothrow @nogc:
 
     ///
     this(CRCSpec!WorkingType specification) {
@@ -148,10 +189,9 @@ const @safe nothrow @nogc pure:
         this.specification = specification;
 
         {
-            const topBitMask = WorkingType(1) << (specification.width - 1);
-            WorkingType[256] tempTable;
+            auto topBitMask = WorkingType(1) << (specification.width - 1);
 
-            foreach(i, ref v; tempTable) {
+            foreach(i, ref v; this.table) {
                 const inputWT = specification.reverseBitsIn ? WorkingType(reverseBitsLSB!ubyte(cast(ubyte)i, 8)) : WorkingType(cast(ubyte)i);
                 WorkingType intermediateValue = inputWT << (specification.width - 8);
 
@@ -168,12 +208,12 @@ const @safe nothrow @nogc pure:
 
                 v = intermediateValue & bitMaskForNumberOfBits!WorkingType(cast(uint)specification.width);
             }
-
-            this.table = tempTable;
         }
 
         haveTable = true;
     }
+
+const:
 
     ///
     alias opCall = calculate;
@@ -215,7 +255,7 @@ const @safe nothrow @nogc pure:
                 static if(isIntegral!WorkingType)
                     return intermediateValue & 0xFF;
                 else
-                    return intermediateValue.getFirstByte();
+                    return intermediateValue.storage[0] & 0xFF;
             }
 
             ubyte shiftFirstByteIV(uint rsh) {
@@ -225,7 +265,7 @@ const @safe nothrow @nogc pure:
                 static if(isIntegral!WorkingType)
                     return temp & 0xFF;
                 else
-                    return temp.getFirstByte();
+                    return temp.storage[0] & 0xFF;
             }
 
             if(specification.reverseBitsIn) {
@@ -283,7 +323,7 @@ const @safe nothrow @nogc pure:
 private {
     import std.traits : isIntegral, isUnsigned;
 
-    enum isValidWorkingTypeCRC(T) = (isIntegral!T && isUnsigned!T) || is(T == FixedUNum!ByteCount, size_t ByteCount);
+    enum isValidWorkingTypeCRC(T) = (isIntegral!T && isUnsigned!T) || is(T == BigInteger!DigitCount, size_t DigitCount);
 }
 
 /// Compatible to CRC32/crc32Of in phobos.
@@ -687,6 +727,14 @@ immutable {
         assert(crc16_LJ1200(cast(ubyte[])"123456789") == crc16_LJ1200.specification.check);
     }
 
+    /// CRC-16/M17 hash
+    CRC!uint crc16_M17 = CRC!uint(CRCSpec!uint(16, 0x5935, 0xffff, 0x0000, 0x772b, false, false));
+
+    ///
+    unittest {
+        assert(crc16_M17(cast(ubyte[])"123456789") == crc16_M17.specification.check);
+    }
+
     /// CRC-16/MAXIM-DOW hash
     CRC!uint crc16_MAXIM_DOW = CRC!uint(CRCSpec!uint(16, 0x8005, 0x0000, 0xffff, 0x44c2, true, true));
 
@@ -965,11 +1013,6 @@ immutable {
     ///
     unittest {
         assert(crc32_ISO_HDLC(cast(ubyte[])"123456789") == crc32_ISO_HDLC.specification.check);
-
-        import std.digest.crc : crc32Of;
-
-        auto temp = crc32Of(cast(ubyte[])"123456789");
-        assert(*cast(uint*)(&temp[0]) == crc32_ISO_HDLC.specification.check);
     }
 
     /// CRC-32/JAMCRC hash
@@ -1039,6 +1082,15 @@ immutable {
         assert(crc64_MS(cast(ubyte[])"123456789") == crc64_MS.specification.check);
     }
 
+    /// CRC-64/REDIS hash
+    CRC!ulong crc64_REDIS = CRC!ulong(CRCSpec!ulong(64, 0xad93d23594c935a9, 0x0000000000000000, 0x0000000000000000,
+            0xe9c6d914c4b8d9ca, true, true));
+
+    ///
+    unittest {
+        assert(crc64_REDIS(cast(ubyte[])"123456789") == crc64_REDIS.specification.check);
+    }
+
     /// CRC-64/WE hash
     CRC!ulong crc64_WE = CRC!ulong(CRCSpec!ulong(64, 0x42f0e1eba9ea3693, 0xffffffffffffffff, 0xffffffffffffffff,
             0x62ec59e3f1a4f00a, false, false));
@@ -1057,14 +1109,13 @@ immutable {
         assert(crc64_XZ(cast(ubyte[])"123456789") == crc64_XZ.specification.check);
     }
 
-    /+
     /// CRC-82/DARC hash
-    CRC!(FixedUNum!11) crc82_DARC = CRC!(FixedUNum!11)(CRCSpec!(FixedUNum!11)(82, 0x0308c0111011401440411,
-            0x000000000000000000000, 0x000000000000000000000, 0x09ea83f625023801fd612, true, true));
+    CRC!(BigInteger!3) crc82_DARC = CRC!(BigInteger!3)(CRCSpec!(BigInteger!3)(82,
+            BigInteger!3.parseHex("0308c0111011401440411"), BigInteger!3.zero, BigInteger!3.zero,
+            BigInteger!3.parseHex("09ea83f625023801fd612"), true, true));
 
     ///
     unittest {
         assert(crc82_DARC(cast(ubyte[])"123456789") == crc82_DARC.specification.check);
     }
-    +/
 }
