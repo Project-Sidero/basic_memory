@@ -45,6 +45,10 @@ alias BigInteger_64 = BigInteger!20;
 alias BigInteger_128 = BigInteger!40;
 ///
 alias BigInteger_256 = BigInteger!80;
+///
+alias BigInteger_512 = BigInteger!160;
+///
+alias BigInteger_1024 = BigInteger!320;
 
 /// Number of digits is base 10, internally the base is target dependent
 struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
@@ -259,8 +263,16 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
         }
 
         ///
-        this(return scope const ref BigInteger other) scope {
-            this.tupleof = other.tupleof;
+        this(size_t OtherDigits)(return scope const ref BigInteger!OtherDigits other) scope {
+            static assert(OtherDigits <= NumberOfDigits, "Argument number of digits must be less than ours");
+
+            static if (OtherDigits == NumberOfDigits) {
+                this.tupleof = other.tupleof;
+            } else {
+                foreach(i, v; other.storage) {
+                    this.storage[i] = v;
+                }
+            }
         }
 
         ///
@@ -532,6 +544,38 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
         return ret;
     }
 
+    /// Returns zero if all are zero
+    size_t firstNonZeroBitLSB() scope const {
+        size_t ret;
+
+        foreach(v; this.storage) {
+            if ((v & PerIntegerMask) == 0) {
+                ret += BitsPerInteger;
+            } else {
+                PerIntegerType bit = 1;
+
+                foreach(_; 0 .. BitsPerInteger) {
+                    if ((v & bit) == 1)
+                        return ret;
+
+                    bit <<= 1;
+                    ret++;
+                }
+            }
+        }
+
+        return ret;
+    }
+
+    ///
+    void opAssign(size_t OtherDigits)(scope const BigInteger!OtherDigits other) scope {
+        static assert(OtherDigits <= NumberOfDigits, "Argument number of digits must be less than ours");
+
+        foreach(i, v; other.storage) {
+            this.storage[i] = v;
+        }
+    }
+
     ///
     void opOpAssign(string op)(MaxRepresentableInteger other) scope {
         this.opOpAssign!op(BigInteger(other));
@@ -548,7 +592,7 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
     }
 
     ///
-    int opEquals(size_t OtherDigits)(scope BigInteger!OtherDigits other) scope const {
+    int opEquals(size_t OtherDigits)(scope const BigInteger!OtherDigits other) scope const {
         return signedCompare(this.storage[], this.isNegative, other.storage[], other.isNegative) == 0;
     }
 
@@ -558,7 +602,7 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
     }
 
     ///
-    int opCmp(size_t OtherDigits)(scope BigInteger!OtherDigits other) scope const {
+    int opCmp(size_t OtherDigits)(scope const BigInteger!OtherDigits other) scope const {
         return signedCompare(this.storage[], this.isNegative, other.storage[], other.isNegative);
     }
 
