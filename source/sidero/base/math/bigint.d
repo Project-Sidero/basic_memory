@@ -63,31 +63,6 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
     bool wasOverflown;
 
     private {
-        void importSignedValue(T)(T input, ref bool truncated) {
-            if(input >= 0)
-                importValue(input, truncated);
-            else if(input == long.min) {
-                importValue(long.max, truncated);
-                this++;
-                isNegative = true;
-            } else {
-                importValue(-input, truncated);
-                isNegative = true;
-            }
-        }
-
-        void importValue(T)(T value, ref bool truncated) {
-            size_t offset;
-
-            while(value > 0 && offset < storage.length) {
-                storage[offset++] = value & PerIntegerMask;
-                value >>= BitsPerInteger;
-            }
-
-            if(value != 0 && offset == storage.length)
-                truncated = true;
-        }
-
         static BigInteger parseImpl(Str)(Str input, out bool truncated, out size_t used) @safe nothrow @nogc {
             import sidero.base.algorithm : reverse;
 
@@ -216,12 +191,12 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
             ///
             this(T input) scope {
                 bool truncated;
-                importValue(input, truncated);
+                importValue(this.storage[], input, truncated);
             }
 
             ///
             this(T input, out bool truncated) scope {
-                importValue(input, truncated);
+                importValue(this.storage[], input, truncated);
             }
         }
 
@@ -229,18 +204,18 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
             ///
             this(T input) scope {
                 bool truncated;
-                importSignedValue(input, truncated);
+                importSignedValue(this.storage[], this.isNegative, input, truncated);
             }
 
             ///
             this(T input, out bool truncated) scope {
-                importSignedValue(input, truncated);
+                importSignedValue(this.storage[], this.isNegative, input, truncated);
             }
         }
 
         ///
-        this(size_t OtherDigits)(return scope const ref BigInteger!OtherDigits other) scope {
-            static assert(OtherDigits <= NumberOfDigits, "Argument number of digits must be less than ours");
+        this(size_t OtherDigits)(return scope ref const BigInteger!OtherDigits other) scope {
+            static assert(OtherDigits <= NumberOfDigits, "Argument number of digits must be less than or equal to ours");
 
             static if(OtherDigits == NumberOfDigits) {
                 this.tupleof = other.tupleof;
@@ -520,27 +495,26 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
         return ret;
     }
 
-    /// Returns zero if all are zero
-    size_t firstNonZeroBitLSB() scope const {
-        size_t ret;
-
-        foreach(v; this.storage) {
-            if((v & PerIntegerMask) == 0) {
-                ret += BitsPerInteger;
-            } else {
-                PerIntegerType bit = 1;
-
-                foreach(_; 0 .. BitsPerInteger) {
-                    if((v & bit) == 1)
-                        return ret;
-
-                    bit <<= 1;
-                    ret++;
-                }
-            }
+    export {
+        /// Returns zero if all are zero
+        size_t firstNonZeroBitLSB() scope const {
+            return .firstNonZeroBitLSB(this.storage[]);
         }
 
-        return ret;
+        /// Returns zero if all are zero
+        size_t lastNonZeroBitLSB() scope const {
+            return .lastNonZeroBitLSB(this.storage[]);
+        }
+
+        ///
+        void opAssign(scope const(PerIntegerType)[] input, bool isNegative, out bool truncated) scope {
+            if (input.length > this.storage.length)
+                truncated = true;
+
+            foreach(i, v; input) {
+                this.storage[i] = v;
+            }
+        }
     }
 
     ///
@@ -714,6 +688,37 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
     }
 }
 
+static foreach(T; AliasSeq!(byte, short, int, long)) {
+    ///
+    void importSignedValue(scope PerIntegerType[] output, out bool isNegative, T input, ref bool truncated) {
+        if(input >= 0)
+            importValue(output, input, truncated);
+        else if(input == long.min) {
+            importValue(output, long.max, truncated);
+            unsignedAdditionImpl(output, 1, 0, truncated);
+            isNegative = true;
+        } else {
+            importValue(output, -input, truncated);
+            isNegative = true;
+        }
+    }
+}
+
+static foreach(T; AliasSeq!(ubyte, ushort, uint, ulong)) {
+    ///
+    void importValue(scope PerIntegerType[] output, T value, out bool truncated) {
+        size_t offset;
+
+        while(value > 0 && offset < output.length) {
+            output[offset++] = value & PerIntegerMask;
+            value >>= BitsPerInteger;
+        }
+
+        if(value != 0 && offset == output.length)
+            truncated = true;
+    }
+}
+
 ///
 int signedCompare(scope const(PerIntegerType)[] input1, bool input1IsNegative, scope const(PerIntegerType)[] input2, bool input2IsNegative) {
     if(input1IsNegative != input2IsNegative)
@@ -749,6 +754,52 @@ int unsignedCompare(scope const(PerIntegerType)[] input1, scope const(PerInteger
     }
 
     return 0;
+}
+
+/// Returns zero if all are zero
+size_t firstNonZeroBitLSB(scope const(PerIntegerType)[] input) {
+    size_t ret;
+
+    foreach(v; input) {
+        if((v & PerIntegerMask) == 0) {
+            ret += BitsPerInteger;
+        } else {
+            PerIntegerType bit = 1;
+
+            foreach(_; 0 .. BitsPerInteger) {
+                if((v & bit) == 1)
+                    return ret;
+
+                bit <<= 1;
+                ret++;
+            }
+        }
+    }
+
+    return ret;
+}
+
+/// Returns zero if all are zero
+size_t lastNonZeroBitLSB(scope const(PerIntegerType)[] input) {
+    size_t ret = input.length * BitsPerInteger;
+
+    foreach(v; input) {
+        if((v & PerIntegerMask) == 0) {
+            ret -= BitsPerInteger;
+        } else {
+            PerIntegerType bit = 1 << (BitsPerInteger - 1);
+
+            foreach_reverse(_; 0 .. BitsPerInteger) {
+                if((v & bit) == 1)
+                    return ret;
+
+                bit >>= 1;
+                ret--;
+            }
+        }
+    }
+
+    return ret;
 }
 
 /// See_Also: unsignedDivision
