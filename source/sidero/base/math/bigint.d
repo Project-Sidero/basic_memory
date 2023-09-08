@@ -1,6 +1,7 @@
 module sidero.base.math.bigint;
 import sidero.base.errors;
 import sidero.base.text;
+import std.meta : AliasSeq;
 import core.bitop : bsr;
 
 export @safe nothrow @nogc:
@@ -48,22 +49,43 @@ alias BigInteger_256 = BigInteger!80;
 ///
 alias BigInteger_512 = BigInteger!160;
 ///
+alias BigInteger_Double = BigInteger!309;
+///
 alias BigInteger_1024 = BigInteger!320;
 
 /// Number of digits is base 10, internally the base is target dependent
 struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
+    ///
     PerIntegerType[(NumberOfDigits + MaxDigitsPerInteger - 1) / MaxDigitsPerInteger] storage;
+    ///
     bool isNegative;
+    ///
     bool wasOverflown;
 
     private {
-        void importValue(T)(T value) {
+        void importSignedValue(T)(T input, ref bool truncated) {
+            if(input >= 0)
+                importValue(input, truncated);
+            else if(input == long.min) {
+                importValue(long.max, truncated);
+                this++;
+                isNegative = true;
+            } else {
+                importValue(-input, truncated);
+                isNegative = true;
+            }
+        }
+
+        void importValue(T)(T value, ref bool truncated) {
             size_t offset;
 
             while(value > 0 && offset < storage.length) {
                 storage[offset++] = value & PerIntegerMask;
                 value >>= BitsPerInteger;
             }
+
+            if(value != 0 && offset == storage.length)
+                truncated = true;
         }
 
         static BigInteger parseImpl(Str)(Str input, out bool truncated, out size_t used) @safe nothrow @nogc {
@@ -190,75 +212,29 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
 @safe nothrow @nogc:
 
     export {
-        ///
-        this(ubyte input) scope {
-            importValue(input);
-        }
+        static foreach(T; AliasSeq!(ubyte, ushort, uint, ulong)) {
+            ///
+            this(T input) scope {
+                bool truncated;
+                importValue(input, truncated);
+            }
 
-        ///
-        this(byte input) scope {
-            if(input >= 0)
-                importValue(input);
-            else {
-                importValue(-input);
-                isNegative = true;
+            ///
+            this(T input, out bool truncated) scope {
+                importValue(input, truncated);
             }
         }
 
-        ///
-        this(ushort input) scope {
-            importValue(input);
-        }
-
-        ///
-        this(short input) scope {
-            if(input >= 0)
-                importValue(input);
-            else if(input == short.min) {
-                importValue(short.max);
-                this++;
-                isNegative = true;
-            } else {
-                importValue(-input);
-                isNegative = true;
+        static foreach(T; AliasSeq!(byte, short, int, long)) {
+            ///
+            this(T input) scope {
+                bool truncated;
+                importSignedValue(input, truncated);
             }
-        }
 
-        ///
-        this(uint input) scope {
-            importValue(input);
-        }
-
-        ///
-        this(int input) scope {
-            if(input >= 0)
-                importValue(input);
-            else if(input == int.min) {
-                importValue(int.max);
-                this++;
-                isNegative = true;
-            } else {
-                importValue(-input);
-                isNegative = true;
-            }
-        }
-
-        ///
-        this(ulong input) scope {
-            importValue(input);
-        }
-
-        ///
-        this(long input) scope {
-            if(input >= 0)
-                importValue(input);
-            else if(input == long.min) {
-                importValue(long.max);
-                this++;
-                isNegative = true;
-            } else {
-                importValue(-input);
-                isNegative = true;
+            ///
+            this(T input, out bool truncated) scope {
+                importSignedValue(input, truncated);
             }
         }
 
@@ -266,7 +242,7 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
         this(size_t OtherDigits)(return scope const ref BigInteger!OtherDigits other) scope {
             static assert(OtherDigits <= NumberOfDigits, "Argument number of digits must be less than ours");
 
-            static if (OtherDigits == NumberOfDigits) {
+            static if(OtherDigits == NumberOfDigits) {
                 this.tupleof = other.tupleof;
             } else {
                 foreach(i, v; other.storage) {
@@ -549,13 +525,13 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
         size_t ret;
 
         foreach(v; this.storage) {
-            if ((v & PerIntegerMask) == 0) {
+            if((v & PerIntegerMask) == 0) {
                 ret += BitsPerInteger;
             } else {
                 PerIntegerType bit = 1;
 
                 foreach(_; 0 .. BitsPerInteger) {
-                    if ((v & bit) == 1)
+                    if((v & bit) == 1)
                         return ret;
 
                     bit <<= 1;

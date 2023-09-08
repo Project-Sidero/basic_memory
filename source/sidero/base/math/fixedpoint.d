@@ -1,17 +1,94 @@
 module sidero.base.math.fixedpoint;
-import sidero.base.math.bigint : BigInteger, BitsPerInteger, MaxDigitsPerInteger;
+import sidero.base.math.bigint : BigInteger, BigInteger_Double, BitsPerInteger, MaxDigitsPerInteger;
 
-alias FP10_3 = FixedPoint!(10, 3);
+///
+alias FixedPoint_Double = FixedPoint!(309, 309);
 
+///
 struct FixedPoint(size_t NumberOfWholeDigits, size_t NumberOfFractionalDigits) {
     enum {
+        ///
         NumberOfWholeBits = (NumberOfWholeDigits + MaxDigitsPerInteger - 1) / MaxDigitsPerInteger,
+        ///
         NumberOfFractionalBits = (NumberOfFractionalDigits + MaxDigitsPerInteger - 1) / MaxDigitsPerInteger,
+        ///
         NumberOfBits = NumberOfWholeBits + NumberOfFractionalBits,
+        ///
         TotalNumberOfDigitsInStorage = (NumberOfBits + MaxDigitsPerInteger - 1) / MaxDigitsPerInteger,
     }
 
+    ///
     BigInteger!TotalNumberOfDigitsInStorage storage;
+
+@safe nothrow @nogc:
+
+    ///
+    this(double input) {
+        bool truncated;
+        this.__ctor(input, truncated);
+    }
+
+    ///
+    this(double input, out bool truncated) {
+        import core.stdc.math : frexp, round;
+        import core.bitop : bsr, bsf;
+
+        ulong significandInteger;
+        int exponent;
+
+        {
+            // extract the significand of input so it is between 0..1
+            int originalExponent;
+            double significand = frexp(input, &originalExponent);
+
+            if(significand < 0) {
+                significand *= -1;
+            }
+
+            // make the entire significand to not be fractional
+            significand *= ulong(2) ^^ DoublePrecisionBitCount;
+            significandInteger = cast(ulong)round(significand);
+
+            // for 0.1
+            // -52 + -3 = -55
+            // for 1.0
+            // -52 + 1 = -51
+            exponent = -DoublePrecisionBitCount + originalExponent;
+        }
+
+        {
+            // it would probably be a good idea to detect truncation
+
+            // nothing to set
+            if(significandInteger == 0)
+                return;
+
+            // its 0..64
+            const firstNonZeroBit = bsf(significandInteger), lastNonZeroBit = bsr(significandInteger),
+                amountAbove = lastNonZeroBit >= NumberOfFractionalBits ? (lastNonZeroBit - NumberOfFractionalBits) : 0;
+
+            if(-(exponent - amountAbove) >= NumberOfFractionalBits) {
+                // -51 - 1 = -52 = 52 >= 9 = true
+                truncated = true;
+            } else if(exponent - amountAbove >= NumberOfWholeBits) {
+                // 3 - 0 = -3 >= 9 = false
+                truncated = true;
+            }
+
+            if(amountAbove > 0) {
+                // if we are above the fractional portion already, lets bring us back down to 0..1
+                significandInteger >>= amountAbove;
+            }
+        }
+
+        this.storage = typeof(this.storage)(significandInteger);
+
+        if (exponent > 0) {
+            this.storage <<= exponent;
+        } else {
+            this.storage >>= -exponent;
+        }
+    }
 
     ///
     double asDouble(out bool truncated) scope const {
@@ -102,8 +179,5 @@ private:
 
 enum {
     DoublePrecisionBitCount = 53,
-    DoubleMaxDigits = 17,
     DoubleMaxPrecision = 100_000_000_000_000_000,
-    DoubleMaxPrecisionMultiplier = DoubleMaxPrecision / 10,
-    DoubleMaxDigitsToRepresent = 309,
 }
