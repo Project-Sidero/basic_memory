@@ -920,7 +920,7 @@ unittest {
 size_t lastNonZeroBitLSB(scope const(PerIntegerType)[] input) {
     size_t ret = input.length * BitsPerInteger;
 
-    foreach(v; input) {
+    foreach_reverse(v; input) {
         if((v & PerIntegerMask) == 0) {
             ret -= BitsPerInteger;
         } else {
@@ -1036,6 +1036,31 @@ ErrorResult unsignedDivide(scope PerIntegerType[] quotient, scope PerIntegerType
         }
     }
 
+    {
+        // lets see if we can speed up the school algorithm, by increasing our divisor by quite a significant amount
+
+        const msbOfDividend = lastNonZeroBitLSB(dividend), msbOfDivisor = lastNonZeroBitLSB(divisor);
+        const canShift = (msbOfDividend > msbOfDivisor && msbOfDivisor > 0) ? (msbOfDividend - (msbOfDivisor + 1)) : 0;
+
+        if(canShift > 0) {
+            PerIntegerType[] divisor2 = quotient;
+            size_t quotient2;
+
+            foreach(i, v; divisor) {
+                divisor2[i] = v;
+            }
+            leftShift(divisor2, canShift);
+
+            while(unsignedCompare(remainder, divisor2) >= 0) {
+                cast(void)unsignedSubtraction(remainder, divisor2);
+                quotient2++;
+            }
+
+            importValue(quotient, quotient2, overflow);
+            leftShift(quotient, canShift);
+        }
+    }
+
     // school algorithm, correct but slow
     while(unsignedCompare(remainder, divisor) >= 0) {
         cast(void)unsignedSubtraction(remainder, divisor);
@@ -1045,9 +1070,26 @@ ErrorResult unsignedDivide(scope PerIntegerType[] quotient, scope PerIntegerType
     return ErrorResult.init;
 }
 
-///
+/// Known fast test
 unittest {
     PerIntegerType dividend = PerIntegerType(1) << BitsPerInteger, divisor = PerIntegerType(1) << (BitsPerInteger - 1), expected = 2;
+
+    alias BI = BigInteger!(MaxDigitsPerInteger * 2);
+    typeof(BI.storage) storageQuotient, storageRemainder, storageDividend, storageDivisor, storageExpected;
+    bool truncated, overflow;
+
+    importValue(storageDividend[], dividend, truncated);
+    importValue(storageDivisor[], divisor, truncated);
+    importValue(storageExpected[], expected, truncated);
+
+    assert(unsignedDivide(storageQuotient[], storageRemainder[], storageDividend[], storageDivisor[], overflow));
+    assert(!overflow);
+    assert(unsignedCompare(storageQuotient[], storageExpected[]) == 0);
+}
+
+/// Known slow test
+unittest {
+    PerIntegerType dividend = PerIntegerType(1) << BitsPerInteger, divisor = 2, expected = PerIntegerType(1) << (BitsPerInteger - 1);
 
     alias BI = BigInteger!(MaxDigitsPerInteger * 2);
     typeof(BI.storage) storageQuotient, storageRemainder, storageDividend, storageDivisor, storageExpected;
