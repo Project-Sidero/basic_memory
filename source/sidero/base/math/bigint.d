@@ -1043,13 +1043,17 @@ ErrorResult unsignedDivide(scope PerIntegerType[] quotient, scope PerIntegerType
         const canShift = (msbOfDividend > msbOfDivisor && msbOfDivisor > 0) ? (msbOfDividend - (msbOfDivisor + 1)) : 0;
 
         if(canShift > 0) {
+            // we only want to shift by about a half as anything more than that
+            //  is going to end up leave a whole pile of values left to process
+            const willShift = (canShift + 1) / 2;
+
             PerIntegerType[] divisor2 = quotient;
             size_t quotient2;
 
             foreach(i, v; divisor) {
                 divisor2[i] = v;
             }
-            leftShift(divisor2, canShift);
+            leftShift(divisor2, willShift);
 
             while(unsignedCompare(remainder, divisor2) >= 0) {
                 cast(void)unsignedSubtraction(remainder, divisor2);
@@ -1057,7 +1061,7 @@ ErrorResult unsignedDivide(scope PerIntegerType[] quotient, scope PerIntegerType
             }
 
             importValue(quotient, quotient2, overflow);
-            leftShift(quotient, canShift);
+            leftShift(quotient, willShift);
         }
     }
 
@@ -1129,6 +1133,23 @@ ErrorResult unsignedMultiply(scope PerIntegerType[] output, scope const(PerInteg
 
     unsignedMultiplyAddImpl(output, input1, input2, overflow);
     return ErrorResult.init;
+}
+
+///
+unittest {
+    PerIntegerType input = PerIntegerType(1) << (BitsPerInteger - 3), multiplier = 8, expected = PerIntegerType(1) << BitsPerInteger;
+
+    alias BI = BigInteger!(MaxDigitsPerInteger * 2);
+    typeof(BI.storage) storageOutput, storageInput, storageMultiplier, storageExpected;
+    bool truncated, overflow;
+
+    importValue(storageInput[], input, truncated);
+    importValue(storageMultiplier[], multiplier, truncated);
+    importValue(storageExpected[], expected, truncated);
+
+    assert(unsignedMultiply(storageOutput[], storageInput[], storageMultiplier[], overflow));
+    assert(!overflow);
+    assert(unsignedCompare(storageOutput[], storageExpected[]) == 0);
 }
 
 /// See_Also: unsignedAddition
@@ -1708,7 +1729,12 @@ void unsignedMultiplyAddImpl(scope PerIntegerType[] output, scope const(PerInteg
 }
 
 void unsignedAdditionImpl(scope PerIntegerType[] output, PerIntegerType toAdd, PerIntegerType powerOfMaxPerInteger, ref bool overflow) {
-    assert(output.length > powerOfMaxPerInteger);
+    if (powerOfMaxPerInteger >= output.length) {
+        if (toAdd != 0)
+            overflow = true;
+        return;
+    }
+
     bool carry;
 
     {
