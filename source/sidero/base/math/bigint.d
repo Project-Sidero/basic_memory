@@ -275,6 +275,11 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
             BigInteger one() {
                 return BigInteger(1);
             }
+
+            ///
+            size_t numberOfBits() {
+                return storage.length * BitsPerInteger;
+            }
         }
     }
 
@@ -571,7 +576,7 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
         }
 
         ///
-        String_UTF8 toString() scope const {
+        String_UTF8 toString() scope const @trusted {
             import std.algorithm : reverse;
 
             ubyte[(MaxDigitsPerInteger * storage.length) + 1] buffer = void;
@@ -580,21 +585,23 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
 
             size_t offset = 1;
 
-            foreach_reverse(PerIntegerType v; this.storage) {
-                if(offset == 1 && v == 0)
-                    continue;
+            {
+                BigInteger temp = this;
+                BigInteger div = BigInteger(10);
 
-                size_t start = offset, end = offset;
+                while(temp != 0) {
+                    BigInteger quotient, modulas;
+                    bool overflow;
+                    cast(void)unsignedDivide(quotient.storage[], modulas.storage[], temp.storage[], div.storage[], overflow);
 
-                foreach(digitPower; 0 .. MaxDigitsPerInteger) {
-                    const digit = v % 10;
-                    v /= 10;
-
+                    const digit = modulas.storage[0] & 0xFF;
+                    assert(digit < 10);
                     buffer[offset++] = cast(char)('0' + digit);
-                    end++;
+
+                    temp = quotient;
                 }
 
-                reverse(buffer[start .. end]);
+                reverse(buffer[1 .. offset]);
             }
 
             bool excludeNegative = !this.isNegative;
@@ -1043,25 +1050,32 @@ ErrorResult unsignedDivide(scope PerIntegerType[] quotient, scope PerIntegerType
         const canShift = (msbOfDividend > msbOfDivisor && msbOfDivisor > 0) ? (msbOfDividend - (msbOfDivisor + 1)) : 0;
 
         if(canShift > 0) {
-            // we only want to shift by about a half as anything more than that
-            //  is going to end up leave a whole pile of values left to process
-            const willShift = (canShift + 1) / 2;
-
+            size_t quotient2, haveShifted = canShift;
             PerIntegerType[] divisor2 = quotient;
-            size_t quotient2;
 
             foreach(i, v; divisor) {
                 divisor2[i] = v;
             }
-            leftShift(divisor2, willShift);
 
-            while(unsignedCompare(remainder, divisor2) >= 0) {
-                cast(void)unsignedSubtraction(remainder, divisor2);
-                quotient2++;
+            leftShift(divisor2, canShift);
+
+            while(quotient2 <= (ulong.max >> 4) && haveShifted >= 4) {
+                size_t quotientTemp;
+
+                while(unsignedCompare(remainder, divisor2) >= 0) {
+                    cast(void)unsignedSubtraction(remainder, divisor2);
+                    quotientTemp++;
+                }
+
+                quotient2 <<= 4;
+                quotient2 += quotientTemp;
+                haveShifted -= 4;
+
+                rightShift(divisor2, 4);
             }
 
             importValue(quotient, quotient2, overflow);
-            leftShift(quotient, willShift);
+            leftShift(quotient, haveShifted + 4);
         }
     }
 
@@ -1203,6 +1217,10 @@ ErrorResult unsignedAddition(scope PerIntegerType[] output, scope const(PerInteg
         return ErrorResult(MalformedInputException("Output array length must be greater than or equal to first input"));
     else if(output.length < input2.length)
         return ErrorResult(MalformedInputException("Output array length must be greater than or equal to second input"));
+    else if(output.ptr is input1.ptr)
+        return ErrorResult(MalformedInputException("Output array must not be the same array as input 1"));
+    else if(output.ptr is input2.ptr)
+        return ErrorResult(MalformedInputException("Output array must not be the same array as input 2"));
 
     {
         foreach(i, v; input1) {
@@ -1225,12 +1243,31 @@ ErrorResult unsignedAddition(scope PerIntegerType[] output, scope const(PerInteg
 ErrorResult unsignedAddition(scope PerIntegerType[] output, scope const(PerIntegerType)[] input, ref bool overflow) {
     if(output.length < input.length)
         return ErrorResult(MalformedInputException("Output array length must be greater than or equal to input"));
+    else if(output.ptr is input.ptr)
+        return ErrorResult(MalformedInputException("Output array must not be the same array as input"));
 
     foreach(powerOfMaxPerInteger, toAdd; input) {
         unsignedAdditionImpl(output, toAdd, powerOfMaxPerInteger, overflow);
     }
 
     return ErrorResult.init;
+}
+
+///
+unittest {
+    PerIntegerType input = PerIntegerType(1) << (BitsPerInteger - 1), expected = PerIntegerType(1) << BitsPerInteger;
+
+    alias BI = BigInteger!(MaxDigitsPerInteger * 2);
+    typeof(BI.storage) storageOutput, storageInput, storageExpected;
+    bool truncated, overflow;
+
+    importValue(storageOutput[], input, truncated);
+    importValue(storageInput[], input, truncated);
+    importValue(storageExpected[], expected, truncated);
+
+    assert(unsignedAddition(storageOutput[], storageInput[], overflow));
+    assert(!overflow);
+    assert(unsignedCompare(storageOutput[], storageExpected[]) == 0);
 }
 
 /// Add an unsigned integer at a given bit position
@@ -1240,7 +1277,7 @@ void unsignedAddition(scope PerIntegerType[] output, ulong input, size_t bitOffs
 
     if(leftOver != 0) {
         const toAdd = input & ((1 << (leftOver + 1)) - 1);
-        const toAddShifted = toAdd << (BitsPerInteger - leftOver);
+        const toAddShifted = toAdd << leftOver;
 
         unsignedAdditionImpl(output, toAddShifted, powerOf2Offset, overflow);
 
@@ -1259,6 +1296,39 @@ void unsignedAddition(scope PerIntegerType[] output, ulong input, size_t bitOffs
 
     if(input != 0)
         overflow = true;
+}
+
+/// Non-even shift
+unittest {
+    const lsh = BitsPerInteger - 1;
+    PerIntegerType input = PerIntegerType(1) << lsh, expected = PerIntegerType(1) << BitsPerInteger;
+
+    alias BI = BigInteger!(MaxDigitsPerInteger * 2);
+    typeof(BI.storage) storageOutput, storageExpected;
+    bool truncated, overflow;
+
+    importValue(storageOutput[], input, truncated);
+    importValue(storageExpected[], expected, truncated);
+
+    unsignedAddition(storageOutput[], 1, lsh, overflow);
+    assert(!overflow);
+    assert(unsignedCompare(storageOutput[], storageExpected[]) == 0);
+}
+
+/// Even shift
+unittest {
+    PerIntegerType input = PerIntegerType(1) << BitsPerInteger - 1, expected = PerIntegerType(1) << BitsPerInteger;
+
+    alias BI = BigInteger!(MaxDigitsPerInteger * 2);
+    typeof(BI.storage) storageOutput, storageExpected;
+    bool truncated, overflow;
+
+    importValue(storageOutput[], input, truncated);
+    importValue(storageExpected[], expected, truncated);
+
+    unsignedAddition(storageOutput[], input, 0, overflow);
+    assert(!overflow);
+    assert(unsignedCompare(storageOutput[], storageExpected[]) == 0);
 }
 
 /// See_Also: unsignedSubtraction
@@ -1302,6 +1372,60 @@ ErrorResult signedSubtraction(scope PerIntegerType[] output, scope out bool outp
     return ErrorResult.init;
 }
 
+/// Negative - Positive
+unittest {
+    PerIntegerType input = PerIntegerType(1) << BitsPerInteger, expected = input | 1;
+
+    alias BI = BigInteger!(MaxDigitsPerInteger * 2);
+    typeof(BI.storage) storageOutput, storageInput, storageSubtraction, storageExpected;
+    bool truncated, overflow, isNegative;
+
+    importValue(storageInput[], input, truncated);
+    importValue(storageSubtraction[], 1, truncated);
+    importValue(storageExpected[], expected, truncated);
+
+    assert(signedSubtraction(storageOutput[], isNegative, storageInput[], true, storageSubtraction[], false, overflow));
+    assert(unsignedCompare(storageOutput[], storageExpected[]) == 0);
+    assert(isNegative);
+    assert(!overflow);
+}
+
+/// Positive - Negative
+unittest {
+    PerIntegerType input = PerIntegerType(1) << BitsPerInteger, expected = input + 1;
+
+    alias BI = BigInteger!(MaxDigitsPerInteger * 2);
+    typeof(BI.storage) storageOutput, storageInput, storageSubtraction, storageExpected;
+    bool truncated, overflow, isNegative;
+
+    importValue(storageInput[], input, truncated);
+    importValue(storageSubtraction[], 1, truncated);
+    importValue(storageExpected[], expected, truncated);
+
+    assert(signedSubtraction(storageOutput[], isNegative, storageInput[], false, storageSubtraction[], true, overflow));
+    assert(unsignedCompare(storageOutput[], storageExpected[]) == 0);
+    assert(!isNegative);
+    assert(!overflow);
+}
+
+/// Negative - Negative
+unittest {
+    PerIntegerType input = PerIntegerType(1) << BitsPerInteger, expected = input - 1;
+
+    alias BI = BigInteger!(MaxDigitsPerInteger * 2);
+    typeof(BI.storage) storageOutput, storageInput, storageSubtraction, storageExpected;
+    bool truncated, overflow, isNegative;
+
+    importValue(storageInput[], input, truncated);
+    importValue(storageSubtraction[], 1, truncated);
+    importValue(storageExpected[], expected, truncated);
+
+    assert(signedSubtraction(storageOutput[], isNegative, storageInput[], true, storageSubtraction[], true, overflow));
+    assert(unsignedCompare(storageOutput[], storageExpected[]) == 0);
+    assert(isNegative);
+    assert(!overflow);
+}
+
 ///
 ErrorResult unsignedSubtraction(scope PerIntegerType[] output, scope const(PerIntegerType)[] input1, scope const(PerIntegerType)[] input2) {
     if(output.length < input1.length)
@@ -1324,6 +1448,22 @@ ErrorResult unsignedSubtraction(scope PerIntegerType[] output, scope const(PerIn
     }
 
     return unsignedSubtraction(output, input2);
+}
+
+///
+unittest {
+    PerIntegerType input = PerIntegerType(1) << BitsPerInteger, expected = (PerIntegerType(1) << BitsPerInteger) - 1;
+
+    alias BI = BigInteger!(MaxDigitsPerInteger * 2);
+    typeof(BI.storage) storageOutput, storageInput, storageSubtraction, storageExpected;
+    bool truncated;
+
+    importValue(storageInput[], input, truncated);
+    importValue(storageSubtraction[], 1, truncated);
+    importValue(storageExpected[], expected, truncated);
+
+    assert(unsignedSubtraction(storageOutput[], storageInput[], storageSubtraction[]));
+    assert(unsignedCompare(storageOutput[], storageExpected[]) == 0);
 }
 
 ///
@@ -1395,9 +1535,15 @@ void leftShift(scope PerIntegerType[] output, size_t amount) {
         return;
     } else if(amountMod == 0) {
         // we're moving whole integers around, so that is quite easy!
+
         foreach_reverse(i; 0 .. output.length - entriesToIgnore) {
             output[i + entriesToIgnore] = output[i];
         }
+
+        foreach(i; 0 .. entriesToIgnore) {
+            output[i] = 0;
+        }
+
         return;
     }
 
@@ -1426,7 +1572,7 @@ void leftShift(scope PerIntegerType[] output, size_t amount) {
                     // 2.1) abcd efgh ijkl -> +ijk -> abcd efgh +ijk
                     // 2.2) abcd efgh hijk -> +efg -> abcd +efg hijk
                     const temp = output[srcByteOffset] << amountMod;
-                    output[dstByteOffset] = temp;
+                    output[dstByteOffset] = temp & PerIntegerMask;
                 }
 
                 if(srcByteOffset == 0)
@@ -1439,7 +1585,7 @@ void leftShift(scope PerIntegerType[] output, size_t amount) {
                     // 2.1) abcd efgh +ijk -> h+++ -> abcd efgh hijk
                     // 2.2) abcd +efg hijk -> d+++ -> abcd defg hijk
                     const temp = output[srcByteOffset] >> bitsToIgnore;
-                    output[dstByteOffset] |= temp;
+                    output[dstByteOffset] |= temp & PerIntegerMask;
                 }
 
                 dstByteOffset--;
@@ -1456,6 +1602,26 @@ void leftShift(scope PerIntegerType[] output, size_t amount) {
     }
 }
 
+///
+unittest {
+    PerIntegerType expected1 = PerIntegerType(1) << (BitsPerInteger - 1), expected2 = PerIntegerType(1) << BitsPerInteger;
+
+    alias BI = BigInteger!(MaxDigitsPerInteger * 2);
+    typeof(BI.storage) storage1, storage2, storageExpected1, storageExpected2;
+    bool truncated;
+
+    importValue(storage1, 1, truncated);
+    importValue(storage2, 1, truncated);
+    importValue(storageExpected1, expected1, truncated);
+    importValue(storageExpected2, expected2, truncated);
+
+    leftShift(storage1, BitsPerInteger - 1);
+    assert(unsignedCompare(storage1[], storageExpected1[]) == 0);
+
+    leftShift(storage2, BitsPerInteger);
+    assert(unsignedCompare(storage2[], storageExpected2[]) == 0);
+}
+
 /// Per integer shift MSB to LSB
 void rightShift(scope PerIntegerType[] output, size_t amount) {
     const entriesToIgnore = amount / BitsPerInteger;
@@ -1470,8 +1636,13 @@ void rightShift(scope PerIntegerType[] output, size_t amount) {
         return;
     } else if(amountMod == 0) {
         // we're moving whole integers around, so that is quite easy!
+
         foreach(i; 0 .. output.length - entriesToIgnore) {
             output[i] = output[i + entriesToIgnore];
+        }
+
+        foreach(i; output.length - entriesToIgnore .. output.length) {
+            output[i] = 0;
         }
         return;
     }
@@ -1528,8 +1699,40 @@ void rightShift(scope PerIntegerType[] output, size_t amount) {
 }
 
 ///
+unittest {
+    PerIntegerType input1 = PerIntegerType(1) << (BitsPerInteger - 1), input2 = PerIntegerType(1) << BitsPerInteger;
+
+    alias BI = BigInteger!(MaxDigitsPerInteger * 2);
+    typeof(BI.storage) storage1, storage2, storageExpected;
+    bool truncated;
+
+    importValue(storage1, input1, truncated);
+    importValue(storage2, input2, truncated);
+    importValue(storageExpected, 1, truncated);
+
+    rightShift(storage1, BitsPerInteger - 1);
+    assert(unsignedCompare(storage1[], storageExpected[]) == 0);
+
+    rightShift(storage2, BitsPerInteger);
+    assert(unsignedCompare(storage2[], storageExpected[]) == 0);
+}
+
+///
 ErrorResult bitwiseAnd(scope PerIntegerType[] output, scope const(PerIntegerType)[] input) {
     return bitwiseAnd(output, output, input);
+}
+
+///
+unittest {
+    alias BI = BigInteger!(MaxDigitsPerInteger * 2);
+    typeof(BI.storage) storage, storageExpected;
+    bool truncated;
+
+    importValue(storage[], 15, truncated);
+    importValue(storageExpected[], 5, truncated);
+
+    assert(bitwiseAnd(storage[], storageExpected[]));
+    assert(unsignedCompare(storage[], storageExpected[]) == 0);
 }
 
 ///
@@ -1553,8 +1756,35 @@ ErrorResult bitwiseAnd(scope PerIntegerType[] output, scope const(PerIntegerType
 }
 
 ///
+unittest {
+    alias BI = BigInteger!(MaxDigitsPerInteger * 2);
+    typeof(BI.storage) storage, storageExpected;
+    bool truncated;
+
+    importValue(storage[], 15, truncated);
+    importValue(storageExpected[], 5, truncated);
+
+    assert(bitwiseAnd(storage[], storage[], storageExpected[]));
+    assert(unsignedCompare(storage[], storageExpected[]) == 0);
+}
+
+///
 ErrorResult bitwiseOr(scope PerIntegerType[] output, scope const(PerIntegerType)[] input) {
     return bitwiseOr(output, output, input);
+}
+
+///
+unittest {
+    alias BI = BigInteger!(MaxDigitsPerInteger * 2);
+    typeof(BI.storage) storage, storageOr, storageExpected;
+    bool truncated;
+
+    importValue(storage[], 14, truncated);
+    importValue(storageOr[], 1, truncated);
+    importValue(storageExpected[], 15, truncated);
+
+    assert(bitwiseOr(storage[], storageOr[]));
+    assert(unsignedCompare(storage[], storageExpected[]) == 0);
 }
 
 ///
@@ -1584,8 +1814,36 @@ ErrorResult bitwiseOr(scope PerIntegerType[] output, scope const(PerIntegerType)
 }
 
 ///
+unittest {
+    alias BI = BigInteger!(MaxDigitsPerInteger * 2);
+    typeof(BI.storage) storage, storageOr, storageExpected;
+    bool truncated;
+
+    importValue(storage[], 14, truncated);
+    importValue(storageOr[], 1, truncated);
+    importValue(storageExpected[], 15, truncated);
+
+    assert(bitwiseOr(storage[], storage[], storageOr[]));
+    assert(unsignedCompare(storage[], storageExpected[]) == 0);
+}
+
+///
 ErrorResult bitwiseXor(scope PerIntegerType[] output, scope const(PerIntegerType)[] input) {
     return bitwiseXor(output, output, input);
+}
+
+///
+unittest {
+    alias BI = BigInteger!(MaxDigitsPerInteger * 2);
+    typeof(BI.storage) storage, storageXor, storageExpected;
+    bool truncated;
+
+    importValue(storage[], 14, truncated);
+    importValue(storageXor[], 3, truncated);
+    importValue(storageExpected[], 13, truncated);
+
+    assert(bitwiseXor(storage[], storageXor[]));
+    assert(unsignedCompare(storage[], storageExpected[]) == 0);
 }
 
 ///
@@ -1600,11 +1858,11 @@ ErrorResult bitwiseXor(scope PerIntegerType[] output, scope const(PerIntegerType
     const min = input1.length > input2.length ? input2.length : input1.length;
 
     foreach(offset, ref v; output[0 .. min]) {
-        v = input1[offset] ^ input2[offset];
+        v = (input1[offset] ^ input2[offset]) & PerIntegerMask;
     }
 
     foreach(offset, ref v; output[min .. input1.length]) {
-        v = input1[offset ^ min];
+        v = (input1[offset + min] ^ 0) & PerIntegerMask;
     }
 
     foreach(ref v; output[input1.length .. $]) {
@@ -1612,6 +1870,20 @@ ErrorResult bitwiseXor(scope PerIntegerType[] output, scope const(PerIntegerType
     }
 
     return ErrorResult.init;
+}
+
+///
+unittest {
+    alias BI = BigInteger!(MaxDigitsPerInteger * 2);
+    typeof(BI.storage) storage, storageXor, storageExpected;
+    bool truncated;
+
+    importValue(storage[], 14, truncated);
+    importValue(storageXor[], 3, truncated);
+    importValue(storageExpected[], 13, truncated);
+
+    assert(bitwiseXor(storage[], storage[], storageXor[]));
+    assert(unsignedCompare(storage[], storageExpected[]) == 0);
 }
 
 /// Uses exponent as counter
@@ -1638,7 +1910,6 @@ ErrorResult signedPower(scope PerIntegerType[] output, scope out bool outputIsNe
 
 /// Uses exponent as counter
 void unsignedPower(scope PerIntegerType[] output, scope const(PerIntegerType)[] input, scope PerIntegerType[] exponent, out bool overflow) {
-
     foreach(ref v; output) {
         v = 0;
     }
@@ -1729,8 +2000,8 @@ void unsignedMultiplyAddImpl(scope PerIntegerType[] output, scope const(PerInteg
 }
 
 void unsignedAdditionImpl(scope PerIntegerType[] output, PerIntegerType toAdd, PerIntegerType powerOfMaxPerInteger, ref bool overflow) {
-    if (powerOfMaxPerInteger >= output.length) {
-        if (toAdd != 0)
+    if(powerOfMaxPerInteger >= output.length) {
+        if(toAdd != 0)
             overflow = true;
         return;
     }

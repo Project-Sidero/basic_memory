@@ -10,9 +10,24 @@ import std.traits : isIntegral;
 
 export @safe nothrow @nogc:
 
+///
+T zero(T)(T value) if (isIntegral!T) {
+    return T(0);
+}
+
+///
+T one(T)(T value) if (isIntegral!T) {
+    return T(1);
+}
+
+///
+size_t numberOfBits(Arg)(Arg input) if (isIntegral!Arg) {
+    return Arg.sizeof * 8;
+}
+
 /// Get a bit mask for a given number of bits.
-Return bitMaskForNumberOfBits(Return = size_t, Arg)(Arg numberOfBits) if (isIntegral!Arg) {
-    if(numberOfBits >= Return.sizeof * 8)
+Return bitMaskForNumberOfBits(Return = size_t)(size_t numberOfBits) {
+    if(numberOfBits >= Return.init.numberOfBits)
         return Return.max;
 
     Return ret = 1;
@@ -20,10 +35,18 @@ Return bitMaskForNumberOfBits(Return = size_t, Arg)(Arg numberOfBits) if (isInte
     return ret - 1;
 }
 
+///
+unittest {
+    import sidero.base.math.bigint : BigInteger, MaxDigitsPerInteger, BitsPerInteger;
+
+    alias BI = BigInteger!(MaxDigitsPerInteger * 2);
+    assert(bitMaskForNumberOfBits!(BI)((BitsPerInteger * 2) - 1) == BI.max >> 1);
+}
+
 /// Reverse a specified number of LSB bits
-Return reverseBitsLSB(Return = size_t, Arg)(Return input, Arg numberOfBitsToReverse) if (isIntegral!Arg) {
-    if(numberOfBitsToReverse >= Return.sizeof * 8)
-        numberOfBitsToReverse = Return.sizeof * 8;
+Return reverseBitsLSB(Return = size_t)(Return input, size_t numberOfBitsToReverse) {
+    if(numberOfBitsToReverse >= input.numberOfBits)
+        numberOfBitsToReverse = input.numberOfBits;
 
     Return result;
 
@@ -39,8 +62,13 @@ Return reverseBitsLSB(Return = size_t, Arg)(Return input, Arg numberOfBitsToReve
 
 ///
 unittest {
+    import sidero.base.math.bigint : BigInteger;
+
     assert(reverseBitsLSB!uint(0x3e23, 3) == 0x3e26);
     assert(reverseBitsLSB!ulong(0x8000000000000002, 64) == 0x4000000000000001);
+
+    assert(reverseBitsLSB(BigInteger!5(0x3e23), 3) == BigInteger!5(0x3e26));
+    assert(reverseBitsLSB(BigInteger!22(0x8000000000000002), 64) == BigInteger!22(0x4000000000000001));
 }
 
 /// Treat any enum as if it was setup for bit flags
