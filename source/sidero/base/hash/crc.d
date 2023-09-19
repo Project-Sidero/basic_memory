@@ -58,7 +58,7 @@ function allEntries() {
 }
 
 function generateGlobalEntries() {
-    append('///\nimmutable {\n');
+    append('///\n__gshared {\n');
 
     data.forEach(function(entry) {
         if (entry.width < 8)
@@ -144,7 +144,7 @@ generateGlobalEntries();
 
 /// A specification of a CRC as per RockSoft's model
 struct CRCSpec(WorkingType) {
-    static assert(isValidWorkingTypeCRC!WorkingType, "CRC can only work with unsigned integral types or FixedUNum");
+    static assert(isValidWorkingTypeCRC!WorkingType, "CRC can only work with unsigned integral types or BigInteger");
 
     //string name;
 
@@ -176,20 +176,12 @@ struct CRC(WorkingType) {
         CRCSpec!WorkingType specification;
         ///
         WorkingType[256] table;
-    }
 
-    private bool haveTable;
+        void initTable() @safe nothrow @nogc {
+            import sidero.base.bitmanip : bitMaskForNumberOfBits, reverseBitsLSB;
 
-@safe nothrow @nogc:
-
-    ///
-    this(CRCSpec!WorkingType specification) {
-        import sidero.base.bitmanip : bitMaskForNumberOfBits, reverseBitsLSB;
-
-        this.specification = specification;
-
-        {
-            auto topBitMask = WorkingType(1) << (specification.width - 1);
+            const mask = bitMaskForNumberOfBits!WorkingType(cast(uint)specification.width);
+            const topBitMask = WorkingType(1) << (specification.width - 1);
 
             foreach(i, ref v; this.table) {
                 const inputWT = specification.reverseBitsIn ? WorkingType(reverseBitsLSB!ubyte(cast(ubyte)i, 8)) : WorkingType(cast(ubyte)i);
@@ -206,24 +198,36 @@ struct CRC(WorkingType) {
                 if(specification.reverseBitsIn)
                     intermediateValue = reverseBitsLSB(intermediateValue, cast(uint)specification.width);
 
-                v = intermediateValue & bitMaskForNumberOfBits!WorkingType(cast(uint)specification.width);
+                v = intermediateValue & mask;
             }
-        }
 
-        haveTable = true;
+            haveTable = true;
+        }
     }
 
-const:
+    private bool haveTable;
+
+@safe nothrow @nogc:
+
+    ///
+    this(CRCSpec!WorkingType specification) {
+        this.specification = specification;
+    }
 
     ///
     alias opCall = calculate;
 
     ///
     WorkingType calculate(scope const(ubyte)[] array...) {
+        if(!haveTable)
+            initTable;
+
         auto temp = startMultiRunCalculation();
         addToMultiRunCalculation(temp, array);
         return completeMultiRunCalculation(temp);
     }
+
+const:
 
     /**
         Calculate a crc hash in a multi-step process with ability to get partial hashes.
@@ -243,7 +247,7 @@ const:
 
     /// Ditto
     void addToMultiRunCalculation(scope ref WorkingType intermediateValue, scope const(ubyte)[] array...) {
-        import sidero.base.bitmanip : bitMaskForNumberOfBits, reverseBitsLSB;
+        import sidero.base.bitmanip : bitMaskForNumberOfBits, reverseBitsLSB, zero, one;
 
         const mask = bitMaskForNumberOfBits!WorkingType(specification.width);
 
@@ -284,6 +288,7 @@ const:
             // we don't need to use this, if we have the table
 
             const topBitMask = WorkingType(1) << (specification.width - 1);
+            assert(topBitMask != WorkingType.init.zero);
 
             foreach(input; array) {
                 const inputWT = specification.reverseBitsIn ? WorkingType(reverseBitsLSB!ubyte(input, 8)) : WorkingType(input);
@@ -334,7 +339,7 @@ alias crc64ECMA = crc64_ECMA_182;
 alias crc64ISOOf = crc64_GO_ISO;
 
 ///
-immutable {
+__gshared {
     /// CRC-8/AUTOSAR hash
     CRC!uint crc8_AUTOSAR = CRC!uint(CRCSpec!uint(8, 0x2f, 0xff, 0xff, 0xdf, false, false));
 
@@ -1110,9 +1115,9 @@ immutable {
     }
 
     /// CRC-82/DARC hash
-    CRC!(BigInteger!3) crc82_DARC = CRC!(BigInteger!3)(CRCSpec!(BigInteger!3)(82,
-            BigInteger!3.parseHex("0308c0111011401440411"), BigInteger!3.zero, BigInteger!3.zero,
-            BigInteger!3.parseHex("09ea83f625023801fd612"), true, true));
+    CRC!(BigInteger!21) crc82_DARC = CRC!(BigInteger!21)(CRCSpec!(BigInteger!21)(82,
+            BigInteger!21.parseHex("0308c0111011401440411"), BigInteger!21.zero, BigInteger!21.zero,
+            BigInteger!21.parseHex("09ea83f625023801fd612"), true, true));
 
     ///
     unittest {
