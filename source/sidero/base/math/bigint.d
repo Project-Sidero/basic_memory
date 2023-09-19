@@ -65,48 +65,6 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
     bool wasOverflown;
 
     private {
-        static BigInteger parseImpl(Str)(Str input, out bool truncated, out size_t used) @safe nothrow @nogc {
-            import sidero.base.algorithm : reverse;
-
-            BigInteger ret;
-
-            PerIntegerType temp;
-            size_t count, offset;
-
-            foreach(c; input) {
-                if(count == NumberOfDigits) {
-                    if(count > 0)
-                        ret.storage[offset++] = temp;
-                    break;
-                }
-
-                if(used == 0 && c == '-') {
-                    used++;
-                    ret.isNegative = true;
-                } else if(c >= '0' && c <= '9') {
-                    used++;
-
-                    temp *= 10;
-                    temp += cast(PerIntegerType)(c - '0');
-                    count++;
-
-                    if(count == MaxDigitsPerInteger) {
-                        ret.storage[offset++] = temp;
-                        count = 0;
-                    }
-                } else
-                    break;
-            }
-
-            if(used == 1 && ret.isNegative) {
-                used = 0;
-                ret.isNegative = false;
-            }
-
-            reverse(ret.storage[0 .. offset]);
-            return ret;
-        }
-
         static BigInteger parseHexImpl(Str)(Str input, out bool truncated, out size_t used) @safe nothrow @nogc {
             BigInteger ret;
 
@@ -621,9 +579,87 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
         }
 
         ///
-        static BigInteger parseHex(scope ref String_UTF8.LiteralType text, out bool truncated) {
-            size_t used;
-            return parseHexImpl(text, truncated, used);
+        static BigInteger parseHex(scope String_UTF8.LiteralType input, out bool truncated) {
+            BigInteger ret;
+            parse16Impl(ret.storage[], ret.isNegative, input, truncated);
+            return ret;
+        }
+
+        ///
+        static BigInteger parseHex(scope String_UTF16.LiteralType text) {
+            bool truncated;
+            return parseHex(text, truncated);
+        }
+
+        ///
+        static BigInteger parseHex(scope String_UTF16.LiteralType input, out bool truncated) {
+            BigInteger ret;
+            parse16Impl(ret.storage[], ret.isNegative, input, truncated);
+            return ret;
+        }
+
+        ///
+        static BigInteger parseHex(scope String_UTF32.LiteralType text) {
+            bool truncated;
+            return parseHex(text, truncated);
+        }
+
+        ///
+        static BigInteger parseHex(scope String_UTF32.LiteralType input, out bool truncated) {
+            BigInteger ret;
+            parse16Impl(ret.storage[], ret.isNegative, input, truncated);
+            return ret;
+        }
+
+        ///
+        static BigInteger parseHex(scope String_UTF8 text) {
+            bool truncated;
+            return parseHex(text, truncated);
+        }
+
+        ///
+        static BigInteger parseHex(scope ref String_UTF8 input, out bool truncated) {
+            String_UTF32 s32 = input.byUTF32;
+
+            BigInteger ret;
+            const used = parse16Impl(ret.storage[], ret.isNegative, input, truncated);
+
+            input = input[used .. $];
+            return ret;
+        }
+
+        ///
+        static BigInteger parseHex(scope String_UTF16 text) {
+            bool truncated;
+            return parseHex(text, truncated);
+        }
+
+        ///
+        static BigInteger parseHex(scope ref String_UTF16 input, out bool truncated) {
+            String_UTF32 s32 = input.byUTF32;
+
+            BigInteger ret;
+            const used = parse16Impl(ret.storage[], ret.isNegative, input, truncated);
+
+            input = input[used .. $];
+            return ret;
+        }
+
+        ///
+        static BigInteger parseHex(scope String_UTF32 text) {
+            bool truncated;
+            return parseHex(text, truncated);
+        }
+
+        ///
+        static BigInteger parseHex(scope ref String_UTF32 input, out bool truncated) {
+            String_UTF32 s32 = input.byUTF32;
+
+            BigInteger ret;
+            const used = parse16Impl(ret.storage[], ret.isNegative, input, truncated);
+
+            input = input[used .. $];
+            return ret;
         }
 
         ///
@@ -633,9 +669,10 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
         }
 
         ///
-        static BigInteger parse(scope ref String_UTF8.LiteralType text, out bool truncated) {
-            size_t used;
-            return parseImpl(text, truncated, used);
+        static BigInteger parse(scope String_UTF8.LiteralType input, out bool truncated) {
+            BigInteger ret;
+            parse10Impl(ret.storage[], ret.isNegative, input, truncated);
+            return ret;
         }
 
         ///
@@ -645,9 +682,10 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
         }
 
         ///
-        static BigInteger parse(scope ref String_UTF16.LiteralType text, out bool truncated) {
-            size_t used;
-            return parseImpl(text, truncated, used);
+        static BigInteger parse(scope String_UTF16.LiteralType input, out bool truncated) {
+            BigInteger ret;
+            parse10Impl(ret.storage[], ret.isNegative, input, truncated);
+            return ret;
         }
 
         ///
@@ -657,9 +695,10 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
         }
 
         ///
-        static BigInteger parse(scope ref String_UTF32.LiteralType text, out bool truncated) {
-            size_t used;
-            return parseImpl(text, truncated, used);
+        static BigInteger parse(scope String_UTF32.LiteralType input, out bool truncated) {
+            BigInteger ret;
+            parse10Impl(ret.storage[], ret.isNegative, input, truncated);
+            return ret;
         }
 
         ///
@@ -669,13 +708,13 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
         }
 
         ///
-        static BigInteger parse(scope ref String_UTF8 text, out bool truncated) {
-            String_UTF32 s32 = text.byUTF32;
-            size_t used;
+        static BigInteger parse(scope ref String_UTF8 input, out bool truncated) {
+            String_UTF32 s32 = input.byUTF32;
 
-            BigInteger ret = parseImpl(s32, truncated, used);
+            BigInteger ret;
+            const used = parse10Impl(ret.storage[], ret.isNegative, input, truncated);
 
-            text = text[used .. $];
+            input = input[used .. $];
             return ret;
         }
 
@@ -686,13 +725,13 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
         }
 
         ///
-        static BigInteger parse(scope ref String_UTF16 text, out bool truncated) {
-            String_UTF32 s32 = text.byUTF32;
-            size_t used;
+        static BigInteger parse(scope ref String_UTF16 input, out bool truncated) {
+            String_UTF32 s32 = input.byUTF32;
 
-            BigInteger ret = parseImpl(s32, truncated, used);
+            BigInteger ret;
+            const used = parse10Impl(ret.storage[], ret.isNegative, input, truncated);
 
-            text = text[used .. $];
+            input = input[used .. $];
             return ret;
         }
 
@@ -703,13 +742,13 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
         }
 
         ///
-        static BigInteger parse(scope ref String_UTF32 text, out bool truncated) {
-            String_UTF32 s32 = text.byUTF32;
-            size_t used;
+        static BigInteger parse(scope ref String_UTF32 input, out bool truncated) {
+            String_UTF32 s32 = input.byUTF32;
 
-            BigInteger ret = parseImpl(s32, truncated, used);
+            BigInteger ret;
+            const used = parse10Impl(ret.storage[], ret.isNegative, input, truncated);
 
-            text = text[used .. $];
+            input = input[used .. $];
             return ret;
         }
     }
@@ -776,6 +815,120 @@ unittest {
     assert(!truncated);
     assert(storage[0] == expected1);
     assert(storage[1] == expected2);
+}
+
+///
+size_t parseHexValue(scope PerIntegerType[] output, out bool isNegative, scope String_UTF8.LiteralType input, out bool truncated) {
+    return parse16Impl(output, isNegative, input, truncated);
+}
+
+///
+unittest {
+    alias BI = BigInteger!10;
+    typeof(BI.storage) storage;
+    bool isNegative, truncated;
+
+    assert(parseHexValue(storage[], isNegative, "-12345678", truncated) == 9);
+    assert(isNegative);
+    assert(!truncated);
+    assert(storage[0] == 0x12345678);
+}
+
+/// Ditto
+size_t parseHexValue(scope PerIntegerType[] output, out bool isNegative, scope String_UTF16.LiteralType input, out bool truncated) {
+    return parse16Impl(output, isNegative, input, truncated);
+}
+
+/// Ditto
+size_t parseHexValue(scope PerIntegerType[] output, out bool isNegative, scope String_UTF32.LiteralType input, out bool truncated) {
+    return parse16Impl(output, isNegative, input, truncated);
+}
+
+/// Ditto
+size_t parseHexValue(scope PerIntegerType[] output, out bool isNegative, scope String_UTF8 input, out bool truncated) {
+    return parse16Impl(output, isNegative, input, truncated);
+}
+
+/// Ditto
+size_t parseHexValue(scope PerIntegerType[] output, out bool isNegative, scope String_UTF16 input, out bool truncated) {
+    return parse16Impl(output, isNegative, input, truncated);
+}
+
+/// Ditto
+size_t parseHexValue(scope PerIntegerType[] output, out bool isNegative, scope String_UTF32 input, out bool truncated) {
+    return parse16Impl(output, isNegative, input, truncated);
+}
+
+/// Ditto
+size_t parseHexValue(scope PerIntegerType[] output, out bool isNegative, scope StringBuilder_UTF8 input, out bool truncated) {
+    return parse16Impl(output, isNegative, input, truncated);
+}
+
+/// Ditto
+size_t parseHexValue(scope PerIntegerType[] output, out bool isNegative, scope StringBuilder_UTF16 input, out bool truncated) {
+    return parse16Impl(output, isNegative, input, truncated);
+}
+
+/// Ditto
+size_t parseHexValue(scope PerIntegerType[] output, out bool isNegative, scope StringBuilder_UTF32 input, out bool truncated) {
+    return parse16Impl(output, isNegative, input, truncated);
+}
+
+///
+size_t parseDecimalValue(scope PerIntegerType[] output, out bool isNegative, scope String_UTF8.LiteralType input, out bool truncated) {
+    return parse10Impl(output, isNegative, input, truncated);
+}
+
+///
+unittest {
+    alias BI = BigInteger!MaxDigitsPerInteger;
+    typeof(BI.storage) storage;
+    bool isNegative, truncated;
+
+    assert(parseDecimalValue(storage[], isNegative, "-1234", truncated) == 5);
+    assert(isNegative);
+    assert(!truncated);
+    assert(storage[0] == 1234);
+}
+
+/// Ditto
+size_t parseDecimalValue(scope PerIntegerType[] output, out bool isNegative, scope String_UTF16.LiteralType input, out bool truncated) {
+    return parse10Impl(output, isNegative, input, truncated);
+}
+
+/// Ditto
+size_t parseDecimalValue(scope PerIntegerType[] output, out bool isNegative, scope String_UTF32.LiteralType input, out bool truncated) {
+    return parse10Impl(output, isNegative, input, truncated);
+}
+
+/// Ditto
+size_t parseDecimalValue(scope PerIntegerType[] output, out bool isNegative, scope String_UTF8 input, out bool truncated) {
+    return parse10Impl(output, isNegative, input, truncated);
+}
+
+/// Ditto
+size_t parseDecimalValue(scope PerIntegerType[] output, out bool isNegative, scope String_UTF16 input, out bool truncated) {
+    return parse10Impl(output, isNegative, input, truncated);
+}
+
+/// Ditto
+size_t parseDecimalValue(scope PerIntegerType[] output, out bool isNegative, scope String_UTF32 input, out bool truncated) {
+    return parse10Impl(output, isNegative, input, truncated);
+}
+
+/// Ditto
+size_t parseDecimalValue(scope PerIntegerType[] output, out bool isNegative, scope StringBuilder_UTF8 input, out bool truncated) {
+    return parse10Impl(output, isNegative, input, truncated);
+}
+
+/// Ditto
+size_t parseDecimalValue(scope PerIntegerType[] output, out bool isNegative, scope StringBuilder_UTF16 input, out bool truncated) {
+    return parse10Impl(output, isNegative, input, truncated);
+}
+
+/// Ditto
+size_t parseDecimalValue(scope PerIntegerType[] output, out bool isNegative, scope StringBuilder_UTF32 input, out bool truncated) {
+    return parse10Impl(output, isNegative, input, truncated);
 }
 
 ///
@@ -1140,6 +1293,10 @@ ErrorResult unsignedMultiply(scope PerIntegerType[] output, scope const(PerInteg
         return ErrorResult(MalformedInputException("Output array must be equal to or larger than first input array"));
     else if(output.length < input2.length)
         return ErrorResult(MalformedInputException("Output array must be equal to or larger than second input array"));
+    else if(output.ptr is input1.ptr)
+        return ErrorResult(MalformedInputException("Output array must not be first input array"));
+    else if(output.ptr is input2.ptr)
+        return ErrorResult(MalformedInputException("Output array must not be second input array"));
 
     foreach(ref v; output) {
         v = 0;
@@ -1958,6 +2115,145 @@ bool sortValueForArgs(scope ref const(PerIntegerType)[] largest, scope ref bool 
     }
 
     return false;
+}
+
+size_t parse10Impl(Str)(scope PerIntegerType[] output, out bool isNegative, scope Str input, out bool truncated) @trusted {
+    import sidero.base.allocators;
+
+    PerIntegerType temp;
+    size_t used, digits;
+
+    RCAllocator allocator;
+    PerIntegerType[64] smallArrayCopy;
+    PerIntegerType[] outputArrayBuffer;
+
+    if(output.length > smallArrayCopy.length) {
+        allocator = globalAllocator();
+        outputArrayBuffer = allocator.makeArray!PerIntegerType(output.length);
+    } else
+        outputArrayBuffer = smallArrayCopy[0 .. output.length];
+
+    scope(exit) {
+        if(!allocator.isNull)
+            allocator.dispose(outputArrayBuffer);
+    }
+
+    void store(bool force) {
+        if(digits == (MaxDigitsPerInteger - 1) || (digits > 0 && force)) {
+            PerIntegerType[1] powerTemp = [PerIntegerType(10) ^^ digits];
+
+            foreach(i, v; output)
+                outputArrayBuffer[i] = v;
+
+            cast(void)unsignedMultiply(output, outputArrayBuffer, powerTemp, truncated);
+
+            unsignedAddition(output, temp, 0, truncated);
+
+            temp = 0;
+            digits = 0;
+        }
+    }
+
+    foreach(c; input) {
+        if(used == 0 && c == '-') {
+            used++;
+            isNegative = true;
+        } else if(c >= '0' && c <= '9') {
+            used++;
+            digits++;
+
+            temp *= 10;
+            temp += cast(PerIntegerType)(c - '0');
+        } else
+            break;
+
+        store(false);
+    }
+
+    store(true);
+
+    if(used == 1 && isNegative) {
+        used = 0;
+        isNegative = false;
+    }
+
+    return used;
+}
+
+size_t parse16Impl(Str)(scope PerIntegerType[] output, out bool isNegative, Str input, out bool truncated) {
+    PerIntegerType temp;
+    size_t used, count, totalBitCount;
+    ptrdiff_t offset = output.length - 1;
+
+    void store() {
+        if(count >= BitsPerInteger) {
+            count -= BitsPerInteger;
+            output[offset] = temp >> count;
+            offset--;
+
+            temp &= (1 << count) - 1;
+            totalBitCount += BitsPerInteger;
+        }
+    }
+
+    foreach(c; input) {
+        if(offset < 0)
+            break;
+
+        if(used == 0 && c == '-') {
+            used++;
+            isNegative = true;
+        } else if(c >= '0' && c <= '9') {
+            used++;
+
+            temp <<= 4;
+            temp |= cast(PerIntegerType)(c - '0');
+            count += 4;
+        } else if(c >= 'a' && c <= 'f') {
+            used++;
+
+            temp <<= 4;
+            temp |= cast(PerIntegerType)(c - 'a') + 10;
+            count += 4;
+        } else if(c >= 'A' && c <= 'F') {
+            used++;
+
+            temp <<= 4;
+            temp |= cast(PerIntegerType)(c - 'A') + 10;
+            count += 4;
+        } else
+            break;
+
+        store();
+    }
+
+    if(count > 0 && offset >= 0) {
+        const toSet = temp << (BitsPerInteger - count);
+
+        output[offset] = toSet;
+        offset--;
+        totalBitCount += count;
+        count = 0;
+    }
+
+    if(count > 0) {
+        // we need to left shift because we have bits that we had to truncate before adding the bits on
+        leftShift(output, count);
+        output[0] |= temp;
+        totalBitCount += count;
+    } else {
+        rightShift(output, (output.length * BitsPerInteger) - totalBitCount);
+    }
+
+    if(totalBitCount > output.length * BitsPerInteger)
+        truncated = true;
+
+    if(used == 1 && isNegative) {
+        used = 0;
+        isNegative = false;
+    }
+
+    return used;
 }
 
 void unsignedMultiplyAddImpl(scope PerIntegerType[] output, scope const(PerIntegerType)[] input1,
