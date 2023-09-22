@@ -650,7 +650,7 @@ struct UTF_State(Char) {
     mixin template CustomIteratorContents() {
         void[4] forwardBuffer, backwardBuffer;
         void[] forwardItems, backwardItems;
-        bool primedForwards, primedBackwardsUTF;
+        bool primedForwardsUTF, primedBackwardsUTF;
         bool primedForwardsNeedPop, primedBackwardsNeedPop;
         size_t amountFromInputForwards, amountFromInputBackwards;
 
@@ -658,6 +658,20 @@ struct UTF_State(Char) {
             blockList.mutex.pureLock;
             scope(exit)
                 blockList.mutex.unlock;
+
+            version(none) {
+                debug {
+                    import std.stdio;
+
+                    try {
+                        writeln(forwardItems.length, " ", backwardItems.length, " ", emptyInternal(), " ",
+                                primedForwards, " ", primedBackwards, " ", this.minimumOffsetFromHead, " <= ",
+                                forwards.offsetFromHead, " <= ", backwards.offsetFromHead, " <= ", this.maximumOffsetFromHead);
+                        stdout.flush;
+                    } catch(Exception) {
+                    }
+                }
+            }
 
             return forwardItems.length == 0 && backwardItems.length == 0 && emptyInternal();
         }
@@ -670,12 +684,13 @@ struct UTF_State(Char) {
             const canRefill = !this.emptyInternal;
             const needRefill = this.forwardItems.length == 0;
             const needToUseOtherBuffer = !canRefill && needRefill && this.backwardItems.length > 0;
+            assert(canRefill || !needRefill || needToUseOtherBuffer);
 
             if(needToUseOtherBuffer) {
                 // take first in backwards buffer
                 assert(this.backwardItems.length > 0);
                 return (cast(TargetChar[])this.backwardItems)[0];
-            } else if(!this.primedForwards) {
+            } else if(!this.primedForwardsUTF) {
                 primeForwardsUTF!TargetChar;
             }
 
@@ -692,6 +707,7 @@ struct UTF_State(Char) {
             const canRefill = !this.emptyInternal;
             const needRefill = this.backwardItems.length == 0;
             const needToUseOtherBuffer = !canRefill && needRefill && this.forwardItems.length > 0;
+            assert(canRefill || !needRefill || needToUseOtherBuffer);
 
             if(needToUseOtherBuffer) {
                 // take first in backwards buffer
@@ -731,9 +747,12 @@ struct UTF_State(Char) {
             Cursor forwardsTempDecodeCursor = forwards;
 
             bool emptyInternal() {
-                size_t actualBack = backwards.offsetFromHead + 1;
-                return forwardsTempDecodeCursor.offsetFromHead + 1 >= actualBack || actualBack <= forwardsTempDecodeCursor.offsetFromHead +
-                    1;
+                if(primedBackwards) {
+                    return backwards.offsetFromHead < forwardsTempDecodeCursor.offsetFromHead ||
+                        forwardsTempDecodeCursor.offsetFromHead >= this.maximumOffsetFromHead;
+                } else {
+                    return forwardsTempDecodeCursor.offsetFromHead >= this.maximumOffsetFromHead;
+                }
             }
 
             Char frontInternal() {
@@ -742,13 +761,17 @@ struct UTF_State(Char) {
             }
 
             void popFrontInternal() {
-                import std.algorithm : min;
-
-                forwardsTempDecodeCursor.advanceForward(1, min(backwards.offsetFromHead + 1, maximumOffsetFromHead), true);
+                if(primedBackwards) {
+                    forwardsTempDecodeCursor.advanceForward(1, backwards.offsetFromHead + 1, true);
+                } else {
+                    forwardsTempDecodeCursor.advanceForward(1, maximumOffsetFromHead, true);
+                }
             }
 
             if(needToUseOtherBuffer) {
                 this.backwardItems = (cast(TargetChar[])this.backwardItems)[1 .. $];
+                this.primedForwardsUTF = true;
+                return;
             } else if(needRefill) {
                 assert(!this.emptyInternal);
 
@@ -799,14 +822,16 @@ struct UTF_State(Char) {
                 this.forwardItems = (cast(TargetChar[])this.forwardItems)[1 .. $];
             }
 
-            this.primedForwards = true;
+            this.primedForwardsUTF = true;
+            assert(this.forwardItems.length > 0 || this.emptyInternal());
         }
 
         void popFrontInternalUTF(TargetChar)() @trusted {
-            foreach(_; 0 .. 1 + !this.primedForwards) {
+            foreach(_; 0 .. 1 + !this.primedForwardsUTF) {
                 if(this.primedForwardsNeedPop) {
                     forwards.advanceForward(this.amountFromInputForwards, maximumOffsetFromHead, true);
                     this.primedForwardsNeedPop = false;
+                    this.primedForwards = true;
                 }
 
                 const needRefill = this.forwardItems.length == 0;
@@ -839,8 +864,8 @@ struct UTF_State(Char) {
             Cursor backwardsTempDecodeCursor = backwards;
 
             bool emptyInternal() {
-                const actualBack = backwardsTempDecodeCursor.offsetFromHead + 1;
-                return forwards.offsetFromHead + 1 >= actualBack || actualBack <= forwards.offsetFromHead + 1;
+                return backwardsTempDecodeCursor.offsetFromHead < forwards.offsetFromHead ||
+                    forwards.offsetFromHead >= this.maximumOffsetFromHead;
             }
 
             Char backInternal() {
@@ -918,6 +943,7 @@ struct UTF_State(Char) {
                 if(this.primedBackwardsNeedPop) {
                     backwards.advanceBackwards(this.amountFromInputBackwards, forwards.offsetFromHead, maximumOffsetFromHead, true, true);
                     this.primedBackwardsNeedPop = false;
+                    this.primedBackwards = true;
                 }
 
                 const canRefill = !this.emptyInternal;
@@ -1072,7 +1098,8 @@ struct UTF_State(Char) {
                     forwards = iterator.forwards;
 
                 size_t maximum() {
-                    return iterator is null ? state.blockList.numberOfItems : iterator.backwards.offsetFromHead;
+                    return iterator is null ? state.blockList.numberOfItems : (iterator.primedBackwards ?
+                            iterator.backwards.offsetFromHead + 1 : iterator.maximumOffsetFromHead);
                 }
 
                 bool emptyInternal() {
@@ -1148,7 +1175,8 @@ struct UTF_State(Char) {
                     forwards = iterator.forwards;
 
                 size_t maximum() {
-                    return iterator is null ? state.blockList.numberOfItems : iterator.backwards.offsetFromHead;
+                    return iterator is null ? state.blockList.numberOfItems : (iterator.primedBackwards ?
+                    iterator.backwards.offsetFromHead + 1 : iterator.maximumOffsetFromHead);
                 }
 
                 bool emptyInternal() {
@@ -1198,7 +1226,8 @@ struct UTF_State(Char) {
                 forwards = iterator.forwards;
 
             size_t maximum() {
-                return iterator is null ? state.blockList.numberOfItems : iterator.backwards.offsetFromHead;
+                return iterator is null ? state.blockList.numberOfItems : (iterator.primedBackwards ?
+                iterator.backwards.offsetFromHead + 1 : iterator.maximumOffsetFromHead);
             }
 
             bool emptyInternal() {
@@ -1387,8 +1416,6 @@ struct UTF_State(Char) {
             }
 
             void popFrontInternal() {
-                import std.algorithm : min;
-
                 forwardsTempDecodeCursor.advanceForward(1, maximumOffsetFromHead, true);
             }
 
@@ -1413,8 +1440,6 @@ struct UTF_State(Char) {
 
         void advance1Forwards() {
             void popFrontInternal() {
-                import std.algorithm : min;
-
                 cursor.advanceForward(1, maximumOffsetFromHead, true);
             }
 
@@ -1799,8 +1824,6 @@ struct UTF_State(Char) {
             }
 
             void popBackInternal() {
-                import std.algorithm : min;
-
                 toRemoveCursor.advanceBackwards(1, minimumOffsetFromHead, maximumOffsetFromHead, false, false);
             }
 
@@ -1857,8 +1880,6 @@ struct UTF_State(Char) {
             }
 
             void popFrontInternal() {
-                import std.algorithm : min;
-
                 cursor.advanceForward(1, maximumOffsetFromHead, true);
             }
 
@@ -1915,8 +1936,6 @@ struct UTF_State(Char) {
             }
 
             void popBackInternal() {
-                import std.algorithm : min;
-
                 backwardsCursor.advanceBackwards(1, minimumOffsetFromHead, maximumOffsetFromHead, false, false);
             }
 

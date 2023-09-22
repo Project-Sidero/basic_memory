@@ -71,8 +71,12 @@ mixin template StringBuilderOperations() {
 
         if(iterator is null)
             ret = blockList.numberOfItems;
-        else
-            ret = iterator.backwards.offsetFromHead - iterator.forwards.offsetFromHead;
+        else {
+            if(iterator.primedBackwards)
+                ret = (iterator.backwards.offsetFromHead + 1) - iterator.forwards.offsetFromHead;
+            else
+                ret = iterator.backwards.offsetFromHead - iterator.forwards.offsetFromHead;
+        }
 
         blockList.mutex.unlock;
         return ret;
@@ -148,14 +152,17 @@ mixin template StringBuilderOperations() {
     ErrorInfo changeIndexToOffset(scope Iterator* iterator, scope ref ptrdiff_t a, scope ref ptrdiff_t b) scope {
         import sidero.base.errors.stock;
 
+        const actualBackwardsOffsetFromHead = iterator !is null ? (iterator.primedBackwards ?
+                (iterator.backwards.offsetFromHead + 1) : iterator.maximumOffsetFromHead) : 0;
         size_t actualLength;
 
         if(iterator !is null) {
-            actualLength = iterator.backwards.offsetFromHead - iterator.forwards.offsetFromHead;
+            actualLength = actualBackwardsOffsetFromHead - iterator.forwards.offsetFromHead;
+
             if(a == ptrdiff_t.max)
-                a = iterator.backwards.offsetFromHead;
+                a = actualBackwardsOffsetFromHead;
             if(b == ptrdiff_t.max)
-                b = iterator.backwards.offsetFromHead;
+                b = actualBackwardsOffsetFromHead;
         } else
             actualLength = blockList.numberOfItems;
 
@@ -187,7 +194,7 @@ mixin template StringBuilderOperations() {
         if(iterator !is null) {
             a += iterator.forwards.offsetFromHead;
 
-            if(b + iterator.forwards.offsetFromHead <= iterator.backwards.offsetFromHead)
+            if(b + iterator.forwards.offsetFromHead <= actualBackwardsOffsetFromHead)
                 b += iterator.forwards.offsetFromHead;
         }
 
@@ -212,7 +219,7 @@ mixin template StringBuilderOperations() {
         iterator1.popFront;
         iterator1.popBack;
         assert(iterator1.forwards.offsetFromHead == 1);
-        assert(iterator1.backwards.offsetFromHead == 14);
+        assert(iterator1.backwards.offsetFromHead == 13);
 
         auto iterator2 = opTest.newIterator(iterator1, 0, ptrdiff_t.max);
         assert(iterator2.forwards.offsetFromHead == 1);
@@ -330,8 +337,6 @@ mixin template StringBuilderOperations() {
                         iterator.onRemoveDecreaseFromHead(toFree, offsetFromHead, canDo);
                     }
 
-                    blockList.remove(toFree);
-
                     debug {
                         foreach(iterator; iteratorList) {
                             assert(iterator.forwards.block !is toFree);
@@ -339,6 +344,7 @@ mixin template StringBuilderOperations() {
                         }
                     }
 
+                    blockList.remove(toFree);
                     block = next;
                 } else {
                     // we have a prefix, this is only applicable to the first block

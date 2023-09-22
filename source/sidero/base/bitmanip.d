@@ -35,12 +35,15 @@ Return bitMaskForNumberOfBits(Return = size_t)(size_t numberOfBits) {
     return ret - 1;
 }
 
-///
-unittest {
-    import sidero.base.math.bigint : BigInteger, MaxDigitsPerInteger, BitsPerInteger;
+version(SideroBase_OnlyUnderTheHood) {
+} else {
+    ///
+    unittest {
+        import sidero.base.math.bigint : BigInteger, MaxDigitsPerInteger, BitsPerInteger;
 
-    alias BI = BigInteger!(MaxDigitsPerInteger * 2);
-    assert(bitMaskForNumberOfBits!(BI)((BitsPerInteger * 2) - 1) == BI.max >> 1);
+        alias BI = BigInteger!(MaxDigitsPerInteger * 2);
+        assert(bitMaskForNumberOfBits!(BI)((BitsPerInteger * 2) - 1) == BI.max >> 1);
+    }
 }
 
 /// Reverse a specified number of LSB bits
@@ -60,15 +63,18 @@ Return reverseBitsLSB(Return = size_t)(Return input, size_t numberOfBitsToRevers
     return result | input;
 }
 
-///
-unittest {
-    import sidero.base.math.bigint : BigInteger;
+version(SideroBase_OnlyUnderTheHood) {
+} else {
+    ///
+    unittest {
+        import sidero.base.math.bigint : BigInteger;
 
-    assert(reverseBitsLSB!uint(0x3e23, 3) == 0x3e26);
-    assert(reverseBitsLSB!ulong(0x8000000000000002, 64) == 0x4000000000000001);
+        assert(reverseBitsLSB!uint(0x3e23, 3) == 0x3e26);
+        assert(reverseBitsLSB!ulong(0x8000000000000002, 64) == 0x4000000000000001);
 
-    assert(reverseBitsLSB(BigInteger!5(0x3e23), 3) == BigInteger!5(0x3e26));
-    assert(reverseBitsLSB(BigInteger!22(0x8000000000000002), 64) == BigInteger!22(0x4000000000000001));
+        assert(reverseBitsLSB(BigInteger!5(0x3e23), 3) == BigInteger!5(0x3e26));
+        assert(reverseBitsLSB(BigInteger!22(0x8000000000000002), 64) == BigInteger!22(0x4000000000000001));
+    }
 }
 
 /// Treat any enum as if it was setup for bit flags

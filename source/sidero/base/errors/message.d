@@ -60,20 +60,23 @@ export scope @safe nothrow @nogc:
         return info.id.length > 0;
     }
 
-    ///
-    auto toString() const {
-        import sidero.base.text;
+    version(SideroBase_OnlyUnderTheHood) {
+    } else {
+        ///
+        auto toString() const {
+            import sidero.base.text;
 
-        StringBuilder_UTF8 ret;
-        this.toString(ret);
-        return ret.asReadOnly();
-    }
+            StringBuilder_UTF8 ret;
+            this.toString(ret);
+            return ret.asReadOnly();
+        }
 
-    ///
-    void toString(S)(scope ref S sink) const {
-        import sidero.base.text.format;
+        ///
+        void toString(S)(scope ref S sink) const {
+            import sidero.base.text.format;
 
-        sink.formattedWrite("Error at {:s}:{:d} {:s}:{:s}", this.moduleName, this.line, this.info.id, this.info.message);
+            sink.formattedWrite("Error at {:s}:{:d} {:s}:{:s}", this.moduleName, this.line, this.info.id, this.info.message);
+        }
     }
 
 pure:

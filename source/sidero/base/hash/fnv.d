@@ -8,21 +8,33 @@ Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
  */
 module sidero.base.hash.fnv;
-import sidero.base.math.bigint;
 
-private enum {
-    FNV_Prime_32 = (2 ^^ 24) + (2 ^^ 8) + 0x93,
-    FNV_Offset_Basis_32 = 0x811c9dc5,
+version(SideroBase_OnlyUnderTheHood) {
+} else {
+    import sidero.base.math.bigint;
+}
 
-    FNV_Prime_64 = (2 ^^ 40) + (2 ^^ 8) + 0xb3,
-    FNV_Offset_Basis_64 = 0xcbf29ce484222325,
+private {
+    enum {
+        FNV_Prime_32 = (2 ^^ 24) + (2 ^^ 8) + 0x93,
+        FNV_Offset_Basis_32 = 0x811c9dc5,
 
-    FNV_Prime_128 = BigInteger_128.parse("309485009821345068724781371"c),
-    FNV_Offset_Basis_128 = BigInteger_128.parse(
-            "144066263297769815596495629667062367629"c),
+        FNV_Prime_64 = (2 ^^ 40) + (2 ^^ 8) + 0xb3,
+        FNV_Offset_Basis_64 = 0xcbf29ce484222325,
+    }
 
-    FNV_Prime_256 = BigInteger_256.parse("374144419156711147060143317175368453031918731002211"c),
-    FNV_Offset_Basis_256 = BigInteger_256.parse("100029257958052580907070968620625704837092796014241193945225284501741471925557"c),
+    version(SideroBase_OnlyUnderTheHood) {
+    } else {
+        enum {
+            FNV_Prime_128 = BigInteger_128.parse(
+                "309485009821345068724781371"c),
+            FNV_Offset_Basis_128 = BigInteger_128.parse("144066263297769815596495629667062367629"c),
+
+            FNV_Prime_256 = BigInteger_256.parse("374144419156711147060143317175368453031918731002211"c),
+            FNV_Offset_Basis_256 = BigInteger_256.parse(
+                    "100029257958052580907070968620625704837092796014241193945225284501741471925557"c),
+        }
+    }
 }
 
 export @safe nothrow @nogc:
@@ -60,28 +72,31 @@ ulong fnv_64_0(const(ubyte)[] data, ulong start = 0) pure {
     return hash;
 }
 
-/// Ditto
-BigInteger_128 fnv_128_0(const(ubyte)[] data, BigInteger_128 start = BigInteger_128(0)) {
-    BigInteger_128 hash = start;
+version(SideroBase_OnlyUnderTheHood) {
+} else {
+    /// Ditto
+    BigInteger_128 fnv_128_0(const(ubyte)[] data, BigInteger_128 start = BigInteger_128(0)) {
+        BigInteger_128 hash = start;
 
-    foreach(b; data) {
-        hash *= FNV_Prime_128;
-        hash ^= BigInteger_128(b);
+        foreach(b; data) {
+            hash *= FNV_Prime_128;
+            hash ^= BigInteger_128(b);
+        }
+
+        return hash;
     }
 
-    return hash;
-}
+    /// Ditto
+    BigInteger_256 fnv_256_0(const(ubyte)[] data, BigInteger_256 start = BigInteger_256(0)) {
+        BigInteger_256 hash = start;
 
-/// Ditto
-BigInteger_256 fnv_256_0(const(ubyte)[] data, BigInteger_256 start = BigInteger_256(0)) {
-    BigInteger_256 hash = start;
+        foreach(b; data) {
+            hash *= FNV_Prime_256;
+            hash ^= BigInteger_256(b);
+        }
 
-    foreach(b; data) {
-        hash *= FNV_Prime_256;
-        hash ^= BigInteger_256(b);
+        return hash;
     }
-
-    return hash;
 }
 
 /**
@@ -117,28 +132,31 @@ ulong fnv_64_1(const(ubyte)[] data, ulong start = FNV_Offset_Basis_64) pure {
     return hash;
 }
 
-/// Ditto
-BigInteger_128 fnv_128_1(const(ubyte)[] data, BigInteger_128 start = FNV_Offset_Basis_128) {
-    BigInteger_128 hash = start;
+version(SideroBase_OnlyUnderTheHood) {
+} else {
+    /// Ditto
+    BigInteger_128 fnv_128_1(const(ubyte)[] data, BigInteger_128 start = FNV_Offset_Basis_128) {
+        BigInteger_128 hash = start;
 
-    foreach(b; data) {
-        hash *= FNV_Prime_128;
-        hash ^= BigInteger_128(b);
+        foreach(b; data) {
+            hash *= FNV_Prime_128;
+            hash ^= BigInteger_128(b);
+        }
+
+        return hash;
     }
 
-    return hash;
-}
+    /// Ditto
+    BigInteger_256 fnv_256_1(const(ubyte)[] data, BigInteger_256 start = FNV_Offset_Basis_256) {
+        BigInteger_256 hash = start;
 
-/// Ditto
-BigInteger_256 fnv_256_1(const(ubyte)[] data, BigInteger_256 start = FNV_Offset_Basis_256) {
-    BigInteger_256 hash = start;
+        foreach(b; data) {
+            hash *= FNV_Prime_256;
+            hash ^= BigInteger_256(b);
+        }
 
-    foreach(b; data) {
-        hash *= FNV_Prime_256;
-        hash ^= BigInteger_256(b);
+        return hash;
     }
-
-    return hash;
 }
 
 /**
@@ -174,26 +192,29 @@ ulong fnv_64_1a(const(ubyte)[] data, ulong start = FNV_Offset_Basis_64) pure {
     return hash;
 }
 
-/// Ditto
-BigInteger_128 fnv_128_1a(const(ubyte)[] data, BigInteger_128 start = FNV_Offset_Basis_128) {
-    BigInteger_128 hash = start;
+version(SideroBase_OnlyUnderTheHood) {
+} else {
+    /// Ditto
+    BigInteger_128 fnv_128_1a(const(ubyte)[] data, BigInteger_128 start = FNV_Offset_Basis_128) {
+        BigInteger_128 hash = start;
 
-    foreach(b; data) {
-        hash ^= BigInteger_128(b);
-        hash *= FNV_Prime_128;
+        foreach(b; data) {
+            hash ^= BigInteger_128(b);
+            hash *= FNV_Prime_128;
+        }
+
+        return hash;
     }
 
-    return hash;
-}
+    /// Ditto
+    BigInteger_256 fnv_256_1a(const(ubyte)[] data, BigInteger_256 start = FNV_Offset_Basis_256) {
+        BigInteger_256 hash = start;
 
-/// Ditto
-BigInteger_256 fnv_256_1a(const(ubyte)[] data, BigInteger_256 start = FNV_Offset_Basis_256) {
-    BigInteger_256 hash = start;
+        foreach(b; data) {
+            hash ^= BigInteger_256(b);
+            hash *= FNV_Prime_256;
+        }
 
-    foreach(b; data) {
-        hash ^= BigInteger_256(b);
-        hash *= FNV_Prime_256;
+        return hash;
     }
-
-    return hash;
 }

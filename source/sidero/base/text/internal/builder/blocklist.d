@@ -363,6 +363,29 @@ struct BlockListImpl(Char) {
         bl.clear;
     }
 
+    void debugMe() @trusted {
+        version(none) {
+            version(D_BetterC) {
+            } else {
+                debug {
+                    try {
+                        import std.stdio;
+
+                        Block* current = &head;
+
+                        while(current !is null) {
+                            writefln!"Block(0x%X) length=%s"(current, current.length);
+
+                            current = current.next;
+                        }
+
+                    } catch(Exception) {
+                    }
+                }
+            }
+        }
+    }
+
     static struct Block {
         Block* previous, next;
         size_t length;

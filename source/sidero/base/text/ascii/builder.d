@@ -306,6 +306,11 @@ nothrow @safe:
     unittest {
         auto builder = typeof(this)("Smile! You don't want to see my other side.");
         builder.popFront;
+
+        assert(builder.length == 42);
+        assert(builder.front == 'm');
+        assert(builder.back == '.');
+
         builder.popBack;
 
         assert(builder.length == 41);

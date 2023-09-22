@@ -1,6 +1,10 @@
 ///
 module sidero.base.typecons;
-import sidero.base.text;
+
+version(SideroBase_OnlyUnderTheHood) {
+} else {
+    import sidero.base.text;
+}
 
 export:
 
@@ -84,42 +88,51 @@ export @safe nothrow @nogc:
             return 1;
     }
 
-    ///
-    String_UTF8 toString() scope const {
-        StringBuilder_UTF8 ret;
-        this.toString(ret);
-        return ret.asReadOnly();
-    }
-
-    ///
-    void toString(S)(scope ref S sink) scope const @trusted {
-        if(!this.isSet)
-            sink ~= "not-set"c;
-        else
-            sink.formattedWrite("{:s}", (cast(Optional*)&this).value);
-    }
-
-    static if(__traits(hasMember, T, "toStringPretty")) {
+    version(SideroBase_OnlyUnderTheHood) {
+    } else {
         ///
-        String_UTF8 toStringPretty() scope const {
+        String_UTF8 toString() scope const {
             StringBuilder_UTF8 ret;
-            this.toStringPretty(ret);
+            this.toString(ret);
             return ret.asReadOnly();
         }
 
         ///
-        void toStringPretty(S)(scope ref S sink) scope const {
-            if(!this.isSet) {
+        void toString(S)(scope ref S sink) scope const @trusted {
+            if (!this.isSet)
                 sink ~= "not-set"c;
-                return;
+            else
+                sink.formattedWrite("{:s}", (cast(Optional*)&this).value);
+        }
+
+        static if (__traits(hasMember, T, "toStringPretty")) {
+            ///
+            String_UTF8 toStringPretty() scope const {
+                StringBuilder_UTF8 ret;
+                this.toStringPretty(ret);
+                return ret.asReadOnly();
             }
 
-            static if(__traits(compiles, { (cast(Optional*)&this).value.toStringPretty(sink); })) {
-                (cast(Optional*)&this).value.toStringPretty(sink);
-            } else static if(__traits(compiles, { (cast(Optional*)&this).value.toStringPretty(&sink.put); })) {
-                (cast(Optional*)&this).value.toStringPretty(&sink.put);
-            } else static if(__traits(compiles, { sink ~= (cast(Optional*)&this).value.toStringPretty(); })) {
-                sink ~= (cast(Optional*)&this).value.toStringPretty();
+            ///
+            void toStringPretty(S)(scope ref S sink) scope const {
+                if (!this.isSet) {
+                    sink ~= "not-set"c;
+                    return;
+                }
+
+                static if (__traits(compiles, {
+                        (cast(Optional*)&this).value.toStringPretty(sink);
+                })) {
+                        (cast(Optional*)&this).value.toStringPretty(sink);
+                } else static if (__traits(compiles, {
+                        (cast(Optional*)&this).value.toStringPretty(&sink.put);
+                })) {
+                        (cast(Optional*)&this).value.toStringPretty(&sink.put);
+                } else static if (__traits(compiles, {
+                    sink ~= (cast(Optional*)&this).value.toStringPretty();
+                })) {
+                    sink ~= (cast(Optional*)&this).value.toStringPretty();
+                }
             }
         }
     }
