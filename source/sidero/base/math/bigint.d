@@ -131,6 +131,49 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
 
             return ret;
         }
+
+        void toStringImpl(scope void delegate(scope char[]) @safe nothrow @nogc del) scope const @safe nothrow @nogc {
+            import std.algorithm : reverse;
+
+            ubyte[(MaxDigitsPerInteger * storage.length) + 1] buffer = void;
+            buffer[0] = '-';
+            buffer[1] = '0';
+
+            size_t offset = 1;
+            bool hitNonZero;
+
+            {
+                BigInteger temp = this;
+                BigInteger div = BigInteger(10);
+
+                while(temp != 0) {
+                    BigInteger quotient, modulas;
+                    bool overflow;
+                    cast(void)unsignedDivide(quotient.storage[], modulas.storage[], temp.storage[], div.storage[], overflow);
+
+                    const digit = modulas.storage[0] & 0xFF;
+                    assert(digit < 10);
+
+                    if (digit != 0 || hitNonZero) {
+                        buffer[offset++] = cast(char)('0' + digit);
+                        hitNonZero = true;
+                    }
+
+                    temp = quotient;
+                }
+
+                reverse(buffer[1 .. offset]);
+            }
+
+            bool excludeNegative = !this.isNegative;
+
+            if(offset == 1) {
+                offset++;
+                excludeNegative = true;
+            }
+
+            del(cast(char[])buffer[excludeNegative .. offset]);
+        }
     }
 
     static if(BitsPerInteger >= 64) {
@@ -535,41 +578,34 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
 
         ///
         String_UTF8 toString() scope const @trusted {
-            import std.algorithm : reverse;
+            String_UTF8 ret;
 
-            ubyte[(MaxDigitsPerInteger * storage.length) + 1] buffer = void;
-            buffer[0] = '-';
-            buffer[1] = '0';
+            toStringImpl((buffer) {
+                ret = String_UTF8(buffer).dup;
+            });
 
-            size_t offset = 1;
+            return ret;
+        }
 
-            {
-                BigInteger temp = this;
-                BigInteger div = BigInteger(10);
+        ///
+        void toString(scope ref StringBuilder_UTF8 builder) scope const {
+            toStringImpl((buffer) {
+                builder ~= String_UTF8(buffer);
+            });
+        }
 
-                while(temp != 0) {
-                    BigInteger quotient, modulas;
-                    bool overflow;
-                    cast(void)unsignedDivide(quotient.storage[], modulas.storage[], temp.storage[], div.storage[], overflow);
+        ///
+        void toString(scope ref StringBuilder_UTF16 builder) scope const {
+            toStringImpl((buffer) {
+                builder ~= String_UTF8(buffer);
+            });
+        }
 
-                    const digit = modulas.storage[0] & 0xFF;
-                    assert(digit < 10);
-                    buffer[offset++] = cast(char)('0' + digit);
-
-                    temp = quotient;
-                }
-
-                reverse(buffer[1 .. offset]);
-            }
-
-            bool excludeNegative = !this.isNegative;
-
-            if(offset == 1) {
-                offset++;
-                excludeNegative = true;
-            }
-
-            return String_UTF8(cast(char[])buffer[excludeNegative .. offset]).dup;
+        ///
+        void toString(scope ref StringBuilder_UTF32 builder) scope const {
+            toStringImpl((buffer) {
+                builder ~= String_UTF8(buffer);
+            });
         }
 
         ///
