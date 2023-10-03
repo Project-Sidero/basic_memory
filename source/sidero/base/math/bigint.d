@@ -154,7 +154,7 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
                     const digit = modulas.storage[0] & 0xFF;
                     assert(digit < 10);
 
-                    if (digit != 0 || hitNonZero) {
+                    if(digit != 0 || hitNonZero) {
                         buffer[offset++] = cast(char)('0' + digit);
                         hitNonZero = true;
                     }
@@ -577,35 +577,27 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
         }
 
         ///
-        String_UTF8 toString() scope const @trusted {
+        String_UTF8 toString() scope const {
             String_UTF8 ret;
 
-            toStringImpl((buffer) {
-                ret = String_UTF8(buffer).dup;
-            });
+            toStringImpl((scope char[] buffer) @trusted { ret = String_UTF8(buffer).dup; });
 
             return ret;
         }
 
         ///
         void toString(scope ref StringBuilder_UTF8 builder) scope const {
-            toStringImpl((buffer) {
-                builder ~= String_UTF8(buffer);
-            });
+            toStringImpl((scope char[] buffer) @trusted { builder ~= String_UTF8(buffer); });
         }
 
         ///
         void toString(scope ref StringBuilder_UTF16 builder) scope const {
-            toStringImpl((buffer) {
-                builder ~= String_UTF8(buffer);
-            });
+            toStringImpl((scope char[] buffer) @trusted { builder ~= String_UTF8(buffer); });
         }
 
         ///
         void toString(scope ref StringBuilder_UTF32 builder) scope const {
-            toStringImpl((buffer) {
-                builder ~= String_UTF8(buffer);
-            });
+            toStringImpl((scope char[] buffer) @trusted { builder ~= String_UTF8(buffer); });
         }
 
         ///

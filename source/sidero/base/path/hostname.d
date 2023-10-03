@@ -35,6 +35,11 @@ export @safe nothrow @nogc:
     }
 
     ///
+    void opAssign(return scope Hostname other) scope {
+        this.__ctor(other);
+    }
+
+    ///
     StringBuilder_UTF8 decoded() scope {
         import sidero.base.encoding.bootstring;
 

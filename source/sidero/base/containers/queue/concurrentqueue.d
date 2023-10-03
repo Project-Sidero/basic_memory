@@ -85,11 +85,11 @@ export @safe nothrow @nogc:
     }
 
     ///
-    void push(scope return Type value) scope @trusted {
+    void push(scope return Type value, bool fiFo = FiFo) scope @trusted {
         checkInit;
 
         state.mutex.pureLock;
-        state.push(value);
+        state.push(fiFo, value);
         state.mutex.unlock;
     }
 
@@ -116,7 +116,7 @@ export @safe nothrow @nogc:
 
         state.mutex.pureLock;
         scope(exit)
-        state.mutex.unlock;
+            state.mutex.unlock;
 
         if(state.head is null)
             return typeof(return)(RangeException("Nothing to pop off of stack"));
@@ -126,7 +126,6 @@ export @safe nothrow @nogc:
     }
 
     @disable auto opCast(T)();
-
 
     ///
     ulong toHash() scope const @trusted {
@@ -224,14 +223,26 @@ export @safe nothrow @nogc:
         tail = null;
     }
 
-    void push(return scope Type value) scope @trusted {
-        head = allocator.make!Node(null, head);
-        head.value = value;
+    void push(bool fiFo, return scope Type value) scope @trusted {
+        Node* node;
 
-        if(tail is null)
-            tail = head;
-        else if(head.next !is null)
-            head.next.previous = head;
+        if(fiFo) {
+            node = allocator.make!Node(null, head, value);
+            head = node;
+
+            if(tail is null)
+                tail = head;
+            else if(head.next !is null)
+                head.next.previous = head;
+        } else {
+            node = allocator.make!Node(tail, null, value);
+            tail = node;
+
+            if(head is null)
+                head = tail;
+            else if(tail.previous !is null)
+                tail.previous.next = tail;
+        }
 
         count++;
     }
