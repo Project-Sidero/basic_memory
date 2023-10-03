@@ -190,10 +190,16 @@ export @safe nothrow @nogc:
     void handleFunctionPointer(Type)(scope StringBuilder_UTF8 builder, scope ref Type input) {
         builder ~= Type.stringof;
 
-        if(input is null)
+        if(input is null) {
             builder ~= "@null"c;
-        else
+            return;
+        }
+
+        static if (is(Type == function)) {
             builder.formattedWrite("@{:p}"c, cast(void*)input);
+        } else static if (is(Type == delegate)) {
+            builder.formattedWrite("@(ptr={:p}, funcptr={:p})"c, input.ptr, input.funcptr);
+        }
     }
 
     void handlePointer(Type)(scope StringBuilder_UTF8 builder, scope ref Type input) {
