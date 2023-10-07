@@ -68,7 +68,7 @@ scope nothrow @nogc @safe:
 
         /// Will verify that you checked
         ref Type get(string moduleName = __MODULE__, int line = __LINE__) return @trusted {
-            logAssert(error__.checked, "You forgot to check if value had an error. assert(thing, thing.error.toString());",
+            logAssert(error__.checked, "You forgot to check if value had an error for " ~ Type.stringof ~ ". assert(thing, thing.error.toString());",
                     this.error__, moduleName, line);
             logAssert(!error__.isSet(), null, this.error__, moduleName, line);
             return value;
@@ -147,7 +147,7 @@ scope nothrow @nogc @safe:
 
     ///
     bool isNull(string moduleName = __MODULE__, int line = __LINE__) @trusted {
-        logAssert(error__.checked, "You forgot to check if value had an error. assert(thing, thing.error.toString());",
+        logAssert(error__.checked, "You forgot to check if value had an error for " ~ Type.stringof ~ ". assert(thing, thing.error.toString());",
                 this.error__, moduleName, line);
         logAssert(!error__.isSet(), null, this.error__, moduleName, line);
 
@@ -368,7 +368,7 @@ scope nothrow @nogc @safe:
 
     ///
     bool isNull(string moduleName = __MODULE__, int line = __LINE__) @trusted const {
-        logAssert(error__.checked, "You forgot to check if value had an error. assert(thing, thing.error.toString());",
+        logAssert(error__.checked, "You forgot to check if value had an error for " ~ Type.stringof ~ ". assert(thing, thing.error.toString());",
                 this.error__, moduleName, line);
         logAssert(!error__.isSet(), null, this.error__, moduleName, line);
 
@@ -383,7 +383,7 @@ scope nothrow @nogc @safe:
 
     /// Will verify that you checked
     ref Type get(string moduleName = __MODULE__, int line = __LINE__) return @trusted {
-        logAssert(error__.checked, "You forgot to check if value had an error. assert(thing, thing.error.toString());",
+        logAssert(error__.checked, "You forgot to check if value had an error for " ~ Type.stringof ~ ". assert(thing, thing.error.toString());",
                 this.error__, moduleName, line);
         logAssert(!error__.isSet(), null, this.error__, moduleName, line);
         assert(_value !is null);

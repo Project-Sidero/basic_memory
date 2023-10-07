@@ -15,7 +15,32 @@ struct DuplicateHashMap(RealKeyType, ValueType) {
     /// If key type supports asReadOnly it is used instead of RealKeyType internally.
     alias KeyType = typeof(state).KeyType;
 
+    private {
+        int opApplyImpl(Del)(scope Del del) scope @trusted {
+            if(isNull)
+                return 0;
+
+            int result;
+
+            foreach(ref bucket; state.nodeList.buckets) {
+                auto kn = bucket.head.next;
+
+                while(kn !is null) {
+                    result = del(kn.key);
+                    if (result)
+                        return result;
+                    kn = kn.next;
+                }
+            }
+
+            return result;
+        }
+    }
+
 export:
+
+    ///
+    mixin OpApplyCombos!("KeyType", null, ["@safe", "nothrow", "@nogc"]);
 
 @safe nothrow @nogc:
 

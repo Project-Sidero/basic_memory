@@ -442,20 +442,20 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
     }
 
     void rcNodeExternal(bool addRef, scope Node* node) scope {
-        /+mutex.pureLock;
+        mutex.pureLock;
 
-        if (node !is null) {
-            if (addRef)
+        if(node !is null) {
+            if(addRef)
                 node.onIteratorIn;
             else
                 node.onIteratorOut;
 
-            if (node.refCount == 0 && (node.isDeleted || !this.keepNoExternalReferences))
+            if(node.refCount == 0 && (node.isDeleted || !this.keepNoExternalReferences))
                 nodeList.removeNode(node);
         }
 
-        if (rcInternal(addRef, null))
-            mutex.unlock;+/
+        if(rcInternal(addRef, null))
+            mutex.unlock;
     }
 
     Iterator* createIteratorExternal() scope @trusted {
@@ -648,14 +648,14 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
     // \/ internal
 
     bool rcInternal(bool addRef, scope Iterator* iterator) scope @trusted {
-        /+if (addRef) {
+        if(addRef) {
             nodeList.refCount++;
-            if (iterator !is null)
+            if(iterator !is null)
                 iterator.rc(true, nodeList, iteratorList);
-        } else if (nodeList.refCount == 1) {
+        } else if(nodeList.refCount == 1) {
             this.clearAllInternal;
 
-            if (iterator !is null)
+            if(iterator !is null)
                 iterator.rc(false, nodeList, iteratorList);
 
             assert(iteratorList.head is null);
@@ -666,9 +666,9 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
             return false;
         } else {
             nodeList.refCount--;
-            if (iterator !is null)
+            if(iterator !is null)
                 iterator.rc(false, nodeList, iteratorList);
-        }+/
+        }
 
         return true;
     }
