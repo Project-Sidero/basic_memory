@@ -12,20 +12,20 @@ version(DigitalMars) {
     alias atomicFence = coreatomic.atomicFence;
 }
 
-static foreach(T; AliasSeq!(bool, ubyte, byte, ushort, short, uint, int, ulong, long, size_t[2], ptrdiff_t[2])) {
+static foreach(T; AliasSeq!(bool, ubyte, byte, ushort, short, uint, int, ulong, long, size_t[2], ptrdiff_t[2], void*)) {
     const(T) atomicLoad(ref return scope const T val) {
         pragma(inline, true);
         return coreatomic.atomicLoad(val);
     }
 
-    const(T) atomicLoad(ref return scope const shared T val) {
+    const(T) atomicLoad(ref return scope const shared T val) @trusted {
         pragma(inline, true);
-        return coreatomic.atomicLoad(val);
+        return cast(const(T))coreatomic.atomicLoad(val);
     }
 
-    void atomicStore(ref shared T val, T newval) {
+    void atomicStore(ref shared T val, T newval) @trusted {
         pragma(inline, true);
-        coreatomic.atomicStore(val, newval);
+        coreatomic.atomicStore(val, cast(shared)newval);
     }
 
     bool cas(ref shared T here, shared T ifThis, shared T writeThis) @trusted {
@@ -33,7 +33,7 @@ static foreach(T; AliasSeq!(bool, ubyte, byte, ushort, short, uint, int, ulong, 
         return coreatomic.cas!(coreatomic.MemoryOrder.seq, coreatomic.MemoryOrder.seq)(&here, ifThis, writeThis);
     }
 
-    static if(!(is(T == bool) || is(T == size_t[2]) || is(T == ptrdiff_t[2]))) {
+    static if(!(is(T == bool) || is(T == size_t[2]) || is(T == ptrdiff_t[2]) || is(T == void*))) {
         T atomicIncrementAndLoad(ref shared T here, T newval) {
             pragma(inline, true);
             return coreatomic.atomicOp!"+="(here, newval);

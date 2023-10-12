@@ -1,5 +1,6 @@
 ///
 module sidero.base.typecons;
+import sidero.base.attributes;
 
 version(SideroBase_OnlyUnderTheHood) {
 } else {
@@ -10,7 +11,7 @@ export:
 
 /// Similar to std.typecons : Nullable except -betterC compatible
 struct Optional(T) {
-    private {
+    private @PrintIgnore {
         T value;
         bool isSet;
     }
@@ -102,7 +103,7 @@ export @safe nothrow @nogc:
             if (!this.isSet)
                 sink ~= "not-set"c;
             else
-                sink.formattedWrite("{:s}", (cast(Optional*)&this).value);
+                sink.formattedWrite("{:}", (cast(Optional*)&this).value);
         }
 
         static if (__traits(hasMember, T, "toStringPretty")) {

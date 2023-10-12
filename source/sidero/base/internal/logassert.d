@@ -3,6 +3,11 @@ import sidero.base.errors.message;
 
 export @safe nothrow @nogc:
 
+void logAssert(bool condition, scope string message, string moduleName = __MODULE__, int line = __LINE__) @trusted {
+    ErrorInfo errorInfo;
+    logAssert(condition, message, errorInfo, moduleName, line);
+}
+
 void logAssert(bool condition, scope string message, scope ref const ErrorInfo errorInfo, string moduleName = __MODULE__, int line = __LINE__) @trusted {
     import core.stdc.stdio : fprintf;
     import core.stdc.stdlib : exit;

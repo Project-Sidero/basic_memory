@@ -97,6 +97,16 @@ export @safe nothrow @nogc:
     mixin DateType.DateWrapper!();
 
     ///
+    uint nanoSecond() scope const {
+        return this.time_.nanoSecond();
+    }
+
+    ///
+    uint milliSecond() scope const {
+        return this.time_.milliSecond();
+    }
+
+    ///
     uint microSecond() scope const {
         return this.time_.microSecond();
     }

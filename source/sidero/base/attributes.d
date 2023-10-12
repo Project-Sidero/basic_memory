@@ -10,10 +10,10 @@ version(LDC) {
 
 public import core.attribute : mustuse;
 
-/// Disables printing of field except for pretty printing.
+/// Disables printing of field for formattedWrite only.
 struct PrintIgnore {
 }
 
-/// Disables printing of field for formattedWrite only.
+/// Disables printing of a field completely.
 struct PrettyPrintIgnore {
 }

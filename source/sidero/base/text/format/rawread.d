@@ -380,9 +380,10 @@ bool readIntegral(Input, Output)(scope ref Input input, scope ref Output output,
     }
 
     {
+        int digitCount = format.precision;
         bool doneOne;
 
-        Loop: while(!inputTemp.empty) {
+        Loop: while(!inputTemp.empty && digitCount > 0) {
             auto c = inputTemp.front;
             uint digit;
 
@@ -407,6 +408,7 @@ bool readIntegral(Input, Output)(scope ref Input input, scope ref Output output,
             output += digit;
             inputTemp.popFront;
             doneOne = true;
+            digitCount--;
         }
 
         if(!doneOne)
