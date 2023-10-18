@@ -54,6 +54,13 @@ ErrorResult loadLibCrypto(scope FilePath filePath = FilePath.init) @trusted {
                 handled = attempt(filePathP.get);
             else
                 ret = ErrorResult(filePathP.getError());
+        } else version(OSX) {
+            auto filePathP = FilePath.from("libcrypto.dylib");
+
+            if(filePathP)
+                handled = attempt(filePathP.get);
+            else
+                ret = ErrorResult(filePathP.getError());
         } else version(Posix) {
             auto filePathP = FilePath.from("libcrypto.so");
 

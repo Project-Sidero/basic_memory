@@ -92,6 +92,9 @@ alias f_X509_PKEY_free = void function(X509_PKEY* a);
 alias f_X509_INFO_free = void function(X509_INFO* a);
 
 ///
+alias sk_X509_compfunc = int function(const X509* *a, const X509 * *b);
+
+///
 int sk_X509_INFO_num(const STACK_OF!X509_INFO* sk) {
     pragma(inline, true);
     return OPENSSL_sk_num(cast(const OPENSSL_STACK*)sk);
@@ -107,6 +110,30 @@ X509_INFO* sk_X509_INFO_value(const STACK_OF!X509_INFO* sk, int idx) {
 void sk_X509_INFO_pop_free(STACK_OF!X509_INFO* sk, f_OPENSSL_sk_pop_free_freefunc freefunc) {
     pragma(inline, true);
     OPENSSL_sk_pop_free(cast(stack_st*)sk, freefunc);
+}
+
+///
+int sk_X509_num(const STACK_OF!X509* sk) {
+    pragma(inline, true);
+    return OPENSSL_sk_num(cast(const OPENSSL_STACK*)sk);
+}
+
+///
+STACK_OF!X509* sk_X509_new(sk_X509_compfunc compare) {
+    pragma(inline, true);
+    return cast(STACK_OF!X509*)OPENSSL_sk_new(cast(OPENSSL_sk_compfunc)compare);
+}
+
+///
+void sk_X509_pop_free(STACK_OF!X509* sk, f_OPENSSL_sk_pop_free_freefunc freefunc) {
+    pragma(inline, true);
+    OPENSSL_sk_pop_free(cast(stack_st*)sk, freefunc);
+}
+
+///
+void sk_X509_push(STACK_OF!X509* sk, X509* value) {
+    pragma(inline, true);
+    OPENSSL_sk_push(cast(stack_st*)sk, value);
 }
 
 ///

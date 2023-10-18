@@ -1,6 +1,7 @@
 module sidero.base.bindings.openssl.libcrypto.types;
+import core.stdc.config : c_ulong, c_long;
 
-export extern(C) nothrow @nogc:
+export extern (C) nothrow @nogc:
 
 package(sidero.base.bindings.openssl.libcrypto) enum string[] typesFUNCTIONS = [];
 
@@ -49,5 +50,28 @@ struct asn1_object_st;
 alias ASN1_OBJECT = asn1_object_st;
 
 ///
-alias pem_password_cb = extern (C) int function(ubyte* buf, int size, int rwflag, void* userdata);
+struct ssl_st;
+///
+alias SSL = ssl_st;
 
+///
+struct ssl_ctx_st;
+///
+alias SSL_CTX = ssl_ctx_st;
+
+///
+struct buf_mem_st {
+    ///
+    size_t length;
+    ///
+    ubyte* data;
+    ///
+    size_t max;
+    ///
+    c_ulong flags;
+}
+///
+alias BUF_MEM = buf_mem_st;
+
+///
+alias pem_password_cb = extern (C) int function(ubyte* buf, int size, int rwflag, void* userdata);

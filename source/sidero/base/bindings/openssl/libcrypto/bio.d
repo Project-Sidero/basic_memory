@@ -12,6 +12,11 @@ package(sidero.base.bindings.openssl.libcrypto) enum string[] bioFUNCTIONS = [
 enum {
     ///
     BIO_CTRL_INFO = 3,
+    ///
+    BIO_C_GET_BUF_MEM_PTR = 115,
+
+    ///
+    BIO_FLAGS_MEM_RDONLY = 0x200,
 }
 
 ///
@@ -34,6 +39,12 @@ alias f_BIO_ctrl = long function(BIO* bp, int cmd, c_long larg, void* parg);
 c_ulong BIO_get_mem_data(BIO* bp, ref ubyte* data) {
     pragma(inline, true);
     return cast(c_ulong)BIO_ctrl(bp, BIO_CTRL_INFO, 0, cast(void*)&data);
+}
+
+///
+c_ulong BIO_get_mem_ptr(BIO* bp, ref BUF_MEM* data) {
+    pragma(inline, true);
+    return cast(c_ulong)BIO_ctrl(bp, BIO_C_GET_BUF_MEM_PTR, 0, cast(void*)&data);
 }
 
 ///
