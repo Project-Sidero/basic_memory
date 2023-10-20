@@ -702,6 +702,10 @@ private:
             if(actualLength < -a)
                 return ErrorInfo(RangeException("First offset must be smaller than length"));
             a = actualLength + a;
+        } else if (a > actualLength) {
+            if(a < ptrdiff_t.max)
+                return ErrorInfo(RangeException("First offset must be smaller than length"));
+            a = actualLength;
         }
 
         return ErrorInfo.init;
@@ -714,12 +718,20 @@ private:
             if(actualLength < -a)
                 return ErrorInfo(RangeException("First offset must be smaller than length"));
             a = actualLength + a;
+        } else if (a > actualLength) {
+            if(a < ptrdiff_t.max)
+                return ErrorInfo(RangeException("First offset must be smaller than length"));
+            a = actualLength;
         }
 
         if(b < 0) {
             if(actualLength < -b)
                 return ErrorInfo(RangeException("Second offset must be smaller than length"));
             b = actualLength + b;
+        } else if (b > actualLength) {
+            if(b < ptrdiff_t.max)
+                return ErrorInfo(RangeException("Second offset must be smaller than length"));
+            b = actualLength;
         }
 
         if(b < a) {

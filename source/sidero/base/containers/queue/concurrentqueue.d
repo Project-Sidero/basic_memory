@@ -153,6 +153,17 @@ export @safe nothrow @nogc:
             return 0;
     }
 
+    version(none) {
+        void debugMe() scope {
+            import sidero.base.console;
+
+            if (isNull)
+                writeln("Queue is null");
+            else
+                this.state.debugMe();
+        }
+    }
+
 private:
 
     void checkInit() scope @trusted {
@@ -211,6 +222,22 @@ struct State(Type) {
     size_t count;
 
 export @safe nothrow @nogc:
+
+    void debugMe() {
+        import sidero.base.console;
+        Node* node = head;
+
+        writeln("\\/");
+
+        while(node !is null) {
+
+            debugWriteln(node.value);
+
+            node = node.next;
+        }
+
+        writeln("/\\");
+    }
 
     void clear() scope @trusted {
         while(head !is null) {

@@ -119,9 +119,9 @@ int sk_X509_num(const STACK_OF!X509* sk) {
 }
 
 ///
-STACK_OF!X509* sk_X509_new(sk_X509_compfunc compare) {
+STACK_OF!X509* sk_X509_new_reserve(sk_X509_compfunc compare, int n) {
     pragma(inline, true);
-    return cast(STACK_OF!X509*)OPENSSL_sk_new(cast(OPENSSL_sk_compfunc)compare);
+    return cast(STACK_OF!X509*)OPENSSL_sk_new_reserve(cast(OPENSSL_sk_compfunc)compare, n);
 }
 
 ///

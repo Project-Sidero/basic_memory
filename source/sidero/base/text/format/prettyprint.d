@@ -645,7 +645,7 @@ export @safe nothrow @nogc:
         static if(__traits(compiles, fullyQualifiedName!SubType)) {
             enum EntryName = fullyQualifiedName!SubType;
         } else
-            enum EntryName = __traits(identifier, SubType);
+            enum EntryName = SubType.stringof;
 
         bool handled;
 

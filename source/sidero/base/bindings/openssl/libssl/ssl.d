@@ -4,7 +4,8 @@ import sidero.base.bindings.openssl.libcrypto;
 export extern (C) nothrow @nogc:
 package(sidero.base.bindings.openssl.libssl) enum string[] sslFUNCTIONS = [
     "SSL_get_error", "SSL_CTX_new", "SSL_CTX_free", "SSL_CTX_set_options", "TLS_method", "SSL_new", "SSL_free",
-    "SSL_set_bio", "SSL_set_connect_state", "SSL_set_accept_state", "SSL_use_cert_and_key", "SSL_write_ex", "SSL_read_ex"
+    "SSL_set_bio", "SSL_set0_rbio", "SSL_set0_wbio", "SSL_set_connect_state", "SSL_set_accept_state", "SSL_use_cert_and_key",
+    "SSL_write_ex", "SSL_read_ex", "SSL_do_handshake"
 ];
 
 enum {
@@ -84,6 +85,11 @@ alias f_SSL_free = void function(SSL* ssl);
 ///
 alias f_SSL_set_bio = void function(SSL* s, BIO* rbio, BIO* wbio);
 ///
+alias f_SSL_set0_rbio = void function(SSL* s, BIO* rbio);
+///
+alias f_SSL_set0_wbio = void function(SSL* s, BIO* wbio);
+
+///
 alias f_SSL_set_connect_state = void function(SSL* s);
 ///
 alias f_SSL_set_accept_state = void function(SSL* s);
@@ -94,6 +100,9 @@ alias f_SSL_use_cert_and_key = int function(SSL* ssl, X509* x509, EVP_PKEY* priv
 alias f_SSL_write_ex = int function(SSL* s, const void* buf, size_t num, size_t* written);
 ///
 alias f_SSL_read_ex = int function(SSL* ssl, void* buf, size_t num, size_t* readbytes);
+
+///
+alias f_SSL_do_handshake = int function(SSL* s);
 
 __gshared {
     ///
@@ -117,6 +126,9 @@ __gshared {
     ///
     f_SSL_set_bio SSL_set_bio;
     ///
+    f_SSL_set0_rbio SSL_set0_rbio;
+
+    ///
     f_SSL_set_connect_state SSL_set_connect_state;
     ///
     f_SSL_set_accept_state SSL_set_accept_state;
@@ -127,4 +139,9 @@ __gshared {
     f_SSL_write_ex SSL_write_ex;
     ///
     f_SSL_read_ex SSL_read_ex;
+    ///
+    f_SSL_set0_wbio SSL_set0_wbio;
+
+    ///
+    f_SSL_do_handshake SSL_do_handshake;
 }
