@@ -1,11 +1,12 @@
 module sidero.base.bindings.openssl.libssl.ssl;
 import sidero.base.bindings.openssl.libcrypto;
+import core.stdc.config : c_ulong, c_long;
 
 export extern (C) nothrow @nogc:
 package(sidero.base.bindings.openssl.libssl) enum string[] sslFUNCTIONS = [
     "SSL_get_error", "SSL_CTX_new", "SSL_CTX_free", "SSL_CTX_set_options", "TLS_method", "SSL_new", "SSL_free",
-    "SSL_set_bio", "SSL_set0_rbio", "SSL_set0_wbio", "SSL_set_connect_state", "SSL_set_accept_state", "SSL_use_cert_and_key",
-    "SSL_write_ex", "SSL_read_ex", "SSL_do_handshake"
+    "SSL_set_bio", "SSL_set0_rbio", "SSL_set0_wbio", "SSL_set_connect_state", "SSL_set_accept_state",
+    "SSL_use_cert_and_key", "SSL_set_verify", "SSL_write_ex", "SSL_read_ex", "SSL_do_handshake", "SSL_ctrl"
 ];
 
 enum {
@@ -35,6 +36,20 @@ enum {
     SSL_ERROR_WANT_CLIENT_HELLO_CB = 11,
     ///
     SSL_ERROR_WANT_RETRY_VERIFY = 12,
+
+    ///
+    SSL_CTRL_SET_TLSEXT_HOSTNAME = 55,
+
+    ///
+    SSL_VERIFY_NONE = 0x00,
+    ///
+    SSL_VERIFY_PEER = 0x01,
+    ///
+    SSL_VERIFY_FAIL_IF_NO_PEER_CERT = 0x02,
+    ///
+    SSL_VERIFY_CLIENT_ONCE = 0x04,
+    ///
+    SSL_VERIFY_POST_HANDSHAKE = 0x08,
 }
 
 ///
@@ -46,6 +61,9 @@ alias SSL_METHOD = ssl_method_st;
 struct ssl_session_st;
 ///
 alias SSL_SESSION = ssl_session_st;
+
+///
+alias SSL_verify_cb = int function(int preverify_ok, X509_STORE_CTX* x509_ctx);
 
 enum {
     ///
@@ -95,6 +113,8 @@ alias f_SSL_set_connect_state = void function(SSL* s);
 alias f_SSL_set_accept_state = void function(SSL* s);
 ///
 alias f_SSL_use_cert_and_key = int function(SSL* ssl, X509* x509, EVP_PKEY* privatekey, STACK_OF!X509* chain, int override_);
+//
+alias f_SSL_set_verify = void function(SSL* s, int mode, SSL_verify_cb callback);
 
 ///
 alias f_SSL_write_ex = int function(SSL* s, const void* buf, size_t num, size_t* written);
@@ -103,6 +123,9 @@ alias f_SSL_read_ex = int function(SSL* ssl, void* buf, size_t num, size_t* read
 
 ///
 alias f_SSL_do_handshake = int function(SSL* s);
+
+///
+alias f_SSL_ctrl = c_long function(SSL* ssl, int cmd, c_long larg, void* parg);
 
 __gshared {
     ///
@@ -134,6 +157,8 @@ __gshared {
     f_SSL_set_accept_state SSL_set_accept_state;
     ///
     f_SSL_use_cert_and_key SSL_use_cert_and_key;
+    ///
+    f_SSL_set_verify SSL_set_verify;
 
     ///
     f_SSL_write_ex SSL_write_ex;
@@ -144,4 +169,7 @@ __gshared {
 
     ///
     f_SSL_do_handshake SSL_do_handshake;
+
+    ///
+    f_SSL_ctrl SSL_ctrl;
 }

@@ -1,5 +1,6 @@
 module sidero.base.bindings.openssl.libssl;
 public import sidero.base.bindings.openssl.libssl.ssl;
+public import sidero.base.bindings.openssl.libssl.tls1;
 import sidero.base.bindings.symbolloader;
 import sidero.base.path.file;
 import sidero.base.errors;
@@ -87,4 +88,4 @@ private pragma(crt_destructor) extern (C) void deinitializeLibSSLAutomatically()
 
 private:
 
-static immutable AllFunctions = sslFUNCTIONS;
+static immutable AllFunctions = sslFUNCTIONS ~ tls1FUNCTIONS;

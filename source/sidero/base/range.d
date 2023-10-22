@@ -26,6 +26,8 @@ enum bool isForwardRange(R) = isInputRange!R && is(typeof((R r) { return r.save;
 /// Ditto
 enum bool isBidirectionalRange(R) = isForwardRange!R && is(typeof((R r) => r.popBack)) &&
     (is(typeof((return ref R r) => r.back)) || is(typeof(ref(return ref R r) => r.back))) && is(typeof(R.init.back.init) == ElementType!R);
+/// Ditto
+enum bool isOutputRange(R, E) = is(typeof(put(lvalueOf!R, lvalueOf!E)));
 
 /// Ditto
 @property bool empty(T)(auto ref scope T a) if (is(typeof(a.length) : size_t)) {

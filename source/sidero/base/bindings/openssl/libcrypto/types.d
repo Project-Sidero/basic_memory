@@ -60,6 +60,16 @@ struct ssl_ctx_st;
 alias SSL_CTX = ssl_ctx_st;
 
 ///
+struct x509_store_st;
+///
+alias X509_STORE = x509_store_st;
+
+///
+struct x509_store_ctx_st;
+///
+alias X509_STORE_CTX = x509_store_ctx_st;
+
+///
 struct buf_mem_st {
     ///
     size_t length;
