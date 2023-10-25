@@ -99,7 +99,7 @@ export @system nothrow @nogc:
             scope(exit)
                 mutex.unlock;
 
-            String_UTF8 filename = filePath.toStringUTF();
+            String_UTF8 filename = filePath.toString();
             atomicStore(this.binary, dlopen(filename.ptr, RTLD_GLOBAL | RTLD_NOW));
 
             if(isLoaded && loadSymbolsDel !is null)
