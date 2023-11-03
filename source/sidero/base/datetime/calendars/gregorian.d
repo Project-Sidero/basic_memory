@@ -127,6 +127,11 @@ export @safe nothrow @nogc:
     ///
     ubyte daysInMonth() scope const {
         static immutable ubyte[12] Count = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+        // not valid
+        if (this.month_ == 0)
+            return 0;
+
         return (isLeapYear() && this.month_ == 2) ? 29 : Count[this.month_ - 1];
     }
 

@@ -113,6 +113,12 @@
             "dflags": [
                 "-preview=dip1000"
             ],
+            "dflags-posix-dmd": [
+                "-allinst"
+            ],
+           "dflags-posix-ldc": [
+                "-allinst"
+            ],
             "lflags-windows": [
                 "/IGNORE:4217",
                 "/FORCE:MULTIPLE"

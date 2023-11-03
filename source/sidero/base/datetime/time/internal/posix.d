@@ -51,7 +51,9 @@ String_UTF8 getPosixLocalTimeZone() @trusted {
         {
             // /etc/timezone
             // read first line, strip, return
-            auto read = readFile!char(FilePath.from("/etc/timezone\0"), tzFileSize[0]);
+            auto toRead = FilePath.from("/etc/timezone\0");
+            assert(toRead);
+            auto read = readFile!char(toRead, tzFileSize[0]);
 
             if(read.length > 0) {
                 tzFileSize[0] = read.length;
