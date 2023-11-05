@@ -78,6 +78,7 @@ export:
             allocator = globalAllocator();
 
         state = allocator.make!(ConcurrentHashMapImpl!(RealKeyType, ValueType))(allocator, valueAllocator);
+        assert(state !is null);
     }
 
     ///

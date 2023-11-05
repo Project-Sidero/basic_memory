@@ -301,11 +301,6 @@ export:
     }
 
     ///
-    auto toHash() scope const {
-        return this.name_.toHash();
-    }
-
-    ///
     static LoggerReference forName(return scope String_UTF8 name, return scope RCAllocator allocator = RCAllocator.init) @trusted {
         if(name.length == 0)
             return typeof(return)(MalformedInputException("Name must not be empty"));
@@ -436,6 +431,22 @@ export:
         message!(moduleName, line)(LogLevel.Fatal, args);
         mutex.unlock;
     }
+
+    ///
+    bool opEquals(Logger other) const {
+        return this.name_ == other.name_;
+    }
+
+    ///
+    int opCmp(Logger other) const {
+        return this.name_.opCmp(other.name_);
+    }
+
+    ///
+    ulong toHash() const {
+        return this.name_.toHash();
+    }
+
 
     /*private:*/
     void message(string moduleName, int line, Args...)(LogLevel level, Args args) scope {

@@ -119,7 +119,7 @@ struct GCAllocatorLock(PoolAllocator) {
     ///
     PoolAllocator poolAllocator;
 
-    private AllocatedTree!(Mallocator) allocatedTree;
+    private AllocatedTree!() allocatedTree;
 
     ///
     enum NeedsLocking = false;
@@ -199,6 +199,8 @@ pure:
 
     ///
     bool deallocate(scope void[] array) {
+        import sidero.base.internal.logassert;
+
         if(array is null)
             return false;
 
@@ -210,8 +212,8 @@ pure:
         if(trueArray is null)
             return false;
 
-        assert(trueArray.ptr is array.ptr);
-        assert(trueArray.length >= array.length);
+        logAssert(trueArray.ptr <= array.ptr, null);
+        logAssert(trueArray.length >= array.length, null);
 
         const got = poolAllocator.deallocate(trueArray);
 
