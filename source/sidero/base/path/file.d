@@ -310,120 +310,132 @@ export @safe nothrow @nogc:
 
     /// Ditto
     FilePath opBinary(string op : "~")(scope String_UTF8.LiteralType input) scope return {
-        ErrorResult error = this ~= input;
+        FilePath ret = this.dup;
+        ErrorResult error = ret ~= input;
 
         if(error)
-            return this;
+            return ret;
         else
             return FilePath.init;
     }
 
     /// Ditto
     FilePath opBinary(string op : "~")(scope String_UTF16.LiteralType input) scope return {
-        ErrorResult error = this ~= input;
+        FilePath ret = this.dup;
+        ErrorResult error = ret ~= input;
 
         if(error)
-            return this;
+            return ret;
         else
             return FilePath.init;
     }
 
     /// Ditto
     FilePath opBinary(string op : "~")(scope String_UTF32.LiteralType input) scope return {
-        ErrorResult error = this ~= input;
+        FilePath ret = this.dup;
+        ErrorResult error = ret ~= input;
 
         if(error)
-            return this;
+            return ret;
         else
             return FilePath.init;
     }
 
     /// Ditto
     FilePath opBinary(string op : "~")(scope String_ASCII input) scope return {
-        ErrorResult error = this ~= input;
+        FilePath ret = this.dup;
+        ErrorResult error = ret ~= input;
 
         if(error)
-            return this;
+            return ret;
         else
             return FilePath.init;
     }
 
     /// Ditto
     FilePath opBinary(string op : "~")(scope String_UTF8 input) scope return {
-        ErrorResult error = this ~= input;
+        FilePath ret = this.dup;
+        ErrorResult error = ret ~= input;
 
         if(error)
-            return this;
+            return ret;
         else
             return FilePath.init;
     }
 
     /// Ditto
     FilePath opBinary(string op : "~")(scope String_UTF16 input) scope return {
-        ErrorResult error = this ~= input;
+        FilePath ret = this.dup;
+        ErrorResult error = ret ~= input;
 
         if(error)
-            return this;
+            return ret;
         else
             return FilePath.init;
     }
 
     /// Ditto
     FilePath opBinary(string op : "~")(scope String_UTF32 input) scope return {
-        ErrorResult error = this ~= input;
+        FilePath ret = this.dup;
+        ErrorResult error = ret ~= input;
 
         if(error)
-            return this;
+            return ret;
         else
             return FilePath.init;
     }
 
     /// Ditto
     FilePath opBinary(string op : "~")(scope StringBuilder_ASCII input) scope return {
-        ErrorResult error = this ~= input;
+        FilePath ret = this.dup;
+        ErrorResult error = ret ~= input;
 
         if(error)
-            return this;
+            return ret;
         else
             return FilePath.init;
     }
 
     /// Ditto
     FilePath opBinary(string op : "~")(scope StringBuilder_UTF8 input) scope return {
-        ErrorResult error = this ~= input;
+        FilePath ret = this.dup;
+        ErrorResult error = ret ~= input;
 
         if(error)
-            return this;
+            return ret;
         else
             return FilePath.init;
     }
 
     /// Ditto
     FilePath opBinary(string op : "~")(scope StringBuilder_UTF16 input) scope return {
-        ErrorResult error = this ~= input;
+        FilePath ret = this.dup;
+        ErrorResult error = ret ~= input;
 
         if(error)
-            return this;
+            return ret;
         else
             return FilePath.init;
     }
 
     /// Ditto
     FilePath opBinary(string op : "~")(scope StringBuilder_UTF32 input) scope return {
-        ErrorResult error = this ~= input;
+        FilePath ret = this.dup;
+        ErrorResult error = ret ~= input;
 
         if(error)
-            return this;
+            return ret;
         else
             return FilePath.init;
     }
 
     /// Ditto
     FilePath opBinary(string op : "~")(scope DynamicArray!String_UTF8 input) scope return {
-        ErrorResult error = this ~= input;
+        FilePath ret = this.dup;
+        ErrorResult error = ret ~= input;
 
         if(error)
-            return this;
+            return ret;
         else
             return FilePath.init;
     }

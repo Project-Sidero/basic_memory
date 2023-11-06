@@ -359,6 +359,8 @@ scope nothrow @nogc:
         ErrorInfo errorInfo = changeIndexToOffset(index);
         if(errorInfo.isSet)
             return typeof(return)(errorInfo);
+        else if ((maximumOffset == size_t.max && minimumOffset + index >= this.state.amountUsed) || index >= maximumOffset)
+            return Result!ElementType(RangeException("Offset out of bounds"));
 
         return Result!ElementType(this.state.slice[minimumOffset + index]);
     }
@@ -808,9 +810,12 @@ private:
 
         if(a < 0) {
             if(actualLength < -a)
-                return ErrorInfo(RangeException("First offset must be smaller than length"));
+                return ErrorInfo(RangeException("First index must be smaller than length"));
             a = actualLength + a;
         }
+
+        if(a > actualLength)
+            return ErrorInfo(RangeException("First offset must be smaller than length"));
 
         return ErrorInfo.init;
     }
@@ -820,13 +825,13 @@ private:
 
         if(a < 0) {
             if(actualLength < -a)
-                return ErrorInfo(RangeException("First offset must be smaller than length"));
+                return ErrorInfo(RangeException("First index must be smaller than length"));
             a = actualLength + a;
         }
 
         if(b < 0) {
             if(actualLength < -b)
-                return ErrorInfo(RangeException("Second offset must be smaller than length"));
+                return ErrorInfo(RangeException("Second index must be smaller than length"));
             b = actualLength + b;
         }
 
@@ -837,9 +842,9 @@ private:
         }
 
         if(a > actualLength)
-            a = actualLength;
+            return ErrorInfo(RangeException("First offset must be smaller than length"));
         if(b > actualLength)
-            b = actualLength;
+            return ErrorInfo(RangeException("Second offset must be smaller than length"));
 
         return ErrorInfo.init;
     }
