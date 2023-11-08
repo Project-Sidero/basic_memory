@@ -219,6 +219,15 @@ unittest {
     Thing* thing = allocator.make!Thing(4);
     assert(thing !is null);
     assert(thing.x == 4);
+
+    struct Thing2 {
+        int call(int a){
+            return a + 3;
+        }
+    }
+    Thing2* thing2 = allocator.make!Thing2();
+    assert(thing2 !is null);
+    assert(thing2.call(1) == 4);
 }
 
 ///
@@ -263,16 +272,24 @@ unittest {
     assert(got[1].length == 4);
 }
 
+template stateSize(T)
+{
+    import std.traits : Fields,isNested;
+    static if (is(T == class) || is(T == interface))
+        enum stateSize = __traits(classInstanceSize, T);
+    else static if (is(T == struct) || is(T == union))
+        enum stateSize = Fields!T.length || isNested!T ? T.sizeof : 0;
+    else static if (is(T == void))
+        enum size_t stateSize = 0;
+    else
+        enum stateSize = T.sizeof;
+}
+
 /// A subset of the std.experimental.allocator one, as that one can use exceptions.
 auto make(T, Allocator, Args...)(scope auto ref Allocator alloc, return scope auto ref Args args) @trusted {
     import core.lifetime : emplace;
-
-    size_t sizeToAllocate = T.sizeof;
-
-    static if(is(T == class)) {
-        sizeToAllocate = __traits(classInstanceSize, T);
-    }
-
+    size_t sizeToAllocate = stateSize!T;
+    if(sizeToAllocate == 0) sizeToAllocate = 1;
     version(D_BetterC) {
         void[] array = alloc.allocate(sizeToAllocate);
     } else {
@@ -289,34 +306,16 @@ auto make(T, Allocator, Args...)(scope auto ref Allocator alloc, return scope au
         return typeof(ret).init;
     assert(ret !is null);
 
-    static if(is(T == class)) {
-        emplace(&ret);
+    version(D_BetterC) {
+        emplace!T(ret,args);
     } else {
-        emplace(ret);
-    }
-
-    static if(__traits(compiles, { ret.__ctor(args); })) {
-        version(D_BetterC) {
-            ret.__ctor(args);
-        } else {
-            try {
-                ret.__ctor(args);
-            } catch(Exception) {
-                alloc.deallocate(array);
-            }
-        }
-    } else {
-        static if(is(T == class)) {
-            static foreach(i; 0 .. Args.length) {
-                ret.tupleof[i] = args[i];
-            }
-        } else {
-            static foreach(i; 0 .. Args.length) {
-                (*ret).tupleof[i] = args[i];
-            }
+        try {
+            emplace!T(ret,args);
+        } catch(Exception) {
+            alloc.deallocate(array);
+            ret = null;
         }
     }
-
     return ret;
 }
 
@@ -324,19 +323,17 @@ auto make(T, Allocator, Args...)(scope auto ref Allocator alloc, return scope au
 T[] makeArray(T, Allocator)(auto ref Allocator alloc, size_t length) @trusted {
     if(length == 0)
         return null;
-
-    enum MaximumInArray = size_t.max / T.sizeof;
-
-    if(length > MaximumInArray)
-        return null;
-
-    size_t sizeToAllocate = T.sizeof;
-
-    static if(is(T == class)) {
-        sizeToAllocate = __traits(classInstanceSize, T);
+    static if (T.sizeof <= 1)
+    {
+        const sizeToAllocate = length * T.sizeof;
     }
-
-    sizeToAllocate *= length;
+    else
+    {
+        import core.checkedint : mulu;
+        bool overflow;
+        const sizeToAllocate = mulu(length, T.sizeof, overflow);
+        if (overflow) return null;
+    }
 
     version(D_BetterC) {
         void[] array = alloc.allocate(sizeToAllocate);
