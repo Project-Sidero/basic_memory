@@ -219,6 +219,15 @@ unittest {
     Thing* thing = allocator.make!Thing(4);
     assert(thing !is null);
     assert(thing.x == 4);
+
+    struct Thing2 {
+        int call(int a){
+            return a + 3;
+        }
+    }
+    Thing2* thing2 = allocator.make!Thing2();
+    assert(thing2 !is null);
+    assert(thing2.call(1) == 4);
 }
 
 ///
@@ -279,45 +288,35 @@ template stateSize(T)
 /// A subset of the std.experimental.allocator one, as that one can use exceptions.
 auto make(T, Allocator, Args...)(scope auto ref Allocator alloc, return scope auto ref Args args) @trusted {
     import core.lifetime : emplace;
-    
-    static if (!is(T == class) && !is(T == interface) && Args.length == 0
-        && __traits(compiles, {T t;}) && __traits(isZeroInit, T)
-        && is(typeof(alloc.allocateZeroed(size_t.max))))
-    {
-        auto m = alloc.allocate(sizeToAllocate);
-        return cast(T*) m.ptr;
+    size_t sizeToAllocate = stateSize!T;
+    if(sizeToAllocate == 0) sizeToAllocate = 1;
+    version(D_BetterC) {
+        void[] array = alloc.allocate(sizeToAllocate);
+    } else {
+        void[] array = alloc.allocate(sizeToAllocate, typeid(T));
     }
-    else
-    {
-        size_t sizeToAllocate = stateSize!T;
-        if(sizeToAllocate == 0) sizeToAllocate = 1;
-        version(D_BetterC) {
-            void[] array = alloc.allocate(sizeToAllocate);
-        } else {
-            void[] array = alloc.allocate(sizeToAllocate, typeid(T));
-        }
 
-        static if(is(T == class)) {
-            auto ret = cast(T)array.ptr;
-        } else {
-            auto ret = cast(T*)array.ptr;
-        }
-
-        if(array is null)
-            return typeof(ret).init;
-        assert(ret !is null);
-
-        version(D_BetterC) {
-            emplace(ret,args);
-        } else {
-            try {
-                emplace(ret,args);
-            } catch(Exception) {
-                alloc.deallocate(array);
-            }
-        }
-        return ret;
+    static if(is(T == class)) {
+        auto ret = cast(T)array.ptr;
+    } else {
+        auto ret = cast(T*)array.ptr;
     }
+
+    if(array is null)
+        return typeof(ret).init;
+    assert(ret !is null);
+
+    version(D_BetterC) {
+        emplace!T(ret,args);
+    } else {
+        try {
+            emplace!T(ret,args);
+        } catch(Exception) {
+            alloc.deallocate(array);
+            ret = null;
+        }
+    }
+    return ret;
 }
 
 /// Similar to std.experimental.allocator one
