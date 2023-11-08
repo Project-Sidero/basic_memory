@@ -263,80 +263,78 @@ unittest {
     assert(got[1].length == 4);
 }
 
+template stateSize(T)
+{
+    import std.traits : Fields,isNested;
+    static if (is(T == class) || is(T == interface))
+        enum stateSize = __traits(classInstanceSize, T);
+    else static if (is(T == struct) || is(T == union))
+        enum stateSize = Fields!T.length || isNested!T ? T.sizeof : 0;
+    else static if (is(T == void))
+        enum size_t stateSize = 0;
+    else
+        enum stateSize = T.sizeof;
+}
+
 /// A subset of the std.experimental.allocator one, as that one can use exceptions.
 auto make(T, Allocator, Args...)(scope auto ref Allocator alloc, return scope auto ref Args args) @trusted {
     import core.lifetime : emplace;
-
-    size_t sizeToAllocate = T.sizeof;
-
-    static if(is(T == class)) {
-        sizeToAllocate = __traits(classInstanceSize, T);
+    
+    static if (!is(T == class) && !is(T == interface) && Args.length == 0
+        && __traits(compiles, {T t;}) && __traits(isZeroInit, T)
+        && is(typeof(alloc.allocateZeroed(size_t.max))))
+    {
+        auto m = alloc.allocate(sizeToAllocate);
+        return cast(T*) m.ptr;
     }
-
-    version(D_BetterC) {
-        void[] array = alloc.allocate(sizeToAllocate);
-    } else {
-        void[] array = alloc.allocate(sizeToAllocate, typeid(T));
-    }
-
-    static if(is(T == class)) {
-        auto ret = cast(T)array.ptr;
-    } else {
-        auto ret = cast(T*)array.ptr;
-    }
-
-    if(array is null)
-        return typeof(ret).init;
-    assert(ret !is null);
-
-    static if(is(T == class)) {
-        emplace(&ret);
-    } else {
-        emplace(ret);
-    }
-
-    static if(__traits(compiles, { ret.__ctor(args); })) {
+    else
+    {
+        size_t sizeToAllocate = stateSize!T;
+        if(sizeToAllocate == 0) sizeToAllocate = 1;
         version(D_BetterC) {
-            ret.__ctor(args);
+            void[] array = alloc.allocate(sizeToAllocate);
+        } else {
+            void[] array = alloc.allocate(sizeToAllocate, typeid(T));
+        }
+
+        static if(is(T == class)) {
+            auto ret = cast(T)array.ptr;
+        } else {
+            auto ret = cast(T*)array.ptr;
+        }
+
+        if(array is null)
+            return typeof(ret).init;
+        assert(ret !is null);
+
+        version(D_BetterC) {
+            emplace(ret,args);
         } else {
             try {
-                ret.__ctor(args);
+                emplace(ret,args);
             } catch(Exception) {
                 alloc.deallocate(array);
             }
         }
-    } else {
-        static if(is(T == class)) {
-            static foreach(i; 0 .. Args.length) {
-                ret.tupleof[i] = args[i];
-            }
-        } else {
-            static foreach(i; 0 .. Args.length) {
-                (*ret).tupleof[i] = args[i];
-            }
-        }
+        return ret;
     }
-
-    return ret;
 }
 
 /// Similar to std.experimental.allocator one
 T[] makeArray(T, Allocator)(auto ref Allocator alloc, size_t length) @trusted {
     if(length == 0)
         return null;
-
-    enum MaximumInArray = size_t.max / T.sizeof;
-
-    if(length > MaximumInArray)
-        return null;
-
-    size_t sizeToAllocate = T.sizeof;
-
-    static if(is(T == class)) {
-        sizeToAllocate = __traits(classInstanceSize, T);
+    static if (T.sizeof <= 1)
+    {
+        const sizeToAllocate = length * T.sizeof;
     }
-
-    sizeToAllocate *= length;
+    else
+    {
+        import core.checkedint : mulu;
+        bool overflow;
+        const sizeToAllocate = mulu(length, T.sizeof, overflow);
+        if (overflow) return null;
+    }
 
     version(D_BetterC) {
         void[] array = alloc.allocate(sizeToAllocate);
