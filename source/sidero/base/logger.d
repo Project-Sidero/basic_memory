@@ -133,7 +133,7 @@ struct Logger {
         RCAllocator allocator;
         String_UTF8 name_;
 
-        ubyte[TestTestSetLockInline.sizeof] mutexStorage;
+        SystemLock mutex;
         LogLevel logLevel;
         uint targets;
 
@@ -143,10 +143,6 @@ struct Logger {
         ConsoleTarget consoleTarget;
         FileTarget fileTarget;
         DynamicArray!CustomTarget customTargets;
-
-        export ref TestTestSetLockInline mutex() scope return nothrow @nogc @trusted {
-            return *cast(TestTestSetLockInline*)mutexStorage.ptr;
-        }
 
         static int opApplyImpl(Del)(scope Del del) @trusted {
             int result;
@@ -198,21 +194,21 @@ export:
 
     ///
     void setLevel(LogLevel level) scope {
-        mutex.pureLock;
+        cast(void)mutex.lock;
         logLevel = level;
         mutex.unlock;
     }
 
     /// See_Also: LoggingTargets
     void setTargets(uint targets = LoggingTargets.None) scope {
-        mutex.pureLock;
+        cast(void)mutex.lock;
         this.targets = targets;
         mutex.unlock;
     }
 
     ///
     void setTags(scope return String_UTF8 tags) scope {
-        mutex.pureLock;
+        cast(void)mutex.lock;
         this.tags = tags;
         mutex.unlock;
     }
@@ -229,7 +225,7 @@ export:
 
     /// Set console stream back to the default
     void setToDefaultConsoleStream() scope {
-        mutex.pureLock;
+        cast(void)mutex.lock;
         foreach(i, ref v; this.consoleTarget.useErrorStream)
             v = ConsoleTarget.DefaultErrorStream[i];
         mutex.unlock;
@@ -237,7 +233,7 @@ export:
 
     /// Will console stream be stderr instead of stdout?
     void setConsoleStream(bool useError) scope {
-        mutex.pureLock;
+        cast(void)mutex.lock;
         foreach(ref v; this.consoleTarget.useErrorStream)
             v = useError;
         mutex.unlock;
@@ -245,14 +241,14 @@ export:
 
     ///
     void setToDefaultConsoleColors() scope {
-        mutex.pureLock;
+        cast(void)mutex.lock;
         consoleTarget.colors = ConsoleTarget.DefaultConsoleColors;
         mutex.unlock;
     }
 
     ///
     void setConsoleColor(LogLevel level, ConsoleColor foreground = ConsoleColor.Unknown, ConsoleColor background = ConsoleColor.Unknown) {
-        mutex.pureLock;
+        cast(void)mutex.lock;
         consoleTarget.colors[level] = [foreground, background];
         mutex.unlock;
     }
@@ -266,7 +262,7 @@ export:
         } else
             return ErrorResult(MalformedInputException("Expected a log directory path that could be made absolute"));
 
-        mutex.pureLock;
+        cast(void)mutex.lock;
         fileTarget.rootLogDirectory = rootLogDirectory;
         fileTarget.filePrefix = filePrefix;
         fileTarget.filePrefixSeparator = filePrefixSeparator;
@@ -282,7 +278,7 @@ export:
         if(messageDel is null && onRemoveDel is null)
             return;
 
-        mutex.pureLock;
+        cast(void)mutex.lock;
         customTargets ~= CustomTarget();
         customTargets.unsafeGetLiteral[$ - 1] = CustomTarget(messageDel, onRemoveDel);
         mutex.unlock;
@@ -290,7 +286,7 @@ export:
 
     ///
     void clearCustomTargets() {
-        mutex.pureLock;
+        cast(void)mutex.lock;
         customTargets = typeof(customTargets)();
         mutex.unlock;
     }
@@ -354,7 +350,7 @@ export:
         if(logLevel > LogLevel.Trace)
             return;
 
-        mutex.pureLock;
+        cast(void)mutex.lock;
         message!(moduleName, line)(LogLevel.Trace, args);
         mutex.unlock;
     }
@@ -364,7 +360,7 @@ export:
         if(logLevel > LogLevel.Debug)
             return;
 
-        mutex.pureLock;
+        cast(void)mutex.lock;
         message!(moduleName, line)(LogLevel.Debug, args);
         mutex.unlock;
     }
@@ -377,7 +373,7 @@ export:
         if(logLevel > LogLevel.Info)
             return;
 
-        mutex.pureLock;
+        cast(void)mutex.lock;
         message!(moduleName, line)(LogLevel.Info, args);
         mutex.unlock;
     }
@@ -387,7 +383,7 @@ export:
         if(logLevel > LogLevel.Notice)
             return;
 
-        mutex.pureLock;
+        cast(void)mutex.lock;
         message!(moduleName, line)(LogLevel.Notice, args);
         mutex.unlock;
     }
@@ -400,7 +396,7 @@ export:
         if(logLevel > LogLevel.Warning)
             return;
 
-        mutex.pureLock;
+        cast(void)mutex.lock;
         message!(moduleName, line)(LogLevel.Warning, args);
         mutex.unlock;
     }
@@ -410,7 +406,7 @@ export:
         if(logLevel > LogLevel.Error)
             return;
 
-        mutex.pureLock;
+        cast(void)mutex.lock;
         message!(moduleName, line)(LogLevel.Error, args);
         mutex.unlock;
     }
@@ -420,14 +416,14 @@ export:
         if(logLevel > LogLevel.Critical)
             return;
 
-        mutex.pureLock;
+        cast(void)mutex.lock;
         message!(moduleName, line)(LogLevel.Critical, args);
         mutex.unlock;
     }
 
     ///
     void fatal(string moduleName = __MODULE__, int line = __LINE__, Args...)(Args args) scope {
-        mutex.pureLock;
+        cast(void)mutex.lock;
         message!(moduleName, line)(LogLevel.Fatal, args);
         mutex.unlock;
     }
@@ -724,6 +720,7 @@ version(Windows) {
 private:
 import sidero.base.containers.map.concurrenthashmap;
 import sidero.base.synchronization.mutualexclusion : TestTestSetLockInline;
+import sidero.base.synchronization.system.lock;
 import sidero.base.internal.filesystem;
 import sidero.base.datetime : GDateTime;
 

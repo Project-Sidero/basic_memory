@@ -22,6 +22,36 @@ struct ReaderWriterLockInline {
 
 export @safe nothrow @nogc:
 
+    ///
+    void writeLock() scope {
+        globalLock.lock;
+    }
+
+    ///
+    void readLock() scope {
+        readerLock.lock;
+        if(atomicIncrementAndLoad(readers, 1) == 1)
+            globalLock.lock;
+        readerLock.unlock;
+    }
+
+    ///
+    void readUnlock() scope {
+        readerLock.lock;
+        if(atomicDecrementAndLoad(readers, 1) == 0)
+            globalLock.unlock;
+        readerLock.unlock;
+    }
+
+    ///
+    void pureConvertReadToWrite() scope @trusted {
+        readerLock.lock;
+        if(atomicDecrementAndLoad(readers, 1) == 0)
+            globalLock.unlock;
+        readerLock.unlock;
+        globalLock.lock;
+    }
+
 pure:
 
     /// A limited lock method, that is pure.

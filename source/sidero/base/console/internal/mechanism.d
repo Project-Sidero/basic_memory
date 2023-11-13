@@ -33,25 +33,25 @@ enum {
 }
 
 void protect(scope void delegate() @safe nothrow @nogc del) @trusted {
-    rwlock.pureWriteLock;
+    rwlock.writeLock;
     del();
     rwlock.pureWriteUnlock;
 }
 
 void protectReadAction(scope void delegate() @safe nothrow @nogc del) @trusted {
-    rwlock.pureReadLock;
-    readingLock.pureLock;
+    rwlock.readLock;
+    readingLock.lock;
     del();
     readingLock.unlock;
-    rwlock.pureReadUnlock;
+    rwlock.readUnlock;
 }
 
 void protectWriteAction(scope void delegate() @safe nothrow @nogc del) @trusted {
-    rwlock.pureReadLock;
-    writingLock.pureLock;
+    rwlock.readLock;
+    writingLock.lock;
     del();
     writingLock.unlock;
-    rwlock.pureReadUnlock;
+    rwlock.readUnlock;
 }
 
 void initializeConsoleDefaultImpl() @trusted {

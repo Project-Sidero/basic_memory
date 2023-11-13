@@ -137,7 +137,7 @@ bool inFinalizer() pure @nogc nothrow {
 void registerGC(scope void* key, EnableFunction enable, DisableFunction disable, CollectFunction collect, MinimizeFunction minimize,
         AddRangeFunction addRange, RemoveRangeFunction removeRange, RunFinalizersFunction runFinalizers, InFinalizerFunction inFinalizer) nothrow {
 
-    rwlock.pureWriteLock;
+    rwlock.writeLock;
     scope(exit)
         rwlock.pureWriteUnlock;
 
@@ -189,7 +189,7 @@ void registerGC(scope void* key, EnableFunction enable, DisableFunction disable,
 
 ///
 void deregisterGC(scope void* key) nothrow {
-    rwlock.pureWriteLock;
+    rwlock.writeLock;
     scope(exit)
         rwlock.pureWriteUnlock;
 
@@ -210,7 +210,7 @@ void deregisterGC(scope void* key) nothrow {
 package(sidero.base.allocators) {
     void readLockImpl() @trusted pure @nogc nothrow {
         static void handle() @trusted {
-            rwlock.pureReadLock;
+            rwlock.readLock;
         }
 
         (cast(void function()@trusted pure nothrow @nogc)&handle)();
@@ -226,7 +226,7 @@ package(sidero.base.allocators) {
 
     void writeLockImpl() @trusted pure @nogc nothrow {
         static void handle() @trusted {
-            rwlock.pureWriteLock;
+            rwlock.writeLock;
         }
 
         (cast(void function()@trusted pure nothrow @nogc)&handle)();
