@@ -3,6 +3,7 @@ import sidero.base.errors.message;
 import sidero.base.attributes;
 import sidero.base.internal.logassert;
 import sidero.base.containers.utils : genericCompare;
+ import std.traits : isPointer;
 
 export:
 
@@ -155,6 +156,8 @@ scope nothrow @nogc @safe:
 
         static if (__traits(hasMember, Type, "isNull")) {
             return value.isNull;
+        } else static if (isPointer!Type) {
+            return value is null;
         } else
             return false;
     }
@@ -374,6 +377,8 @@ scope nothrow @nogc @safe:
 
         static if (__traits(hasMember, Type, "isNull")) {
             return _value.isNull;
+        } else static if (isPointer!Type) {
+            return *_value is null;
         } else
             return false;
     }
