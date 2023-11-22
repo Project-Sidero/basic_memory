@@ -11,7 +11,7 @@ export:
 auto result(Type)(Type argument) {
     import std.traits : Unqual;
 
-    static if (is(UnQual!Type == ErrorMessage)) {
+    static if(is(UnQual!Type == ErrorMessage)) {
         return ErrorResult(argument);
     } else {
         return Result!Type(argument);
@@ -27,7 +27,7 @@ export:
     ///
     enum HaveValue = !is(Type == void);
 
-    static if (HaveValue) {
+    static if(HaveValue) {
         private {
             Type value;
         }
@@ -37,20 +37,20 @@ export:
             this.value = arg;
         }
 
-        static if (__traits(hasMember, Type, "opAssign")) {
+        static if(__traits(hasMember, Type, "opAssign")) {
             ///
             auto opAssign(Args...)(return scope Args args) {
-                if (isNull)
+                if(isNull)
                     assert(0);
                 this.error__ = ErrorInfo.init;
                 return value.opAssign(args);
             }
         }
 
-        static if (__traits(hasMember, Type, "toHash") && !__traits(isDisabled, Type.toHash)) {
+        static if(__traits(hasMember, Type, "toHash") && !__traits(isDisabled, Type.toHash)) {
             ///
             auto toHash() const {
-                if (error__.info.id !is null)
+                if(error__.info.id !is null)
                     return 0;
                 return value.toHash();
             }
@@ -61,7 +61,7 @@ export:
 
 scope nothrow @nogc @safe:
 
-    static if (HaveValue) {
+    static if(HaveValue) {
         ///
         this(return scope Type value) @trusted {
             this.value = value;
@@ -112,14 +112,14 @@ scope nothrow @nogc @safe:
     /// Will check and only error if there is an error.
     Type assumeOkay(string moduleName = __MODULE__, int line = __LINE__) return @system {
         logAssert(!error__.isSet(), null, this.error__, moduleName, line);
-        static if (HaveValue) {
+        static if(HaveValue) {
             return value;
         }
     }
 
     ///
     this(return scope ref Result other) @trusted {
-        static foreach (i; 0 .. this.tupleof.length)
+        static foreach(i; 0 .. this.tupleof.length)
             this.tupleof[i] = other.tupleof[i];
 
         this.error__.checked = false;
@@ -148,13 +148,13 @@ scope nothrow @nogc @safe:
     }
 
     ///
-    bool isNull(string moduleName = __MODULE__, int line = __LINE__) @trusted {
+    bool isNull(string moduleName = __MODULE__, int line = __LINE__) @trusted const {
         logAssert(error__.checked,
                 "You forgot to check if value had an error for " ~ Type.stringof ~ ". assert(thing, thing.error.toString());",
                 this.error__, moduleName, line);
         logAssert(!error__.isSet(), null, this.error__, moduleName, line);
 
-        static if (__traits(hasMember, Type, "isNull")) {
+        static if(__traits(hasMember, Type, "isNull")) {
             return value.isNull;
         } else static if (isPointer!Type) {
             return value is null;
@@ -167,10 +167,10 @@ scope nothrow @nogc @safe:
         return error__.info.id !is null && error__.info.id == other.id;
     }
 
-    static if (HaveValue) {
+    static if(HaveValue) {
         ///
         bool opEquals(scope const Type other) const @trusted {
-            if (error__.info.message !is null)
+            if(error__.info.message !is null)
                 return false;
             else
                 return genericCompare(*cast(Type*)&this.value, *cast(Type*)&other) == 0;
@@ -178,7 +178,7 @@ scope nothrow @nogc @safe:
 
         ///
         bool opEquals(scope Result!Type other) const @trusted {
-            if (error__.info.message !is null)
+            if(error__.info.message !is null)
                 return other.error__.info.message !is null;
             else
                 return genericCompare(*cast(Type*)&this.value, *cast(Type*)&other.value) == 0;
@@ -190,7 +190,7 @@ scope nothrow @nogc @safe:
 unittest {
     ErrorResult got = ErrorResult();
 
-    if (got) {
+    if(got) {
         // ok
     } else {
         assert(0, "Null, but no error");
@@ -205,7 +205,7 @@ unittest {
 
     ErrorResult got = ErrorResult(NullPointerException("Missing some state?"));
 
-    if (got) {
+    if(got) {
         assert(0, "Null, have error");
     } else {
         // ok
@@ -219,10 +219,10 @@ unittest {
     auto success1 = ErrorResult(), success2 = ErrorResult();
     auto error = ErrorResult(NullPointerException("Missing some state?"));
 
-    if (success1 && success2) {
+    if(success1 && success2) {
         // ok
 
-        if (success1 && success2 && error) {
+        if(success1 && success2 && error) {
             // not so ok
             assert(0, "Null, have error");
         }
@@ -284,12 +284,12 @@ scope nothrow @nogc @safe:
         this.tupleof = other.tupleof;
         this.error__.checked = false;
 
-        if (this._rcHandle !is null)
+        if(this._rcHandle !is null)
             this._rcHandle(true, this._user);
     }
 
     ~this() @trusted {
-        if (this._rcHandle !is null)
+        if(this._rcHandle !is null)
             this._rcHandle(false, this._user);
     }
 
@@ -303,30 +303,30 @@ scope nothrow @nogc @safe:
         this.tupleof = other.tupleof;
         this.error__.checked = false;
 
-        if (this._rcHandle !is null)
+        if(this._rcHandle !is null)
             this._rcHandle(true, this._user);
     }
 
     ///
     void opAssign(Type value) {
-        if (!this || isNull || _value is null)
+        if(!this || isNull || _value is null)
             return;
         *_value = value;
     }
 
-    static if (__traits(hasMember, Type, "opAssign")) {
+    static if(__traits(hasMember, Type, "opAssign")) {
         ///
         auto opAssign(Args...)(Args args) {
-            if (!this || isNull || _value is null)
+            if(!this || isNull || _value is null)
                 assert(0);
             return _value.opAssign(args);
         }
     }
 
-    static if (__traits(hasMember, Type, "toHash") && !__traits(isDisabled, Type.toHash)) {
+    static if(__traits(hasMember, Type, "toHash") && !__traits(isDisabled, Type.toHash)) {
         ///
         auto toHash() const {
-            if (!this)
+            if(!this)
                 return 0;
             return _value.toHash();
         }
@@ -372,10 +372,10 @@ scope nothrow @nogc @safe:
                 this.error__, moduleName, line);
         logAssert(!error__.isSet(), null, this.error__, moduleName, line);
 
-        if (_value is null)
+        if(_value is null)
             return true;
 
-        static if (__traits(hasMember, Type, "isNull")) {
+        static if(__traits(hasMember, Type, "isNull")) {
             return _value.isNull;
         } else static if (isPointer!Type) {
             return *_value is null;
@@ -403,45 +403,63 @@ scope nothrow @nogc @safe:
 
     ///
     bool opEquals(scope const Type other) const @trusted {
-        if (error__.info.message !is null || _value is null)
+        if(error__.info.message !is null || _value is null)
             return false;
 
-        static if (is(Type == float) || is(Type == double))
+        static if(is(Type == float) || is(Type == double))
             return (*this._value).isClose(other);
-        else
+        else {
+            static if(__traits(hasMember, Type, "isNull")) {
+                if(_value.isNull == other.isNull)
+                    return true;
+            }
+
             return genericCompare(*cast(Type*)this._value, *cast(Type*)&other) == 0;
+        }
     }
 
     ///
     bool opEquals(scope Result!Type other) const @trusted {
-        if (error__.isSet || other.error__.isSet || error__.info.message !is null || _value is null || other.error__.info.message !is null)
+        if(error__.isSet || other.error__.isSet || error__.info.message !is null || _value is null || other.error__.info.message !is null)
             return error__.isSet && other.error__.isSet;
-        else
+        else {
+            static if(__traits(hasMember, Type, "isNull")) {
+                if(_value.isNull == other.isNull)
+                    return true;
+            }
+
             return genericCompare(*cast(Type*)this._value, *cast(Type*)&other.value) == 0;
+        }
     }
 
     ///
     bool opEquals(scope const Result!Type other) const @trusted {
-        if (error__.isSet || other.error__.isSet || error__.info.message !is null || _value is null || other.error__.info.message !is null)
+        if(error__.isSet || other.error__.isSet || error__.info.message !is null || _value is null || other.error__.info.message !is null)
             return error__.isSet && other.error__.isSet;
+        else if(this.isNull && other.isNull)
+            return true;
         else
             return genericCompare(*cast(Type*)this._value, *cast(Type*)&other.value) == 0;
     }
 
     ///
     bool opEquals(scope ResultReference!Type other) const @trusted {
-        if (error__.isSet || other.error__.isSet || error__.info.message !is null || _value is null ||
+        if(error__.isSet || other.error__.isSet || error__.info.message !is null || _value is null ||
                 other.error__.info.message !is null || other._value is null)
             return error__.isSet && other.error__.isSet;
+        else if(this.isNull && other.isNull)
+            return true;
         else
             return genericCompare(*cast(Type*)this._value, *cast(Type*)other._value) == 0;
     }
 
     ///
     bool opEquals(scope const ResultReference!Type other) const @trusted {
-        if (error__.isSet || other.error__.isSet || error__.info.message !is null || _value is null ||
+        if(error__.isSet || other.error__.isSet || error__.info.message !is null || _value is null ||
                 other.error__.info.message !is null || other._value is null)
             return error__.isSet && other.error__.isSet;
+        else if(this.isNull && other.isNull)
+            return true;
         else
             return genericCompare(*cast(Type*)this._value, *cast(Type*)other._value) == 0;
     }
@@ -465,7 +483,7 @@ export @safe nothrow @nogc:
 
     ///
     this(Type value, return scope RCAllocator allocator = RCAllocator.init) scope @trusted {
-        if (allocator.isNull)
+        if(allocator.isNull)
             allocator = globalAllocator();
 
         state = allocator.make!State;
@@ -488,9 +506,9 @@ export @safe nothrow @nogc:
         State* state = cast(State*)user;
         assert(state !is null);
 
-        if (addRef)
+        if(addRef)
             atomicIncrementAndLoad(state.refCount, cast(ptrdiff_t)1);
-        else if (atomicDecrementAndLoad(state.refCount, cast(ptrdiff_t)1) == 0) {
+        else if(atomicDecrementAndLoad(state.refCount, cast(ptrdiff_t)1) == 0) {
             RCAllocator alloc = state.allocator;
             alloc.dispose(state);
         }

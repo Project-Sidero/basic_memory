@@ -113,7 +113,7 @@ scope @safe @nogc pure nothrow:
  */
 struct GCAllocatorLock(PoolAllocator) {
     import sidero.base.allocators.gc;
-    import sidero.base.allocators.buffers.freetree : AllocatedTree;
+    import sidero.base.allocators.storage.allocatedtree;
     import sidero.base.allocators.mapping.malloc;
 
     ///

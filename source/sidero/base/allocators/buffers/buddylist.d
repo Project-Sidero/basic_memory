@@ -52,7 +52,7 @@ export:
     }
 
     private {
-        import sidero.base.allocators.buffers.freetree : AllocatedTree;
+        import sidero.base.allocators.storage.allocatedtree;
 
         enum NumberOfBlocks = maxExponent - minExponent;
 

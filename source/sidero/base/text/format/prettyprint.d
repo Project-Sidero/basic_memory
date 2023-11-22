@@ -128,7 +128,7 @@ export @safe nothrow @nogc:
                 handleString(builder, input, useQuotes);
             } else static if(isStaticArray!ActualType && (isSomeString!(typeof(ActualType.init[])))) {
                 auto temp = input[];
-                this.handle(temp, true);
+                this.handle(builder, temp, useQuotes, useName, forcePrint);
             } else static if(isFunctionPointer!ActualType) {
                 handleFunctionPointer(builder, input);
             } else static if(isPointer!ActualType && __traits(compiles, typeof(*input))) {
