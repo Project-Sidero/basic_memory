@@ -12,31 +12,19 @@ import sidero.base.path.file;
 
 package(sidero.base.datetime) @safe nothrow @nogc:
 
-bool loadAutoIANA(scope FilePath path = FilePath.init) @trusted {
+bool loadAutoIANA(scope FilePath path = FilePath.init, String_UTF8 limitToRegion = String_UTF8.init) @trusted {
     import sidero.base.internal.filesystem;
 
     if (path.isNull)
         path = getDefaultTZDirectory();
 
-    version (Android) {
-        const wasAndroid = androidFileSize > 0 || tzDatabase.length == 0;
-    } else {
-        const wasAndroid = androidFileSize > 0 || getFileSize(path.dup ~ "tzdata") > 0;
-    }
-
-    tzDatabase.clear;
-    posixTZToIANA.clear;
-    androidFileSize = 0;
-
-    if (wasAndroid)
-        loadForAndroid(path);
-    else
-        loadStandard(path);
+    loadedPath = path;
+    reloadTZ(true, limitToRegion);
 
     return tzDatabase.length > 0;
 }
 
-void reloadTZ(bool forceReload = true) @trusted {
+void reloadTZ(bool forceReload = true, String_UTF8 limitToRegion = String_UTF8.init) @trusted {
     version (Android) {
         const wasAndroid = androidFileSize > 0 || tzDatabase.length == 0;
     } else {
@@ -55,12 +43,12 @@ void reloadTZ(bool forceReload = true) @trusted {
     FilePath path = loadedPath;
 
     if (wasAndroid)
-        loadForAndroid(path);
+        loadForAndroid(path, limitToRegion);
     else
-        loadStandard(path);
+        loadStandard(path, limitToRegion);
 }
 
-void loadForAndroid(scope FilePath path = FilePath.init) @trusted {
+void loadForAndroid(scope FilePath path = FilePath.init, String_UTF8 limitToRegion) @trusted {
     import sidero.base.internal.filesystem;
     import sidero.base.allocators;
     import sidero.base.bitmanip : bigEndianToNative;
@@ -186,7 +174,7 @@ void loadForAndroid(scope FilePath path = FilePath.init) @trusted {
     // we don't need them, as the information we need is at the start.
 }
 
-void loadStandard(scope FilePath path = FilePath.init) @trusted {
+void loadStandard(scope FilePath path = FilePath.init, String_UTF8 limitToRegion) @trusted {
     import sidero.base.internal.filesystem;
 
     if (!loadedPath.isNull)
@@ -263,31 +251,59 @@ void loadStandard(scope FilePath path = FilePath.init) @trusted {
     readRegions(zoneTabLength, "zone.tab");
     readRegions(zone1970TabLength, "zone1970.tab");
 
-    foreach (region, value; tzDatabase) {
-        assert(region);
-        assert(value);
-
-        auto src = path ~ region.get;
-        auto rawFileRead = readFile!ubyte(src, value.fileSize);
+    void processPerRegion(String_UTF8 region, size_t regionFileSize) {
+        auto src = path ~ region;
+        auto rawFileRead = readFile!ubyte(src, regionFileSize);
 
         if (!rawFileRead.isNull) {
             TZFile loaded;
-            loadTZ(rawFileRead, region.get, loaded);
-            value = loaded;
+            loadTZ(rawFileRead, region, loaded);
+            tzDatabase[limitToRegion] = loaded;
+        }
+    }
+
+    if (!limitToRegion.isNull) {
+        size_t existingFileSize;
+
+        auto existingValue = tzDatabase[limitToRegion];
+        if (existingValue && !existingValue.isNull)
+            existingFileSize = existingValue.fileSize;
+
+        processPerRegion(limitToRegion, existingFileSize);
+    } else {
+        foreach (region, value; tzDatabase) {
+            assert(region);
+            assert(value);
+
+            processPerRegion(region.get, value.fileSize);
         }
     }
 }
 
 Result!IanaTZBase findIANATimeZone(scope String_UTF8 zone) @trusted {
-    reloadTZ(false);
-
     auto name = posixTZToIANA.get(zone, zone);
-    if (!name)
-        return typeof(return)(name.getError);
+    assert(name);
+
+    reloadTZ(false, name);
 
     auto ret = tzDatabase[name];
-    if (!ret)
-        return typeof(return)(ret.getError);
+    if (!ret) {
+        version (Posix) {
+            // If we are only Posix, it is possible that we just haven't loaded the right region yet
+            //  so we'll force a load of only the region Posix TZ mapping and try that one again
+
+            // TODO: only load the regions Posix TZ mapping
+            reloadTZ(false);
+
+            name = posixTZToIANA.get(zone, zone);
+            assert(name);
+
+            ret = tzDatabase[name];
+        }
+
+        if (!ret)
+            return typeof(return)(ret.getError);
+    }
 
     IanaTZBase temp;
     temp.tzFile = ret;
@@ -363,12 +379,15 @@ package(sidero.base.datetime):
                 size_t count;
 
                 foreach (transition; temp) {
+                    assert(transition);
                     if (transition.appliesOn >= endUnixTime)
                         break;
                     count++;
                 }
 
-                transitionsForRange = tzFile.transitions[index .. index + count];
+                auto tempTransitions = tzFile.transitions[index .. index + count];
+                assert(tempTransitions);
+                transitionsForRange = tempTransitions;
             }
         }
 
@@ -594,7 +613,7 @@ void loadTZ(scope DynamicArray!ubyte rawFileRead, return scope String_UTF8 regio
                 tzFile.transitions ~= TZFile.Transition(appliesOn);
             }
 
-            foreach(i; 0 .. tzh_timecnt) {
+            foreach (i; 0 .. tzh_timecnt) {
                 auto got = tzFile.transitions[i];
                 assert(got);
 

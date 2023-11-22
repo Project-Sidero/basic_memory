@@ -222,12 +222,12 @@ export @safe nothrow @nogc:
     }
 
     ///
-    Result!long toUnixTime() scope const @trusted {
+    Result!long toUnixTime(bool removeSecondBias = true) scope const @trusted {
         static if(!__traits(hasMember, DateType, "UnixEpoch")) {
             return typeof(return)(MissingUnixEpochException);
         } else {
             auto gDateTime = this.asGregorian();
-            auto oldBias = this.timezone_.currentSecondsBias(gDateTime);
+            auto oldBias = removeSecondBias ? this.timezone_.currentSecondsBias(gDateTime) : 0;
 
             Duration interval = this.date_ - DateType.UnixEpoch;
 

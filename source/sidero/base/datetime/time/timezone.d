@@ -175,7 +175,7 @@ export @safe nothrow @nogc:
             return this.isInDaylightSavings(date) ? (cast(State*)state)
                 .windowsBase.daylightSavingsOffset.seconds : (cast(State*)state).windowsBase.standardOffset.seconds;
         case Source.IANA:
-            auto unixTime = date.toUnixTime();
+            auto unixTime = date.toUnixTime(false);
             assert(unixTime);
 
             return (cast(State*)state).ianaTZBase.secondsBias(unixTime);
