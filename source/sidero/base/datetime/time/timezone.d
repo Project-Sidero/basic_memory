@@ -178,7 +178,7 @@ export @safe nothrow @nogc:
             auto unixTime = date.toUnixTime(false);
             assert(unixTime);
 
-            return (cast(State*)state).ianaTZBase.secondsBias(unixTime);
+            return (cast(State*)state).ianaTZBase.secondsBias(unixTime, true);
         case Source.PosixRule:
             return this.isInDaylightSavings(date) ? (cast(State*)state).posixTZBase.dstOffset : (cast(State*)state).posixTZBase.stdOffset;
         }
