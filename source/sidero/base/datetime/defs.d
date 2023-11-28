@@ -707,6 +707,8 @@ private @hidden:
         auto temp = this.asGregorian();
         const oldYear = temp.year;
         const oldBias = this.timezone_.currentSecondsBias(temp);
+        auto oldUnixTimeWithLeapAndBias = temp.toUnixTime();
+        assert(oldUnixTimeWithLeapAndBias);
 
         callback();
 
@@ -718,6 +720,15 @@ private @hidden:
 
         if(oldBias != newBias) {
             auto dateInterval = this.time_.advanceSeconds(newBias - oldBias, true);
+            this.date_.advanceDays(dateInterval.days);
+        }
+
+        auto newUnixTimeWithBias = temp.toUnixTime();
+        assert(newUnixTimeWithBias);
+        const deltaLeap = this.timezone_.leapSecondsBetween(oldUnixTimeWithLeapAndBias.get - oldBias, newUnixTimeWithBias.get - newBias);
+
+        if(deltaLeap != 0) {
+            auto dateInterval = this.time_.advanceSeconds(deltaLeap, true);
             this.date_.advanceDays(dateInterval.days);
         }
     }

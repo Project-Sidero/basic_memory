@@ -213,6 +213,33 @@ export @safe nothrow @nogc:
         }
     }
 
+    long leapSecondsBetween(long startWithLeap, long endWithoutLeap) scope const @trusted {
+        if(isNull)
+            return 0;
+
+        long delta;
+
+        final switch(state.source) {
+        case Source.Fixed:
+        case Source.Windows:
+        case Source.PosixRule:
+            return 0;
+
+        case Source.IANA:
+            foreach(leap; (cast(State*)state).ianaTZBase.tzFile.get.leapSecond) {
+                if (leap.appliesOn < startWithLeap) {
+                    continue;
+                } else if (endWithoutLeap >= leap.appliesOn)
+                    break;
+
+                delta += leap.amount;
+                endWithoutLeap += delta;
+            }
+        }
+
+        return delta;
+    }
+
     ///
     bool opEquals(const TimeZone other) scope const @trusted {
         if(isNull)

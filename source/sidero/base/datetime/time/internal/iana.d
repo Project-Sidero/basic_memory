@@ -441,23 +441,21 @@ package(sidero.base.datetime):
     long secondsBias(long unixTime, bool hasOffsetApplied = false) scope @trusted {
         long ret;
 
-        foreach_reverse(offset, transition; this.transitionsForRange) {
+        foreach_reverse(transitionLeapSecond; this.tzFile.transitionLeapSeconds) {
+            unixTime -= transitionLeapSecond.leapSeconds;
             long bias, tempUnixTime = unixTime;
 
-            {
-                auto got = this.tzFile.postTransitionInfo[transition.postTransitionInfoOffset];
-                assert(got);
-
-                bias = got.secondsSinceUTC0;
+            if(transitionLeapSecond.secondsSinceUTC0 >= 0) {
+                bias = transitionLeapSecond.secondsSinceUTC0;
 
                 if(hasOffsetApplied)
                     tempUnixTime -= bias;
             }
 
-            if(transition.appliesOn < unixTime)
+            if(transitionLeapSecond.appliesOn <= tempUnixTime) {
+                ret = bias;
                 break;
-
-            ret = bias;
+            }
         }
 
         return ret;
@@ -797,6 +795,53 @@ void loadTZ(scope DynamicArray!ubyte rawFileRead, return scope String_UTF8 regio
                     posixTZToIANA[tzFile.tzString] = region;
             }
         }
+
+        {
+            // Perform a two-way merge of transitions + leap seconds for calculation of seconds bias
+
+            const lengthOfLeapSeconds = tzFile.leapSecond.length, lengthOfTransitions = tzFile.transitions.length;
+            const maxElements = lengthOfLeapSeconds + lengthOfTransitions;
+            tzFile.transitionLeapSeconds = typeof(tzFile.transitionLeapSeconds).init;
+            tzFile.transitionLeapSeconds.reserve(maxElements);
+
+            const leapSeconds = tzFile.leapSecond.unsafeGetLiteral;
+            const transitions = tzFile.transitions.unsafeGetLiteral;
+            auto postTransitions = tzFile.postTransitionInfo.unsafeGetLiteral;
+
+            size_t leapSecondIndex, transitionIndex;
+
+            foreach(_; 0 .. maxElements) {
+                if(leapSecondIndex == lengthOfLeapSeconds) {
+                    // transition
+                    auto transition = transitions[transitionIndex++];
+                    auto postTransition = postTransitions[transition.postTransitionInfoOffset];
+
+                    tzFile.transitionLeapSeconds ~= TZFile.TransitionLeapSecond(transition.appliesOn, postTransition.secondsSinceUTC0, 0);
+                } else if(transitionIndex == lengthOfTransitions) {
+                    // leap second
+                    auto leapSecond = leapSeconds[leapSecondIndex++];
+                    tzFile.transitionLeapSeconds ~= TZFile.TransitionLeapSecond(leapSecond.appliesOn, -1, leapSecond.amount);
+                } else {
+                    auto transition = transitions[transitionIndex];
+                    auto postTransition = postTransitions[transition.postTransitionInfoOffset];
+                    auto leapSecond = leapSeconds[leapSecondIndex];
+
+                    if(transition.appliesOn < leapSecond.appliesOn) {
+                        transitionIndex++;
+                        tzFile.transitionLeapSeconds ~= TZFile.TransitionLeapSecond(transition.appliesOn,
+                                postTransition.secondsSinceUTC0, 0);
+                    } else if(transition.appliesOn > leapSecond.appliesOn) {
+                        leapSecondIndex++;
+                        tzFile.transitionLeapSeconds ~= TZFile.TransitionLeapSecond(leapSecond.appliesOn, -1, leapSecond.amount);
+                    } else {
+                        transitionIndex++;
+                        leapSecondIndex++;
+                        tzFile.transitionLeapSeconds ~= TZFile.TransitionLeapSecond(transition.appliesOn,
+                                postTransition.secondsSinceUTC0, leapSecond.amount);
+                    }
+                }
+            }
+        }
     }
 
 End:
@@ -811,6 +856,7 @@ struct TZFile {
     DynamicArray!Transition transitions;
     DynamicArray!PostTransitionInfo postTransitionInfo;
     DynamicArray!LeapSecond leapSecond;
+    DynamicArray!TransitionLeapSecond transitionLeapSeconds;
 
     String_UTF8 tzString;
 
@@ -860,5 +906,11 @@ struct TZFile {
     static struct LeapSecond {
         long appliesOn;
         int amount;
+    }
+
+    static struct TransitionLeapSecond {
+        long appliesOn;
+        int secondsSinceUTC0;
+        int leapSeconds;
     }
 }
