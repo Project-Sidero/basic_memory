@@ -57,14 +57,21 @@ export @safe nothrow @nogc:
         this.time_ = time;
     }
 
-    ///
+    /// Does not adjust date/time into timezone!
     this(return scope DateType date, return scope TimeOfDay time, return scope TimeZone timezone) scope {
         this.date_ = date;
         this.time_ = time;
         this.timezone_ = timezone;
     }
 
-    /// Does not adjust date/time into timezone!
+    /// Ditto
+    this(return scope DateType date, return scope TimeZone timezone) scope {
+        this.date_ = date;
+        this.time_ = time;
+        this.timezone_ = timezone;
+    }
+
+    /// Ditto
     this(return scope DateTime datetime, return scope TimeZone timezone) scope {
         this.date_ = datetime.date_;
         this.time_ = datetime.time_;
@@ -204,14 +211,25 @@ export @safe nothrow @nogc:
             auto gDateTime = this.asGregorian();
             auto oldBias = this.timezone_.currentSecondsBias(gDateTime);
             auto newBias = timezone.currentSecondsBias(gDateTime);
+
+            // remove timezone bias, but keep leap (unnecessary work)
+            auto unixTime = this.toUnixTime(true, false);
+            assert(unixTime);
+            const oldLeap = this.timezone_.totalLeapSeconds(unixTime.get, true);
+            const newLeap = timezone.totalLeapSeconds(unixTime.get - oldLeap, false);
+
             delta = newBias - oldBias;
+            delta -= oldLeap - newLeap;
         }
 
         DateTime ret = this;
         ret.timezone_ = timezone;
 
-        if(delta != 0)
-            ret.advanceSeconds(delta);
+        if(delta != 0) {
+            // since we are handling leap seconds, its better not to go through the guard
+            auto dateInterval = ret.time_.advanceSeconds(delta, true);
+            ret.date_.advanceDays(dateInterval.days);
+        }
 
         return ret;
     }
@@ -222,7 +240,7 @@ export @safe nothrow @nogc:
     }
 
     ///
-    Result!long toUnixTime(bool removeSecondBias = true) scope const @trusted {
+    Result!long toUnixTime(bool removeSecondBias = true, bool removeLeapSeconds = true) scope const @trusted {
         static if(!__traits(hasMember, DateType, "UnixEpoch")) {
             return typeof(return)(MissingUnixEpochException);
         } else {
@@ -239,16 +257,18 @@ export @safe nothrow @nogc:
             else
                 working -= this.time_.totalSeconds;
 
-            return typeof(return)(cast(long)working);
+            if(removeLeapSeconds)
+                working -= this.timezone_.totalLeapSeconds(working, true);
+            return typeof(return)(working);
         }
     }
 
     ///
     static DateTime fromUnixTime(long amount, return scope TimeZone timeZone = TimeZone.init) @trusted {
-        DateTime ret = DateTime(DateType.UnixEpoch);
-        ret = ret.asTimeZone(timeZone);
-
+        DateTime ret = DateTime(DateType.UnixEpoch, TimeZone.from(0));
         ret.advanceSeconds(amount);
+
+        ret = ret.asTimeZone(timeZone);
         return ret;
     }
 

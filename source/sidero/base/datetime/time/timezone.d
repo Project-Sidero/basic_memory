@@ -213,6 +213,35 @@ export @safe nothrow @nogc:
         }
     }
 
+    ///
+    long totalLeapSeconds(long unixTime, bool hasLeap) scope const @trusted {
+        if(isNull)
+            return 0;
+
+        long delta;
+
+        final switch(state.source) {
+        case Source.Fixed:
+        case Source.Windows:
+        case Source.PosixRule:
+            return 0;
+
+        case Source.IANA:
+            foreach(leap; (cast(State*)state).ianaTZBase.tzFile.get.leapSecond) {
+                if(hasLeap)
+                    unixTime -= leap.amount;
+
+                if(leap.appliesOn > unixTime)
+                    break;
+
+                delta += leap.amount;
+            }
+        }
+
+        return delta;
+    }
+
+    ///
     long leapSecondsBetween(long startWithLeap, long endWithoutLeap) scope const @trusted {
         if(isNull)
             return 0;
@@ -227,9 +256,9 @@ export @safe nothrow @nogc:
 
         case Source.IANA:
             foreach(leap; (cast(State*)state).ianaTZBase.tzFile.get.leapSecond) {
-                if (leap.appliesOn < startWithLeap) {
+                if(leap.appliesOn < startWithLeap) {
                     continue;
-                } else if (endWithoutLeap >= leap.appliesOn)
+                } else if(endWithoutLeap >= leap.appliesOn)
                     break;
 
                 delta += leap.amount;
