@@ -1,12 +1,12 @@
 module sidero.base.bindings.openssl.libcrypto.buffer;
 import sidero.base.bindings.openssl.libcrypto.types;
 
-export extern (C) nothrow @nogc:
+export nothrow @nogc:
 
 package(sidero.base.bindings.openssl.libcrypto) enum string[] bufferFUNCTIONS = ["BUF_MEM_new"];
 
 ///
-alias f_BUF_MEM_new = BUF_MEM* function();
+alias f_BUF_MEM_new = extern (C) BUF_MEM* function();
 
 __gshared {
     ///

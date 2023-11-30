@@ -2,7 +2,7 @@ module sidero.base.bindings.openssl.libssl.ssl;
 import sidero.base.bindings.openssl.libcrypto;
 import core.stdc.config : c_ulong, c_long;
 
-export extern (C) nothrow @nogc:
+export nothrow @nogc:
 package(sidero.base.bindings.openssl.libssl) enum string[] sslFUNCTIONS = [
     "SSL_get_error", "SSL_CTX_new", "SSL_CTX_free", "SSL_CTX_set_options", "TLS_method", "SSL_new", "SSL_free",
     "SSL_set_bio", "SSL_set0_rbio", "SSL_set0_wbio", "SSL_set_connect_state", "SSL_set_accept_state",
@@ -63,7 +63,7 @@ struct ssl_session_st;
 alias SSL_SESSION = ssl_session_st;
 
 ///
-alias SSL_verify_cb = int function(int preverify_ok, X509_STORE_CTX* x509_ctx);
+alias SSL_verify_cb = extern (C) int function(int preverify_ok, X509_STORE_CTX* x509_ctx);
 
 enum {
     ///
@@ -83,49 +83,49 @@ enum {
 }
 
 ///
-alias f_SSL_get_error = int function(const SSL* ssl, int ret);
+alias f_SSL_get_error = extern (C) int function(const SSL* ssl, int ret);
 
 ///
-alias f_SSL_CTX_new = SSL_CTX* function(const SSL_METHOD* meth);
+alias f_SSL_CTX_new = extern (C) SSL_CTX* function(const SSL_METHOD* meth);
 ///
-alias f_SSL_CTX_free = void function(SSL_CTX*);
+alias f_SSL_CTX_free = extern (C) void function(SSL_CTX*);
 ///
-alias f_SSL_CTX_set_options = ulong function(SSL_CTX* ctx, ulong op);
+alias f_SSL_CTX_set_options = extern (C) ulong function(SSL_CTX* ctx, ulong op);
 
 ///
-alias f_TLS_method = const(SSL_METHOD)* function();
+alias f_TLS_method = extern (C) const(SSL_METHOD)* function();
 
 ///
-alias f_SSL_new = SSL* function(SSL_CTX* ctx);
+alias f_SSL_new = extern (C) SSL* function(SSL_CTX* ctx);
 ///
-alias f_SSL_free = void function(SSL* ssl);
+alias f_SSL_free = extern (C) void function(SSL* ssl);
 
 ///
-alias f_SSL_set_bio = void function(SSL* s, BIO* rbio, BIO* wbio);
+alias f_SSL_set_bio = extern (C) void function(SSL* s, BIO* rbio, BIO* wbio);
 ///
-alias f_SSL_set0_rbio = void function(SSL* s, BIO* rbio);
+alias f_SSL_set0_rbio = extern (C) void function(SSL* s, BIO* rbio);
 ///
-alias f_SSL_set0_wbio = void function(SSL* s, BIO* wbio);
+alias f_SSL_set0_wbio = extern (C) void function(SSL* s, BIO* wbio);
 
 ///
-alias f_SSL_set_connect_state = void function(SSL* s);
+alias f_SSL_set_connect_state = extern (C) void function(SSL* s);
 ///
-alias f_SSL_set_accept_state = void function(SSL* s);
+alias f_SSL_set_accept_state = extern (C) void function(SSL* s);
 ///
-alias f_SSL_use_cert_and_key = int function(SSL* ssl, X509* x509, EVP_PKEY* privatekey, STACK_OF!X509* chain, int override_);
+alias f_SSL_use_cert_and_key = extern (C) int function(SSL* ssl, X509* x509, EVP_PKEY* privatekey, STACK_OF!X509* chain, int override_);
 //
-alias f_SSL_set_verify = void function(SSL* s, int mode, SSL_verify_cb callback);
+alias f_SSL_set_verify = extern (C) void function(SSL* s, int mode, SSL_verify_cb callback);
 
 ///
-alias f_SSL_write_ex = int function(SSL* s, const void* buf, size_t num, size_t* written);
+alias f_SSL_write_ex = extern (C) int function(SSL* s, const void* buf, size_t num, size_t* written);
 ///
-alias f_SSL_read_ex = int function(SSL* ssl, void* buf, size_t num, size_t* readbytes);
+alias f_SSL_read_ex = extern (C) int function(SSL* ssl, void* buf, size_t num, size_t* readbytes);
 
 ///
-alias f_SSL_do_handshake = int function(SSL* s);
+alias f_SSL_do_handshake = extern (C) int function(SSL* s);
 
 ///
-alias f_SSL_ctrl = c_long function(SSL* ssl, int cmd, c_long larg, void* parg);
+alias f_SSL_ctrl = extern (C) c_long function(SSL* ssl, int cmd, c_long larg, void* parg);
 
 __gshared {
     ///

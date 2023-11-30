@@ -1,7 +1,7 @@
 module sidero.base.bindings.openssl.libcrypto.evp;
 import sidero.base.bindings.openssl.libcrypto.types;
 
-export extern(C) nothrow @nogc:
+export nothrow @nogc:
 
 package(sidero.base.bindings.openssl.libcrypto) enum string[] evpFUNCTIONS = [];
 

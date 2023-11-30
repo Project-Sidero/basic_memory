@@ -1,7 +1,7 @@
 module sidero.base.bindings.openssl.libcrypto.types;
 import core.stdc.config : c_ulong, c_long;
 
-export extern (C) nothrow @nogc:
+export nothrow @nogc:
 
 package(sidero.base.bindings.openssl.libcrypto) enum string[] typesFUNCTIONS = [];
 
