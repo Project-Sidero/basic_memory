@@ -22,7 +22,7 @@ void write(Args...)(scope Args args) {
 
 /// Adds newline at end
 void writeln(Args...)(scope Args args) {
-    write(args, deliminateArgs(false), "\n");
+    write(args, deliminateArgs(false), "\r\n");
 }
 
 /// Turns on pretty printing and delimination of args by default.
@@ -32,7 +32,7 @@ void debugWrite(Args...)(scope Args args) {
 
 ///  Adds newline at end and turns on pretty printing and delimination of args by default.
 void debugWriteln(Args...)(scope Args args) {
-    debugWrite(args, deliminateArgs(false), "\n");
+    debugWrite(args, deliminateArgs(false), "\r\n");
 }
 
 /// Writes string data to console (ASCII/Unicode aware) and immediately flushes.
