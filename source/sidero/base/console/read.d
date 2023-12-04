@@ -40,7 +40,7 @@ Result!dchar readChar(Duration timeout = Duration.min) @trusted {
                 if(!block) {
                     tcgetattr(fnum, &originalTermios);
 
-                    termios toSetTermios;
+                    termios toSetTermios = originalTermios;
                     toSetTermios.c_cc[VMIN] = 0;
                     toSetTermios.c_cc[VTIME] = cast(ubyte)(timeout.totalMilliSeconds / 100);
 
@@ -112,7 +112,7 @@ Result!StringBuilder_ASCII readLine(return scope ref StringBuilder_ASCII builder
                 if(!block) {
                     tcgetattr(fnum, &originalTermios);
 
-                    termios toSetTermios;
+                    termios toSetTermios = originalTermios;
                     toSetTermios.c_cc[VMIN] = 0;
                     toSetTermios.c_cc[VTIME] = cast(ubyte)(timeout.totalMilliSeconds / 100);
 
@@ -186,7 +186,7 @@ Result!StringBuilder_UTF8 readLine(return scope ref StringBuilder_UTF8 builder, 
                 if(!block) {
                     tcgetattr(fnum, &originalTermios);
 
-                    termios toSetTermios;
+                    termios toSetTermios = originalTermios;
                     toSetTermios.c_cc[VMIN] = 0;
                     toSetTermios.c_cc[VTIME] = cast(ubyte)(timeout.totalMilliSeconds / 100);
 
