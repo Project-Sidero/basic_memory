@@ -582,6 +582,7 @@ void loadTZ(scope DynamicArray!ubyte rawFileRead, return scope String_UTF8 regio
 
         tzFile = TZFile.init;
         tzFile.fileSize = originalFileSize;
+        tzFile.region = region;
 
         {
             // 0, '2', '3', '4'
@@ -779,7 +780,7 @@ void loadTZ(scope DynamicArray!ubyte rawFileRead, return scope String_UTF8 regio
 
             if (rawFileRead.length > 2) {
                 if (readValue!ubyte != '\n')
-                    goto End;
+                    goto MergeTransitionLeap;
 
                 StringBuilder_UTF8 tzStringBuilder;
 
@@ -797,7 +798,7 @@ void loadTZ(scope DynamicArray!ubyte rawFileRead, return scope String_UTF8 regio
             }
         }
 
-        {
+    MergeTransitionLeap: {
             // Perform a two-way merge of transitions + leap seconds for calculation of seconds bias
 
             const lengthOfLeapSeconds = tzFile.leapSecond.length, lengthOfTransitions = tzFile.transitions.length;
@@ -844,8 +845,6 @@ void loadTZ(scope DynamicArray!ubyte rawFileRead, return scope String_UTF8 regio
             }
         }
     }
-
-End:
 }
 
 struct TZFile {

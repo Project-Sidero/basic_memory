@@ -630,9 +630,9 @@ export @safe nothrow @nogc:
                     mutex.unlock;
 
                     auto got2 = TimeZone.from(tzVar, currentYear());
-                    if(got2)
+                    if(got2) {
                         return got2;
-                    else
+                    } else
                         mutex.pureLock;
                 }
             }
@@ -664,7 +664,8 @@ export @safe nothrow @nogc:
             mutex.unlock;
             return got2;
         } else version(Posix) {
-            auto got = findIANATimeZone(getPosixLocalTimeZone());
+            auto posixLocalTimeZone = getPosixLocalTimeZone();
+            auto got = findIANATimeZone(posixLocalTimeZone);
 
             if(!got) {
                 mutex.unlock;
