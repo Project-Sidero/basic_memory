@@ -823,11 +823,17 @@ export @safe nothrow @nogc:
 }
 
 ///
+alias day = days;
+
+///
 Duration days(long amount) {
     Duration ret;
     ret.days_ = amount;
     return ret;
 }
+
+///
+alias hour = hours;
 
 ///
 Duration hours(long amount) {
@@ -837,11 +843,17 @@ Duration hours(long amount) {
 }
 
 ///
+alias minute = minutes;
+
+///
 Duration minutes(long amount) {
     Duration temp;
     temp.nanoSeconds_ = amount * 60_000_000_000;
     return Duration.init + temp;
 }
+
+///
+alias second = seconds;
 
 ///
 Duration seconds(long amount) {
@@ -851,6 +863,9 @@ Duration seconds(long amount) {
 }
 
 ///
+alias milliSecond = milliSeconds;
+
+///
 Duration milliSeconds(long amount) {
     Duration temp;
     temp.nanoSeconds_ = amount * 1_000_000;
@@ -858,11 +873,17 @@ Duration milliSeconds(long amount) {
 }
 
 ///
+alias microSecond = microSeconds;
+
+///
 Duration microSeconds(long amount) {
     Duration temp;
     temp.nanoSeconds_ = amount * 1_000;
     return Duration.init + temp;
 }
+
+///
+alias nanoSecond = nanoSeconds;
 
 ///
 Duration nanoSeconds(long amount) {
