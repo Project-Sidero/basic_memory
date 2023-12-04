@@ -34,10 +34,12 @@ DateTime!GregorianDate accurateDateTime() @trusted {
         import core.sys.posix.time;
 
         timespec ts;
+        const err = clock_gettime(CLOCK_REALTIME, &ts);
 
-        if(clock_gettime(CLOCK_REALTIME, &ts) == 0) {
+        if(err == 0) {
+            ret = typeof(ret).fromUnixTime(ts.tv_sec, fixedUTC0);
             ret.advanceNanoSeconds(ts.tv_nsec);
-            ret = ret.asTimeZone(fixedUTC0);
+
             // this is UTC+0
             needTimeZoneAdjustment = true;
         }
