@@ -86,6 +86,16 @@ template isDesiredUDA(alias attribute) {
     }
 }
 
+///
+template SetFunctionAttributes(T, string linkage, uint attrs)
+if (is(T == function))
+{
+    // To avoid a lot of syntactic headaches, we just use the above version to
+    // operate on the corresponding function pointer type and then remove the
+    // indirection again.
+    alias SetFunctionAttributes = FunctionTypeOf!(SetFunctionAttributes!(T*, linkage, attrs));
+}
+
 private:
 
 template fqnSym(alias T : X!A, alias X, A...) {
@@ -161,7 +171,7 @@ template fqnType(T, bool alreadyConst, bool alreadyImmutable, bool alreadyShared
             static assert(0, "New variadic style has been added, please update fullyQualifiedName implementation");
 
         static if(parameters.length) {
-            import std.algorithm.iteration : map;
+            import sidero.base.algorithm : map;
             import std.array : join;
             import std.meta : staticMap;
             import std.range : zip;
@@ -264,4 +274,81 @@ template fqnType(T, bool alreadyConst, bool alreadyImmutable, bool alreadyShared
         enum fqnType = chain!("__vector(" ~ fqnType!(V, qualifiers) ~ "[" ~ N.to!string ~ "])");
     } else // In case something is forgotten
         static assert(0, "Unrecognized type " ~ T.stringof ~ ", can't convert to fully qualified string");
+}
+
+///
+template SetFunctionAttributes(T, string linkage, uint attrs)
+if (isFunctionPointer!T || isDelegate!T)
+{
+    mixin({
+        import sidero.base.algorithm : canFind;
+
+        static assert(!(attrs & FunctionAttribute.trusted) ||
+        !(attrs & FunctionAttribute.safe),
+        "Cannot have a function/delegate that is both trusted and safe.");
+
+        static immutable linkages = ["D", "C", "Windows", "C++", "System"];
+        static assert(canFind(linkages, linkage), "Invalid linkage '" ~
+        linkage ~ "', must be one of " ~ linkages.stringof ~ ".");
+
+        string result = "alias ";
+
+        static if (linkage != "D")
+            result ~= "extern(" ~ linkage ~ ") ";
+
+        static if (attrs & FunctionAttribute.ref_)
+            result ~= "ref ";
+
+        result ~= "ReturnType!T";
+
+        static if (isDelegate!T)
+            result ~= " delegate";
+        else
+            result ~= " function";
+
+        result ~= "(";
+
+        static if (Parameters!T.length > 0)
+            result ~= "Parameters!T";
+
+        enum varStyle = variadicFunctionStyle!T;
+        static if (varStyle == Variadic.c)
+            result ~= ", ...";
+        else static if (varStyle == Variadic.d)
+            result ~= "...";
+        else static if (varStyle == Variadic.typesafe)
+                result ~= "...";
+
+        result ~= ")";
+
+        static if (attrs & FunctionAttribute.pure_)
+            result ~= " pure";
+        static if (attrs & FunctionAttribute.nothrow_)
+            result ~= " nothrow";
+        static if (attrs & FunctionAttribute.property)
+            result ~= " @property";
+        static if (attrs & FunctionAttribute.trusted)
+            result ~= " @trusted";
+        static if (attrs & FunctionAttribute.safe)
+            result ~= " @safe";
+        static if (attrs & FunctionAttribute.nogc)
+            result ~= " @nogc";
+        static if (attrs & FunctionAttribute.system)
+            result ~= " @system";
+        static if (attrs & FunctionAttribute.const_)
+            result ~= " const";
+        static if (attrs & FunctionAttribute.immutable_)
+            result ~= " immutable";
+        static if (attrs & FunctionAttribute.inout_)
+            result ~= " inout";
+        static if (attrs & FunctionAttribute.shared_)
+            result ~= " shared";
+        static if (attrs & FunctionAttribute.return_)
+            result ~= " return";
+        static if (attrs & FunctionAttribute.live)
+            result ~= " @live";
+
+        result ~= " SetFunctionAttributes;";
+        return result;
+    }());
 }

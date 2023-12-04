@@ -1,21 +1,23 @@
 module sidero.base.internal.conv;
-export @safe nothrow:
+@safe nothrow:
 
-wstring stringToWstring(string input) {
+wstring stringToWstring(string input)() {
     import sidero.base.encoding.utf : reEncode;
 
     assert(__ctfe);
 
-    wstring ret;
-
-    reEncode(input, (wchar c) { ret ~= c; });
+    enum ret = () {
+        wstring ret;
+        reEncode(input, (wchar c) { ret ~= c; });
+        return ret;
+    }();
 
     return ret;
 }
 
 wstring intToWString(int input)() {
     assert(__ctfe);
-    return stringToWstring(intToString!(input));
+    return stringToWstring!(intToString!(input));
 }
 
 string intToString(int inputV)() {

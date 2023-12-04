@@ -902,7 +902,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
         }
 
         Char frontInternal() {
-            import std.algorithm : min;
+            import sidero.base.algorithm : min;
 
             primedForwards = true;
 

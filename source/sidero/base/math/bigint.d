@@ -133,7 +133,7 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
         }
 
         void toStringImpl(scope void delegate(scope char[]) @safe nothrow @nogc del) scope const @safe nothrow @nogc {
-            import std.algorithm : reverse;
+            import sidero.base.algorithm : reverse;
 
             ubyte[(MaxDigitsPerInteger * storage.length) + 1] buffer = void;
             buffer[0] = '-';

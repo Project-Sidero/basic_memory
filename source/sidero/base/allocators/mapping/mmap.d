@@ -62,7 +62,7 @@ private:
 nothrow @nogc pure:
 
     auto assumeAllAttributes(T)(T arg) @trusted {
-        import std.traits : SetFunctionAttributes, FunctionAttribute;
+        import sidero.base.traits : SetFunctionAttributes, FunctionAttribute;
 
         return cast(SetFunctionAttributes!(T, "C",
                 FunctionAttribute.pure_ | FunctionAttribute.nothrow_ | FunctionAttribute.safe | FunctionAttribute.nogc))arg;

@@ -449,7 +449,7 @@ export:
         import sidero.base.datetime.time.clock;
         import sidero.base.internal.conv;
 
-        enum ModuleLine2 = moduleName.stringToWstring ~ ":"w ~ intToWString!line;
+        enum ModuleLine2 = stringToWstring!moduleName ~ ":"w ~ intToWString!line;
         enum ModuleLine = " `" ~ moduleName ~ ":" ~ intToString!line ~ "` ";
 
         GDateTime currentDateTime = accurateDateTime();

@@ -289,7 +289,7 @@ export @safe nothrow @nogc:
 
     ///
     Type sum() scope const {
-        import std.algorithm.iteration : sum;
+        import sidero.base.algorithm : sum;
 
         return sum(this.data[]);
     }

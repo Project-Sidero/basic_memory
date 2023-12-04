@@ -2465,7 +2465,7 @@ struct ASCII_State {
             }
 
             void popFrontInternal() {
-                import std.algorithm : min;
+                import sidero.base.algorithm : min;
 
                 forwardsCursor.advanceForward(1, maximumOffsetFromHead, true);
             }
@@ -2537,7 +2537,7 @@ struct ASCII_State {
             }
 
             void popFrontInternal() {
-                import std.algorithm : min;
+                import sidero.base.algorithm : min;
 
                 forwardsCursor.advanceForward(1, maximumOffsetFromHead, true);
             }
@@ -2620,7 +2620,7 @@ struct ASCII_State {
             }
 
             void popFrontInternal() {
-                import std.algorithm : min;
+                import sidero.base.algorithm : min;
 
                 forwardsCursor.advanceForward(1, maximumOffsetFromHead, true);
             }
@@ -2826,7 +2826,7 @@ struct ASCII_State {
             }
 
             void popFrontInternal() {
-                import std.algorithm : min;
+                import sidero.base.algorithm : min;
 
                 toRemoveCursor.advanceForward(1, maximumOffsetFromHead, true);
             }
@@ -2880,7 +2880,7 @@ struct ASCII_State {
             }
 
             void popBackInternal() {
-                import std.algorithm : min;
+                import sidero.base.algorithm : min;
 
                 toRemoveCursor.advanceBackwards(1, minimumOffsetFromHead, maximumOffsetFromHead, false, false);
             }

@@ -20,7 +20,7 @@ export @safe nothrow @nogc:
     ///
     static String_ASCII opIndex(scope String_ASCII key) @trusted nothrow @nogc {
         import sidero.base.allocators.api;
-        import std.algorithm : countUntil;
+        import sidero.base.algorithm : countUntil;
         import core.stdc.string : strlen;
 
         if(key.isNull)
@@ -83,7 +83,7 @@ export @safe nothrow @nogc:
     ///
     static Other opIndex(Other)(scope Other key) @trusted if (isUTFReadOnly!Other) {
         import sidero.base.allocators.api;
-        import std.algorithm : countUntil;
+        import sidero.base.algorithm : countUntil;
         import core.stdc.string : strlen;
 
         if(key.isNull)

@@ -288,7 +288,7 @@ export @safe nothrow @nogc:
     }
 
     void opCall(scope dchar[] array) @trusted scope {
-        import std.algorithm : sort;
+        import sidero.base.algorithm : sort;
 
         if(rotateBuffer.length == 0)
             rotateBuffer = rotateInlineBuffer[];
@@ -341,7 +341,7 @@ export @safe nothrow @nogc:
     }
 
     bool partialFinish(scope RotatePartialHandlerDelegate handler) scope @trusted {
-        import std.algorithm : sort;
+        import sidero.base.algorithm : sort;
 
         auto rb = rotateBuffer[0 .. rotateBufferUsed];
         rb.sort!((a, b) => a < b);

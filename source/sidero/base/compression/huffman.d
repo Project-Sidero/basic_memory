@@ -286,7 +286,7 @@ export:
     string toString() scope const @trusted {
         version(D_BetterC) {
             return null;
-        } else {
+        } else version(none) {
             debug {
                 import std.array : appender;
                 import std.format : formattedWrite;

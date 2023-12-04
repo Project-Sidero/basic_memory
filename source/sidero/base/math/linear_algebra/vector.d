@@ -304,7 +304,7 @@ export @safe nothrow @nogc:
 
     ///
     Type sum() scope const {
-        import algorithm = std.algorithm.iteration;
+        import algorithm = sidero.base.algorithm;
 
         return algorithm.sum(this.data[]);
     }
@@ -477,7 +477,7 @@ Vector!(Type, Dimension) max(Type, size_t Dimension)(scope Vector!(Type, Dimensi
 
 ///
 Type magnitude(Type)(scope const Type[] values) if (isNumeric!Type) {
-    import std.algorithm.iteration : sum;
+    import sidero.base.algorithm : sum;
     import core.math : sqrt;
 
     static struct Handler {
@@ -537,7 +537,7 @@ unittest {
 ///
 Result!CommonType distance(A, B, CommonType = typeof(A.init + B.init))(scope const(A)[] input1, scope const(B)[] input2)
         if (isNumeric!A && isNumeric!B) {
-    import std.algorithm.iteration : sum;
+    import sidero.base.algorithm : sum;
     import std.math : sqrt;
 
     if(input1.length != input2.length)
@@ -638,7 +638,7 @@ unittest {
 
 ///
 Type standardDeviation(Type)(scope const(Type)[] values) if (isNumeric!Type) {
-    import std.algorithm.iteration : sum;
+    import sidero.base.algorithm : sum;
 
     static struct Handler {
         const(Type)[] values;

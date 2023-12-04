@@ -14,7 +14,7 @@ alias FixedPoint_Double = FixedPoint!(309, 309);
 ///
 struct FixedPoint(size_t NumberOfWholeDigits, size_t NumberOfFractionalDigits) {
     private {
-        import std.algorithm : min;
+        import sidero.base.algorithm : min;
     }
 
     enum {
@@ -453,7 +453,7 @@ struct FixedPoint(size_t NumberOfWholeDigits, size_t NumberOfFractionalDigits) {
 private:
     void toStringImpl(scope void delegate(scope char[]) @safe nothrow @nogc del) scope const @safe nothrow @nogc {
         import sidero.base.math.bigint : unsignedDivide;
-        import std.algorithm : reverse;
+        import sidero.base.algorithm : reverse;
 
         ubyte[(MaxDigitsPerInteger * storage.storage.length) + 4] buffer = void;
         buffer[0] = '-';

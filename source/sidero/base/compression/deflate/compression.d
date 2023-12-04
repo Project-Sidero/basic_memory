@@ -50,7 +50,7 @@ import sidero.base.compression.internal.hashchain;
 void compressDeflate(scope ref BitReader source, scope ref BitWriter result, DeflateCompressionRate compressionRate,
         size_t amountNeededInFirstBatch, out size_t amountInFirstBatch, RCAllocator allocator = RCAllocator.init) @trusted {
     import sidero.base.compression.internal.hashchain;
-    import std.algorithm : min;
+    import sidero.base.algorithm : min;
 
     DeflateCompressionImpl impl = DeflateCompressionImpl(source, result, compressionRate, amountNeededInFirstBatch,
             amountInFirstBatch, allocator);
@@ -81,7 +81,7 @@ struct DeflateCompressionImpl {
     }
 
     void perform() {
-        import std.algorithm : min;
+        import sidero.base.algorithm : min;
 
         const initialConsumed = source.consumed;
         bool isFirst = true;
