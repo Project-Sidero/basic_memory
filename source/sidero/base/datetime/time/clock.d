@@ -61,8 +61,6 @@ DateTime!GregorianDate accurateDateTime() @trusted {
 
     if(needTimeZoneAdjustment) {
         auto timeZone = TimeZone.local;
-        import sidero.base.console;
-        debugWriteln(timeZone);
 
         if(timeZone) {
             assert(!timeZone.state.allocator.isNull);
