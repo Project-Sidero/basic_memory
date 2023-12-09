@@ -6,7 +6,8 @@ export nothrow @nogc:
 package(sidero.base.bindings.openssl.libssl) enum string[] sslFUNCTIONS = [
     "SSL_get_error", "SSL_CTX_new", "SSL_CTX_free", "SSL_CTX_set_options", "TLS_method", "SSL_new", "SSL_free",
     "SSL_set_bio", "SSL_set0_rbio", "SSL_set0_wbio", "SSL_set_connect_state", "SSL_set_accept_state",
-    "SSL_use_cert_and_key", "SSL_set_verify", "SSL_write_ex", "SSL_read_ex", "SSL_do_handshake", "SSL_ctrl"
+    "SSL_use_cert_and_key", "SSL_set_verify", "SSL_write_ex", "SSL_read_ex", "SSL_do_handshake", "SSL_ctrl",
+    "SSL_CTX_set_default_verify_paths"
 ];
 
 enum {
@@ -127,6 +128,9 @@ alias f_SSL_do_handshake = extern (C) int function(SSL* s);
 ///
 alias f_SSL_ctrl = extern (C) c_long function(SSL* ssl, int cmd, c_long larg, void* parg);
 
+///
+alias f_SSL_CTX_set_default_verify_paths = extern(C) int function(SSL_CTX* ctx);
+
 __gshared {
     ///
     f_SSL_get_error SSL_get_error;
@@ -172,4 +176,7 @@ __gshared {
 
     ///
     f_SSL_ctrl SSL_ctrl;
+
+    ///
+    f_SSL_CTX_set_default_verify_paths SSL_CTX_set_default_verify_paths;
 }
