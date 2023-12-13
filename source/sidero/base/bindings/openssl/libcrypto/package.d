@@ -11,6 +11,7 @@ public import sidero.base.bindings.openssl.libcrypto.types;
 public import sidero.base.bindings.openssl.libcrypto.x509;
 public import sidero.base.bindings.openssl.libcrypto.obj_mac;
 public import sidero.base.bindings.openssl.libcrypto.objects;
+public import sidero.base.bindings.openssl.libcrypto.rsa;
 import sidero.base.bindings.symbolloader;
 import sidero.base.path.file;
 import sidero.base.errors;
@@ -25,16 +26,16 @@ ErrorResult loadLibCrypto(scope FilePath filePath = FilePath.init) @trusted {
     ErrorResult ret;
 
     bool attempt(FilePath filePath) {
-        if(!filePath.couldPointToEntry())
+        if (!filePath.couldPointToEntry())
             return false;
 
         return libCryptoSymbolLoader.load(filePath, () {
-            static foreach(f; AllFunctions) {
-                if(ret) {
+            static foreach (f; AllFunctions) {
+                if (ret) {
                     void* symbol = libCryptoSymbolLoader.acquire(f);
                     mixin(f ~ " = cast(f_" ~ f ~ ")symbol;");
 
-                    if(symbol is null) {
+                    if (symbol is null) {
                         ret = ErrorResult(NullPointerException("Missing libcrypto function " ~ f));
                     }
                 }
@@ -44,28 +45,28 @@ ErrorResult loadLibCrypto(scope FilePath filePath = FilePath.init) @trusted {
 
     bool handled = libCryptoSymbolLoader.isLoaded();
 
-    if(!handled)
+    if (!handled)
         handled = attempt(filePath);
 
-    if(!handled) {
-        version(Windows) {
+    if (!handled) {
+        version (Windows) {
             auto filePathP = FilePath.from("libcrypto.dll");
 
-            if(filePathP)
+            if (filePathP)
                 handled = attempt(filePathP.get);
             else
                 ret = ErrorResult(filePathP.getError());
-        } else version(OSX) {
+        } else version (OSX) {
             auto filePathP = FilePath.from("libcrypto.dylib");
 
-            if(filePathP)
+            if (filePathP)
                 handled = attempt(filePathP.get);
             else
                 ret = ErrorResult(filePathP.getError());
-        } else version(Posix) {
+        } else version (Posix) {
             auto filePathP = FilePath.from("libcrypto.so");
 
-            if(filePathP)
+            if (filePathP)
                 handled = attempt(filePathP.get);
             else
                 ret = ErrorResult(filePathP.getError());
@@ -74,10 +75,10 @@ ErrorResult loadLibCrypto(scope FilePath filePath = FilePath.init) @trusted {
         }
     }
 
-    if(!handled)
+    if (!handled)
         ret = ErrorResult(UnknownPlatformBehaviorException("Missing libcrypto shared library, cannot load"));
 
-    if(!ret)
+    if (!ret)
         unloadLibCrypto();
 
     return ret;
@@ -86,7 +87,7 @@ ErrorResult loadLibCrypto(scope FilePath filePath = FilePath.init) @trusted {
 ///
 void unloadLibCrypto() @trusted {
     libCryptoSymbolLoader.unload(() {
-        static foreach(f; AllFunctions) {
+        static foreach (f; AllFunctions) {
             mixin(f ~ " = null;");
         }
     });
@@ -98,5 +99,5 @@ private pragma(crt_destructor) extern (C) void deinitializeLibCryptoAutomaticall
 
 private:
 
-static immutable AllFunctions = asn1FUNCTIONS ~ bioFUNCTIONS ~ bufferFUNCTIONS ~ cryptoFUNCTIONS ~ evpFUNCTIONS ~
-    pemFUNCTIONS ~ safestackFUNCTIONS ~ stackFUNCTIONS ~ typesFUNCTIONS ~ x509FUNCTIONS ~ objmacFUNCTIONS ~ objectsFUNCTIONS;
+static immutable AllFunctions = asn1FUNCTIONS ~ bioFUNCTIONS ~ bufferFUNCTIONS ~ cryptoFUNCTIONS ~ evpFUNCTIONS ~ pemFUNCTIONS ~
+    safestackFUNCTIONS ~ stackFUNCTIONS ~ typesFUNCTIONS ~ x509FUNCTIONS ~ objmacFUNCTIONS ~ objectsFUNCTIONS ~ rsaFUNCTIONS;

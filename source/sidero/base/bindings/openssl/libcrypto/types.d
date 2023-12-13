@@ -28,6 +28,8 @@ alias ASN1_OCTET_STRING = asn1_string_st;
 alias ASN1_TIME = asn1_string_st;
 ///
 alias ASN1_STRING = asn1_string_st;
+///
+alias ASN1_INTEGER = asn1_string_st;
 
 ///
 struct X509_crl_st;
@@ -70,6 +72,11 @@ struct x509_store_ctx_st;
 alias X509_STORE_CTX = x509_store_ctx_st;
 
 ///
+struct ossl_lib_ctx_st;
+///
+alias OSSL_LIB_CTX = ossl_lib_ctx_st;
+
+///
 struct buf_mem_st {
     ///
     size_t length;
@@ -85,3 +92,8 @@ alias BUF_MEM = buf_mem_st;
 
 ///
 alias pem_password_cb = extern (C) int function(ubyte* buf, int size, int rwflag, void* userdata);
+
+///
+struct evp_md_st;
+///
+alias EVP_MD  = evp_md_st;
