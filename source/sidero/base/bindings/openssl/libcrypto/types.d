@@ -96,4 +96,19 @@ alias pem_password_cb = extern (C) int function(ubyte* buf, int size, int rwflag
 ///
 struct evp_md_st;
 ///
-alias EVP_MD  = evp_md_st;
+alias EVP_MD = evp_md_st;
+
+///
+struct rsa_st;
+///
+alias RSA = rsa_st;
+
+///
+struct bn_gencb_st;
+///
+alias BN_GENCB = bn_gencb_st;
+
+///
+struct bignum_st;
+///
+alias BIGNUM = bignum_st;

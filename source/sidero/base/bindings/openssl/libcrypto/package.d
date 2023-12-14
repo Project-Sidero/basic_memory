@@ -1,6 +1,7 @@
 module sidero.base.bindings.openssl.libcrypto;
 public import sidero.base.bindings.openssl.libcrypto.asn1;
 public import sidero.base.bindings.openssl.libcrypto.bio;
+public import sidero.base.bindings.openssl.libcrypto.bn;
 public import sidero.base.bindings.openssl.libcrypto.buffer;
 public import sidero.base.bindings.openssl.libcrypto.crypto;
 public import sidero.base.bindings.openssl.libcrypto.evp;
@@ -30,12 +31,16 @@ ErrorResult loadLibCrypto(scope FilePath filePath = FilePath.init) @trusted {
             return false;
 
         return libCryptoSymbolLoader.load(filePath, () {
+            import std.meta : staticIndexOf;
+
             static foreach (f; AllFunctions) {
                 if (ret) {
+                    enum required = mixin("staticIndexOf!(`optional`, __traits(getAttributes, " ~ f ~ ")) == -1");
+
                     void* symbol = libCryptoSymbolLoader.acquire(f);
                     mixin(f ~ " = cast(f_" ~ f ~ ")symbol;");
 
-                    if (symbol is null) {
+                    if (required && symbol is null) {
                         ret = ErrorResult(NullPointerException("Missing libcrypto function " ~ f));
                     }
                 }
@@ -99,5 +104,5 @@ private pragma(crt_destructor) extern (C) void deinitializeLibCryptoAutomaticall
 
 private:
 
-static immutable AllFunctions = asn1FUNCTIONS ~ bioFUNCTIONS ~ bufferFUNCTIONS ~ cryptoFUNCTIONS ~ evpFUNCTIONS ~ pemFUNCTIONS ~
-    safestackFUNCTIONS ~ stackFUNCTIONS ~ typesFUNCTIONS ~ x509FUNCTIONS ~ objmacFUNCTIONS ~ objectsFUNCTIONS ~ rsaFUNCTIONS;
+static immutable AllFunctions = asn1FUNCTIONS ~ bioFUNCTIONS ~ bnFUNCTIONS ~ bufferFUNCTIONS ~ cryptoFUNCTIONS ~ evpFUNCTIONS ~
+    pemFUNCTIONS ~ safestackFUNCTIONS ~ stackFUNCTIONS ~ typesFUNCTIONS ~ x509FUNCTIONS ~ objmacFUNCTIONS ~ objectsFUNCTIONS ~ rsaFUNCTIONS;

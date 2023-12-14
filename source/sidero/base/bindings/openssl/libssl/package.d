@@ -15,16 +15,20 @@ ErrorResult loadLibSSL(scope FilePath filePath = FilePath.init) @trusted {
     ErrorResult ret;
 
     bool attempt(FilePath filePath) {
-        if(!filePath.couldPointToEntry())
+        if (!filePath.couldPointToEntry())
             return false;
 
         return libSSLSymbolLoader.load(filePath, () {
-            static foreach(f; AllFunctions) {
-                if(ret) {
+            import std.meta : staticIndexOf;
+
+            static foreach (f; AllFunctions) {
+                if (ret) {
+                    enum required = mixin("staticIndexOf!(`optional`, __traits(getAttributes, " ~ f ~ ")) == -1");
+
                     void* symbol = libSSLSymbolLoader.acquire(f);
                     mixin(f ~ " = cast(f_" ~ f ~ ")symbol;");
 
-                    if(symbol is null) {
+                    if (symbol is null) {
                         ret = ErrorResult(NullPointerException("Missing libssl function " ~ f));
                     }
                 }
@@ -34,28 +38,28 @@ ErrorResult loadLibSSL(scope FilePath filePath = FilePath.init) @trusted {
 
     bool handled = libSSLSymbolLoader.isLoaded();
 
-    if(!handled)
+    if (!handled)
         handled = attempt(filePath);
 
-    if(!handled) {
-        version(Windows) {
+    if (!handled) {
+        version (Windows) {
             auto filePathP = FilePath.from("libssl.dll");
 
             if (filePathP)
                 handled = attempt(filePathP.get);
             else
                 ret = ErrorResult(filePathP.getError());
-        } else version(OSX) {
+        } else version (OSX) {
             auto filePathP = FilePath.from("libssl.dylib");
 
-            if(filePathP)
+            if (filePathP)
                 handled = attempt(filePathP.get);
             else
                 ret = ErrorResult(filePathP.getError());
-        } else version(Posix) {
+        } else version (Posix) {
             auto filePathP = FilePath.from("libssl.so");
 
-            if(filePathP)
+            if (filePathP)
                 handled = attempt(filePathP.get);
             else
                 ret = ErrorResult(filePathP.getError());
@@ -64,10 +68,10 @@ ErrorResult loadLibSSL(scope FilePath filePath = FilePath.init) @trusted {
         }
     }
 
-    if(!handled)
+    if (!handled)
         ret = ErrorResult(UnknownPlatformBehaviorException("Missing libssl shared library, cannot load"));
 
-    if(!ret)
+    if (!ret)
         unloadLibSSL();
 
     return ret;
@@ -76,7 +80,7 @@ ErrorResult loadLibSSL(scope FilePath filePath = FilePath.init) @trusted {
 ///
 void unloadLibSSL() @trusted {
     libSSLSymbolLoader.unload(() {
-        static foreach(f; AllFunctions) {
+        static foreach (f; AllFunctions) {
             mixin(f ~ " = null;");
         }
     });

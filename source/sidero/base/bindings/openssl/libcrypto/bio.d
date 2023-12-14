@@ -5,7 +5,8 @@ import core.stdc.config : c_ulong, c_long;
 export nothrow @nogc:
 
 package(sidero.base.bindings.openssl.libcrypto) enum string[] bioFUNCTIONS = [
-    "BIO_new", "BIO_new_file", "BIO_s_mem", "BIO_free", "BIO_ctrl", "BIO_set_flags", "BIO_read_ex"
+    "BIO_new", "BIO_new_file", "BIO_s_mem", "BIO_free", "BIO_ctrl", "BIO_set_flags", "BIO_read_ex", "BIO_read",
+    "BIO_puts", "BIO_write", "BIO_push"
 ];
 
 ///
@@ -64,6 +65,15 @@ alias f_BIO_set_flags = extern (C) void function(BIO* b, int flags);
 
 ///
 alias f_BIO_read_ex = extern (C) int function(BIO* b, ubyte* data, size_t dlen, size_t* readbytes);
+///
+alias f_BIO_read = extern (C) int function(BIO* b, void* data, int dlen);
+///
+alias f_BIO_puts = extern (C) int function(BIO* b, const(char)* buf);
+///
+alias f_BIO_write = extern (C) int function(BIO* b, void* data, int dlen);
+
+///
+alias f_BIO_push = extern (C) BIO* function(BIO* b, BIO* next);
 
 ///
 __gshared {
@@ -82,4 +92,13 @@ __gshared {
 
     ///
     f_BIO_read_ex BIO_read_ex;
+    ///
+    f_BIO_read BIO_read;
+    ///
+    f_BIO_puts BIO_puts;
+    ///
+    f_BIO_write BIO_write;
+
+    ///
+    f_BIO_push BIO_push;
 }
