@@ -26,6 +26,7 @@ export @safe nothrow @nogc:
     ///
     this(scope T value) scope {
         this = value;
+        this.isSet = true;
     }
 
     ///
