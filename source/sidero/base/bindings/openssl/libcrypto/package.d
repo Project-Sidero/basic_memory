@@ -5,6 +5,7 @@ public import sidero.base.bindings.openssl.libcrypto.bn;
 public import sidero.base.bindings.openssl.libcrypto.buffer;
 public import sidero.base.bindings.openssl.libcrypto.crypto;
 public import sidero.base.bindings.openssl.libcrypto.evp;
+public import sidero.base.bindings.openssl.libcrypto.err;
 public import sidero.base.bindings.openssl.libcrypto.pem;
 public import sidero.base.bindings.openssl.libcrypto.safestack;
 public import sidero.base.bindings.openssl.libcrypto.stack;
@@ -104,5 +105,5 @@ private pragma(crt_destructor) extern (C) void deinitializeLibCryptoAutomaticall
 
 private:
 
-static immutable AllFunctions = asn1FUNCTIONS ~ bioFUNCTIONS ~ bnFUNCTIONS ~ bufferFUNCTIONS ~ cryptoFUNCTIONS ~ evpFUNCTIONS ~
+static immutable AllFunctions = asn1FUNCTIONS ~ bioFUNCTIONS ~ bnFUNCTIONS ~ bufferFUNCTIONS ~ cryptoFUNCTIONS ~ evpFUNCTIONS ~ errFUNCTIONS ~
     pemFUNCTIONS ~ safestackFUNCTIONS ~ stackFUNCTIONS ~ typesFUNCTIONS ~ x509FUNCTIONS ~ objmacFUNCTIONS ~ objectsFUNCTIONS ~ rsaFUNCTIONS;
