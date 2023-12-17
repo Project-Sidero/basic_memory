@@ -171,6 +171,18 @@ export:
         }
     }
 
+    /// Will insert or update if already in map
+    bool update(return scope RealKeyType key, return scope ValueType value) scope {
+        setupState;
+        willModify;
+
+        static if(!is(KeyType == RealKeyType)) {
+            return this.update(key.asReadOnly(), value);
+        } else {
+            return state.insertExternal(key, value, true);
+        }
+    }
+
     /// Will update if already in map
     void opIndexAssign(return scope ValueType value, return scope RealKeyType key) scope {
         setupState;
@@ -313,6 +325,14 @@ export:
             willModify;
 
             return state.insertExternal(key, value, false);
+        }
+
+        /// Will insert or update if in map
+        bool update(return scope KeyType key, return scope ValueType value) scope {
+            setupState;
+            willModify;
+
+            return state.insertExternal(key, value, true);
         }
 
         ///
