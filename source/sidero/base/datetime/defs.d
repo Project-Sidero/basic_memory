@@ -104,6 +104,19 @@ export @safe nothrow @nogc:
     mixin DateType.DateWrapper!();
 
     ///
+    alias nanoSeconds = nanoSecond;
+    ///
+    alias milliSeconds = milliSecond;
+    ///
+    alias microSeconds = microSecond;
+    ///
+    alias seconds = second;
+    ///
+    alias minutes = minute;
+    ///
+    alias hours = hour;
+
+    ///
     uint nanoSecond() scope const {
         return this.time_.nanoSecond();
     }
@@ -160,7 +173,7 @@ export @safe nothrow @nogc:
 
     ///
     void advance(const Duration interval) scope {
-        this.advanceMicroSeconds(interval.totalMicroSeconds);
+        timezoneCheck(() { this.advanceNanoSeconds(interval.totalNanoSeconds); this.date_.advance(interval); });
     }
 
     ///
@@ -300,6 +313,30 @@ export @safe nothrow @nogc:
         ourNanoSeconds += ourUnixTime * 1_000_000_000;
         otherNanoSeconds += otherUnixTime * 1_000_000_000;
         return typeof(return)((ourNanoSeconds - otherNanoSeconds).nanoSeconds);
+    }
+
+    ///
+    DateTime opBinary(string op : "+")(const Duration other) scope const {
+        DateTime ret = this;
+        ret.advance(other);
+        return ret;
+    }
+
+    ///
+    DateTime opBinary(string op : "-")(const Duration other) scope const {
+        DateTime ret = this;
+        ret.advance(-other);
+        return ret;
+    }
+
+    ///
+    void opOpAssign(string op : "+")(const Duration other) scope {
+        this.advance(other);
+    }
+
+    ///
+    void opOpAssign(string op : "-")(const Duration other) scope {
+        this.advance(-other);
     }
 
     ///
