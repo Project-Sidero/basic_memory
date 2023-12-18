@@ -202,7 +202,7 @@ export @safe nothrow @nogc:
         }
     }
 
-    void handlePointer(Type)(scope StringBuilder_UTF8 builder, scope ref Type input) {
+    void handlePointer(Type)(scope StringBuilder_UTF8 builder, scope ref Type input) @trusted {
         alias SubType = typeof(*input);
 
         static if(__traits(compiles, fullyQualifiedName!SubType))
