@@ -175,7 +175,7 @@ export @safe nothrow @nogc:
         if(amount < 0)
             amount += 1_000_000_000;
 
-        this.nanoSeconds_ += amount;
+        this.nanoSeconds_ = cast(uint)amount;
 
         if(allowOverflow) {
             return rollDays.days + this.advanceHours(rollHours) + this.advanceMinutes(rollMinutes) + this.advanceSeconds(rollSeconds);
