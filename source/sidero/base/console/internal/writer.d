@@ -58,17 +58,23 @@ alias handleOneWriterPrototype(Type) = void function(scope ref Writer writer, si
 
 void handleOneWrite(Type)(scope ref Writer writer, size_t argumentId, scope ref Type arg) {
     static if(isAnyString!Type) {
-        if(writer.deliminateArguments)
-            rawWriteImpl(String_UTF8(`"`), writer.useErrorStream);
+        if(writer.deliminateArguments) {
+            StringBuilder_UTF8 builder;
 
-        static if(isReadOnlyString!Type || isBuilderString!Type) {
-            rawWriteImpl(arg.byUTF8, writer.useErrorStream);
+            builder ~= arg;
+            builder.escape('"');
+
+            builder.prepend(`"`);
+            builder.append(`"`);
+
+            rawWriteImpl(builder, writer.useErrorStream);
         } else {
-            rawWriteImpl(String_UTF8(arg), writer.useErrorStream);
+            static if (isReadOnlyString!Type || isBuilderString!Type) {
+                rawWriteImpl(arg.byUTF8, writer.useErrorStream);
+            } else {
+                rawWriteImpl(String_UTF8(arg), writer.useErrorStream);
+            }
         }
-
-        if(writer.deliminateArguments)
-            rawWriteImpl(String_UTF8(`"`), writer.useErrorStream);
     } else static if(is(Type == InBandInfo)) {
         if(arg.resetDefaults) {
             writer.prettyPrintDepth = 0;
