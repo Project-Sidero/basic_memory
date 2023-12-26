@@ -10,7 +10,7 @@ version(Windows) {
         ENABLE_PROCESSED_OUTPUT, GetConsoleOutputCP, SetConsoleOutputCP, GetConsoleCP, SetConsoleCP, FreeConsole,
         INVALID_HANDLE_VALUE, ReadConsoleA,
         ENABLE_ECHO_INPUT, WaitForMultipleObjects,
-        WAIT_OBJECT_0, KEY_EVENT, WriteConsoleA, WAIT_TIMEOUT, ReadConsoleW, INFINITE, WriteConsoleW;
+        WAIT_OBJECT_0, KEY_EVENT, WriteConsoleA, WAIT_TIMEOUT, ReadConsoleW, INFINITE, WriteConsoleW, HANDLE_FLAG_INHERIT;
 
     // needed cos Unicode
     struct CONSOLE_READCONSOLE_CONTROL {
@@ -69,4 +69,5 @@ version(Windows) {
     extern (Windows) BOOL ReadConsoleInputA(HANDLE, INPUT_RECORD*, DWORD, DWORD*) nothrow @nogc;
     extern (Windows) BOOL ReadConsoleInputW(HANDLE, INPUT_RECORD*, DWORD, DWORD*) nothrow @nogc;
     extern (Windows) BOOL GetOverlappedResultEx(HANDLE, OVERLAPPED*, DWORD*, DWORD, BOOL) nothrow @nogc;
+    extern (Windows) BOOL SetHandleInformation(HANDLE, DWORD, DWORD) nothrow @nogc;
 }

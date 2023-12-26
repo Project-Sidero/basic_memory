@@ -125,6 +125,10 @@ void allocateWindowsConsole() @trusted {
                 SetConsoleMode(hStdError, originalConsoleErrorMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING | ENABLE_PROCESSED_OUTPUT);
             }
 
+            SetHandleInformation(hStdin, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+            SetHandleInformation(hStdout, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+            SetHandleInformation(hStdError, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+
             originalConsoleOutputCP = GetConsoleOutputCP();
             if(!SetConsoleOutputCP(65001))
                 originalConsoleOutputCP = 0;
