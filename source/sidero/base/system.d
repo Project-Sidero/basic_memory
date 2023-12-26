@@ -1,5 +1,6 @@
 module sidero.base.system;
 import sidero.base.containers.readonlyslice;
+import sidero.base.containers.map.hashmap;
 import sidero.base.text;
 import sidero.base.text.unicode.characters.database : UnicodeLanguage;
 import sidero.base.traits : isUTFReadOnly, isUTFBuilder;
@@ -224,6 +225,17 @@ export @safe nothrow @nogc:
                 unsetenv(cast(char*)toUseK.ptr);
         } else
             static assert(0, "Unimplemented");
+    }
+
+    ///
+    static HashMap!(String_UTF8, String_UTF8) toHashMap() {
+        HashMap!(String_UTF8, String_UTF8) ret;
+
+        foreach(k, v; EnvironmentVariables) {
+            ret[k] = v;
+        }
+
+        return ret;
     }
 
     ///
