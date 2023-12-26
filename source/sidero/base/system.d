@@ -95,7 +95,7 @@ export @safe nothrow @nogc:
             import core.sys.windows.winbase : GetEnvironmentVariableW;
             import core.sys.windows.winnt : LPWSTR;
 
-            static if(is(Char == wchar)) {
+            static if(is(Other.Char == wchar)) {
                 String_UTF16 toUse = key;
             } else {
                 String_UTF16 toUse = key.byUTF16;
@@ -123,7 +123,7 @@ export @safe nothrow @nogc:
         } else version(Posix) {
             import core.stdc.stdlib : getenv;
 
-            static if(is(Char == char)) {
+            static if(is(Other.Char == char)) {
                 String_UTF8 toUse = key;
             } else {
                 String_UTF8 toUse = key.byUTF8;

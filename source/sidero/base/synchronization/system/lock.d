@@ -82,6 +82,11 @@ export @safe nothrow @nogc:
     }
 
     ///
+    void opAssign(return scope SystemLock other) scope {
+        this.__ctor(other);
+    }
+
+    ///
     ErrorResult lock(Duration timeout = Duration.max) scope @trusted {
         if (timeout <= Duration.init)
             return ErrorResult(MalformedInputException("Timeout duration must be above zero"));

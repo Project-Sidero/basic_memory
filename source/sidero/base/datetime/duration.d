@@ -13,10 +13,10 @@ struct Duration {
         long nanoSeconds_;
     }
 
+    export @safe nothrow @nogc:
+
     ///
     static immutable string DefaultFormat = "%a", HumanDeltaFormat = "%D";
-
-export @safe nothrow @nogc:
 
     ///
     this(long day, long nanoSecond) {

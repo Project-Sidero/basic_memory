@@ -208,5 +208,4 @@ void quoteCharImpl(Builder, Char)(scope ref Builder output, Char c) {
             output ~= [c];
             break;
     }
-
 }

@@ -313,7 +313,8 @@ export:
                 return ret[];
             } else
                 return null;
-        }
+        } else
+            return null;
     }
 }
 
