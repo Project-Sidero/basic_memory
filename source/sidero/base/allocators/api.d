@@ -435,7 +435,7 @@ bool shrinkArray(T, Allocator)(auto ref Allocator alloc, scope ref T[] array, si
 
 /// A subset of std.experimental.allocator one simplified to be faster to compile.
 void dispose(Type, Allocator)(auto ref Allocator alloc, scope auto ref Type* p) {
-    void[] toDeallocate = (cast(void*)p)[0 .. Type.sizeof];
+    void[] toDeallocate = () @trusted { return (cast(void*)p)[0 .. Type.sizeof]; }();
 
     destroy(*p);
     alloc.deallocate(toDeallocate);
@@ -444,10 +444,11 @@ void dispose(Type, Allocator)(auto ref Allocator alloc, scope auto ref Type* p) 
 }
 
 /// Ditto
-void dispose(Type, Allocator)(auto ref Allocator alloc, scope auto ref Type p) @trusted
+void dispose(Type, Allocator)(auto ref Allocator alloc, scope auto ref Type p)
         if (is(Type == class) || is(Type == interface)) {
-    if(!p)
+    if(p is null)
         return;
+
     static if(is(Type == interface)) {
         version(Windows) {
             import core.sys.windows.unknwn : IUnknown;
@@ -457,21 +458,24 @@ void dispose(Type, Allocator)(auto ref Allocator alloc, scope auto ref Type p) @
         auto ob = cast(Object)p;
     } else
         alias ob = p;
-    auto support = (cast(void*)ob)[0 .. typeid(ob).initializer.length];
+
+    void[] toDeallocate = () @trusted { return (cast(void*)ob)[0 .. typeid(ob).initializer.length]; }();
+
     destroy(p);
-    alloc.deallocate(support);
+    alloc.deallocate(toDeallocate);
     p = null;
 }
 
 /// Ditto
-void dispose(Type, Allocator)(auto ref Allocator alloc, scope auto ref Type[] array) @trusted {
+void dispose(Type, Allocator)(auto ref Allocator alloc, scope auto ref Type[] array) {
     static if(!is(typeof(array[0]) == void)) {
         foreach(ref e; array) {
             destroy(cast()e);
         }
     }
 
-    alloc.deallocate((cast(void*)array.ptr)[0 .. Type.sizeof * array.length]);
+    void[] toDeallocate = () @trusted { return (cast(void*)array.ptr)[0 .. Type.sizeof * array.length]; }();
+
     array = null;
 }
 
