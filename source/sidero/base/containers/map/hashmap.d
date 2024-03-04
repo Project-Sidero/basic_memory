@@ -1043,7 +1043,14 @@ struct HashMapNode(RealKeyType, ValueType) {
         Bucket* bucket = &buckets[getBucketId(hash)];
         Node* currentNode = &bucket.head;
 
-        while(currentNode.next.next !is null && currentNode.next.hash <= hash) {
+        // Putting all conditions in while condition,
+        //  has a tendency to cause bad codegen.
+        while(currentNode.next !is null) {
+            if (currentNode.next.next is null)
+                break;
+            else if (currentNode.next.hash > hash)
+                break;
+
             currentNode = currentNode.next;
         }
 
