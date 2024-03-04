@@ -394,7 +394,7 @@ FilePath currentWorkingDirectory() @trusted {
             }
 
             auto fp = FilePath.from(String_UTF8(got[0 .. length], allocator, buffer));
-            if (fp)
+            if(fp)
                 return fp.get;
         }
     } else
@@ -504,6 +504,11 @@ FilePath homeDirectory() @trusted {
 ///
 Slice!String_UTF8 commandLineArguments() @trusted {
     return _commandLineArguments;
+}
+
+///
+String_UTF8 userName() @trusted {
+    return _userName;
 }
 
 ///
@@ -712,6 +717,31 @@ pragma(crt_constructor) extern (C) void initializeSystemInfo() @trusted {
         } else
             static assert(0, "Unimplemented cpu count");
     }
+
+    {
+        version(Windows) {
+            import core.sys.windows.lmcons : UNLEN;
+            import core.sys.windows.winbase : GetUserNameW;
+
+            wchar[UNLEN + 1] buffer;
+            DWORD length = UNLEN + 1;
+
+            if (GetUserNameW(buffer.ptr, &length))
+                _userName = String_UTF8(buffer[0 .. length]).dup;
+        } else version(Posix) {
+            import core.sys.posix.unistd : getlogin;
+
+            char* ptr = getlogin();
+
+            if(ptr !is null) {
+                auto length = strlen(ptr);
+                if (length > 0)
+                    length++;
+
+                _userName = String_UTF8(ptr[0 .. length]).dup;
+            }
+        }
+    }
 }
 
 private @hidden:
@@ -743,6 +773,8 @@ __gshared {
     FilePath _homeDirectory;
 
     uint cpuCount_;
+
+    String_UTF8 _userName;
 }
 
 Locale getLocaleImpl(ref bool refresh) @trusted {
