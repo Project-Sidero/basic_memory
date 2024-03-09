@@ -1,6 +1,8 @@
 /**
 The main API for memory allocators.
 
+Posix: On fork will set global allocator to malloc.
+
 License: Artistic v2
 Authors: Richard (Rikki) Andrew Cattermole
 Copyright: 2022 Richard Andrew Cattermole
@@ -38,6 +40,18 @@ RCAllocator globalAllocator() @trusted nothrow @nogc {
             import sidero.base.allocators.mapping.malloc;
 
             globalAllocator_ = RCAllocator.instanceOf!Mallocator();
+        }
+
+        version(Posix) {
+            import sidero.base.allocators.mapping.malloc;
+            import core.sys.posix.pthread : pthread_atfork;
+
+            extern(C) static void onForkForGlobalAllocator() {
+                globalAllocator_ = RCAllocator.instanceOf!Mallocator();
+            }
+
+            // we need to clear out the state due to locks not getting cleared *sigh*
+            pthread_atfork(null, null, &onForkForGlobalAllocator);
         }
     }
 

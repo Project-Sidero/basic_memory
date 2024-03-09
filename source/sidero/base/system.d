@@ -729,14 +729,20 @@ pragma(crt_constructor) extern (C) void initializeSystemInfo() @trusted {
             if (GetUserNameW(buffer.ptr, &length))
                 _userName = String_UTF8(buffer[0 .. length]).dup;
         } else version(Posix) {
-            import core.sys.posix.unistd : getlogin;
+            import core.sys.posix.unistd : getlogin, getuid;
+            import core.sys.posix.pwd : getpwuid;
 
-            char* ptr = getlogin();
+            auto passwd = getpwuid(getuid());
+            char* ptr = passwd !is null ? passwd.pw_name : null;
+
+            if (ptr is null)
+                ptr = getlogin();
 
             if(ptr !is null) {
                 auto length = strlen(ptr);
                 if (length > 0)
                     length++;
+
 
                 _userName = String_UTF8(ptr[0 .. length]).dup;
             }
