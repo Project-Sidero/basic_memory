@@ -304,7 +304,7 @@ export:
         mutexForCreation.pureLock;
 
         LoggerReference ret = loggers[name];
-        if(ret) {
+        if(ret && !ret.isNull) {
             mutexForCreation.unlock;
             return ret;
         }

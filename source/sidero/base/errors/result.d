@@ -389,7 +389,7 @@ scope nothrow @nogc @safe:
                 "You forgot to check if value had an error for " ~ Type.stringof ~ ". assert(thing, thing.error.toString());",
                 this.error__, moduleName, line);
         logAssert(!error__.isSet(), null, this.error__, moduleName, line);
-        assert(_value !is null);
+        logAssert(_value !is null, "Reference to value has null reference, cannot return value", moduleName, line);
         return *_value;
     }
 

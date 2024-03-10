@@ -182,18 +182,24 @@ pure:
             return false;
         array = trueArray;
 
+        disableImpl();
+
+        allocatedTree.remove(trueArray);
+        removeRangeImpl(trueArray);
+
         const got = poolAllocator.reallocate(array, newSize);
 
         if(got) {
-            allocatedTree.remove(trueArray);
-            removeRangeImpl(trueArray);
-
             allocatedTree.store(array);
             addRangeImpl(array);
 
             array = array[0 .. newSize];
+        } else {
+            allocatedTree.store(trueArray);
+            addRangeImpl(trueArray);
         }
 
+        enableImpl();
         return got;
     }
 
@@ -215,12 +221,10 @@ pure:
         logAssert(trueArray.ptr <= array.ptr, null);
         logAssert(trueArray.length >= array.length, null);
 
-        const got = poolAllocator.deallocate(trueArray);
+        allocatedTree.remove(trueArray);
+        removeRangeImpl(trueArray);
 
-        if(got) {
-            allocatedTree.remove(trueArray);
-            removeRangeImpl(trueArray);
-        }
+        const got = poolAllocator.deallocate(trueArray);
 
         return got;
     }

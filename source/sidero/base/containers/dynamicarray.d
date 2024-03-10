@@ -806,6 +806,9 @@ private:
     }
 
     ErrorInfo changeIndexToOffset(ref ptrdiff_t a) scope @trusted {
+        if (this.isNull)
+            return ErrorInfo(NullPointerException("Dynamic array is null"));
+
         size_t actualLength = this.unsafeGetLiteral().length;
 
         if (a < 0) {
@@ -824,6 +827,9 @@ private:
     }
 
     ErrorInfo changeIndexToOffset(ref ptrdiff_t a, ref ptrdiff_t b) scope @trusted {
+        if (this.isNull)
+            return ErrorInfo(NullPointerException("Dynamic array is null"));
+
         size_t actualLength = this.unsafeGetLiteral().length;
 
         if (a < 0) {

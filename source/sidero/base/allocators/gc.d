@@ -28,12 +28,12 @@ alias InFinalizerFunction = extern (C) bool function() nothrow @nogc @safe;
 ///
 void enable() @trusted nothrow {
     readLockImpl;
-    scope(exit)
+    scope (exit)
         readUnlockImpl;
 
     GCInfo* current = gcInfoLL;
-    while(current !is null) {
-        if(current.enable !is null)
+    while (current !is null) {
+        if (current.enable !is null)
             current.enable();
         current = current.next;
     }
@@ -42,12 +42,12 @@ void enable() @trusted nothrow {
 ///
 void disable() @trusted nothrow {
     readLockImpl;
-    scope(exit)
+    scope (exit)
         readUnlockImpl;
 
     GCInfo* current = gcInfoLL;
-    while(current !is null) {
-        if(current.disable !is null)
+    while (current !is null) {
+        if (current.disable !is null)
             current.disable();
         current = current.next;
     }
@@ -56,7 +56,7 @@ void disable() @trusted nothrow {
 ///
 void addRange(scope void[] block, TypeInfo ti = null) pure @nogc nothrow {
     readLockImpl;
-    scope(exit)
+    scope (exit)
         readUnlockImpl;
 
     addRangeImpl(block, ti);
@@ -65,7 +65,7 @@ void addRange(scope void[] block, TypeInfo ti = null) pure @nogc nothrow {
 ///
 void removeRange(scope void[] block) pure @nogc nothrow {
     readLockImpl;
-    scope(exit)
+    scope (exit)
         readUnlockImpl;
 
     removeRangeImpl(block);
@@ -74,12 +74,12 @@ void removeRange(scope void[] block) pure @nogc nothrow {
 ///
 void collect() nothrow {
     readLockImpl;
-    scope(exit)
+    scope (exit)
         readUnlockImpl;
 
     GCInfo* current = gcInfoLL;
-    while(current !is null) {
-        if(current.collect !is null)
+    while (current !is null) {
+        if (current.collect !is null)
             current.collect();
         current = current.next;
     }
@@ -88,12 +88,12 @@ void collect() nothrow {
 ///
 void minimize() nothrow {
     readLockImpl;
-    scope(exit)
+    scope (exit)
         readUnlockImpl;
 
     GCInfo* current = gcInfoLL;
-    while(current !is null) {
-        if(current.minimize !is null)
+    while (current !is null) {
+        if (current.minimize !is null)
             current.minimize();
         current = current.next;
     }
@@ -102,12 +102,12 @@ void minimize() nothrow {
 ///
 void runFinalizers(const scope void[] block) {
     readLockImpl;
-    scope(exit)
+    scope (exit)
         readUnlockImpl;
 
     GCInfo* current = gcInfoLL;
-    while(current !is null) {
-        if(current.runFinalizers !is null)
+    while (current !is null) {
+        if (current.runFinalizers !is null)
             current.runFinalizers(block);
         current = current.next;
     }
@@ -116,13 +116,13 @@ void runFinalizers(const scope void[] block) {
 ///
 bool inFinalizer() pure @nogc nothrow {
     readLockImpl;
-    scope(exit)
+    scope (exit)
         readUnlockImpl;
 
     static bool handle() @trusted {
         GCInfo* current = gcInfoLL;
-        while(current !is null) {
-            if(current.inFinalizer !is null && current.inFinalizer())
+        while (current !is null) {
+            if (current.inFinalizer !is null && current.inFinalizer())
                 return true;
             current = current.next;
         }
@@ -138,34 +138,34 @@ void registerGC(scope void* key, EnableFunction enable, DisableFunction disable,
         AddRangeFunction addRange, RemoveRangeFunction removeRange, RunFinalizersFunction runFinalizers, InFinalizerFunction inFinalizer) nothrow {
 
     rwlock.writeLock;
-    scope(exit)
+    scope (exit)
         rwlock.pureWriteUnlock;
 
     GCInfo* current = gcInfoLL;
     GCInfo** parent = &gcInfoLL;
 
-    while(current !is null && cast(size_t)current.key < cast(size_t)key) {
+    while (current !is null && cast(size_t)current.key < cast(size_t)key) {
         parent = &current.next;
         current = current.next;
     }
 
-    if(current !is null && cast(size_t)current.key == cast(size_t)key) {
+    if (current !is null && cast(size_t)current.key == cast(size_t)key) {
         // update, why? idk
-        if(current.enable is null)
+        if (current.enable is null)
             current.enable = enable;
-        if(current.disable is null)
+        if (current.disable is null)
             current.disable = disable;
-        if(current.collect is null)
+        if (current.collect is null)
             current.collect = collect;
-        if(current.minimize is null)
+        if (current.minimize is null)
             current.minimize = minimize;
-        if(current.addRange is null)
+        if (current.addRange is null)
             current.addRange = addRange;
-        if(current.removeRange is null)
+        if (current.removeRange is null)
             current.removeRange = removeRange;
-        if(current.runFinalizers is null)
+        if (current.runFinalizers is null)
             current.runFinalizers = runFinalizers;
-        if(current.inFinalizer is null)
+        if (current.inFinalizer is null)
             current.inFinalizer = inFinalizer;
     } else {
         void[] block = gcInfoAllocator.allocate(GCInfo.sizeof);
@@ -190,18 +190,18 @@ void registerGC(scope void* key, EnableFunction enable, DisableFunction disable,
 ///
 void deregisterGC(scope void* key) nothrow {
     rwlock.writeLock;
-    scope(exit)
+    scope (exit)
         rwlock.pureWriteUnlock;
 
     GCInfo* current = gcInfoLL;
     GCInfo** parent = &gcInfoLL;
 
-    while(current !is null && cast(size_t)current.key < cast(size_t)key) {
+    while (current !is null && cast(size_t)current.key < cast(size_t)key) {
         parent = &current.next;
         current = current.next;
     }
 
-    if(current !is null && cast(size_t)current.key == cast(size_t)key) {
+    if (current !is null && cast(size_t)current.key == cast(size_t)key) {
         *parent = current.next;
         gcInfoAllocator.deallocate((cast(void*)current)[0 .. GCInfo.sizeof]);
     }
@@ -240,11 +240,37 @@ package(sidero.base.allocators) {
         (cast(void function()@trusted pure nothrow @nogc)&handle)();
     }
 
+    void enableImpl() @trusted pure @nogc nothrow {
+        static void handle() {
+            GCInfo* current = gcInfoLL;
+            while (current !is null) {
+                if (current.enable !is null)
+                    current.enable();
+                current = current.next;
+            }
+        }
+
+        (cast(void function()@trusted pure nothrow @nogc)&handle)();
+    }
+
+    void disableImpl() @trusted pure @nogc nothrow {
+        static void handle() {
+            GCInfo* current = gcInfoLL;
+            while (current !is null) {
+                if (current.disable !is null)
+                    current.disable();
+                current = current.next;
+            }
+        }
+
+        (cast(void function()@trusted pure nothrow @nogc)&handle)();
+    }
+
     void addRangeImpl(scope void[] block, scope TypeInfo ti = null) @trusted pure @nogc nothrow {
         static void handle(scope void[] block, scope TypeInfo ti = null) @trusted {
             GCInfo* current = gcInfoLL;
-            while(current !is null) {
-                if(current.addRange !is null)
+            while (current !is null) {
+                if (current.addRange !is null)
                     current.addRange(block.ptr, block.length, ti);
                 current = current.next;
             }
@@ -258,8 +284,8 @@ package(sidero.base.allocators) {
 
         static void handle(scope void[] block) @trusted {
             GCInfo* current = gcInfoLL;
-            while(current !is null) {
-                if(current.removeRange !is null)
+            while (current !is null) {
+                if (current.removeRange !is null)
                     current.removeRange(block.ptr);
                 current = current.next;
             }
