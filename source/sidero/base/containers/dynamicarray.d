@@ -180,7 +180,9 @@ scope nothrow @nogc:
         @disable this(size_t initialSize, RCAllocator allocator) const;
 
         this(return scope ref DynamicArray other) {
-            this.tupleof = other.tupleof;
+            this.state = other.state;
+            this.minimumOffset = other.minimumOffset;
+            this.maximumOffset = other.maximumOffset;
 
             if (this.state !is null) {
                 assert(!this.state.allocator.isNull);
