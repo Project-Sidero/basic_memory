@@ -66,9 +66,14 @@ struct GeneralPurposeAllocator {
     }
 
     // This is the best possible use of a free tree, which should be more efficient than a buddylist.
-    version(all) {
+    version(none) {
         alias GeneralPurposeAllocatorImpl = GCAllocatorLock!(FreeTree!(MemoryRegionsAllocator!(0),
                 FitsStrategy.BestFit, GoodAlignment, 0, false));
+    }
+
+    // for debugging issues
+    version(all) {
+        alias GeneralPurposeAllocatorImpl = GCAllocatorLock!Mallocator;
     }
 
     GeneralPurposeAllocatorImpl impl;

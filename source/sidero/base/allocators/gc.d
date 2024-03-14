@@ -149,42 +149,37 @@ void registerGC(scope void* key, EnableFunction enable, DisableFunction disable,
         current = current.next;
     }
 
-    if (current !is null && cast(size_t)current.key == cast(size_t)key) {
-        // update, why? idk
-        if (current.enable is null)
-            current.enable = enable;
-        if (current.disable is null)
-            current.disable = disable;
-        if (current.collect is null)
-            current.collect = collect;
-        if (current.minimize is null)
-            current.minimize = minimize;
-        if (current.addRange is null)
-            current.addRange = addRange;
-        if (current.removeRange is null)
-            current.removeRange = removeRange;
-        if (current.runFinalizers is null)
-            current.runFinalizers = runFinalizers;
-        if (current.inFinalizer is null)
-            current.inFinalizer = inFinalizer;
-    } else {
+    if (current is null || cast(size_t)current.key != cast(size_t)key) {
         void[] block = gcInfoAllocator.allocate(GCInfo.sizeof);
         assert(block.length == GCInfo.sizeof);
         GCInfo* newNode = cast(GCInfo*)block.ptr;
 
         newNode.next = current;
         newNode.key = key;
-        newNode.enable = enable;
-        newNode.disable = disable;
-        newNode.collect = collect;
-        newNode.minimize = minimize;
-        newNode.addRange = addRange;
-        newNode.removeRange = removeRange;
-        newNode.runFinalizers = runFinalizers;
-        newNode.inFinalizer = inFinalizer;
+        newNode.count = 0;
 
-        *parent = newNode;
+        current = newNode;
+        *parent = current;
     }
+
+    current.count++;
+
+    if (current.enable is null)
+        current.enable = enable;
+    if (current.disable is null)
+        current.disable = disable;
+    if (current.collect is null)
+        current.collect = collect;
+    if (current.minimize is null)
+        current.minimize = minimize;
+    if (current.addRange is null)
+        current.addRange = addRange;
+    if (current.removeRange is null)
+        current.removeRange = removeRange;
+    if (current.runFinalizers is null)
+        current.runFinalizers = runFinalizers;
+    if (current.inFinalizer is null)
+        current.inFinalizer = inFinalizer;
 }
 
 ///
@@ -202,8 +197,12 @@ void deregisterGC(scope void* key) nothrow {
     }
 
     if (current !is null && cast(size_t)current.key == cast(size_t)key) {
-        *parent = current.next;
-        gcInfoAllocator.deallocate((cast(void*)current)[0 .. GCInfo.sizeof]);
+        current.count--;
+
+        if (current.count == 0) {
+            *parent = current.next;
+            gcInfoAllocator.deallocate((cast(void*)current)[0 .. GCInfo.sizeof]);
+        }
     }
 }
 
@@ -267,12 +266,24 @@ package(sidero.base.allocators) {
     }
 
     void addRangeImpl(scope void[] block, scope TypeInfo ti = null) @trusted pure @nogc nothrow {
+        import core.stdc.stdio;
+        assert(block.ptr !is null);
+        assert(block.length > 0);
+
         static void handle(scope void[] block, scope TypeInfo ti = null) @trusted {
+            //printf("add %p %iL\n", block.ptr, block.length);
+
             GCInfo* current = gcInfoLL;
             while (current !is null) {
+                //printf("adding %p[[", current.key);
+                //fflush(stdout);
+
                 if (current.addRange !is null)
                     current.addRange(block.ptr, block.length, ti);
                 current = current.next;
+
+                //printf("]]\n");
+                //fflush(stdout);
             }
         }
 
@@ -280,14 +291,23 @@ package(sidero.base.allocators) {
     }
 
     void removeRangeImpl(scope void[] block) @trusted pure @nogc nothrow {
+        import core.stdc.stdio;
         assert(block.ptr !is null);
 
         static void handle(scope void[] block) @trusted {
+            //printf("remove %p %iL\n", block.ptr, block.length);
+
             GCInfo* current = gcInfoLL;
             while (current !is null) {
+                //printf("removeing %p[[", current.key);
+                //fflush(stdout);
+
                 if (current.removeRange !is null)
                     current.removeRange(block.ptr);
                 current = current.next;
+
+                //printf("]]\n");
+                //fflush(stdout);
             }
         }
 
@@ -308,6 +328,7 @@ __gshared {
 struct GCInfo {
     GCInfo* next;
     void* key;
+    ptrdiff_t count;
 
     EnableFunction enable;
     DisableFunction disable;

@@ -712,6 +712,7 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
     }
 
     bool tryInsertInternal(scope KeyType key, scope ValueType value, bool canUpdate = true) scope @trusted {
+        import sidero.base.containers.utils : genericCompare;
         const hash = nodeList.getHash(key);
         Node* prior = nodeList.priorNodeFor(hash);
 
@@ -719,6 +720,7 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
             // just update
 
             if(canUpdate) {
+                const differs = genericCompare(prior.next.key, key) != 0 || genericCompare(prior.next.value, value) != 0;
                 prior.next.key = key;
 
                 static if(isAnyPointer!ValueType) {
@@ -727,7 +729,7 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
                 }
 
                 prior.next.value = value;
-                return true;
+                return differs;
             } else
                 return false;
         }
