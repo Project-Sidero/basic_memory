@@ -288,7 +288,7 @@ nothrow @nogc:
 
         if(this.lifeTime !is null && atomicDecrementAndLoad(lifeTime.refCount, 1) == 0) {
             RCAllocator allocator = lifeTime.allocator;
-            allocator.dispose(cast(void[])lifeTime.original);
+            allocator.dispose(lifeTime.original);
             allocator.dispose(lifeTime);
         }
     }

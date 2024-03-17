@@ -166,7 +166,7 @@ scope @safe @nogc pure nothrow:
 
         if(current !is null && current.matches(array.ptr)) {
             removeNodeInParentAndRotate(parent);
-            internalAllocator.deallocate(current[0 .. Node.sizeof]);
+            internalAllocator.deallocate((cast(void*)current)[0 .. Node.sizeof]);
         }
     }
 

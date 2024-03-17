@@ -61,18 +61,18 @@ struct GeneralPurposeAllocator {
 
     // this will automatically bump up to the next power 2 size, and will always be a good size allocated based upon the PAGESIZE.
     // it'll hold up to 4gb of blocks quite happily. If you need more... yeah you're gonna have a problem anyway.
-    version(none) {
+    version (none) {
         alias GeneralPurposeAllocatorImpl = GCAllocatorLock!(BuddyList!(MemoryRegionsAllocator!(0), 6, 22, false));
     }
 
     // This is the best possible use of a free tree, which should be more efficient than a buddylist.
-    version(none) {
+    version (all) {
         alias GeneralPurposeAllocatorImpl = GCAllocatorLock!(FreeTree!(MemoryRegionsAllocator!(0),
                 FitsStrategy.BestFit, GoodAlignment, 0, false));
     }
 
     // for debugging issues
-    version(all) {
+    version (none) {
         alias GeneralPurposeAllocatorImpl = GCAllocatorLock!Mallocator;
     }
 

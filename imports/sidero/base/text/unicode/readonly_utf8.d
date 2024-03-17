@@ -444,6 +444,7 @@ nothrow @nogc:
 
     ///
     void opAssign(return scope typeof(this) other) scope @trusted {
+        this.__dtor;
         this.__ctor(other);
     }
 

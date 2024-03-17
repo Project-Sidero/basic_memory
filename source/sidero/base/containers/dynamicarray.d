@@ -199,9 +199,7 @@ scope nothrow @nogc:
 
                 if (state.slice !is null)
                     allocator.dispose(this.state.slice);
-                assert(!allocator.isNull);
                 allocator.dispose(this.state);
-                assert(!allocator.isNull);
                 this.state = null;
             }
         }
@@ -210,8 +208,8 @@ scope nothrow @nogc:
 @safe:
 
     void opAssign(scope DynamicArray other) {
-        this.tupleof = other.tupleof;
-        other.state = null;
+        this.__dtor;
+        this.__ctor(other);
     }
 
     ///
@@ -269,17 +267,15 @@ scope nothrow @nogc:
         RCAllocator allocator = this.state.allocator;
         size_t newLength = maximumOffset != size_t.max ? maximumOffset + amount : state.amountUsed + amount;
 
-        if (state.slice.length == 0) {
-            this.state = allocator.make!State(1, allocator.makeArray!ElementType(newLength), 0, allocator);
-            assert(this.state !is null);
-            assert(this.state.slice.length == newLength);
-
+        if (state.slice is null) {
+            this.state.slice = allocator.makeArray!ElementType(newLength);
             this.minimumOffset = 0;
             this.maximumOffset = size_t.max;
         } else if (newLength <= this.state.slice.length) {
             return;
         } else {
-            DynamicArray old = this;
+            DynamicArray old;
+            old.tupleof = this.tupleof;
 
             if (!allocator.expandArray(state.slice, amount)) {
                 newLength = old.maximumOffset != size_t.max ? old.maximumOffset : old.state.amountUsed;
