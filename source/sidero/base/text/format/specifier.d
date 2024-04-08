@@ -259,6 +259,10 @@ export @safe nothrow @nogc:
         Pointer, /// p, includes the prefix 0x and is in hex
     }
 
+    static FormatSpecifier defaults() {
+        return FormatSpecifier.init;
+    }
+
 private @hidden:
 
     static FormatSpecifier fromImpl(FormatString)(return scope ref FormatString format, bool alreadyInBrace = false) @trusted {
@@ -273,7 +277,7 @@ private @hidden:
             }
         }
 
-        FormatSpecifier ret = void;
+        FormatSpecifier ret = FormatSpecifier.defaults;
 
         // argId
         {
