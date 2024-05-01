@@ -245,7 +245,7 @@ export @safe nothrow @nogc:
         auto sep = this.platformSeparator();
         assert(sep);
 
-        DynamicArray!String_UTF8 ret = DynamicArray!String_UTF8(0, allocator);
+        DynamicArray!String_UTF8 ret = DynamicArray!String_UTF8(allocator);
         ret.reserve(parts.count(sep) + 1);
 
         while(parts.length > 0) {

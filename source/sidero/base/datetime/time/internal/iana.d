@@ -377,7 +377,6 @@ package(sidero.base.datetime):
                 size_t count;
 
                 foreach (transition; temp) {
-                    assert(transition);
                     if (transition.appliesOn >= endUnixTime)
                         break;
                     count++;

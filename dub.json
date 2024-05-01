@@ -50,7 +50,7 @@
                 "source/sidero/base/text/unicode/builder.d"
             ],
             "preBuildCommands": [
-                "$DUB_EXE run --single tools/unicode.d"
+                "DFLAGS=\"\" $DUB_EXE run --skip-registry=all --single tools/unicode.d"
             ]
         },
         {

@@ -164,7 +164,7 @@ nothrow @nogc:
     }
 
     ///
-    const(ElementType)[] unsafeGetLiteral() @system {
+    const(ElementType)[] unsafeGetLiteral() inout @system {
         return this.literal;
     }
 
@@ -367,7 +367,8 @@ nothrow @nogc:
 
     ///
     DynamicArray!ElementType asMutable(RCAllocator allocator = RCAllocator.init) scope {
-        return DynamicArray!ElementType(this, allocator);
+        DynamicArray!ElementType temp = DynamicArray!ElementType(this, allocator);
+        return temp;
     }
 
     ///

@@ -183,7 +183,7 @@ export @safe nothrow @nogc:
 
         auto sliced = state.storage[state.offsetOfPath .. state.offsetOfPath + state.lengthOfPath].asReadOnly(allocator);
 
-        DynamicArray!String_ASCII ret = DynamicArray!String_ASCII(0, allocator);
+        DynamicArray!String_ASCII ret = DynamicArray!String_ASCII(allocator);
         ret.reserve(sliced.count("/") + 1);
 
         while(!sliced.empty) {
@@ -226,7 +226,7 @@ export @safe nothrow @nogc:
 
         StringBuilder_UTF8 buffer = StringBuilder_UTF8(allocator);
 
-        DynamicArray!StringBuilder_UTF8 ret = DynamicArray!StringBuilder_UTF8(0, allocator);
+        DynamicArray!StringBuilder_UTF8 ret = DynamicArray!StringBuilder_UTF8(allocator);
         ret.reserve(sliced.count("/") + 1);
 
         while(!sliced.empty) {
@@ -297,7 +297,7 @@ export @safe nothrow @nogc:
 
         auto sliced = state.storage[state.offsetOfQuery .. state.offsetOfQuery + state.lengthOfQuery].asReadOnly(allocator);
 
-        DynamicArray!String_ASCII ret = DynamicArray!String_ASCII(0, allocator);
+        DynamicArray!String_ASCII ret = DynamicArray!String_ASCII(allocator);
         ret.reserve(sliced.count("&") + 1);
 
         while(!sliced.empty) {
@@ -339,7 +339,7 @@ export @safe nothrow @nogc:
 
         StringBuilder_UTF8 buffer = StringBuilder_UTF8(allocator);
 
-        DynamicArray!StringBuilder_UTF8 ret = DynamicArray!StringBuilder_UTF8(0, allocator);
+        DynamicArray!StringBuilder_UTF8 ret = DynamicArray!StringBuilder_UTF8(allocator);
         ret.reserve(sliced.count("&") + 1);
 
         while(!sliced.empty) {

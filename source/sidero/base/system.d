@@ -469,7 +469,9 @@ FilePath homeDirectory() @trusted {
                     ret = got.get;
             } else {
                 const sizeNeeded = sysconf(_SC_GETPW_R_SIZE_MAX);
-                DynamicArray!ubyte buffer = DynamicArray!ubyte(sizeNeeded > 0 ? sizeNeeded : 16384);
+
+                DynamicArray!ubyte buffer;
+                buffer.length = sizeNeeded > 0 ? sizeNeeded : 16384;
 
                 passwd pwdBuffer;
                 passwd* pwdResult;
@@ -599,7 +601,7 @@ pragma(crt_constructor) extern (C) void initializeSystemInfo() @trusted {
     }
 
     {
-        DynamicArray!String_UTF8 ret = DynamicArray!String_UTF8(0);
+        DynamicArray!String_UTF8 ret;
 
         scope (exit) {
             _commandLineArguments = ret.asReadOnly;
