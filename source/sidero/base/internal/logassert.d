@@ -8,7 +8,7 @@ void logAssert(bool condition, scope string message, string moduleName = __MODUL
     logAssert(condition, message, errorInfo, moduleName, line);
 }
 
-void logAssert(bool condition, scope string message, scope ref const ErrorInfo errorInfo, string moduleName = __MODULE__, int line = __LINE__) @trusted pure {
+void logAssert(bool condition, scope string message, scope const ErrorInfo errorInfo, string moduleName = __MODULE__, int line = __LINE__) @trusted pure {
     import core.stdc.stdlib : exit;
 
     if(condition)
