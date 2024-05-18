@@ -354,7 +354,7 @@ export:
 
     ///
     void opOpAssign(string op : "~")(return scope Slice!T input) scope @trusted {
-        this.opOpAssign!op(input.unsafeGetLiteral());
+        this.opOpAssign!op(cast(T[])input.unsafeGetLiteral());
     }
 
     ///
