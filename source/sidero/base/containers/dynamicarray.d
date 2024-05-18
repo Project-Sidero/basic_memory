@@ -475,7 +475,7 @@ export:
 
         this.copyOnWrite;
 
-        return Slice!T.fromDynamicArray(allocator, this.state.sliceMemory, this.unsafeGetLiteral());
+        return Slice!T.fromDynamicArray(this.state.sliceMemory, this.unsafeGetLiteral());
     }
 
     @property {
@@ -1176,10 +1176,8 @@ export @safe nothrow @nogc:
         else if (length == size_t.max)
             length = this.slice.length;
 
-        const offsetT = offset * ElementType.sizeof;
         const resultingLength = this.sliceMemory.expand!ElementType(offset, length, newLength, adjustToNewSize);
-
-        this.slice = cast(ElementType[])(this.sliceMemory.original[offsetT .. resultingLength]);
+        this.slice = cast(ElementType[])(this.sliceMemory.original[0 .. resultingLength]);
     }
 
     ulong toHash() scope const {

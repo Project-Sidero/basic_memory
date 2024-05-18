@@ -14,7 +14,7 @@ struct Slice(T) {
     private @PrettyPrintIgnore {
         import sidero.base.internal.meta : OpApplyCombos;
 
-        State!T* state;
+        State!T state;
         size_t _offset, _length;
 
         int opApplyImpl(Del)(scope Del del) @trusted scope {
@@ -99,7 +99,7 @@ export:
 @safe nothrow @nogc:
 
     invariant () {
-        if(state is null)
+        if(state.sliceMemory is null)
             return;
 
         assert(this._offset <= state.slice.length);
@@ -149,7 +149,7 @@ export:
 
     ///
     bool isNull() scope const {
-        return state is null;
+        return state.sliceMemory is null;
     }
 
     ///
@@ -263,7 +263,7 @@ export:
 
         ///
         void popFront() scope {
-            if(state is null)
+            if(this.isNull)
                 return;
 
             if(this._length == size_t.max)
@@ -277,7 +277,7 @@ export:
 
         ///
         void popBack() scope {
-            if(state is null)
+            if(this.isNull)
                 return;
             if(this._length == size_t.max)
                 this._length = state.slice.length - this._offset;
@@ -526,16 +526,12 @@ export:
         return indexOf(other) >= 0;
     }
 
-    package(sidero.base.containers) static Slice fromDynamicArray(RCAllocator allocator, SliceMemory* sliceMemory, T[] slice) @trusted {
+    package(sidero.base.containers) static Slice fromDynamicArray(SliceMemory* sliceMemory, T[] slice) @trusted {
         // This is almost guaranteed to be initialized with the DynamicArray,
         //  so don't worry too much about exports.
         import sidero.base.internal.atomic;
 
         Slice ret;
-
-        ret.state = allocator.make!(State!T);
-        ret.state.allocator = allocator;
-        atomicStore(ret.state.refCount, 1);
 
         ret._offset = slice.ptr - (cast(T*)sliceMemory.original.ptr);
         ret._length = slice.length;
@@ -556,10 +552,6 @@ private:
         void createState() {
             if(allocator.isNull)
                 allocator = globalAllocator();
-
-            this.state = allocator.make!(State!T);
-            this.state.allocator = allocator;
-            atomicStore(this.state.refCount, 1);
 
             this._offset = 0;
             this._length = size_t.max;
@@ -599,7 +591,7 @@ private:
             this.state.sliceMemory.copyElements = &copyElements;
         }
 
-        if(this.state is null) {
+        if(this.state.sliceMemory is null) {
             // If we are currently null, we merely need to construct state
 
             createState();
@@ -760,25 +752,19 @@ private:
 import sidero.base.containers.internal.slice;
 
 struct State(ElementType) {
-    RCAllocator allocator;
-    shared(ptrdiff_t) refCount;
-
     SliceMemory* sliceMemory;
     ElementType[] slice;
 
 export @safe nothrow @nogc:
 
+    this(ref State other) scope @trusted {
+        this.tupleof = other.tupleof;
+    }
+
     void rcExternal(bool addRef) scope @trusted {
         import sidero.base.internal.atomic;
 
-        if(addRef)
-            atomicIncrementAndLoad(this.refCount, 1);
-        else if(atomicDecrementAndLoad(this.refCount, 1) == 0) {
-            sliceMemory.rcExternal(false);
-
-            RCAllocator allocator = this.allocator;
-            allocator.dispose(&this);
-        }
+        sliceMemory.rcExternal(addRef);
     }
 
     void expand(size_t offset, size_t length, size_t newLength, bool adjustToNewSize = true) scope @trusted {
@@ -787,10 +773,8 @@ export @safe nothrow @nogc:
         else if (length == size_t.max)
             length = this.slice.length;
 
-        const offsetT = offset * ElementType.sizeof;
         const resultingLength = this.sliceMemory.expand!ElementType(offset, length, newLength, adjustToNewSize);
-
-        this.slice = cast(ElementType[])(this.sliceMemory.original[offsetT .. resultingLength]);
+        this.slice = cast(ElementType[])(this.sliceMemory.original[0 .. resultingLength]);
     }
 
     ulong toHash() scope const {

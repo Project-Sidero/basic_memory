@@ -90,11 +90,6 @@ export @safe nothrow @nogc:
     }
 
     size_t expand(ElementType)(size_t offset, size_t length, size_t newLength, bool adjustToNewSize = true) scope @trusted {
-        /+if (newLength <= this.slice.length)
-            return;
-        else if (length == size_t.max)
-            length = this.slice.length;+/
-
         bool canExpandIntoOriginal() scope const {
             size_t temp = offset;
             temp += length;
@@ -127,13 +122,6 @@ export @safe nothrow @nogc:
             return newEndOffsetT;
         } else
             return oldEndOffsetT;
-
-        /+if (sliceIt) {
-            this.slice = cast(ElementType[])(this.sliceMemory.original[offsetT .. newEndOffsetT]);
-            sliceMemory.amountUsed = newEndOffsetT;
-        } else {
-            this.slice = cast(ElementType[])(this.sliceMemory.original[offsetT .. oldEndOffsetT]);
-        }+/
     }
 
     ulong toHash() scope const {
