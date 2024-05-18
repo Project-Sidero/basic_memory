@@ -121,12 +121,12 @@ export:
     }
 
     ///
-    this(return scope T[] input, RCAllocator allocator = RCAllocator.init) scope @trusted {
+    this(return scope const(T)[] input, RCAllocator allocator = RCAllocator.init) scope @trusted {
         this.ensureSetup(true, input.length, allocator);
         assert(this.length == input.length);
 
         foreach(i, ref v; cast(T[])this.unsafeGetLiteral())
-            v = input[i];
+            v = *cast(T*)&input[i];
     }
 
     ///
