@@ -18,15 +18,15 @@ export @safe nothrow @nogc:
     void rcExternal(bool addRef) scope @trusted {
         import sidero.base.internal.atomic;
 
-        if (addRef)
+        if(addRef)
             atomicIncrementAndLoad(this.refCount, 1);
-        else if (atomicDecrementAndLoad(this.refCount, 1) == 0) {
+        else if(atomicDecrementAndLoad(this.refCount, 1) == 0) {
             RCAllocator allocator = this.allocator;
 
-            if (this.cleanup !is null)
+            if(this.cleanup !is null)
                 this.cleanup(original[0 .. this.amountUsed]);
 
-            if (this.original.length > 0)
+            if(this.original.length > 0)
                 allocator.dispose(this.original);
             allocator.dispose(&this);
         }
@@ -38,10 +38,10 @@ export @safe nothrow @nogc:
         const oldSize = this.original.length;
         logAssert(oldSize < newSize, "New size of slice is smaller than existing size");
 
-        if (newSize > 0) {
-            if (oldSize == 0)
+        if(newSize > 0) {
+            if(oldSize == 0)
                 this.original = this.allocator.allocate(newSize);
-            else if (!this.allocator.reallocate(this.original, newSize)) {
+            else if(!this.allocator.reallocate(this.original, newSize)) {
                 void[] temp = this.allocator.allocate(newSize);
 
                 this.copyElements(this.original[0 .. this.amountUsed], temp[0 .. this.amountUsed]);
@@ -83,9 +83,57 @@ export @safe nothrow @nogc:
 
         ret.original = allocator.makeArray!void(amountForNewBuffer);
         ret.initElements(ret.original);
-        ret.copyElements(this.original[offsetIntoOriginalBuffer .. offsetIntoOriginalBuffer + amountFromOriginalBuffer], ret.original[0 .. amountFromOriginalBuffer]);
+        ret.copyElements(this.original[offsetIntoOriginalBuffer .. offsetIntoOriginalBuffer + amountFromOriginalBuffer],
+                ret.original[0 .. amountFromOriginalBuffer]);
 
         return ret;
+    }
+
+    size_t expand(ElementType)(size_t offset, size_t length, size_t newLength, bool adjustToNewSize = true) scope @trusted {
+        /+if (newLength <= this.slice.length)
+            return;
+        else if (length == size_t.max)
+            length = this.slice.length;+/
+
+        bool canExpandIntoOriginal() scope const {
+            size_t temp = offset;
+            temp += length;
+            temp *= ElementType.sizeof;
+
+            if(temp != this.amountUsed)
+                return false;
+
+            temp = offset;
+            temp += newLength;
+            temp *= ElementType.sizeof;
+
+            return temp <= this.original.length;
+        }
+
+        const offsetT = offset * ElementType.sizeof;
+        const oldLengthT = length * ElementType.sizeof;
+        const newLengthT = newLength * ElementType.sizeof;
+
+        const oldEndOffsetT = offsetT + oldLengthT;
+        const newEndOffsetT = offsetT + newLengthT;
+
+        if(canExpandIntoOriginal()) {
+        } else {
+            this.expandInternal(newEndOffsetT);
+        }
+
+        if(adjustToNewSize) {
+            this.amountUsed = newEndOffsetT;
+            return newEndOffsetT;
+        } else
+            return oldEndOffsetT;
+
+        /+if (sliceIt) {
+            this.slice = cast(ElementType[])(this.sliceMemory.original[offsetT .. newEndOffsetT]);
+            sliceMemory.amountUsed = newEndOffsetT;
+        } else {
+            this.slice = cast(ElementType[])(this.sliceMemory.original[offsetT .. oldEndOffsetT]);
+        }+/
     }
 
     ulong toHash() scope const {

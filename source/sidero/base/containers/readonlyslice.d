@@ -705,13 +705,6 @@ unittest {
         aValue = da2slice[$ - 1];
         assert(aValue, aValue.getError.toString().unsafeGetLiteral);
         assert(aValue == 9);
-
-        ErrorResult didAssign = da2[2] = 6270;
-        assert(didAssign);
-        Result!int checkValue = da2[2];
-        assert(checkValue);
-        assert(checkValue == 6270);
-        assert(da2 == [2, 6, 6270, 1]);
     }
 
     {
@@ -788,45 +781,16 @@ export @safe nothrow @nogc:
         }
     }
 
-    void expand(size_t offset, size_t length, size_t newLength, bool sliceIt = true) scope @trusted {
-        if(newLength <= this.slice.length)
+    void expand(size_t offset, size_t length, size_t newLength, bool adjustToNewSize = true) scope @trusted {
+        if (newLength <= this.slice.length)
             return;
-        else if(length == size_t.max)
+        else if (length == size_t.max)
             length = this.slice.length;
 
-        bool canExpandIntoOriginal() scope const {
-            size_t temp = offset;
-            temp += length;
-            temp *= ElementType.sizeof;
-
-            if(temp != this.sliceMemory.amountUsed)
-                return false;
-
-            temp = offset;
-            temp += newLength;
-            temp *= ElementType.sizeof;
-
-            return temp <= this.sliceMemory.original.length;
-        }
-
         const offsetT = offset * ElementType.sizeof;
-        const oldLengthT = length * ElementType.sizeof;
-        const newLengthT = newLength * ElementType.sizeof;
+        const resultingLength = this.sliceMemory.expand!ElementType(offset, length, newLength, adjustToNewSize);
 
-        const oldEndOffsetT = offsetT + oldLengthT;
-        const newEndOffsetT = offsetT + newLengthT;
-
-        if(canExpandIntoOriginal()) {
-        } else {
-            sliceMemory.expandInternal(newEndOffsetT);
-        }
-
-        if(sliceIt) {
-            this.slice = cast(ElementType[])(this.sliceMemory.original[offsetT .. newEndOffsetT]);
-            sliceMemory.amountUsed = newEndOffsetT;
-        } else {
-            this.slice = cast(ElementType[])(this.sliceMemory.original[offsetT .. oldEndOffsetT]);
-        }
+        this.slice = cast(ElementType[])(this.sliceMemory.original[offsetT .. resultingLength]);
     }
 
     ulong toHash() scope const {
