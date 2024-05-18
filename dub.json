@@ -49,8 +49,11 @@
                 "source/sidero/base/text/unicode/readonly.d",
                 "source/sidero/base/text/unicode/builder.d"
             ],
-            "preBuildCommands": [
+            "preBuildCommands-posix": [
                 "DFLAGS=\"\" $DUB_EXE run --skip-registry=all --single tools/unicode.d"
+            ],
+            "preBuildCommands-windows": [
+                "set DFLAGS=\"\"; $DUB_EXE run --skip-registry=all --single tools/unicode.d"
             ]
         },
         {
