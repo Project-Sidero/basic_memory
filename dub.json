@@ -152,7 +152,8 @@
             ]
         },
         {
-            "name": "unittest"
+            "name": "unittest",
+            "versions": ["InitAfterDruntimeSideroBase"]
         },
         {
             "name": "executable",
