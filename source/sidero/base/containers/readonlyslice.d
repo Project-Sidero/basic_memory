@@ -1,55 +1,37 @@
-///
 module sidero.base.containers.readonlyslice;
 import sidero.base.containers.dynamicarray;
 import sidero.base.allocators;
-import sidero.base.text;
-import sidero.base.text.format;
 import sidero.base.errors;
+import sidero.base.text;
 import sidero.base.attributes;
 
-export:
-
-private alias SliceI = Slice!int;
+private {
+    alias Sint = Slice!int;
+}
 
 ///
-struct Slice(Type) {
-    package(sidero.base.containers) @PrettyPrintIgnore LiteralType literal;
-
+struct Slice(T) {
     private @PrettyPrintIgnore {
         import sidero.base.internal.meta : OpApplyCombos;
-        import sidero.base.internal.atomic;
 
-        LifeTime* lifeTime;
-        Iterator* iterator;
+        State!T* state;
+        size_t _offset, _length;
 
         int opApplyImpl(Del)(scope Del del) @trusted scope {
-            bool deallocateAllocator;
-
             if(isNull)
                 return 0;
-
-            Iterator* oldIterator = this.iterator;
-
-            this.iterator = null;
-            setupIterator;
-
-            if(oldIterator !is null)
-                this.iterator.literal = oldIterator.literal;
-
-            scope(exit) {
-                this.iterator.rc(false);
-                this.iterator = oldIterator;
-            }
 
             size_t offset;
             int result;
 
-            while(!empty) {
-                Result!Type temp = front();
+            Slice self = this;
+
+            while(!self.empty) {
+                Result!T temp = self.front();
                 if(!temp)
                     return result;
 
-                Type got = temp;
+                T got = temp;
 
                 static if(__traits(compiles, del(offset, got)))
                     result = del(offset, got);
@@ -62,7 +44,7 @@ struct Slice(Type) {
                     return result;
 
                 offset++;
-                popFront();
+                self.popFront();
             }
 
             return result;
@@ -72,28 +54,17 @@ struct Slice(Type) {
             if(isNull)
                 return 0;
 
-            Iterator* oldIterator = this.iterator;
-
-            this.iterator = null;
-            setupIterator;
-
-            if(oldIterator !is null)
-                this.iterator.literal = oldIterator.literal;
-
-            scope(exit) {
-                this.iterator.rc(false);
-                this.iterator = oldIterator;
-            }
-
             size_t offset = this.length - 1;
             int result;
 
-            while(!empty) {
-                Result!Type temp = back();
+            Slice self = this;
+
+            while(!self.empty) {
+                Result!T temp = self.back();
                 if(!temp)
                     return result;
 
-                Type got = temp;
+                T got = temp;
 
                 static if(__traits(compiles, del(offset, got)))
                     result = del(offset, got);
@@ -106,443 +77,369 @@ struct Slice(Type) {
                     return result;
 
                 offset--;
-                popBack();
+                self.popBack();
             }
 
             return result;
         }
     }
+
 export:
 
     ///
-    alias ElementType = Type;
+    mixin OpApplyCombos!("T", "size_t", ["@safe", "nothrow", "@nogc"]);
     ///
-    alias LiteralType = const(Type)[];
-
-    ///
-    mixin OpApplyCombos!("ElementType", "size_t", ["@safe", "nothrow", "@nogc"]);
+    mixin OpApplyCombos!("T", "size_t", ["@safe", "nothrow", "@nogc"], "opApplyReverse");
 
     ///
-    unittest {
-        static Literal = [ElementType.init];
-        Slice literal = Slice(Literal);
+    alias ElementType = T;
+    ///
+    alias LiteralType = const(T)[];
 
-        size_t lastIndex;
+@safe nothrow @nogc:
 
-        foreach(c; literal) {
-            assert(Literal[lastIndex] == c);
-            lastIndex++;
-        }
+    invariant () {
+        if(state is null)
+            return;
 
-        assert(lastIndex == Literal.length);
+        assert(this._offset <= state.slice.length);
+
+        if(this._length < size_t.max)
+            assert(this._offset + this._length <= state.slice.length);
     }
 
     ///
-    mixin OpApplyCombos!("ElementType", "size_t", ["@safe", "nothrow", "@nogc"], "opApplyReverse");
-
-    ///
-    unittest {
-        static Literal = [ElementType.init];
-        Slice literal = Slice(Literal);
-
-        size_t lastIndex = Literal.length;
-
-        foreach_reverse(c; literal) {
-            lastIndex--;
-            assert(Literal[lastIndex] == c);
-        }
-
-        assert(lastIndex == 0);
-    }
-
-nothrow @nogc:
-    const(ElementType)* ptr() @system {
-        if(this.lifeTime !is null)
-            return this.lifeTime.original.ptr;
-        else
-            return this.literal.ptr;
+    this(RCAllocator allocator) scope {
+        this.ensureSetup(true, 0, allocator);
     }
 
     ///
-    const(ElementType)[] unsafeGetLiteral() inout @system {
-        return this.literal;
+    this(return scope T input, RCAllocator allocator = RCAllocator.init) scope @trusted {
+        this.ensureSetup(true, 1, allocator);
+
+        (cast(T[])this.unsafeGetLiteral())[0] = input;
     }
 
     ///
-    Slice opSlice() scope @trusted {
-        if(isNull)
-            return Slice();
+    this(return scope T[] input, RCAllocator allocator = RCAllocator.init) scope @trusted {
+        this.ensureSetup(true, input.length, allocator);
+        assert(this.length == input.length);
 
-        Slice ret;
-
-        ret.lifeTime = this.lifeTime;
-        if(ret.lifeTime !is null)
-            atomicIncrementAndLoad(ret.lifeTime.refCount, 1);
-
-        ret.literal = this.literal;
-        ret.setupIterator();
-        return ret;
+        foreach(i, ref v; cast(T[])this.unsafeGetLiteral())
+            v = input[i];
     }
 
     ///
-    Result!Slice opSlice(ptrdiff_t startIndex, ptrdiff_t endIndex) scope @trusted {
-        ErrorInfo errorInfo = changeIndexToOffset(startIndex, endIndex);
-        if(errorInfo.isSet)
-            return typeof(return)(errorInfo);
-        if(startIndex == endIndex)
-            return Result!Slice();
-
-        Slice ret;
-
-        ret.lifeTime = this.lifeTime;
-        if(ret.lifeTime !is null)
-            atomicIncrementAndLoad(ret.lifeTime.refCount, 1);
-
-        ret.literal = this.literal[startIndex .. endIndex];
-        return Result!Slice(ret);
-    }
-
-    ///
-    Slice withoutIterator() scope @trusted {
-        Slice ret;
-        ret.literal = this.literal;
-        ret.lifeTime = this.lifeTime;
-
-        if(this.lifeTime !is null)
-            atomicIncrementAndLoad(ret.lifeTime.refCount, 1);
-
-        return ret;
-    }
-
-    ///
-    unittest {
-        static Literal = [ElementType.init];
-        Slice stuff = Slice(Literal);
-        assert(stuff == stuff.withoutIterator);
-    }
-
-@safe:
-
-    ///
-    void opAssign(scope LiteralType literal) scope @trusted {
-        this = Slice(literal);
-    }
-
-    ///
-    unittest {
-        Slice info;
-        info = [ElementType.init];
-    }
-
-    @disable void opAssign(scope LiteralType other) scope const;
-
-    ///
-    this(return scope ref Slice other) scope @trusted {
+    this(return scope ref Slice other) scope {
         this.tupleof = other.tupleof;
 
-        if(haveIterator)
-            this.iterator.rc(true);
-        if(this.lifeTime !is null)
-            atomicIncrementAndLoad(this.lifeTime.refCount, 1);
+        if(!isNull)
+            this.state.rcExternal(true);
     }
 
     ///
-    unittest {
-        static Literal = [ElementType.init];
-        Slice original = Slice(Literal);
-        Slice copied = original;
+    ~this() {
+        if(isNull)
+            return;
+
+        this.state.rcExternal(false);
     }
 
-    @disable this(ref return scope const Slice other) scope const;
-
-    @trusted {
-        ///
-        this(return scope LiteralType literal, return scope RCAllocator allocator = RCAllocator.init,
-                return scope LiteralType toDeallocate = null) scope {
-            if(literal.length > 0 || (toDeallocate.length > 0 && !allocator.isNull)) {
-                this.literal = literal;
-
-                if(!allocator.isNull) {
-                    if(toDeallocate is null)
-                        toDeallocate = literal;
-
-                    lifeTime = allocator.make!LifeTime(1, allocator, toDeallocate);
-                    assert(this.lifeTime !is null);
-                }
-            }
-        }
-
-        ///
-        unittest {
-            static Literal = [ElementType.init];
-            Slice foobar = Slice(Literal);
-        }
-
-        @disable this(return scope LiteralType literal, return scope RCAllocator allocator = RCAllocator.init,
-                return scope LiteralType toDeallocate = null) scope const;
-    }
-
-    ~this() scope @trusted {
-        if(haveIterator)
-            this.iterator.rc(false);
-
-        if(this.lifeTime !is null && atomicDecrementAndLoad(lifeTime.refCount, 1) == 0) {
-            RCAllocator allocator = lifeTime.allocator;
-            allocator.dispose(lifeTime.original);
-            allocator.dispose(lifeTime);
-        }
-    }
+    @disable auto opCast(T)();
 
     ///
     bool isNull() scope const {
-        return this.literal is null || this.literal.length == 0;
+        return state is null;
     }
 
     ///
-    @trusted unittest {
-        Slice stuff;
-        assert(stuff.isNull);
+    inout(T)* ptr() scope inout @system {
+        if(isNull)
+            return null;
 
-        stuff = [ElementType.init];
-        assert(!stuff.isNull);
-
-        stuff = stuff[1 .. 1].assumeOkay;
-        assert(stuff.isNull);
+        return &state.slice[this._offset];
     }
 
     ///
-    bool haveIterator() scope {
-        return this.iterator !is null;
-    }
+    const(T)[] unsafeGetLiteral() return scope inout @system {
+        if(isNull)
+            return null;
 
-    ///
-    unittest {
-        static Literal = [ElementType.init];
-        Slice thing = Slice(Literal);
-        assert(!thing.haveIterator);
-
-        assert(!thing.empty);
-        thing.popFront;
-
-        assert(thing.haveIterator);
+        return state.slice[this._offset .. this._offset + this.length];
     }
 
     ///
     alias opDollar = length;
 
     ///
-    ptrdiff_t length() const scope nothrow @nogc {
-        return this.literal.length;
+    size_t length() scope const {
+        if(isNull)
+            return 0;
+        else if(this._length == size_t.max)
+            return this.state.slice.length - this._offset;
+        else
+            return this._length;
     }
 
     ///
-    unittest {
-        static Slice global = Slice([ElementType.init]);
-        assert(global.length == 1);
-        assert(global.literal.length == 1);
+    Slice withoutIterator() return scope @trusted {
+        if(isNull)
+            return Slice.init;
+
+        Slice ret = this;
+        ret._offset = 0;
+        ret._length = size_t.max;
+
+        return ret;
+    }
+
+    ///
+    void opAssign(return scope Slice other) scope {
+        this.destroy;
+        this.__ctor(other);
+    }
+
+    ///
+    Result!Slice opSlice(ptrdiff_t start, ptrdiff_t end) {
+        ErrorInfo errorInfo = changeIndexToOffset(start, end);
+        if(errorInfo.isSet())
+            return typeof(return)(errorInfo);
+
+        Slice ret = this;
+        ret._offset = this._offset + start;
+        ret._length = end - start;
+
+        return typeof(return)(ret);
+    }
+
+    ///
+    Result!T opIndex(ptrdiff_t index) scope @trusted {
+        ErrorInfo errorInfo = changeIndexToOffset(index);
+        if(errorInfo.isSet())
+            return typeof(return)(errorInfo);
+
+        return typeof(return)(this.state.slice[this._offset + index]);
     }
 
     ///
     Slice dup(RCAllocator allocator = RCAllocator.init) scope @trusted {
-        if(isNull)
-            return Slice();
+        const newLength = this.length;
 
-        if(allocator.isNull) {
-            allocator = globalAllocator();
+        Slice ret;
+        ret.ensureSetup(true, newLength, allocator);
+        ret.state.expand(0, newLength, newLength);
+        ret._length = newLength;
+
+        size_t offset;
+
+        foreach(ref v; cast(T[])this.unsafeGetLiteral()) {
+            ret.state.slice[offset++] = v;
         }
 
-        LiteralType literal = allocator.makeArray!ElementType(this.literal);
-        return Slice(literal, allocator, literal);
+        return ret;
     }
 
     ///
-    @system unittest {
-        static Slice original = Slice([ElementType.init]);
-        Slice copy = original.dup;
-
-        assert(copy.length == original.length);
-        assert(copy.literal.length == original.literal.length);
-        assert(original.ptr !is copy.ptr);
-    }
-
-    ///
-    DynamicArray!ElementType asMutable(RCAllocator allocator = RCAllocator.init) scope {
-        DynamicArray!ElementType temp = DynamicArray!ElementType(this, allocator);
+    DynamicArray!ElementType asMutable(RCAllocator allocator = RCAllocator.init) scope @trusted {
+        DynamicArray!ElementType temp = DynamicArray!ElementType(cast(T[])this.unsafeGetLiteral, allocator);
         return temp;
     }
 
-    ///
-    unittest {
-        static Literal = [ElementType.init];
-        DynamicArray!ElementType got = Slice(Literal).asMutable();
-        assert(got.length == Literal.length);
+    @property {
+        ///
+        bool empty() scope const {
+            return this.length == 0;
+        }
+
+        ///
+        Result!T front() scope {
+            return this[0];
+        }
+
+        ///
+        Result!T back() scope {
+            return this[-1];
+        }
+
+        ///
+        void popFront() scope {
+            if(state is null)
+                return;
+
+            if(this._length == size_t.max)
+                this._length = state.slice.length - this._offset;
+            if(this._length == 0)
+                return;
+
+            this._offset++;
+            this._length--;
+        }
+
+        ///
+        void popBack() scope {
+            if(state is null)
+                return;
+            if(this._length == size_t.max)
+                this._length = state.slice.length - this._offset;
+            if(this._length == 0)
+                return;
+
+            this._length--;
+        }
+    }
+
+    @PrintIgnore @PrettyPrintIgnore {
+        ///
+        String_UTF8 toString(RCAllocator allocator = RCAllocator.init) @trusted {
+            StringBuilder_UTF8 ret = StringBuilder_UTF8(allocator);
+            toString(ret);
+            return ret.asReadOnly;
+        }
+
+        ///
+        void toString(Sink)(scope ref Sink sink) @trusted {
+            sink.formattedWrite("", this.unsafeGetLiteral());
+        }
+
+        ///
+        String_UTF8 toStringPretty(RCAllocator allocator = RCAllocator.init) @trusted {
+            StringBuilder_UTF8 ret = StringBuilder_UTF8(allocator);
+            toStringPretty(ret);
+            return ret.asReadOnly;
+        }
+
+        ///
+        void toStringPretty(Sink)(scope ref Sink sink) @trusted {
+            PrettyPrint prettyPrint = PrettyPrint.defaults;
+            prettyPrint(sink, this.unsafeGetLiteral());
+        }
     }
 
     ///
-    Result!Type opIndex(ptrdiff_t index) scope @trusted {
-        ErrorInfo errorInfo = changeIndexToOffset(index);
-        if(errorInfo.isSet)
-            return typeof(return)(errorInfo);
+    ulong toHash() scope const @trusted {
+        import sidero.base.hash.utils : hashOf;
 
-        return Result!Type(*cast(Type*)&this.literal[index]);
+        const data = this.unsafeGetLiteral();
+        return hashOf(data);
     }
-
-    @disable auto opCast(Type)();
 
     ///
     alias equals = opEquals;
 
     ///
-    bool opEquals(scope DynamicArray!Type other) scope const {
-        return opCmp(other) == 0;
+    bool opEquals(scope const T[] other) scope const @trusted {
+        import sidero.base.containers.utils : genericCompare;
+
+        const dataUs = this.unsafeGetLiteral();
+        return genericCompare(dataUs, other) == 0;
     }
 
     ///
-    bool opEquals(scope Slice!Type other) scope const {
-        return opCmp(other) == 0;
+    bool opEquals(scope const Slice other) scope const @trusted {
+        import sidero.base.containers.utils : genericCompare;
+
+        const dataUs = this.unsafeGetLiteral(), dataOther = other.unsafeGetLiteral();
+        return genericCompare(dataUs, dataOther) == 0;
     }
 
     ///
-    bool opEquals(scope LiteralType other) scope const {
-        return opCmp(other) == 0;
+    bool opEquals(scope const DynamicArray!T other) scope const @trusted {
+        import sidero.base.containers.utils : genericCompare;
+
+        const dataUs = this.unsafeGetLiteral(), dataOther = other.unsafeGetLiteral();
+        return genericCompare(dataUs, dataOther) == 0;
     }
 
     ///
     alias compare = opCmp;
 
     ///
-    int opCmp(scope DynamicArray!Type other) scope @trusted const {
-        return opCmp(other.unsafeGetLiteral);
+    int opCmp(scope const T[] other) scope const @trusted {
+        import sidero.base.containers.utils : genericCompare;
+
+        const dataUs = this.unsafeGetLiteral();
+        return genericCompare(dataUs, other);
     }
 
     ///
-    int opCmp(scope Slice!Type other) scope @trusted const {
-        return opCmp(other.unsafeGetLiteral);
+    int opCmp(scope const Slice other) scope const @trusted {
+        import sidero.base.containers.utils : genericCompare;
+
+        const dataUs = this.unsafeGetLiteral(), dataOther = other.unsafeGetLiteral();
+        return genericCompare(dataUs, dataOther);
     }
 
     ///
-    int opCmp(scope LiteralType other) scope const @trusted {
-        import sidero.base.containers.utils;
+    int opCmp(scope const DynamicArray!T other) scope const @trusted {
+        import sidero.base.containers.utils : genericCompare;
 
-        LiteralType us = this.literal;
-        return genericCompare(us, other);
+        const dataUs = this.unsafeGetLiteral(), dataOther = other.unsafeGetLiteral();
+        return genericCompare(dataUs, dataOther);
     }
 
     ///
-    ulong toHash() scope const {
-        import sidero.base.hash.utils : hashOf;
-
-        ulong ret = hashOf();
-
-        foreach(ref v; this.literal) {
-            ret = hashOf(v);
-        }
-
-        return ret;
-    }
-
-    @property {
-        ///
-        bool empty() scope {
-            return (haveIterator && this.iterator.literal.length == 0) || this.literal.length == 0;
-        }
-
-        ///
-        Result!ElementType front() scope @trusted {
-            assert(!isNull);
-            setupIterator;
-
-            if(empty)
-                return typeof(return)(RangeException);
-
-            return typeof(return)(*cast(ElementType*)&this.iterator.literal[0]);
-        }
-
-        ///
-        Result!ElementType back() scope @trusted {
-            assert(!isNull);
-            setupIterator;
-
-            if(empty)
-                return typeof(return)(RangeException);
-
-            return typeof(return)(*cast(ElementType*)&this.iterator.literal[$ - 1]);
-        }
-    }
-
-    /// See_Also: front
-    void popFront() scope {
-        assert(!empty);
-        setupIterator;
-
-        this.iterator.literal = this.iterator.literal[1 .. $];
-    }
-
-    /// See_Also: back
-    void popBack() scope {
-        assert(!empty);
-        setupIterator;
-
-        this.iterator.literal = this.iterator.literal[0 .. $ - 1];
-    }
-
-    ///
-    bool startsWith(scope DynamicArray!Type other) scope @trusted {
+    bool startsWith(scope DynamicArray!T other) scope @trusted {
         return startsWith(other.unsafeGetLiteral);
     }
 
     ///
-    bool startsWith(scope Slice!Type other) scope @trusted {
+    bool startsWith(scope Slice other) scope @trusted {
         return startsWith(other.unsafeGetLiteral);
     }
 
     ///
     bool startsWith(scope LiteralType other...) scope @trusted {
-        LiteralType us = this.literal;
+        import sidero.base.containers.utils : genericCompare;
 
-        if(other.length == 0 || other.length == 0 || other.length > us.length)
+        LiteralType us = unsafeGetLiteral();
+
+        if(other.length > us.length)
             return false;
-        return cast(Type[])us[0 .. other.length] == cast(Type[])other;
+        return genericCompare(us[0 .. other.length], other) == 0;
     }
 
     ///
-    bool endsWith(scope DynamicArray!Type other) scope @trusted {
+    bool endsWith(scope DynamicArray!T other) scope @trusted {
         return endsWith(other.unsafeGetLiteral);
     }
 
     ///
-    bool endsWith(scope Slice!Type other) scope @trusted {
+    bool endsWith(scope Slice other) scope @trusted {
         return endsWith(other.unsafeGetLiteral);
     }
 
     ///
     bool endsWith(scope LiteralType other...) scope @trusted {
-        LiteralType us = this.literal;
+        import sidero.base.containers.utils : genericCompare;
+
+        LiteralType us = unsafeGetLiteral();
 
         if(us.length == 0 || other.length == 0 || us.length < other.length)
             return false;
-        return cast(Type[])us[$ - other.length .. $] == cast(Type[])other;
+        return genericCompare(us[$ - other.length .. $], other) == 0;
     }
 
     ///
-    ptrdiff_t indexOf(scope DynamicArray!Type other) scope @trusted {
+    ptrdiff_t indexOf(scope DynamicArray!T other) scope @trusted {
         return indexOf(other.unsafeGetLiteral);
     }
 
     ///
-    ptrdiff_t indexOf(scope Slice!Type other) scope @trusted {
+    ptrdiff_t indexOf(scope Slice other) scope @trusted {
         return indexOf(other.unsafeGetLiteral);
     }
 
     ///
     ptrdiff_t indexOf(scope LiteralType other...) scope @trusted {
-        LiteralType us = this.literal;
+        import sidero.base.containers.utils : genericCompare;
+
+        LiteralType us = unsafeGetLiteral();
 
         if(other.length > us.length)
             return -1;
 
         foreach(i; 0 .. (us.length + 1) - other.length) {
-            if(cast(Type[])us[i .. i + other.length] == cast(Type[])other)
+            if(genericCompare(us[i .. i + other.length], other) == 0)
                 return i;
         }
 
@@ -550,24 +447,26 @@ nothrow @nogc:
     }
 
     ///
-    ptrdiff_t lastIndexOf(scope DynamicArray!Type other) scope @trusted {
+    ptrdiff_t lastIndexOf(scope DynamicArray!T other) scope @trusted {
         return lastIndexOf(other.unsafeGetLiteral);
     }
 
     ///
-    ptrdiff_t lastIndexOf(scope Slice!Type other) scope @trusted {
+    ptrdiff_t lastIndexOf(scope Slice other) scope @trusted {
         return lastIndexOf(other.unsafeGetLiteral);
     }
 
     ///
     ptrdiff_t lastIndexOf(scope LiteralType other...) scope @trusted {
-        LiteralType us = this.literal;
+        import sidero.base.containers.utils : genericCompare;
+
+        LiteralType us = unsafeGetLiteral();
 
         if(other.length > us.length)
             return -1;
 
         foreach_reverse(i; 0 .. (us.length + 1) - other.length) {
-            if(cast(Type[])us[i .. i + other.length] == cast(Type[])other)
+            if(genericCompare(us[i .. i + other.length], other) == 0)
                 return i;
         }
 
@@ -575,18 +474,20 @@ nothrow @nogc:
     }
 
     ///
-    ptrdiff_t count(scope DynamicArray!Type other) scope @trusted {
+    ptrdiff_t count(scope DynamicArray!T other) scope @trusted {
         return count(other.unsafeGetLiteral);
     }
 
     ///
-    ptrdiff_t count(scope Slice!Type other) scope @trusted {
+    ptrdiff_t count(scope Slice other) scope @trusted {
         return count(other.unsafeGetLiteral);
     }
 
     ///
     size_t count(scope LiteralType other...) scope @trusted {
-        LiteralType us = this.literal;
+        import sidero.base.containers.utils : genericCompare;
+
+        LiteralType us = unsafeGetLiteral();
 
         if(other.length > us.length)
             return 0;
@@ -594,7 +495,7 @@ nothrow @nogc:
         size_t got;
 
         while(us.length >= other.length) {
-            if(cast(Type[])us[0 .. other.length] == cast(Type[])other) {
+            if(genericCompare(us[0 .. other.length], other) == 0) {
                 got++;
                 us = us[other.length .. $];
             } else
@@ -605,14 +506,14 @@ nothrow @nogc:
     }
 
     ///
-    bool contains(scope DynamicArray!Type other) scope {
+    bool contains(scope DynamicArray!T other) scope {
         if(other.isNull)
             return 0;
         return indexOf(other) >= 0;
     }
 
     ///
-    bool contains(scope Slice!Type other) scope {
+    bool contains(scope Slice other) scope {
         if(other.isNull)
             return 0;
         return indexOf(other) >= 0;
@@ -625,85 +526,106 @@ nothrow @nogc:
         return indexOf(other) >= 0;
     }
 
-    @PrintIgnore @PrettyPrintIgnore {
-        ///
-        String_UTF8 toString(RCAllocator allocator = globalAllocator()) @trusted {
-            StringBuilder_UTF8 ret = StringBuilder_UTF8(allocator);
-            toString(ret);
-            return ret.asReadOnly;
-        }
+    package(sidero.base.containers) static Slice fromDynamicArray(RCAllocator allocator, SliceMemory* sliceMemory, T[] slice) @trusted {
+        // This is almost guaranteed to be initialized with the DynamicArray,
+        //  so don't worry too much about exports.
+        import sidero.base.internal.atomic;
 
-        ///
-        void toString(Sink)(scope ref Sink sink) @trusted {
-            sink.formattedWrite("", this.unsafeGetLiteral);
-        }
+        Slice ret;
 
-        ///
-        String_UTF8 toStringPretty(RCAllocator allocator = globalAllocator()) @trusted {
-            StringBuilder_UTF8 ret = StringBuilder_UTF8(allocator);
-            this.toStringPretty(ret);
-            return ret.asReadOnly;
-        }
+        ret.state = allocator.make!(State!T);
+        ret.state.allocator = allocator;
+        atomicStore(ret.state.refCount, 1);
 
-        ///
-        void toStringPretty(Sink)(scope ref Sink sink) {
-            PrettyPrint prettyPrint = PrettyPrint.defaults;
-            prettyPrint(sink, cast(Slice)this);
-        }
+        ret._offset = slice.ptr - (cast(T*)sliceMemory.original.ptr);
+        ret._length = slice.length;
+
+        ret.state.sliceMemory = sliceMemory;
+        sliceMemory.rcExternal(true);
+
+        ret.state.slice = slice;
+        return ret;
     }
 
 private:
-    static struct LifeTime {
-        shared(ptrdiff_t) refCount;
-        RCAllocator allocator;
-        LiteralType original;
 
-        @disable bool opEquals(ref const LifeTime other) const;
-    }
+    void ensureSetup(bool willModify, size_t amountNeeded = 0, RCAllocator allocator = RCAllocator.init) scope @trusted {
+        import sidero.base.allocators.utils : fillUninitializedWithInit;
+        import sidero.base.internal.atomic;
 
-    static struct Iterator {
-        shared(ptrdiff_t) refCount;
-        RCAllocator allocator;
-        LiteralType literal;
+        void createState() {
+            if(allocator.isNull)
+                allocator = globalAllocator();
 
-    export scope @nogc nothrow:
+            this.state = allocator.make!(State!T);
+            this.state.allocator = allocator;
+            atomicStore(this.state.refCount, 1);
 
-        void rc(bool add) @trusted {
-            if(add)
-                atomicIncrementAndLoad(refCount, 1);
-            else if(atomicDecrementAndLoad(refCount, 1) == 0) {
-                RCAllocator allocator2 = this.allocator;
-                allocator2.dispose(&this);
-            }
-
+            this._offset = 0;
+            this._length = size_t.max;
         }
 
-        @disable bool opEquals(ref const Iterator other) const;
-    }
+        void createSliceMemory() {
+            this.state.sliceMemory = allocator.make!SliceMemory;
+            this.state.sliceMemory.allocator = allocator;
+            atomicStore(this.state.sliceMemory.refCount, 1);
 
-    void setupIterator() @trusted scope {
-        if(isNull || haveIterator)
+            static void cleanup(void[] slice) @trusted {
+                T[] array = cast(T[])slice;
+
+                foreach(ref v; array) {
+                    v.destroy;
+                }
+            }
+
+            static void initElements(void[] slice) @trusted {
+                T[] array = cast(T[])slice;
+
+                fillUninitializedWithInit(array);
+            }
+
+            static void copyElements(void[] from, void[] into) @trusted {
+                T[] from2 = cast(T[])from;
+                T[] into2 = cast(T[])into;
+                assert(from2.length <= into2.length);
+
+                foreach(i; 0 .. from2.length) {
+                    into2[i] = from2[i];
+                }
+            }
+
+            this.state.sliceMemory.initElements = &initElements;
+            this.state.sliceMemory.cleanup = &cleanup;
+            this.state.sliceMemory.copyElements = &copyElements;
+        }
+
+        if(this.state is null) {
+            // If we are currently null, we merely need to construct state
+
+            createState();
+            createSliceMemory();
+
+            if(amountNeeded > 0)
+                this.state.expand(0, 0, amountNeeded, true);
+
             return;
-
-        RCAllocator allocator;
-
-        if(lifeTime is null)
-            allocator = globalAllocator();
-        else
-            allocator = lifeTime.allocator;
-
-        this.iterator = allocator.make!Iterator(1, allocator, this.literal);
-        assert(this.iterator !is null);
+        } else
+            assert(0);
     }
 
-    ErrorInfo changeIndexToOffset(ref ptrdiff_t a) scope {
-        size_t actualLength = literal.length;
+    ErrorInfo changeIndexToOffset(ref ptrdiff_t a) scope @trusted {
+        if(this.isNull)
+            return ErrorInfo(NullPointerException("Dynamic array is null"));
+
+        size_t actualLength = this.length;
 
         if(a < 0) {
             if(actualLength < -a)
-                return ErrorInfo(RangeException("First offset must be smaller than length"));
+                return ErrorInfo(RangeException("First index must be smaller than length"));
             a = actualLength + a;
-        } else if (a > actualLength) {
+        }
+
+        if(a > actualLength) {
             if(a < ptrdiff_t.max)
                 return ErrorInfo(RangeException("First offset must be smaller than length"));
             a = actualLength;
@@ -712,27 +634,22 @@ private:
         return ErrorInfo.init;
     }
 
-    ErrorInfo changeIndexToOffset(ref ptrdiff_t a, ref ptrdiff_t b) scope {
-        size_t actualLength = literal.length;
+    ErrorInfo changeIndexToOffset(ref ptrdiff_t a, ref ptrdiff_t b) scope @trusted {
+        if(this.isNull)
+            return ErrorInfo(NullPointerException("Dynamic array is null"));
+
+        size_t actualLength = this.length;
 
         if(a < 0) {
             if(actualLength < -a)
-                return ErrorInfo(RangeException("First offset must be smaller than length"));
+                return ErrorInfo(RangeException("First index must be smaller than length"));
             a = actualLength + a;
-        } else if (a > actualLength) {
-            if(a < ptrdiff_t.max)
-                return ErrorInfo(RangeException("First offset must be smaller than length"));
-            a = actualLength;
         }
 
         if(b < 0) {
             if(actualLength < -b)
-                return ErrorInfo(RangeException("Second offset must be smaller than length"));
+                return ErrorInfo(RangeException("Second index must be smaller than length"));
             b = actualLength + b;
-        } else if (b > actualLength) {
-            if(b < ptrdiff_t.max)
-                return ErrorInfo(RangeException("Second offset must be smaller than length"));
-            b = actualLength;
         }
 
         if(b < a) {
@@ -741,11 +658,186 @@ private:
             b = temp;
         }
 
+        if(a > actualLength) {
+            if(a < ptrdiff_t.max)
+                return ErrorInfo(RangeException("First offset must be smaller than length"));
+            a = actualLength;
+        }
+        if(b > actualLength) {
+            if(b < ptrdiff_t.max)
+                return ErrorInfo(RangeException("Second offset must be smaller than length"));
+            b = actualLength;
+        }
+
         return ErrorInfo.init;
     }
 }
 
+///
 unittest {
-    SliceI slice = SliceI([1, 2, 3, 4, 5]);
-    assert(slice.toString() == "[1, 2, 3, 4, 5]");
+    alias SliceI = Slice!int;
+
+    {
+        SliceI da2 = SliceI([2, 6, 9, 1]);
+        assert(da2 == [2, 6, 9, 1]);
+
+        Result!int aValue = da2[1];
+        assert(aValue, aValue.getError.toString().unsafeGetLiteral);
+        assert(aValue == 6);
+        aValue = da2[-2];
+        assert(aValue, aValue.getError.toString().unsafeGetLiteral);
+        assert(aValue == 9);
+        aValue = da2[$ - 2];
+        assert(aValue, aValue.getError.toString().unsafeGetLiteral);
+        assert(aValue == 9);
+
+        Result!SliceI da2slice = da2[1 .. -1];
+        assert(da2slice, da2slice.getError.toString().unsafeGetLiteral);
+        assert(da2slice.length == 2);
+        assert(da2slice.assumeOkay == [6, 9]);
+
+        aValue = da2slice[0];
+        assert(aValue, aValue.getError.toString().unsafeGetLiteral);
+        assert(aValue == 6);
+        aValue = da2slice[-1];
+        assert(aValue, aValue.getError.toString().unsafeGetLiteral);
+        assert(aValue == 9);
+        aValue = da2slice[$ - 1];
+        assert(aValue, aValue.getError.toString().unsafeGetLiteral);
+        assert(aValue == 9);
+
+        ErrorResult didAssign = da2[2] = 6270;
+        assert(didAssign);
+        Result!int checkValue = da2[2];
+        assert(checkValue);
+        assert(checkValue == 6270);
+        assert(da2 == [2, 6, 6270, 1]);
+    }
+
+    {
+        assert(SliceI([1, 2, 3]) < [4, 5, 6]);
+        assert(SliceI([1, 2, 3]) < [1, 2, 3, 4]);
+        assert(SliceI([1, 2, 3]) < [1, 2, 4]);
+        assert(SliceI([1, 2, 3]) > [1, 2]);
+        assert(SliceI([1, 2, 3]) > [1, 2, 1]);
+        assert(SliceI([1, 2, 3]) == [1, 2, 3]);
+
+        assert(SliceI([1, 2, 3]) < SliceI([4, 5, 6]));
+        assert(SliceI([1, 2, 3]) < SliceI([1, 2, 3, 4]));
+        assert(SliceI([1, 2, 3]) < SliceI([1, 2, 4]));
+        assert(SliceI([1, 2, 3]) > SliceI([1, 2]));
+        assert(SliceI([1, 2, 3]) > SliceI([1, 2, 1]));
+        assert(SliceI([1, 2, 3]) == SliceI([1, 2, 3]));
+    }
+
+    {
+        int[] data = [4, 5, 6, 9, 22, 7, 13, 10000000];
+        ptrdiff_t lastSeen = -1, seen;
+
+        foreach(i, v; SliceI(data)) {
+            assert(lastSeen + 1 == i);
+            assert(data[i] == v);
+
+            lastSeen = i;
+            seen++;
+        }
+        assert(seen == data.length);
+
+        lastSeen = 8;
+        seen = 0;
+        foreach_reverse(i, v; SliceI(data)) {
+            assert(lastSeen - 1 == i);
+            assert(data[i] == v);
+
+            lastSeen = i;
+            seen++;
+        }
+        assert(seen == data.length);
+
+        seen = 0;
+        foreach(v; SliceI(data)) {
+            assert(data[seen] == v);
+            seen++;
+        }
+        assert(seen == data.length);
+    }
+}
+
+private:
+import sidero.base.containers.internal.slice;
+
+struct State(ElementType) {
+    RCAllocator allocator;
+    shared(ptrdiff_t) refCount;
+
+    SliceMemory* sliceMemory;
+    ElementType[] slice;
+
+export @safe nothrow @nogc:
+
+    void rcExternal(bool addRef) scope @trusted {
+        import sidero.base.internal.atomic;
+
+        if(addRef)
+            atomicIncrementAndLoad(this.refCount, 1);
+        else if(atomicDecrementAndLoad(this.refCount, 1) == 0) {
+            sliceMemory.rcExternal(false);
+
+            RCAllocator allocator = this.allocator;
+            allocator.dispose(&this);
+        }
+    }
+
+    void expand(size_t offset, size_t length, size_t newLength, bool sliceIt = true) scope @trusted {
+        if(newLength <= this.slice.length)
+            return;
+        else if(length == size_t.max)
+            length = this.slice.length;
+
+        bool canExpandIntoOriginal() scope const {
+            size_t temp = offset;
+            temp += length;
+            temp *= ElementType.sizeof;
+
+            if(temp != this.sliceMemory.amountUsed)
+                return false;
+
+            temp = offset;
+            temp += newLength;
+            temp *= ElementType.sizeof;
+
+            return temp <= this.sliceMemory.original.length;
+        }
+
+        const offsetT = offset * ElementType.sizeof;
+        const oldLengthT = length * ElementType.sizeof;
+        const newLengthT = newLength * ElementType.sizeof;
+
+        const oldEndOffsetT = offsetT + oldLengthT;
+        const newEndOffsetT = offsetT + newLengthT;
+
+        if(canExpandIntoOriginal()) {
+        } else {
+            sliceMemory.expandInternal(newEndOffsetT);
+        }
+
+        if(sliceIt) {
+            this.slice = cast(ElementType[])(this.sliceMemory.original[offsetT .. newEndOffsetT]);
+            sliceMemory.amountUsed = newEndOffsetT;
+        } else {
+            this.slice = cast(ElementType[])(this.sliceMemory.original[offsetT .. oldEndOffsetT]);
+        }
+    }
+
+    ulong toHash() scope const {
+        assert(0);
+    }
+
+    bool opEquals(scope const State other) scope const {
+        assert(0);
+    }
+
+    int opCmp(scope const State other) scope const {
+        assert(0);
+    }
 }

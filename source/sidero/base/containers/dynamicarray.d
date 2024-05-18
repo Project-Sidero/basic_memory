@@ -473,7 +473,9 @@ export:
         else if (allocator.isNull)
             allocator = globalAllocator();
 
-        return Slice!T(allocator.makeArray!T(this.unsafeGetLiteral), allocator);
+        this.copyOnWrite;
+
+        return Slice!T.fromDynamicArray(allocator, this.state.sliceMemory, this.unsafeGetLiteral());
     }
 
     @property {
@@ -698,12 +700,12 @@ export:
     }
 
     ///
-    ptrdiff_t lastIndexOf(scope DynamicArray!ElementType other) scope @trusted {
+    ptrdiff_t lastIndexOf(scope DynamicArray other) scope @trusted {
         return lastIndexOf(other.unsafeGetLiteral);
     }
 
     ///
-    ptrdiff_t lastIndexOf(scope Slice!ElementType other) scope @trusted {
+    ptrdiff_t lastIndexOf(scope Slice!T other) scope @trusted {
         return lastIndexOf(other.unsafeGetLiteral);
     }
 
@@ -828,8 +830,6 @@ private:
             this.state.sliceMemory.cleanup = &cleanup;
             this.state.sliceMemory.copyElements = &copyElements;
         }
-
-        import sidero.base.console;
 
         if (this.state is null) {
             // If we are currently null, we merely need to construct state
