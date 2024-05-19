@@ -62,7 +62,9 @@
             "dflags": [
                 "-preview=dip1000"
             ],
-            "versions": ["SideroBase_OnlyUnderTheHood"],
+            "versions": [
+                "SideroBase_OnlyUnderTheHood"
+            ],
             "importPaths": [
             ],
             "sourcePaths": [
@@ -119,15 +121,22 @@
             "dflags-posix-dmd": [
                 "-allinst"
             ],
-           "dflags-posix-ldc": [
+            "dflags-posix-ldc": [
                 "-allinst"
             ],
             "lflags-windows": [
                 "/IGNORE:4217",
                 "/FORCE:MULTIPLE"
             ],
-            "libs-windows": ["Ws2_32", "advapi32", "Userenv"],
-            "versions": ["Windows7"],
+            "libs-windows": [
+                "Ws2_32",
+                "advapi32",
+                "Userenv",
+                "Netapi32"
+            ],
+            "versions": [
+                "Windows7"
+            ],
             "dependencies": {
                 "sidero_base:makeUnicodeStrings": "*"
             }
@@ -153,7 +162,9 @@
         },
         {
             "name": "unittest",
-            "versions": ["InitAfterDruntimeSideroBase"]
+            "versions": [
+                "InitAfterDruntimeSideroBase"
+            ]
         },
         {
             "name": "executable",
