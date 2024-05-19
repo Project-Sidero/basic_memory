@@ -588,6 +588,31 @@ void unicodeLanguage(UnicodeLanguage language) @trusted {
     initMutex.unlock;
 }
 
+///
+struct OperatingSystem {
+    ///
+    String_UTF8 name;
+    ///
+    uint major, minor;
+
+export @safe nothrow @nogc:
+
+    this(return scope ref OperatingSystem other) scope @trusted {
+        this.tupleof = other.tupleof;
+    }
+}
+
+///
+OperatingSystem operatingSystem() @trusted {
+    initMutex.pureLock;
+
+    scope (exit) {
+        initMutex.unlock;
+    }
+
+    return _operatingSystem;
+}
+
 /// Initializes system info
 pragma(crt_constructor) extern (C) void initializeSystemInfo() @trusted {
     import sidero.base.containers.dynamicarray;
@@ -749,6 +774,28 @@ pragma(crt_constructor) extern (C) void initializeSystemInfo() @trusted {
             }
         }
     }
+
+    {
+        version (Windows) {
+
+        } else version (Posix) {
+            import core.sys.posix.sys.utsname : utsname, uname;
+
+            _operatingSystem = OperatingSystem.init;
+
+            utsname name;
+            if (uname(&name) >= 0) {
+                char[] sysname = name.sysname[0 .. strlen(name.sysname.ptr)];
+                char[] release = name.release[0 .. strlen(name.release.ptr)];
+
+                String_UTF8 sysnameWrapped = String_UTF8(sysname);
+                String_UTF8 releaseWrapped = String_UTF8(release);
+
+                _operatingSystem.name = sysnameWrapped.dup;
+                cast(void)releaseWrapped.formattedRead("{:d}.{:d}", _operatingSystem.major, _operatingSystem.minor);
+            }
+        }
+    }
 }
 
 /// Uninitialize system info
@@ -793,6 +840,8 @@ __gshared {
     uint cpuCount_;
 
     String_UTF8 _userName;
+
+    OperatingSystem _operatingSystem;
 }
 
 Locale getLocaleImpl(ref bool refresh) @trusted {
