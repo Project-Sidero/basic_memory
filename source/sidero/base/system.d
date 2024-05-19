@@ -618,6 +618,7 @@ pragma(crt_constructor) extern (C) void initializeSystemInfo() @trusted {
     import sidero.base.containers.dynamicarray;
     import core.stdc.string : strlen;
     import core.stdc.wchar_ : wcslen;
+    import core.stdc.stdio : sscanf;
 
     initMutex.pureLock;
 
@@ -802,19 +803,13 @@ pragma(crt_constructor) extern (C) void initializeSystemInfo() @trusted {
                 char[] release = name.release[0 .. strlen(name.release.ptr)];
 
                 String_UTF8 sysnameWrapped = String_UTF8(sysname);
-                String_UTF8 releaseWrapped = String_UTF8(release);
 
                 _operatingSystem.name = sysnameWrapped.dup;
-                cast(void)releaseWrapped.formattedRead("{:d}.{:d}", _operatingSystem.major, _operatingSystem.minor);
+                sscanf(release.ptr, "%u.%u", &_operatingSystem.major, &_operatingSystem.minor);
             }
         } else
             static assert(0, "Unimplemented getting of operating system details");
     }
-}
-
-shared static this() {
-    import sidero.base.console;
-    debugWriteln("/", operatingSystem);
 }
 
 /// Uninitialize system info
