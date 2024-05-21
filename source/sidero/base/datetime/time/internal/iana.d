@@ -535,7 +535,6 @@ void loadTZ(scope DynamicArray!ubyte rawFileRead, return scope String_UTF8 regio
 
         size_t i;
         foreach (v; reading) {
-            assert(v);
             buffer[i++] = v;
         }
 

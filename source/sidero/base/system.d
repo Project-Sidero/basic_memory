@@ -600,6 +600,10 @@ export @safe nothrow @nogc:
     this(return scope ref OperatingSystem other) scope @trusted {
         this.tupleof = other.tupleof;
     }
+
+    static OperatingSystem defaults() {
+        return OperatingSystem.init;
+    }
 }
 
 ///
