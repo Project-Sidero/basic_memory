@@ -29,21 +29,20 @@ export @safe nothrow @nogc:
 
     ///
     void readLock() scope {
-        if(atomicIncrementAndLoad(readers, 1) == 1)
+        if (atomicIncrementAndLoad(readers, 1) == 1)
             globalLock.lock;
     }
 
     ///
     void readUnlock() scope {
-        if(atomicDecrementAndLoad(readers, 1) == 0)
+        if (atomicDecrementAndLoad(readers, 1) == 0)
             globalLock.unlock;
     }
 
     ///
-    void pureConvertReadToWrite() scope @trusted {
-        if(atomicDecrementAndLoad(readers, 1) == 0)
-            return;
-        globalLock.lock;
+    void convertReadToWrite() scope @trusted {
+        if (atomicDecrementAndLoad(readers, 1) > 0)
+            globalLock.lock;
     }
 
 pure:
@@ -55,7 +54,7 @@ pure:
 
     /// A limited lock method, that is pure.
     void pureReadLock() scope @trusted {
-        if(atomicIncrementAndLoad(readers, 1) == 1)
+        if (atomicIncrementAndLoad(readers, 1) == 1)
             globalLock.pureLock;
     }
 
@@ -66,14 +65,13 @@ pure:
 
     /// A limited unlock method, that is pure.
     void pureReadUnlock() scope @trusted {
-        if(atomicDecrementAndLoad(readers, 1) == 0)
+        if (atomicDecrementAndLoad(readers, 1) == 0)
             globalLock.unlock;
     }
 
     /// A limited conversion method, that is pure.
     void pureConvertReadToWrite() scope @trusted {
-        if(atomicDecrementAndLoad(readers, 1) == 0)
-            return;
-        globalLock.pureLock;
+        if (atomicDecrementAndLoad(readers, 1) > 0)
+            globalLock.pureLock;
     }
 }

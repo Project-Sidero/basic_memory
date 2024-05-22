@@ -41,10 +41,9 @@ export @safe nothrow @nogc:
     }
 
     ///
-    void pureConvertReadToWrite() scope @trusted {
-        if (atomicDecrementAndLoad(readers, 1) == 0)
-            return;
-        logAssert(globalLock.lock, "Failed to lock");
+    void convertReadToWrite() scope @trusted {
+        if (atomicDecrementAndLoad(readers, 1) > 0)
+            logAssert(globalLock.lock, "Failed to lock");
     }
 
 pure:
@@ -73,8 +72,7 @@ pure:
 
     /// A limited conversion method, that is pure.
     void pureConvertReadToWrite() scope @trusted {
-        if (atomicDecrementAndLoad(readers, 1) == 0)
-            return;
-        logAssert(globalLock.lock, "Failed to lock");
+        if (atomicDecrementAndLoad(readers, 1) > 0)
+            logAssert(globalLock.lock, "Failed to lock");
     }
 }
