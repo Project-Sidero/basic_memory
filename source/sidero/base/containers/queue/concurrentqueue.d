@@ -1,6 +1,6 @@
 module sidero.base.containers.queue.concurrentqueue;
 import sidero.base.allocators;
-import sidero.base.synchronization.mutualexclusion;
+import sidero.base.synchronization.system.lock;
 import sidero.base.errors;
 
 ///
@@ -12,6 +12,7 @@ alias LiFoConcurrentQueue(Type) = ConcurrentQueue!(Type, false);
 struct ConcurrentQueue(Type, bool FiFo) {
     private {
         import sidero.base.internal.atomic;
+        import sidero.base.internal.logassert;
 
         State!Type* state;
     }
@@ -20,7 +21,7 @@ export @safe nothrow @nogc:
 
     ///
     this(RCAllocator allocator) scope @trusted {
-        if(allocator.isNull)
+        if (allocator.isNull)
             allocator = globalAllocator();
 
         this.state = allocator.make!(State!Type);
@@ -31,14 +32,14 @@ export @safe nothrow @nogc:
     this(return scope ref ConcurrentQueue other) scope {
         this.state = other.state;
 
-        if(this.state !is null) {
+        if (this.state !is null) {
             atomicIncrementAndLoad(state.refCount, 1);
         }
     }
 
     ///
     ~this() scope @trusted {
-        if(this.state !is null && atomicDecrementAndLoad(state.refCount, 1) == 0) {
+        if (this.state !is null && atomicDecrementAndLoad(state.refCount, 1) == 0) {
             RCAllocator allocator = state.allocator;
             state.clear;
             allocator.dispose(state);
@@ -52,11 +53,12 @@ export @safe nothrow @nogc:
 
     ///
     bool empty() scope {
-        if(isNull)
+        if (isNull)
             return true;
 
-        state.mutex.pureLock;
-        scope(exit)
+        auto err = state.mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
+        scope (exit)
             state.mutex.unlock;
 
         return state.head is null;
@@ -64,21 +66,23 @@ export @safe nothrow @nogc:
 
     ///
     void clear() scope {
-        if(isNull)
+        if (isNull)
             return;
 
-        state.mutex.pureLock;
+        auto err = state.mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
         state.clear;
         state.mutex.unlock;
     }
 
     ///
     size_t count() scope {
-        if(isNull)
+        if (isNull)
             return 0;
 
-        state.mutex.pureLock;
-        scope(exit)
+        auto err = state.mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
+        scope (exit)
             state.mutex.unlock;
 
         return state.count;
@@ -88,21 +92,23 @@ export @safe nothrow @nogc:
     void push(scope return Type value, bool fiFo = FiFo) scope @trusted {
         checkInit;
 
-        state.mutex.pureLock;
+        auto err = state.mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
         state.push(fiFo, value);
         state.mutex.unlock;
     }
 
     ///
     Result!Type pop(bool fiFo = FiFo) return scope {
-        if(isNull)
+        if (isNull)
             return typeof(return)(NullPointerException);
 
-        state.mutex.pureLock;
-        scope(exit)
+        auto err = state.mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
+        scope (exit)
             state.mutex.unlock;
 
-        if(state.head is null)
+        if (state.head is null)
             return typeof(return)(RangeException("Nothing to pop off of stack"));
 
         auto temp = state.pop(fiFo);
@@ -111,14 +117,15 @@ export @safe nothrow @nogc:
 
     ///
     Result!Type peek(bool fiFo = FiFo) return scope {
-        if(isNull)
+        if (isNull)
             return typeof(return)(NullPointerException);
 
-        state.mutex.pureLock;
-        scope(exit)
+        auto err = state.mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
+        scope (exit)
             state.mutex.unlock;
 
-        if(state.head is null)
+        if (state.head is null)
             return typeof(return)(RangeException("Nothing to pop off of stack"));
 
         auto temp = state.peek(fiFo);
@@ -145,15 +152,15 @@ export @safe nothrow @nogc:
 
     ///
     int opCmp(scope ConcurrentQueue other) scope const @trusted {
-        if(this.state < other.state)
+        if (this.state < other.state)
             return -1;
-        else if(this.state > other.state)
+        else if (this.state > other.state)
             return 1;
         else
             return 0;
     }
 
-    version(none) {
+    version (none) {
         void debugMe() scope {
             import sidero.base.console;
 
@@ -167,7 +174,7 @@ export @safe nothrow @nogc:
 private:
 
     void checkInit() scope @trusted {
-        if(!isNull)
+        if (!isNull)
             return;
 
         RCAllocator allocator = globalAllocator();
@@ -216,7 +223,7 @@ struct State(Type) {
     shared(ptrdiff_t) refCount = 1;
     RCAllocator allocator;
 
-    TestTestSetLockInline mutex;
+    SystemLock mutex;
 
     Node* head, tail;
     size_t count;
@@ -225,11 +232,12 @@ export @safe nothrow @nogc:
 
     void debugMe() {
         import sidero.base.console;
+
         Node* node = head;
 
         writeln("\\/");
 
-        while(node !is null) {
+        while (node !is null) {
 
             debugWriteln(node.value);
 
@@ -240,7 +248,7 @@ export @safe nothrow @nogc:
     }
 
     void clear() scope @trusted {
-        while(head !is null) {
+        while (head !is null) {
             Node* current = head;
             head = current.next;
 
@@ -253,21 +261,21 @@ export @safe nothrow @nogc:
     void push(bool fiFo, return scope Type value) scope @trusted {
         Node* node;
 
-        if(fiFo) {
+        if (fiFo) {
             node = allocator.make!Node(null, head, value);
             head = node;
 
-            if(tail is null)
+            if (tail is null)
                 tail = head;
-            else if(head.next !is null)
+            else if (head.next !is null)
                 head.next.previous = head;
         } else {
             node = allocator.make!Node(tail, null, value);
             tail = node;
 
-            if(head is null)
+            if (head is null)
                 head = tail;
-            else if(tail.previous !is null)
+            else if (tail.previous !is null)
                 tail.previous.next = tail;
         }
 
@@ -277,13 +285,13 @@ export @safe nothrow @nogc:
     Type pop(bool fiFo) return scope @trusted {
         Type ret;
 
-        if(fiFo) {
+        if (fiFo) {
             ret = tail.value;
 
             Node* toDeallocate = tail;
             tail = tail.previous;
 
-            if(tail !is null)
+            if (tail !is null)
                 tail.next = null;
             else
                 head = null;
@@ -295,7 +303,7 @@ export @safe nothrow @nogc:
             Node* toDeallocate = head;
             head = head.next;
 
-            if(head !is null)
+            if (head !is null)
                 head.previous = null;
             else
                 tail = null;
@@ -310,7 +318,7 @@ export @safe nothrow @nogc:
     Result!Type peek(bool fiFo) return scope @trusted {
         Type ret;
 
-        if(fiFo) {
+        if (fiFo) {
             ret = tail.value;
         } else {
             ret = head.value;

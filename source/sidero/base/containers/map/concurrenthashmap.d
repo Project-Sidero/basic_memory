@@ -433,14 +433,15 @@ export:
 }
 
 private:
-import sidero.base.synchronization.mutualexclusion : TestTestSetLockInline;
+import sidero.base.synchronization.system.lock;
 import sidero.base.traits : isAnyPointer;
+import sidero.base.internal.logassert;
 
 struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
     ConcurrentHashMapNode!(RealKeyType, ValueType) nodeList;
     ConcurrentHashMapIterator!(RealKeyType, ValueType) iteratorList;
 
-    TestTestSetLockInline mutex;
+    SystemLock mutex;
     bool copyOnWrite, keepNoExternalReferences;
 
     alias Node = typeof(nodeList).Node;
@@ -456,14 +457,16 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
     }
 
     void rcExternal(bool addRef, scope Iterator* iterator) scope {
-        mutex.pureLock;
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
 
         if(rcInternal(addRef, iterator))
             mutex.unlock;
     }
 
     void rcNodeExternal(bool addRef, scope Node* node) scope {
-        mutex.pureLock;
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
 
         if(node !is null) {
             if(addRef)
@@ -480,7 +483,8 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
     }
 
     Iterator* createIteratorExternal() scope @trusted {
-        mutex.pureLock;
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
 
         Iterator* ret = iteratorList.createIterator(nodeList);
         this.rcInternal(true, ret);
@@ -490,7 +494,8 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
     }
 
     bool iteratorEmptyExternal(scope Iterator* iterator) scope {
-        mutex.pureLock;
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
 
         assert(iterator !is null);
         bool ret = iterator.forwards.isOutOfRange();
@@ -501,7 +506,8 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
 
     bool iteratorGetExternal(scope Iterator* iterator, scope out ResultReference!KeyType key, scope out ResultReference!ValueType value) scope @trusted {
         assert(iterator !is null);
-        mutex.pureLock;
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
 
         if(iterator.forwards.isOutOfRange()) {
             mutex.unlock;
@@ -523,7 +529,8 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
 
     bool iteratorAdvanceExternal(scope Iterator* iterator) scope @trusted {
         assert(iterator !is null);
-        mutex.pureLock;
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
 
         Node* old = iterator.forwards.node;
         iterator.forwards.advanceForward(nodeList);
@@ -541,8 +548,10 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
         if(&this is other)
             return 0;
 
-        mutex.pureLock;
-        other.mutex.pureLock;
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
+        err = other.mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
 
         int result = genericCompare(nodeList.aliveNodes, other.nodeList.aliveNodes);
 
@@ -575,7 +584,8 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
     }
 
     void clearExternal() scope {
-        mutex.pureLock;
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
 
         this.clearAllInternal();
 
@@ -583,7 +593,8 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
     }
 
     bool insertExternal(scope KeyType key, scope ValueType value, bool canUpdate = true) scope {
-        mutex.pureLock;
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
 
         bool ret = tryInsertInternal(key, value, canUpdate);
 
@@ -592,7 +603,8 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
     }
 
     bool removeExternal(scope KeyType key) scope {
-        mutex.pureLock;
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
 
         const hash = nodeList.getHash(key);
         bool ret = tryRemoveInternal(hash);
@@ -602,7 +614,8 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
     }
 
     ConcurrentHashMapImpl* dupExternal(scope RCAllocator allocator, scope RCAllocator valueAllocator) scope @trusted {
-        mutex.pureLock;
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
 
         if(allocator.isNull)
             allocator = globalAllocator();
@@ -618,7 +631,8 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
     }
 
     bool containsExternal(scope KeyType key) scope {
-        mutex.pureLock;
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
 
         const hash = nodeList.getHash(key);
         Node* ret = nodeList.nodeFor(hash);
@@ -628,7 +642,8 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
     }
 
     ResultReference!ValueType getValueExternal(scope KeyType key) scope @trusted {
-        mutex.pureLock;
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
 
         const hash = nodeList.getHash(key);
         Node* node = nodeList.nodeFor(hash);
@@ -652,7 +667,8 @@ struct ConcurrentHashMapImpl(RealKeyType, ValueType) {
     ulong hashExternal() scope @trusted {
         import sidero.base.hash.utils : hashOf;
 
-        mutex.pureLock;
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
 
         ulong ret = hashOf();
 

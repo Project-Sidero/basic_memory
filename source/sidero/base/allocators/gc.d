@@ -317,10 +317,10 @@ package(sidero.base.allocators) {
 
 private:
 import sidero.base.allocators.predefined;
-import sidero.base.synchronization.rwmutex;
+import sidero.base.synchronization.system.rwmutex;
 
 __gshared {
-    ReaderWriterLockInline rwlock;
+    SystemReaderWriterLock rwlock;
     GCInfo* gcInfoLL;
     HouseKeepingAllocator!() gcInfoAllocator;
 }

@@ -8,6 +8,7 @@ Copyright: 2022 Richard Andrew Cattermole
 module sidero.base.allocators.locking;
 import sidero.base.attributes;
 import sidero.base.typecons : Ternary;
+import sidero.base.internal.logassert;
 
 export:
 
@@ -22,16 +23,16 @@ struct AllocatorLocking(PoolAllocator) {
     enum NeedsLocking = false;
 
     private @PrettyPrintIgnore {
-        import sidero.base.synchronization.mutualexclusion : TestTestSetLockInline;
+        import sidero.base.internal.puresystemlock;
 
-        TestTestSetLockInline mutex;
+        PureSystemLock mutex;
     }
 
 scope @safe @nogc pure nothrow:
 
     ///
     this(return scope ref AllocatorLocking other) @trusted {
-        other.mutex.pureLock;
+        logAssert(other.mutex.lock, "Failed to lock mutex");
         scope(exit)
             other.mutex.unlock;
 
@@ -46,7 +47,7 @@ scope @safe @nogc pure nothrow:
 
     ///
     void[] allocate(size_t size, TypeInfo ti = null) {
-        mutex.pureLock;
+        logAssert(mutex.lock, "Failed to lock mutex");
         scope(exit)
             mutex.unlock;
 
@@ -55,7 +56,7 @@ scope @safe @nogc pure nothrow:
 
     ///
     bool reallocate(scope ref void[] array, size_t newSize) {
-        mutex.pureLock;
+        logAssert(mutex.lock, "Failed to lock mutex");
         scope(exit)
             mutex.unlock;
 
@@ -67,7 +68,7 @@ scope @safe @nogc pure nothrow:
         if(array is null)
             return false;
 
-        mutex.pureLock;
+        logAssert(mutex.lock, "Failed to lock mutex");
         scope(exit)
             mutex.unlock;
 
@@ -77,7 +78,7 @@ scope @safe @nogc pure nothrow:
     static if(__traits(hasMember, PoolAllocator, "owns")) {
         ///
         Ternary owns(scope void[] array) {
-            mutex.pureLock;
+            logAssert(mutex.lock, "Failed to lock mutex");
             scope(exit)
                 mutex.unlock;
 
@@ -88,7 +89,7 @@ scope @safe @nogc pure nothrow:
     static if(__traits(hasMember, PoolAllocator, "deallocateAll")) {
         ///
         bool deallocateAll() {
-            mutex.pureLock;
+            logAssert(mutex.lock, "Failed to lock mutex");
             scope(exit)
                 mutex.unlock;
 
@@ -99,7 +100,7 @@ scope @safe @nogc pure nothrow:
     static if(__traits(hasMember, PoolAllocator, "empty")) {
         ///
         bool empty() {
-            mutex.pureLock;
+            logAssert(mutex.lock, "Failed to lock mutex");
             scope(exit)
                 mutex.unlock;
 

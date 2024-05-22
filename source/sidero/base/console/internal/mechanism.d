@@ -1,15 +1,15 @@
 module sidero.base.console.internal.mechanism;
 import sidero.base.console.internal.bindings;
-import sidero.base.internal.logassert : stderr, stdout, stdin;
-import sidero.base.synchronization.mutualexclusion;
-import sidero.base.synchronization.rwmutex;
+import sidero.base.internal.logassert;
+import sidero.base.synchronization.system.rwmutex;
+import sidero.base.synchronization.system.lock;
 import sidero.base.text;
 
 export @safe nothrow @nogc:
 
 __gshared {
-    ReaderWriterLockInline rwlock;
-    TestTestSetLockInline readingLock, writingLock;
+    SystemReaderWriterLock rwlock;
+    SystemLock readingLock, writingLock;
     bool useANSI, useWindows, useStdio, autoCloseStdio, consoleSetup;
 
     FILE* stdioIn, stdioOut, stdioError;
@@ -40,7 +40,7 @@ void protect(scope void delegate() @safe nothrow @nogc del) @trusted {
 
 void protectReadAction(scope void delegate() @safe nothrow @nogc del) @trusted {
     rwlock.readLock;
-    readingLock.lock;
+    readingLock.lock.assumeOkay;
     del();
     readingLock.unlock;
     rwlock.readUnlock;
@@ -48,7 +48,7 @@ void protectReadAction(scope void delegate() @safe nothrow @nogc del) @trusted {
 
 void protectWriteAction(scope void delegate() @safe nothrow @nogc del) @trusted {
     rwlock.readLock;
-    writingLock.lock;
+    writingLock.lock.assumeOkay;
     del();
     writingLock.unlock;
     rwlock.readUnlock;

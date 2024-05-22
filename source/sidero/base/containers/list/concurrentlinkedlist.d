@@ -20,22 +20,22 @@ struct ConcurrentLinkedList(Type) {
         typeof(state).Iterator* iterator;
 
         int opApplyImpl(Del)(scope Del del) @trusted scope {
-            if(isNull)
+            if (isNull)
                 return 0;
 
             int result;
 
-            while(!empty) {
+            while (!empty) {
                 ElementType got = front();
-                if(!got)
+                if (!got)
                     return result;
 
-                static if(__traits(compiles, del(got)))
+                static if (__traits(compiles, del(got)))
                     result = del(got);
                 else
                     static assert(0);
 
-                if(result)
+                if (result)
                     return result;
 
                 popFront();
@@ -45,22 +45,22 @@ struct ConcurrentLinkedList(Type) {
         }
 
         int opApplyReverseImpl(Del)(scope Del del) @trusted scope {
-            if(isNull)
+            if (isNull)
                 return 0;
 
             int result;
 
-            while(!empty) {
+            while (!empty) {
                 ElementType got = back();
-                if(!got)
+                if (!got)
                     return result;
 
-                static if(__traits(compiles, del(got)))
+                static if (__traits(compiles, del(got)))
                     result = del(got);
                 else
                     static assert(0);
 
-                if(result)
+                if (result)
                     return result;
 
                 popBack();
@@ -81,7 +81,7 @@ export:
 
         int count;
 
-        foreach(v; cll) {
+        foreach (v; cll) {
             assert(v);
             assert(v == Type.init);
             count++;
@@ -100,7 +100,7 @@ export:
 
         int count;
 
-        foreach_reverse(v; cll) {
+        foreach_reverse (v; cll) {
             assert(v);
             assert(v == Type.init);
             count++;
@@ -123,7 +123,7 @@ nothrow @nogc:
         ConcurrentLinkedList ret;
         ret.tupleof = this.tupleof;
 
-        if(!isNull)
+        if (!isNull)
             ret.iterator = state.createIteratorExternal(iterator);
 
         return ret;
@@ -149,7 +149,7 @@ nothrow @nogc:
         ConcurrentLinkedList ret;
         ret.tupleof = this.tupleof;
 
-        if(!isNull)
+        if (!isNull)
             ret.iterator = state.createIteratorExternal(iterator, start, end);
 
         return ret;
@@ -172,7 +172,7 @@ nothrow @nogc:
         ConcurrentLinkedList ret;
         ret.state = this.state;
 
-        if(state !is null)
+        if (state !is null)
             state.rcExternal(true, null);
 
         return ret;
@@ -204,7 +204,7 @@ nothrow @nogc:
     this(return scope ref ConcurrentLinkedList other) scope @trusted {
         this.tupleof = other.tupleof;
 
-        if(!isNull)
+        if (!isNull)
             state.rcExternal(true, iterator);
     }
 
@@ -219,7 +219,7 @@ nothrow @nogc:
     @trusted {
         ///
         this(RCAllocator allocator, RCAllocator valueAllocator = RCAllocator.init) scope {
-            if(allocator.isNull)
+            if (allocator.isNull)
                 allocator = globalAllocator();
 
             state = allocator.make!(ConcurrentLinkedListImpl!Type)(allocator, valueAllocator);
@@ -229,7 +229,7 @@ nothrow @nogc:
         this(scope Type[] input, RCAllocator allocator = RCAllocator.init, RCAllocator valueAllocator = RCAllocator.init) scope {
             this(allocator, valueAllocator);
 
-            foreach(i, ref v; input) {
+            foreach (i, ref v; input) {
                 state.insertExternal(iterator, i, v);
             }
         }
@@ -244,7 +244,7 @@ nothrow @nogc:
     }
 
     ~this() {
-        if(!isNull)
+        if (!isNull)
             state.rcExternal(false, iterator);
     }
 
@@ -263,7 +263,7 @@ nothrow @nogc:
 
     ///
     ptrdiff_t length() scope {
-        if(isNull)
+        if (isNull)
             return 0;
         else
             return state.lengthExternal(iterator);
@@ -278,10 +278,10 @@ nothrow @nogc:
 
     ///
     Slice!Type asReadOnly(RCAllocator allocator = RCAllocator.init) scope {
-        if(isNull)
+        if (isNull)
             return typeof(return).init;
 
-        if(allocator.isNull)
+        if (allocator.isNull)
             allocator = globalAllocator();
 
         return state.asReadOnlyExternal(iterator, allocator);
@@ -300,10 +300,10 @@ nothrow @nogc:
 
     ///
     ConcurrentLinkedList!Type dup(RCAllocator allocator = RCAllocator.init) scope {
-        if(isNull)
+        if (isNull)
             return typeof(return).init;
 
-        if(allocator.isNull)
+        if (allocator.isNull)
             allocator = globalAllocator();
 
         return state.dupExternal(iterator, allocator);
@@ -322,7 +322,7 @@ nothrow @nogc:
 
     ///
     ResultReference!Type opIndex(ptrdiff_t index) scope {
-        if(isNull)
+        if (isNull)
             return ResultReference!Type(NullPointerException);
 
         return state.indexExternal(iterator, index);
@@ -409,7 +409,7 @@ nothrow @nogc:
 
     /// Takes in an opApply
     int opCmp(scope int delegate(scope int delegate(ref Type) @safe nothrow @nogc) @safe nothrow @nogc del) {
-        if(isNull)
+        if (isNull)
             return del is null ? 0 : (del((ref Type) => 1) ? -1 : 0);
         return state.opCmpExternal(iterator, del);
     }
@@ -428,7 +428,7 @@ nothrow @nogc:
 
     ///
     int opCmp(scope Type[] other...) scope {
-        if(isNull)
+        if (isNull)
             return other.length == 0 ? 0 : -1;
         return state.opCmpExternal(iterator, other);
     }
@@ -452,7 +452,7 @@ nothrow @nogc:
     @property {
         ///
         bool empty() scope {
-            if(this.isNull())
+            if (this.isNull())
                 return true;
 
             setupIterator;
@@ -470,7 +470,7 @@ nothrow @nogc:
 
         ///
         ResultReference!Type front() scope {
-            if(this.isNull())
+            if (this.isNull())
                 return ResultReference!Type(NullPointerException);
 
             setupIterator;
@@ -496,7 +496,7 @@ nothrow @nogc:
 
         ///
         ResultReference!Type back() scope {
-            if(this.isNull())
+            if (this.isNull())
                 return ResultReference!Type(NullPointerException);
 
             setupIterator;
@@ -526,7 +526,7 @@ nothrow @nogc:
 
     ///
     void popFront() scope {
-        if(this.isNull())
+        if (this.isNull())
             return;
 
         setupIterator;
@@ -535,7 +535,7 @@ nothrow @nogc:
 
     ///
     void popBack() scope {
-        if(this.isNull())
+        if (this.isNull())
             return;
 
         setupIterator;
@@ -544,7 +544,7 @@ nothrow @nogc:
 
     ///
     bool startsWith(scope Type input) scope {
-        if(isNull)
+        if (isNull)
             return false;
         return state.startsWithExternal(iterator, input);
     }
@@ -558,7 +558,7 @@ nothrow @nogc:
 
     ///
     bool endsWith(scope Type input) scope {
-        if(isNull)
+        if (isNull)
             return false;
         return state.endsWithExternal(iterator, input);
     }
@@ -572,7 +572,7 @@ nothrow @nogc:
 
     ///
     ptrdiff_t indexOf(scope Type input) scope {
-        if(isNull)
+        if (isNull)
             return -1;
         return state.indexOfExternal(iterator, input, true);
     }
@@ -586,7 +586,7 @@ nothrow @nogc:
 
     ///
     ptrdiff_t lastIndexOf(scope Type input) scope {
-        if(isNull)
+        if (isNull)
             return -1;
         return state.indexOfExternal(iterator, input, false);
     }
@@ -600,7 +600,7 @@ nothrow @nogc:
 
     ///
     size_t count(scope Type input) scope {
-        if(isNull)
+        if (isNull)
             return 0;
         return state.countExternal(iterator, input);
     }
@@ -626,7 +626,7 @@ nothrow @nogc:
 
     ///
     void clear() scope {
-        if(isNull)
+        if (isNull)
             return;
 
         state.clearExternal(iterator);
@@ -693,7 +693,7 @@ nothrow @nogc:
     void insert(ptrdiff_t index, scope Type[] input...) scope {
         setupState;
 
-        foreach_reverse(i, ref v; input)
+        foreach_reverse (i, ref v; input)
             state.insertExternal(iterator, index, v);
     }
 
@@ -717,7 +717,7 @@ nothrow @nogc:
     void prepend(scope Type[] input...) scope {
         setupState;
 
-        foreach_reverse(i, ref v; input)
+        foreach_reverse (i, ref v; input)
             state.insertExternal(iterator, 0, v);
     }
 
@@ -745,7 +745,7 @@ nothrow @nogc:
     void append(scope Type[] input...) scope {
         setupState;
 
-        foreach_reverse(i, ref v; input)
+        foreach_reverse (i, ref v; input)
             state.insertExternal(iterator, ptrdiff_t.max, v);
     }
 
@@ -764,7 +764,7 @@ nothrow @nogc:
 
     ///
     void remove(scope Type value) scope {
-        if(isNull)
+        if (isNull)
             return;
 
         state.removeExternal(iterator, value);
@@ -787,7 +787,7 @@ nothrow @nogc:
 
     ///
     void remove(ptrdiff_t index, size_t count) scope {
-        if(isNull)
+        if (isNull)
             return;
 
         state.removeExternal(iterator, index, count);
@@ -810,7 +810,7 @@ nothrow @nogc:
 
 private:
     void setupState() scope @trusted {
-        if(!isNull)
+        if (!isNull)
             return;
 
         RCAllocator allocator = globalAllocator();
@@ -818,7 +818,7 @@ private:
     }
 
     void setupIterator() scope {
-        if(state is null || iterator !is null)
+        if (state is null || iterator !is null)
             return;
 
         iterator = state.createIteratorExternal(null);
@@ -826,20 +826,21 @@ private:
     }
 
     void debugPosition() scope {
-        if(!isNull)
+        if (!isNull)
             state.debugPosition(iterator);
     }
 }
 
 private:
-import sidero.base.synchronization.mutualexclusion : TestTestSetLockInline;
+import sidero.base.synchronization.system.lock;
 import sidero.base.traits : isAnyPointer;
+import sidero.base.internal.logassert;
 
 struct ConcurrentLinkedListImpl(Type) {
     ConcurrentLinkedListNodeList!Type nodeList;
     ConcurrentLinkedListIteratorList!Type iteratorList;
 
-    TestTestSetLockInline mutex;
+    SystemLock mutex;
     alias Node = typeof(nodeList).Node;
     alias Iterator = typeof(iteratorList).Iterator;
     alias Cursor = typeof(iteratorList).Cursor;
@@ -851,31 +852,35 @@ struct ConcurrentLinkedListImpl(Type) {
     }
 
     void rcExternal(bool addRef, scope Iterator* iterator) scope @trusted {
-        mutex.pureLock;
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
 
-        if(rcInternal(addRef, iterator))
+        if (rcInternal(addRef, iterator))
             mutex.unlock;
     }
 
     void rcNodeExternal(bool addRef, scope Node* node) scope @trusted {
-        mutex.pureLock;
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
 
-        if(node !is null) {
-            if(addRef)
+        if (node !is null) {
+            if (addRef)
                 node.onIteratorIn;
             else
                 node.onIteratorOut;
 
-            if(node.refCount == 0 && node.isDeleted)
+            if (node.refCount == 0 && node.isDeleted)
                 nodeList.removeNode(node);
         }
 
-        if(rcInternal(addRef, null))
+        if (rcInternal(addRef, null))
             mutex.unlock;
     }
 
     size_t lengthExternal(scope Iterator* iterator) scope {
-        mutex.pureLock;
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
+
         size_t ret = iterator is null ? nodeList.aliveNodes : (iterator.maximumOffsetFromHead - iterator.minimumOffsetFromHead);
         mutex.unlock;
         return ret;
@@ -883,7 +888,8 @@ struct ConcurrentLinkedListImpl(Type) {
 
     Iterator* createIteratorExternal(scope Iterator* iterator, ptrdiff_t minimumOffsetFromHead = 0,
             ptrdiff_t maximumOffsetFromHead = ptrdiff_t.max) scope @trusted {
-        mutex.pureLock;
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
 
         changeIndexToOffset(iterator, minimumOffsetFromHead, maximumOffsetFromHead);
         Iterator* ret = iteratorList.createIterator(nodeList, minimumOffsetFromHead, maximumOffsetFromHead);
@@ -895,7 +901,8 @@ struct ConcurrentLinkedListImpl(Type) {
     }
 
     void insertExternal(scope Iterator* iterator, ptrdiff_t index, ref Type value) scope {
-        mutex.pureLock;
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
 
         changeIndexToOffset(iterator, index);
         Cursor cursor = iteratorList.cursorFor(nodeList, index);
@@ -903,7 +910,7 @@ struct ConcurrentLinkedListImpl(Type) {
         Node* current = nodeList.createNode(cursor.node);
         current.value = value;
 
-        foreach(iterator; iteratorList) {
+        foreach (iterator; iteratorList) {
             iterator.forwards.onInsertIncreaseFromHead(index, 1);
             iterator.backwards.onInsertIncreaseFromHead(index, 1);
         }
@@ -914,7 +921,8 @@ struct ConcurrentLinkedListImpl(Type) {
 
     void insertExternal(scope Iterator* iterator, ptrdiff_t index,
             scope int delegate(scope int delegate(ref Type) @safe nothrow @nogc) @safe nothrow @nogc del) scope {
-        mutex.pureLock;
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
 
         changeIndexToOffset(iterator, index);
         Cursor cursor = iteratorList.cursorFor(nodeList, index);
@@ -922,7 +930,7 @@ struct ConcurrentLinkedListImpl(Type) {
         Node* prior = cursor.node;
         size_t count;
 
-        foreach(ref v; del) {
+        foreach (ref v; del) {
             Node* current = nodeList.createNode(prior);
 
             current.value = v;
@@ -931,8 +939,8 @@ struct ConcurrentLinkedListImpl(Type) {
             prior = current;
         }
 
-        if(count > 0) {
-            foreach(iterator; iteratorList) {
+        if (count > 0) {
+            foreach (iterator; iteratorList) {
                 iterator.forwards.onInsertIncreaseFromHead(index, count);
                 iterator.backwards.onInsertIncreaseFromHead(index, count);
             }
@@ -943,10 +951,12 @@ struct ConcurrentLinkedListImpl(Type) {
     }
 
     void clearExternal(scope Iterator* iterator) scope @trusted {
-        mutex.pureLock;
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
+
         size_t count = nodeList.aliveNodes, offset = 0;
 
-        if(iterator !is null) {
+        if (iterator !is null) {
             count = iterator.maximumOffsetFromHead - iterator.minimumOffsetFromHead;
             offset = iterator.minimumOffsetFromHead;
         }
@@ -958,14 +968,14 @@ struct ConcurrentLinkedListImpl(Type) {
             cursor.onEOL(nodeList);
         }
 
-        foreach(iterator; iteratorList) {
+        foreach (iterator; iteratorList) {
             iterator.onRemoveDecreaseFromHead(offset, count, null);
         }
 
-        while(*currentPtr !is &nodeList.tail && count > 0) {
+        while (*currentPtr !is &nodeList.tail && count > 0) {
             Node* current = *currentPtr;
 
-            if(current.refCount == 0) {
+            if (current.refCount == 0) {
                 nodeList.removeNode(current);
             } else {
                 appendDeletedNodeToList(current.next, current);
@@ -980,11 +990,12 @@ struct ConcurrentLinkedListImpl(Type) {
 
     Slice!Type asReadOnlyExternal(scope Iterator* iterator, RCAllocator allocator) scope @trusted {
         assert(!allocator.isNull);
-        mutex.pureLock;
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
 
         size_t count = nodeList.aliveNodes, offset = 0, maximumOffsetFromHead = count;
 
-        if(iterator !is null) {
+        if (iterator !is null) {
             count = iterator.maximumOffsetFromHead - iterator.minimumOffsetFromHead;
             offset = iterator.minimumOffsetFromHead;
             maximumOffsetFromHead = iterator.maximumOffsetFromHead;
@@ -994,7 +1005,7 @@ struct ConcurrentLinkedListImpl(Type) {
         Type[] ret = allocator.makeArray!Type(count);
         size_t outputOffset;
 
-        while(cursor.node !is &nodeList.tail && count > 0) {
+        while (cursor.node !is &nodeList.tail && count > 0) {
             ret[outputOffset++] = cursor.node.value;
 
             cursor.advanceForwards(1, maximumOffsetFromHead);
@@ -1008,11 +1019,12 @@ struct ConcurrentLinkedListImpl(Type) {
 
     ConcurrentLinkedList!Type dupExternal(scope Iterator* iterator, RCAllocator allocator) scope @trusted {
         assert(!allocator.isNull);
-        mutex.pureLock;
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
 
         size_t count = nodeList.aliveNodes, offset = 0, maximumOffsetFromHead = count;
 
-        if(iterator !is null) {
+        if (iterator !is null) {
             count = iterator.maximumOffsetFromHead - iterator.minimumOffsetFromHead;
             offset = iterator.minimumOffsetFromHead;
             maximumOffsetFromHead = iterator.maximumOffsetFromHead;
@@ -1023,7 +1035,7 @@ struct ConcurrentLinkedListImpl(Type) {
         ConcurrentLinkedList!Type ret = ConcurrentLinkedList!Type(allocator);
         Node* previous = &ret.state.nodeList.head;
 
-        while(cursor.node !is &nodeList.tail && count > 0) {
+        while (cursor.node !is &nodeList.tail && count > 0) {
             previous = ret.state.nodeList.createNode(previous);
             previous.value = cursor.node.value;
 
@@ -1037,12 +1049,13 @@ struct ConcurrentLinkedListImpl(Type) {
     }
 
     ResultReference!Type indexExternal(scope Iterator* iterator, ptrdiff_t index) scope @trusted {
-        mutex.pureLock;
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
 
         size_t maximumOffsetFromHead = nodeList.aliveNodes;
 
         auto error = changeIndexToOffset(iterator, index);
-        if(error.isSet)
+        if (error.isSet)
             return typeof(return)(error);
 
         Cursor cursor = iteratorList.cursorFor(nodeList, index);
@@ -1057,10 +1070,12 @@ struct ConcurrentLinkedListImpl(Type) {
     }
 
     void removeExternal(scope Iterator* iterator, scope Type filterValue) scope @trusted {
-        mutex.pureLock;
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
+
         size_t count = nodeList.aliveNodes, offset = 0;
 
-        if(iterator !is null) {
+        if (iterator !is null) {
             count = iterator.maximumOffsetFromHead - iterator.minimumOffsetFromHead;
             offset = iterator.minimumOffsetFromHead;
         }
@@ -1072,15 +1087,15 @@ struct ConcurrentLinkedListImpl(Type) {
             cursor.onEOL(nodeList);
         }
 
-        while(*currentPtr !is &nodeList.tail && count > 0) {
+        while (*currentPtr !is &nodeList.tail && count > 0) {
             Node* current = *currentPtr;
 
-            if(current.value == filterValue) {
-                foreach(iterator; iteratorList) {
+            if (current.value == filterValue) {
+                foreach (iterator; iteratorList) {
                     iterator.onRemoveDecreaseFromHead(offset, 1, null);
                 }
 
-                if(current.refCount == 0) {
+                if (current.refCount == 0) {
                     nodeList.removeNode(current);
                 } else {
                     appendDeletedNodeToList(current.next, current);
@@ -1098,18 +1113,19 @@ struct ConcurrentLinkedListImpl(Type) {
     }
 
     void removeExternal(scope Iterator* iterator, ptrdiff_t index, size_t countInput) scope @trusted {
-        mutex.pureLock;
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
 
         size_t maximumOffsetFromHead = nodeList.aliveNodes;
 
         auto error = changeIndexToOffset(iterator, index);
-        if(error.isSet)
+        if (error.isSet)
             return;
-        if(iterator !is null)
+        if (iterator !is null)
             maximumOffsetFromHead = iterator.maximumOffsetFromHead;
 
         size_t count = maximumOffsetFromHead - index;
-        if(count > countInput)
+        if (count > countInput)
             count = countInput;
 
         Node** currentPtr;
@@ -1119,14 +1135,14 @@ struct ConcurrentLinkedListImpl(Type) {
             cursor.onEOL(nodeList);
         }
 
-        foreach(iterator; iteratorList) {
+        foreach (iterator; iteratorList) {
             iterator.onRemoveDecreaseFromHead(index, count, null);
         }
 
-        while(*currentPtr !is &nodeList.tail && count > 0) {
+        while (*currentPtr !is &nodeList.tail && count > 0) {
             Node* current = *currentPtr;
 
-            if(current.refCount == 0) {
+            if (current.refCount == 0) {
                 nodeList.removeNode(current);
             } else {
                 appendDeletedNodeToList(current.next, current);
@@ -1142,7 +1158,8 @@ struct ConcurrentLinkedListImpl(Type) {
     ulong hashExternal(scope Iterator* iterator) scope @trusted {
         import sidero.base.hash.utils : hashOf;
 
-        mutex.pureLock;
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
 
         ulong ret = hashOf();
         foreachValue(iterator, (scope ref Type value) { ret = hashOf(value, ret); return 0; });
@@ -1153,7 +1170,9 @@ struct ConcurrentLinkedListImpl(Type) {
 
     ResultReference!Type frontExternal(scope Iterator* iterator) scope @trusted {
         assert(iterator !is null);
-        mutex.pureLock;
+
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
 
         ResultReference!Type ret = ResultReference!Type(&iterator.forwards.node.value, iterator.forwards.node,
                 cast(typeof(return).RCHandle)&rcNodeExternal);
@@ -1166,9 +1185,11 @@ struct ConcurrentLinkedListImpl(Type) {
 
     ResultReference!Type backExternal(scope Iterator* iterator) scope @trusted {
         assert(iterator !is null);
-        mutex.pureLock;
 
-        if(iterator.backwards.offsetFromHead == iterator.maximumOffsetFromHead)
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
+
+        if (iterator.backwards.offsetFromHead == iterator.maximumOffsetFromHead)
             iterator.backwards.advanceBackwards(1, iterator.forwards.offsetFromHead);
 
         ResultReference!Type ret = ResultReference!Type(&iterator.backwards.node.value, iterator.backwards.node,
@@ -1182,7 +1203,9 @@ struct ConcurrentLinkedListImpl(Type) {
 
     bool emptyExternal(scope Iterator* iterator) scope {
         assert(iterator !is null);
-        mutex.pureLock;
+
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
 
         bool ret = iterator.forwards.offsetFromHead == iterator.backwards.offsetFromHead;
 
@@ -1192,7 +1215,9 @@ struct ConcurrentLinkedListImpl(Type) {
 
     void popFrontExternal(scope Iterator* iterator) scope {
         assert(iterator !is null);
-        mutex.pureLock;
+
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
 
         iterator.forwards.advanceForwards(1, iterator.backwards.offsetFromHead);
         mutex.unlock;
@@ -1200,9 +1225,11 @@ struct ConcurrentLinkedListImpl(Type) {
 
     void popBackExternal(scope Iterator* iterator) scope {
         assert(iterator !is null);
-        mutex.pureLock;
 
-        if(iterator.backwards.offsetFromHead == iterator.maximumOffsetFromHead)
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
+
+        if (iterator.backwards.offsetFromHead == iterator.maximumOffsetFromHead)
             iterator.backwards.advanceBackwards(1, iterator.forwards.offsetFromHead);
 
         iterator.backwards.advanceBackwards(1, iterator.forwards.offsetFromHead);
@@ -1211,27 +1238,29 @@ struct ConcurrentLinkedListImpl(Type) {
 
     int opCmpExternal(scope Iterator* iterator, scope Type[] other) {
         int ret;
-        mutex.pureLock;
+
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
 
         size_t offset, count = nodeList.aliveNodes, maximumOffsetFromHead = count;
 
-        if(iterator !is null) {
+        if (iterator !is null) {
             offset = iterator.minimumOffsetFromHead;
             count = iterator.maximumOffsetFromHead - offset;
             maximumOffsetFromHead = iterator.maximumOffsetFromHead;
         }
 
-        if(other.length < count)
+        if (other.length < count)
             ret = -1;
-        else if(other.length > count)
+        else if (other.length > count)
             ret = 1;
         else {
             Cursor cursor = iteratorList.cursorFor(nodeList, offset);
 
-            while(ret == 0 && !cursor.isOutOfRange(offset, maximumOffsetFromHead)) {
-                if(cursor.node.value < other[0])
+            while (ret == 0 && !cursor.isOutOfRange(offset, maximumOffsetFromHead)) {
+                if (cursor.node.value < other[0])
                     ret = -1;
-                else if(cursor.node.value > other[0])
+                else if (cursor.node.value > other[0])
                     ret = 1;
 
                 other = other[1 .. $];
@@ -1248,11 +1277,13 @@ struct ConcurrentLinkedListImpl(Type) {
 
     int opCmpExternal(scope Iterator* iterator, scope int delegate(scope int delegate(ref Type) @safe nothrow @nogc) @safe nothrow @nogc del) {
         int ret;
-        mutex.pureLock;
+
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
 
         size_t offset, count = nodeList.aliveNodes, maximumOffsetFromHead = count;
 
-        if(iterator !is null) {
+        if (iterator !is null) {
             offset = iterator.minimumOffsetFromHead;
             count = iterator.maximumOffsetFromHead - offset;
             maximumOffsetFromHead = iterator.maximumOffsetFromHead;
@@ -1260,18 +1291,18 @@ struct ConcurrentLinkedListImpl(Type) {
 
         Cursor cursor = iteratorList.cursorFor(nodeList, offset);
 
-        foreach(ref otherValue; del) {
-            if(ret != 0)
+        foreach (ref otherValue; del) {
+            if (ret != 0)
                 break;
-            else if(cursor.isOutOfRange(offset, maximumOffsetFromHead)) {
+            else if (cursor.isOutOfRange(offset, maximumOffsetFromHead)) {
                 ret = -1;
                 break;
             }
 
-            if(cursor.node.value < otherValue) {
+            if (cursor.node.value < otherValue) {
                 ret = -1;
                 break;
-            } else if(cursor.node.value > otherValue) {
+            } else if (cursor.node.value > otherValue) {
                 ret = 1;
                 break;
             }
@@ -1279,7 +1310,7 @@ struct ConcurrentLinkedListImpl(Type) {
             cursor.advanceForwards(1, maximumOffsetFromHead);
         }
 
-        if(ret == 0 && !cursor.isOutOfRange(offset, maximumOffsetFromHead)) {
+        if (ret == 0 && !cursor.isOutOfRange(offset, maximumOffsetFromHead)) {
             ret = 1;
         }
 
@@ -1290,11 +1321,13 @@ struct ConcurrentLinkedListImpl(Type) {
 
     ptrdiff_t indexOfExternal(scope Iterator* iterator, scope Type input, bool doOne = true) scope {
         ptrdiff_t ret = -1;
-        mutex.pureLock;
+
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
 
         size_t offset, count = nodeList.aliveNodes, maximumOffsetFromHead = count;
 
-        if(iterator !is null) {
+        if (iterator !is null) {
             offset = iterator.minimumOffsetFromHead;
             count = iterator.maximumOffsetFromHead - offset;
             maximumOffsetFromHead = iterator.maximumOffsetFromHead;
@@ -1302,10 +1335,10 @@ struct ConcurrentLinkedListImpl(Type) {
 
         Cursor cursor = iteratorList.cursorFor(nodeList, offset);
 
-        while(!cursor.isOutOfRange(offset, maximumOffsetFromHead)) {
-            if(cursor.node.value == input) {
+        while (!cursor.isOutOfRange(offset, maximumOffsetFromHead)) {
+            if (cursor.node.value == input) {
                 ret = cursor.offsetFromHead;
-                if(doOne)
+                if (doOne)
                     break;
             }
 
@@ -1319,11 +1352,13 @@ struct ConcurrentLinkedListImpl(Type) {
 
     size_t countExternal(scope Iterator* iterator, scope Type input) scope {
         size_t ret;
-        mutex.pureLock;
+
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
 
         size_t offset, count = nodeList.aliveNodes, maximumOffsetFromHead = count;
 
-        if(iterator !is null) {
+        if (iterator !is null) {
             offset = iterator.minimumOffsetFromHead;
             count = iterator.maximumOffsetFromHead - offset;
             maximumOffsetFromHead = iterator.maximumOffsetFromHead;
@@ -1331,8 +1366,8 @@ struct ConcurrentLinkedListImpl(Type) {
 
         Cursor cursor = iteratorList.cursorFor(nodeList, offset);
 
-        while(!cursor.isOutOfRange(offset, maximumOffsetFromHead)) {
-            if(cursor.node.value == input) {
+        while (!cursor.isOutOfRange(offset, maximumOffsetFromHead)) {
+            if (cursor.node.value == input) {
                 ret++;
             }
 
@@ -1346,11 +1381,13 @@ struct ConcurrentLinkedListImpl(Type) {
 
     bool startsWithExternal(scope Iterator* iterator, scope Type input) scope {
         bool ret;
-        mutex.pureLock;
+
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
 
         size_t offset, count = nodeList.aliveNodes, maximumOffsetFromHead = count;
 
-        if(iterator !is null) {
+        if (iterator !is null) {
             offset = iterator.minimumOffsetFromHead;
             count = iterator.maximumOffsetFromHead - offset;
             maximumOffsetFromHead = iterator.maximumOffsetFromHead;
@@ -1358,7 +1395,7 @@ struct ConcurrentLinkedListImpl(Type) {
 
         Cursor cursor = iteratorList.cursorFor(nodeList, offset);
 
-        while(!cursor.isOutOfRange(offset, maximumOffsetFromHead)) {
+        while (!cursor.isOutOfRange(offset, maximumOffsetFromHead)) {
             ret = cursor.node.value == input;
             break;
         }
@@ -1370,17 +1407,19 @@ struct ConcurrentLinkedListImpl(Type) {
 
     bool endsWithExternal(scope Iterator* iterator, scope Type input) scope {
         bool ret;
-        mutex.pureLock;
+
+        auto err = mutex.lock;
+        logAssert(cast(bool)err, "Failed to lock", err.getError());
 
         size_t offset, count = nodeList.aliveNodes, maximumOffsetFromHead = count;
 
-        if(iterator !is null) {
+        if (iterator !is null) {
             offset = iterator.minimumOffsetFromHead;
             count = iterator.maximumOffsetFromHead - offset;
             maximumOffsetFromHead = iterator.maximumOffsetFromHead;
         }
 
-        if(maximumOffsetFromHead > offset) {
+        if (maximumOffsetFromHead > offset) {
             Cursor cursor = iteratorList.cursorFor(nodeList, maximumOffsetFromHead - 1);
             ret = cursor.node.value == input;
             cursor.onEOL(nodeList);
@@ -1394,14 +1433,14 @@ struct ConcurrentLinkedListImpl(Type) {
     // \/ internal
 
     bool rcInternal(bool addRef, scope Iterator* iterator) scope @trusted {
-        if(addRef) {
+        if (addRef) {
             nodeList.refCount++;
-            if(iterator !is null)
+            if (iterator !is null)
                 iterator.rc(true, nodeList, iteratorList);
-        } else if(nodeList.refCount == 1) {
+        } else if (nodeList.refCount == 1) {
             this.clearAllInternal;
 
-            if(iterator !is null)
+            if (iterator !is null)
                 iterator.rc(false, nodeList, iteratorList);
 
             assert(iteratorList.head is null);
@@ -1412,7 +1451,7 @@ struct ConcurrentLinkedListImpl(Type) {
             return false;
         } else {
             nodeList.refCount--;
-            if(iterator !is null)
+            if (iterator !is null)
                 iterator.rc(false, nodeList, iteratorList);
         }
 
@@ -1422,14 +1461,14 @@ struct ConcurrentLinkedListImpl(Type) {
     void clearAllInternal() scope @trusted {
         Node** currentPtr = &nodeList.head.next;
 
-        foreach(iterator; iteratorList) {
+        foreach (iterator; iteratorList) {
             iterator.onRemoveDecreaseFromHead(0, nodeList.aliveNodes, null);
         }
 
-        while(*currentPtr !is &nodeList.tail) {
+        while (*currentPtr !is &nodeList.tail) {
             Node* current = *currentPtr;
 
-            if(current.refCount == 0) {
+            if (current.refCount == 0) {
                 nodeList.removeNode(current);
             } else {
                 appendDeletedNodeToList(current.next, current);
@@ -1444,7 +1483,7 @@ struct ConcurrentLinkedListImpl(Type) {
         assert(toAdd !is null);
         assert(!toAdd.isDeleted);
 
-        if(toAdd.previousReadyToBeDeleted !is null)
+        if (toAdd.previousReadyToBeDeleted !is null)
             nodeList.mergeDeletedListToNewParent(toAdd, parent);
         assert(toAdd.previousReadyToBeDeleted is null);
 
@@ -1453,7 +1492,7 @@ struct ConcurrentLinkedListImpl(Type) {
         toAdd.previous.next = toAdd.next;
         toAdd.next.previous = toAdd.previous;
 
-        if(parent.previousReadyToBeDeleted !is null) {
+        if (parent.previousReadyToBeDeleted !is null) {
             // we already have a list of nodes
             // we just need to inject on the end
 
@@ -1474,8 +1513,8 @@ struct ConcurrentLinkedListImpl(Type) {
     ErrorInfo changeIndexToOffset(scope Iterator* iterator, ref ptrdiff_t a) scope {
         size_t actualLength = iterator is null ? nodeList.aliveNodes : (iterator.maximumOffsetFromHead - iterator.minimumOffsetFromHead);
 
-        if(a < 0) {
-            if(actualLength < -a) {
+        if (a < 0) {
+            if (actualLength < -a) {
                 a = actualLength;
                 return ErrorInfo(RangeException("First offset must be smaller than length"));
             }
@@ -1483,11 +1522,11 @@ struct ConcurrentLinkedListImpl(Type) {
             a = actualLength + a;
         }
 
-        if(iterator !is null) {
+        if (iterator !is null) {
             a += iterator.minimumOffsetFromHead;
         }
 
-        if(a > actualLength) {
+        if (a > actualLength) {
             a = actualLength;
             return ErrorInfo(RangeException("First offset must be smaller than length"));
         }
@@ -1498,8 +1537,8 @@ struct ConcurrentLinkedListImpl(Type) {
     ErrorInfo changeIndexToOffset(scope Iterator* iterator, ref ptrdiff_t a, ref ptrdiff_t b) scope {
         size_t actualLength = iterator is null ? nodeList.aliveNodes : (iterator.maximumOffsetFromHead - iterator.minimumOffsetFromHead);
 
-        if(a < 0) {
-            if(actualLength < -a) {
+        if (a < 0) {
+            if (actualLength < -a) {
                 a = actualLength;
                 b = actualLength;
                 return ErrorInfo(RangeException("First offset must be smaller than length"));
@@ -1507,28 +1546,28 @@ struct ConcurrentLinkedListImpl(Type) {
             a = actualLength + a;
         }
 
-        if(b < 0) {
-            if(actualLength < -b) {
+        if (b < 0) {
+            if (actualLength < -b) {
                 b = actualLength;
                 return ErrorInfo(RangeException("Second offset must be smaller than length"));
             }
             b = actualLength + b;
         }
 
-        if(iterator !is null) {
+        if (iterator !is null) {
             a += iterator.minimumOffsetFromHead;
             b += iterator.minimumOffsetFromHead;
         }
 
-        if(b < a) {
+        if (b < a) {
             ptrdiff_t temp = a;
             a = b;
             b = temp;
         }
 
-        if(a > actualLength)
+        if (a > actualLength)
             a = actualLength;
-        if(b > actualLength)
+        if (b > actualLength)
             b = actualLength;
 
         return ErrorInfo.init;
@@ -1537,11 +1576,11 @@ struct ConcurrentLinkedListImpl(Type) {
     int foreachValue(scope Iterator* iterator, scope int delegate(scope ref Type value) @safe nothrow @nogc del) scope {
         int result;
 
-        if(iterator !is null) {
+        if (iterator !is null) {
             Cursor cursor = iteratorList.cursorFor(nodeList, iterator.minimumOffsetFromHead);
             cursor.node.onIteratorIn;
 
-            while(result == 0 && !cursor.isOutOfRange(0, iterator.maximumOffsetFromHead)) {
+            while (result == 0 && !cursor.isOutOfRange(0, iterator.maximumOffsetFromHead)) {
                 result = del(cursor.node.value);
                 cursor.advanceForwards(1, iterator.maximumOffsetFromHead);
             }
@@ -1553,9 +1592,9 @@ struct ConcurrentLinkedListImpl(Type) {
     }
 
     void debugPosition(scope Iterator* iterator = null) scope @trusted {
-        version(D_BetterC) {
+        version (D_BetterC) {
         } else {
-            version(unittest)
+            version (unittest)
                 debug {
                     import std.stdio;
 
@@ -1563,27 +1602,27 @@ struct ConcurrentLinkedListImpl(Type) {
 
                     try {
                         debug writeln("aliveNodes: ", nodeList.aliveNodes, " allNodes: ", nodeList.allNodes);
-                        if(iterator !is null)
+                        if (iterator !is null)
                             debug writeln("min: ", iterator.minimumOffsetFromHead, " forwards: ", iterator.forwards.offsetFromHead,
                                     " backwards: ", iterator.backwards.offsetFromHead, " max: ", iterator.maximumOffsetFromHead);
 
-                        while(current !is null) {
-                            if(iterator !is null && iterator.forwards.node is current)
+                        while (current !is null) {
+                            if (iterator !is null && iterator.forwards.node is current)
                                 debug write(">");
 
-                            if(current is &nodeList.head) {
+                            if (current is &nodeList.head) {
                                 debug writef!"0x%X HEAD "(current);
-                            } else if(current is &nodeList.tail) {
+                            } else if (current is &nodeList.tail) {
                                 debug writef!"0x%X TAIL "(current);
                             } else {
                                 debug writef!"0x%X = %s "(current, current.value);
                             }
 
                             debug write("refcount ", current.refCount);
-                            if(current.previousReadyToBeDeleted !is null)
+                            if (current.previousReadyToBeDeleted !is null)
                                 debug writef!" prtbd 0x%X"(current.previousReadyToBeDeleted);
 
-                            if(iterator !is null && iterator.backwards.node is current)
+                            if (iterator !is null && iterator.backwards.node is current)
                                 debug write("<");
 
                             debug writeln;
@@ -1592,7 +1631,7 @@ struct ConcurrentLinkedListImpl(Type) {
 
                         debug stdout.flush;
                         debug stderr.flush;
-                    } catch(Exception) {
+                    } catch (Exception) {
                     }
                 }
         }
@@ -1615,7 +1654,7 @@ struct ConcurrentLinkedListIteratorList(Type) {
         Iterator* ret = nodeList.allocator.make!Iterator;
 
         ret.next = head;
-        if(head !is null)
+        if (head !is null)
             head.previous = ret;
         head = ret;
 
@@ -1625,7 +1664,7 @@ struct ConcurrentLinkedListIteratorList(Type) {
         ret.forwards = cursorFor(nodeList, minimumOffsetFromHead);
         ret.backwards = cursorFor(nodeList, maximumOffsetFromHead);
 
-        if(ret.forwards.node is &nodeList.tail) {
+        if (ret.forwards.node is &nodeList.tail) {
             nodeList.tail.onIteratorOut;
             ret.forwards.node = &nodeList.head;
             nodeList.head.onIteratorIn;
@@ -1638,7 +1677,7 @@ struct ConcurrentLinkedListIteratorList(Type) {
         Cursor ret;
         ret.node = impl.head.next;
 
-        while(ret.node.next !is null && ret.offsetFromHead < offsetFromHead) {
+        while (ret.node.next !is null && ret.offsetFromHead < offsetFromHead) {
             ret.node = ret.node.next;
             ret.offsetFromHead++;
         }
@@ -1651,7 +1690,7 @@ struct ConcurrentLinkedListIteratorList(Type) {
         Iterator* iterator = head;
         int result;
 
-        while(iterator !is null && result == 0) {
+        while (iterator !is null && result == 0) {
             result = del(iterator);
             iterator = iterator.next;
         }
@@ -1669,23 +1708,23 @@ struct ConcurrentLinkedListIteratorList(Type) {
     @safe nothrow @nogc:
 
         void rc(bool addRef, scope ref NodeList nodeList, scope ref IteratorList iteratorList) scope @trusted {
-            if(addRef)
+            if (addRef)
                 refCount++;
             else {
                 refCount--;
 
-                if(refCount == 0) {
+                if (refCount == 0) {
                     forwards.onEOL(nodeList);
                     backwards.onEOL(nodeList);
 
-                    if(iteratorList.head is &this) {
+                    if (iteratorList.head is &this) {
                         iteratorList.head = this.next;
                         assert(this.previous is null);
                     }
 
-                    if(this.previous !is null)
+                    if (this.previous !is null)
                         this.previous.next = this.next;
-                    if(this.next !is null)
+                    if (this.next !is null)
                         this.next.previous = this.previous;
 
                     nodeList.allocator.dispose(&this);
@@ -1694,13 +1733,13 @@ struct ConcurrentLinkedListIteratorList(Type) {
         }
 
         void onRemoveDecreaseFromHead(size_t ifFromOffsetFromHead, size_t amount, scope NodeList.Node* node) scope {
-            if(maximumOffsetFromHead < ifFromOffsetFromHead)
+            if (maximumOffsetFromHead < ifFromOffsetFromHead)
                 return;
 
-            if(this.minimumOffsetFromHead > ifFromOffsetFromHead) {
+            if (this.minimumOffsetFromHead > ifFromOffsetFromHead) {
                 size_t amountToGoBackwards = this.minimumOffsetFromHead - ifFromOffsetFromHead;
 
-                if(amountToGoBackwards > amount)
+                if (amountToGoBackwards > amount)
                     amountToGoBackwards = amount;
 
                 this.minimumOffsetFromHead -= amountToGoBackwards;
@@ -1711,7 +1750,7 @@ struct ConcurrentLinkedListIteratorList(Type) {
             {
                 size_t amountToGoBackwards = this.maximumOffsetFromHead - ifFromOffsetFromHead;
 
-                if(amountToGoBackwards > amount)
+                if (amountToGoBackwards > amount)
                     amountToGoBackwards = amount;
 
                 newMaximumOffsetFromHead -= amountToGoBackwards;
@@ -1737,7 +1776,7 @@ struct ConcurrentLinkedListIteratorList(Type) {
         void onEOL(scope ref NodeList nodeList) {
             node.onIteratorOut;
 
-            if(node.isDeleted && node.refCount == 0) {
+            if (node.isDeleted && node.refCount == 0) {
                 nodeList.removeNode(node);
             }
 
@@ -1752,7 +1791,7 @@ struct ConcurrentLinkedListIteratorList(Type) {
             ifDeletedBringIntoLife();
             node.onIteratorOut;
 
-            while(node.next !is null && amount > 0 && offsetFromHead < maximumOffsetFromHead) {
+            while (node.next !is null && amount > 0 && offsetFromHead < maximumOffsetFromHead) {
                 node = node.next;
                 amount--;
                 offsetFromHead++;
@@ -1765,7 +1804,7 @@ struct ConcurrentLinkedListIteratorList(Type) {
             ifDeletedBringIntoLife();
             node.onIteratorOut;
 
-            while(node.previous !is null && amount > 0 && offsetFromHead > minimumOffsetFromHead) {
+            while (node.previous !is null && amount > 0 && offsetFromHead > minimumOffsetFromHead) {
                 node = node.previous;
                 amount--;
                 offsetFromHead--;
@@ -1778,7 +1817,7 @@ struct ConcurrentLinkedListIteratorList(Type) {
             assert(node !is null);
             node.onIteratorOut;
 
-            while(node.isDeleted && node.next !is null) {
+            while (node.isDeleted && node.next !is null) {
                 node = node.next;
             }
 
@@ -1786,20 +1825,20 @@ struct ConcurrentLinkedListIteratorList(Type) {
         }
 
         void onInsertIncreaseFromHead(size_t ifOffsetFromHead, size_t amount) scope {
-            if(this.offsetFromHead >= ifOffsetFromHead) {
+            if (this.offsetFromHead >= ifOffsetFromHead) {
                 this.offsetFromHead += amount;
             }
         }
 
         void onRemoveDecreaseFromHead(size_t ifFromOffsetFromHead, size_t amount, scope NodeList.Node* node) scope {
-            if(this.offsetFromHead > ifFromOffsetFromHead) {
+            if (this.offsetFromHead > ifFromOffsetFromHead) {
                 size_t amountToGoBackwards = this.offsetFromHead - ifFromOffsetFromHead;
 
-                if(amountToGoBackwards > amount)
+                if (amountToGoBackwards > amount)
                     amountToGoBackwards = amount;
 
                 this.offsetFromHead -= amountToGoBackwards;
-            } else if(this.node is node && this.offsetFromHead == ifFromOffsetFromHead) {
+            } else if (this.node is node && this.offsetFromHead == ifFromOffsetFromHead) {
                 this.offsetFromHead++;
             }
         }
@@ -1829,7 +1868,7 @@ struct ConcurrentLinkedListNodeList(Type) {
 
         // obivously we can't append to the tail node
         // so we move to the previous one and append to that
-        if(prior is &tail)
+        if (prior is &tail)
             prior = prior.previous;
 
         Node* ret = allocator.make!Node();
@@ -1849,23 +1888,23 @@ struct ConcurrentLinkedListNodeList(Type) {
         assert(node !is &head);
         assert(node !is &tail);
 
-        if(node.previous !is null)
+        if (node.previous !is null)
             node.previous.next = node.next;
 
-        if(node.next.previousReadyToBeDeleted is node)
+        if (node.next.previousReadyToBeDeleted is node)
             node.next.previousReadyToBeDeleted = node.previous;
         else {
             node.next.previous = node.previous;
 
-            if(node.previousReadyToBeDeleted !is null)
+            if (node.previousReadyToBeDeleted !is null)
                 mergeDeletedListToNewParent(node, node.next);
         }
 
-        if(!node.isDeleted)
+        if (!node.isDeleted)
             this.aliveNodes--;
 
-        static if(isAnyPointer!Type) {
-            if(!valueAllocator.isNull)
+        static if (isAnyPointer!Type) {
+            if (!valueAllocator.isNull)
                 valueAllocator.dispose(node.value);
         }
 
@@ -1886,7 +1925,7 @@ struct ConcurrentLinkedListNodeList(Type) {
 
         Node* endOfNewList = newParent.previousReadyToBeDeleted;
 
-        if(endOfNewList !is null) {
+        if (endOfNewList !is null) {
             assert(endOfNewList.isDeleted);
             assert(endOfNewList.previousReadyToBeDeleted is null);
 
@@ -1895,7 +1934,7 @@ struct ConcurrentLinkedListNodeList(Type) {
             // which allows us to append it to the new list
             Node* startOfOldList = endOfOldList;
 
-            while(startOfOldList.previous !is null)
+            while (startOfOldList.previous !is null)
                 startOfOldList = startOfOldList.previous;
             assert(startOfOldList !is null);
 
