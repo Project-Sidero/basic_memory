@@ -80,6 +80,7 @@ export @safe nothrow @nogc:
 
     ///
     void opAssign(return scope DateTime other) scope @trusted {
+        this.destroy;
         this.__ctor(other);
     }
 

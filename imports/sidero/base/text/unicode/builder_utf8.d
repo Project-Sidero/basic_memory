@@ -65,11 +65,13 @@ export:
 nothrow @safe:
 
     void opAssign(return scope ref typeof(this) other) scope @nogc {
-        __ctor(other);
+        this.destroy;
+        this.__ctor(other);
     }
 
     void opAssign(return scope typeof(this) other) scope @nogc {
-        __ctor(other);
+        this.destroy;
+        this.__ctor(other);
     }
 
     @disable void opAssign(return scope ref typeof(this) other) scope const;

@@ -111,11 +111,13 @@ export:
 nothrow @safe:
 
     void opAssign(ref return scope StringBuilder_ASCII other) @nogc {
-        __ctor(other);
+        this.destroy;
+        this.__ctor(other);
     }
 
     void opAssign(return scope StringBuilder_ASCII other) @nogc {
-        __ctor(other);
+        this.destroy;
+        this.__ctor(other);
     }
 
     @disable void opAssign(ref StringBuilder_ASCII other) const;

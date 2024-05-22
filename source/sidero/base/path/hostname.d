@@ -36,6 +36,7 @@ export @safe nothrow @nogc:
 
     ///
     void opAssign(return scope Hostname other) scope {
+        this.__dtor;
         this.__ctor(other);
     }
 

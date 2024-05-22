@@ -104,6 +104,7 @@ export @safe nothrow @nogc:
 
     ///
     void opAssign(return scope TimeZone other) scope @trusted {
+        this.destroy;
         this.__ctor(other);
     }
 
@@ -838,7 +839,7 @@ export @safe nothrow @nogc:
                 builder.formattedWrite("{:s}", tod.minute);
             }
 
-            ret.state.name = builder.asReadOnly;
+            //ret.state.name = builder.asReadOnly;
             ret.state.source = Source.Fixed;
         }
 
