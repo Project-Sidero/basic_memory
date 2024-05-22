@@ -37,7 +37,7 @@ export @safe nothrow @nogc:
     ///
     void readUnlock() scope {
         if (atomicDecrementAndLoad(readers, 1) == 0)
-            logAssert(globalLock.lock, "Failed to lock");
+            globalLock.unlock;
     }
 
     ///
