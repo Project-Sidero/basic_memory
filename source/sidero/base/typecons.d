@@ -54,6 +54,8 @@ export @safe nothrow @nogc:
 
     ///
     void opAssign(scope T value) scope {
+        this.destroy;
+
         this.value = value;
         this.isSet = true;
     }

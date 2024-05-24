@@ -467,15 +467,14 @@ export:
     }
 
     ///
-    Slice!T asReadOnly(RCAllocator allocator = RCAllocator.init) scope @trusted {
+    Slice!T asReadOnly() scope @trusted {
         if (isNull)
             return Slice!T();
-        else if (allocator.isNull)
-            allocator = globalAllocator();
 
         this.copyOnWrite;
 
-        return Slice!T.fromDynamicArray(this.state.sliceMemory, this.unsafeGetLiteral());
+        auto ret = Slice!T.fromDynamicArray(this.state.sliceMemory, this.unsafeGetLiteral());
+        return ret;
     }
 
     @property {

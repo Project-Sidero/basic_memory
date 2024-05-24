@@ -16,7 +16,7 @@ struct ReaderWriterLockInline {
     private @PrettyPrintIgnore {
         import sidero.base.synchronization.mutualexclusion : TestTestSetLockInline;
 
-        TestTestSetLockInline globalLock;
+        TestTestSetLockInline readersLock, globalLock;
         shared(ptrdiff_t) readers;
     }
 
@@ -29,8 +29,10 @@ export @safe nothrow @nogc:
 
     ///
     void readLock() scope {
+        readersLock.lock;
         if (atomicIncrementAndLoad(readers, 1) == 1)
             globalLock.lock;
+        readersLock.unlock;
     }
 
     ///
@@ -41,8 +43,10 @@ export @safe nothrow @nogc:
 
     ///
     void convertReadToWrite() scope @trusted {
+        readersLock.lock;
         if (atomicDecrementAndLoad(readers, 1) > 0)
             globalLock.lock;
+        readersLock.unlock;
     }
 
 pure:
@@ -54,8 +58,10 @@ pure:
 
     /// A limited lock method, that is pure.
     void pureReadLock() scope @trusted {
+        readersLock.pureLock;
         if (atomicIncrementAndLoad(readers, 1) == 1)
             globalLock.pureLock;
+        readersLock.unlock;
     }
 
     /// A limited unlock method, that is pure.
@@ -71,7 +77,9 @@ pure:
 
     /// A limited conversion method, that is pure.
     void pureConvertReadToWrite() scope @trusted {
+        readersLock.pureLock;
         if (atomicDecrementAndLoad(readers, 1) > 0)
             globalLock.pureLock;
+        readersLock.unlock;
     }
 }

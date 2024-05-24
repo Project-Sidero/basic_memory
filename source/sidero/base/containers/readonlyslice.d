@@ -529,7 +529,6 @@ export:
     package(sidero.base.containers) static Slice fromDynamicArray(SliceMemory* sliceMemory, T[] slice) @trusted {
         // This is almost guaranteed to be initialized with the DynamicArray,
         //  so don't worry too much about exports.
-        import sidero.base.internal.atomic;
 
         Slice ret;
 

@@ -79,6 +79,11 @@ export:
             state.rcExternal(false);
     }
 
+    void opAssign(return scope DuplicateHashMap other) scope {
+        this.destroy;
+        this.__ctor(other);
+    }
+
     ///
     bool isNull() scope const {
         return state is null;
@@ -283,6 +288,11 @@ export:
         }
 
         ~this() scope {
+        }
+
+        void opAssign(return scope DuplicateHashMapByKey other) scope {
+            this.destroy;
+            this.__ctor(other);
         }
 
         ///

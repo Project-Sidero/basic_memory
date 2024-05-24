@@ -148,10 +148,8 @@ scope:
 
     ///
     void opAssign(scope RCAllocator other) @trusted {
-        this.tupleof = other.tupleof;
-
-        if (refAdd_ !is null)
-            refAdd_();
+        this.destroy;
+        this.__ctor(other);
     }
 
     ///

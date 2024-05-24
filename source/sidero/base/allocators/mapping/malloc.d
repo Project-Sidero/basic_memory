@@ -61,9 +61,9 @@ export:
     }
 
     ///
-    bool deallocate(scope void[] data) {
-        if(data.length > 0) {
-            pureFree(&data[0]);
+    bool deallocate(scope void[] data) @trusted {
+        if(data.ptr !is null) {
+            pureFree(data.ptr);
             return true;
         } else
             return false;

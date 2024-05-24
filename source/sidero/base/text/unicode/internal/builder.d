@@ -972,13 +972,22 @@ struct UTF_State(Char) {
 
     this(return scope RCAllocator allocator) scope @trusted {
         this.blockList = BlockList(allocator);
+        this.blockList.refCount = 1;
     }
 
     //@disable this(this);
 
     ~this() {
+    }
+
+    void deallocateAllState() {
+        RCAllocator allocator = blockList.allocator;
         blockList.clear;
+
         assert(iteratorList.head is null);
+        assert(blockList.head.next.next is null);
+
+        allocator.dispose(&this);
     }
 
     UnicodeLanguage language;

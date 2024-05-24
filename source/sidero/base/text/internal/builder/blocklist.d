@@ -16,7 +16,7 @@ struct BlockListImpl(Char) {
     TestTestSetLockInline mutex;
     Block head, tail;
     size_t numberOfItems, numberOfBlocks;
-    int refCount = 1;
+    ptrdiff_t refCount;
 
 @safe nothrow @nogc @hidden:
 

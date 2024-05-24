@@ -7,6 +7,7 @@ import sidero.base.errors;
 import sidero.base.text;
 import sidero.base.containers.dynamicarray;
 import sidero.base.typecons;
+import sidero.base.internal.atomic;
 
 export @safe nothrow @nogc:
 
@@ -17,6 +18,25 @@ struct URIAddress {
     }
 
 export @safe nothrow @nogc:
+
+    this(return scope ref URIAddress other) scope @trusted {
+        this.state = other.state;
+
+        if (state !is null)
+            atomicIncrementAndLoad(state.refCount, 1);
+    }
+
+    ~this() scope {
+        if (state !is null && atomicDecrementAndLoad(state.refCount, 1) == 0) {
+            RCAllocator alloc = state.allocator;
+            alloc.dispose(state);
+        }
+    }
+
+    void opAssign(URIAddress other) scope @trusted {
+        this.destroy;
+        this.__ctor(other);
+    }
 
     ///
     bool isNull() scope const {

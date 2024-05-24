@@ -24,7 +24,7 @@ export @safe nothrow @nogc:
         if (allocator.isNull)
             allocator = globalAllocator();
 
-        this.state = allocator.make!(State!Type);
+        this.state = allocator.make!(State!Type)(1);
         this.state.allocator = allocator;
     }
 
@@ -32,9 +32,8 @@ export @safe nothrow @nogc:
     this(return scope ref ConcurrentQueue other) scope {
         this.state = other.state;
 
-        if (this.state !is null) {
+        if (this.state !is null)
             atomicIncrementAndLoad(state.refCount, 1);
-        }
     }
 
     ///
@@ -44,6 +43,11 @@ export @safe nothrow @nogc:
             state.clear;
             allocator.dispose(state);
         }
+    }
+
+    void opAssign(return scope ConcurrentQueue other) scope {
+        this.destroy;
+        this.__ctor(other);
     }
 
     ///
@@ -112,7 +116,8 @@ export @safe nothrow @nogc:
             return typeof(return)(RangeException("Nothing to pop off of stack"));
 
         auto temp = state.pop(fiFo);
-        return Result!Type(temp);
+        auto ret = Result!Type(temp);
+        return ret;
     }
 
     ///
@@ -178,8 +183,9 @@ private:
             return;
 
         RCAllocator allocator = globalAllocator();
-        this.state = allocator.make!(State!Type);
+        this.state = allocator.make!(State!Type)(1);
         this.state.allocator = allocator;
+        atomicStore(this.state.refCount, 1);
     }
 }
 
@@ -220,7 +226,7 @@ unittest {
 private:
 
 struct State(Type) {
-    shared(ptrdiff_t) refCount = 1;
+    shared(ptrdiff_t) refCount;
     RCAllocator allocator;
 
     SystemLock mutex;
@@ -316,15 +322,16 @@ export @safe nothrow @nogc:
     }
 
     Result!Type peek(bool fiFo) return scope @trusted {
-        Type ret;
+        Type res;
 
         if (fiFo) {
-            ret = tail.value;
+            res = tail.value;
         } else {
-            ret = head.value;
+            res = head.value;
         }
 
-        return typeof(return)(ret);
+        auto ret = typeof(return)(res);
+        return ret;
     }
 
     struct Node {

@@ -54,6 +54,11 @@ export @safe nothrow @nogc:
         }
     }
 
+    void opAssign(return scope FilePath other) scope {
+        this.destroy;
+        this.__ctor(other);
+    }
+
     ///
     bool isNull() scope const @trusted {
         FilePathState* state = cast(FilePathState*)this.state;

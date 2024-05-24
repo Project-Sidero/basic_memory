@@ -38,13 +38,7 @@ mixin template StringBuilderOperations() {
         if(addRef)
             blockList.refCount++;
         else if(blockList.refCount == 1) {
-            RCAllocator allocator = blockList.allocator;
-            blockList.clear;
-
-            assert(iteratorList.head is null);
-            assert(blockList.head.next.next is null);
-
-            allocator.dispose(&this);
+            this.deallocateAllState;
             return false;
         } else
             blockList.refCount--;
@@ -1147,13 +1141,22 @@ struct OpTest(Char) {
 
     this(return scope RCAllocator allocator) scope @trusted {
         this.blockList = BlockList(allocator);
+        this.blockList.refCount = 1;
     }
 
     //@disable this(this);
 
     ~this() {
+    }
+
+    void deallocateAllState() {
+        RCAllocator allocator = blockList.allocator;
         blockList.clear;
+
         assert(iteratorList.head is null);
+        assert(blockList.head.next.next is null);
+
+        allocator.dispose(&this);
     }
 
     void debugPosition(scope Cursor cursor) {

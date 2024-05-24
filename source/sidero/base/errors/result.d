@@ -33,8 +33,8 @@ export:
         }
 
         void opAssign(return scope Type arg) scope @trusted nothrow @nogc {
-            this.error__ = ErrorInfo.init;
-            this.value = arg;
+            this.destroy;
+            cast(void)this.__ctor(arg);
         }
 
         static if(__traits(hasMember, Type, "opAssign")) {
@@ -101,11 +101,13 @@ scope nothrow @nogc @safe:
 
     ///
     void opAssign(ErrorMessage errorMessage, string moduleName = __MODULE__, int line = __LINE__) {
+        this.destroy;
         error__ = ErrorInfo(errorMessage, moduleName, line);
     }
 
     ///
     void opAssign(scope Result other) {
+        this.destroy;
         cast(void)this.__ctor(other);
     }
 
@@ -119,13 +121,12 @@ scope nothrow @nogc @safe:
 
     ///
     this(return scope ref Result other) @trusted {
-        static foreach(i; 0 .. this.tupleof.length)
-            this.tupleof[i] = other.tupleof[i];
+        this.tupleof = other.tupleof;
 
         this.error__.checked = false;
     }
 
-    ~this() @trusted {
+    ~this() {
     }
 
     ///
@@ -295,16 +296,14 @@ scope nothrow @nogc @safe:
 
     ///
     void opAssign(ErrorMessage errorMessage, string moduleName = __MODULE__, int line = __LINE__) {
+        this.destroy;
         error__ = ErrorInfo(errorMessage, moduleName, line);
     }
 
     ///
     void opAssign(return scope ResultReference other) {
-        this.tupleof = other.tupleof;
-        this.error__.checked = false;
-
-        if(this._rcHandle !is null)
-            this._rcHandle(true, this._user);
+        this.destroy;
+        cast(void)this.__ctor(other);
     }
 
     ///

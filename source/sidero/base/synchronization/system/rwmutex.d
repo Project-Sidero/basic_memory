@@ -17,7 +17,7 @@ struct SystemReaderWriterLock {
     private @PrettyPrintIgnore {
         import sidero.base.internal.puresystemlock;
 
-        PureSystemLock globalLock;
+        PureSystemLock readersLock, globalLock;
         shared(ptrdiff_t) readers;
     }
 
@@ -30,8 +30,10 @@ export @safe nothrow @nogc:
 
     ///
     void readLock() scope {
+        logAssert(readersLock.lock, "Failed to lock");
         if (atomicIncrementAndLoad(readers, 1) == 1)
             logAssert(globalLock.lock, "Failed to lock");
+        readersLock.unlock;
     }
 
     ///
@@ -42,8 +44,10 @@ export @safe nothrow @nogc:
 
     ///
     void convertReadToWrite() scope @trusted {
+        logAssert(readersLock.lock, "Failed to lock");
         if (atomicDecrementAndLoad(readers, 1) > 0)
             logAssert(globalLock.lock, "Failed to lock");
+        readersLock.unlock;
     }
 
 pure:
@@ -55,8 +59,10 @@ pure:
 
     /// A limited lock method, that is pure.
     void pureReadLock() scope @trusted {
+        logAssert(readersLock.lock, "Failed to lock");
         if (atomicIncrementAndLoad(readers, 1) == 1)
             logAssert(globalLock.lock, "Failed to lock");
+        readersLock.unlock;
     }
 
     /// A limited unlock method, that is pure.
@@ -72,7 +78,9 @@ pure:
 
     /// A limited conversion method, that is pure.
     void pureConvertReadToWrite() scope @trusted {
+        logAssert(readersLock.lock, "Failed to lock");
         if (atomicDecrementAndLoad(readers, 1) > 0)
             logAssert(globalLock.lock, "Failed to lock");
+        readersLock.unlock;
     }
 }
