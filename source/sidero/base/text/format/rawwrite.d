@@ -1008,11 +1008,22 @@ bool writeStructClass(Builder, Input)(scope ref Builder output, scope Input inpu
 
                                 if(hadToString && output.length > offsetForToString) {
                                     static FQN = fullyQualifiedName!Input;
+                                    static TypeIdentifierName = __traits(identifier, Input);
+
                                     auto subset = output[offsetForToString .. $];
 
-                                    if(subset == FQN)
+                                    if(subset == FQN) {
                                         output.remove(offsetForToString, FQN.length);
-                                    else if(!hadOpenBracket)
+                                    } else if (subset.startsWith(TypeIdentifierName)) {
+                                        output.remove(offsetForToString, TypeIdentifierName.length);
+
+                                        if (subset.startsWith("(")) {
+                                            output.remove(offsetForToString, 1);
+
+                                            if (subset.endsWith(")"))
+                                                subset.remove(-1, 1);
+                                        }
+                                    } else if(!hadOpenBracket)
                                         output.insert(offsetForToString, " -> "c);
                                 }
                             }
