@@ -20,6 +20,8 @@ Result!dchar readChar(Duration timeout = Duration.min) @trusted {
     Result!dchar ret;
 
     protectReadAction(() @trusted {
+        FILE* cstdioIn = stdioIn;
+
         version(Windows) {
             if(useWindows) {
                 ret = handleWindowsReadChar(timeout);
@@ -28,10 +30,10 @@ Result!dchar readChar(Duration timeout = Duration.min) @trusted {
         } else version(Posix) {
             import core.sys.posix.stdio : fileno;
 
-            const fnum = fileno(stdioIn);
+            const fnum = fileno(cstdioIn);
         }
 
-        if(useStdio && stdioIn !is null) {
+        if(useStdio && cstdioIn !is null) {
             version(Posix) {
                 import core.sys.posix.termios;
 
@@ -52,7 +54,7 @@ Result!dchar readChar(Duration timeout = Duration.min) @trusted {
             }
 
             for(;;) {
-                const got = getc(stdioIn);
+                const got = getc(cstdioIn);
 
                 if(got == EOF)
                     break;
@@ -92,6 +94,8 @@ Result!StringBuilder_ASCII readLine(return scope ref StringBuilder_ASCII builder
     typeof(return) ret;
 
     protectReadAction(() @trusted {
+        FILE* cstdioIn = stdioIn;
+
         version(Windows) {
             if(useWindows) {
                 ret = handleWindowsReadLine(builder, timeout);
@@ -100,10 +104,10 @@ Result!StringBuilder_ASCII readLine(return scope ref StringBuilder_ASCII builder
         } else version(Posix) {
             import core.sys.posix.stdio : fileno;
 
-            const fnum = fileno(stdioIn);
+            const fnum = fileno(cstdioIn);
         }
 
-        if(useStdio && stdioIn !is null) {
+        if(useStdio && cstdioIn !is null) {
             version(Posix) {
                 import core.sys.posix.termios;
 
@@ -124,7 +128,7 @@ Result!StringBuilder_ASCII readLine(return scope ref StringBuilder_ASCII builder
             }
 
             for(;;) {
-                int got = getc(stdioIn);
+                int got = getc(cstdioIn);
 
                 if(got == EOF)
                     break;
@@ -166,6 +170,8 @@ Result!StringBuilder_UTF8 readLine(return scope ref StringBuilder_UTF8 builder, 
     typeof(return) ret;
 
     protectReadAction(() @trusted {
+        FILE* cstdioIn = stdioIn;
+
         version(Windows) {
             if(useWindows) {
                 ret = handleWindowsReadLine(builder, timeout);
@@ -174,10 +180,10 @@ Result!StringBuilder_UTF8 readLine(return scope ref StringBuilder_UTF8 builder, 
         } else version(Posix) {
             import core.sys.posix.stdio : fileno;
 
-            const fnum = fileno(stdioIn);
+            const fnum = fileno(cstdioIn);
         }
 
-        if(useStdio && stdioIn !is null) {
+        if(useStdio && cstdioIn !is null) {
             version(Posix) {
                 import core.sys.posix.termios;
 
@@ -198,7 +204,7 @@ Result!StringBuilder_UTF8 readLine(return scope ref StringBuilder_UTF8 builder, 
             }
 
             for(;;) {
-                int got = getc(stdioIn);
+                int got = getc(cstdioIn);
 
                 if(got == EOF)
                     break;
@@ -259,6 +265,7 @@ Result!dchar handleWindowsReadChar(Duration timeout) @trusted {
         size_t outputBufferCount;
         char[4] outputBuffer = void;
         DWORD dwTimeout, readLength;
+        HANDLE whStdin = hStdin;
 
         if(block) {
             dwTimeout = INFINITE;
@@ -274,18 +281,18 @@ Result!dchar handleWindowsReadChar(Duration timeout) @trusted {
 
             {
                 DWORD mode;
-                GetConsoleMode(hStdin, &mode);
+                GetConsoleMode(whStdin, &mode);
                 if(setStdinMode && (mode & ENABLE_ECHO_INPUT) == ENABLE_ECHO_INPUT) {
                     needEcho = true;
                 }
             }
 
             ReadLoopConsole: for(;;) {
-                DWORD result = WaitForMultipleObjects(1, &hStdin, false, dwTimeout);
+                DWORD result = WaitForMultipleObjects(1, &whStdin, false, dwTimeout);
 
                 switch(result) {
                 case WAIT_OBJECT_0:
-                    if(ReadConsoleW(hStdin, &outputBuffer16[outputBufferCount], 1, &readLength, null)) {
+                    if(ReadConsoleW(whStdin, &outputBuffer16[outputBufferCount], 1, &readLength, null)) {
                         outputBufferCount++;
 
                         if(decodeLength(outputBuffer16[0]) == outputBufferCount || outputBufferCount == 2) {
@@ -320,8 +327,8 @@ Result!dchar handleWindowsReadChar(Duration timeout) @trusted {
 
             while(timeCounter < dwTimeout) {
             TryPipeAgain:
-                if(PeekNamedPipe(hStdin, null, 0, null, &readLength, null) && readLength > 0) {
-                    ReadFile(hStdin, &outputBuffer8[outputBufferCount], 1, &readLength, null);
+                if(PeekNamedPipe(whStdin, null, 0, null, &readLength, null) && readLength > 0) {
+                    ReadFile(whStdin, &outputBuffer8[outputBufferCount], 1, &readLength, null);
                     outputBufferCount++;
 
                     if(decodeLength(outputBuffer8[0]) == outputBufferCount || outputBufferCount == 4) {
@@ -351,7 +358,7 @@ Result!dchar handleWindowsReadChar(Duration timeout) @trusted {
 
             // unfortunately for non-consoles like pipes we kinda just have to block :(
             for(;;) {
-                if(ReadFile(hStdin, &outputBuffer8[outputBufferCount], 1, &readLength, null)) {
+                if(ReadFile(whStdin, &outputBuffer8[outputBufferCount], 1, &readLength, null)) {
                     outputBufferCount++;
 
                     if(decodeLength(outputBuffer8[0]) == outputBufferCount || outputBufferCount == 4) {
@@ -376,6 +383,7 @@ Result!StringBuilder_ASCII handleWindowsReadLine(scope ref StringBuilder_ASCII b
     version(Windows) {
         const block = timeout < Duration.zero;
         DWORD dwTimeout, oldMode, readLength;
+        HANDLE whStdin = hStdin;
 
         if(block) {
             dwTimeout = INFINITE;
@@ -383,20 +391,20 @@ Result!StringBuilder_ASCII handleWindowsReadLine(scope ref StringBuilder_ASCII b
             dwTimeout = cast(DWORD)timeout.totalMilliSeconds;
         }
 
-        GetConsoleMode(hStdin, &oldMode);
+        GetConsoleMode(whStdin, &oldMode);
 
         if(isStdinConsole) {
             INPUT_RECORD[128] buffer = void;
             const needEcho = (oldMode & ENABLE_ECHO_INPUT) == ENABLE_ECHO_INPUT;
 
             ReadLoopConsole: for(;;) {
-                const result = WaitForMultipleObjects(1, &hStdin, false, dwTimeout);
+                const result = WaitForMultipleObjects(1, &whStdin, false, dwTimeout);
 
                 switch(result) {
                 case WAIT_OBJECT_0:
                     uint amountBeforeNewLine;
 
-                    if(PeekConsoleInputA(hStdin, buffer.ptr, cast(uint)buffer.length, &readLength)) {
+                    if(PeekConsoleInputA(whStdin, buffer.ptr, cast(uint)buffer.length, &readLength)) {
                         size_t count;
                         bool lastNewLine;
 
@@ -432,7 +440,7 @@ Result!StringBuilder_ASCII handleWindowsReadLine(scope ref StringBuilder_ASCII b
                             }
                         }
 
-                        ReadConsoleInputA(hStdin, buffer.ptr, amountBeforeNewLine, &readLength);
+                        ReadConsoleInputA(whStdin, buffer.ptr, amountBeforeNewLine, &readLength);
                         if(lastNewLine)
                             return typeof(return)(builder);
                     }
@@ -455,8 +463,8 @@ Result!StringBuilder_ASCII handleWindowsReadLine(scope ref StringBuilder_ASCII b
                 bool success;
 
                 while(timeCounter < dwTimeout) {
-                    if(PeekNamedPipe(hStdin, null, 0, null, &readLength, null) && readLength > 0) {
-                        ReadFile(hStdin, &outputBuffer8, 1, &readLength, null);
+                    if(PeekNamedPipe(whStdin, null, 0, null, &readLength, null) && readLength > 0) {
+                        ReadFile(whStdin, &outputBuffer8, 1, &readLength, null);
                         outputBufferCount++;
                     }
 
@@ -484,7 +492,7 @@ Result!StringBuilder_ASCII handleWindowsReadLine(scope ref StringBuilder_ASCII b
 
             for(;;) {
                 // unfortunately for non-consoles like pipes we kinda just have to block :(
-                if(ReadFile(hStdin, &outputBuffer8, 1, &readLength, null) == 0) {
+                if(ReadFile(whStdin, &outputBuffer8, 1, &readLength, null) == 0) {
                     continue;
                 }
 
@@ -507,6 +515,7 @@ Result!StringBuilder_UTF8 handleWindowsReadLine(scope ref StringBuilder_UTF8 bui
 
         const block = timeout < Duration.zero;
         DWORD dwTimeout, oldMode, readLength;
+        HANDLE whStdin = hStdin;
 
         if(block) {
             dwTimeout = INFINITE;
@@ -514,7 +523,7 @@ Result!StringBuilder_UTF8 handleWindowsReadLine(scope ref StringBuilder_UTF8 bui
             dwTimeout = cast(DWORD)timeout.totalMilliSeconds;
         }
 
-        GetConsoleMode(hStdin, &oldMode);
+        GetConsoleMode(whStdin, &oldMode);
 
         if(isStdinConsole) {
             // ok use UTF-16 API's with console specific behavior
@@ -522,13 +531,13 @@ Result!StringBuilder_UTF8 handleWindowsReadLine(scope ref StringBuilder_UTF8 bui
             const needEcho = (oldMode & ENABLE_ECHO_INPUT) == ENABLE_ECHO_INPUT;
 
             ReadLoopConsole: for(;;) {
-                const result = WaitForMultipleObjects(1, &hStdin, false, dwTimeout);
+                const result = WaitForMultipleObjects(1, &whStdin, false, dwTimeout);
 
                 switch(result) {
                 case WAIT_OBJECT_0:
                     uint amountBeforeNewLine;
 
-                    if(PeekConsoleInputW(hStdin, buffer.ptr, cast(uint)buffer.length, &readLength)) {
+                    if(PeekConsoleInputW(whStdin, buffer.ptr, cast(uint)buffer.length, &readLength)) {
                         size_t count;
                         bool lastNewLine;
 
@@ -564,7 +573,7 @@ Result!StringBuilder_UTF8 handleWindowsReadLine(scope ref StringBuilder_UTF8 bui
                             }
                         }
 
-                        ReadConsoleInputW(hStdin, buffer.ptr, amountBeforeNewLine, &readLength);
+                        ReadConsoleInputW(whStdin, buffer.ptr, amountBeforeNewLine, &readLength);
                         if(lastNewLine)
                             return typeof(return)(builder);
                     }
@@ -588,8 +597,8 @@ Result!StringBuilder_UTF8 handleWindowsReadLine(scope ref StringBuilder_UTF8 bui
 
                 while(timeCounter < dwTimeout) {
                 TryPipeAgain:
-                    if(PeekNamedPipe(hStdin, null, 0, null, &readLength, null) && readLength > 0) {
-                        ReadFile(hStdin, &outputBuffer8[outputBufferCount], 1, &readLength, null);
+                    if(PeekNamedPipe(whStdin, null, 0, null, &readLength, null) && readLength > 0) {
+                        ReadFile(whStdin, &outputBuffer8[outputBufferCount], 1, &readLength, null);
                         outputBufferCount++;
 
                         if(decodeLength(outputBuffer8[0]) == outputBufferCount || outputBufferCount == 4) {
@@ -628,7 +637,7 @@ Result!StringBuilder_UTF8 handleWindowsReadLine(scope ref StringBuilder_UTF8 bui
 
                 // unfortunately for non-consoles like pipes we kinda just have to block :(
                 for(;;) {
-                    if(ReadFile(hStdin, &outputBuffer8[outputBufferCount], 1, &readLength, null)) {
+                    if(ReadFile(whStdin, &outputBuffer8[outputBufferCount], 1, &readLength, null)) {
                         outputBufferCount++;
 
                         if(decodeLength(outputBuffer8[0]) == outputBufferCount || outputBufferCount == 4) {

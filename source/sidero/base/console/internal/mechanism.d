@@ -8,8 +8,7 @@ import sidero.base.text;
 export @safe nothrow @nogc:
 
 __gshared {
-    SystemReaderWriterLock rwlock;
-    SystemLock readingLock, writingLock;
+    SystemLock stateLock, readingLock, writingLock;
     bool useANSI, useWindows, useStdio, autoCloseStdio, consoleSetup;
 
     FILE* stdioIn, stdioOut, stdioError;
@@ -33,17 +32,16 @@ enum {
 }
 
 void protect(scope void delegate() @safe nothrow @nogc del) @trusted {
-    rwlock.writeLock;
+    stateLock.lock.assumeOkay;
     scope (exit)
-        rwlock.pureWriteUnlock;
+        stateLock.unlock;
 
     del();
 }
 
 void protectReadAction(scope void delegate() @safe nothrow @nogc del) @trusted {
-    rwlock.readLock;
-    scope (exit)
-        rwlock.pureReadUnlock;
+    stateLock.lock.assumeOkay;
+    stateLock.unlock;
 
     readingLock.lock.assumeOkay;
     scope (exit)
@@ -53,9 +51,8 @@ void protectReadAction(scope void delegate() @safe nothrow @nogc del) @trusted {
 }
 
 void protectWriteAction(scope void delegate() @safe nothrow @nogc del) @trusted {
-    rwlock.readLock;
-    scope (exit)
-        rwlock.pureReadUnlock;
+    stateLock.lock.assumeOkay;
+    stateLock.unlock;
 
     writingLock.lock.assumeOkay;
     scope (exit)

@@ -2,6 +2,7 @@ module sidero.base.console.internal.rawwrite;
 import sidero.base.console.internal.mechanism;
 import sidero.base.console.inbandinfo;
 import sidero.base.text;
+import sidero.base.console.internal.bindings;
 
 export @safe nothrow @nogc:
 
@@ -191,8 +192,10 @@ void rawWriteImpl(scope String_ASCII input, bool useError = false) @trusted {
     }
 
     if(useStdio) {
-        fwrite(input.ptr, char.sizeof, useLength, useError ? stdioError : stdioOut);
-        fflush(useError ? stdioError : stdioOut);
+        FILE* fileHandle = useError ? stdioError : stdioOut;
+
+        fwrite(input.ptr, char.sizeof, useLength, fileHandle);
+        fflush(fileHandle);
     }
 }
 
@@ -218,8 +221,10 @@ void rawWriteImpl(scope StringBuilder_ASCII input, bool useError = false) @trust
     }
 
     if(useStdio) {
-        fwrite(inputA.ptr, char.sizeof, useLength, useError ? stdioError : stdioOut);
-        fflush(useError ? stdioError : stdioOut);
+        FILE* fileHandle = useError ? stdioError : stdioOut;
+
+        fwrite(inputA.ptr, char.sizeof, useLength, fileHandle);
+        fflush(fileHandle);
     }
 }
 
@@ -267,8 +272,10 @@ void rawWriteImpl(scope String_UTF8 input, bool useError = false) @trusted {
         assert(input.length > 0);
         assert(input.ptr !is null);
 
-        fwrite(input.ptr, char.sizeof, useLength, useError ? stdioError : stdioOut);
-        fflush(useError ? stdioError : stdioOut);
+        FILE* fileHandle = useError ? stdioError : stdioOut;
+
+        fwrite(input.ptr, char.sizeof, useLength, fileHandle);
+        fflush(fileHandle);
     }
 }
 
@@ -309,7 +316,9 @@ void rawWriteImpl(scope StringBuilder_UTF8 input, bool useError = false) @truste
                 return;
         }
 
-        fwrite(input8.ptr, char.sizeof, useLength, useError ? stdioError : stdioOut);
-        fflush(useError ? stdioError : stdioOut);
+        FILE* fileHandle = useError ? stdioError : stdioOut;
+
+        fwrite(input8.ptr, char.sizeof, useLength, fileHandle);
+        fflush(fileHandle);
     }
 }
