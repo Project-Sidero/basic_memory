@@ -67,12 +67,12 @@ void rawWrite(scope String_UTF8 input, bool useError = false) {
 
 /// Ditto
 void rawWrite(scope String_UTF16 input, bool useError = false) {
-    protectWriteAction(() { rawWriteImpl(input.byUTF8(), useError); });
+    protectWriteAction(() { String_UTF8 temp = input.byUTF8(); rawWriteImpl(temp, useError); });
 }
 
 /// Ditto
 void rawWrite(scope String_UTF32 input, bool useError = false) {
-    protectWriteAction(() { rawWriteImpl(input.byUTF8(), useError); });
+    protectWriteAction(() { String_UTF8 temp = input.byUTF8(); rawWriteImpl(temp, useError); });
 }
 
 /// Ditto
@@ -82,12 +82,12 @@ void rawWrite(scope StringBuilder_UTF8 input, bool useError = false) {
 
 /// Ditto
 void rawWrite(scope StringBuilder_UTF16 input, bool useError = false) {
-    protectWriteAction(() { rawWriteImpl(input.byUTF8(), useError); });
+    protectWriteAction(() { StringBuilder_UTF8 temp = input.byUTF8(); rawWriteImpl(temp, useError); });
 }
 
 /// Ditto
 void rawWrite(scope StringBuilder_UTF32 input, bool useError = false) {
-    protectWriteAction(() { rawWriteImpl(input.byUTF8(), useError); });
+    protectWriteAction(() { StringBuilder_UTF8 temp = input.byUTF8(); rawWriteImpl(temp, useError); });
 }
 
 /// Modifies the console settings (colors)

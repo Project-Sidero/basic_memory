@@ -51,7 +51,6 @@ mixin template StringBuilderOperations() {
         blockList.mutex.pureLock;
         changeIndexToOffset(iterator, minimumOffsetFromHead, maximumOffsetFromHead);
 
-        this.rcInternal(true);
         Iterator* ret = iteratorList.newIterator(&blockList, minimumOffsetFromHead, maximumOffsetFromHead);
 
         blockList.mutex.unlock;

@@ -586,7 +586,6 @@ nothrow @safe:
     ///
     typeof(this) dup(scope return RCAllocator allocator = RCAllocator.init) scope const @nogc @trusted {
         auto ret = StringBuilder_UTF32(allocator);
-        ret.state.setup(Char.sizeof);
         ret.state.insertImpl(*cast(StringBuilder_UTF32*)&this);
         return ret;
     }
