@@ -25,4 +25,6 @@ enum {
             "Platform behavior is unexpected"),
     ///
     DuplicateValueException = ErrorMessage("DVE", "Duplicate value received"),
+    ///
+    ShuttingStateDownException = ErrorMessage("SSDE", "State is currently being shutdown"),
 }

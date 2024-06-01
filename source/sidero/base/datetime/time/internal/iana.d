@@ -462,6 +462,13 @@ package(sidero.base.datetime):
     }
 }
 
+void uninitializeIANATZ() @trusted {
+    loadedPath = FilePath.init;
+    defaultTZDirectory = FilePath.init;
+    tzDatabase = typeof(tzDatabase).init;
+    posixTZToIANA = typeof(posixTZToIANA).init;
+}
+
 private:
 
 __gshared {

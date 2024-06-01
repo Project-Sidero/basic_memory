@@ -230,6 +230,10 @@ bool isInDaylightSavings(scope ref WindowsTimeZoneBase self, scope DateTime!Greg
     }
 }
 
+void unitializeWindowsTZ() @trusted {
+    windowsTimeZones = typeof(windowsTimeZones).init;
+}
+
 private @hidden:
 import sidero.base.containers.map.concurrenthashmap;
 

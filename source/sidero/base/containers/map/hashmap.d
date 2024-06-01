@@ -25,7 +25,7 @@ struct HashMap(RealKeyType, ValueType) {
             auto iterator = state.createIteratorExternal();
             assert(iterator !is null);
             scope (exit)
-                state.rcExternal(false, iterator);
+                state.rcIteratorExternal(false, iterator);
 
             int result;
 
@@ -93,7 +93,7 @@ export:
         this.tupleof = other.tupleof;
 
         if (!isNull)
-            state.rcExternal(true, null);
+            state.rcExternal(true);
     }
 
     ///
@@ -106,7 +106,7 @@ export:
 
     ~this() scope {
         if (!isNull)
-            state.rcExternal(false, null);
+            state.rcExternal(false);
     }
 
     void opAssign(return scope HashMap other) scope {
@@ -460,8 +460,15 @@ struct HashMapImpl(RealKeyType, ValueType) {
         keepNoExternalReferences = true;
     }
 
-    void rcExternal(bool addRef, scope Iterator* iterator) scope {
-        rcInternal(addRef, iterator);
+    void rcExternal(bool addRef) scope {
+        rcInternal(addRef);
+    }
+
+    void rcIteratorExternal(bool addRef, scope Iterator* iterator) {
+        assert(!addRef);
+
+        if (!iterator.rc(addRef, nodeList, iteratorList) || rcInternal(addRef)) {
+        }
     }
 
     void rcNodeExternal(bool addRef, scope Node* node) scope {
@@ -475,12 +482,12 @@ struct HashMapImpl(RealKeyType, ValueType) {
                 nodeList.removeNode(node);
         }
 
-        rcInternal(addRef, null);
+        rcInternal(addRef);
     }
 
     Iterator* createIteratorExternal() scope @trusted {
         Iterator* ret = iteratorList.createIterator(nodeList);
-        this.rcInternal(true, ret);
+        this.rcInternal(true);
         return ret;
     }
 
@@ -498,8 +505,8 @@ struct HashMapImpl(RealKeyType, ValueType) {
 
         node.onIteratorIn;
         node.onIteratorIn;
-        this.rcInternal(true, null);
-        this.rcInternal(true, null);
+        this.rcInternal(true);
+        this.rcInternal(true);
 
         key = typeof(key)(node.key);
         value = typeof(value)(node.value);
@@ -525,7 +532,6 @@ struct HashMapImpl(RealKeyType, ValueType) {
 
         if (result != 0) {
             Cursor cursor = iteratorList.cursorFor(nodeList);
-            cursor.node.onIteratorIn;
 
             foreach (otherNode; other.nodeList) {
                 if (result != 0)
@@ -591,9 +597,6 @@ struct HashMapImpl(RealKeyType, ValueType) {
         if (node is null) {
             ret = typeof(return)(NullPointerException);
         } else {
-            node.onIteratorIn;
-            this.rcInternal(true, null);
-
             ret = typeof(return)(node.value);
         }
 
@@ -615,27 +618,22 @@ struct HashMapImpl(RealKeyType, ValueType) {
     // /\ external
     // \/ internal
 
-    bool rcInternal(bool addRef, scope Iterator* iterator) scope @trusted {
+    bool rcInternal(bool addRef) scope @trusted {
         if (addRef) {
             nodeList.refCount++;
-            if (iterator !is null)
-                iterator.rc(true, nodeList, iteratorList);
         } else if (nodeList.refCount == 1) {
             this.clearAllInternal;
 
-            if (iterator !is null)
-                iterator.rc(false, nodeList, iteratorList);
-
             assert(iteratorList.head is null);
             assert(nodeList.allNodes == 0);
+
+            nodeList.cleanup;
 
             RCAllocator allocator = nodeList.allocator;
             allocator.dispose(&this);
             return false;
         } else {
             nodeList.refCount--;
-            if (iterator !is null)
-                iterator.rc(false, nodeList, iteratorList);
         }
 
         return true;
@@ -647,13 +645,7 @@ struct HashMapImpl(RealKeyType, ValueType) {
 
             while (*currentPtr !is &bucket.tail) {
                 Node* current = *currentPtr;
-
-                if (current.refCount == 0) {
-                    nodeList.removeNode(current);
-                } else {
-                    appendDeletedNodeToList(current.next, current);
-                    nodeList.aliveNodes--;
-                }
+                nodeList.removeNode(current);
             }
         }
     }
@@ -735,10 +727,10 @@ struct HashMapImpl(RealKeyType, ValueType) {
 
         if (iterator is null)
             cursor = iteratorList.cursorFor(nodeList);
-        else
+        else {
             cursor = iterator.forwards;
-
-        cursor.node.onIteratorIn;
+            cursor.node.onIteratorIn;
+        }
 
         while (result == 0 && !cursor.isOutOfRange()) {
             result = del(cursor.node.key, cursor.node.value);
@@ -749,37 +741,76 @@ struct HashMapImpl(RealKeyType, ValueType) {
         return result;
     }
 
-    void debugPosition(scope Iterator* iterator = null) scope @trusted {
-        version (D_BetterC) {
-        } else {
-            version (unittest)
-                debug {
-                    import std.stdio;
+    void checkForNodes(string func = __FUNCTION__, int line = __LINE__) scope @trusted {
+        import core.stdc.stdio : printf;
 
-                    try {
-                        debug writeln("refCount: ", nodeList.refCount, " aliveNodes: ", nodeList.aliveNodes,
-                                " allNodes: ", nodeList.allNodes);
+        size_t seenAlive, seenTotal;
 
-                        foreach (node; nodeList) {
-                            if (iterator !is null && iterator.forwards.node is node)
-                                debug write(">");
+        foreach (ref bucket; nodeList.buckets) {
+            Node* currentInBucket = &bucket.head;
 
-                            debug writef!"0x%X %s=%s %s:%s"(node, node.previous.previous is null ? "" : "$",
-                                    node.next.next is null ? "" : "$", node.key, node.value);
-
-                            debug write(" refcount ", node.refCount);
-                            if (node.previousReadyToBeDeleted !is null)
-                                debug writef!" prtbd 0x%X"(node.previousReadyToBeDeleted);
-                        }
-
-                        debug writeln;
-
-                        debug stdout.flush;
-                        debug stderr.flush;
-                    } catch (Exception) {
-                    }
+            while (currentInBucket !is null) {
+                if (currentInBucket.previous !is null && currentInBucket.next !is null) {
+                    seenAlive++;
+                    seenTotal++;
                 }
+
+                Node* currentInDeleted = currentInBucket.previousReadyToBeDeleted;
+                while (currentInDeleted !is null) {
+                    seenTotal++;
+                    currentInDeleted = currentInDeleted.previous;
+                }
+
+                currentInBucket = currentInBucket.next;
+            }
         }
+
+        if (seenAlive != nodeList.aliveNodes || seenTotal != nodeList.allNodes) {
+            printf("seen alive: %zd total: %zd at %s:%d\n", seenAlive, seenTotal, func.ptr, line);
+            debugPosition;
+            assert(0);
+        }
+    }
+
+    void debugPosition(scope Iterator* iterator = null) scope @trusted {
+        import core.stdc.stdio : printf, stdout, fflush;
+
+        printf("refCount: %zd aliveNodes: %zd allNodes: %zd\n", nodeList.refCount, nodeList.aliveNodes, nodeList.allNodes);
+
+        void printNode(Node* node) {
+            if ((node.previous is null || node.previous.previous is null) && (node.next is null || node.next.next is null))
+                printf("%p = refcount %zd\n", node, node.refCount);
+            else if (node.previous is null || node.previous.previous is null)
+                printf("%p =$ refcount %zd\n", node, node.refCount);
+            else if (node.next is null || node.next.next is null)
+                    printf("%p $= refcount %zd\n", node, node.refCount);
+                else
+                    printf("%p $=$ refcount %zd\n", node, node.refCount);
+        }
+
+        foreach (ref bucket; nodeList.buckets) {
+            Node* currentInBucket = &bucket.head;
+
+            if (iterator !is null && iterator.forwards.node is currentInBucket)
+                printf(">");
+
+            while (currentInBucket !is null) {
+                if (currentInBucket.previous !is null && currentInBucket.next !is null)
+                    printNode(currentInBucket);
+
+                Node* currentInDeleted = currentInBucket.previousReadyToBeDeleted;
+                while (currentInDeleted !is null) {
+                    printf("    DEL ");
+                    printNode(currentInDeleted);
+
+                    currentInDeleted = currentInDeleted.previous;
+                }
+
+                currentInBucket = currentInBucket.next;
+            }
+        }
+
+        fflush(stdout);
     }
 }
 
@@ -795,6 +826,7 @@ struct HashMapIterator(RealKeyType, ValueType) {
 
     Iterator* createIterator(return scope ref NodeList nodeList) scope @trusted {
         Iterator* ret = nodeList.allocator.make!Iterator;
+        ret.refCount = 1;
 
         ret.next = head;
         if (head !is null)
@@ -833,7 +865,7 @@ struct HashMapIterator(RealKeyType, ValueType) {
 
     @safe nothrow @nogc:
 
-        void rc(bool addRef, scope ref NodeList nodeList, scope ref IteratorList iteratorList) scope @trusted {
+        bool rc(bool addRef, scope ref NodeList nodeList, scope ref IteratorList iteratorList) scope @trusted {
             if (addRef)
                 refCount++;
             else {
@@ -853,8 +885,11 @@ struct HashMapIterator(RealKeyType, ValueType) {
                         this.next.previous = this.previous;
 
                     nodeList.allocator.dispose(&this);
+                    return true;
                 }
             }
+
+            return false;
         }
     }
 
@@ -952,6 +987,11 @@ struct HashMapNode(RealKeyType, ValueType) {
         assert(buckets.length > 0);
     }
 
+    void cleanup() scope {
+        if (buckets.ptr !is smallBucketOptimization.ptr)
+            allocator.dispose(buckets);
+    }
+
     size_t getBucketId(ulong hash, scope Bucket[] buckets = null) scope {
         if (buckets.length == 0)
             buckets = this.buckets;
@@ -1029,16 +1069,17 @@ struct HashMapNode(RealKeyType, ValueType) {
                 mergeDeletedListToNewParent(node, node.next);
         }
 
-        if (!node.isDeleted)
-            this.aliveNodes--;
-
         if (node.refCount > 0) {
             node.isDeleted = true;
+            this.aliveNodes--;
         } else {
             static if (isAnyPointer!ValueType) {
                 if (!valueAllocator.isNull)
                     valueAllocator.dispose(node.value);
             }
+
+            if (!node.isDeleted)
+                this.aliveNodes--;
 
             this.allNodes--;
             allocator.dispose(node);
@@ -1114,26 +1155,32 @@ struct HashMapNode(RealKeyType, ValueType) {
 
                         currentNode.previous = priorNode;
                         currentNode.next = &intoBucket.tail;
-                    } else {
-                        lastIntoBucket = intoBucket;
-                        priorNode = currentNode;
 
+                        priorNode = currentNode;
+                    } else {
                         intoBucket.head.next = currentNode;
                         intoBucket.tail.previous = currentNode;
                         currentNode.previous = &intoBucket.head;
                         currentNode.next = &intoBucket.tail;
+
+                        lastIntoBucket = intoBucket;
+                        priorNode = currentNode;
                     }
 
                     currentNode = nextNode;
                 }
 
+                if (oldBucket.head.previousReadyToBeDeleted !is null) {
+                    mergeDeletedListToNewParent(&oldBucket.head, &into[0].head);
+                }
+
                 if (oldBucket.tail.previousReadyToBeDeleted !is null) {
-                    mergeDeletedListToNewParent(oldBucket.tail.previousReadyToBeDeleted, currentNode.next.previousReadyToBeDeleted);
+                    mergeDeletedListToNewParent(&oldBucket.tail, &into[$ - 1].tail);
                 }
             }
         }
 
-        if (buckets.length * 1.5 <= aliveNodes) {
+        if (buckets.length * 32 <= aliveNodes) {
             size_t nextCount = nextCountOfBuckets();
 
             if (nextCount == buckets.length)
