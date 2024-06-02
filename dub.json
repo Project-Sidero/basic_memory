@@ -112,7 +112,9 @@
                 "msvc_exports.def"
             ],
             "dflags-windows-ldc": [
-                "--fvisibility=public",
+                "--fvisibility=public"
+            ],
+            "dflags-ldc": [
                 "--linkonce-templates",
                 "--link-internally"
             ],

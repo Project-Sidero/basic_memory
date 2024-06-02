@@ -250,8 +250,10 @@ __gshared {
 }
 
 version(Windows) {
-    import core.sys.windows.windows : DWORD, LONG, WCHAR, SYSTEMTIME, BOOLEAN, BOOL, USHORT, ERROR_NO_MORE_ITEMS,
-        ERROR_SUCCESS, TIME_ZONE_INFORMATION, GetTimeZoneInformation, GetSystemTime;
+    import core.sys.windows.windef : DWORD, LONG, WCHAR, BOOL, USHORT;
+    import core.sys.windows.winnt : BOOLEAN;
+    import core.sys.windows.winbase : SYSTEMTIME, TIME_ZONE_INFORMATION, GetTimeZoneInformation, GetSystemTime;
+    import core.sys.windows.winerror : ERROR_NO_MORE_ITEMS, ERROR_SUCCESS;
 
     struct DYNAMIC_TIME_ZONE_INFORMATION {
         LONG Bias;

@@ -12,7 +12,8 @@ struct SymbolLoader {
         TestTestSetLockInline mutex;
 
         version(Windows) {
-            import core.sys.windows.windows : HMODULE, FreeLibrary, LoadLibraryExW, GetProcAddress;
+            import core.sys.windows.windef : HMODULE;
+            import core.sys.windows.winbase : FreeLibrary, LoadLibraryExW, GetProcAddress;
 
             shared HMODULE binary;
 

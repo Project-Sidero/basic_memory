@@ -11,8 +11,8 @@ struct PureSystemLock {
         bool initialized;
 
         version(Windows) {
-            import core.sys.windows.windows : CreateMutex, INFINITE, WAIT_OBJECT_0, WAIT_ABANDONED,
-                WAIT_FAILED, WAIT_TIMEOUT;
+            import core.sys.windows.winbase : CreateMutex, INFINITE, WAIT_OBJECT_0, WAIT_ABANDONED, WAIT_FAILED;
+            import core.sys.windows.winerror : WAIT_TIMEOUT;
 
             HANDLE mutex;
 
@@ -205,7 +205,8 @@ export @safe nothrow @nogc pure:
 private:
 
 version(Windows) {
-    import core.sys.windows.windows : HANDLE, DWORD, BOOL;
+    import core.sys.windows.basetsd : HANDLE;
+    import core.sys.windows.windef : DWORD, BOOL;
 
     extern (Windows) nothrow @nogc pure {
         BOOL CloseHandle(HANDLE);
@@ -234,7 +235,7 @@ version(Windows) {
 
 bool waitForLock(scope void* handle) @trusted nothrow @nogc pure {
     version(Windows) {
-        import core.sys.windows.windows : INFINITE, WAIT_OBJECT_0, WAIT_ABANDONED, WAIT_FAILED;
+        import core.sys.windows.winbase : INFINITE, WAIT_OBJECT_0, WAIT_ABANDONED, WAIT_FAILED;
 
         auto result = WaitForSingleObject(handle, INFINITE);
 
