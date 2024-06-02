@@ -7,7 +7,7 @@ import sidero.base.traits;
 export @safe nothrow @nogc:
 
 ///
-bool rawRead(Input, Output)(scope ref Input input, scope out Output output, scope FormatSpecifier format = FormatSpecifier.init)
+bool rawRead(Input, Output)(scope ref Input input, scope out Output output, scope FormatSpecifier format = FormatSpecifier.init) @trusted
         if (isUTF!Input || isASCII!Input) {
     if(input.empty)
         return false;

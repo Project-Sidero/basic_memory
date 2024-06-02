@@ -11,6 +11,11 @@ Warning: Only supports Punycode, parts required for other arguments is missing.
 */
 struct BootString(uint Base, uint Tmin, uint Tmax, uint Skew, uint Damp, uint InitialBias, uint InitialN, ubyte Deliminator) {
     static assert(Base == 36, "BootString implementation only implemented for Punycode");
+
+    private {
+        enum DeliminatorString = "" ~ Deliminator;
+    }
+
 export @safe nothrow @nogc static:
 
     ///
@@ -299,7 +304,7 @@ private:
         if(numberOfBasicCharacters == input.length)
             return ErrorResult.init;
         haveEncoded = true;
-        output ~= [Deliminator];
+        output ~= DeliminatorString;
 
         size_t amountConsumed = numberOfBasicCharacters;
 
@@ -381,7 +386,7 @@ private:
         }
 
         {
-            ptrdiff_t lastDelimIndex = input.lastIndexOf([Deliminator]);
+            ptrdiff_t lastDelimIndex = input.lastIndexOf(DeliminatorString);
             if(lastDelimIndex < 0) {
                 if(copyIfBasic(input)) {
                     input = Input.init;
@@ -732,7 +737,7 @@ private:
             return result;
 
         if(haveEncoded) {
-            if(output[originalLength .. $].lastIndexOf(['-']) != 0)
+            if(output[originalLength .. $].lastIndexOf("-") != 0)
                 output.insert(originalLength, "xn--");
             else
                 output.insert(originalLength, "xn-");
@@ -744,7 +749,7 @@ private:
     ErrorResult decode_(Input)(scope StringBuilder_UTF32 output, scope Input input) @trusted {
         if(input.startsWith("xn--")) {
             // got a prefix, but do we have a deliminator?
-            if(input.lastIndexOf(['-']) == 3) {
+            if(input.lastIndexOf("-") == 3) {
                 // dangit, we need to keep one from ACE prefix!
                 input = input[3 .. $];
             } else {

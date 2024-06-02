@@ -1,5 +1,12 @@
 {
     "name": "tools",
-    "sourcePaths": ["source"],
-    "targetType": "executable"
+    "targetType": "none",
+
+    "subPackages": [
+        {
+            "name": "preBuild",
+            "sourcePaths": ["preBuild"],
+            "targetType": "executable"
+        }
+    ]
 }

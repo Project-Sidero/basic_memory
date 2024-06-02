@@ -125,15 +125,16 @@ Expected formattedReadImpl(Input, Args...)(scope ref Input input, scope String_U
 
                 static if(isASCII!Input) {
                     auto c2 = formatString.front;
-                    ubyte c;
+                    ubyte[1] c;
                     if(c2 >= 128)
                         goto FailStartsWith;
-                    c = cast(ubyte)c2;
+                    c[0] = cast(ubyte)c2;
                 } else {
-                    auto c = formatString.front;
+                    auto cTemp = formatString.front;
+                    typeof(cTemp)[1] c = [cTemp];
                 }
 
-                if(inputTemp.startsWith([c])) {
+                if(inputTemp.startsWith(c[])) {
                     inputTemp.popFront;
                     formatString.popFront;
                     continue;

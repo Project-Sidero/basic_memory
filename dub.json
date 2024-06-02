@@ -7,9 +7,7 @@
     "license": "Artistic-2.0",
     "name": "sidero_base",
     "homepage": "https://github.com/Project-Sidero/basic_memory",
-    "importPaths": [
-        "imports"
-    ],
+    "importPaths": [],
     "sourcePaths": [],
     "sourceFiles": [
         "source/ignoreme.d"
@@ -33,28 +31,45 @@
         {
             "name": "verify_generated",
             "sourcePaths": [
-                "database/generated",
-                "database/verify_generated",
+                "generated",
+                "tools/verify_generated",
                 "source"
             ],
             "targetType": "executable",
-            "workingDirectory": "database"
+            "dflags-posix": [
+                "-allinst"
+            ],
+            "lflags-windows": [
+                "/IGNORE:4217",
+                "/FORCE:MULTIPLE"
+            ],
+            "libs-windows": [
+                "Ws2_32",
+                "advapi32",
+                "Userenv",
+                "Netapi32"
+            ],
+            "versions": [
+                "Windows7"
+            ]
         },
         {
-            "name": "runtools",
+            "name": "rungenerators",
             "targetType": "staticLibrary",
             "sourcePaths": [],
-            "sourceFiles": ["source/ignoreme.d"],
+            "sourceFiles": [
+                "source/ignoreme.d"
+            ],
             "importPaths": [],
             "extraDependencyFiles": [
                 "tools/templates/sidero/base/text/unicode/readonly.d",
                 "tools/templates/sidero/base/text/unicode/builder.d"
             ],
             "preBuildCommands-posix": [
-                "DFLAGS=\"\" ${DUB_EXE} run --bare --skip-registry=all --root=${SIDERO_BASE:RUNTOOLS_PACKAGE_DIR}/tools"
+                "DFLAGS=\"\" ${DUB_EXE} run --bare --skip-registry=all --root=${SIDERO_BASE:RUNGENERATORS_PACKAGE_DIR}/tools :preBuild"
             ],
             "preBuildCommands-windows": [
-                "set DFLAGS= && ${DUB_EXE} run --bare --skip-registry=all --root=${SIDERO_BASE:RUNTOOLS_PACKAGE_DIR}/tools"
+                "set DFLAGS= && ${DUB_EXE} run --bare --skip-registry=all --root=${SIDERO_BASE:RUNGENERATORS_PACKAGE_DIR}/tools :preBuild"
             ]
         },
         {
@@ -72,7 +87,7 @@
                 "source/sidero/base/allocators",
                 "source/sidero/base/text/internal",
                 "source/sidero/base/synchronization",
-                "database/generated"
+                "generated"
             ],
             "sourceFiles": [
                 "source/sidero/base/attributes.d",
@@ -88,21 +103,12 @@
             "name": "source",
             "targetType": "sourceLibrary",
             "importPaths": [
-                "source"
+                "source",
+                "generated"
             ],
             "sourcePaths": [
                 "source",
-                "database/generated"
-            ],
-            "sourceFiles": [
-                "imports/sidero/base/datetime/cldr.d",
-                "imports/sidero/base/text/unicode/database.d",
-                "imports/sidero/base/text/unicode/readonly_utf8.d",
-                "imports/sidero/base/text/unicode/readonly_utf16.d",
-                "imports/sidero/base/text/unicode/readonly_utf32.d",
-                "imports/sidero/base/text/unicode/builder_utf8.d",
-                "imports/sidero/base/text/unicode/builder_utf16.d",
-                "imports/sidero/base/text/unicode/builder_utf32.d"
+                "generated"
             ],
             "excludedSourceFiles": [
                 "source/sidero/base/text/unicode/readonly.d",
@@ -121,10 +127,7 @@
             "dflags": [
                 "-preview=dip1000"
             ],
-            "dflags-posix-dmd": [
-                "-allinst"
-            ],
-            "dflags-posix-ldc": [
+            "dflags-posix": [
                 "-allinst"
             ],
             "lflags-windows": [
@@ -139,10 +142,7 @@
             ],
             "versions": [
                 "Windows7"
-            ],
-            "dependencies": {
-                "sidero_base:runtools": "*"
-            }
+            ]
         }
     ],
     "configurations": [

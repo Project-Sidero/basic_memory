@@ -17,3 +17,5 @@ basic_memory-test-*
 sidero_base.iml
 *.exp
 database/tz/
+tools/tz/
+dub.selections.json
