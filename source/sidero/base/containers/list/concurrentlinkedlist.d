@@ -72,7 +72,7 @@ struct ConcurrentLinkedList(Type) {
 export:
 
     ///
-    mixin OpApplyCombos!("ElementType", null, ["@safe", "nothrow", "@nogc"]);
+    mixin OpApplyCombos!(ElementType, void, "opApply", true, true, true, false, false);
 
     ///
     unittest {
@@ -91,7 +91,7 @@ export:
     }
 
     ///
-    mixin OpApplyCombos!("ElementType", null, ["@safe", "nothrow", "@nogc"], "opApplyReverse");
+    mixin OpApplyCombos!(ElementType, void, "opApplyReverse", true, true, true, false, false);
 
     ///
     unittest {

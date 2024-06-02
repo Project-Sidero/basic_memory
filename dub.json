@@ -41,19 +41,20 @@
             "workingDirectory": "database"
         },
         {
-            "name": "makeUnicodeStrings",
-            "targetType": "sourceLibrary",
+            "name": "runtools",
+            "targetType": "staticLibrary",
             "sourcePaths": [],
+            "sourceFiles": ["source/ignoreme.d"],
             "importPaths": [],
             "extraDependencyFiles": [
-                "source/sidero/base/text/unicode/readonly.d",
-                "source/sidero/base/text/unicode/builder.d"
+                "tools/templates/sidero/base/text/unicode/readonly.d",
+                "tools/templates/sidero/base/text/unicode/builder.d"
             ],
             "preBuildCommands-posix": [
-                "DFLAGS=\"\" $DUB_EXE run --skip-registry=all --single tools/unicode.d"
+                "DFLAGS=\"\" ${DUB_EXE} run --bare --skip-registry=all --root=${SIDERO_BASE:RUNTOOLS_PACKAGE_DIR}/tools"
             ],
             "preBuildCommands-windows": [
-                "set DFLAGS=\"\"; $DUB_EXE run --skip-registry=all --single tools/unicode.d"
+                "set DFLAGS= && ${DUB_EXE} run --bare --skip-registry=all --root=${SIDERO_BASE:RUNTOOLS_PACKAGE_DIR}/tools"
             ]
         },
         {
@@ -138,7 +139,7 @@
                 "Windows7"
             ],
             "dependencies": {
-                "sidero_base:makeUnicodeStrings": "*"
+                "sidero_base:runtools": "*"
             }
         }
     ],

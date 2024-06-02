@@ -107,7 +107,12 @@ scope nothrow @nogc @safe:
 
     ///
     void opAssign(scope Result other) {
-        this.destroy;
+        if (__ctfe) {
+            this.tupleof = Result.init.tupleof;
+        } else {
+            this.destroy;
+        }
+
         cast(void)this.__ctor(other);
     }
 

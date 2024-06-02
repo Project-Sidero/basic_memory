@@ -1,0 +1,5 @@
+{
+    "name": "tools",
+    "sourcePaths": ["source"],
+    "targetType": "executable"
+}

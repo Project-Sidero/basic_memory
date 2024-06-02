@@ -73,7 +73,7 @@ export:
     }
 export:
 
-    mixin OpApplyCombos!("Char", null, ["@safe", "nothrow", "@nogc"]);
+    mixin OpApplyCombos!(Char, void, "opApply", true, true, true, false, false);
 
     ///
     unittest {
@@ -90,7 +90,7 @@ export:
         assert(lastIndex == Text.length);
     }
 
-    mixin OpApplyCombos!("Char", null, ["@safe", "nothrow", "@nogc"], "opApplyReverse");
+    mixin OpApplyCombos!(Char, void, "opApplyReverse", true, true, true, false, false);
 
     ///
     unittest {
@@ -110,12 +110,12 @@ export:
 
 nothrow @safe:
 
-    void opAssign(ref return scope StringBuilder_ASCII other) @nogc {
+    void opAssign(ref return scope StringBuilder_ASCII other) scope @nogc {
         this.destroy;
         this.__ctor(other);
     }
 
-    void opAssign(return scope StringBuilder_ASCII other) @nogc {
+    void opAssign(return scope StringBuilder_ASCII other) scope @nogc {
         this.destroy;
         this.__ctor(other);
     }

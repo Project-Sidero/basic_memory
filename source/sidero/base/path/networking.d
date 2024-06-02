@@ -29,6 +29,12 @@ export @safe nothrow @nogc:
     }
 
     ///
+    void opAssign(return scope NetworkAddress other) scope {
+        this.destroy;
+        this.__ctor(other);
+    }
+
+    ///
     Type type() scope const {
         return this.type_;
     }

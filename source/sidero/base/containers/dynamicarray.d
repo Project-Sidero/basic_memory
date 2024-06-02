@@ -85,16 +85,15 @@ struct DynamicArray(T) {
     }
 
 export:
-
-    ///
-    mixin OpApplyCombos!("T", "size_t", ["@safe", "nothrow", "@nogc"]);
-    ///
-    mixin OpApplyCombos!("T", "size_t", ["@safe", "nothrow", "@nogc"], "opApplyReverse");
-
     ///
     alias ElementType = T;
     ///
     alias LiteralType = const(T)[];
+
+    ///
+    mixin OpApplyCombos!(ElementType, size_t, "opApply", true, true, true, false, false);
+    ///
+    mixin OpApplyCombos!(ElementType, size_t, "opApplyReverse", true, true, true, false, false);
 
 @safe nothrow @nogc:
 

@@ -52,7 +52,7 @@ struct ConcurrentHashMap(RealKeyType, ValueType) {
 export:
 
     ///
-    mixin OpApplyCombos!("ResultReference!ValueType", "ResultReference!KeyType", ["@safe", "nothrow", "@nogc"]);
+    mixin OpApplyCombos!(ResultReference!ValueType, ResultReference!KeyType, "opApply", true, true, true, false, false);
 
     ///
     unittest {

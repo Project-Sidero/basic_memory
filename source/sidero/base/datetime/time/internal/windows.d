@@ -101,6 +101,11 @@ struct WindowsTimeZoneBase {
         this.tupleof = other.tupleof;
     }
 
+    void opAssign(return scope WindowsTimeZoneBase other) scope {
+        this.destroy;
+        this.__ctor(other);
+    }
+
     export bool opEquals(scope const WindowsTimeZoneBase other) scope const @trusted {
         return (cast(WindowsTimeZoneBase)this).tupleof == (cast(WindowsTimeZoneBase)other).tupleof;
     }

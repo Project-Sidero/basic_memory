@@ -52,7 +52,7 @@ struct HashMap(RealKeyType, ValueType) {
 export:
 
     ///
-    mixin OpApplyCombos!("Result!ValueType", "Result!KeyType", ["@safe", "nothrow", "@nogc"]);
+    mixin OpApplyCombos!(Result!ValueType, Result!KeyType, "opApply", true, true, true, false, false);
 
     ///
     unittest {

@@ -1,15 +1,11 @@
-#!/usr/bin/env dub
-/+ dub.sdl:
-	name "unicode_builder"
-+/
-module tools.unicode;
+module unicode_builders;
 
-void main() {
+void runUnicodeBuilders() {
     import std.file : readText;
     import std.parallelism : parallel;
 
-    string readOnlyText = readText("source/sidero/base/text/unicode/readonly.d");
-    string builderText = readText("source/sidero/base/text/unicode/builder.d");
+    string readOnlyText = readText("tools/templates/sidero/base/text/unicode/readonly.d");
+    string builderText = readText("tools/templates/sidero/base/text/unicode/builder.d");
 
     Work[] work = [
         Work(readOnlyText, "readonly", "String_UTF", "readonly_utf8", "String_UTF8", "char"),
@@ -24,6 +20,8 @@ void main() {
         todo.processFile;
     }
 }
+
+private:
 
 struct Work {
     string originalText, originalModuleName, originalTypeName, moduleName, typeName, charName;

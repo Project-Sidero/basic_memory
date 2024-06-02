@@ -601,6 +601,9 @@ export @safe nothrow @nogc:
         this.tupleof = other.tupleof;
     }
 
+    ~this() scope {
+    }
+
     static OperatingSystem defaults() {
         return OperatingSystem.init;
     }

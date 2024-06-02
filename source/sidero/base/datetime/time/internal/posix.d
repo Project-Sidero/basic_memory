@@ -461,6 +461,11 @@ struct PosixTZBase {
         this.tupleof = other.tupleof;
     }
 
+    void opAssign(return scope PosixTZBase other) scope {
+        this.destroy;
+        this.__ctor(other);
+    }
+
     bool loadFromFile() scope const {
         return !loadFromTZifFile.isNull;
     }

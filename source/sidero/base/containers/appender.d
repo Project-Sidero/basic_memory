@@ -85,12 +85,14 @@ struct Appender(Type) {
         }
     }
 
-    ///
-    mixin OpApplyCombos!("ElementType", "size_t", ["@safe", "nothrow", "@nogc"]);
-    ///
-    mixin OpApplyCombos!("ElementType", "size_t", ["@safe", "nothrow", "@nogc"], "opApplyReverse");
+export:
 
-export @safe nothrow @nogc:
+    ///
+    mixin OpApplyCombos!(ElementType, size_t, "opApply", true, true, true, true, false);
+    ///
+    mixin OpApplyCombos!(ElementType, size_t, "opApplyReverse", true, true, true, true, false);
+
+@safe nothrow @nogc:
 
     ///
     alias ElementType = Type;

@@ -40,7 +40,7 @@ struct DuplicateHashMap(RealKeyType, ValueType) {
 export:
 
     ///
-    mixin OpApplyCombos!("KeyType", null, ["@safe", "nothrow", "@nogc"]);
+    mixin OpApplyCombos!(KeyType, void, "opApply", true, true, true, false, false);
 
 @safe nothrow @nogc:
 
@@ -296,7 +296,7 @@ export:
         }
 
         ///
-        mixin OpApplyCombos!("ValueType", null, ["@safe", "nothrow", "@nogc"]);
+        mixin OpApplyCombos!(ValueType, void, "opApply", true, true, true, false, false);
 
         ///
         unittest {

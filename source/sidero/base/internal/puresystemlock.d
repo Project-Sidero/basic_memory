@@ -10,16 +10,16 @@ struct PureSystemLock {
         TestTestSetLockInline protectMutex;
         bool initialized;
 
-        version (Windows) {
-            import core.sys.windows.windows : CreateMutex, HANDLE, CloseHandle, WaitForSingleObject, INFINITE,
-            WAIT_OBJECT_0, WAIT_ABANDONED, WAIT_FAILED, WAIT_TIMEOUT, ReleaseMutex;
+        version(Windows) {
+            import core.sys.windows.windows : CreateMutex, INFINITE, WAIT_OBJECT_0, WAIT_ABANDONED,
+                WAIT_FAILED, WAIT_TIMEOUT;
 
             HANDLE mutex;
 
             void setupImpl() scope @trusted nothrow @nogc {
                 protectMutex.pureLock;
 
-                if (!initialized) {
+                if(!initialized) {
                     mutex = CreateMutex(null, false, null);
                     assert(mutex !is null);
                     initialized = true;
@@ -27,10 +27,9 @@ struct PureSystemLock {
 
                 protectMutex.unlock;
             }
-        } else version (Posix) {
-            import core.sys.posix.pthread : pthread_mutex_t, pthread_mutex_init,
-            pthread_mutexattr_t, pthread_mutexattr_settype, PTHREAD_MUTEX_RECURSIVE, pthread_mutexattr_init,
-            pthread_mutexattr_destroy;
+        } else version(Posix) {
+            import core.sys.posix.pthread : pthread_mutex_t, pthread_mutex_init, pthread_mutexattr_t,
+                pthread_mutexattr_settype, PTHREAD_MUTEX_RECURSIVE, pthread_mutexattr_init, pthread_mutexattr_destroy;
             import core.stdc.errno : EOWNERDEAD, EAGAIN, ENOTRECOVERABLE, EBUSY;
 
             pthread_mutex_t mutex;
@@ -38,7 +37,7 @@ struct PureSystemLock {
             void setupImpl() scope @trusted {
                 protectMutex.pureLock;
 
-                if (!initialized) {
+                if(!initialized) {
                     pthread_mutexattr_t attr;
                     auto result = pthread_mutexattr_init(&attr);
                     assert(result == 0);
@@ -56,13 +55,12 @@ struct PureSystemLock {
         } else
             static assert(0, "Unimplemented platform");
 
-
         void setup() scope @trusted nothrow @nogc pure {
-                (cast(void delegate()@safe nothrow @nogc pure)&this.setupImpl)();
+            (cast(void delegate()@safe nothrow @nogc pure)&this.setupImpl)();
         }
     }
 
-    export @safe nothrow @nogc pure:
+export @safe nothrow @nogc pure:
     this(return scope PureSystemLock other) scope @trusted {
         this.tupleof = other.tupleof;
         other.tupleof = PureSystemLock.init.tupleof;
@@ -70,10 +68,10 @@ struct PureSystemLock {
 
     ///
     ~this() scope @trusted {
-        if (initialized) {
-            version (Windows) {
+        if(initialized) {
+            version(Windows) {
                 CloseHandle(mutex);
-            } else version (Posix) {
+            } else version(Posix) {
                 pthread_mutex_destroy(&mutex);
             } else
                 static assert(0, "Unimplemented platform");
@@ -87,39 +85,39 @@ struct PureSystemLock {
 
     ///
     bool lock(Duration timeout = Duration.max) scope @trusted {
-        if (timeout <= Duration.init)
+        if(timeout <= Duration.init)
             return false;
 
         setup;
 
-        version (Windows) {
-            if (timeout < Duration.max) {
+        version(Windows) {
+            if(timeout < Duration.max) {
                 auto result = WaitForSingleObject(mutex, timeout < Duration.max ? cast(uint)timeout.totalMilliSeconds() : INFINITE);
 
-                switch (result) {
-                    case WAIT_OBJECT_0:
-                    case WAIT_ABANDONED:
-                        return true;
+                switch(result) {
+                case WAIT_OBJECT_0:
+                case WAIT_ABANDONED:
+                    return true;
 
-                    case WAIT_FAILED:
-                    default:
-                        return false;
+                case WAIT_FAILED:
+                default:
+                    return false;
                 }
             } else {
                 return waitForLock(mutex);
             }
-        } else version (Posix) {
+        } else version(Posix) {
             import core.sys.posix.time : CLOCK_REALTIME;
             import core.stdc.errno : EINVAL, ETIMEDOUT, EAGAIN;
 
-            if (timeout < Duration.max) {
+            if(timeout < Duration.max) {
                 int result;
 
                 long secs = timeout.totalSeconds();
                 long nsecs = (timeout - secs.seconds()).totalNanoSeconds();
 
                 timespec ts;
-                if (clock_gettime(CLOCK_REALTIME, &ts) != 0)
+                if(clock_gettime(CLOCK_REALTIME, &ts) != 0)
                     return false;
 
                 ts.tv_sec += secs;
@@ -127,20 +125,20 @@ struct PureSystemLock {
 
                 result = pthread_mutex_timedlock(&mutex, &ts);
 
-                switch (result) {
-                    case 0:
-                        return true;
+                switch(result) {
+                case 0:
+                    return true;
 
-                    case EOWNERDEAD:
-                        pthread_mutex_consistent(&mutex);
-                        return false;
+                case EOWNERDEAD:
+                    pthread_mutex_consistent(&mutex);
+                    return false;
 
-                    case EINVAL:
-                    case ETIMEDOUT:
-                    case EAGAIN:
-                    case ENOTRECOVERABLE:
-                    default:
-                        return false;
+                case EINVAL:
+                case ETIMEDOUT:
+                case EAGAIN:
+                case ENOTRECOVERABLE:
+                default:
+                    return false;
                 }
             } else {
                 return waitForLock(&mutex);
@@ -153,39 +151,39 @@ struct PureSystemLock {
     bool tryLock() scope @trusted {
         setup;
 
-        version (Windows) {
+        version(Windows) {
             auto result = WaitForSingleObject(mutex, 0);
 
-            switch (result) {
-                case WAIT_OBJECT_0:
-                case WAIT_ABANDONED:
-                    return true;
+            switch(result) {
+            case WAIT_OBJECT_0:
+            case WAIT_ABANDONED:
+                return true;
 
-                case WAIT_TIMEOUT:
-                    return false;
+            case WAIT_TIMEOUT:
+                return false;
 
-                case WAIT_FAILED:
-                default:
-                    return false;
+            case WAIT_FAILED:
+            default:
+                return false;
             }
-        } else version (Posix) {
+        } else version(Posix) {
             auto result = pthread_mutex_trylock(&mutex);
 
-            switch (result) {
-                case 0:
-                    return true;
+            switch(result) {
+            case 0:
+                return true;
 
-                case EOWNERDEAD:
-                    pthread_mutex_consistent(&mutex);
-                    return true;
+            case EOWNERDEAD:
+                pthread_mutex_consistent(&mutex);
+                return true;
 
-                case EBUSY:
-                    return false;
+            case EBUSY:
+                return false;
 
-                case EAGAIN:
-                case ENOTRECOVERABLE:
-                default:
-                    return false;
+            case EAGAIN:
+            case ENOTRECOVERABLE:
+            default:
+                return false;
             }
         } else
             static assert(0, "Unimplemented platform");
@@ -195,9 +193,9 @@ struct PureSystemLock {
     void unlock() scope @trusted {
         setup;
 
-        version (Windows) {
+        version(Windows) {
             ReleaseMutex(mutex);
-        } else version (Posix) {
+        } else version(Posix) {
             pthread_mutex_unlock(&mutex);
         } else
             static assert(0, "Unimplemented platform");
@@ -206,7 +204,15 @@ struct PureSystemLock {
 
 private:
 
-version (Posix) {
+version(Windows) {
+    import core.sys.windows.windows : HANDLE, DWORD, BOOL;
+
+    extern (Windows) nothrow @nogc pure {
+        BOOL CloseHandle(HANDLE);
+        DWORD WaitForSingleObject(HANDLE, DWORD);
+        BOOL ReleaseMutex(HANDLE);
+    }
+} else version(Posix) {
     import core.sys.posix.pthread : pthread_mutex_t, pthread_mutexattr_t;
     import core.sys.posix.time : clockid_t, timespec;
 
@@ -227,39 +233,39 @@ version (Posix) {
 }
 
 bool waitForLock(scope void* handle) @trusted nothrow @nogc pure {
-    version (Windows) {
-        import core.sys.windows.windows : WaitForSingleObject, INFINITE, WAIT_OBJECT_0, WAIT_ABANDONED, WAIT_FAILED;
+    version(Windows) {
+        import core.sys.windows.windows : INFINITE, WAIT_OBJECT_0, WAIT_ABANDONED, WAIT_FAILED;
 
         auto result = WaitForSingleObject(handle, INFINITE);
 
-        switch (result) {
-            case WAIT_OBJECT_0:
-            case WAIT_ABANDONED:
-                return true;
+        switch(result) {
+        case WAIT_OBJECT_0:
+        case WAIT_ABANDONED:
+            return true;
 
-            case WAIT_FAILED:
-            default:
-                return false;
+        case WAIT_FAILED:
+        default:
+            return false;
         }
-    } else version (Posix) {
+    } else version(Posix) {
         import core.stdc.errno : EINVAL, ETIMEDOUT, EAGAIN, EOWNERDEAD, ENOTRECOVERABLE, EBUSY;
 
         int result = pthread_mutex_lock(cast(pthread_mutex_t*)handle);
 
-        switch (result) {
-            case 0:
-                return true;
+        switch(result) {
+        case 0:
+            return true;
 
-            case EOWNERDEAD:
-                pthread_mutex_consistent(cast(pthread_mutex_t*)handle);
-                return true;
+        case EOWNERDEAD:
+            pthread_mutex_consistent(cast(pthread_mutex_t*)handle);
+            return true;
 
-            case EINVAL:
-            case ETIMEDOUT:
-            case EAGAIN:
-            case ENOTRECOVERABLE:
-            default:
-                return false;
+        case EINVAL:
+        case ETIMEDOUT:
+        case EAGAIN:
+        case ENOTRECOVERABLE:
+        default:
+            return false;
         }
     }
 }

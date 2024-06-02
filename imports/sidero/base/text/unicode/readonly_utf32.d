@@ -182,7 +182,7 @@ export:
     alias LiteralType = const(Char)[];
 
     ///
-    mixin OpApplyCombos!("Char", null, ["@safe", "nothrow", "@nogc"]);
+    mixin OpApplyCombos!(Char, void, "opApply", true, true, true, false, false);
 
     ///
     unittest {
@@ -200,7 +200,7 @@ export:
     }
 
     ///
-    mixin OpApplyCombos!("Char", null, ["@safe", "nothrow", "@nogc"], "opApplyReverse");
+    mixin OpApplyCombos!(Char, void, "opApplyReverse", true, true, true, false, false);
 
     ///
     unittest {

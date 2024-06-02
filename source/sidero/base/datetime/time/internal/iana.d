@@ -320,6 +320,11 @@ struct IanaTZBase {
         this.tupleof = other.tupleof;
     }
 
+    void opAssign(return scope IanaTZBase other) scope {
+        this.destroy;
+        this.__ctor(other);
+    }
+
     export ulong toHash() scope const {
         import sidero.base.hash.utils : hashOf;
 
@@ -871,6 +876,11 @@ struct TZFile {
         this.tupleof = other.tupleof;
     }
 
+    void opAssign(return scope TZFile other) scope {
+        this.destroy;
+        this.__ctor(other);
+    }
+
     export ulong toHash() scope const {
         import sidero.base.hash.utils : hashOf;
 
@@ -899,6 +909,11 @@ struct TZFile {
 
         this(return scope ref PostTransitionInfo other) scope {
             this.tupleof = other.tupleof;
+        }
+
+        void opAssign(return scope PostTransitionInfo other) scope {
+            this.destroy;
+            this.__ctor(other);
         }
 
         export ulong toHash() scope const {

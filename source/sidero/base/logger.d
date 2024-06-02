@@ -173,7 +173,7 @@ export:
 
     static {
         ///
-        mixin OpApplyCombos!("LoggerReference", "String_UTF8", ["@safe", "nothrow", "@nogc"], "opApply", "opApplyImpl", true);
+        mixin OpApplyCombos!(LoggerReference, String_UTF8, "opApply", true, true, true, false, false);
     }
 
 @safe nothrow @nogc:
@@ -184,6 +184,11 @@ export:
     }
 
     ~this() scope {
+    }
+
+    void opAssign(return scope Logger other) scope {
+        this.destroy;
+        this.__ctor(other);
     }
 
     ///
