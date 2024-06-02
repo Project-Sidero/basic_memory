@@ -801,7 +801,7 @@ private:
             atomicStore(this.state.sliceMemory.refCount, 1);
 
             static void cleanup(void[] slice) @trusted {
-                T[] array = cast(T[])slice;
+                T[] array = (cast(T*)slice.ptr)[0 .. slice.length / T.sizeof];
 
                 foreach (ref v; array) {
                     v.destroy;
@@ -809,14 +809,14 @@ private:
             }
 
             static void initElements(void[] slice) @trusted {
-                T[] array = cast(T[])slice;
+                T[] array = (cast(T*)slice.ptr)[0 .. slice.length / T.sizeof];
 
                 fillUninitializedWithInit(array);
             }
 
             static void copyElements(void[] from, void[] into) @trusted {
-                T[] from2 = cast(T[])from;
-                T[] into2 = cast(T[])into;
+                T[] from2 = (cast(T*)from.ptr)[0 .. from.length / T.sizeof];
+                T[] into2 = (cast(T*)into.ptr)[0 .. into.length / T.sizeof];
                 assert(from2.length <= into2.length);
 
                 foreach (i; 0 .. from2.length) {
@@ -1175,7 +1175,7 @@ export @safe nothrow @nogc:
             length = this.slice.length;
 
         const resultingLength = this.sliceMemory.expand!ElementType(offset, length, newLength, adjustToNewSize);
-        this.slice = cast(ElementType[])(this.sliceMemory.original[0 .. resultingLength]);
+        this.slice = (cast(ElementType*)this.sliceMemory.original.ptr)[0 .. resultingLength * ElementType.sizeof];
     }
 
     ulong toHash() scope const {

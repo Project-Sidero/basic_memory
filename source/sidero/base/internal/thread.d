@@ -4,7 +4,7 @@ export @safe nothrow @nogc:
 
 void threadYield() @trusted {
     version (Windows) {
-        import core.sys.windows.windows : SwitchToThread;
+        import core.sys.windows.winbase : SwitchToThread;
 
         SwitchToThread();
     } else version (Posix) {

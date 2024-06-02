@@ -11,8 +11,10 @@ struct SystemSemaphore {
         bool initialized;
 
         version(Windows) {
-            import core.sys.windows.windows : HANDLE, ReleaseSemaphore, WaitForSingleObject, CreateSemaphoreA,
-                CloseHandle, WAIT_OBJECT_0, WAIT_ABANDONED, WAIT_TIMEOUT, WAIT_FAILED, INFINITE;
+            import core.sys.windows.winerror : WAIT_TIMEOUT;
+            import core.sys.windows.basetsd : HANDLE;
+            import core.sys.windows.winbase : ReleaseSemaphore, WaitForSingleObject, CreateSemaphoreA, CloseHandle,
+                WAIT_OBJECT_0, WAIT_ABANDONED, WAIT_FAILED, INFINITE;
 
             HANDLE semaphore;
         } else version(Posix) {
@@ -146,6 +148,7 @@ export @safe nothrow @nogc:
             }
         } else version(Posix) {
             import core.stdc.errno : EINVAL, EAGAIN, EINTR;
+
             auto result = sem_trywait(&semaphore);
 
             switch(result) {
@@ -186,7 +189,7 @@ private:
 
 ErrorResult waitForLock(scope void* handle) @trusted nothrow @nogc {
     version(Windows) {
-        import core.sys.windows.windows : WaitForSingleObject, INFINITE, WAIT_OBJECT_0, WAIT_ABANDONED, WAIT_FAILED;
+        import core.sys.windows.winbase : WaitForSingleObject, INFINITE, WAIT_OBJECT_0, WAIT_ABANDONED, WAIT_FAILED;
 
         auto result = WaitForSingleObject(handle, INFINITE);
 

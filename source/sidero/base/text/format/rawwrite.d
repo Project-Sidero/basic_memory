@@ -1007,7 +1007,7 @@ bool writeStructClass(Builder, Input)(scope ref Builder output, scope Input inpu
                                 }
 
                                 if(hadToString && output.length > offsetForToString) {
-                                    static FQN = fullyQualifiedName!Input;
+                                    static FQN = __traits(fullyQualifiedName, Input);
                                     static TypeIdentifierName = __traits(identifier, Input);
 
                                     auto subset = output[offsetForToString .. $];

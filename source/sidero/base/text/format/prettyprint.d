@@ -204,11 +204,7 @@ export @safe nothrow @nogc:
 
     void handlePointer(Type)(scope StringBuilder_UTF8 builder, scope ref Type input) @trusted {
         alias SubType = typeof(*input);
-
-        static if (__traits(compiles, fullyQualifiedName!SubType))
-            enum EntryName = fullyQualifiedName!SubType;
-        else
-            enum EntryName = SubType.stringof;
+        enum EntryName = __traits(fullyQualifiedName, SubType);
 
         builder ~= EntryName;
 
@@ -261,7 +257,7 @@ export @safe nothrow @nogc:
     void handleStructClass(Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useQuotes, bool useName, bool forcePrint) @trusted {
         import std.meta : Filter;
 
-        static FQN = fullyQualifiedName!Type;
+        static FQN = __traits(fullyQualifiedName, Type);
         static TypeIdentifierName = __traits(identifier, Type);
 
         if (useName) {
@@ -333,7 +329,7 @@ export @safe nothrow @nogc:
                 static foreach (i, Base; BaseClassesTuple!Type) {
                     handlePrefix(builder, false, true, false);
                     builder ~= "---- "c;
-                    builder ~= fullyQualifiedName!Base;
+                    builder ~= __traits(fullyQualifiedName, Base);
                     builder ~= " ----\n"c;
                     isFirst = true;
 
@@ -441,7 +437,7 @@ export @safe nothrow @nogc:
                 static foreach (i, Base; BaseClassesTuple!ActualType) {
                     handlePrefix(builder, false, true, false);
                     builder ~= "---- "c;
-                    builder ~= fullyQualifiedName!Base;
+                    builder ~= __traits(fullyQualifiedName, Base);
                     builder ~= " ----\n"c;
                     isFirst = true;
 
@@ -660,11 +656,7 @@ export @safe nothrow @nogc:
 
     void handleSlice(Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useName) @trusted {
         alias SubType = Unqual!(typeof(input[0]));
-
-        static if (__traits(compiles, fullyQualifiedName!SubType)) {
-            enum EntryName = fullyQualifiedName!SubType;
-        } else
-            enum EntryName = SubType.stringof;
+        enum EntryName = __traits(fullyQualifiedName, SubType);
 
         bool handled;
 
@@ -748,15 +740,8 @@ export @safe nothrow @nogc:
     void handleAA(Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useName) {
         alias Key = KeyType!Type;
         alias Value = ValueType!Type;
-
-        static if (__traits(compiles, fullyQualifiedName!Key))
-            enum KeyName = fullyQualifiedName!Key;
-        else
-            enum KeyName = Key.stringof;
-        static if (__traits(compiles, fullyQualifiedName!Value))
-            enum ValueName = fullyQualifiedName!Value;
-        else
-            enum ValueName = Value.stringof;
+        enum KeyName = __traits(fullyQualifiedName, Key);
+        enum ValueName = __traits(fullyQualifiedName, Value);
 
         enum EntryName = ValueName ~ "[" ~ KeyName ~ "]";
 
@@ -788,7 +773,7 @@ export @safe nothrow @nogc:
     }
 
     void handleEnum(Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useQuotes, bool useName, bool forcePrint) {
-        enum FQN = fullyQualifiedName!Type;
+        enum FQN = __traits(fullyQualifiedName, Type);
         builder ~= FQN;
         auto actualValue = cast(OriginalType!Type)input;
 

@@ -2,15 +2,17 @@ module sidero.base.console.internal.bindings;
 public import core.stdc.stdio : getc, EOF, FILE, fflush, fclose;
 
 version(Windows) {
-    public import core.sys.windows.windows : HANDLE, ULONG, WORD, BOOL, UINT, CHAR, COORD, WaitForSingleObject,
-        PeekNamedPipe, ReadFile, WCHAR, DWORD, OVERLAPPED, GetStdHandle, GetFileType, FILE_TYPE_UNKNOWN, FILE_TYPE_CHAR,
-        FILE_TYPE_PIPE, AllocConsole, CreateEvent, CloseHandle, GetConsoleMode, SetConsoleMode, STD_INPUT_HANDLE,
-        STD_OUTPUT_HANDLE, STD_ERROR_HANDLE, ENABLE_LINE_INPUT,
+    public import core.sys.windows.basetsd : HANDLE;
+    public import core.sys.windows.windef : ULONG, WORD, BOOL, UINT, DWORD;
+    public import core.sys.windows.winnt : CHAR, WCHAR;
+    public import core.sys.windows.wincon : COORD, AllocConsole, GetConsoleMode, SetConsoleMode, ENABLE_LINE_INPUT,
         ENABLE_VIRTUAL_TERMINAL_PROCESSING,
         ENABLE_PROCESSED_OUTPUT, GetConsoleOutputCP, SetConsoleOutputCP, GetConsoleCP, SetConsoleCP, FreeConsole,
-        INVALID_HANDLE_VALUE, ReadConsoleA,
-        ENABLE_ECHO_INPUT, WaitForMultipleObjects,
-        WAIT_OBJECT_0, KEY_EVENT, WriteConsoleA, WAIT_TIMEOUT, ReadConsoleW, INFINITE, WriteConsoleW, HANDLE_FLAG_INHERIT;
+        ReadConsoleA, ENABLE_ECHO_INPUT, KEY_EVENT, WriteConsoleA, ReadConsoleW, WriteConsoleW;
+    public import core.sys.windows.winbase : WaitForSingleObject, PeekNamedPipe, ReadFile, OVERLAPPED, GetStdHandle, GetFileType,
+        FILE_TYPE_UNKNOWN, FILE_TYPE_CHAR, FILE_TYPE_PIPE, CreateEvent, CloseHandle, STD_INPUT_HANDLE, STD_OUTPUT_HANDLE,
+        STD_ERROR_HANDLE, INVALID_HANDLE_VALUE, WaitForMultipleObjects, WAIT_OBJECT_0, INFINITE, HANDLE_FLAG_INHERIT;
+    public import core.sys.windows.winerror : WAIT_TIMEOUT;
 
     // needed cos Unicode
     struct CONSOLE_READCONSOLE_CONTROL {

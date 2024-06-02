@@ -182,7 +182,7 @@ void rawWriteImpl(scope String_ASCII input, bool useError = false) @trusted {
 
     version(Windows) {
         if(useWindows) {
-            import core.sys.windows.windows : WriteConsoleA;
+            import core.sys.windows.wincon : WriteConsoleA;
 
             if(WriteConsoleA(useError ? hStdError : hStdout, cast(void*)input.ptr, useLength, null, null))
                 return;
@@ -211,7 +211,7 @@ void rawWriteImpl(scope StringBuilder_ASCII input, bool useError = false) @trust
 
     version(Windows) {
         if(useWindows) {
-            import core.sys.windows.windows : WriteConsoleA;
+            import core.sys.windows.wincon : WriteConsoleA;
 
             if(WriteConsoleA(useError ? hStdError : hStdout, cast(void*)inputA.ptr, useLength, null, null))
                 return;
@@ -235,7 +235,7 @@ void rawWriteImpl(scope String_UTF8 input, bool useError = false) @trusted {
 
     version(Windows) {
         if(useWindows) {
-            import core.sys.windows.windows : WriteConsoleW;
+            import core.sys.windows.wincon : WriteConsoleW;
 
             String_UTF16 input16 = input.byUTF16();
 
@@ -286,7 +286,7 @@ void rawWriteImpl(scope StringBuilder_UTF8 input, bool useError = false) @truste
 
     version(Windows) {
         if(useWindows) {
-            import core.sys.windows.windows : WriteConsoleW;
+            import core.sys.windows.wincon : WriteConsoleW;
 
             String_UTF16 input16 = input.byUTF16().asReadOnly();
 

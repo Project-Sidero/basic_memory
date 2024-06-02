@@ -229,7 +229,7 @@ version(Posix) {
 
 ErrorResult waitForLock(scope void* handle) @trusted nothrow @nogc {
     version(Windows) {
-        import core.sys.windows.windows : WaitForSingleObject, INFINITE, WAIT_OBJECT_0, WAIT_ABANDONED, WAIT_FAILED;
+        import core.sys.windows.winbase : WaitForSingleObject, INFINITE, WAIT_OBJECT_0, WAIT_ABANDONED, WAIT_FAILED;
 
         auto result = WaitForSingleObject(handle, INFINITE);
 

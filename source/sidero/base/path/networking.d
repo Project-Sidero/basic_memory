@@ -659,7 +659,8 @@ version(Windows) {
     }
 
     pragma(crt_constructor) extern (C) void initializePathNetworkingWSA() {
-        import core.sys.windows.windows : WSAStartup, WSADATA, MAKEWORD;
+        import core.sys.windows.windef : MAKEWORD;
+        import core.sys.windows.winsock2 : WSAStartup, WSADATA;
 
         enum ver = MAKEWORD(2, 2);
 
@@ -668,7 +669,7 @@ version(Windows) {
     }
 
     pragma(crt_destructor) extern (C) void deinitializePathNetworkingWSA() {
-        import core.sys.windows.windows : WSACleanup;
+        import core.sys.windows.winsock2 : WSACleanup;
 
         WSACleanup();
     }

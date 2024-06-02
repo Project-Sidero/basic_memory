@@ -152,7 +152,7 @@ struct Logger {
                 return loggers;
             }
 
-            static if (__traits(compiles, { LoggerReference lr; del(lr); })) {
+            static if(__traits(compiles, { LoggerReference lr; del(lr); })) {
                 result = getLoggers.opApply(del);
             } else {
                 int handle()(ref ResultReference!String_UTF8 k, ref LoggerReference v) {
@@ -205,7 +205,7 @@ export:
     void setLevel(LogLevel level) scope {
         auto err = mutex.lock;
         logAssert(cast(bool)err, "Failed to lock", err.getError());
-        scope (exit)
+        scope(exit)
             mutex.unlock;
 
         logLevel = level;
@@ -215,7 +215,7 @@ export:
     void setTargets(uint targets = LoggingTargets.None) scope {
         auto err = mutex.lock;
         logAssert(cast(bool)err, "Failed to lock", err.getError());
-        scope (exit)
+        scope(exit)
             mutex.unlock;
 
         this.targets = targets;
@@ -225,7 +225,7 @@ export:
     void setTags(scope return String_UTF8 tags) scope {
         auto err = mutex.lock;
         logAssert(cast(bool)err, "Failed to lock", err.getError());
-        scope (exit)
+        scope(exit)
             mutex.unlock;
 
         this.tags = tags;
@@ -245,10 +245,10 @@ export:
     void setToDefaultConsoleStream() scope {
         auto err = mutex.lock;
         logAssert(cast(bool)err, "Failed to lock", err.getError());
-        scope (exit)
+        scope(exit)
             mutex.unlock;
 
-        foreach (i, ref v; this.consoleTarget.useErrorStream)
+        foreach(i, ref v; this.consoleTarget.useErrorStream)
             v = ConsoleTarget.DefaultErrorStream[i];
     }
 
@@ -256,10 +256,10 @@ export:
     void setConsoleStream(bool useError) scope {
         auto err = mutex.lock;
         logAssert(cast(bool)err, "Failed to lock", err.getError());
-        scope (exit)
+        scope(exit)
             mutex.unlock;
 
-        foreach (ref v; this.consoleTarget.useErrorStream)
+        foreach(ref v; this.consoleTarget.useErrorStream)
             v = useError;
     }
 
@@ -267,7 +267,7 @@ export:
     void setToDefaultConsoleColors() scope {
         auto err = mutex.lock;
         logAssert(cast(bool)err, "Failed to lock", err.getError());
-        scope (exit)
+        scope(exit)
             mutex.unlock;
 
         consoleTarget.colors = ConsoleTarget.DefaultConsoleColors;
@@ -277,7 +277,7 @@ export:
     void setConsoleColor(LogLevel level, ConsoleColor foreground = ConsoleColor.Unknown, ConsoleColor background = ConsoleColor.Unknown) {
         auto err = mutex.lock;
         logAssert(cast(bool)err, "Failed to lock", err.getError());
-        scope (exit)
+        scope(exit)
             mutex.unlock;
 
         consoleTarget.colors[level] = [foreground, background];
@@ -286,15 +286,15 @@ export:
     /// Prefix (Separator DateTime)? . Extension
     ErrorResult setLogFile(FilePath rootLogDirectory, String_UTF8 filePrefix, String_UTF8 filePrefixSeparator,
             String_UTF8 fileExtension, LogRotateFrequency rotateFrequency = LogRotateFrequency.OnStart) {
-        if (rootLogDirectory.couldPointToEntry) {
-            if (!rootLogDirectory.asAbsolute())
+        if(rootLogDirectory.couldPointToEntry) {
+            if(!rootLogDirectory.asAbsolute())
                 rootLogDirectory = rootLogDirectory.asAbsolute();
         } else
             return ErrorResult(MalformedInputException("Expected a log directory path that could be made absolute"));
 
         auto err = mutex.lock;
         logAssert(cast(bool)err, "Failed to lock", err.getError());
-        scope (exit)
+        scope(exit)
             mutex.unlock;
 
         fileTarget.rootLogDirectory = rootLogDirectory;
@@ -308,12 +308,12 @@ export:
 
     ///
     void addCustomTarget(CustomTargetMessage messageDel, CustomTargetOnRemove onRemoveDel = null) @trusted {
-        if (messageDel is null && onRemoveDel is null)
+        if(messageDel is null && onRemoveDel is null)
             return;
 
         auto err = mutex.lock;
         logAssert(cast(bool)err, "Failed to lock", err.getError());
-        scope (exit)
+        scope(exit)
             mutex.unlock;
 
         customTargets ~= CustomTarget();
@@ -324,7 +324,7 @@ export:
     void clearCustomTargets() {
         auto err = mutex.lock;
         logAssert(cast(bool)err, "Failed to lock", err.getError());
-        scope (exit)
+        scope(exit)
             mutex.unlock;
 
         customTargets = typeof(customTargets)();
@@ -337,7 +337,7 @@ export:
 
     ///
     static LoggerReference forName(return scope String_UTF8 name, return scope RCAllocator allocator = RCAllocator.init) {
-        if (name.length == 0)
+        if(name.length == 0)
             return typeof(return)(MalformedInputException("Name must not be empty"));
 
         LoggerReference ret;
@@ -345,13 +345,13 @@ export:
         guardForCreation(() @trusted {
             ret = loggers[name];
 
-            if (ret && !ret.isNull)
+            if(ret && !ret.isNull)
                 return;
 
-            if (allocator.isNull)
+            if(allocator.isNull)
                 allocator = globalAllocator();
 
-            if (loggers.isNull) {
+            if(loggers.isNull) {
                 loggers = ConcurrentHashMap!(String_UTF8, Logger)(globalAllocator());
                 loggers.cleanupUnreferencedNodes;
             }
@@ -369,7 +369,7 @@ export:
             ret.fileTarget.fileExtension = String_UTF8("log");
             ret.fileTarget.logRotateFrequency = LogRotateFrequency.OnStart;
 
-            if (name == "global") {
+            if(name == "global") {
                 globalLogger = ret;
             }
 
@@ -386,12 +386,12 @@ export:
 
     ///
     void trace(string moduleName = __MODULE__, int line = __LINE__, Args...)(Args args) scope {
-        if (logLevel > LogLevel.Trace)
+        if(logLevel > LogLevel.Trace)
             return;
 
         auto err = mutex.lock;
         logAssert(cast(bool)err, "Failed to lock", err.getError());
-        scope (exit)
+        scope(exit)
             mutex.unlock;
 
         message!(moduleName, line)(LogLevel.Trace, args);
@@ -399,12 +399,12 @@ export:
 
     ///
     void debug_(string moduleName = __MODULE__, int line = __LINE__, Args...)(Args args) scope {
-        if (logLevel > LogLevel.Debug)
+        if(logLevel > LogLevel.Debug)
             return;
 
         auto err = mutex.lock;
         logAssert(cast(bool)err, "Failed to lock", err.getError());
-        scope (exit)
+        scope(exit)
             mutex.unlock;
 
         message!(moduleName, line)(LogLevel.Debug, args);
@@ -415,12 +415,12 @@ export:
 
     ///
     void information(string moduleName = __MODULE__, int line = __LINE__, Args...)(Args args) scope {
-        if (logLevel > LogLevel.Info)
+        if(logLevel > LogLevel.Info)
             return;
 
         auto err = mutex.lock;
         logAssert(cast(bool)err, "Failed to lock", err.getError());
-        scope (exit)
+        scope(exit)
             mutex.unlock;
 
         message!(moduleName, line)(LogLevel.Info, args);
@@ -428,12 +428,12 @@ export:
 
     ///
     void notice(string moduleName = __MODULE__, int line = __LINE__, Args...)(Args args) scope {
-        if (logLevel > LogLevel.Notice)
+        if(logLevel > LogLevel.Notice)
             return;
 
         auto err = mutex.lock;
         logAssert(cast(bool)err, "Failed to lock", err.getError());
-        scope (exit)
+        scope(exit)
             mutex.unlock;
 
         message!(moduleName, line)(LogLevel.Notice, args);
@@ -444,12 +444,12 @@ export:
 
     ///
     void warning(string moduleName = __MODULE__, int line = __LINE__, Args...)(Args args) scope {
-        if (logLevel > LogLevel.Warning)
+        if(logLevel > LogLevel.Warning)
             return;
 
         auto err = mutex.lock;
         logAssert(cast(bool)err, "Failed to lock", err.getError());
-        scope (exit)
+        scope(exit)
             mutex.unlock;
 
         message!(moduleName, line)(LogLevel.Warning, args);
@@ -457,12 +457,12 @@ export:
 
     ///
     void error(string moduleName = __MODULE__, int line = __LINE__, Args...)(Args args) scope {
-        if (logLevel > LogLevel.Error)
+        if(logLevel > LogLevel.Error)
             return;
 
         auto err = mutex.lock;
         logAssert(cast(bool)err, "Failed to lock", err.getError());
-        scope (exit)
+        scope(exit)
             mutex.unlock;
 
         message!(moduleName, line)(LogLevel.Error, args);
@@ -470,12 +470,12 @@ export:
 
     ///
     void critical(string moduleName = __MODULE__, int line = __LINE__, Args...)(Args args) scope {
-        if (logLevel > LogLevel.Critical)
+        if(logLevel > LogLevel.Critical)
             return;
 
         auto err = mutex.lock;
         logAssert(cast(bool)err, "Failed to lock", err.getError());
-        scope (exit)
+        scope(exit)
             mutex.unlock;
 
         message!(moduleName, line)(LogLevel.Critical, args);
@@ -485,7 +485,7 @@ export:
     void fatal(string moduleName = __MODULE__, int line = __LINE__, Args...)(Args args) scope {
         auto err = mutex.lock;
         logAssert(cast(bool)err, "Failed to lock", err.getError());
-        scope (exit)
+        scope(exit)
             mutex.unlock;
 
         message!(moduleName, line)(LogLevel.Fatal, args);
@@ -507,7 +507,7 @@ export:
     }
 
     /*private:*/
-    void message(string moduleName, int line, Args...)(LogLevel level, Args args) scope {
+    void message(string moduleName, int line, Args...)(LogLevel level, Args args) scope @trusted {
         import sidero.base.datetime.time.clock;
         import sidero.base.internal.conv;
 
@@ -524,99 +524,9 @@ export:
             " NOTICE", " WARNING", " ERROR", " CRITICAL", " FATAL"
         ];
 
-        void syslog() {
-            version (Posix) {
-                import core.sys.posix.syslog : syslog, openlog, closelog, LOG_PID, LOG_CONS, LOG_USER;
+        // all of the targets use to be in nested functions, but that generated too many symbols
 
-                guardForCreation(() @trusted {
-                    if (!haveSysLog) {
-                        openlog("ProjectSidero dependent program".ptr, LOG_PID | LOG_CONS, LOG_USER);
-                        haveSysLog = true;
-                    }
-
-                    syslog(PrioritySyslogForLevels[level], contentUTF8.ptr);
-                });
-            }
-        }
-
-        void windowsEvents() @trusted {
-            version (Windows) {
-                import core.sys.windows.windows : ReportEventW, WORD, DWORD, EVENTLOG_INFORMATION_TYPE,
-                    EVENTLOG_WARNING_TYPE, EVENTLOG_ERROR_TYPE;
-
-                guardForCreation(() @trusted {
-                    static WORD[] WTypes = [
-                        EVENTLOG_INFORMATION_TYPE, EVENTLOG_INFORMATION_TYPE, EVENTLOG_WARNING_TYPE,
-                        EVENTLOG_ERROR_TYPE, EVENTLOG_ERROR_TYPE, EVENTLOG_ERROR_TYPE
-                    ];
-
-                    String_UTF16 text = contentBuilder[dateTimeText.length + ModuleLine.length .. $].byUTF16.asReadOnly;
-
-                    static WORD[] dwEventID = [0, 1, 2, 3, 4, 5];
-                    const(wchar)*[2] messages = [ModuleLine2.ptr, text.ptr];
-
-                    ReportEventW(needWindowsEventHandle(), WTypes[level], dwEventID[level], 0, cast(void*)null, 2,
-                        0, &messages[0], cast(void*)null);
-                });
-            }
-        }
-
-        void file() @trusted {
-            bool triggered = fileTarget.logStream.isNull;
-
-            if (!triggered) {
-                // check based upon last date/time
-
-                final switch (fileTarget.logRotateFrequency) {
-                case LogRotateFrequency.None:
-                case LogRotateFrequency.OnStart:
-                    break;
-                case LogRotateFrequency.Hourly:
-                    triggered = currentDateTime.hour != fileTarget.logRotateLastDateTime.hour;
-                    break;
-                case LogRotateFrequency.Daily:
-                    triggered = currentDateTime.day != fileTarget.logRotateLastDateTime.day;
-                    break;
-                }
-            }
-
-            if (triggered) {
-                // recreate!
-                FilePath fp = fileTarget.rootLogDirectory.dup;
-
-                StringBuilder_UTF8 filename;
-                filename ~= fileTarget.filePrefix;
-
-                if (fileTarget.logRotateFrequency == LogRotateFrequency.None) {
-                    // does not include date/time
-                } else {
-                    filename ~= fileTarget.filePrefixSeparator;
-                    filename ~= currentDateTime.format(GDateTime.LogFileName);
-                }
-
-                if (fileTarget.fileExtension.length > 0 && !fileTarget.fileExtension.startsWith("."))
-                    filename ~= "."c;
-                filename ~= fileTarget.fileExtension;
-
-                cast(void)(fp ~= filename);
-
-                auto filePath = FilePath.from(filename);
-                if (filePath)
-                    fileTarget.logStream = FileAppender(filePath.get);
-            }
-
-            fileTarget.logStream.append(contentBuilder);
-            fileTarget.logStream.append(String_UTF8("\n"));
-        }
-
-        void custom() @trusted {
-            foreach (ref ct; customTargets.unsafeGetLiteral()) {
-                ct.messageDel(level, currentDateTime, String_UTF8(ModuleLine), String_UTF16(ModuleLine2), tags,
-                        String_UTF8(LevelTag[level + (tags.isNull ? 0 : 6)]), contentUTF8);
-            }
-        }
-
-        if (targets & LoggingTargets.Console) {
+        if(targets & LoggingTargets.Console) {
             import sidero.base.console;
 
             auto fg = consoleTarget.colors[level][0], bg = consoleTarget.colors[level][1];
@@ -627,7 +537,7 @@ export:
                     resetDefaultBeforeApplying(), ": ", args, resetDefaultBeforeApplying());
         }
 
-        if (targets & LoggingTargets.File || targets & LoggingTargets.Syslog || targets & LoggingTargets.Windows ||
+        if(targets & LoggingTargets.File || targets & LoggingTargets.Syslog || targets & LoggingTargets.Windows ||
                 targets & LoggingTargets.Custom) {
             {
                 contentBuilder ~= dateTimeText;
@@ -640,47 +550,131 @@ export:
                 prettyPrinter(contentBuilder, args);
             }
 
-            if (targets & LoggingTargets.Windows)
-                windowsEvents;
-            if (targets & LoggingTargets.Syslog || targets & LoggingTargets.Custom)
+            if(targets & LoggingTargets.Windows) {
+                version(Windows) {
+                    import core.sys.windows.windef : WORD, DWORD;
+                    import core.sys.windows.winbase : ReportEventW, EVENTLOG_INFORMATION_TYPE, EVENTLOG_WARNING_TYPE, EVENTLOG_ERROR_TYPE;
+
+                    guardForCreation(() @trusted {
+                        static WORD[] WTypes = [
+                            EVENTLOG_INFORMATION_TYPE, EVENTLOG_INFORMATION_TYPE, EVENTLOG_WARNING_TYPE,
+                            EVENTLOG_ERROR_TYPE, EVENTLOG_ERROR_TYPE, EVENTLOG_ERROR_TYPE
+                        ];
+
+                        String_UTF16 text = contentBuilder[dateTimeText.length + ModuleLine.length .. $].byUTF16.asReadOnly;
+
+                        static WORD[] dwEventID = [0, 1, 2, 3, 4, 5];
+                        const(wchar)*[2] messages = [ModuleLine2.ptr, text.ptr];
+
+                        ReportEventW(needWindowsEventHandle(), WTypes[level], dwEventID[level], 0, cast(void*)null, 2,
+                        0, &messages[0], cast(void*)null);
+                    });
+                }
+            }
+
+            if(targets & LoggingTargets.Syslog || targets & LoggingTargets.Custom)
                 contentUTF8 = contentBuilder.asReadOnly;
-            if (targets & LoggingTargets.File)
-                file;
-            if (targets & LoggingTargets.Syslog)
-                syslog;
-            if (targets & LoggingTargets.Custom)
-                custom;
+
+            if(targets & LoggingTargets.File) {
+                bool triggered = fileTarget.logStream.isNull;
+
+                if(!triggered) {
+                    // check based upon last date/time
+
+                    final switch(fileTarget.logRotateFrequency) {
+                        case LogRotateFrequency.None:
+                        case LogRotateFrequency.OnStart:
+                            break;
+                        case LogRotateFrequency.Hourly:
+                            triggered = currentDateTime.hour != fileTarget.logRotateLastDateTime.hour;
+                            break;
+                        case LogRotateFrequency.Daily:
+                            triggered = currentDateTime.day != fileTarget.logRotateLastDateTime.day;
+                            break;
+                    }
+                }
+
+                if(triggered) {
+                    // recreate!
+                    FilePath fp = fileTarget.rootLogDirectory.dup;
+
+                    StringBuilder_UTF8 filename;
+                    filename ~= fileTarget.filePrefix;
+
+                    if(fileTarget.logRotateFrequency == LogRotateFrequency.None) {
+                        // does not include date/time
+                    } else {
+                        filename ~= fileTarget.filePrefixSeparator;
+                        filename ~= currentDateTime.format(GDateTime.LogFileName);
+                    }
+
+                    if(fileTarget.fileExtension.length > 0 && !fileTarget.fileExtension.startsWith("."))
+                        filename ~= "."c;
+                    filename ~= fileTarget.fileExtension;
+
+                    cast(void)(fp ~= filename);
+
+                    auto filePath = FilePath.from(filename);
+                    if(filePath)
+                        fileTarget.logStream = FileAppender(filePath.get);
+                }
+
+                fileTarget.logStream.append(contentBuilder);
+                fileTarget.logStream.append(String_UTF8("\n"));
+            }
+
+            if(targets & LoggingTargets.Syslog) {
+                version(Posix) {
+                    import core.sys.posix.syslog : syslog, openlog, closelog, LOG_PID, LOG_CONS, LOG_USER;
+
+                    guardForCreation(() @trusted {
+                        if(!haveSysLog) {
+                            openlog("ProjectSidero dependent program".ptr, LOG_PID | LOG_CONS, LOG_USER);
+                            haveSysLog = true;
+                        }
+
+                        syslog(PrioritySyslogForLevels[level], contentUTF8.ptr);
+                    });
+                }
+            }
+
+            if(targets & LoggingTargets.Custom) {
+                foreach(ref ct; customTargets.unsafeGetLiteral()) {
+                    ct.messageDel(level, currentDateTime, String_UTF8(ModuleLine), String_UTF16(ModuleLine2), tags,
+                    String_UTF8(LevelTag[level + (tags.isNull ? 0 : 6)]), contentUTF8);
+                }
+            }
         }
     }
 }
 
 ///
 void setLogProcessName(String_UTF8 name) @trusted {
-    if (name.length == 0) {
+    if(name.length == 0) {
         guardForCreation(() @trusted { processName = String_UTF8.init; });
         return;
     }
 
-    if (name.isPtrNullTerminated && !name.isEncodingChanged)
+    if(name.isPtrNullTerminated && !name.isEncodingChanged)
         processName = name;
     else
         processName = name.dup;
 
-    version (Posix) {
+    version(Posix) {
         import core.sys.posix.syslog : openlog, closelog, LOG_PID, LOG_CONS, LOG_USER;
 
         guardForCreation(() @trusted {
-            if (haveSysLog)
+            if(haveSysLog)
                 closelog();
             haveSysLog = true;
 
             openlog(processName.ptr, LOG_PID | LOG_CONS, LOG_USER);
         });
-    } else version (Windows) {
-        import core.sys.windows.windows : RegisterEventSourceW, DeregisterEventSource;
+    } else version(Windows) {
+        import core.sys.windows.winbase : RegisterEventSourceW, DeregisterEventSource;
 
         guardForCreation(() @trusted {
-            if (windowsEventHandle !is null) {
+            if(windowsEventHandle !is null) {
                 DeregisterEventSource(windowsEventHandle);
             }
 
@@ -737,17 +731,17 @@ void fatal(string moduleName = __MODULE__, int line = __LINE__, Args...)(Args ar
 }
 
 pragma(crt_destructor) extern (C) void deinitializeLogging() @trusted {
-    version (Posix) {
+    version(Posix) {
         import core.sys.posix.syslog : closelog;
 
-        if (haveSysLog) {
+        if(haveSysLog) {
             closelog;
             haveSysLog = false;
         }
-    } else version (Windows) {
-        import core.sys.windows.windows : DeregisterEventSource;
+    } else version(Windows) {
+        import core.sys.windows.winbase : DeregisterEventSource;
 
-        if (windowsEventHandle !is null) {
+        if(windowsEventHandle !is null) {
             DeregisterEventSource(windowsEventHandle);
             windowsEventHandle = null;
         }
@@ -757,17 +751,17 @@ pragma(crt_destructor) extern (C) void deinitializeLogging() @trusted {
 export void guardForCreation(scope void delegate() @safe nothrow @nogc del) @trusted {
     auto err = mutexForCreation.lock;
     logAssert(cast(bool)err, "Failed to lock", err.getError());
-    scope (exit)
+    scope(exit)
         mutexForCreation.unlock;
 
     del();
 }
 
-version (Windows) {
+version(Windows) {
     export HANDLE needWindowsEventHandle() @trusted {
-        import core.sys.windows.windows : RegisterEventSourceW;
+        import core.sys.windows.winbase : RegisterEventSourceW;
 
-        if (windowsEventHandle is null)
+        if(windowsEventHandle is null)
             windowsEventHandle = RegisterEventSourceW(null, cast(wchar*)"ProjectSidero dependent program"w.ptr);
 
         return windowsEventHandle;
@@ -825,7 +819,7 @@ struct FileTarget {
 
         ulong ret = hashOf();
 
-        static foreach (I; 0 .. this.tupleof.length) {
+        static foreach(I; 0 .. this.tupleof.length) {
             ret = hashOf((*cast(FileTarget*)&this).tupleof[I], ret);
         }
 
@@ -840,16 +834,16 @@ struct CustomTarget {
 export @safe nothrow @nogc:
 
      ~this() scope {
-        if (onRemoveDel !is null)
+        if(onRemoveDel !is null)
             onRemoveDel();
     }
 }
 
-version (Windows) {
-    import core.sys.windows.windows : HANDLE;
+version(Windows) {
+    import core.sys.windows.basetsd : HANDLE;
 
     __gshared HANDLE windowsEventHandle;
-} else version (Posix) {
+} else version(Posix) {
     import core.sys.posix.syslog : LOG_DEBUG, LOG_INFO, LOG_NOTICE, LOG_WARNING, LOG_ERR, LOG_CRIT;
 
     static PrioritySyslogForLevels = [

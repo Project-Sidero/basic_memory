@@ -432,7 +432,9 @@ FilePath homeDirectory() @trusted {
     if(_homeDirectory.isNull) {
         version(Windows) {
             import sidero.base.allocators;
-            import core.sys.windows.windows : OpenProcessToken, GetCurrentProcess, CloseHandle, HANDLE, DWORD;
+            import core.sys.windows.basetsd : HANDLE;
+            import core.sys.windows.windef : DWORD;
+            import core.sys.windows.winbase : OpenProcessToken, GetCurrentProcess, CloseHandle;
             import core.sys.windows.winnt : TOKEN_QUERY;
 
             HANDLE userToken;
@@ -732,7 +734,7 @@ pragma(crt_constructor) extern (C) void initializeSystemInfo() @trusted {
 
     {
         version(Windows) {
-            import core.sys.windows.windows : GetSystemInfo, SYSTEM_INFO;
+            import core.sys.windows.winbase : GetSystemInfo, SYSTEM_INFO;
 
             SYSTEM_INFO systemInfo;
             GetSystemInfo(&systemInfo);
@@ -840,9 +842,10 @@ enum {
 
 version(Windows) {
     import core.sys.windows.winnt : LPWSTR;
-    import core.sys.windows.windows : DWORD, HANDLE;
+    import core.sys.windows.windef : DWORD;
+    import core.sys.windows.basetsd : HANDLE;
 
-    extern(Windows) nothrow @nogc {
+    extern (Windows) nothrow @nogc {
         int GetUserDefaultLocaleName(LPWSTR, int);
         bool GetUserProfileDirectoryW(HANDLE, LPWSTR, DWORD*);
         DWORD NetServerGetInfo(LPWSTR, DWORD, ubyte**);
@@ -973,6 +976,5 @@ void handleLocale(ref Locale locale) @trusted {
 }
 
 version(Windows) {
-
 
 }
