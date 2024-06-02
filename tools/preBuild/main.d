@@ -5,7 +5,7 @@ import std.array : appender;
 import std.file : remove, exists, mkdirRecurse, write;
 
 void main() {
-    writeln("Running tools");
+    writeln("Running pre build tools");
 
     try {
         if(exists("generated"))

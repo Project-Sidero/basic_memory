@@ -10,43 +10,43 @@ export @safe nothrow @nogc:
 ///
 Expected formattedRead(Input, Args...)(scope ref Input input, scope String_UTF8.LiteralType formatString, scope ref Args args)
         if (isUTF!Input && Args.length > 0) {
-    String_UTF32 tempFormat;
-    tempFormat.__ctor(formatString);
+    String_UTF32 tempFormat = String_UTF32(formatString);
     return formattedReadImpl(input, tempFormat, args);
 }
 
 /// Ditto
 Expected formattedRead(Input, Args...)(scope ref Input input, scope String_UTF16.LiteralType formatString, scope ref Args args)
         if (isUTF!Input && Args.length > 0) {
-    String_UTF32 tempFormat;
-    tempFormat.__ctor(formatString);
+    String_UTF32 tempFormat = String_UTF32(formatString);
     return formattedReadImpl(input, tempFormat, args);
 }
 
 /// Ditto
 Expected formattedRead(Input, Args...)(scope ref Input input, scope String_UTF32.LiteralType formatString, scope ref Args args)
         if (isUTF!Input && Args.length > 0) {
-    String_UTF32 tempFormat;
-    tempFormat.__ctor(formatString);
+    String_UTF32 tempFormat = String_UTF32(formatString);
     return formattedReadImpl(input, tempFormat, args);
 }
 
 /// Ditto
 Expected formattedRead(Input, Args...)(scope ref Input input, scope String_ASCII formatString, scope ref Args args) @trusted
         if (isUTF!Input || isASCII!Input) {
-    return formattedReadImpl(input, String_UTF8(cast(const(char)[])formatString.unsafeGetLiteral()).byUTF32, args);
+    String_UTF32 tempFormat = String_UTF32(cast(const(char)[])formatString.unsafeGetLiteral());
+    return formattedReadImpl(input, tempFormat, args);
 }
 
 /// Ditto
-Expected formattedRead(Input, Args...)(scope ref Input input, scope String_UTF8 formatString, scope ref Args args)
+Expected formattedRead(Input, Args...)(scope ref Input input, scope String_UTF8 formatString, scope ref Args args) @trusted
         if (isUTF!Input && Args.length > 0) {
-    return formattedReadImpl(input, formatString.byUTF32, args);
+    String_UTF32 tempFormat = formatString.byUTF32;
+    return formattedReadImpl(input, tempFormat, args);
 }
 
 /// Ditto
-Expected formattedRead(Input, Args...)(scope ref Input input, scope String_UTF16 formatString, scope ref Args args)
+Expected formattedRead(Input, Args...)(scope ref Input input, scope String_UTF16 formatString, scope ref Args args) @trusted
         if (isUTF!Input && Args.length > 0) {
-    return formattedReadImpl(input, formatString.byUTF32, args);
+    String_UTF32 tempFormat = formatString.byUTF32;
+    return formattedReadImpl(input, tempFormat, args);
 }
 
 /// Ditto

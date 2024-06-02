@@ -646,7 +646,7 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
         }
 
         ///
-        static BigInteger parseHex(scope ref String_UTF8 input, out bool truncated) {
+        static BigInteger parseHex(scope ref String_UTF8 input, out bool truncated) @trusted {
             String_UTF32 s32 = input.byUTF32;
 
             BigInteger ret;
@@ -663,7 +663,7 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
         }
 
         ///
-        static BigInteger parseHex(scope ref String_UTF16 input, out bool truncated) {
+        static BigInteger parseHex(scope ref String_UTF16 input, out bool truncated) @trusted {
             String_UTF32 s32 = input.byUTF32;
 
             BigInteger ret;
@@ -680,7 +680,7 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
         }
 
         ///
-        static BigInteger parseHex(scope ref String_UTF32 input, out bool truncated) {
+        static BigInteger parseHex(scope ref String_UTF32 input, out bool truncated) @trusted {
             String_UTF32 s32 = input.byUTF32;
 
             BigInteger ret;
@@ -736,7 +736,7 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
         }
 
         ///
-        static BigInteger parse(scope ref String_UTF8 input, out bool truncated) {
+        static BigInteger parse(scope ref String_UTF8 input, out bool truncated) @trusted {
             String_UTF32 s32 = input.byUTF32;
 
             BigInteger ret;
@@ -753,7 +753,7 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
         }
 
         ///
-        static BigInteger parse(scope ref String_UTF16 input, out bool truncated) {
+        static BigInteger parse(scope ref String_UTF16 input, out bool truncated) @trusted {
             String_UTF32 s32 = input.byUTF32;
 
             BigInteger ret;
@@ -770,7 +770,7 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
         }
 
         ///
-        static BigInteger parse(scope ref String_UTF32 input, out bool truncated) {
+        static BigInteger parse(scope ref String_UTF32 input, out bool truncated) @trusted {
             String_UTF32 s32 = input.byUTF32;
 
             BigInteger ret;

@@ -297,7 +297,7 @@ void addPrefix(Builder)(scope ref Builder output, scope FormatSpecifier format) 
 }
 
 void handleFill(Builder)(scope ref Builder output, scope FormatSpecifier format,
-        scope void delegate() @safe nothrow @nogc prefixDel, scope void delegate() @safe nothrow @nogc mainDel) {
+        scope void delegate() @safe nothrow @nogc prefixDel, scope void delegate() @safe nothrow @nogc mainDel) @trusted {
 
     final switch(format.alignment) {
     case FormatSpecifier.Alignment.None:
@@ -435,13 +435,13 @@ bool writeIntegral(Builder, Input)(scope ref Builder output, scope Input input, 
         break;
     }
 
-    handleFill(output, format, () {
+    handleFill(output, format, () @trusted {
         addSign(output, format, input >= 0);
 
         if(format.useAlternativeForm) {
             addPrefix(output, format);
         }
-    }, () {
+    }, () @trusted {
         assert(base > 0);
         assert(base < 17);
         assert(base <= alphabet.length);
@@ -1014,13 +1014,13 @@ bool writeStructClass(Builder, Input)(scope ref Builder output, scope Input inpu
 
                                     if(subset == FQN) {
                                         output.remove(offsetForToString, FQN.length);
-                                    } else if (subset.startsWith(TypeIdentifierName)) {
+                                    } else if(subset.startsWith(TypeIdentifierName)) {
                                         output.remove(offsetForToString, TypeIdentifierName.length);
 
-                                        if (subset.startsWith("(")) {
+                                        if(subset.startsWith("(")) {
                                             output.remove(offsetForToString, 1);
 
-                                            if (subset.endsWith(")"))
+                                            if(subset.endsWith(")"))
                                                 subset.remove(-1, 1);
                                         }
                                     } else if(!hadOpenBracket)

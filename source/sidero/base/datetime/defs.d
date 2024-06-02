@@ -386,7 +386,7 @@ export @safe nothrow @nogc:
 
      Note: Implements I, O, P, p, T, Z, c, r, U. Defers everything else to respective type
      */
-    void format(Builder, Format)(scope ref Builder builder, scope Format specification, bool usePercentageEscape = true) scope const
+    void format(Builder, Format)(scope ref Builder builder, scope Format specification, bool usePercentageEscape = true) scope const @trusted
             if (isBuilderString!Builder && isReadOnlyString!Format) {
         import sidero.base.allocators;
 
@@ -637,7 +637,7 @@ export @safe nothrow @nogc:
 
     ///
     static bool parse(Input)(scope ref Input input, scope ref DateTime output, scope String_UTF8 specification,
-            bool usePercentageEscape = true) {
+            bool usePercentageEscape = true) @trusted {
         if(specification.length == 0)
             return false;
         bool isEscaped;
@@ -691,7 +691,7 @@ export @safe nothrow @nogc:
     }
 
     ///
-    bool parseValue(Input)(scope ref Input input, dchar specification) {
+    bool parseValue(Input)(scope ref Input input, dchar specification) @trusted {
         import reader = sidero.base.text.format.read;
 
         Input input2;

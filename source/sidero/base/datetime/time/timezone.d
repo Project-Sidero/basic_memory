@@ -548,7 +548,7 @@ export @safe nothrow @nogc:
     }
 
     ///
-    bool parseValue(Input)(scope ref Input input, dchar specification) {
+    bool parseValue(Input)(scope ref Input input, dchar specification) @trusted {
         switch (specification) {
         case 'e':
             // Windows maxes out at 3 spaces, so we'll check up to 4
