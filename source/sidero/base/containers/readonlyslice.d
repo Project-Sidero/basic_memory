@@ -771,8 +771,8 @@ export @safe nothrow @nogc:
         else if (length == size_t.max)
             length = this.slice.length;
 
-        const resultingLength = this.sliceMemory.expand!ElementType(offset, length, newLength, adjustToNewSize);
-        this.slice = (cast(ElementType*)this.sliceMemory.original.ptr)[0 .. resultingLength * ElementType.sizeof];
+        const resultingLengthT = this.sliceMemory.expand!ElementType(offset, length, newLength, adjustToNewSize);
+        this.slice = (cast(ElementType*)this.sliceMemory.original.ptr)[0 .. resultingLengthT / ElementType.sizeof];
     }
 
     ulong toHash() scope const {

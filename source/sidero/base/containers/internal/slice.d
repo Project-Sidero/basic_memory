@@ -18,15 +18,15 @@ export @safe nothrow @nogc:
     void rcExternal(bool addRef) scope @trusted {
         import sidero.base.internal.atomic;
 
-        if(addRef)
+        if (addRef)
             atomicIncrementAndLoad(this.refCount, 1);
-        else if(atomicDecrementAndLoad(this.refCount, 1) == 0) {
+        else if (atomicDecrementAndLoad(this.refCount, 1) == 0) {
             RCAllocator allocator = this.allocator;
 
-            if(this.cleanup !is null)
+            if (this.cleanup !is null)
                 this.cleanup(original[0 .. this.amountUsed]);
 
-            if(this.original.length > 0)
+            if (this.original.length > 0)
                 allocator.dispose(this.original);
             allocator.dispose(&this);
         }
@@ -38,11 +38,13 @@ export @safe nothrow @nogc:
         const oldSize = this.original.length;
         logAssert(oldSize < newSize, "New size of slice is smaller than existing size");
 
-        if(newSize > 0) {
-            if(oldSize == 0)
+        if (newSize > 0) {
+            if (oldSize == 0) {
                 this.original = this.allocator.allocate(newSize);
-            else if(!this.allocator.reallocate(this.original, newSize)) {
+                this.initElements(this.original);
+            } else if (!this.allocator.reallocate(this.original, newSize)) {
                 void[] temp = this.allocator.allocate(newSize);
+                this.initElements(temp);
 
                 this.copyElements(this.original[0 .. this.amountUsed], temp[0 .. this.amountUsed]);
                 this.cleanup(this.original);
@@ -51,8 +53,6 @@ export @safe nothrow @nogc:
                 this.original = temp;
             }
         }
-
-        this.initElements(this.original[oldSize .. $]);
     }
 
     SliceMemory* dup(size_t amountNotNeeded, size_t amountNeeded, RCAllocator allocator) scope @trusted {
@@ -95,7 +95,7 @@ export @safe nothrow @nogc:
             temp += length;
             temp *= ElementType.sizeof;
 
-            if(temp != this.amountUsed)
+            if (temp != this.amountUsed)
                 return false;
 
             temp = offset;
@@ -112,12 +112,12 @@ export @safe nothrow @nogc:
         const oldEndOffsetT = offsetT + oldLengthT;
         const newEndOffsetT = offsetT + newLengthT;
 
-        if(canExpandIntoOriginal()) {
+        if (canExpandIntoOriginal()) {
         } else {
             this.expandInternal(newEndOffsetT);
         }
 
-        if(adjustToNewSize) {
+        if (adjustToNewSize) {
             this.amountUsed = newEndOffsetT;
             return newEndOffsetT;
         } else
