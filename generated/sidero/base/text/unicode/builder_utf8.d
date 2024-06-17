@@ -463,16 +463,22 @@ nothrow @safe:
 
         state.handle((StateIterator.S8 state, StateIterator.I8 iterator) @trusted {
             assert(state !is null);
+            state.rc(true);
+
             ret.state.encoding = this.state.encoding;
             ret.state.u8 = state;
             ret.state.i8 = state.newIterator(iterator);
         }, (StateIterator.S16 state, StateIterator.I16 iterator) @trusted {
             assert(state !is null);
+            state.rc(true);
+
             ret.state.encoding = this.state.encoding;
             ret.state.u16 = state;
             ret.state.i16 = state.newIterator(iterator);
         }, (StateIterator.S32 state, StateIterator.I32 iterator) @trusted {
             assert(state !is null);
+            state.rc(true);
+
             ret.state.encoding = this.state.encoding;
             ret.state.u32 = state;
             ret.state.i32 = state.newIterator(iterator);
@@ -518,16 +524,22 @@ nothrow @safe:
 
         state.handle((StateIterator.S8 state, StateIterator.I8 iterator) @trusted {
             assert(state !is null);
+            state.rc(true);
+
             ret.state.encoding = this.state.encoding;
             ret.state.u8 = state;
             ret.state.i8 = state.newIterator(iterator, start, end);
         }, (StateIterator.S16 state, StateIterator.I16 iterator) @trusted {
             assert(state !is null);
+            state.rc(true);
+
             ret.state.encoding = this.state.encoding;
             ret.state.u16 = state;
             ret.state.i16 = state.newIterator(iterator, start, end);
         }, (StateIterator.S32 state, StateIterator.I32 iterator) @trusted {
             assert(state !is null);
+            state.rc(true);
+
             ret.state.encoding = this.state.encoding;
             ret.state.u32 = state;
             ret.state.i32 = state.newIterator(iterator, start, end);
@@ -1173,25 +1185,22 @@ nothrow @safe:
 
         ret.state.handle((StateIterator.S8 state, ref StateIterator.I8 iterator) {
             assert(state !is null);
+            state.rc(true);
 
             if(iterator !is null)
                 iterator = state.newIterator(iterator);
-            else
-                state.rc(true);
         }, (StateIterator.S16 state, ref StateIterator.I16 iterator) {
             assert(state !is null);
+            state.rc(true);
 
             if(iterator !is null)
                 iterator = state.newIterator(iterator);
-            else
-                state.rc(true);
         }, (StateIterator.S32 state, ref StateIterator.I32 iterator) {
             assert(state !is null);
+            state.rc(true);
 
             if(iterator !is null)
                 iterator = state.newIterator(iterator);
-            else
-                state.rc(true);
         });
 
         return ret;
@@ -1220,25 +1229,22 @@ nothrow @safe:
 
         ret.state.handle((StateIterator.S8 state, ref StateIterator.I8 iterator) {
             assert(state !is null);
+            state.rc(true);
 
             if(iterator !is null)
                 iterator = state.newIterator(iterator);
-            else
-                state.rc(true);
         }, (StateIterator.S16 state, ref StateIterator.I16 iterator) {
             assert(state !is null);
+            state.rc(true);
 
             if(iterator !is null)
                 iterator = state.newIterator(iterator);
-            else
-                state.rc(true);
         }, (StateIterator.S32 state, ref StateIterator.I32 iterator) {
             assert(state !is null);
+            state.rc(true);
 
             if(iterator !is null)
                 iterator = state.newIterator(iterator);
-            else
-                state.rc(true);
         });
 
         return ret;
@@ -1267,25 +1273,22 @@ nothrow @safe:
 
         ret.state.handle((StateIterator.S8 state, ref StateIterator.I8 iterator) {
             assert(state !is null);
+            state.rc(true);
 
             if(iterator !is null)
                 iterator = state.newIterator(iterator);
-            else
-                state.rc(true);
         }, (StateIterator.S16 state, ref StateIterator.I16 iterator) {
             assert(state !is null);
+            state.rc(true);
 
             if(iterator !is null)
                 iterator = state.newIterator(iterator);
-            else
-                state.rc(true);
         }, (StateIterator.S32 state, ref StateIterator.I32 iterator) {
             assert(state !is null);
+            state.rc(true);
 
             if(iterator !is null)
                 iterator = state.newIterator(iterator);
-            else
-                state.rc(true);
         });
 
         return ret;

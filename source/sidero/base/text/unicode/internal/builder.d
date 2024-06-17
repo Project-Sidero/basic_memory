@@ -46,12 +46,15 @@ struct StateIterator {
         this.handle((StateIterator.S8 state, ref StateIterator.I8 iterator) {
             assert(state !is null);
             iterator = state.newIterator(iterator);
+            state.rc(true);
         }, (StateIterator.S16 state, ref StateIterator.I16 iterator) {
             assert(state !is null);
             iterator = state.newIterator(iterator);
+            state.rc(true);
         }, (StateIterator.S32 state, ref StateIterator.I32 iterator) {
             assert(state !is null);
             iterator = state.newIterator(iterator);
+            state.rc(true);
         });
 
         scope(exit) {
@@ -90,25 +93,28 @@ struct StateIterator {
 
         StateIterator oldState = this;
 
-        this.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+        this.handle((StateIterator.S8 state, ref StateIterator.I8 iterator) {
             assert(state !is null);
             iterator = state.newIterator(iterator);
-        }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+            state.rc(true);
+        }, (StateIterator.S16 state, ref StateIterator.I16 iterator) {
             assert(state !is null);
             iterator = state.newIterator(iterator);
-        }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+            state.rc(true);
+        }, (StateIterator.S32 state, ref StateIterator.I32 iterator) {
             assert(state !is null);
             iterator = state.newIterator(iterator);
+            state.rc(true);
         });
 
         scope(exit) {
-            this.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
+            this.handle((StateIterator.S8 state, ref StateIterator.I8 iterator) {
                 assert(state !is null);
                 state.rcIterator(false, iterator);
-            }, (StateIterator.S16 state, StateIterator.I16 iterator) {
+            }, (StateIterator.S16 state, ref StateIterator.I16 iterator) {
                 assert(state !is null);
                 state.rcIterator(false, iterator);
-            }, (StateIterator.S32 state, StateIterator.I32 iterator) {
+            }, (StateIterator.S32 state, ref StateIterator.I32 iterator) {
                 assert(state !is null);
                 state.rcIterator(false, iterator);
             });
@@ -116,11 +122,10 @@ struct StateIterator {
             this = oldState;
         }
 
-        Char temp;
         int result;
 
         while(!empty) {
-            temp = back!Char();
+            Char temp = back!Char();
 
             result = del(temp);
             if(result)
@@ -522,7 +527,6 @@ scope nothrow @nogc @safe @hidden:
 
             if(iterator is null) {
                 iterator = state.newIterator();
-                state.rc(false);
             }
 
             return iterator.frontUTF!Char;
@@ -531,7 +535,6 @@ scope nothrow @nogc @safe @hidden:
 
             if(iterator is null) {
                 iterator = state.newIterator();
-                state.rc(false);
             }
 
             return iterator.frontUTF!Char;
@@ -540,7 +543,6 @@ scope nothrow @nogc @safe @hidden:
 
             if(iterator is null) {
                 iterator = state.newIterator();
-                state.rc(false);
             }
 
             return iterator.frontUTF!Char;
@@ -553,7 +555,6 @@ scope nothrow @nogc @safe @hidden:
 
             if(iterator is null) {
                 iterator = state.newIterator();
-                state.rc(false);
             }
 
             return iterator.backUTF!Char;
@@ -562,7 +563,6 @@ scope nothrow @nogc @safe @hidden:
 
             if(iterator is null) {
                 iterator = state.newIterator();
-                state.rc(false);
             }
 
             return iterator.backUTF!Char;
@@ -571,7 +571,6 @@ scope nothrow @nogc @safe @hidden:
 
             if(iterator is null) {
                 iterator = state.newIterator();
-                state.rc(false);
             }
 
             return iterator.backUTF!Char;
@@ -584,7 +583,6 @@ scope nothrow @nogc @safe @hidden:
 
             if(iterator is null) {
                 iterator = state.newIterator();
-                state.rc(false);
             }
 
             iterator.popFrontUTF!Char;
@@ -593,7 +591,6 @@ scope nothrow @nogc @safe @hidden:
 
             if(iterator is null) {
                 iterator = state.newIterator();
-                state.rc(false);
             }
 
             iterator.popFrontUTF!Char;
@@ -602,7 +599,6 @@ scope nothrow @nogc @safe @hidden:
 
             if(iterator is null) {
                 iterator = state.newIterator();
-                state.rc(false);
             }
 
             iterator.popFrontUTF!Char;
@@ -615,7 +611,6 @@ scope nothrow @nogc @safe @hidden:
 
             if(iterator is null) {
                 iterator = state.newIterator();
-                state.rc(false);
             }
 
             iterator.popBackUTF!Char;
@@ -624,7 +619,6 @@ scope nothrow @nogc @safe @hidden:
 
             if(iterator is null) {
                 iterator = state.newIterator();
-                state.rc(false);
             }
 
             iterator.popBackUTF!Char;
@@ -633,7 +627,6 @@ scope nothrow @nogc @safe @hidden:
 
             if(iterator is null) {
                 iterator = state.newIterator();
-                state.rc(false);
             }
 
             iterator.popBackUTF!Char;
@@ -1629,10 +1622,7 @@ struct UTF_State(Char) {
         cac.setAgainst(other.foreachValue, caseSensitive);
         result = cac.compare(osat.foreachValue, true);
 
-        {
-            iteratorList.rcIteratorInternal(false, iterator);
-            this.rcInternal(false);
-        }
+        iteratorList.rcIteratorInternal(false, iterator);
 
         debug checkForNullIterator;
         blockList.mutex.unlock;

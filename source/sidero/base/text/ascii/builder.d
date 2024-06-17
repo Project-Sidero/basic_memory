@@ -22,6 +22,7 @@ export:
 
             auto oldIterator = this.iterator;
             iterator = state.newIterator(oldIterator);
+            state.rc(true);
 
             scope (exit) {
                 state.rcIterator(false, iterator);
@@ -49,6 +50,7 @@ export:
 
             auto oldIterator = this.iterator;
             iterator = state.newIterator(oldIterator);
+            state.rc(true);
 
             scope (exit) {
                 state.rcIterator(false, iterator);
@@ -298,6 +300,8 @@ nothrow @safe:
         if (isNull)
             return StringBuilder_ASCII();
 
+        state.rc(true);
+
         StringBuilder_ASCII ret;
         ret.state = state;
         ret.iterator = state.newIterator(iterator);
@@ -345,6 +349,8 @@ nothrow @safe:
         StringBuilder_ASCII ret;
 
         if (state !is null) {
+            state.rc(true);
+
             ret.state = state;
             ret.iterator = state.newIterator(iterator, start, end);
         }
@@ -673,7 +679,6 @@ nothrow @safe:
 
         if (iterator is null) {
             iterator = state.newIterator();
-            state.rc(false);
         }
 
         return iterator.front;
@@ -702,7 +707,6 @@ nothrow @safe:
 
         if (iterator is null) {
             iterator = state.newIterator();
-            state.rc(false);
         }
 
         return iterator.back;
@@ -731,7 +735,6 @@ nothrow @safe:
 
         if (iterator is null) {
             iterator = state.newIterator();
-            state.rc(false);
         }
 
         iterator.popFront;
@@ -743,7 +746,6 @@ nothrow @safe:
 
         if (iterator is null) {
             iterator = state.newIterator();
-            state.rc(false);
         }
 
         iterator.popBack;

@@ -17,7 +17,6 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
         ret.next = head;
 
         ret.refCount = 1;
-        blockList.refCount++;
 
         if(minimumOffsetFromHead > blockList.numberOfItems)
             minimumOffsetFromHead = blockList.numberOfItems;
