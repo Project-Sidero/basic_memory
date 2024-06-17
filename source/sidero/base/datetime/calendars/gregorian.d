@@ -35,12 +35,12 @@ export @safe nothrow @nogc:
 
     ///
     this(long year, ubyte month, ubyte day) scope {
-        this.day_ = 1;
-        this.month_ = 1;
+        this.day_ = 0;
+        this.month_ = 0;
         this.year_ = year;
 
-        this.advanceMonths(month - 1);
-        this.advanceDays(day - 1);
+        this.advanceMonths(month);
+        this.advanceDays(day);
     }
 
     ///
@@ -211,6 +211,17 @@ export @safe nothrow @nogc:
     ///
     GregorianDate endOfMonth() scope const {
         return GregorianDate(this.year_, this.month_, daysInMonth());
+    }
+
+    /// Get the week in year, respects 53'rd when week starts on a monday.
+    ubyte weekInYear() scope const {
+        // https://en.wikipedia.org/wiki/ISO_week_date#Calculating_the_week_number_from_an_ordinal_date
+        return cast(ubyte)((this.dayInYear() + 10 - this.dayInWeek()) / 7);
+    }
+
+    ///
+    unittest {
+        assert(GregorianDate(2026, 12, 31).weekInYear == 53);
     }
 
     ///
@@ -496,7 +507,7 @@ export @safe nothrow @nogc:
             break;
 
         case 'W':
-            writer.formattedWrite(builder, "{:s}", (this.dayInYear() - this.firstMondayOfYear()) / 7);
+            writer.formattedWrite(builder, "{:s}", this.weekInYear);
             break;
 
         case 'F':
