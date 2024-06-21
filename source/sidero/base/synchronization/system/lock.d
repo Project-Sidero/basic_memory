@@ -6,6 +6,7 @@ import sidero.base.attributes;
 /// Recursive mutex
 struct SystemLock {
     private @PrettyPrintIgnore {
+        import sidero.base.synchronization.system.internal.bindings;
         import sidero.base.synchronization.mutualexclusion : TestTestSetLockInline;
 
         TestTestSetLockInline protectMutex;
@@ -85,6 +86,7 @@ export @safe nothrow @nogc:
 
     ///
     void opAssign(return scope SystemLock other) scope {
+        this.destroy;
         this.__ctor(other);
     }
 
@@ -96,29 +98,26 @@ export @safe nothrow @nogc:
         setup;
 
         version(Windows) {
-            if(timeout < Duration.max) {
-                auto result = WaitForSingleObject(mutex, timeout < Duration.max ? cast(uint)timeout.totalMilliSeconds() : INFINITE);
+            auto result = WaitForSingleObject(mutex, timeout < Duration.max ? cast(uint)timeout.totalMilliSeconds() : INFINITE);
 
-                switch(result) {
-                case WAIT_OBJECT_0:
-                case WAIT_ABANDONED:
-                    return ErrorResult.init;
+            switch(result) {
+            case WAIT_OBJECT_0, WAIT_ABANDONED:
+                return ErrorResult.init;
 
-                case WAIT_FAILED:
-                default:
-                    return ErrorResult(UnknownPlatformBehaviorException("Could not lock mutex"));
-                }
-            } else {
-                return waitForLock(mutex);
+            case WAIT_FAILED:
+                goto default;
+
+            default:
+                return ErrorResult(UnknownPlatformBehaviorException("Could not lock mutex"));
             }
         } else version(Posix) {
             import core.sys.posix.pthread : pthread_mutex_timedlock;
             import core.sys.posix.time : clock_gettime, CLOCK_REALTIME, timespec;
             import core.stdc.errno : EINVAL, ETIMEDOUT, EAGAIN;
 
-            if(timeout < Duration.max) {
-                int result;
+            int result;
 
+            if(timeout < Duration.max) {
                 long secs = timeout.totalSeconds();
                 long nsecs = (timeout - secs.seconds()).totalNanoSeconds();
 
@@ -130,28 +129,29 @@ export @safe nothrow @nogc:
                 ts.tv_nsec += nsecs;
 
                 result = pthread_mutex_timedlock(&mutex, &ts);
-
-                switch(result) {
-                case 0:
-                    return ErrorResult.init;
-
-                case EOWNERDEAD:
-                    pthread_mutex_consistent(&mutex);
-                    return ErrorResult.init;
-
-                case EINVAL:
-                    return ErrorResult(MalformedInputException("Timeout duration out of range"));
-
-                case ETIMEDOUT:
-                    return ErrorResult(UnknownPlatformBehaviorException("Could not lock the mutex due to timeout"));
-
-                case EAGAIN:
-                case ENOTRECOVERABLE:
-                default:
-                    return ErrorResult(UnknownPlatformBehaviorException("Could not lock mutex"));
-                }
             } else {
-                return waitForLock(&mutex);
+                result = pthread_mutex_lock(&mutex);
+            }
+
+            switch(result) {
+            case 0:
+                return ErrorResult.init;
+
+            case EOWNERDEAD:
+                pthread_mutex_consistent(&mutex);
+                return ErrorResult.init;
+
+            case EINVAL:
+                return ErrorResult(MalformedInputException("Timeout duration out of range"));
+
+            case ETIMEDOUT:
+                return ErrorResult(UnknownPlatformBehaviorException("Could not lock the mutex due to timeout"));
+
+            case EAGAIN, ENOTRECOVERABLE:
+                goto default;
+
+            default:
+                return ErrorResult(UnknownPlatformBehaviorException("Could not lock mutex"));
             }
         } else
             static assert(0, "Unimplemented platform");
@@ -165,14 +165,15 @@ export @safe nothrow @nogc:
             auto result = WaitForSingleObject(mutex, 0);
 
             switch(result) {
-            case WAIT_OBJECT_0:
-            case WAIT_ABANDONED:
+            case WAIT_OBJECT_0, WAIT_ABANDONED:
                 return typeof(return)(true);
 
             case WAIT_TIMEOUT:
                 return typeof(return)(false);
 
             case WAIT_FAILED:
+                goto default;
+
             default:
                 return typeof(return)(UnknownPlatformBehaviorException("Could not lock mutex"));
             }
@@ -190,8 +191,9 @@ export @safe nothrow @nogc:
             case EBUSY:
                 return typeof(return)(false);
 
-            case EAGAIN:
-            case ENOTRECOVERABLE:
+            case EAGAIN, ENOTRECOVERABLE:
+                goto default;
+
             default:
                 return typeof(return)(UnknownPlatformBehaviorException("Could not lock mutex"));
             }
@@ -209,63 +211,5 @@ export @safe nothrow @nogc:
             pthread_mutex_unlock(&mutex);
         } else
             static assert(0, "Unimplemented platform");
-    }
-}
-
-private:
-
-version(Posix) {
-    import core.sys.posix.pthread : pthread_mutex_t, pthread_mutexattr_t;
-
-    enum {
-        PTHREAD_MUTEX_ROBUST = 1,
-    }
-
-    extern (C) nothrow @nogc {
-        int pthread_mutexattr_setrobust(pthread_mutexattr_t* attr, int robustness);
-        int pthread_mutex_consistent(pthread_mutex_t* mutex);
-    }
-}
-
-ErrorResult waitForLock(scope void* handle) @trusted nothrow @nogc {
-    version(Windows) {
-        import core.sys.windows.winbase : WaitForSingleObject, INFINITE, WAIT_OBJECT_0, WAIT_ABANDONED, WAIT_FAILED;
-
-        auto result = WaitForSingleObject(handle, INFINITE);
-
-        switch(result) {
-        case WAIT_OBJECT_0:
-        case WAIT_ABANDONED:
-            return ErrorResult.init;
-
-        case WAIT_FAILED:
-        default:
-            return ErrorResult(UnknownPlatformBehaviorException("Could not lock mutex"));
-        }
-    } else version(Posix) {
-        import core.sys.posix.pthread : pthread_mutex_lock;
-        import core.stdc.errno : EINVAL, ETIMEDOUT, EAGAIN, EOWNERDEAD, ENOTRECOVERABLE, EBUSY;
-
-        int result = pthread_mutex_lock(cast(pthread_mutex_t*)handle);
-
-        switch(result) {
-        case 0:
-            return ErrorResult.init;
-
-        case EOWNERDEAD:
-            pthread_mutex_consistent(cast(pthread_mutex_t*)handle);
-            return ErrorResult.init;
-
-        case EINVAL:
-            return ErrorResult(MalformedInputException("Timeout duration out of range"));
-
-        case ETIMEDOUT:
-            return ErrorResult(UnknownPlatformBehaviorException("Could not lock the mutex due to timeout"));
-
-        case EAGAIN:
-        case ENOTRECOVERABLE:
-        default:
-            return ErrorResult(UnknownPlatformBehaviorException("Could not lock mutex"));
-        }
     }
 }
