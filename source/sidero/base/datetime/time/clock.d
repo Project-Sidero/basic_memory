@@ -71,6 +71,29 @@ DateTime!GregorianDate accurateDateTime() @trusted {
     return ret;
 }
 
+/// Acquires a point in time, since an unknown epoch measured in nano seconds.
+long accuratePointInTime() {
+    version(Windows) {
+        ULONGLONG ret;
+
+        // Acquire as hnsec
+        QueryInterruptTime(&ret);
+
+        return ret * 100;
+    } else version(Posix) {
+        import core.sys.posix.time;
+
+        timespec ts;
+        const err = clock_gettime(CLOCK_MONOTONIC, &ts);
+
+        if(err == 0) {
+            return (ts.tv_sec * 1000000000) + ts.tv_nsec;
+        }
+    }
+
+    return 0;
+}
+
 /// Get the current year
 long currentYear() @trusted {
     import core.stdc.time;
@@ -84,6 +107,8 @@ long currentYear() @trusted {
 
 version(Windows) {
     import core.sys.windows.winbase : FILETIME, SYSTEMTIME, FileTimeToSystemTime;
+    import core.sys.windows.winnt : ULONGLONG;
 
     extern (Windows) void GetSystemTimePreciseAsFileTime(FILETIME*) @safe nothrow @nogc;
+    extern (Windows) void QueryInterruptTime(scope ULONGLONG* lpInterruptTime) @safe nothrow @nogc;
 }
