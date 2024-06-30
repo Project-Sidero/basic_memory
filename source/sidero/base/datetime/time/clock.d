@@ -31,8 +31,6 @@ DateTime!GregorianDate accurateDateTime() @trusted {
             needTimeZoneAdjustment = true;
         }
     } else version(Posix) {
-        import core.sys.posix.time;
-
         timespec ts;
         const err = clock_gettime(CLOCK_REALTIME, &ts);
 
@@ -81,13 +79,38 @@ long accuratePointInTime() {
 
         return ret * 100;
     } else version(Posix) {
-        import core.sys.posix.time;
-
         timespec ts;
         const err = clock_gettime(CLOCK_MONOTONIC, &ts);
 
         if(err == 0) {
             return (ts.tv_sec * 1000000000) + ts.tv_nsec;
+        }
+    }
+
+    return 0;
+}
+
+/// Acquires the amount of user time this process has used in micro seconds.
+long amountOfProcessUserTime() {
+    version(Windows) {
+        FILETIME userTime; // hnsecs over two uint's
+        FILETIME dummy1, dummy2, dummy3;
+
+        if(GetProcessTimes(GetCurrentProcess(), &dummy1, &dummy2, &dummy3, &userTime) != 0) {
+            long ret = (cast(long)userTime.dwHighDateTime << 32) | userTime.dwLowDateTime;
+            // 1000ns to 1 ms
+            // time acquired is 100ns
+            return ret / 10;
+        }
+    } else version(Posix) {
+        import core.sys.posix.sys.resource;
+
+        rusage ru;
+        if (getrusage(RUSAGE_SELF, &ru) == 0)
+        {
+            long ret = (cast(long)ru.ru_utime.tv_sec * 1000000) + tv.usec;
+            // micro seconds
+            return ret;
         }
     }
 
@@ -107,8 +130,14 @@ long currentYear() @trusted {
 
 version(Windows) {
     import core.sys.windows.winbase : FILETIME, SYSTEMTIME, FileTimeToSystemTime;
-    import core.sys.windows.winnt : ULONGLONG;
+    import core.sys.windows.winnt : ULONGLONG, HANDLE;
 
-    extern (Windows) void GetSystemTimePreciseAsFileTime(FILETIME*) @safe nothrow @nogc;
-    extern (Windows) void QueryInterruptTime(scope ULONGLONG* lpInterruptTime) @safe nothrow @nogc;
+    extern (Windows) @safe nothrow @nogc {
+        void GetSystemTimePreciseAsFileTime(FILETIME*);
+        void QueryInterruptTime(scope ULONGLONG* lpInterruptTime);
+        HANDLE GetCurrentProcess();
+        bool GetProcessTimes(scope HANDLE, scope FILETIME*, scope FILETIME*, scope FILETIME*, scope FILETIME*);
+    }
+} else version(Posix) {
+    import core.sys.posix.time;
 }
