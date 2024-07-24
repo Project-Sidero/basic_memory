@@ -19,8 +19,6 @@ export:
 struct TestSetLockInline {
     private @PrettyPrintIgnore shared(bool) state;
 
-    @disable this(this);
-
     export @safe nothrow @nogc:
 
     /// Non-pure will yield the thread lock
@@ -58,8 +56,6 @@ struct TestSetLockInline {
 ///
 struct TestTestSetLockInline {
     private @PrettyPrintIgnore shared(bool) state;
-
-    //@disable this(this);
 
 export @safe @nogc nothrow:
 

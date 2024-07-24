@@ -499,7 +499,7 @@ bool writeChar(Builder, Input)(scope ref Builder output, scope Input input, scop
     if(quote)
         output ~= "'"c;
 
-    static if(isASCII!Input) {
+    static if(isASCII!Builder) {
         if(input >= 128)
             return false;
 

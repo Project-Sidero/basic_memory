@@ -423,7 +423,7 @@ scope nothrow @nogc @safe:
     }
 
     ///
-    bool opEquals(scope Result!Type other) const @trusted {
+    bool opEquals()(scope Result!Type other) const @trusted {
         if(error__.isSet || other.error__.isSet || error__.info.message !is null || _value is null || other.error__.info.message !is null)
             return error__.isSet && other.error__.isSet;
         else {
@@ -437,7 +437,7 @@ scope nothrow @nogc @safe:
     }
 
     ///
-    bool opEquals(scope const Result!Type other) const @trusted {
+    bool opEquals()(scope const Result!Type other) const @trusted {
         if(error__.isSet || other.error__.isSet || error__.info.message !is null || _value is null || other.error__.info.message !is null)
             return error__.isSet && other.error__.isSet;
         else if(this.isNull && other.isNull)
