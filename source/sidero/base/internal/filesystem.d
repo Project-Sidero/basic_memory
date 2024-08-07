@@ -12,7 +12,7 @@ DynamicArray!Type readFile(Type)(scope FilePath filename, size_t ifNotSize = 0) 
     String_UTF8 path = filename.toString();
 
     FILE* toRead = fopen(path.ptr, "rb");
-    if (toRead is null)
+    if(toRead is null)
         return typeof(return).init;
 
     typeof(return) ret;
@@ -21,8 +21,8 @@ DynamicArray!Type readFile(Type)(scope FilePath filename, size_t ifNotSize = 0) 
         auto got = fseek(toRead, 0, SEEK_END);
         auto toReserve = ftell(toRead);
 
-        if (got == 0) {
-            if (toReserve == ifNotSize) {
+        if(got == 0) {
+            if(toReserve == ifNotSize) {
                 fclose(toRead);
                 return typeof(return).init;
             }
@@ -37,7 +37,7 @@ DynamicArray!Type readFile(Type)(scope FilePath filename, size_t ifNotSize = 0) 
     Type[1024] buffer;
 
     size_t read;
-    while ((read = fread(buffer.ptr, 1, buffer.length, toRead)) > 0) {
+    while((read = fread(buffer.ptr, 1, buffer.length, toRead)) > 0) {
         ret ~= buffer[0 .. read];
     }
 
@@ -51,11 +51,11 @@ ptrdiff_t getFileSize(scope FilePath filename) @trusted {
     String_UTF8 path = filename.toString();
 
     FILE* toRead = fopen(path.ptr, "rb");
-    if (toRead is null)
+    if(toRead is null)
         return -1;
 
     auto got = fseek(toRead, 0, SEEK_END);
-    if (got != 0) {
+    if(got != 0) {
         fclose(toRead);
         return -2;
     }
@@ -63,21 +63,21 @@ ptrdiff_t getFileSize(scope FilePath filename) @trusted {
     auto ret = ftell(toRead);
     fclose(toRead);
 
-    if (ret < 0)
+    if(ret < 0)
         return -3;
 
     return cast(ptrdiff_t)ret;
 }
 
 bool directoryExists(FilePath directory) @trusted {
-    version (Posix) {
+    version(Posix) {
         import core.sys.posix.sys.stat : lstat, stat_t;
 
         String_UTF8 path = directory.toString();
 
         stat_t buffer;
         return lstat(cast(char*)path.ptr, &buffer) > 0 && S_ISDIR(buffer.st_mode);
-    } else version (Windows) {
+    } else version(Windows) {
         import core.sys.windows.winbase : GetFileAttributesW;
         import core.sys.windows.winnt : INVALID_FILE_ATTRIBUTES, FILE_ATTRIBUTE_DIRECTORY;
 
@@ -112,7 +112,7 @@ export @safe nothrow @nogc:
     //@disable this(this);
 
     ~this() scope @trusted {
-        if (descriptor !is null) {
+        if(descriptor !is null) {
             fflush(descriptor);
             fclose(descriptor);
         }
@@ -149,18 +149,18 @@ export @safe nothrow @nogc:
     }
 
     void append(scope String_UTF8 input) scope @trusted {
-        if (isNull || input.length == 0)
+        if(isNull || input.length == 0)
             return;
 
-        if (!input.isPtrNullTerminated || input.isEncodingChanged)
+        if(!input.isPtrNullTerminated || input.isEncodingChanged)
             input = input.dup;
 
         size_t writtenSoFar, written, failedAttempt;
 
-        while (!isNull && written < input.length && failedAttempt < 2) {
+        while(!isNull && written < input.length && failedAttempt < 2) {
             written = fwrite(input.ptr + writtenSoFar, 1, input.length, descriptor);
 
-            if (written == 0) {
+            if(written == 0) {
                 fflush(descriptor);
                 failedAttempt = 0;
                 writtenSoFar += written;
@@ -176,18 +176,18 @@ export @safe nothrow @nogc:
     }
 
     void append(scope String_ASCII input) scope @trusted {
-        if (isNull)
+        if(isNull)
             return;
 
-        if (!input.isPtrNullTerminated)
+        if(!input.isPtrNullTerminated)
             input = input.dup;
 
         size_t writtenSoFar, written, failedAttempt;
 
-        while (!isNull && written < input.length && failedAttempt < 2) {
+        while(!isNull && written < input.length && failedAttempt < 2) {
             written = fwrite(input.ptr + writtenSoFar, 1, input.length, descriptor);
 
-            if (written == 0) {
+            if(written == 0) {
                 fflush(descriptor);
                 failedAttempt = 0;
                 writtenSoFar += written;
@@ -203,12 +203,42 @@ export @safe nothrow @nogc:
     }
 }
 
-private:
+version(Posix) {
+    import core.sys.posix.sys.stat;
 
-version (Posix) {
-    import core.sys.posix.sys.stat : mode_t, S_IFDIR, S_IFMT;
+    mode_t S_GETTYPE(mode_t mode) {
+        return mode & S_IFMT;
+    }
+
+    bool S_ISTYPE(mode_t mode, uint mask) {
+        return S_GETTYPE(mode) == mask;
+    }
+
+    bool S_ISBLK(mode_t mode) {
+        return S_ISTYPE(mode, S_IFBLK);
+    }
+
+    bool S_ISCHR(mode_t mode) {
+        return S_ISTYPE(mode, S_IFCHR);
+    }
 
     bool S_ISDIR(mode_t mode) {
-        return (mode & S_IFMT) == S_IFDIR;
+        return S_ISTYPE(mode, S_IFDIR);
+    }
+
+    bool S_ISFIFO(mode_t mode) {
+        return S_ISTYPE(mode, S_IFIFO);
+    }
+
+    bool S_ISREG(mode_t mode) {
+        return S_ISTYPE(mode, S_IFREG);
+    }
+
+    bool S_ISLNK(mode_t mode) {
+        return S_ISTYPE(mode, S_IFLNK);
+    }
+
+    bool S_ISSOCK(mode_t mode) {
+        return S_ISTYPE(mode, S_IFSOCK);
     }
 }
