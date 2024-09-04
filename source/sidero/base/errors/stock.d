@@ -24,7 +24,11 @@ enum {
     UnknownPlatformBehaviorException = ErrorMessage("UPBE",
             "Platform behavior is unexpected"),
     ///
-    DuplicateValueException = ErrorMessage("DVE", "Duplicate value received"),
+    PlatformStateNotMatchingArgument = ErrorMessage("PSNMA",
+            "The platform state does not match argument"),
+    ///
+    DuplicateValueException = ErrorMessage("DVE",
+            "Duplicate value received"),
     ///
     ShuttingStateDownException = ErrorMessage("SSDE", "State is currently being shutdown"),
 }
