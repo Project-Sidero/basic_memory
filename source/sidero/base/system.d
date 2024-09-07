@@ -848,6 +848,7 @@ version(Windows) {
     // In case we use -i
     pragma(lib, "Userenv.lib");
     pragma(lib, "Netapi32.lib");
+    pragma(lib, "Advapi32.lib");
 
     extern (Windows) nothrow @nogc {
         int GetUserDefaultLocaleName(LPWSTR, int);
