@@ -210,6 +210,12 @@ export @safe nothrow @nogc:
         assert(fs.iterableDividerCharacter == ',');
         assert(fs.iterableStartCharacter == '[');
         assert(fs.iterableEndCharacter == notACharacter);
+
+        fs = FormatSpecifier.from(String_UTF8("{:0<10d}"));
+        assert(fs != FormatSpecifier.init);
+        assert(fs.fillCharacter == '0');
+        assert(fs.alignment == FormatSpecifier.Alignment.Left);
+        assert(fs.minimumWidth == 10);
     }
 
     ///
@@ -298,7 +304,6 @@ private @hidden:
         ret.fullFormatSpec = format.save.byUTF8;
         ret.parseSpec(amountInInner, amountLeft);
 
-        import sidero.base.console;
         {
             int countBracketPairs = 1;
 
@@ -605,7 +610,7 @@ private @hidden:
 private:
 
 bool readInt(Input)(scope ref Input input, scope ref int ret) {
-    uint place = 1;
+    uint done;
     bool negate;
 
     if(!input.empty && input.front == '-') {
@@ -620,9 +625,11 @@ bool readInt(Input)(scope ref Input input, scope ref int ret) {
         case '0': .. case '9':
             uint diff = c - '0';
 
-            ret += diff * place;
-            place *= 10;
+            ret *= 10;
+            ret += diff;
+
             input.popFront;
+            done++;
             break;
 
         default:
@@ -633,5 +640,5 @@ bool readInt(Input)(scope ref Input input, scope ref int ret) {
     if(negate)
         ret *= -1;
 
-    return place > 1;
+    return done > 0;
 }
