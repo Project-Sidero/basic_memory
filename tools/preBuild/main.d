@@ -68,5 +68,10 @@ void main() {
         windowsZones;
     }
 
+    {
+        import generators.all_generated;
+        generateAllGeneratedFiles();
+    }
+
     writeln("All tools have run successfully");
 }

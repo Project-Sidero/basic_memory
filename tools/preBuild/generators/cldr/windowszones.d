@@ -92,7 +92,7 @@ uint fnv_32_1a(scope const(ubyte)[] data, uint start = FNV_Offset_Basis_32) @saf
     }
 
     append(CLDRAPIFile, api.data);
-    write(CLDRDirectory ~ "windowszone.d", internal.data);
+    write(CLDRDirectory ~ "windowszones.d", internal.data);
 }
 
 void processEachLine(string inputText, ref TotalState state) {

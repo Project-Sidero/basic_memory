@@ -845,6 +845,10 @@ version(Windows) {
     import core.sys.windows.windef : DWORD;
     import core.sys.windows.basetsd : HANDLE;
 
+    // In case we use -i
+    pragma(lib, "Userenv.lib");
+    pragma(lib, "Netapi32.lib");
+
     extern (Windows) nothrow @nogc {
         int GetUserDefaultLocaleName(LPWSTR, int);
         bool GetUserProfileDirectoryW(HANDLE, LPWSTR, DWORD*);

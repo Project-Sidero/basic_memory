@@ -10,4 +10,5 @@ enum {
     CLDRDirectory = "generated/sidero/base/internal/cldr/",
     CLDRAPIFile = "generated/sidero/base/datetime/cldr.d",
     InternalMetaFile = "generated/sidero/base/internal/meta.d",
+    InternalAllGeneratedFile = "generated/sidero/base/internal/all_generated.d",
 }
