@@ -755,7 +755,7 @@ export @safe nothrow @nogc:
 
     /// Ditto
     Result!FilePath asAbsolute(scope FilePath cwd = FilePath.init, scope FilePath home = FilePath.init,
-            scope return RCAllocator allocator = RCAllocator.init) {
+            scope return RCAllocator allocator = RCAllocator.init) scope {
         FilePath ret = this.dup(allocator);
         auto error = ret.makeAbsolute(cwd, home);
 
@@ -792,6 +792,100 @@ export @safe nothrow @nogc:
         assert(FilePath.from("../bin", FilePathPlatform.Windows).assumeOkay.asAbsolute(FilePath.from("C:\\Windows",
                 FilePathPlatform.Windows).assumeOkay, FilePath.from("C:\\Users\\Sidero", FilePathPlatform.Windows).assumeOkay).assumeOkay ==
                 "\\\\?\\C:\\bin");
+    }
+
+    ///
+    ErrorResult makeRelativeTo(scope FilePath parent) scope {
+        if(!parent.isParentOf(this))
+            return typeof(return)(MalformedInputException("This is not a child of parent"));
+
+        this.state.mutex.lock;
+        parent.state.mutex.lock;
+        scope(exit) {
+            parent.state.mutex.unlock;
+            this.state.mutex.unlock;
+        }
+
+        this.state.storage.remove(0, parent.state.storage.length);
+
+        final switch(this.state.platformRule) {
+        case FilePathPlatform.Windows:
+            if(this.state.storage.startsWith("\\"))
+                this.state.storage.remove(0, 1);
+            break;
+        case FilePathPlatform.Posix:
+            if(this.state.storage.startsWith("/"))
+                this.state.storage.remove(0, 1);
+            break;
+        }
+
+        this.state.relativeTo = FilePathRelativeTo.CurrentWorkingDirectory;
+        this.state.lengthOfLeading -= parent.state.lengthOfLeading;
+        this.state.lengthOfWindowsDrive -= parent.state.lengthOfWindowsDrive;
+        this.state.lengthOfHost -= parent.state.lengthOfHost;
+        this.state.lengthOfShare -= parent.state.lengthOfShare;
+
+        // ability to point to entry does not change
+
+        return ErrorResult.init;
+    }
+
+    /// Ditto
+    Result!FilePath asRelativeTo(scope FilePath parent, scope return RCAllocator allocator = RCAllocator.init) scope {
+        if(!parent.isParentOf(this))
+            return typeof(return)(MalformedInputException("This is not a child of parent"));
+
+        FilePath ret = this.dup(allocator);
+        auto error = ret.makeRelativeTo(parent);
+
+        if(error)
+            return typeof(return)(ret);
+        else
+            return typeof(return)(error.getError());
+    }
+
+    ///
+    @trusted unittest {
+        assert(FilePath.from("/home/sidero", FilePathPlatform.Posix).assumeOkay.asRelativeTo(FilePath.from("/home",
+                FilePathPlatform.Posix).assumeOkay).assumeOkay == "sidero");
+        assert(FilePath.from("/home/sidero/", FilePathPlatform.Posix).assumeOkay.asRelativeTo(FilePath.from("/home",
+                FilePathPlatform.Posix).assumeOkay).assumeOkay == "sidero");
+        assert(FilePath.from("C:\\Users\\Sidero", FilePathPlatform.Windows)
+                .assumeOkay.asRelativeTo(FilePath.from("C:\\Users", FilePathPlatform.Windows).assumeOkay).assumeOkay == "Sidero");
+        assert(FilePath.from("C:\\Users\\Sidero\\", FilePathPlatform.Windows)
+                .assumeOkay.asRelativeTo(FilePath.from("C:\\Users", FilePathPlatform.Windows).assumeOkay).assumeOkay == "Sidero");
+    }
+
+    ///
+    bool isParentOf(scope FilePath child) scope @trusted {
+        if(this.isNull || child.isNull)
+            return false;
+
+        this.state.mutex.lock;
+        child.state.mutex.lock;
+        scope(exit) {
+            child.state.mutex.unlock;
+            this.state.mutex.unlock;
+        }
+
+        if(!this.state.couldPointToEntry || !child.state.couldPointToEntry)
+            return false;
+        else if(this.state.platformRule != child.state.platformRule)
+            return false;
+        else if(this.state.storage.length > child.state.storage.length)
+            return false;
+        else if(!child.state.storage.startsWith(this.state.storage))
+            return false;
+        else
+            return true;
+    }
+
+    ///
+    @trusted unittest {
+        assert(FilePath.from("/home", FilePathPlatform.Posix).assumeOkay.isParentOf(FilePath.from("/home/sidero",
+                FilePathPlatform.Posix).assumeOkay));
+        assert(FilePath.from("C:\\Users", FilePathPlatform.Windows)
+                .assumeOkay.isParentOf(FilePath.from("C:\\Users\\Sidero", FilePathPlatform.Windows).assumeOkay));
     }
 
     ///
@@ -924,7 +1018,6 @@ export @safe nothrow @nogc:
     String_UTF8 toString(return scope RCAllocator allocator = RCAllocator.init) scope const @trusted {
         if(isNull)
             return String_UTF8.init;
-
         FilePathState* state = cast(FilePathState*)this.state;
 
         state.mutex.pureLock;
@@ -938,7 +1031,6 @@ export @safe nothrow @nogc:
     String_UTF16 toStringUTF16(return scope RCAllocator allocator = RCAllocator.init) scope const @trusted {
         if(isNull)
             return String_UTF16.init;
-
         FilePathState* state = cast(FilePathState*)this.state;
 
         state.mutex.pureLock;
@@ -1252,22 +1344,18 @@ export @safe nothrow @nogc:
 ///
 enum FilePathPlatform {
     ///
-    Posix,
-    ///
+    Posix, ///
     Windows
 }
 
 ///
 enum FilePathRelativeTo {
     ///
-    Nothing,
-    ///
-    Home,
-    ///
+    Nothing, ///
+    Home, ///
     CurrentWorkingDirectory,
     ///
-    DriveAndCWD,
-    ///
+    DriveAndCWD, ///
     CurrentDrive,
 }
 
@@ -1277,9 +1365,7 @@ import sidero.base.synchronization.mutualexclusion : TestTestSetLockInline;
 static immutable LegacyWindowsDevices = [
     "CON", "PRN", "AUX", "NUL", "COM0", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "LPT0",
     "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"
-];
-
-// there are others not supported, like number ranges but its not worth solving
+]; // there are others not supported, like number ranges but its not worth solving
 bool isValidWindowsComponentCharacter(dchar c) {
     switch(c) {
     case '<':
