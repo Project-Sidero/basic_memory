@@ -3,7 +3,7 @@ import sidero.base.errors.message;
 import sidero.base.attributes;
 import sidero.base.internal.logassert;
 import sidero.base.containers.utils : genericCompare;
- import std.traits : isPointer;
+import std.traits : isPointer;
 
 export:
 
@@ -107,7 +107,7 @@ scope nothrow @nogc @safe:
 
     ///
     void opAssign(scope Result other) {
-        if (__ctfe) {
+        if(__ctfe) {
             this.tupleof = Result.init.tupleof;
         } else {
             this.destroy;
@@ -162,7 +162,7 @@ scope nothrow @nogc @safe:
 
         static if(__traits(hasMember, Type, "isNull")) {
             return value.isNull;
-        } else static if (isPointer!Type) {
+        } else static if(isPointer!Type) {
             return value is null;
         } else
             return false;
@@ -312,6 +312,13 @@ scope nothrow @nogc @safe:
     }
 
     ///
+    void opAssign(return scope ResultReferenceAlternative!Type other) {
+        this.destroy;
+        this.tupleof = other.tupleof;
+        cast(void)this.__ctor(this);
+    }
+
+    ///
     void opAssign(Type value) {
         if(!this || isNull || _value is null)
             return;
@@ -325,6 +332,15 @@ scope nothrow @nogc @safe:
                 assert(0);
             return _value.opAssign(args);
         }
+    }
+
+    /// Use this to get around forward reference bugs
+    ResultReferenceAlternative!Type asAlternative() return scope {
+        ResultReferenceAlternative!Type ret;
+        ret.tupleof = this.tupleof;
+        ret.__ctor(ret);
+
+        return ret;
     }
 
     static if(__traits(hasMember, Type, "toHash") && !__traits(isDisabled, Type.toHash)) {
@@ -381,7 +397,7 @@ scope nothrow @nogc @safe:
 
         static if(__traits(hasMember, Type, "isNull")) {
             return _value.isNull;
-        } else static if (isPointer!Type) {
+        } else static if(isPointer!Type) {
             return *_value is null;
         } else
             return false;
@@ -467,6 +483,63 @@ scope nothrow @nogc @safe:
         else
             return genericCompare(*cast(Type*)this._value, *cast(Type*)other._value) == 0;
     }
+}
+
+struct ResultReferenceAlternative(Type) {
+export:
+    alias RCHandle = void delegate(bool addRef, scope void* _user) @safe nothrow @nogc;
+
+    private {
+        Type* _value;
+        void* _user;
+
+        RCHandle _rcHandle;
+    }
+
+    package(sidero.base) ErrorInfo error__;
+
+scope nothrow @nogc @safe:
+
+    ///
+    this(return scope ref ResultReferenceAlternative other) @trusted {
+        this.tupleof = other.tupleof;
+        this.error__.checked = false;
+
+        if(this._rcHandle !is null)
+            this._rcHandle(true, this._user);
+    }
+
+    ~this() @trusted {
+        if(this._rcHandle !is null)
+            this._rcHandle(false, this._user);
+    }
+
+    ///
+    bool opCast(T : bool)() {
+        error__.checked = true;
+        return error__.info.message is null;
+    }
+
+    ///
+    bool opCast(T : bool)() @trusted const {
+        assert(!__ctfe, "Don't check for error on const in CTFE");
+
+        (cast(ErrorInfo*)&error__).checked = true;
+        return error__.info.message is null;
+    }
+
+    /// Will verify that you checked
+    ref Type get(string moduleName = __MODULE__, int line = __LINE__) return @trusted {
+        logAssert(error__.checked,
+                "You forgot to check if value had an error for " ~ Type.stringof ~ ". assert(thing, thing.error.toString());",
+                this.error__, moduleName, line);
+        logAssert(!error__.isSet(), null, this.error__, moduleName, line);
+        logAssert(_value !is null, "Reference to value has null reference, cannot return value", moduleName, line);
+        return *_value;
+    }
+
+    ///
+    alias get this;
 }
 
 /// Compatible with ResultReference, should not be copied around, only passed directly to ResultReference!

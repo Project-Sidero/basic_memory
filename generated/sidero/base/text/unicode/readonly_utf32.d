@@ -3009,6 +3009,8 @@ package(sidero.base.text) @hidden:
                 other = other[0 .. $ - 1];
             if(isNull)
                 return other.length > 0 ? -1 : 0;
+            else if (other.ptr is this.literal.ptr && other.length == this.literal.length)
+                return 0;
 
             int matches(Type)(Type us) {
                 if(us.length > 0 && us[$ - 1] == '\0')
