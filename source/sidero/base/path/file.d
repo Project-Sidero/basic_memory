@@ -28,7 +28,7 @@ https://learn.microsoft.com/en-us/dotnet/standard/io/file-path-formats
 
 ///
 struct FilePath {
-    private {
+    private @PrettyPrintIgnore {
         FilePathState* state;
     }
 
