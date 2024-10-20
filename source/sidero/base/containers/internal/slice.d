@@ -124,6 +124,10 @@ export @safe nothrow @nogc:
             return oldEndOffsetT;
     }
 
+    void opAssign(SliceMemory other) scope {
+        this.tupleof = other.tupleof;
+    }
+
     ulong toHash() scope const {
         assert(0);
     }
