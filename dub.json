@@ -64,33 +64,6 @@
             ]
         },
         {
-            "name": "underthehood",
-            "targetType": "sourceLibrary",
-            "dflags": [
-                "-preview=dip1000"
-            ],
-            "versions": [
-                "SideroBase_OnlyUnderTheHood"
-            ],
-            "importPaths": [
-            ],
-            "sourcePaths": [
-                "source/sidero/base/allocators",
-                "source/sidero/base/text/internal",
-                "source/sidero/base/synchronization",
-                "generated"
-            ],
-            "sourceFiles": [
-                "source/sidero/base/attributes.d",
-                "source/sidero/base/typecons.d",
-                "source/sidero/base/internal/atomic.d",
-                "source/sidero/base/errors/message.d",
-                "source/sidero/base/errors/stock.d",
-                "source/sidero/base/bitmanip.d",
-                "source/sidero/base/hash/fnv.d"
-            ]
-        },
-        {
             "name": "source",
             "targetType": "sourceLibrary",
             "importPaths": [
