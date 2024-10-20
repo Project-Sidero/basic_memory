@@ -4,8 +4,8 @@ import sidero.base.allocators;
 package(sidero.base):
 
 struct SliceMemory {
-    RCAllocator allocator;
     shared(ptrdiff_t) refCount;
+    RCAllocator allocator;
 
     void[] original;
     size_t amountUsed;
@@ -134,5 +134,40 @@ export @safe nothrow @nogc:
 
     int opCmp(scope const SliceMemory other) scope const {
         assert(0);
+    }
+
+    static SliceMemory configureFor(Type)(RCAllocator allocator, void[] block=null, size_t amountUsed=0) {
+        SliceMemory ret = SliceMemory(1, allocator, block, amountUsed);
+
+        static void cleanup(void[] slice) @trusted {
+            Type[] array = (cast(Type*)slice.ptr)[0 .. slice.length / Type.sizeof];
+
+            foreach (ref v; array) {
+                v.destroy;
+            }
+        }
+
+        static void initElements(void[] slice) @trusted {
+            import sidero.base.allocators.utils : fillUninitializedWithInit;
+            Type[] array = (cast(Type*)slice.ptr)[0 .. slice.length / Type.sizeof];
+
+            fillUninitializedWithInit(array);
+        }
+
+        static void copyElements(void[] from, void[] into) @trusted {
+            Type[] from2 = (cast(Type*)from.ptr)[0 .. from.length / Type.sizeof];
+            Type[] into2 = (cast(Type*)into.ptr)[0 .. into.length / Type.sizeof];
+            assert(from2.length <= into2.length);
+
+            foreach (i; 0 .. from2.length) {
+                into2[i] = from2[i];
+            }
+        }
+
+        ret.initElements = &initElements;
+        ret.cleanup = &cleanup;
+        ret.copyElements = &copyElements;
+
+        return ret;
     }
 }

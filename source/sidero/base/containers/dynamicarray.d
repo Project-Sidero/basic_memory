@@ -18,7 +18,7 @@ struct DynamicArray(T) {
         size_t _offset, _length;
 
         int opApplyImpl(Del)(scope Del del) @trusted scope {
-            if (isNull)
+            if(isNull)
                 return 0;
 
             size_t offset;
@@ -26,21 +26,21 @@ struct DynamicArray(T) {
 
             DynamicArray self = this;
 
-            while (!self.empty) {
+            while(!self.empty) {
                 Result!T temp = self.front();
-                if (!temp)
+                if(!temp)
                     return result;
 
                 T got = temp;
 
-                static if (__traits(compiles, del(offset, got)))
+                static if(__traits(compiles, del(offset, got)))
                     result = del(offset, got);
-                else static if (__traits(compiles, del(got)))
+                else static if(__traits(compiles, del(got)))
                     result = del(got);
                 else
                     static assert(0);
 
-                if (result)
+                if(result)
                     return result;
 
                 offset++;
@@ -51,7 +51,7 @@ struct DynamicArray(T) {
         }
 
         int opApplyReverseImpl(Del)(scope Del del) @trusted scope {
-            if (isNull)
+            if(isNull)
                 return 0;
 
             size_t offset = this.length - 1;
@@ -59,21 +59,21 @@ struct DynamicArray(T) {
 
             DynamicArray self = this;
 
-            while (!self.empty) {
+            while(!self.empty) {
                 Result!T temp = self.back();
-                if (!temp)
+                if(!temp)
                     return result;
 
                 T got = temp;
 
-                static if (__traits(compiles, del(offset, got)))
+                static if(__traits(compiles, del(offset, got)))
                     result = del(offset, got);
-                else static if (__traits(compiles, del(got)))
+                else static if(__traits(compiles, del(got)))
                     result = del(got);
                 else
                     static assert(0);
 
-                if (result)
+                if(result)
                     return result;
 
                 offset--;
@@ -98,12 +98,12 @@ export:
 @safe nothrow @nogc:
 
     invariant () {
-        if (state is null)
+        if(state is null)
             return;
 
         assert(this._offset <= state.slice.length);
 
-        if (this._length < size_t.max)
+        if(this._length < size_t.max)
             assert(this._offset + this._length <= state.slice.length);
     }
 
@@ -125,7 +125,7 @@ export:
         assert(this.length == input.length);
         assert(this.capacity >= input.length);
 
-        foreach (i, ref v; this.unsafeGetLiteral())
+        foreach(i, ref v; this.unsafeGetLiteral())
             v = input[i];
     }
 
@@ -134,17 +134,40 @@ export:
         this(cast(T[])initial.unsafeGetLiteral, allocator);
     }
 
+    this(return scope T[] input, SliceMemory* sliceMemory) scope @trusted {
+        import sidero.base.internal.atomic;
+
+        if(sliceMemory is null) {
+            this.__ctor(input);
+        } else {
+            RCAllocator allocator = globalAllocator();
+
+            this.state = allocator.make!(State!T);
+            this.state.allocator = allocator;
+            atomicStore(this.state.refCount, 1);
+
+            this._offset = 0;
+            this._length = size_t.max;
+
+            this.state.sliceMemory = sliceMemory;
+            this.state.slice = input;
+            this.state.copyOnWrite = true;
+
+            sliceMemory.rcExternal(true);
+        }
+    }
+
     ///
     this(return scope ref DynamicArray other) scope {
         this.tupleof = other.tupleof;
 
-        if (!isNull)
+        if(!isNull)
             this.state.rcExternal(true);
     }
 
     ///
     ~this() {
-        if (isNull)
+        if(isNull)
             return;
 
         this.state.rcExternal(false);
@@ -159,7 +182,7 @@ export:
 
     ///
     inout(T)* ptr() scope inout @system {
-        if (isNull)
+        if(isNull)
             return null;
 
         return &state.slice[this._offset];
@@ -167,7 +190,7 @@ export:
 
     ///
     inout(T)[] unsafeGetLiteral() return scope inout @system {
-        if (isNull)
+        if(isNull)
             return null;
 
         return state.slice[this._offset .. this._offset + this.length];
@@ -178,9 +201,9 @@ export:
 
     ///
     size_t length() scope const {
-        if (isNull)
+        if(isNull)
             return 0;
-        else if (this._length == size_t.max)
+        else if(this._length == size_t.max)
             return this.state.slice.length - this._offset;
         else
             return this._length;
@@ -193,7 +216,7 @@ export:
 
         this.state.expand(this._offset, currentLength, newLength);
 
-        if (this._offset + newLength == this.state.slice.length)
+        if(this._offset + newLength == this.state.slice.length)
             this._length = size_t.max;
         else
             this._length = newLength;
@@ -201,7 +224,7 @@ export:
 
     ///
     size_t capacity() scope const {
-        if (isNull)
+        if(isNull)
             return 0;
 
         const total = this.state.sliceMemory.original.length / T.sizeof;
@@ -219,7 +242,7 @@ export:
 
     ///
     DynamicArray withoutIterator() return scope @trusted {
-        if (isNull)
+        if(isNull)
             return DynamicArray.init;
 
         DynamicArray ret = this;
@@ -231,7 +254,7 @@ export:
 
     ///
     void copyOnWrite() {
-        if (state !is null)
+        if(state !is null)
             state.copyOnWrite = true;
     }
 
@@ -243,7 +266,7 @@ export:
 
     ///
     void opAssign(scope T input) scope @trusted {
-        foreach (ref v; this.unsafeGetLiteral)
+        foreach(ref v; this.unsafeGetLiteral)
             v = input;
     }
 
@@ -251,13 +274,13 @@ export:
     void opAssign(scope T[] input...) scope @trusted {
         this.ensureSetup(true, input.length);
 
-        if (this.length < input.length)
+        if(this.length < input.length)
             length = input.length;
 
         auto original = this.unsafeGetLiteral();
         auto slice = original[0 .. input.length];
 
-        foreach (i, ref v; slice)
+        foreach(i, ref v; slice)
             v = input[i];
     }
 
@@ -265,13 +288,13 @@ export:
     void opAssign(scope const(T)[] input...) scope @trusted {
         this.ensureSetup(true, input.length);
 
-        if (this.length < input.length)
+        if(this.length < input.length)
             length = input.length;
 
         auto original = this.unsafeGetLiteral();
         auto slice = original[0 .. input.length];
 
-        foreach (i, ref v; slice)
+        foreach(i, ref v; slice)
             v = *cast(T*)&input[i];
     }
 
@@ -283,7 +306,7 @@ export:
     ///
     Result!DynamicArray opSlice(ptrdiff_t start, ptrdiff_t end) {
         ErrorInfo errorInfo = changeIndexToOffset(start, end);
-        if (errorInfo.isSet())
+        if(errorInfo.isSet())
             return typeof(return)(errorInfo);
 
         DynamicArray ret = this;
@@ -296,7 +319,7 @@ export:
     ///
     Result!T opIndex(ptrdiff_t index) scope @trusted {
         ErrorInfo errorInfo = changeIndexToOffset(index);
-        if (errorInfo.isSet())
+        if(errorInfo.isSet())
             return typeof(return)(errorInfo);
 
         return typeof(return)(this.state.slice[this._offset + index]);
@@ -305,7 +328,7 @@ export:
     ///
     ErrorResult opIndexAssign(T input, ptrdiff_t index) scope @trusted {
         ErrorInfo errorInfo = changeIndexToOffset(index);
-        if (errorInfo.isSet())
+        if(errorInfo.isSet())
             return typeof(return)(errorInfo);
 
         this.state.slice[this._offset + index] = input;
@@ -319,7 +342,7 @@ export:
 
         this.state.expand(this._offset, oldLength, oldLength + 1);
 
-        if (this._length == size_t.max) {
+        if(this._length == size_t.max) {
             this.state.slice[$ - 1] = input;
         } else {
             this.state.slice[this._offset + this._length] = input;
@@ -334,16 +357,16 @@ export:
 
         this.state.expand(this._offset, oldLength, oldLength + input.length);
 
-        if (this._length == size_t.max) {
+        if(this._length == size_t.max) {
             const offset = this.state.slice.length - input.length;
 
-            foreach (i, ref v; input) {
+            foreach(i, ref v; input) {
                 this.state.slice[offset + i] = v;
             }
         } else {
             size_t offset = this._offset + this._length;
 
-            foreach (ref v; input) {
+            foreach(ref v; input) {
                 this.state.slice[offset++] = v;
             }
 
@@ -362,16 +385,16 @@ export:
 
         this.state.expand(this._offset, this._length, this._length + input.length);
 
-        if (this._length == size_t.max) {
+        if(this._length == size_t.max) {
             const offset = this.state.slice.length - input.length;
 
-            foreach (i, ref v; input.unsafeGetLiteral()) {
+            foreach(i, ref v; input.unsafeGetLiteral()) {
                 this.state.slice[offset + i] = v;
             }
         } else {
             size_t offset = this._offset + this._length;
 
-            foreach (ref v; input.unsafeGetLiteral()) {
+            foreach(ref v; input.unsafeGetLiteral()) {
                 this.state.slice[offset++] = v;
             }
 
@@ -390,7 +413,7 @@ export:
 
         size_t offset;
 
-        foreach (ref v; this.unsafeGetLiteral()) {
+        foreach(ref v; this.unsafeGetLiteral()) {
             ret.state.slice[offset++] = v;
         }
 
@@ -409,11 +432,11 @@ export:
 
         size_t offset;
 
-        foreach (ref v; this.unsafeGetLiteral()) {
+        foreach(ref v; this.unsafeGetLiteral()) {
             ret.state.slice[offset++] = v;
         }
 
-        foreach (ref v; input) {
+        foreach(ref v; input) {
             ret.state.slice[offset++] = v;
         }
 
@@ -436,11 +459,11 @@ export:
 
         size_t offset;
 
-        foreach (ref v; this.unsafeGetLiteral()) {
+        foreach(ref v; this.unsafeGetLiteral()) {
             ret.state.slice[offset++] = v;
         }
 
-        foreach (ref v; input.unsafeGetLiteral()) {
+        foreach(ref v; input.unsafeGetLiteral()) {
             ret.state.slice[offset++] = v;
         }
 
@@ -458,7 +481,7 @@ export:
 
         size_t offset;
 
-        foreach (ref v; this.unsafeGetLiteral()) {
+        foreach(ref v; this.unsafeGetLiteral()) {
             ret.state.slice[offset++] = v;
         }
 
@@ -467,13 +490,29 @@ export:
 
     ///
     Slice!T asReadOnly() scope @trusted {
-        if (isNull)
+        if(isNull)
             return Slice!T();
 
         this.copyOnWrite;
 
         auto ret = Slice!T.fromDynamicArray(this.state.sliceMemory, this.unsafeGetLiteral());
         return ret;
+    }
+
+    static if(is(T == ubyte)) {
+        ///
+        String_ASCII asASCII() scope @trusted {
+            if(this.isNull)
+                return String_ASCII.init;
+            return String_ASCII(this.unsafeGetLiteral(), this.state.sliceMemory);
+        }
+
+        ///
+        @trusted unittest {
+            DynamicArray slice = DynamicArray(cast(ubyte[])"Hello!");
+            String_ASCII str = slice.asASCII;
+            assert(!str.isNull);
+        }
     }
 
     @property {
@@ -494,12 +533,12 @@ export:
 
         ///
         void popFront() scope {
-            if (state is null)
+            if(state is null)
                 return;
 
-            if (this._length == size_t.max)
+            if(this._length == size_t.max)
                 this._length = state.slice.length - this._offset;
-            if (this._length == 0)
+            if(this._length == 0)
                 return;
 
             this._offset++;
@@ -508,11 +547,11 @@ export:
 
         ///
         void popBack() scope {
-            if (state is null)
+            if(state is null)
                 return;
-            if (this._length == size_t.max)
+            if(this._length == size_t.max)
                 this._length = state.slice.length - this._offset;
-            if (this._length == 0)
+            if(this._length == 0)
                 return;
 
             this._length--;
@@ -644,7 +683,7 @@ export:
 
         LiteralType us = unsafeGetLiteral();
 
-        if (other.length > us.length)
+        if(other.length > us.length)
             return false;
         return genericCompare(us[0 .. other.length], other) == 0;
     }
@@ -665,7 +704,7 @@ export:
 
         LiteralType us = unsafeGetLiteral();
 
-        if (us.length == 0 || other.length == 0 || us.length < other.length)
+        if(us.length == 0 || other.length == 0 || us.length < other.length)
             return false;
         return genericCompare(us[$ - other.length .. $], other) == 0;
     }
@@ -686,11 +725,11 @@ export:
 
         LiteralType us = unsafeGetLiteral();
 
-        if (other.length > us.length)
+        if(other.length > us.length)
             return -1;
 
-        foreach (i; 0 .. (us.length + 1) - other.length) {
-            if (genericCompare(us[i .. i + other.length], other) == 0)
+        foreach(i; 0 .. (us.length + 1) - other.length) {
+            if(genericCompare(us[i .. i + other.length], other) == 0)
                 return i;
         }
 
@@ -713,11 +752,11 @@ export:
 
         LiteralType us = unsafeGetLiteral();
 
-        if (other.length > us.length)
+        if(other.length > us.length)
             return -1;
 
-        foreach_reverse (i; 0 .. (us.length + 1) - other.length) {
-            if (genericCompare(us[i .. i + other.length], other) == 0)
+        foreach_reverse(i; 0 .. (us.length + 1) - other.length) {
+            if(genericCompare(us[i .. i + other.length], other) == 0)
                 return i;
         }
 
@@ -740,13 +779,13 @@ export:
 
         LiteralType us = unsafeGetLiteral();
 
-        if (other.length > us.length)
+        if(other.length > us.length)
             return 0;
 
         size_t got;
 
-        while (us.length >= other.length) {
-            if (genericCompare(us[0 .. other.length], other) == 0) {
+        while(us.length >= other.length) {
+            if(genericCompare(us[0 .. other.length], other) == 0) {
                 got++;
                 us = us[other.length .. $];
             } else
@@ -758,21 +797,21 @@ export:
 
     ///
     bool contains(scope DynamicArray other) scope {
-        if (other.isNull)
+        if(other.isNull)
             return 0;
         return indexOf(other) >= 0;
     }
 
     ///
     bool contains(scope Slice!T other) scope {
-        if (other.isNull)
+        if(other.isNull)
             return 0;
         return indexOf(other) >= 0;
     }
 
     ///
     bool contains(scope LiteralType other...) scope {
-        if (other is null)
+        if(other is null)
             return 0;
         return indexOf(other) >= 0;
     }
@@ -780,11 +819,10 @@ export:
 private:
 
     void ensureSetup(bool willModify, size_t amountNeeded = 0, RCAllocator allocator = RCAllocator.init) scope @trusted {
-        import sidero.base.allocators.utils : fillUninitializedWithInit;
         import sidero.base.internal.atomic;
 
         void createState() {
-            if (allocator.isNull)
+            if(allocator.isNull)
                 allocator = globalAllocator();
 
             this.state = allocator.make!(State!T);
@@ -797,45 +835,16 @@ private:
 
         void createSliceMemory() {
             this.state.sliceMemory = allocator.make!SliceMemory;
-            this.state.sliceMemory.allocator = allocator;
-            atomicStore(this.state.sliceMemory.refCount, 1);
-
-            static void cleanup(void[] slice) @trusted {
-                T[] array = (cast(T*)slice.ptr)[0 .. slice.length / T.sizeof];
-
-                foreach (ref v; array) {
-                    v.destroy;
-                }
-            }
-
-            static void initElements(void[] slice) @trusted {
-                T[] array = (cast(T*)slice.ptr)[0 .. slice.length / T.sizeof];
-
-                fillUninitializedWithInit(array);
-            }
-
-            static void copyElements(void[] from, void[] into) @trusted {
-                T[] from2 = (cast(T*)from.ptr)[0 .. from.length / T.sizeof];
-                T[] into2 = (cast(T*)into.ptr)[0 .. into.length / T.sizeof];
-                assert(from2.length <= into2.length);
-
-                foreach (i; 0 .. from2.length) {
-                    into2[i] = from2[i];
-                }
-            }
-
-            this.state.sliceMemory.initElements = &initElements;
-            this.state.sliceMemory.cleanup = &cleanup;
-            this.state.sliceMemory.copyElements = &copyElements;
+            *this.state.sliceMemory = SliceMemory.configureFor!T(allocator);
         }
 
-        if (this.state is null) {
+        if(this.state is null) {
             // If we are currently null, we merely need to construct state
 
             createState();
             createSliceMemory();
 
-            if (amountNeeded > 0)
+            if(amountNeeded > 0)
                 this.state.expand(0, 0, amountNeeded, true);
 
             return;
@@ -848,12 +857,12 @@ private:
             const ourEnd = this._offset + actualLength;
             const wantedEnd = this._offset + amountNeeded;
 
-            if (ourEnd == wantedEnd && !state.copyOnWrite)
+            if(ourEnd == wantedEnd && !state.copyOnWrite)
                 return; // Nothing needs to change
-            else if (wantedEnd > 0 && wantedEnd < ourEnd)
+            else if(wantedEnd > 0 && wantedEnd < ourEnd)
                 return; // Already allocated
 
-            if (amountNeeded > 0 && ourEnd == actualEnd && !this.state.copyOnWrite) {
+            if(amountNeeded > 0 && ourEnd == actualEnd && !this.state.copyOnWrite) {
                 this.state.expand(this._offset, this._length, amountNeeded);
                 return;
             }
@@ -875,19 +884,19 @@ private:
     }
 
     ErrorInfo changeIndexToOffset(ref ptrdiff_t a) scope @trusted {
-        if (this.isNull)
+        if(this.isNull)
             return ErrorInfo(NullPointerException("Dynamic array is null"));
 
         size_t actualLength = this.length;
 
-        if (a < 0) {
-            if (actualLength < -a)
+        if(a < 0) {
+            if(actualLength < -a)
                 return ErrorInfo(RangeException("First index must be smaller than length"));
             a = actualLength + a;
         }
 
-        if (a > actualLength) {
-            if (a < ptrdiff_t.max)
+        if(a > actualLength) {
+            if(a < ptrdiff_t.max)
                 return ErrorInfo(RangeException("First offset must be smaller than length"));
             a = actualLength;
         }
@@ -896,36 +905,36 @@ private:
     }
 
     ErrorInfo changeIndexToOffset(ref ptrdiff_t a, ref ptrdiff_t b) scope @trusted {
-        if (this.isNull)
+        if(this.isNull)
             return ErrorInfo(NullPointerException("Dynamic array is null"));
 
         size_t actualLength = this.length;
 
-        if (a < 0) {
-            if (actualLength < -a)
+        if(a < 0) {
+            if(actualLength < -a)
                 return ErrorInfo(RangeException("First index must be smaller than length"));
             a = actualLength + a;
         }
 
-        if (b < 0) {
-            if (actualLength < -b)
+        if(b < 0) {
+            if(actualLength < -b)
                 return ErrorInfo(RangeException("Second index must be smaller than length"));
             b = actualLength + b;
         }
 
-        if (b < a) {
+        if(b < a) {
             ptrdiff_t temp = a;
             a = b;
             b = temp;
         }
 
-        if (a > actualLength) {
-            if (a < ptrdiff_t.max)
+        if(a > actualLength) {
+            if(a < ptrdiff_t.max)
                 return ErrorInfo(RangeException("First offset must be smaller than length"));
             a = actualLength;
         }
-        if (b > actualLength) {
-            if (b < ptrdiff_t.max)
+        if(b > actualLength) {
+            if(b < ptrdiff_t.max)
                 return ErrorInfo(RangeException("Second offset must be smaller than length"));
             b = actualLength;
         }
@@ -1112,7 +1121,7 @@ unittest {
         int[] data = [4, 5, 6, 9, 22, 7, 13, 10000000];
         ptrdiff_t lastSeen = -1, seen;
 
-        foreach (i, v; DAint(data)) {
+        foreach(i, v; DAint(data)) {
             assert(lastSeen + 1 == i);
             assert(data[i] == v);
 
@@ -1123,7 +1132,7 @@ unittest {
 
         lastSeen = 8;
         seen = 0;
-        foreach_reverse (i, v; DAint(data)) {
+        foreach_reverse(i, v; DAint(data)) {
             assert(lastSeen - 1 == i);
             assert(data[i] == v);
 
@@ -1133,7 +1142,7 @@ unittest {
         assert(seen == data.length);
 
         seen = 0;
-        foreach (v; DAint(data)) {
+        foreach(v; DAint(data)) {
             assert(data[seen] == v);
             seen++;
         }
@@ -1158,9 +1167,9 @@ export @safe nothrow @nogc:
     void rcExternal(bool addRef) scope @trusted {
         import sidero.base.internal.atomic;
 
-        if (addRef)
+        if(addRef)
             atomicIncrementAndLoad(this.refCount, 1);
-        else if (atomicDecrementAndLoad(this.refCount, 1) == 0) {
+        else if(atomicDecrementAndLoad(this.refCount, 1) == 0) {
             sliceMemory.rcExternal(false);
 
             RCAllocator allocator = this.allocator;
@@ -1169,9 +1178,9 @@ export @safe nothrow @nogc:
     }
 
     void expand(size_t offset, size_t length, size_t newLength, bool adjustToNewSize = true) scope @trusted {
-        if (newLength <= this.slice.length)
+        if(newLength <= this.slice.length)
             return;
-        else if (length == size_t.max)
+        else if(length == size_t.max)
             length = this.slice.length;
 
         const resultingLengthT = this.sliceMemory.expand!ElementType(offset, length, newLength, adjustToNewSize);

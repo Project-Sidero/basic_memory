@@ -2,6 +2,9 @@ module sidero.base.text.ascii.readonly;
 import sidero.base.text;
 import sidero.base.allocators;
 import sidero.base.attributes : hidden;
+import sidero.base.containers.internal.slice;
+import sidero.base.containers.readonlyslice;
+import sidero.base.containers.dynamicarray;
 
 export:
 
@@ -13,7 +16,7 @@ struct String_ASCII {
         import sidero.base.internal.meta : OpApplyCombos;
         import sidero.base.internal.atomic;
 
-        LifeTime* lifeTime;
+        SliceMemory* lifeTime;
         Iterator* iterator;
 
         int opApplyImpl(Del)(scope Del del) @trusted scope {
@@ -132,7 +135,7 @@ nothrow @nogc:
     /// Makes no guarantee that the string is actually null terminated. Unsafe!!!
     const(ubyte)* ptr() @system {
         if(this.lifeTime !is null)
-            return this.lifeTime.original.ptr;
+            return cast(const(ubyte)*)this.lifeTime.original.ptr;
         else
             return this.literal.ptr;
     }
@@ -313,8 +316,8 @@ nothrow @nogc:
                     if(toDeallocate is null)
                         toDeallocate = literal;
 
-                    lifeTime = allocator.make!LifeTime(1, allocator, toDeallocate);
-                    assert(this.lifeTime !is null);
+                    lifeTime = allocator.make!SliceMemory;
+                    *lifeTime = SliceMemory.configureFor!ubyte(allocator, cast(void[])toDeallocate, toDeallocate.length);
                 }
             }
         }
@@ -324,10 +327,20 @@ nothrow @nogc:
             String_ASCII foobar = String_ASCII(cast(LiteralType)"Fds");
         }
 
+        this(return scope LiteralType literal, SliceMemory* sliceMemory) scope {
+            this.literal = literal;
+
+            if (sliceMemory !is null) {
+                this.lifeTime = sliceMemory;
+                sliceMemory.rcExternal(true);
+            }
+        }
+
         @disable this(return scope string literal, return scope RCAllocator allocator = RCAllocator.init,
                 return scope string toDeallocate = null) scope const;
         @disable this(return scope LiteralType literal, return scope RCAllocator allocator = RCAllocator.init,
                 return scope LiteralType toDeallocate = null) scope const;
+        @disable this(return scope LiteralType literal, SliceMemory* sliceMemory) scope const;
     }
 
     ~this() scope @trusted {
@@ -385,8 +398,9 @@ nothrow @nogc:
         else if(this.lifeTime is null)
             return this.literal[$ - 1] == '\0';
 
-        return this.lifeTime.original[$ - 1] == '\0' &&
-            ((this.lifeTime.original.ptr + this.lifeTime.original.length) - (this.literal.length + 1)) is this.literal.ptr;
+        const(ubyte)[] original = cast(const(ubyte)[])this.lifeTime.original;
+
+        return original[$ - 1] == '\0' && ((original.ptr + original.length) - (this.literal.length + 1)) is this.literal.ptr;
     }
 
     ///
@@ -441,6 +455,34 @@ nothrow @nogc:
     }
 
     ///
+    Slice!ubyte asSlice() scope @trusted {
+        return Slice!ubyte(cast(ubyte[])this.unsafeGetLiteral(), this.lifeTime);
+    }
+
+    ///
+    @trusted unittest {
+        Slice!ubyte slice1 = Slice!ubyte(cast(ubyte[])"Hello Mz. Hyde!");
+        String_ASCII str = slice1.asASCII;
+
+        Slice!ubyte slice2 = str.asSlice;
+        assert(slice2.length == 15);
+    }
+
+    ///
+    DynamicArray!ubyte asDynamic() scope @trusted {
+        return DynamicArray!ubyte(cast(ubyte[])this.unsafeGetLiteral(), this.lifeTime);
+    }
+
+    ///
+    @trusted unittest {
+        DynamicArray!ubyte slice1 = DynamicArray!ubyte(cast(ubyte[])"Hello Mz. Hyde!");
+        String_ASCII str = slice1.asASCII;
+
+        DynamicArray!ubyte slice2 = str.asDynamic;
+        assert(slice2.length == 15);
+    }
+
+    ///
     String_ASCII dup(RCAllocator allocator = RCAllocator.init) scope @trusted {
         if(isNull)
             return String_ASCII();
@@ -453,12 +495,12 @@ nothrow @nogc:
         }
 
         ubyte[] zliteral;
+        const(ubyte)[] original = this.lifeTime !is null ? cast(const(ubyte)[])this.lifeTime.original : null;
 
         if(this.literal[$ - 1] == '\0')
             zliteral = allocator.makeArray!ubyte(this.literal);
-        else if(this.lifeTime !is null && this.lifeTime.original.length >= this.literal.length &&
-                this.lifeTime.original[$ - 1] == '\0' &&
-                (this.lifeTime.original.ptr + this.lifeTime.original.length) - this.literal.length is this.literal.ptr)
+        else if(original.length >= this.literal.length && original[$ - 1] == '\0' &&
+                (original.ptr + original.length) - this.literal.length is this.literal.ptr)
             zliteral = allocator.makeArray!ubyte(cast(ubyte[])(this.literal.ptr[0 .. this.literal.length + 1]));
         else {
             zliteral = allocator.makeArray!ubyte(this.literal.length + 1);

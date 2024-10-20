@@ -128,6 +128,19 @@ export:
             v = *cast(T*)&input[i];
     }
 
+    this(return scope T[] input, SliceMemory* sliceMemory) scope {
+        if(sliceMemory is null) {
+            this.__ctor(input);
+        } else {
+            this._offset = 0;
+            this._length = size_t.max;
+            this.state.sliceMemory = sliceMemory;
+            this.state.slice = input;
+
+            sliceMemory.rcExternal(true);
+        }
+    }
+
     ///
     this(return scope ref Slice other) scope {
         this.tupleof = other.tupleof;
@@ -236,6 +249,22 @@ export:
         }
 
         return ret;
+    }
+
+    static if(is(T == ubyte)) {
+        ///
+        String_ASCII asASCII() scope @trusted {
+            if(this.isNull)
+                return String_ASCII.init;
+            return String_ASCII(this.unsafeGetLiteral(), this.state.sliceMemory);
+        }
+
+        ///
+        @trusted unittest {
+            Slice slice = Slice(cast(ubyte[])"Hello!");
+            String_ASCII str = slice.asASCII;
+            assert(!str.isNull);
+        }
     }
 
     ///
@@ -544,7 +573,6 @@ export:
 private:
 
     void ensureSetup(bool willModify, size_t amountNeeded = 0, RCAllocator allocator = RCAllocator.init) scope @trusted {
-        import sidero.base.allocators.utils : fillUninitializedWithInit;
         import sidero.base.internal.atomic;
 
         void createState() {
@@ -557,36 +585,7 @@ private:
 
         void createSliceMemory() {
             this.state.sliceMemory = allocator.make!SliceMemory;
-            this.state.sliceMemory.allocator = allocator;
-            atomicStore(this.state.sliceMemory.refCount, 1);
-
-            static void cleanup(void[] slice) @trusted {
-                T[] array = (cast(T*)slice.ptr)[0 .. slice.length / T.sizeof];
-
-                foreach(ref v; array) {
-                    v.destroy;
-                }
-            }
-
-            static void initElements(void[] slice) @trusted {
-                T[] array = (cast(T*)slice.ptr)[0 .. slice.length / T.sizeof];
-
-                fillUninitializedWithInit(array);
-            }
-
-            static void copyElements(void[] from, void[] into) @trusted {
-                T[] from2 = (cast(T*)from.ptr)[0 .. from.length / T.sizeof];
-                T[] into2 = (cast(T*)into.ptr)[0 .. into.length / T.sizeof];
-                assert(from2.length <= into2.length);
-
-                foreach(i; 0 .. from2.length) {
-                    into2[i] = from2[i];
-                }
-            }
-
-            this.state.sliceMemory.initElements = &initElements;
-            this.state.sliceMemory.cleanup = &cleanup;
-            this.state.sliceMemory.copyElements = &copyElements;
+            *this.state.sliceMemory = SliceMemory.configureFor!T(allocator);
         }
 
         if(this.state.sliceMemory is null) {
@@ -766,9 +765,9 @@ export @safe nothrow @nogc:
     }
 
     void expand(size_t offset, size_t length, size_t newLength, bool adjustToNewSize = true) scope @trusted {
-        if (newLength <= this.slice.length)
+        if(newLength <= this.slice.length)
             return;
-        else if (length == size_t.max)
+        else if(length == size_t.max)
             length = this.slice.length;
 
         const resultingLengthT = this.sliceMemory.expand!ElementType(offset, length, newLength, adjustToNewSize);
