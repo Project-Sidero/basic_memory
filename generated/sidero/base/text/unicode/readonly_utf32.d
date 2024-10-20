@@ -8,6 +8,9 @@ import sidero.base.errors;
 import sidero.base.traits : isUTFReadOnly;
 import sidero.base.attributes : hidden;
 import sidero.base.internal.atomic;
+import sidero.base.containers.internal.slice;
+import sidero.base.containers.readonlyslice;
+import sidero.base.containers.dynamicarray;
 
 export:
 
@@ -18,20 +21,8 @@ struct String_UTF32 {
         UnicodeEncoding literalEncoding;
         UnicodeLanguage language;
 
-        LifeTime* lifeTime;
+        SliceMemory* lifeTime;
         Iterator* iterator;
-
-        static struct LifeTime {
-            shared(ptrdiff_t) refCount;
-            RCAllocator allocator;
-            const(void)[] original;
-
-            export ulong toHash() const @safe nothrow {
-                assert(0);
-            }
-
-            @disable bool opEquals(ref const LifeTime other) const;
-        }
 
         static struct Iterator {
             shared(ptrdiff_t) refCount;
@@ -310,8 +301,9 @@ nothrow @nogc:
 
         ret.lifeTime = this.lifeTime;
         ret.literalEncoding = this.literalEncoding;
+
         if(ret.lifeTime !is null)
-            atomicIncrementAndLoad(ret.lifeTime.refCount, 1);
+            ret.lifeTime.rcExternal(true);
 
         ret.literal = this.literal;
         ret.setupIterator();
@@ -342,8 +334,9 @@ nothrow @nogc:
 
         ret.lifeTime = this.lifeTime;
         ret.literalEncoding = this.literalEncoding;
+
         if(ret.lifeTime !is null)
-            atomicIncrementAndLoad(ret.lifeTime.refCount, 1);
+            ret.lifeTime.rcExternal(true);
 
         literalEncoding.handle(() @trusted {
             auto actual = cast(const(char)[])this.literal;
@@ -392,8 +385,8 @@ nothrow @nogc:
         ret.literalEncoding = this.literalEncoding;
         ret.lifeTime = this.lifeTime;
 
-        if(this.lifeTime !is null)
-            atomicIncrementAndLoad(ret.lifeTime.refCount, 1);
+        if(ret.lifeTime !is null)
+            ret.lifeTime.rcExternal(true);
 
         return ret;
     }
@@ -461,7 +454,7 @@ nothrow @nogc:
             this.iterator.rc(true);
 
         if(this.lifeTime !is null)
-            atomicIncrementAndLoad(this.lifeTime.refCount, 1);
+            this.lifeTime.rcExternal(true);
     }
 
     ///
@@ -493,6 +486,8 @@ nothrow @nogc:
 
         private void initForLiteral(T, U)(return scope T input, return scope RCAllocator allocator, return scope U toDeallocate,
                 UnicodeLanguage language) {
+            import sidero.base.traits : Unqual;
+
             if(input.length > 0 || (toDeallocate.length > 0 && !allocator.isNull)) {
                 version(D_BetterC) {
                 } else {
@@ -505,7 +500,7 @@ nothrow @nogc:
                     }
                 }
 
-                alias InputChar = typeof(T.init[0]);
+                alias InputChar = Unqual!(typeof(T.init[0]));
 
                 this.literal = input;
                 assert(input.length * InputChar.sizeof == this.literal.length);
@@ -517,8 +512,8 @@ nothrow @nogc:
                     if(toDeallocate is null)
                         toDeallocate = input;
 
-                    lifeTime = allocator.make!LifeTime(1, allocator, toDeallocate);
-                    assert(this.lifeTime !is null);
+                    lifeTime = allocator.make!SliceMemory;
+                    *lifeTime= SliceMemory.configureFor!InputChar(allocator, cast(void[])toDeallocate, toDeallocate.length * InputChar.sizeof);
                 }
             }
         }
@@ -530,10 +525,9 @@ nothrow @nogc:
                 this.iterator.rc(false);
             }
 
-            if(this.lifeTime !is null && atomicDecrementAndLoad(lifeTime.refCount, 1) == 0) {
-                RCAllocator allocator = lifeTime.allocator;
-                allocator.dispose(cast(void[])lifeTime.original);
-                allocator.dispose(lifeTime);
+            size_t[4] _=void; // for some reason dmd needs this???
+            if(this.lifeTime !is null) {
+                this.lifeTime.rcExternal(false);
             }
         }
     }
@@ -1384,13 +1378,13 @@ nothrow @nogc:
     ///
     String_UTF8 byUTF8() return scope @trusted {
         String_UTF8 ret;
-        ret.lifeTime = cast(String_UTF8.LifeTime*)this.lifeTime;
+        ret.lifeTime = this.lifeTime;
         ret.literal = this.literal;
         ret.literalEncoding = this.literalEncoding;
         ret.language = this.language;
 
-        if(this.lifeTime !is null)
-            atomicIncrementAndLoad(this.lifeTime.refCount, 1);
+        if(ret.lifeTime !is null)
+            ret.lifeTime.rcExternal(true);
 
         if(this.iterator !is null) {
             ret.setupIterator;
@@ -1426,13 +1420,13 @@ nothrow @nogc:
     ///
     String_UTF16 byUTF16() return scope @trusted {
         String_UTF16 ret;
-        ret.lifeTime = cast(String_UTF16.LifeTime*)this.lifeTime;
+        ret.lifeTime = this.lifeTime;
         ret.literal = this.literal;
         ret.literalEncoding = this.literalEncoding;
         ret.language = this.language;
 
-        if(this.lifeTime !is null)
-            atomicIncrementAndLoad(this.lifeTime.refCount, 1);
+        if(ret.lifeTime !is null)
+            ret.lifeTime.rcExternal(true);
 
         if(this.iterator !is null) {
             ret.setupIterator;
@@ -1468,13 +1462,13 @@ nothrow @nogc:
     ///
     String_UTF32 byUTF32() return scope @trusted {
         String_UTF32 ret;
-        ret.lifeTime = cast(String_UTF32.LifeTime*)this.lifeTime;
+        ret.lifeTime = this.lifeTime;
         ret.literal = this.literal;
         ret.literalEncoding = this.literalEncoding;
         ret.language = this.language;
 
-        if(this.lifeTime !is null)
-            atomicIncrementAndLoad(this.lifeTime.refCount, 1);
+        if(ret.lifeTime !is null)
+            ret.lifeTime.rcExternal(true);
 
         if(this.iterator !is null) {
             ret.setupIterator;
@@ -3009,7 +3003,7 @@ package(sidero.base.text) @hidden:
                 other = other[0 .. $ - 1];
             if(isNull)
                 return other.length > 0 ? -1 : 0;
-            else if (other.ptr is this.literal.ptr && other.length == this.literal.length)
+            else if(other.ptr is this.literal.ptr && other.length == this.literal.length)
                 return 0;
 
             int matches(Type)(Type us) {

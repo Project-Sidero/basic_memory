@@ -28,6 +28,9 @@ export @safe nothrow @nogc:
         this.tupleof = other.tupleof;
     }
 
+    ~this() scope {
+    }
+
     ///
     void opAssign(return scope NetworkAddress other) scope {
         this.destroy;

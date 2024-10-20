@@ -18,9 +18,9 @@ export @safe nothrow @nogc:
     void rcExternal(bool addRef) scope @trusted {
         import sidero.base.internal.atomic;
 
-        if (addRef)
+        if (addRef) {
             atomicIncrementAndLoad(this.refCount, 1);
-        else if (atomicDecrementAndLoad(this.refCount, 1) == 0) {
+        } else if (atomicDecrementAndLoad(this.refCount, 1) == 0) {
             RCAllocator allocator = this.allocator;
 
             if (this.cleanup !is null)
@@ -42,7 +42,9 @@ export @safe nothrow @nogc:
             if (oldSize == 0) {
                 this.original = this.allocator.allocate(newSize);
                 this.initElements(this.original);
-            } else if (!this.allocator.reallocate(this.original, newSize)) {
+            } else if (this.allocator.reallocate(this.original, newSize)) {
+                this.initElements(this.original[oldSize .. $]);
+            } else {
                 void[] temp = this.allocator.allocate(newSize);
                 this.initElements(temp);
 

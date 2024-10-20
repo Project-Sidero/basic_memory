@@ -175,13 +175,14 @@ nothrow @nogc:
 
         ret.lifeTime = this.lifeTime;
         if(ret.lifeTime !is null)
-            atomicIncrementAndLoad(ret.lifeTime.refCount, 1);
+            ret.lifeTime.rcExternal(true);
 
         if(this.iterator !is null)
             ret.literal = this.iterator.literal;
         else
             ret.literal = this.literal;
 
+        ret.iterator = null;
         ret.setupIterator();
         return ret;
     }
@@ -211,7 +212,7 @@ nothrow @nogc:
 
         ret.lifeTime = this.lifeTime;
         if(ret.lifeTime !is null)
-            atomicIncrementAndLoad(ret.lifeTime.refCount, 1);
+            ret.lifeTime.rcExternal(true);
 
         ret.literal = this.literal[start .. end];
         return ret;
@@ -230,9 +231,10 @@ nothrow @nogc:
         String_ASCII ret;
         ret.literal = this.literal;
         ret.lifeTime = this.lifeTime;
+        ret.iterator = null;
 
-        if(this.lifeTime !is null)
-            atomicIncrementAndLoad(ret.lifeTime.refCount, 1);
+        if(ret.lifeTime !is null)
+            ret.lifeTime.rcExternal(true);
 
         return ret;
     }
@@ -269,7 +271,6 @@ nothrow @nogc:
 
     ///
     void opAssign(return scope typeof(this) other) scope @trusted {
-        this.destroy;
         this.__ctor(other);
     }
 
@@ -284,7 +285,7 @@ nothrow @nogc:
         if(haveIterator)
             this.iterator.rc(true);
         if(this.lifeTime !is null)
-            atomicIncrementAndLoad(this.lifeTime.refCount, 1);
+            this.lifeTime.rcExternal(true);
     }
 
     ///
@@ -309,16 +310,15 @@ nothrow @nogc:
         ///
         this(return scope LiteralType literal, return scope RCAllocator allocator = RCAllocator.init,
                 return scope LiteralType toDeallocate = null) scope {
-            if(literal.length > 0 || (toDeallocate.length > 0 && !allocator.isNull)) {
-                this.literal = literal;
+            this.literal = literal;
+            this.iterator = null;
 
-                if(!allocator.isNull) {
-                    if(toDeallocate is null)
-                        toDeallocate = literal;
+            if(!allocator.isNull) {
+                if(toDeallocate is null)
+                    toDeallocate = literal;
 
-                    lifeTime = allocator.make!SliceMemory;
-                    *lifeTime = SliceMemory.configureFor!ubyte(allocator, cast(void[])toDeallocate, toDeallocate.length);
-                }
+                lifeTime = allocator.make!SliceMemory;
+                *lifeTime = SliceMemory.configureFor!ubyte(allocator, cast(void[])toDeallocate, toDeallocate.length);
             }
         }
 
@@ -329,8 +329,9 @@ nothrow @nogc:
 
         this(return scope LiteralType literal, SliceMemory* sliceMemory) scope {
             this.literal = literal;
+            this.iterator = null;
 
-            if (sliceMemory !is null) {
+            if(sliceMemory !is null) {
                 this.lifeTime = sliceMemory;
                 sliceMemory.rcExternal(true);
             }
@@ -347,11 +348,8 @@ nothrow @nogc:
         if(haveIterator)
             this.iterator.rc(false);
 
-        if(this.lifeTime !is null && atomicDecrementAndLoad(lifeTime.refCount, 1) == 0) {
-            RCAllocator allocator = lifeTime.allocator;
-            allocator.dispose(cast(void[])lifeTime.original);
-            allocator.dispose(lifeTime);
-        }
+        if (this.lifeTime !is null)
+            this.lifeTime.rcExternal(false);
     }
 
     ///

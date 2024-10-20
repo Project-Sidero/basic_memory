@@ -685,7 +685,7 @@ export @safe nothrow @nogc:
                     builder ~= "]"c;
                 } else {
                     builder ~= "=0x["c;
-                    auto temp = cast()input;
+                    auto temp = cast()input[];
 
                     while (temp.length > 0) {
                         builder.formattedWrite("{:.2X}", *cast(const(ubyte)*)&temp[0]);
@@ -725,7 +725,7 @@ export @safe nothrow @nogc:
                 builder ~= "]"c;
             } else {
                 builder ~= "=0x"c;
-                auto temp = cast()input;
+                auto temp = cast()input[];
 
                 while (temp.length > 0) {
                     builder.formattedWrite("{:.2X}", *cast(const(ubyte)*)&temp[0]);

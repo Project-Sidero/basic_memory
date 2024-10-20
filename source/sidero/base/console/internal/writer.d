@@ -74,7 +74,9 @@ void handleOneWrite(Type)(scope ref Writer writer, size_t argumentId, scope ref 
 
                 rawWriteImpl(builder, writer.useErrorStream);
             } else {
-                static if (isReadOnlyString!Type || isBuilderString!Type) {
+                static if (isASCII!Type) {
+                    rawWriteImpl(arg, writer.useErrorStream);
+                } else static if (isReadOnlyString!Type || isBuilderString!Type) {
                     auto temp = arg.byUTF8;
                     rawWriteImpl(temp, writer.useErrorStream);
                 } else {
