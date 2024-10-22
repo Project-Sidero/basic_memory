@@ -513,19 +513,53 @@ nothrow @nogc:
                         toDeallocate = input;
 
                     lifeTime = allocator.make!SliceMemory;
-                    *lifeTime= SliceMemory.configureFor!InputChar(allocator, cast(void[])toDeallocate, toDeallocate.length * InputChar.sizeof);
+                    *lifeTime = SliceMemory.configureFor!InputChar(allocator, cast(void[])toDeallocate,
+                            toDeallocate.length * InputChar.sizeof);
                 }
+            }
+        }
+
+        this(return scope const(char)[] literal, SliceMemory* sliceMemory) scope {
+            this.literal = literal;
+            this.literalEncoding = UnicodeEncoding.For!char;
+            this.iterator = null;
+
+            if(sliceMemory !is null) {
+                this.lifeTime = sliceMemory;
+                sliceMemory.rcExternal(true);
+            }
+        }
+
+        this(return scope const(wchar)[] literal, SliceMemory* sliceMemory) scope {
+            this.literal = literal;
+            this.literalEncoding = UnicodeEncoding.For!wchar;
+            this.iterator = null;
+
+            if(sliceMemory !is null) {
+                this.lifeTime = sliceMemory;
+                sliceMemory.rcExternal(true);
+            }
+        }
+
+        this(return scope const(dchar)[] literal, SliceMemory* sliceMemory) scope {
+            this.literal = literal;
+            this.literalEncoding = UnicodeEncoding.For!dchar;
+            this.iterator = null;
+
+            if(sliceMemory !is null) {
+                this.lifeTime = sliceMemory;
+                sliceMemory.rcExternal(true);
             }
         }
 
         ///
         ~this() {
             if(haveIterator) {
-                assert(this.iterator !is null);
+                //assert(this.iterator !is null);
                 this.iterator.rc(false);
             }
 
-            size_t[4] _=void; // for some reason dmd needs this???
+            size_t[4] _ = void; // for some reason dmd needs this???
             if(this.lifeTime !is null) {
                 this.lifeTime.rcExternal(false);
             }
@@ -758,6 +792,89 @@ nothrow @nogc:
 
         auto got = typeof(this)(Text).asMutable();
         assert(got.length == Text.length);
+    }
+
+    ///
+    Slice!Char asSlice() scope {
+        return literalEncoding.handle(() @trusted {
+            auto actual = cast(char[])this.literal[0 .. this.length];
+
+            static if(is(Char == char))
+                return Slice!char(actual, this.lifeTime);
+            else
+                return this.dup.asSlice;
+        }, () @trusted {
+            auto actual = (cast(wchar[])this.literal)[0 .. this.length];
+
+            static if(is(Char == wchar))
+                return Slice!wchar(actual, this.lifeTime);
+            else
+                return this.dup.asSlice;
+        }, () @trusted {
+            auto actual = (cast(dchar[])this.literal)[0 .. this.length];
+
+            static if(is(Char == dchar))
+                return Slice!dchar(actual, this.lifeTime);
+            else
+                return this.dup.asSlice;
+        });
+    }
+
+    ///
+    unittest {
+        Slice!Char slice1 = Slice!Char("Hello Mz. Hyde!");
+        typeof(this) str = slice1.asUTF;
+
+        Slice!Char slice2 = str.asSlice;
+        assert(slice2.length == 15);
+    }
+
+    ///
+    DynamicArray!Char asDynamic() scope {
+        return literalEncoding.handle(() @trusted {
+            auto actual = cast(char[])this.literal[0 .. this.length];
+
+            static if(is(Char == char))
+                return DynamicArray!char(actual, this.lifeTime);
+            else
+                return this.dup.asDynamic;
+        }, () @trusted {
+            auto actual = (cast(wchar[])this.literal)[0 .. this.length];
+
+            static if(is(Char == wchar))
+                return DynamicArray!wchar(actual, this.lifeTime);
+            else
+                return this.dup.asDynamic;
+        }, () @trusted {
+            auto actual = (cast(dchar[])this.literal)[0 .. this.length];
+
+            static if(is(Char == dchar))
+                return DynamicArray!dchar(actual, this.lifeTime);
+            else
+                return this.dup.asDynamic;
+        });
+    }
+
+    ///
+    @trusted unittest {
+        DynamicArray!Char slice1 = DynamicArray!Char(cast(Char[])"Hello Mz. Hyde!");
+        typeof(this) str = slice1.asUTF;
+
+        DynamicArray!Char slice2 = str.asDynamic;
+        assert(slice2.length == 15);
+    }
+
+    ///
+    String_ASCII asASCII() scope @system {
+        auto temp = this.byUTF8().asSlice().asUTF;
+        return String_ASCII(cast(const(ubyte)[])temp.unsafeGetLiteral(), temp.lifeTime);
+    }
+
+    ///
+    @trusted unittest {
+        typeof(this) slice = typeof(this)(cast(Char[])"Hello Mz. Hyde!");
+        String_ASCII ascii = slice.asASCII;
+        assert(ascii.length == 15);
     }
 
     ///

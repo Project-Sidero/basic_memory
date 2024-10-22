@@ -481,6 +481,18 @@ nothrow @nogc:
     }
 
     ///
+    String_UTF8 asUTF() scope @trusted {
+        return String_UTF8(cast(char[])this.unsafeGetLiteral(), this.lifeTime);
+    }
+
+    ///
+    @trusted unittest {
+        String_ASCII ascii = String_ASCII("Hello Mz. Hyde!");
+        String_UTF8 utf = ascii.asUTF;
+        assert(utf.length == ascii.length);
+    }
+
+    ///
     String_ASCII dup(RCAllocator allocator = RCAllocator.init) scope @trusted {
         if(isNull)
             return String_ASCII();

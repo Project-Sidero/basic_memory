@@ -265,6 +265,45 @@ export:
             String_ASCII str = slice.asASCII;
             assert(!str.isNull);
         }
+    } else static if(is(T == char)) {
+        String_UTF8 asUTF() scope @trusted {
+            if(this.isNull)
+                return String_UTF8.init;
+            return String_UTF8(this.unsafeGetLiteral(), this.state.sliceMemory);
+        }
+
+        ///
+        @trusted unittest {
+            Slice slice = Slice("Hello!"c);
+            String_UTF8 str = slice.asUTF;
+            assert(!str.isNull);
+        }
+    } else static if(is(T == wchar)) {
+        String_UTF16 asUTF() scope @trusted {
+            if(this.isNull)
+                return String_UTF16.init;
+            return String_UTF16(this.unsafeGetLiteral(), this.state.sliceMemory);
+        }
+
+        ///
+        @trusted unittest {
+            Slice slice = Slice("Hello!"w);
+            String_UTF16 str = slice.asUTF;
+            assert(!str.isNull);
+        }
+    } else static if(is(T == dchar)) {
+        String_UTF32 asUTF() scope @trusted {
+            if(this.isNull)
+                return String_UTF32.init;
+            return String_UTF32(this.unsafeGetLiteral(), this.state.sliceMemory);
+        }
+
+        ///
+        @trusted unittest {
+            Slice slice = Slice("Hello!"d);
+            String_UTF32 str = slice.asUTF;
+            assert(!str.isNull);
+        }
     }
 
     ///
