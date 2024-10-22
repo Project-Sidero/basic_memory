@@ -38,7 +38,8 @@
                 "Ws2_32",
                 "advapi32",
                 "Userenv",
-                "Netapi32"
+                "Netapi32",
+                "mincore"
             ],
             "versions": [
                 "Windows7"
