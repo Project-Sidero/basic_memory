@@ -1068,32 +1068,25 @@ export immutable(SpecialCasing) sidero_utf_lut_getSpecialCasingTurkic(dchar inpu
 }
 
 /// Get the Line break class
-export extern(C) immutable(LineBreakClass) sidero_utf_lut_getLineBreakClass(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) LineBreakClass sidero_utf_lut_getLineBreakClass(dchar against) @safe nothrow @nogc pure;
 
 /// Is member of Emoji class?
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfEmoji(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isMemberOfEmoji(dchar against) @safe nothrow @nogc pure;
 
 /// Is member of Emoji_Presentation class?
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfEmoji_Presentation(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isMemberOfEmoji_Presentation(dchar against) @safe nothrow @nogc pure;
 
 /// Is member of Emoji_Modifier class?
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfEmoji_Modifier(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isMemberOfEmoji_Modifier(dchar against) @safe nothrow @nogc pure;
 
 /// Is member of Emoji_Modifier_Base class?
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfEmoji_Modifier_Base(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isMemberOfEmoji_Modifier_Base(dchar against) @safe nothrow @nogc pure;
 
 /// Is member of Emoji_Component class?
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfEmoji_Component(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isMemberOfEmoji_Component(dchar against) @safe nothrow @nogc pure;
 
 /// Is member of Extended_Pictographic class?
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfExtended_Pictographic(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isMemberOfExtended_Pictographic(dchar against) @safe nothrow @nogc pure;
 
 /// Get the Script for a character
 export extern(C) immutable(Script) sidero_utf_lut_getScript(dchar input) @trusted nothrow @nogc pure;

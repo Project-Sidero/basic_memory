@@ -17,33 +17,9 @@ void emojiData() {
 
     static foreach(Em; __traits(allMembers, EmojiClass)) {
         {
-            SequentialRanges!(bool, SequentialRangeSplitGroup, 2) sr;
-
-            foreach (range; state.values[__traits(getMember, EmojiClass, Em)]) {
-                foreach (c; range.start .. range.end + 1)
-                    sr.add(c, true);
-            }
-
-            sr.splitForSame;
-            sr.calculateTrueSpread;
-            sr.joinWithDiff(null, 64);
-            sr.calculateTrueSpread;
-            sr.layerByRangeMax(0, ushort.max / 4);
-            sr.layerByRangeMax(1, ushort.max / 2);
-
-            LookupTableGenerator!(bool, SequentialRangeSplitGroup, 2) lut;
-            lut.sr = sr;
-            lut.lutType = "bool";
-            lut.name = "sidero_utf_lut_isMemberOf" ~ Em;
-
-            auto gotDcode = lut.build();
-
             api ~= "\n";
             api ~= "/// Is member of " ~ Em ~ " class?\n";
-            api ~= gotDcode[0];
-            api ~= "\n";
-
-            internal ~= gotDcode[1];
+            generateIsCheck(api, internal, "sidero_utf_lut_isMemberOf" ~ Em, state.values[__traits(getMember, EmojiClass, Em)]);
         }
     }
 
@@ -53,8 +29,8 @@ void emojiData() {
 
 private:
 import std.array : appender;
-import utilities.sequential_ranges;
-import utilities.lut;
+import utilities.sequential_ranges : ValueRange;
+import utilities.inverselist;
 
 void processEachLine(string inputText, ref TotalState state) {
     import std.algorithm : countUntil, splitter;
@@ -65,7 +41,7 @@ void processEachLine(string inputText, ref TotalState state) {
         ValueRange!dchar ret;
 
         ptrdiff_t offsetOfSeperator = charRangeStr.countUntil("..");
-        if (offsetOfSeperator < 0) {
+        if(offsetOfSeperator < 0) {
             ret.start = parse!uint(charRangeStr, 16);
             ret.end = ret.start;
         } else {
@@ -81,15 +57,23 @@ void processEachLine(string inputText, ref TotalState state) {
         ptrdiff_t offset;
 
         offset = line.countUntil('#');
-        if (offset >= 0)
+        if(offset >= 0)
             line = line[0 .. offset];
         line = line.strip;
 
     SLB:
-        switch (line) {
-            static foreach (m; __traits(allMembers, EmojiClass)) {
+        switch(line) {
+            static foreach(m; __traits(allMembers, EmojiClass)) {
         case m:
-                state.values[__traits(getMember, EmojiClass, m)] ~= range;
+                enum property = __traits(getMember, EmojiClass, m);
+                if(state.values[property].length == 0)
+                    state.values[property] ~= range;
+                else {
+                    if(range.start == state.values[property][$ - 1].end + 1)
+                        state.values[property][$ - 1].end = range.end;
+                    else
+                        state.values[property] ~= range;
+                }
                 break SLB;
             }
 
@@ -98,19 +82,19 @@ void processEachLine(string inputText, ref TotalState state) {
         }
     }
 
-    foreach (line; inputText.lineSplitter) {
+    foreach(line; inputText.lineSplitter) {
         ptrdiff_t offset;
 
         offset = line.countUntil('#');
-        if (offset >= 0)
+        if(offset >= 0)
             line = line[0 .. offset];
         line = line.strip;
 
-        if (line.length < 5) // anything that low can't represent a functional line
+        if(line.length < 5) // anything that low can't represent a functional line
             continue;
 
         offset = line.countUntil(';');
-        if (offset < 0) // no char range
+        if(offset < 0) // no char range
             continue;
         string charRangeStr = line[0 .. offset].strip;
         line = line[offset + 1 .. $].strip;

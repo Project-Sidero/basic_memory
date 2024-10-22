@@ -16,34 +16,14 @@ void lineBreak() {
     auto api = appender!string();
 
     {
-        SequentialRanges!(ubyte, SequentialRangeSplitGroup, 2) sr;
-
-        foreach (range, value; state.values) {
-            foreach (c; range.start .. range.end + 1)
-                sr.add(c, cast(ubyte)value);
-        }
-
-        sr.splitForSame;
-        sr.calculateTrueSpread;
-        sr.joinWithDiff(null, 64);
-        sr.calculateTrueSpread;
-        sr.layerByRangeMax(0, ushort.max / 4);
-        sr.layerByRangeMax(1, ushort.max / 2);
-
-        LookupTableGenerator!(ubyte, SequentialRangeSplitGroup, 2) lut;
-        lut.sr = sr;
-        lut.lutType = "ubyte";
-        lut.externType = "LineBreakClass";
-        lut.name = "sidero_utf_lut_getLineBreakClass";
-
-        auto gotDcode = lut.build();
-
         api ~= "\n";
         api ~= "/// Get the Line break class\n";
-        api ~= gotDcode[0];
-        api ~= "\n";
 
-        internal ~= gotDcode[1];
+        dchar[] ranges;
+        ubyte[] values;
+        seqEntries(ranges, values, state.pairs);
+
+        generateReturn(api, internal, "sidero_utf_lut_getLineBreakClass", ranges, values, "LineBreakClass");
     }
 
     append(UnicodeAPIFile, api.data);
@@ -53,7 +33,7 @@ void lineBreak() {
 private:
 import std.array : appender;
 import utilities.sequential_ranges;
-import utilities.lut;
+import utilities.inverselist;
 
 void processEachLine(string inputText, ref TotalState state) {
     import std.algorithm : countUntil, splitter;
@@ -88,7 +68,7 @@ void processEachLine(string inputText, ref TotalState state) {
         switch (line) {
             static foreach (m; __traits(allMembers, LineBreak)) {
         case m:
-                state.values[range] = __traits(getMember, LineBreak, m);
+                state.pairs ~= Pair(range, __traits(getMember, LineBreak, m));
                 break SLB;
             }
 
@@ -120,10 +100,15 @@ void processEachLine(string inputText, ref TotalState state) {
 }
 
 struct TotalState {
-    LineBreak[ValueRange!dchar] values;
+    Pair[] pairs;
 }
 
-enum LineBreak {
+struct Pair {
+    ValueRange!dchar range;
+    LineBreak lineBreak;
+}
+
+enum LineBreak : ubyte {
     XX, ///
     BK, ///
     CR, ///
@@ -172,4 +157,20 @@ enum LineBreak {
     AS, ///
     VF, ///
     AP, ///
+}
+
+void seqEntries(out dchar[] ranges, out ubyte[] lineBreaks, Pair[] entries) {
+    import std.algorithm : sort;
+
+    sort!"a.range.start < b.range.start"(entries);
+
+    ranges.reserve(entries.length);
+    lineBreaks.reserve(entries.length);
+
+    foreach(v; entries) {
+        foreach(c; v.range.start .. v.range.end + 1) {
+            ranges ~= c;
+            lineBreaks ~= cast(ubyte)v.lineBreak;
+        }
+    }
 }

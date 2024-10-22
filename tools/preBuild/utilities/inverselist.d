@@ -69,8 +69,8 @@ void generateReturn(ref Appender!string interfaceAppender, ref Appender!string i
 }
 
 void generateReturn(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
-        string functionName, dchar[] ranges, ubyte[] returnValues) {
-    generateIntegerReturn!(ubyte, 2)(interfaceAppender, implementationAppender, functionName, ranges, returnValues);
+        string functionName, dchar[] ranges, ubyte[] returnValues, string returnTypeName) {
+    generateIntegerReturn!(ubyte, 2)(interfaceAppender, implementationAppender, functionName, ranges, returnValues, returnTypeName);
 }
 
 void generateReturn(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
@@ -383,11 +383,11 @@ void generateIntegerReturn(Type, uint SizeToPrint)(ref Appender!string interface
     }
 }
 
-void generateIntegerReturn(Type, uint SizeToPrint)(ref Appender!string interfaceAppender,
-        ref Appender!string implementationAppender, string functionName, dchar[] ranges, Type[] returnValues) {
+void generateIntegerReturn(Type, uint SizeToPrint)(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
+        string functionName, dchar[] ranges, Type[] returnValues, string returnTypeName = Type.stringof) {
     {
         interfaceAppender ~= "export extern(C) ";
-        interfaceAppender ~= Type.stringof;
+        interfaceAppender ~= returnTypeName;
         interfaceAppender ~= " ";
         interfaceAppender ~= functionName;
         interfaceAppender ~= "(dchar against) @safe nothrow @nogc pure;\n";
