@@ -2,7 +2,7 @@
     "authors": [
         "Richard (Rikki) Andrew Cattermole"
     ],
-    "copyright": "Copyright © 2022, Richard Cattermole",
+    "copyright": "Copyright © 2022-2024, Richard Cattermole",
     "description": "Basic memory handling for -betterC and beyond.",
     "license": "Artistic-2.0",
     "name": "sidero_base",
