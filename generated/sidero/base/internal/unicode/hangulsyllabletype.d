@@ -35,14 +35,17 @@ export extern(C) bool sidero_utf_lut_isHangulSyllable(dchar against) @trusted no
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 export extern(C) immutable(void[]) sidero_utf_lut_hangulSyllables2(HangulSyllableType type) @safe nothrow @nogc pure {
     final switch(type) {

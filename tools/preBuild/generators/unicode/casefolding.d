@@ -14,151 +14,54 @@ void caseFolding() {
 
     auto api = appender!string();
 
+
+    dchar[] codepoints, replacedBysDchar;
+    dstring[] replacedBys;
+    uint[] replacedByUints;
+
     {
-        SequentialRanges!(dstring, SequentialRangeSplitGroup, 2) sr;
-
-        foreach (entry; state.common)
-            sr.add(entry.codepoint, entry.replacedBy);
-        foreach (entry; state.full)
-            sr.add(entry.codepoint, entry.replacedBy);
-
-        sr.splitForSame;
-        sr.calculateTrueSpread;
-        sr.joinWhenClose((dchar codepoint) @trusted => cast(dstring)[codepoint]);
-        sr.calculateTrueSpread;
-        sr.layerByRangeMax(0, ushort.max / 4);
-        sr.layerByRangeMax(1, ushort.max / 2);
-
-        LookupTableGenerator!(dstring, SequentialRangeSplitGroup, 2) lut;
-        lut.sr = sr;
-        lut.lutType = "dstring";
-        lut.name = "sidero_utf_lut_getCaseFolding";
-
-        auto gotDcode = lut.build();
-
         api ~= "\n";
         api ~= "/// Lookup Casefolding for character.\n";
         api ~= "/// Returns: null if unchanged.\n";
-        api ~= gotDcode[0];
 
-        internal ~= gotDcode[1];
+        joinEntries(codepoints, replacedBys, state.common, state.full);
+        generateReturn(api, internal, "sidero_utf_lut_getCaseFolding", codepoints, replacedBys);
     }
 
     {
-        SequentialRanges!(dstring, SequentialRangeSplitGroup, 2) sr;
-
-        foreach (entry; state.turkic)
-            sr.add(entry.codepoint, entry.replacedBy);
-
-        sr.splitForSame;
-        sr.calculateTrueSpread;
-        sr.joinWhenClose((dchar codepoint) @trusted => cast(dstring)[codepoint]);
-        sr.calculateTrueSpread;
-        sr.layerByRangeMax(0, ushort.max / 4);
-        sr.layerByRangeMax(1, ushort.max / 2);
-
-        LookupTableGenerator!(dstring, SequentialRangeSplitGroup, 2) lut;
-        lut.sr = sr;
-        lut.lutType = "dstring";
-        lut.name = "sidero_utf_lut_getCaseFoldingTurkic";
-
-        auto gotDcode = lut.build();
-
         api ~= "\n";
         api ~= "/// Lookup Casefolding for character.\n";
         api ~= "/// Returns: null if unchanged.\n";
-        api ~= gotDcode[0];
 
-        internal ~= gotDcode[1];
+        joinEntries(codepoints, replacedBys, state.turkic);
+        generateReturn(api, internal, "sidero_utf_lut_getCaseFoldingTurkic", codepoints, replacedBys);
     }
 
     {
-        SequentialRanges!(dchar, SequentialRangeSplitGroup, 2) sr;
-
-        foreach (entry; state.common)
-            sr.add(entry.codepoint, entry.replacedBy[0]);
-        foreach (entry; state.simple)
-            sr.add(entry.codepoint, entry.replacedBy[0]);
-
-        sr.splitForSame;
-        sr.calculateTrueSpread;
-        sr.joinWhenClose((dchar codepoint) => codepoint);
-        sr.calculateTrueSpread;
-        sr.layerByRangeMax(0, ushort.max / 4);
-        sr.layerByRangeMax(1, ushort.max / 2);
-
-        LookupTableGenerator!(dchar, SequentialRangeSplitGroup, 2) lut;
-        lut.sr = sr;
-        lut.lutType = "dchar";
-        lut.name = "sidero_utf_lut_getCaseFoldingFast";
-        lut.defaultReturn = "input";
-
-        auto gotDcode = lut.build();
-
         api ~= "\n";
         api ~= "/// Lookup Casefolding (simple) for character.\n";
         api ~= "/// Returns: The casefolded character.\n";
-        api ~= gotDcode[0];
 
-        internal ~= gotDcode[1];
+        joinEntries(codepoints, replacedBysDchar, state.common, state.simple);
+        generateReturn(api, internal, "sidero_utf_lut_getCaseFoldingFast", codepoints, replacedBysDchar);
     }
 
     {
-        SequentialRanges!(size_t, SequentialRangeSplitGroup, 2) sr;
-
-        foreach (entry; state.common)
-            sr.add(entry.codepoint, entry.replacedBy.length);
-        foreach (entry; state.full)
-            sr.add(entry.codepoint, entry.replacedBy.length);
-
-        sr.splitForSame;
-        sr.calculateTrueSpread;
-        sr.joinWhenClose((dchar codepoint) => cast(size_t)1);
-        sr.calculateTrueSpread;
-        sr.layerByRangeMax(0, ushort.max / 4);
-        sr.layerByRangeMax(1, ushort.max / 2);
-
-        LookupTableGenerator!(size_t, SequentialRangeSplitGroup, 2) lut;
-        lut.sr = sr;
-        lut.lutType = "size_t";
-        lut.name = "sidero_utf_lut_lengthOfCaseFolding";
-
-        auto gotDcode = lut.build();
-
         api ~= "\n";
         api ~= "/// Lookup Casefolding length for character.\n";
         api ~= "/// Returns: 0 if unchanged.\n";
-        api ~= gotDcode[0];
 
-        internal ~= gotDcode[1];
+        joinEntriesLength(codepoints, replacedByUints, state.common, state.full);
+        generateReturn(api, internal, "sidero_utf_lut_lengthOfCaseFolding", codepoints, replacedByUints);
     }
 
     {
-        SequentialRanges!(size_t, SequentialRangeSplitGroup, 2) sr;
-
-        foreach (entry; state.turkic)
-            sr.add(entry.codepoint, entry.replacedBy.length);
-
-        sr.splitForSame;
-        sr.calculateTrueSpread;
-        sr.joinWhenClose((dchar codepoint) => cast(size_t)1);
-        sr.calculateTrueSpread;
-        sr.layerByRangeMax(0, ushort.max / 4);
-        sr.layerByRangeMax(1, ushort.max / 2);
-
-        LookupTableGenerator!(size_t, SequentialRangeSplitGroup, 2) lut;
-        lut.sr = sr;
-        lut.lutType = "size_t";
-        lut.name = "sidero_utf_lut_lengthOfCaseFoldingTurkic";
-
-        auto gotDcode = lut.build();
-
         api ~= "\n";
         api ~= "/// Lookup Casefolding length for character.\n";
         api ~= "/// Returns: 0 if unchanged.\n";
-        api ~= gotDcode[0];
 
-        internal ~= gotDcode[1];
+        joinEntriesLength(codepoints, replacedByUints, state.turkic);
+        generateReturn(api, internal, "sidero_utf_lut_lengthOfCaseFoldingTurkic", codepoints, replacedByUints);
     }
 
     append(UnicodeAPIFile, api.data);
@@ -169,6 +72,7 @@ private:
 import std.array : appender;
 import utilities.sequential_ranges;
 import utilities.lut;
+import utilities.inverselist;
 
 void processEachLine(string inputText, ref TotalState state) {
     import std.algorithm : countUntil, splitter;
@@ -249,4 +153,79 @@ struct TotalState {
 struct Entry {
     dchar codepoint;
     dstring replacedBy;
+}
+
+void joinEntries(out dchar[] codepoints, out dstring[] replacedBys, Entry[][] entries...) {
+    import std.algorithm : sort;
+
+    Entry[] total;
+
+    foreach(entry; entries) {
+        total ~= entry;
+    }
+
+    sort!"a.codepoint < b.codepoint"(total);
+
+    codepoints.reserve(total.length);
+    replacedBys.reserve(total.length);
+
+    dchar lastCodepoint;
+
+    foreach(v; total) {
+        assert(lastCodepoint != v.codepoint);
+
+        codepoints ~= v.codepoint;
+        replacedBys ~= v.replacedBy;
+        lastCodepoint = v.codepoint;
+    }
+}
+
+void joinEntries(out dchar[] codepoints, out dchar[] replacedBys, Entry[][] entries...) {
+    import std.algorithm : sort;
+
+    Entry[] total;
+
+    foreach(entry; entries) {
+        total ~= entry;
+    }
+
+    sort!"a.codepoint < b.codepoint"(total);
+
+    codepoints.reserve(total.length);
+    replacedBys.reserve(total.length);
+
+    dchar lastCodepoint;
+
+    foreach(v; total) {
+        assert(lastCodepoint != v.codepoint);
+
+        codepoints ~= v.codepoint;
+        replacedBys ~= v.replacedBy[0];
+        lastCodepoint = v.codepoint;
+    }
+}
+
+void joinEntriesLength(out dchar[] codepoints, out uint[] replacedBys, Entry[][] entries...) {
+    import std.algorithm : sort;
+
+    Entry[] total;
+
+    foreach(entry; entries) {
+        total ~= entry;
+    }
+
+    sort!"a.codepoint < b.codepoint"(total);
+
+    codepoints.reserve(total.length);
+    replacedBys.reserve(total.length);
+
+    dchar lastCodepoint;
+
+    foreach(v; total) {
+        assert(lastCodepoint != v.codepoint);
+
+        codepoints ~= v.codepoint;
+        replacedBys ~= cast(uint)v.replacedBy.length;
+        lastCodepoint = v.codepoint;
+    }
 }

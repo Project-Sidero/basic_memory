@@ -468,23 +468,23 @@ bool isUnicodeGraphemeExtend(dchar input) @safe nothrow @nogc pure {
 
 /// Lookup Casefolding for character.
 /// Returns: null if unchanged.
-export extern(C) immutable(dstring) sidero_utf_lut_getCaseFolding(dchar input) @trusted nothrow @nogc pure;
+export extern(C) dstring sidero_utf_lut_getCaseFolding(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup Casefolding for character.
 /// Returns: null if unchanged.
-export extern(C) immutable(dstring) sidero_utf_lut_getCaseFoldingTurkic(dchar input) @trusted nothrow @nogc pure;
+export extern(C) dstring sidero_utf_lut_getCaseFoldingTurkic(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup Casefolding (simple) for character.
 /// Returns: The casefolded character.
-export extern(C) immutable(dchar) sidero_utf_lut_getCaseFoldingFast(dchar input) @trusted nothrow @nogc pure;
+export extern(C) dchar sidero_utf_lut_getCaseFoldingFast(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup Casefolding length for character.
 /// Returns: 0 if unchanged.
-export extern(C) immutable(size_t) sidero_utf_lut_lengthOfCaseFolding(dchar input) @trusted nothrow @nogc pure;
+export extern(C) uint sidero_utf_lut_lengthOfCaseFolding(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup Casefolding length for character.
 /// Returns: 0 if unchanged.
-export extern(C) immutable(size_t) sidero_utf_lut_lengthOfCaseFoldingTurkic(dchar input) @trusted nothrow @nogc pure;
+export extern(C) uint sidero_utf_lut_lengthOfCaseFoldingTurkic(dchar against) @safe nothrow @nogc pure;
 
 /// Is excluded from composition.
 /// Returns: false if not set.
@@ -492,6 +492,7 @@ export extern(C) bool sidero_utf_lut_isCompositionExcluded(dchar against) @safe 
 
 /// Is character a hangul syllable?
 export extern(C) bool sidero_utf_lut_isHangulSyllable(dchar against) @safe nothrow @nogc pure;
+
 /// Gets the ranges of values in a given Hangul syllable type.
 export immutable(ValueRange[]) sidero_utf_lut_hangulSyllables(HangulSyllableType type) @trusted nothrow @nogc pure {
     return cast(immutable(ValueRange[]))sidero_utf_lut_hangulSyllables2(type);

@@ -10,14 +10,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfWhite_Space(dchar against) @trust
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfBidi_Control(dchar against) @trusted nothrow @nogc pure {
@@ -28,14 +31,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfBidi_Control(dchar against) @trus
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfJoin_Control(dchar against) @trusted nothrow @nogc pure {
@@ -46,14 +52,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfJoin_Control(dchar against) @trus
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfDash(dchar against) @trusted nothrow @nogc pure {
@@ -64,14 +73,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfDash(dchar against) @trusted noth
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfHyphen(dchar against) @trusted nothrow @nogc pure {
@@ -82,14 +94,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfHyphen(dchar against) @trusted no
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfQuotation_Mark(dchar against) @trusted nothrow @nogc pure {
@@ -100,14 +115,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfQuotation_Mark(dchar against) @tr
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfTerminal_Punctuation(dchar against) @trusted nothrow @nogc pure {
@@ -118,14 +136,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfTerminal_Punctuation(dchar agains
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfOther_Math(dchar against) @trusted nothrow @nogc pure {
@@ -136,14 +157,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfOther_Math(dchar against) @truste
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfHex_Digit(dchar against) @trusted nothrow @nogc pure {
@@ -154,14 +178,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfHex_Digit(dchar against) @trusted
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfASCII_Hex_Digit(dchar against) @trusted nothrow @nogc pure {
@@ -172,14 +199,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfASCII_Hex_Digit(dchar against) @t
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfOther_Alphabetic(dchar against) @trusted nothrow @nogc pure {
@@ -190,14 +220,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfOther_Alphabetic(dchar against) @
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfIdeographic(dchar against) @trusted nothrow @nogc pure {
@@ -208,14 +241,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfIdeographic(dchar against) @trust
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfDiacritic(dchar against) @trusted nothrow @nogc pure {
@@ -226,14 +262,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfDiacritic(dchar against) @trusted
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfExtender(dchar against) @trusted nothrow @nogc pure {
@@ -244,14 +283,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfExtender(dchar against) @trusted 
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfOther_Lowercase(dchar against) @trusted nothrow @nogc pure {
@@ -262,14 +304,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfOther_Lowercase(dchar against) @t
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfOther_Uppercase(dchar against) @trusted nothrow @nogc pure {
@@ -280,14 +325,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfOther_Uppercase(dchar against) @t
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfNoncharacter_Code_Point(dchar against) @trusted nothrow @nogc pure {
@@ -298,14 +346,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfNoncharacter_Code_Point(dchar aga
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfOther_Grapheme_Extend(dchar against) @trusted nothrow @nogc pure {
@@ -316,14 +367,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfOther_Grapheme_Extend(dchar again
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfIDS_Binary_Operator(dchar against) @trusted nothrow @nogc pure {
@@ -334,14 +388,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfIDS_Binary_Operator(dchar against
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfIDS_Trinary_Operator(dchar against) @trusted nothrow @nogc pure {
@@ -352,14 +409,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfIDS_Trinary_Operator(dchar agains
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfIDS_Unary_Operator(dchar against) @trusted nothrow @nogc pure {
@@ -370,14 +430,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfIDS_Unary_Operator(dchar against)
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfRadical(dchar against) @trusted nothrow @nogc pure {
@@ -388,14 +451,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfRadical(dchar against) @trusted n
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfUnified_Ideograph(dchar against) @trusted nothrow @nogc pure {
@@ -406,14 +472,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfUnified_Ideograph(dchar against) 
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfOther_Default_Ignorable_Code_Point(dchar against) @trusted nothrow @nogc pure {
@@ -424,14 +493,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfOther_Default_Ignorable_Code_Poin
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfDeprecated(dchar against) @trusted nothrow @nogc pure {
@@ -442,14 +514,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfDeprecated(dchar against) @truste
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfSoft_Dotted(dchar against) @trusted nothrow @nogc pure {
@@ -460,14 +535,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfSoft_Dotted(dchar against) @trust
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfLogical_Order_Exception(dchar against) @trusted nothrow @nogc pure {
@@ -478,14 +556,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfLogical_Order_Exception(dchar aga
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfOther_ID_Start(dchar against) @trusted nothrow @nogc pure {
@@ -496,14 +577,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfOther_ID_Start(dchar against) @tr
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfOther_ID_Continue(dchar against) @trusted nothrow @nogc pure {
@@ -514,14 +598,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfOther_ID_Continue(dchar against) 
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfSentence_Terminal(dchar against) @trusted nothrow @nogc pure {
@@ -532,14 +619,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfSentence_Terminal(dchar against) 
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfVariation_Selector(dchar against) @trusted nothrow @nogc pure {
@@ -550,14 +640,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfVariation_Selector(dchar against)
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfPattern_White_Space(dchar against) @trusted nothrow @nogc pure {
@@ -568,14 +661,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfPattern_White_Space(dchar against
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfPattern_Syntax(dchar against) @trusted nothrow @nogc pure {
@@ -586,14 +682,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfPattern_Syntax(dchar against) @tr
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfPrepended_Concatenation_Mark(dchar against) @trusted nothrow @nogc pure {
@@ -604,14 +703,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfPrepended_Concatenation_Mark(dcha
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfRegional_Indicator(dchar against) @trusted nothrow @nogc pure {
@@ -622,14 +724,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfRegional_Indicator(dchar against)
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfID_Compat_Math_Start(dchar against) @trusted nothrow @nogc pure {
@@ -640,14 +745,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfID_Compat_Math_Start(dchar agains
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfID_Compat_Math_Continue(dchar against) @trusted nothrow @nogc pure {
@@ -658,14 +766,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfID_Compat_Math_Continue(dchar aga
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfModifier_Combining_Mark(dchar against) @trusted nothrow @nogc pure {
@@ -676,12 +787,15 @@ export extern(C) bool sidero_utf_lut_isMemberOfModifier_Combining_Mark(dchar aga
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }

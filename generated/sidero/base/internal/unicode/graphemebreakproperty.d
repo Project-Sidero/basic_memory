@@ -9,14 +9,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfGraphemePrepend(dchar against) @t
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfGraphemeCR(dchar against) @trusted nothrow @nogc pure {
@@ -27,14 +30,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfGraphemeCR(dchar against) @truste
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfGraphemeLF(dchar against) @trusted nothrow @nogc pure {
@@ -45,14 +51,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfGraphemeLF(dchar against) @truste
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfGraphemeControl(dchar against) @trusted nothrow @nogc pure {
@@ -63,14 +72,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfGraphemeControl(dchar against) @t
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfGraphemeExtend(dchar against) @trusted nothrow @nogc pure {
@@ -81,14 +93,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfGraphemeExtend(dchar against) @tr
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfGraphemeRegional_Indicator(dchar against) @trusted nothrow @nogc pure {
@@ -99,14 +114,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfGraphemeRegional_Indicator(dchar 
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfGraphemeSpacingMark(dchar against) @trusted nothrow @nogc pure {
@@ -117,14 +135,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfGraphemeSpacingMark(dchar against
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfGraphemeL(dchar against) @trusted nothrow @nogc pure {
@@ -135,14 +156,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfGraphemeL(dchar against) @trusted
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfGraphemeV(dchar against) @trusted nothrow @nogc pure {
@@ -153,14 +177,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfGraphemeV(dchar against) @trusted
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfGraphemeT(dchar against) @trusted nothrow @nogc pure {
@@ -171,14 +198,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfGraphemeT(dchar against) @trusted
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfGraphemeLV(dchar against) @trusted nothrow @nogc pure {
@@ -189,14 +219,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfGraphemeLV(dchar against) @truste
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfGraphemeLVT(dchar against) @trusted nothrow @nogc pure {
@@ -207,14 +240,17 @@ export extern(C) bool sidero_utf_lut_isMemberOfGraphemeLVT(dchar against) @trust
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfGraphemeZWJ(dchar against) @trusted nothrow @nogc pure {
@@ -225,12 +261,15 @@ export extern(C) bool sidero_utf_lut_isMemberOfGraphemeZWJ(dchar against) @trust
     while(low < high) {
         size_t mid = (low + high) / 2;
 
-        if (against >= Table[mid])
+        if (against > Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
+        else {
+            const pos = high - 1;
+            return (pos & 1) == 0;
+        }
     }
 
-    const pos = high - 1;
-    return (pos & 1) == 0;
+    return false;
 }
