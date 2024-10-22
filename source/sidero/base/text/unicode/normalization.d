@@ -213,8 +213,16 @@ size_t compose_(scope ref dchar[] array, scope RCAllocator allocator) @trusted {
         }
     }
 
-    if(replacementBuffer.length - replacement.length > 0)
-        allocator.shrinkArray(replacementBuffer, replacementBuffer.length - replacement.length);
+    if(replacementBuffer.length > replacement.length) {
+        if (!allocator.shrinkArray(replacementBuffer, replacementBuffer.length - replacement.length)) {
+            if (replacementBuffer.length - replacement.length <= 64)
+                replacementBuffer = replacement;
+            else {
+                replacementBuffer = allocator.makeArray(replacement);
+                allocator.dispose(replacement);
+            }
+        }
+    }
     allocator.dispose(array);
 
     array = replacementBuffer;

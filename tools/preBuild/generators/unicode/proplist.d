@@ -1,4 +1,4 @@
-﻿module generators.unicode.proplist;
+module generators.unicode.proplist;
 import constants;
 
 void propList() {
@@ -14,15 +14,15 @@ void propList() {
 
     auto api = appender!string();
 
-    foreach (i, property; __traits(allMembers, Property)) {
+    foreach(i, property; __traits(allMembers, Property)) {
         {
             SequentialRanges!(bool, SequentialRangeSplitGroup, 2) sr;
 
-            foreach (entry; state.single[__traits(getMember, Property, property)]) {
+            foreach(entry; state.single[__traits(getMember, Property, property)]) {
                 foreach(dchar c; entry.start .. entry.end + 1)
                     sr.add(c, true);
             }
-            foreach (entry; state.range[__traits(getMember, Property, property)]) {
+            foreach(entry; state.range[__traits(getMember, Property, property)]) {
                 foreach(dchar c; entry.start .. entry.end + 1)
                     sr.add(c, true);
             }
@@ -72,7 +72,7 @@ void processEachLine(string inputText, ref TotalState state) {
         ValueRange!dchar ret;
 
         ptrdiff_t offsetOfSeperator = charRangeStr.countUntil("..");
-        if (offsetOfSeperator < 0) {
+        if(offsetOfSeperator < 0) {
             ret.start = parse!uint(charRangeStr, 16);
             ret.end = ret.start;
         } else {
@@ -87,132 +87,36 @@ void processEachLine(string inputText, ref TotalState state) {
     void handleLine(ValueRange!dchar valueRange, string propertyStr) {
         Property property;
 
-        switch (propertyStr) {
-        case "White_Space":
-            property = Property.White_Space;
-            break;
-        case "Bidi_Control":
-            property = Property.Bidi_Control;
-            break;
-        case "Join_Control":
-            property = Property.Join_Control;
-            break;
-        case "Dash":
-            property = Property.Dash;
-            break;
-        case "Hyphen":
-            property = Property.Hyphen;
-            break;
-        case "Quotation_Mark":
-            property = Property.Quotation_Mark;
-            break;
-        case "Terminal_Punctuation":
-            property = Property.Terminal_Punctuation;
-            break;
-        case "Other_Math":
-            property = Property.Other_Math;
-            break;
-        case "Hex_Digit":
-            property = Property.Hex_Digit;
-            break;
-        case "ASCII_Hex_Digit":
-            property = Property.ASCII_Hex_Digit;
-            break;
-        case "Other_Alphabetic":
-            property = Property.Other_Alphabetic;
-            break;
-        case "Ideographic":
-            property = Property.Ideographic;
-            break;
-        case "Diacritic":
-            property = Property.Diacritic;
-            break;
-        case "Extender":
-            property = Property.Extender;
-            break;
-        case "Other_Lowercase":
-            property = Property.Other_Lowercase;
-            break;
-        case "Other_Uppercase":
-            property = Property.Other_Uppercase;
-            break;
-        case "Noncharacter_Code_Point":
-            property = Property.Noncharacter_Code_Point;
-            break;
-        case "Other_Grapheme_Extend":
-            property = Property.Other_Grapheme_Extend;
-            break;
-        case "IDS_Binary_Operator":
-            property = Property.IDS_Binary_Operator;
-            break;
-        case "IDS_Trinary_Operator":
-            property = Property.IDS_Trinary_Operator;
-            break;
-        case "Radical":
-            property = Property.Radical;
-            break;
-        case "Unified_Ideograph":
-            property = Property.Unified_Ideograph;
-            break;
-        case "Other_Default_Ignorable_Code_Point":
-            property = Property.Other_Default_Ignorable_Code_Point;
-            break;
-        case "Deprecated":
-            property = Property.Deprecated;
-            break;
-        case "Soft_Dotted":
-            property = Property.Soft_Dotted;
-            break;
-        case "Logical_Order_Exception":
-            property = Property.Logical_Order_Exception;
-            break;
-        case "Other_ID_Start":
-            property = Property.Other_ID_Start;
-            break;
-        case "Other_ID_Continue":
-            property = Property.Other_ID_Continue;
-            break;
-        case "Sentence_Terminal":
-            property = Property.Sentence_Terminal;
-            break;
-        case "Variation_Selector":
-            property = Property.Variation_Selector;
-            break;
-        case "Pattern_White_Space":
-            property = Property.Pattern_White_Space;
-            break;
-        case "Pattern_Syntax":
-            property = Property.Pattern_Syntax;
-            break;
-        case "Prepended_Concatenation_Mark":
-            property = Property.Prepended_Concatenation_Mark;
-            break;
-        case "Regional_Indicator":
-            property = Property.Regional_Indicator;
-            break;
+    Switch:
+        switch(propertyStr) {
+            static foreach(P; __traits(allMembers, Property)) {
+        case P:
+                property = __traits(getMember, Property, P);
+                break Switch;
+            }
         default:
             assert(0, propertyStr);
         }
 
-        if (valueRange.isSingle)
+        if(valueRange.isSingle)
             state.single[property] ~= valueRange;
         else
             state.range[property] ~= valueRange;
     }
 
-    foreach (line; inputText.lineSplitter) {
+    foreach(line; inputText.lineSplitter) {
         ptrdiff_t offset;
 
         offset = line.countUntil('#');
-        if (offset >= 0)
+        if(offset >= 0)
             line = line[0 .. offset];
         line = line.strip;
 
-        if (line.length < 5) // anything that low can't represent a functional line
+        if(line.length < 5) // anything that low can't represent a functional line
             continue;
 
         offset = line.countUntil(';');
-        if (offset < 0) // no char range
+        if(offset < 0) // no char range
             continue;
         string charRangeStr = line[0 .. offset].strip;
         line = line[offset + 1 .. $].strip;
@@ -249,6 +153,7 @@ enum Property {
     Other_Grapheme_Extend,
     IDS_Binary_Operator,
     IDS_Trinary_Operator,
+    IDS_Unary_Operator,
     Radical,
     Unified_Ideograph,
     Other_Default_Ignorable_Code_Point,
@@ -262,5 +167,8 @@ enum Property {
     Pattern_White_Space,
     Pattern_Syntax,
     Prepended_Concatenation_Mark,
-    Regional_Indicator
+    Regional_Indicator,
+    ID_Compat_Math_Start,
+    ID_Compat_Math_Continue,
+    Modifier_Combining_Mark
 }

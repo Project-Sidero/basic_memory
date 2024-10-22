@@ -14,9 +14,13 @@ void wordBreakTests() {
         bool findNext() @trusted {
             size_t offsetForIterator = currentOffset;
 
-            const temp = WBr(() { return WBr.Entry(1, test.value[offsetForIterator++]); }, () {
+            const temp = WBr(() {
+                return WBr.Entry(1, test.value[offsetForIterator++]);
+            }, () {
                 return offsetForIterator < test.value.length ? WBr.Entry(1, test.value[offsetForIterator]) : WBr.Entry(size_t.max);
-            }, () { return offsetForIterator < test.value.length; }, test.value.length - offsetForIterator, test.value.length).perform();
+            }, () {
+                return offsetForIterator < test.value.length;
+            }, test.value.length - offsetForIterator, test.value.length).perform();
 
             lastOffset = currentOffset;
             currentOffset += temp;
@@ -84,9 +88,10 @@ void parseTestFile() {
         Test test;
         test.comment = comment;
 
-        size_t length;
+        size_t currentOffset, lastOffset;
 
         while(line.length > 0) {
+            currentOffset++;
             offset = line.countUntil(' ');
 
             assert(offset > 0);
@@ -99,19 +104,18 @@ void parseTestFile() {
 
             assert(operation == divide || operation == multiply);
 
+            if(operation == divide) {
+                test.lengths ~= currentOffset - lastOffset;
+                lastOffset = currentOffset;
+            }
+
             test.value ~= character.parse!uint(16);
             assert(character.length == 0);
             test.canBreak ~= operation == divide;
-
-            length++;
-            if(operation == divide) {
-                test.lengths ~= length;
-                length = 0;
-            }
         }
 
-        if(length > 0)
-            test.lengths ~= length;
+        if(currentOffset > lastOffset)
+            test.lengths ~= currentOffset - lastOffset;
 
         assert(test.lengths.length > 0);
         tests ~= test;

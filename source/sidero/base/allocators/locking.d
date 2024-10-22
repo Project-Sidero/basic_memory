@@ -173,7 +173,7 @@ pure:
     }
 
     ///
-    bool reallocate(scope ref void[] array, size_t newSize) {
+    bool reallocate(scope ref void[] array, size_t newSize) @trusted {
         writeLockImpl;
         scope(exit)
             writeUnlockImpl;
@@ -188,7 +188,7 @@ pure:
         allocatedTree.remove(trueArray);
         removeRangeImpl(trueArray);
 
-        const got = poolAllocator.reallocate(array, newSize);
+        bool got = poolAllocator.reallocate(array, newSize);
 
         if(got) {
             allocatedTree.store(array);
@@ -196,6 +196,14 @@ pure:
 
             array = array[0 .. newSize];
         } else {
+            const pointerDifference = array.ptr - trueArray.ptr;
+            const lengthAvailable = trueArray.length - pointerDifference;
+
+            if (lengthAvailable >= newSize) {
+                got = true;
+                array = trueArray[0 .. newSize];
+            }
+
             allocatedTree.store(trueArray);
             addRangeImpl(trueArray);
         }

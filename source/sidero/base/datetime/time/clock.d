@@ -70,7 +70,7 @@ DateTime!GregorianDate accurateDateTime() @trusted {
 }
 
 /// Acquires a point in time, since an unknown epoch measured in nano seconds.
-long accuratePointInTime() {
+long accuratePointInTime() @trusted {
     version(Windows) {
         ULONGLONG ret;
 
@@ -91,7 +91,7 @@ long accuratePointInTime() {
 }
 
 /// Acquires the amount of user time this process has used in micro seconds.
-long amountOfProcessUserTime() {
+long amountOfProcessUserTime() @trusted {
     version(Windows) {
         FILETIME userTime; // hnsecs over two uint's
         FILETIME dummy1, dummy2, dummy3;

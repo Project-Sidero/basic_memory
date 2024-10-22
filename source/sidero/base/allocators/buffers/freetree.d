@@ -267,10 +267,10 @@ export:
             void[] actual = allocations.getTrueRegionOfMemory(array);
 
             if (actual) {
-                size_t pointerDifference = array.ptr - actual.ptr;
-                size_t amountLeft = actual.length - pointerDifference;
+                const pointerDifference = array.ptr - actual.ptr;
+                const lengthAvailable = actual.length - pointerDifference;
 
-                if (amountLeft >= newSize) {
+                if (lengthAvailable >= newSize) {
                     array = array.ptr[0 .. newSize];
                     return true;
                 }

@@ -167,4 +167,9 @@ enum LineBreak {
     JT, ///
     RI, ///
     SA, ///
+    AK, ///
+    VI, ///
+    AS, ///
+    VF, ///
+    AP, ///
 }

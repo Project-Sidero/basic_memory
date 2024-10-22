@@ -25,7 +25,7 @@ export extern(C) string windowsToIANA(scope string windows, scope string territo
                 case 3838523700:
                     return `Australia/Hobart`;
                 case 936719067:
-                    return `Australia/Hobart Australia/Currie Antarctica/Macquarie`;
+                    return `Australia/Hobart Antarctica/Macquarie`;
                 default:
                     return null;
             }
@@ -185,7 +185,7 @@ export extern(C) string windowsToIANA(scope string windows, scope string territo
                 case 1827904350:
                     return `Asia/Tashkent Asia/Samarkand`;
                 case 753842544:
-                    return `Asia/Oral Asia/Aqtau Asia/Aqtobe Asia/Atyrau`;
+                    return `Asia/Oral Asia/Almaty Asia/Aqtau Asia/Aqtobe Asia/Atyrau Asia/Qostanay`;
                 case 1003829543:
                     return `Antarctica/Mawson`;
                 case 452286687:
@@ -278,7 +278,7 @@ export extern(C) string windowsToIANA(scope string windows, scope string territo
         case 3610469414:
             switch(territoryHash) {
                 case 3838523700:
-                    return `Asia/Almaty`;
+                    return `Asia/Bishkek`;
                 case 703509687:
                     return `Asia/Bishkek`;
                 case 2161779444:
@@ -287,8 +287,6 @@ export extern(C) string windowsToIANA(scope string windows, scope string territo
                     return `Antarctica/Vostok`;
                 case 1642658993:
                     return `Indian/Chagos`;
-                case 753842544:
-                    return `Asia/Almaty Asia/Qostanay`;
                 default:
                     return null;
             }
@@ -581,13 +579,13 @@ export extern(C) string windowsToIANA(scope string windows, scope string territo
                 case 3838523700:
                     return `America/Denver`;
                 case 2010780873:
-                    return `America/Edmonton America/Cambridge_Bay America/Inuvik America/Yellowknife`;
+                    return `America/Edmonton America/Cambridge_Bay America/Inuvik`;
                 case 924325685:
                     return `MST7MDT`;
                 case 1710461017:
                     return `America/Denver America/Boise`;
                 case 719301568:
-                    return `America/Ojinaga`;
+                    return `America/Ciudad_Juarez`;
                 default:
                     return null;
             }
@@ -628,8 +626,6 @@ export extern(C) string windowsToIANA(scope string windows, scope string territo
                     return `Etc/GMT+10`;
                 case 721420139:
                     return `Pacific/Tahiti`;
-                case 2146679111:
-                    return `Pacific/Johnston`;
                 case 1710461017:
                     return `Pacific/Honolulu`;
                 case 2111446587:
@@ -705,13 +701,13 @@ export extern(C) string windowsToIANA(scope string windows, scope string territo
                 case 3838523700:
                     return `America/Chicago`;
                 case 2010780873:
-                    return `America/Winnipeg America/Rainy_River America/Rankin_Inlet America/Resolute`;
+                    return `America/Winnipeg America/Rankin_Inlet America/Resolute`;
                 case 924325685:
                     return `CST6CDT`;
                 case 1710461017:
                     return `America/Chicago America/Indiana/Knox America/Indiana/Tell_City America/Menominee America/North_Dakota/Beulah America/North_Dakota/Center America/North_Dakota/New_Salem`;
                 case 719301568:
-                    return `America/Matamoros`;
+                    return `America/Matamoros America/Ojinaga`;
                 default:
                     return null;
             }
@@ -837,7 +833,7 @@ export extern(C) string windowsToIANA(scope string windows, scope string territo
                 case 2095213421:
                     return `Europe/Vilnius`;
                 case 1945347683:
-                    return `Europe/Kiev Europe/Uzhgorod Europe/Zaporozhye`;
+                    return `Europe/Kiev`;
                 case 852830972:
                     return `Europe/Mariehamn`;
                 case 399246879:
@@ -922,7 +918,7 @@ export extern(C) string windowsToIANA(scope string windows, scope string territo
                 case 3838523700:
                     return `America/New_York`;
                 case 2010780873:
-                    return `America/Toronto America/Iqaluit America/Montreal America/Nipigon America/Pangnirtung America/Thunder_Bay`;
+                    return `America/Toronto America/Iqaluit`;
                 case 769487330:
                     return `America/Nassau`;
                 case 1710461017:
@@ -1508,8 +1504,6 @@ export extern(C) string ianaToWindows(scope string iana) @trusted nothrow @nogc 
             return "West Pacific Standard Time";
         case 137307315:
             return "Central Pacific Standard Time";
-        case 2740263968:
-            return "Tasmania Standard Time";
         case 651202456:
             return "Greenwich Standard Time";
         case 4127925939:
@@ -1540,6 +1534,8 @@ export extern(C) string ianaToWindows(scope string iana) @trusted nothrow @nogc 
             return "Central America Standard Time";
         case 3322320427:
             return "Greenwich Standard Time";
+        case 589924279:
+            return "West Asia Standard Time";
         case 2465805222:
             return "Central Europe Standard Time";
         case 1513074250:
@@ -1582,16 +1578,12 @@ export extern(C) string ianaToWindows(scope string iana) @trusted nothrow @nogc 
             return "Arabian Standard Time";
         case 1783373845:
             return "FLE Standard Time";
-        case 3326794860:
-            return "Central Asia Standard Time";
         case 2700255026:
             return "Central Europe Standard Time";
         case 2104134023:
             return "SA Western Standard Time";
         case 4223099349:
             return "SA Western Standard Time";
-        case 3696618852:
-            return "FLE Standard Time";
         case 2194753814:
             return "FLE Standard Time";
         case 3365847555:
@@ -1608,10 +1600,8 @@ export extern(C) string ianaToWindows(scope string iana) @trusted nothrow @nogc 
             return "UTC+12";
         case 4205793671:
             return "Afghanistan Standard Time";
-        case 1486294486:
-            return "Hawaiian Standard Time";
-        case 3839527065:
-            return "Mountain Standard Time";
+        case 2602281650:
+            return "Central Standard Time";
         case 2617592208:
             return "Taipei Standard Time";
         case 3202559804:
@@ -1654,8 +1644,6 @@ export extern(C) string ianaToWindows(scope string iana) @trusted nothrow @nogc 
             return "West Asia Standard Time";
         case 1416355795:
             return "Greenwich Standard Time";
-        case 2445136889:
-            return "Central Standard Time";
         case 226556240:
             return "US Mountain Standard Time";
         case 407790710:
@@ -1666,8 +1654,8 @@ export extern(C) string ianaToWindows(scope string iana) @trusted nothrow @nogc 
             return "SA Western Standard Time";
         case 3588500963:
             return "GMT Standard Time";
-        case 3810321767:
-            return "West Asia Standard Time";
+        case 879352378:
+            return "Myanmar Standard Time";
         case 309158836:
             return "Atlantic Standard Time";
         case 3433803006:
@@ -1688,8 +1676,6 @@ export extern(C) string ianaToWindows(scope string iana) @trusted nothrow @nogc 
             return "SA Western Standard Time";
         case 1548690898:
             return "Arab Standard Time";
-        case 879352378:
-            return "Myanmar Standard Time";
         case 3494211012:
             return "GTB Standard Time";
         case 3153148591:
@@ -1708,6 +1694,8 @@ export extern(C) string ianaToWindows(scope string iana) @trusted nothrow @nogc 
             return "UTC+13";
         case 3141446371:
             return "UTC+12";
+        case 2203034281:
+            return "Central Standard Time";
         case 4153589291:
             return "Cuba Standard Time";
         case 2974478361:
@@ -1792,6 +1780,8 @@ export extern(C) string ianaToWindows(scope string iana) @trusted nothrow @nogc 
             return "South Africa Standard Time";
         case 3527935022:
             return "Omsk Standard Time";
+        case 2358908231:
+            return "Tasmania Standard Time";
         case 1913005334:
             return "UTC+12";
         case 3192550788:
@@ -1820,12 +1810,10 @@ export extern(C) string ianaToWindows(scope string iana) @trusted nothrow @nogc 
             return "Nepal Standard Time";
         case 660011101:
             return "SE Asia Standard Time";
-        case 3246638409:
-            return "Central Asia Standard Time";
-        case 3724642335:
-            return "Middle East Standard Time";
         case 3154337901:
             return "Singapore Standard Time";
+        case 3724642335:
+            return "Middle East Standard Time";
         case 1540401413:
             return "SA Western Standard Time";
         case 2867499402:
@@ -1858,12 +1846,14 @@ export extern(C) string ianaToWindows(scope string iana) @trusted nothrow @nogc 
             return "Hawaiian Standard Time";
         case 1112663984:
             return "Pacific Standard Time";
-        case 4125590834:
-            return "GMT Standard Time";
+        case 2404939425:
+            return "Mountain Standard Time";
         case 3636856728:
             return "GMT Standard Time";
         case 82989757:
             return "AUS Central Standard Time";
+        case 4125590834:
+            return "GMT Standard Time";
         case 2599400844:
             return "Morocco Standard Time";
         case 2880844587:
@@ -1908,6 +1898,8 @@ export extern(C) string ianaToWindows(scope string iana) @trusted nothrow @nogc 
             return "SA Pacific Standard Time";
         case 1207357484:
             return "Saint Pierre Standard Time";
+        case 2429676328:
+            return "Mountain Standard Time";
         case 2063304110:
             return "SA Pacific Standard Time";
         case 1405167450:
@@ -1960,8 +1952,8 @@ export extern(C) string ianaToWindows(scope string iana) @trusted nothrow @nogc 
             return "Bahia Standard Time";
         case 3815991167:
             return "Mountain Standard Time";
-        case 1489268849:
-            return "Eastern Standard Time";
+        case 1868880648:
+            return "Singapore Standard Time";
         case 1077287080:
             return "Azores Standard Time";
         case 3829601497:
@@ -1978,8 +1970,6 @@ export extern(C) string ianaToWindows(scope string iana) @trusted nothrow @nogc 
             return "SE Asia Standard Time";
         case 1734505048:
             return "Ekaterinburg Standard Time";
-        case 1868880648:
-            return "Singapore Standard Time";
         case 3769278047:
             return "North Asia East Standard Time";
         case 1346226359:
@@ -2010,20 +2000,20 @@ export extern(C) string ianaToWindows(scope string iana) @trusted nothrow @nogc 
             return "US Mountain Standard Time";
         case 617549878:
             return "Saratov Standard Time";
-        case 4005611095:
-            return "Mountain Standard Time";
         case 2133049520:
             return "Central Europe Standard Time";
-        case 976392934:
-            return "Atlantic Standard Time";
         case 2877326243:
             return "Central Asia Standard Time";
+        case 976392934:
+            return "Atlantic Standard Time";
         case 4248626852:
             return "Central European Standard Time";
         case 911434708:
             return "Central Standard Time";
         case 171807745:
             return "SA Western Standard Time";
+        case 2637779633:
+            return "Eastern Standard Time";
         case 2301981053:
             return "Tocantins Standard Time";
         case 1036744127:
@@ -2042,8 +2032,6 @@ export extern(C) string ianaToWindows(scope string iana) @trusted nothrow @nogc 
             return "South Africa Standard Time";
         case 475368294:
             return "Norfolk Standard Time";
-        case 1016457943:
-            return "Central Standard Time";
         case 1575912215:
             return "SA Western Standard Time";
         case 1506846175:

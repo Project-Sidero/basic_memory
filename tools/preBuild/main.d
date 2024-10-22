@@ -39,6 +39,7 @@ void main() {
         import generators.unicode.linebreak;
         import generators.unicode.emoji_data;
         import generators.unicode.scripts;
+        import generators.unicode.graphemebreakproperty;
 
         writeln("Running generation of Unicode database");
         createAPIfile;
@@ -56,6 +57,8 @@ void main() {
         lineBreak;
         emojiData;
         handleScripts;
+
+        graphemeBreakProperty;
     }
 
     {

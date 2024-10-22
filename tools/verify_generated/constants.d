@@ -1,5 +1,5 @@
 module constants;
 
 enum {
-    UnicodeDatabaseDirectory = "tools/unicode-14/",
+    UnicodeDatabaseDirectory = "tools/unicode-16/",
 }

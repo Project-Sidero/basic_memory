@@ -333,4 +333,13 @@ enum Script : ubyte {
     Duployan, ///
     Warang_Citi, ///
     Phags_Pa, ///
+    Kawi, ///
+    Nag_Mundari, ///
+    Garay, ///
+    Gurung_Khema, ///
+    Kirat_Rai, ///
+    Ol_Onal, ///
+    Sunuwar, ///
+    Todhri, ///
+    Tulu_Tigalari, ///
 }

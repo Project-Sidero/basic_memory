@@ -5,6 +5,8 @@ import sidero.base.text.unicode.database;
 
 export:
 
+//version = DebugWordBreak;
+
 /**
 This function is based upon Unicode's word break algorithm as defined in [TR29](https://unicode.org/reports/tr29/#Word_Boundary_Rules).
 
@@ -58,17 +60,19 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
     advance();
 
     Loop: for(;;) {
-        version(none) {
-            debugWritefln!"lastLeft: %d %X, left: %d %X, right: %d %X, lookahead: %d %X, amountSkipped: %s %s"(lastLeft.entriesForValue,
-                    lastLeft.value, left.entriesForValue,
-                    left.value, right.entriesForValue, right.value, lookahead.entriesForValue, lookahead.value,
-                    amountSkipped1, amountSkipped2);
+        version(DebugWordBreak) {
+            debugWritefln!"lastLeft: %d %X, left: %d %X, right: %d %X, lookahead: %d %X, amountSkipped: %s %s"(
+                lastLeft.entriesForValue, lastLeft.value,
+                left.entriesForValue, left.value,
+                right.entriesForValue, right.value,
+                lookahead.entriesForValue, lookahead.value,
+                amountSkipped1, amountSkipped2);
         }
 
         if(left == sot) {
             // WB1, but we ignore this as no-op
 
-            version(none) {
+            version(DebugWordBreak) {
                 debugWriteln("WB1");
             }
 
@@ -76,7 +80,7 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
             continue;
         } else if(right == eot) {
             // WB2, and we are done
-            version(none) {
+            version(DebugWordBreak) {
                 debugWriteln("WB2");
             }
 
@@ -85,7 +89,7 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
 
         if(left == '\r' && right == '\n') {
             // WB3
-            version(none) {
+            version(DebugWordBreak) {
                 debugWriteln("WB3");
             }
 
@@ -93,21 +97,21 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
             continue;
         } else if(left == '\r' || left == '\n' || isNewLine(left.value)) {
             // WB3a
-            version(none) {
+            version(DebugWordBreak) {
                 debugWriteln("WB3a");
             }
 
             return offsetLengthLeft;
         } else if(right == '\r' || right == '\n' || isNewLine(right.value)) {
             // WB3b
-            version(none) {
+            version(DebugWordBreak) {
                 debugWriteln("WB3b");
             }
 
             return offsetLengthLeft;
         } else if(left == 0x200D && sidero_utf_lut_isMemberOfExtended_Pictographic(right.value)) {
             // WB3c
-            version(none) {
+            version(DebugWordBreak) {
                 debugWriteln("WB3c");
             }
 
@@ -115,7 +119,7 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
             continue;
         } else if(isWSegSpace(left.value) && isWSegSpace(right.value)) {
             // WB3d
-            version(none) {
+            version(DebugWordBreak) {
                 debugWriteln("WB3d");
             }
 
@@ -123,7 +127,7 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
             continue;
         }
 
-        version(none) {
+        version(DebugWordBreak) {
             debugWritefln!"\tlastLeft: %d %X, left: %d %X, right: %d %X, lookahead: %d %X, amountSkipped: %s %s"(lastLeft.entriesForValue,
                     lastLeft.value, left.entriesForValue,
                     left.value, right.entriesForValue, right.value, lookahead.entriesForValue, lookahead.value,
@@ -133,7 +137,7 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
         for(;;) {
             if(right == eot) {
                 // WB2
-                version(none) {
+                version(DebugWordBreak) {
                     debugWriteln("WB2");
                 }
 
@@ -143,7 +147,7 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
                 // WB4
 
                 if(right == 0x200D && sidero_utf_lut_isMemberOfExtended_Pictographic(lookahead.value)) {
-                    version(none) {
+                    version(DebugWordBreak) {
                         debugWriteln("WB4-1 -> WB3c");
                     }
 
@@ -151,7 +155,7 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
                     continue Loop;
                 }
 
-                version(none) {
+                version(DebugWordBreak) {
                     debugWriteln("WB4-1");
                 }
 
@@ -160,7 +164,7 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
                 break;
         }
 
-        version(none) {
+        version(DebugWordBreak) {
             debugWritefln!"\tlastLeft: %d %X, left: %d %X, right: %d %X, lookahead: %d %X, amountSkipped: %s %s"(lastLeft.entriesForValue,
                     lastLeft.value, left.entriesForValue,
                     left.value, right.entriesForValue, right.value, lookahead.entriesForValue, lookahead.value,
@@ -170,7 +174,7 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
         for(;;) {
             if(lookahead == 0x200D || isExtend(lookahead.value) || isFormat(lookahead.value)) {
                 // WB4
-                version(none) {
+                version(DebugWordBreak) {
                     debugWriteln("WB4-2");
                 }
 
@@ -179,7 +183,7 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
                 break;
         }
 
-        version(none) {
+        version(DebugWordBreak) {
             debugWritefln!"\tlastLeft: %d %X, left: %d %X, right: %d %X, lookahead: %d %X, amountSkipped: %s %s"(lastLeft.entriesForValue,
                     lastLeft.value, left.entriesForValue,
                     left.value, right.entriesForValue, right.value, lookahead.entriesForValue, lookahead.value,
@@ -188,7 +192,7 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
 
         if(isAHLetter(left.value) && isAHLetter(right.value)) {
             // WB5
-            version(none) {
+            version(DebugWordBreak) {
                 debugWriteln("WB5");
             }
 
@@ -196,7 +200,7 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
             continue;
         } else if(isAHLetter(left.value) && (isMidLetter(right.value) || isMidNumLetQ(right.value)) && isAHLetter(lookahead.value)) {
             // WB6
-            version(none) {
+            version(DebugWordBreak) {
                 debugWriteln("WB6");
             }
 
@@ -205,7 +209,7 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
             continue;
         } else if(isAHLetter(lastLeft.value) && (isMidLetter(left.value) || isMidNumLetQ(left.value)) && isAHLetter(right.value)) {
             // WB7
-            version(none) {
+            version(DebugWordBreak) {
                 debugWriteln("WB7");
             }
 
@@ -213,7 +217,7 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
             continue;
         } else if(isHebrewLetter(left.value) && right == 0x27) {
             // WB7a
-            version(none) {
+            version(DebugWordBreak) {
                 debugWriteln("WB7a");
             }
 
@@ -221,7 +225,7 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
             continue;
         } else if(isHebrewLetter(left.value) && right == 0x22 && isHebrewLetter(lookahead.value)) {
             // WB7b
-            version(none) {
+            version(DebugWordBreak) {
                 debugWriteln("WB7b");
             }
 
@@ -230,7 +234,7 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
             continue;
         } else if(isHebrewLetter(lastLeft.value) && left == 0x22 && isHebrewLetter(right.value)) {
             // WB7c
-            version(none) {
+            version(DebugWordBreak) {
                 debugWriteln("WB7c");
             }
 
@@ -238,7 +242,7 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
             continue;
         } else if(isNumeric(left.value) && isNumeric(right.value)) {
             // WB8
-            version(none) {
+            version(DebugWordBreak) {
                 debugWriteln("WB8");
             }
 
@@ -246,7 +250,7 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
             continue;
         } else if(isAHLetter(left.value) && isNumeric(right.value)) {
             // WB9
-            version(none) {
+            version(DebugWordBreak) {
                 debugWriteln("WB9");
             }
 
@@ -254,7 +258,7 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
             continue;
         } else if(isNumeric(left.value) && isAHLetter(right.value)) {
             // WB10
-            version(none) {
+            version(DebugWordBreak) {
                 debugWriteln("WB10");
             }
 
@@ -262,7 +266,7 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
             continue;
         } else if(isNumeric(lastLeft.value) && (isMidNum(left.value) || isMidNumLetQ(left.value)) && isNumeric(right.value)) {
             // WB11
-            version(none) {
+            version(DebugWordBreak) {
                 debugWriteln("WB11");
             }
 
@@ -270,7 +274,7 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
             continue;
         } else if(isNumeric(left.value) && (isMidNum(right.value) || isMidNumLetQ(right.value)) && isNumeric(lookahead.value)) {
             // WB12
-            version(none) {
+            version(DebugWordBreak) {
                 debugWriteln("WB12");
             }
 
@@ -279,7 +283,7 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
             continue;
         } else if(isKatakana(left.value) && isKatakana(right.value)) {
             // WB13
-            version(none) {
+            version(DebugWordBreak) {
                 debugWriteln("WB13");
             }
 
@@ -288,7 +292,7 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
         } else if((isAHLetter(left.value) || isNumeric(left.value) || isKatakana(left.value) || isExtendNumLet(left.value)) &&
                 isExtendNumLet(right.value)) {
             // WB13a
-            version(none) {
+            version(DebugWordBreak) {
                 debugWriteln("WB13a");
             }
 
@@ -296,7 +300,7 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
             continue;
         } else if(isExtendNumLet(left.value) && (isAHLetter(right.value) || isNumeric(right.value) || isKatakana(right.value))) {
             // WB13b
-            version(none) {
+            version(DebugWordBreak) {
                 debugWriteln("WB13b");
             }
 
@@ -304,7 +308,7 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
             continue;
         } else if(sidero_utf_lut_isMemberOfRegional_Indicator(left.value) && sidero_utf_lut_isMemberOfRegional_Indicator(right.value)) {
             // WB15 WB16
-            version(none) {
+            version(DebugWordBreak) {
                 debugWriteln("WB15 W16");
             }
 
@@ -320,7 +324,7 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
             }
         } else {
             // WB999
-            version(none) {
+            version(DebugWordBreak) {
                 debugWriteln("WB999");
                 debugWritefln!"lastLeft: %d %X, left: %d %X, right: %d %X, lookahead: %d %X, amountSkipped: %s %s"(
                         lastLeft.entriesForValue, lastLeft.value,
@@ -331,7 +335,7 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
             if(left == sot)
                 advanceAndMoveLeft();
 
-            return offsetLengthLeft;
+            return offsetLengthLeft + amountSkipped1;
         }
     }
 
@@ -340,7 +344,7 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
 
 @safe nothrow @nogc pure:
 
-version(none) {
+version(DebugWordBreak) {
     void debugWritefln(string fmt, Args...)(scope Args args, int line = __LINE__) {
         try {
             import std.stdio;
@@ -383,6 +387,7 @@ bool isALetter(dchar input) {
     case 0x055E:
     case 0x058A:
     case 0x05F3:
+    case 0x070F:
     case 0xA708: .. case 0xA716:
     case 0xA720:
     case 0xA721:
@@ -497,12 +502,10 @@ bool isExtendNumLet(dchar input) {
 ///
 bool isNumeric(dchar input) {
     switch(input) {
-    case 0xFF10: .. case 0xFF19:
-        return true;
     case 0x066C:
         return false;
     default:
-        return sidero_utf_lut_getWordBreakProperty(input) == WordBreakProperty.Numeric;
+        return sidero_utf_lut_getWordBreakProperty(input) == WordBreakProperty.Numeric || sidero_utf_lut_getGeneralCategory(input) == GeneralCategory.Nd;
     }
 }
 
@@ -522,7 +525,7 @@ bool isFormat(dchar input) {
     case 0x200D:
         return false;
     default:
-        return sidero_utf_lut_getGeneralCategory(input) == GeneralCategory.Cf;
+        return sidero_utf_lut_getGeneralCategory(input) == GeneralCategory.Cf && !sidero_utf_lut_isMemberOfGraphemePrepend(input);
     }
 }
 

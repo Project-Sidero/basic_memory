@@ -1,8 +1,8 @@
 module constants;
 
 enum {
-    UnicodeDatabaseDirectory = "tools/unicode-14/",
-    CLDRFile = "tools/cldr-common-42.0.zip",
+    UnicodeDatabaseDirectory = "tools/unicode-16/",
+    CLDRFile = "tools/cldr-common-45.0.zip",
 
     UnicodeLUTDirectory = "generated/sidero/base/internal/unicode/",
     UnicodeAPIDirectory = "generated/sidero/base/text/unicode/",
