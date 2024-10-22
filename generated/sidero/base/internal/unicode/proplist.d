@@ -5,797 +5,683 @@ module sidero.base.internal.unicode.proplist;
 export extern(C) bool sidero_utf_lut_isMemberOfWhite_Space(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"000000090000000E00000020000000210000008500000086000000A0000000A10000168000001681000020000000200B000020280000202A0000202F000020300000205F000020600000300000003001";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfBidi_Control(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"0000061C0000061D0000200E000020100000202A0000202F000020660000206A";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfJoin_Control(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"0000200C0000200E";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfDash(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"0000002D0000002E0000058A0000058B000005BE000005BF00001400000014010000180600001807000020100000201600002053000020540000207B0000207C0000208B0000208C000022120000221300002E1700002E1800002E1A00002E1B00002E3A00002E3C00002E4000002E4100002E5D00002E5E0000301C0000301D0000303000003031000030A0000030A10000FE310000FE330000FE580000FE590000FE630000FE640000FF0D0000FF0E00010D6E00010D6F00010EAD00010EAE";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfHyphen(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"0000002D0000002E000000AD000000AE0000058A0000058B0000180600001807000020100000201200002E1700002E18000030FB000030FC0000FE630000FE640000FF0D0000FF0E0000FF650000FF66";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfQuotation_Mark(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"00000022000000230000002700000028000000AB000000AC000000BB000000BC0000201800002020000020390000203B00002E4200002E430000300C000030100000301D000030200000FE410000FE450000FF020000FF030000FF070000FF080000FF620000FF64";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfTerminal_Punctuation(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"00000021000000220000002C0000002D0000002E0000002F0000003A0000003C0000003F000000400000037E0000037F0000038700000388000005890000058A000005C3000005C40000060C0000060D0000061B0000061C0000061D00000620000006D4000006D5000007000000070B0000070C0000070D000007F8000007FA0000083000000836000008370000083F0000085E0000085F000009640000096600000E5A00000E5C00000F0800000F0900000F0D00000F130000104A0000104C00001361000013690000166E0000166F000016EB000016EE0000173500001737000017D4000017D7000017DA000017DB0000180200001806000018080000180A000019440000194600001AA800001AAC00001B4E00001B5000001B5A00001B5C00001B5D00001B6000001B7D00001B8000001C3B00001C4000001C7E00001C8000002024000020250000203C0000203E000020470000204A00002CF900002CFC00002E2E00002E2F00002E3C00002E3D00002E4100002E4200002E4C00002E4D00002E4E00002E5000002E5300002E5500003001000030030000A4FE0000A5000000A60D0000A6100000A6F30000A6F80000A8760000A8780000A8CE0000A8D00000A92F0000A9300000A9C70000A9CA0000AA5D0000AA600000AADF0000AAE00000AAF00000AAF20000ABEB0000ABEC0000FE120000FE130000FE150000FE170000FE500000FE530000FE540000FE580000FF010000FF020000FF0C0000FF0D0000FF0E0000FF0F0000FF1A0000FF1C0000FF1F0000FF200000FF610000FF620000FF640000FF650001039F000103A0000103D0000103D100010857000108580001091F0001092000010A5600010A5800010AF000010AF600010B3A00010B4000010B9900010B9D00010F5500010F5A00010F8600010F8A000110470001104E000110BE000110C20001114100011144000111C5000111C7000111CD000111CE000111DE000111E0000112380001123D000112A9000112AA000113D4000113D60001144B0001144E0001145A0001145C000115C2000115C6000115C9000115D800011641000116430001173C0001173F0001194400011945000119460001194700011A4200011A4400011A9B00011A9D00011AA100011AA300011C4100011C4400011C7100011C7200011EF700011EF900011F4300011F45000124700001247500016A6E00016A7000016AF500016AF600016B3700016B3A00016B4400016B4500016D6E00016D7000016E9700016E990001BC9F0001BCA00001DA870001DA8B";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfOther_Math(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"0000005E0000005F000003D0000003D3000003D5000003D6000003F0000003F2000003F4000003F600002016000020170000203200002035000020400000204100002061000020650000207D0000207F0000208D0000208F000020D0000020DD000020E1000020E2000020E5000020E7000020EB000020F0000021020000210300002107000021080000210A000021140000211500002116000021190000211E0000212400002125000021280000212A0000212C0000212E0000212F0000213200002133000021390000213C00002140000021450000214A000021950000219A0000219C000021A0000021A1000021A3000021A4000021A6000021A7000021A8000021A9000021AE000021B0000021B2000021B6000021B8000021BC000021CE000021D0000021D2000021D3000021D4000021D5000021DC000021DD000021DE000021E4000021E6000023080000230C000023B4000023B6000023B7000023B8000023D0000023D1000023E2000023E3000025A0000025A2000025AE000025B7000025BC000025C1000025C6000025C8000025CA000025CC000025CF000025D4000025E2000025E3000025E4000025E5000025E7000025ED00002605000026070000264000002641000026420000264300002660000026640000266D0000266F000027C5000027C7000027E6000027F00000298300002999000029D8000029DC000029FC000029FE0000FE610000FE620000FE630000FE640000FE680000FE690000FF3C0000FF3D0000FF3E0000FF3F0001D4000001D4550001D4560001D49D0001D49E0001D4A00001D4A20001D4A30001D4A50001D4A70001D4A90001D4AD0001D4AE0001D4BA0001D4BB0001D4BC0001D4BD0001D4C40001D4C50001D5060001D5070001D50B0001D50D0001D5150001D5160001D51D0001D51E0001D53A0001D53B0001D53F0001D5400001D5450001D5460001D5470001D54A0001D5510001D5520001D6A60001D6A80001D6C10001D6C20001D6DB0001D6DC0001D6FB0001D6FC0001D7150001D7160001D7350001D7360001D74F0001D7500001D76F0001D7700001D7890001D78A0001D7A90001D7AA0001D7C30001D7C40001D7CC0001D7CE0001D8000001EE000001EE040001EE050001EE200001EE210001EE230001EE240001EE250001EE270001EE280001EE290001EE330001EE340001EE380001EE390001EE3A0001EE3B0001EE3C0001EE420001EE430001EE470001EE480001EE490001EE4A0001EE4B0001EE4C0001EE4D0001EE500001EE510001EE530001EE540001EE550001EE570001EE580001EE590001EE5A0001EE5B0001EE5C0001EE5D0001EE5E0001EE5F0001EE600001EE610001EE630001EE640001EE650001EE670001EE6B0001EE6C0001EE730001EE740001EE780001EE790001EE7D0001EE7E0001EE7F0001EE800001EE8A0001EE8B0001EE9C0001EEA10001EEA40001EEA50001EEAA0001EEAB0001EEBC";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfHex_Digit(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"000000300000003A000000410000004700000061000000670000FF100000FF1A0000FF210000FF270000FF410000FF47";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfASCII_Hex_Digit(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"000000300000003A00000041000000470000006100000067";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfOther_Alphabetic(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"00000345000003460000036300000370000005B0000005BE000005BF000005C0000005C1000005C3000005C4000005C6000005C7000005C8000006100000061B0000064B0000065800000659000006600000067000000671000006D6000006DD000006E1000006E5000006E7000006E9000006ED000006EE00000711000007120000073000000740000007A6000007B100000816000008180000081B000008240000082500000828000008290000082D0000089700000898000008D4000008E0000008E3000008EA000008F0000009040000093A0000093C0000093E0000094D0000094E00000950000009550000095800000962000009640000098100000984000009BE000009C5000009C7000009C9000009CB000009CD000009D7000009D8000009E2000009E400000A0100000A0400000A3E00000A4300000A4700000A4900000A4B00000A4D00000A5100000A5200000A7000000A7200000A7500000A7600000A8100000A8400000ABE00000AC600000AC700000ACA00000ACB00000ACD00000AE200000AE400000AFA00000AFD00000B0100000B0400000B3E00000B4500000B4700000B4900000B4B00000B4D00000B5600000B5800000B6200000B6400000B8200000B8300000BBE00000BC300000BC600000BC900000BCA00000BCD00000BD700000BD800000C0000000C0500000C3E00000C4500000C4600000C4900000C4A00000C4D00000C5500000C5700000C6200000C6400000C8100000C8400000CBE00000CC500000CC600000CC900000CCA00000CCD00000CD500000CD700000CE200000CE400000CF300000CF400000D0000000D0400000D3E00000D4500000D4600000D4900000D4A00000D4D00000D5700000D5800000D6200000D6400000D8100000D8400000DCF00000DD500000DD600000DD700000DD800000DE000000DF200000DF400000E3100000E3200000E3400000E3B00000E4D00000E4E00000EB100000EB200000EB400000EBA00000EBB00000EBD00000ECD00000ECE00000F7100000F8400000F8D00000F9800000F9900000FBD0000102B0000103700001038000010390000103B0000103F000010560000105A0000105E000010610000106200001065000010670000106E0000107100001075000010820000108E0000108F000010900000109A0000109E0000171200001714000017320000173400001752000017540000177200001774000017B6000017C90000188500001887000018A9000018AA000019200000192C000019300000193900001A1700001A1C00001A5500001A5F00001A6100001A7500001ABF00001AC100001ACC00001ACF00001B0000001B0500001B3500001B4400001B8000001B8300001BA100001BAA00001BAC00001BAE00001BE700001BF200001C2400001C3700001DD300001DF5000024B6000024EA00002DE000002E000000A6740000A67C0000A69E0000A6A00000A8020000A8030000A80B0000A80C0000A8230000A8280000A8800000A8820000A8B40000A8C40000A8C50000A8C60000A8FF0000A9000000A9260000A92B0000A9470000A9530000A9800000A9840000A9B40000A9C00000A9E50000A9E60000AA290000AA370000AA430000AA440000AA4C0000AA4E0000AA7B0000AA7E0000AAB00000AAB10000AAB20000AAB50000AAB70000AAB90000AABE0000AABF0000AAEB0000AAF00000AAF50000AAF60000ABE30000ABEB0000FB1E0000FB1F000103760001037B00010A0100010A0400010A0500010A0700010A0C00010A1000010D2400010D2800010D6900010D6A00010EAB00010EAD00010EFC00010EFD0001100000011003000110380001104600011073000110750001108000011083000110B0000110B9000110C2000110C30001110000011103000111270001113300011145000111470001118000011183000111B3000111C0000111CE000111D00001122C0001123500011237000112380001123E0001123F0001124100011242000112DF000112E900011300000113040001133E0001134500011347000113490001134B0001134D00011357000113580001136200011364000113B8000113C1000113C2000113C3000113C5000113C6000113C7000113CB000113CC000113CE00011435000114420001144300011446000114B0000114C2000115AF000115B6000115B8000115BF000115DC000115DE000116300001163F0001164000011641000116AB000116B60001171D0001172B0001182C00011839000119300001193600011937000119390001193B0001193D00011940000119410001194200011943000119D1000119D8000119DA000119E0000119E4000119E500011A0100011A0B00011A3500011A3A00011A3B00011A3F00011A5100011A5C00011A8A00011A9800011C2F00011C3700011C3800011C3F00011C9200011CA800011CA900011CB700011D3100011D3700011D3A00011D3B00011D3C00011D3E00011D3F00011D4200011D4300011D4400011D4700011D4800011D8A00011D8F00011D9000011D9200011D9300011D9700011EF300011EF700011F0000011F0200011F0300011F0400011F3400011F3B00011F3E00011F410001611E0001612F00016F4F00016F5000016F5100016F8800016F8F00016F9300016FF000016FF20001BC9E0001BC9F0001E0000001E0070001E0080001E0190001E01B0001E0220001E0230001E0250001E0260001E02B0001E08F0001E0900001E9470001E9480001F1300001F14A0001F1500001F16A0001F1700001F18A";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfIdeographic(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"0000300600003008000030210000302A000030380000303B0000340000004DC000004E000000A0000000F9000000FA6E0000FA700000FADA00016FE400016FE500017000000187F80001880000018CD600018CFF00018D090001B1700001B2FC000200000002A6E00002A7000002B73A0002B7400002B81E0002B8200002CEA20002CEB00002EBE10002EBF00002EE5E0002F8000002FA1E000300000003134B00031350000323B0";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfDiacritic(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"0000005E0000005F0000006000000061000000A8000000A9000000AF000000B0000000B4000000B5000000B7000000B9000002B00000034F00000350000003580000035D0000036300000374000003760000037A0000037B00000384000003860000048300000488000005590000055A00000591000005A2000005A3000005BE000005BF000005C0000005C1000005C3000005C4000005C50000064B000006530000065700000659000006DF000006E1000006E5000006E7000006EA000006ED000007300000074B000007A6000007B1000007EB000007F6000008180000081A00000898000008A0000008C9000008D3000008E3000008FF0000093C0000093D0000094D0000094E00000951000009550000097100000972000009BC000009BD000009CD000009CE00000A3C00000A3D00000A4D00000A4E00000ABC00000ABD00000ACD00000ACE00000AFD00000B0000000B3C00000B3D00000B4D00000B4E00000B5500000B5600000BCD00000BCE00000C3C00000C3D00000C4D00000C4E00000CBC00000CBD00000CCD00000CCE00000D3B00000D3D00000D4D00000D4E00000DCA00000DCB00000E3A00000E3B00000E4700000E4D00000E4E00000E4F00000EBA00000EBB00000EC800000ECD00000F1800000F1A00000F3500000F3600000F3700000F3800000F3900000F3A00000F3E00000F4000000F8200000F8500000F8600000F8800000FC600000FC70000103700001038000010390000103B0000106300001065000010690000106E000010870000108E0000108F000010900000109A0000109C0000135D0000136000001714000017160000173400001735000017C9000017D4000017DD000017DE000019390000193C00001A6000001A6100001A7500001A7D00001A7F00001A8000001AB000001ABF00001AC100001ACC00001B3400001B3500001B4400001B4500001B6B00001B7400001BAA00001BAC00001BE600001BE700001BF200001BF400001C3600001C3800001C7800001C7E00001CD000001CE900001CED00001CEE00001CF400001CF500001CF700001CFA00001D2C00001D6B00001DC400001DD000001DF500001E0000001FBD00001FBE00001FBF00001FC200001FCD00001FD000001FDD00001FE000001FED00001FF000001FFD00001FFF00002CEF00002CF200002E2F00002E300000302A00003030000030990000309D000030FC000030FD0000A66F0000A6700000A67C0000A67E0000A67F0000A6800000A69C0000A69E0000A6F00000A6F20000A7000000A7220000A7880000A78B0000A7F80000A7FA0000A8060000A8070000A82C0000A82D0000A8C40000A8C50000A8E00000A8F20000A92B0000A92F0000A9530000A9540000A9B30000A9B40000A9C00000A9C10000A9E50000A9E60000AA7B0000AA7E0000AABF0000AAC30000AAF60000AAF70000AB5B0000AB600000AB690000AB6C0000ABEC0000ABEE0000FB1E0000FB1F0000FE200000FE300000FF3E0000FF3F0000FF400000FF410000FF700000FF710000FF9E0000FFA00000FFE30000FFE4000102E0000102E1000107800001078600010787000107B1000107B2000107BB00010A3800010A3B00010A3F00010A4000010AE500010AE700010D2200010D2800010D4E00010D4F00010D6900010D6E00010EFD00010F0000010F4600010F5100010F8200010F8600011046000110470001107000011071000110B9000110BB00011133000111350001117300011174000111C0000111C1000111CA000111CD0001123500011237000112E9000112EB0001133B0001133D0001134D0001134E000113660001136D0001137000011375000113CE000113D1000113D2000113D4000113E1000113E300011442000114430001144600011447000114C2000114C4000115BF000115C10001163F00011640000116B6000116B80001172B0001172C000118390001183B0001193D0001193F0001194300011944000119E0000119E100011A3400011A3500011A4700011A4800011A9900011A9A00011C3F00011C4000011D4200011D4300011D4400011D4600011D9700011D9800011F4100011F4300011F5A00011F5B00013447000134560001612F0001613000016AF000016AF500016B3000016B3700016D6B00016D6D00016F8F00016FA000016FF000016FF20001AFF00001AFF40001AFF50001AFFC0001AFFD0001AFFF0001CF000001CF2E0001CF300001CF470001D1670001D16A0001D16D0001D1730001D17B0001D1830001D1850001D18C0001D1AA0001D1AE0001E0300001E06E0001E1300001E1370001E2AE0001E2AF0001E2EC0001E2F00001E5EE0001E5F00001E8D00001E8D70001E9440001E9470001E9480001E94B";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfExtender(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"000000B7000000B8000002D0000002D20000064000000641000007FA000007FB00000A7100000A7200000AFB00000AFC00000B5500000B5600000E4600000E4700000EC600000EC70000180A0000180B000018430000184400001AA700001AA800001C3600001C3700001C7B00001C7C000030050000300600003031000030360000309D0000309F000030FC000030FF0000A0150000A0160000A60C0000A60D0000A9CF0000A9D00000A9E60000A9E70000AA700000AA710000AADD0000AADE0000AAF30000AAF50000FF700000FF71000107810001078300010D4E00010D4F00010D6A00010D6B00010D6F00010D7000011237000112380001135D0001135E000113D2000113D4000115C6000115C900011A9800011A9900016B4200016B4400016FE000016FE200016FE300016FE40001E13C0001E13E0001E5EF0001E5F00001E9440001E947";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfOther_Lowercase(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"000000AA000000AB000000BA000000BB000002B0000002B9000002C0000002C2000002E0000002E500000345000003460000037A0000037B000010FC000010FD00001D2C00001D6B00001D7800001D7900001D9B00001DC000002071000020720000207F00002080000020900000209D0000217000002180000024D0000024EA00002C7C00002C7E0000A69C0000A69E0000A7700000A7710000A7F20000A7F50000A7F80000A7FA0000AB5C0000AB600000AB690000AB6A0001078000010781000107830001078600010787000107B1000107B2000107BB0001E0300001E06E";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfOther_Uppercase(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"0000216000002170000024B6000024D00001F1300001F14A0001F1500001F16A0001F1700001F18A";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfNoncharacter_Code_Point(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"0000FDD00000FDF00000FFFE000100000001FFFE000200000002FFFE000300000003FFFE000400000004FFFE000500000005FFFE000600000006FFFE000700000007FFFE000800000008FFFE000900000009FFFE000A0000000AFFFE000B0000000BFFFE000C0000000CFFFE000D0000000DFFFE000E0000000EFFFE000F0000000FFFFE001000000010FFFE00110000";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfOther_Grapheme_Extend(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"000009BE000009BF000009D7000009D800000B3E00000B3F00000B5700000B5800000BBE00000BBF00000BD700000BD800000CC000000CC100000CC200000CC300000CC700000CC900000CCA00000CCC00000CD500000CD700000D3E00000D3F00000D5700000D5800000DCF00000DD000000DDF00000DE00000171500001716000017340000173500001B3500001B3600001B3B00001B3C00001B3D00001B3E00001B4300001B4500001BAA00001BAB00001BF200001BF40000200C0000200D0000302E000030300000A9530000A9540000A9C00000A9C10000FF9E0000FFA0000111C0000111C100011235000112360001133E0001133F0001134D0001134E0001135700011358000113B8000113B9000113C2000113C3000113C5000113C6000113C7000113CA000113CF000113D0000114B0000114B1000114BD000114BE000115AF000115B0000116B6000116B700011930000119310001193D0001193E00011F4100011F4200016FF000016FF20001D1650001D1670001D16D0001D173000E0020000E0080";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfIDS_Binary_Operator(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"00002FF000002FF200002FF400002FFE000031EF000031F0";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfIDS_Trinary_Operator(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"00002FF200002FF4";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfIDS_Unary_Operator(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"00002FFE00003000";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfRadical(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"00002E8000002E9A00002E9B00002EF400002F0000002FD6";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfUnified_Ideograph(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"0000340000004DC000004E000000A0000000FA0E0000FA100000FA110000FA120000FA130000FA150000FA1F0000FA200000FA210000FA220000FA230000FA250000FA270000FA2A000200000002A6E00002A7000002B73A0002B7400002B81E0002B8200002CEA20002CEB00002EBE10002EBF00002EE5E000300000003134B00031350000323B0";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfOther_Default_Ignorable_Code_Point(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"0000034F000003500000115F00001161000017B4000017B6000020650000206600003164000031650000FFA00000FFA10000FFF00000FFF9000E0000000E0001000E0002000E0020000E0080000E0100000E01F0000E1000";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfDeprecated(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"000001490000014A000006730000067400000F7700000F7800000F7900000F7A000017A3000017A50000206A00002070000023290000232B000E0001000E0002";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfSoft_Dotted(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"000000690000006B0000012F00000130000002490000024A00000268000002690000029D0000029E000002B2000002B3000003F3000003F40000045600000457000004580000045900001D6200001D6300001D9600001D9700001DA400001DA500001DA800001DA900001E2D00001E2E00001ECB00001ECC0000207100002072000021480000214A00002C7C00002C7D0001D4220001D4240001D4560001D4580001D48A0001D48C0001D4BE0001D4C00001D4F20001D4F40001D5260001D5280001D55A0001D55C0001D58E0001D5900001D5C20001D5C40001D5F60001D5F80001D62A0001D62C0001D65E0001D6600001D6920001D6940001DF1A0001DF1B0001E04C0001E04E0001E0680001E069";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfLogical_Order_Exception(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"00000E4000000E4500000EC000000EC5000019B5000019B8000019BA000019BB0000AAB50000AAB70000AAB90000AABA0000AABB0000AABD";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfOther_ID_Start(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"000018850000188700002118000021190000212E0000212F0000309B0000309D";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfOther_ID_Continue(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"000000B7000000B800000387000003880000136900001372000019DA000019DB0000200C0000200E000030FB000030FC0000FF650000FF66";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfSentence_Terminal(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"00000021000000220000002E0000002F0000003F00000040000005890000058A0000061D00000620000006D4000006D50000070000000703000007F9000007FA0000083700000838000008390000083A0000083D0000083F00000964000009660000104A0000104C000013620000136300001367000013690000166E0000166F0000173500001737000017D4000017D60000180300001804000018090000180A000019440000194600001AA800001AAC00001B4E00001B5000001B5A00001B5C00001B5E00001B6000001B7D00001B8000001C3B00001C3D00001C7E00001C8000002024000020250000203C0000203E000020470000204A00002CF900002CFC00002E2E00002E2F00002E3C00002E3D00002E5300002E5500003002000030030000A4FF0000A5000000A60E0000A6100000A6F30000A6F40000A6F70000A6F80000A8760000A8780000A8CE0000A8D00000A92F0000A9300000A9C80000A9CA0000AA5D0000AA600000AAF00000AAF20000ABEB0000ABEC0000FE120000FE130000FE150000FE170000FE520000FE530000FE560000FE580000FF010000FF020000FF0E0000FF0F0000FF1F0000FF200000FF610000FF6200010A5600010A5800010F5500010F5A00010F8600010F8A0001104700011049000110BE000110C20001114100011144000111C5000111C7000111CD000111CE000111DE000111E0000112380001123A0001123B0001123D000112A9000112AA000113D4000113D60001144B0001144D000115C2000115C4000115C9000115D800011641000116430001173C0001173F0001194400011945000119460001194700011A4200011A4400011A9B00011A9D00011C4100011C4300011EF700011EF900011F4300011F4500016A6E00016A7000016AF500016AF600016B3700016B3900016B4400016B4500016D6E00016D7000016E9800016E990001BC9F0001BCA00001DA880001DA89";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfVariation_Selector(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"0000180B0000180E0000180F000018100000FE000000FE10000E0100000E01F0";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfPattern_White_Space(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"000000090000000E000000200000002100000085000000860000200E00002010000020280000202A";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfPattern_Syntax(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"00000021000000300000003A000000410000005B0000005F00000060000000610000007B0000007F000000A1000000A8000000A9000000AA000000AB000000AD000000AE000000AF000000B0000000B2000000B6000000B7000000BB000000BC000000BF000000C0000000D7000000D8000000F7000000F80000201000002028000020300000203F0000204100002054000020550000205F000021900000246000002500000027760000279400002C0000002E0000002E800000300100003004000030080000302100003030000030310000FD3E0000FD400000FE450000FE47";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfPrepended_Concatenation_Mark(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"0000060000000606000006DD000006DE0000070F000007100000089000000892000008E2000008E3000110BD000110BE000110CD000110CE";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfRegional_Indicator(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"0001F1E60001F200";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfID_Compat_Math_Start(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"000022020000220300002207000022080000221E0000221F0001D6C10001D6C20001D6DB0001D6DC0001D6FB0001D6FC0001D7150001D7160001D7350001D7360001D74F0001D7500001D76F0001D7700001D7890001D78A0001D7A90001D7AA0001D7C30001D7C4";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfID_Compat_Math_Continue(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"000000B2000000B4000000B9000000BA0000207000002071000020740000207F000020800000208F000022020000220300002207000022080000221E0000221F0001D6C10001D6C20001D6DB0001D6DC0001D6FB0001D6FC0001D7150001D7160001D7350001D7360001D74F0001D7500001D76F0001D7700001D7890001D78A0001D7A90001D7AA0001D7C30001D7C4";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 
 export extern(C) bool sidero_utf_lut_isMemberOfModifier_Combining_Mark(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"00000654000006560000065800000659000006DC000006DD000006E3000006E4000006E7000006E9000008CA000008CC000008CD000008D0000008D3000008D4000008F3000008F4";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }

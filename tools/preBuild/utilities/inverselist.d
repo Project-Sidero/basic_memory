@@ -43,22 +43,19 @@ void generateIsCheck(ref Appender!string interfaceAppender, ref Appender!string 
             // classic charInSet binary search as per Unicode Demystified pg.505
 
             implementationAppender ~= q{
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 };
         }
 
@@ -67,32 +64,32 @@ void generateIsCheck(ref Appender!string interfaceAppender, ref Appender!string 
 }
 
 void generateReturn(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
-    string functionName, ValueRange!dchar[] ranges, ubyte[] returnValues) {
+        string functionName, ValueRange!dchar[] ranges, ubyte[] returnValues) {
     generateIntegerReturn!(ubyte, 2)(interfaceAppender, implementationAppender, functionName, ranges, returnValues);
 }
 
 void generateReturn(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
-    string functionName, dchar[] ranges, ubyte[] returnValues) {
+        string functionName, dchar[] ranges, ubyte[] returnValues) {
     generateIntegerReturn!(ubyte, 2)(interfaceAppender, implementationAppender, functionName, ranges, returnValues);
 }
 
 void generateReturn(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
-    string functionName, ValueRange!dchar[] ranges, dchar[] returnValues) {
+        string functionName, ValueRange!dchar[] ranges, dchar[] returnValues) {
     generateIntegerReturn!(dchar, 8)(interfaceAppender, implementationAppender, functionName, ranges, returnValues);
 }
 
 void generateReturn(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
-    string functionName, dchar[] ranges, dchar[] returnValues) {
+        string functionName, dchar[] ranges, dchar[] returnValues) {
     generateIntegerReturn!(dchar, 8)(interfaceAppender, implementationAppender, functionName, ranges, returnValues);
 }
 
 void generateReturn(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
-    string functionName, ValueRange!dchar[] ranges, uint[] returnValues) {
+        string functionName, ValueRange!dchar[] ranges, uint[] returnValues) {
     generateIntegerReturn!(uint, 8)(interfaceAppender, implementationAppender, functionName, ranges, returnValues);
 }
 
 void generateReturn(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
-    string functionName, dchar[] ranges, uint[] returnValues) {
+        string functionName, dchar[] ranges, uint[] returnValues) {
     generateIntegerReturn!(uint, 8)(interfaceAppender, implementationAppender, functionName, ranges, returnValues);
 }
 
@@ -179,27 +176,24 @@ void generateReturn(ref Appender!string interfaceAppender, ref Appender!string i
             // classic charInSet binary search as per Unicode Demystified pg.505
 
             implementationAppender ~= q{
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            if ((pos & 1) != 0)
-                return null;
-
-            const offset = ReturnValues[mid];
-            const offset2 = ReturnValues[mid + 1];
-            return ReturnValuesInterned[offset .. offset2];
-        }
     }
 
-    return null;
+    const pos = high - 1;
+    if((pos & 1) != 0)
+        return null;
+
+    const offset = ReturnValues[pos];
+    const offset2 = ReturnValues[pos + 1];
+    return ReturnValuesInterned[offset .. offset2];
 };
         }
 
@@ -208,7 +202,7 @@ void generateReturn(ref Appender!string interfaceAppender, ref Appender!string i
 }
 
 void generateReturn(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
-    string functionName, dchar[] ranges, dstring[] returnValues) {
+        string functionName, dchar[] ranges, dstring[] returnValues) {
     {
         interfaceAppender ~= "export extern(C) dstring ";
         interfaceAppender ~= functionName;
@@ -268,7 +262,7 @@ void generateReturn(ref Appender!string interfaceAppender, ref Appender!string i
 
             foreach(returnValue; returnValues) {
                 foreach(c; returnValue)
-                implementationAppender.formattedWrite!"%08X"(c);
+                    implementationAppender.formattedWrite!"%08X"(c);
             }
 
             const diff = implementationAppender.data.length - startLength;
@@ -281,24 +275,19 @@ void generateReturn(ref Appender!string interfaceAppender, ref Appender!string i
             // classic charInSet binary search as per Unicode Demystified pg.505
 
             implementationAppender ~= q{
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length - 1;
 
-    while(low < high) {
-        size_t mid = (low + high) / 2;
+    while(low <= high) {
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
-            low = mid + 1;
-        else if (against < Table[mid])
-            high = mid;
-        else {
-            const pos = high - 1;
-            if ((pos & 1) != 0)
-                return null;
-
+        if (Table[mid] == against) {
             const offset = ReturnValues[mid << 1];
             const offset2 = ReturnValues[(mid << 1) + 1];
             return ReturnValuesInterned[offset .. offset2];
-        }
+        } else if (Table[mid] < against)
+            low = mid + 1;
+        else
+            high = mid - 1;
     }
 
     return null;
@@ -311,8 +300,8 @@ void generateReturn(ref Appender!string interfaceAppender, ref Appender!string i
 
 private:
 
-void generateIntegerReturn(Type, uint SizeToPrint)(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
-    string functionName, ValueRange!dchar[] ranges, Type[] returnValues) {
+void generateIntegerReturn(Type, uint SizeToPrint)(ref Appender!string interfaceAppender,
+        ref Appender!string implementationAppender, string functionName, ValueRange!dchar[] ranges, Type[] returnValues) {
     {
         interfaceAppender ~= "export extern(C) ";
         interfaceAppender ~= Type.stringof;
@@ -360,7 +349,7 @@ void generateIntegerReturn(Type, uint SizeToPrint)(ref Appender!string interface
             const startLength = implementationAppender.data.length;
 
             foreach(returnValue; returnValues) {
-                enum Format = "%0" ~ SizeToPrint.stringof[0 .. $-1] ~ "X";
+                enum Format = "%0" ~ SizeToPrint.stringof[0 .. $ - 1] ~ "X";
                 implementationAppender.formattedWrite!Format(returnValue);
             }
 
@@ -374,22 +363,19 @@ void generateIntegerReturn(Type, uint SizeToPrint)(ref Appender!string interface
             // classic charInSet binary search as per Unicode Demystified pg.505
 
             implementationAppender ~= q{
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0 ? ReturnValues[mid >> 1] : 0;
-        }
     }
 
-    return 0;
+    const pos = high - 1;
+    return (mid & 1) == 0 ? ReturnValues[mid >> 1] : 0;
 };
         }
 
@@ -397,8 +383,8 @@ void generateIntegerReturn(Type, uint SizeToPrint)(ref Appender!string interface
     }
 }
 
-void generateIntegerReturn(Type, uint SizeToPrint)(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
-    string functionName, dchar[] ranges, Type[] returnValues) {
+void generateIntegerReturn(Type, uint SizeToPrint)(ref Appender!string interfaceAppender,
+        ref Appender!string implementationAppender, string functionName, dchar[] ranges, Type[] returnValues) {
     {
         interfaceAppender ~= "export extern(C) ";
         interfaceAppender ~= Type.stringof;
@@ -437,7 +423,7 @@ void generateIntegerReturn(Type, uint SizeToPrint)(ref Appender!string interface
             const startLength = implementationAppender.data.length;
 
             foreach(returnValue; returnValues) {
-                enum Format = "%0" ~ SizeToPrint.stringof[0 .. $-1] ~ "X";
+                enum Format = "%0" ~ SizeToPrint.stringof[0 .. $ - 1] ~ "X";
                 implementationAppender.formattedWrite!Format(returnValue);
             }
 
@@ -451,18 +437,17 @@ void generateIntegerReturn(Type, uint SizeToPrint)(ref Appender!string interface
             // classic charInSet binary search as per Unicode Demystified pg.505
 
             implementationAppender ~= q{
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length - 1;
 
-    while(low < high) {
-        size_t mid = (low + high) / 2;
+    while(low <= high) {
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (Table[mid] == against)
+            return ReturnValues[mid];
+        else if (Table[mid] < against)
             low = mid + 1;
-        else if (against < Table[mid])
-            high = mid;
-        else {
-            return ReturnValues[mid >> 1];
-        }
+        else
+            high = mid - 1;
     }
 
     return 0;

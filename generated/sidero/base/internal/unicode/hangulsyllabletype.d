@@ -30,22 +30,19 @@ struct ValueRange {
 export extern(C) bool sidero_utf_lut_isHangulSyllable(dchar against) @trusted nothrow @nogc pure {
     static immutable dchar[] Table = cast(dchar[])x"00001100000012000000A9600000A97D0000AC000000D7A40000D7B00000D7C70000D7CB0000D7FC";
 
-    size_t low, high = Table.length;
+    ptrdiff_t low, high = Table.length;
 
     while(low < high) {
-        size_t mid = (low + high) / 2;
+        const mid = low + ((high - low) / 2);
 
-        if (against > Table[mid])
+        if (against >= Table[mid])
             low = mid + 1;
         else if (against < Table[mid])
             high = mid;
-        else {
-            const pos = high - 1;
-            return (pos & 1) == 0;
-        }
     }
 
-    return false;
+    const pos = high - 1;
+    return (pos & 1) == 0;
 }
 export extern(C) immutable(void[]) sidero_utf_lut_hangulSyllables2(HangulSyllableType type) @safe nothrow @nogc pure {
     final switch(type) {

@@ -4,6 +4,8 @@ import sidero.base.text.unicode.wordbreak;
 import sidero.base.text.wordbreak;
 import std.stdio;
 
+//version = DebugWordBreak;
+
 void wordBreakTests() {
     parseTestFile;
 
@@ -30,7 +32,7 @@ void wordBreakTests() {
 
         writeln("=== ", testId, ": ", test.comment);
 
-        version(none) {
+        version(DebugWordBreak) {
             foreach(i; 0 .. test.value.length)
                 writefln!"%s: %X %s %s"(i, test.value[i], test.value[i], test.canBreak[i]);
         }
@@ -40,7 +42,7 @@ void wordBreakTests() {
         do {
             keepGoing = findNext();
 
-            version(none) {
+            version(DebugWordBreak) {
                 writeln(soFar, ": lastOffset: ", lastOffset, " currentOffset: ", currentOffset, " length: ",
                         currentOffset - lastOffset, " expected length: ", test.lengths[soFar]);
             }
