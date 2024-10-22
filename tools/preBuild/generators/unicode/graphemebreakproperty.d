@@ -8,43 +8,19 @@ void graphemeBreakProperty() {
     processEachLine(readText(UnicodeDatabaseDirectory ~ "GraphemeBreakProperty.txt"), state);
 
     auto internal = appender!string();
-    internal ~= "module sidero.base.internal.unicode.graphemebreakproperty;\n\n";
+    internal ~= "module sidero.base.internal.unicode.graphemebreakproperty;\n";
     internal ~= "// Generated do not modify\n";
 
     auto api = appender!string();
 
     foreach(i, property; __traits(allMembers, Property)) {
         {
-            SequentialRanges!(bool, SequentialRangeSplitGroup, 2) sr;
-
-            foreach(entry; state.single[__traits(getMember, Property, property)]) {
-                foreach(dchar c; entry.start .. entry.end + 1)
-                sr.add(c, true);
-            }
-            foreach(entry; state.range[__traits(getMember, Property, property)]) {
-                foreach(dchar c; entry.start .. entry.end + 1)
-                sr.add(c, true);
-            }
-
-            sr.splitForSame;
-            sr.calculateTrueSpread;
-            sr.joinWithDiff(null, 256);
-            sr.calculateTrueSpread;
-            sr.layerByRangeMax(0, ushort.max / 4);
-            sr.layerByRangeMax(1, ushort.max / 2);
-
-            LookupTableGenerator!(bool, SequentialRangeSplitGroup, 2) lut;
-            lut.sr = sr;
-            lut.lutType = "bool";
-            lut.name = "sidero_utf_lut_isMemberOfGrapheme" ~ property;
-
-            auto gotDcode = lut.build();
+            internal ~= "\n";
 
             api ~= "\n";
             api ~= "/// Is character member of grapheme break property.\n";
-            api ~= gotDcode[0];
 
-            internal ~= gotDcode[1];
+            generateIsCheck(api, internal, "sidero_utf_lut_isMemberOfGrapheme" ~ property, state.ranges[i]);
         }
     }
 
@@ -54,8 +30,8 @@ void graphemeBreakProperty() {
 
 private:
 import std.array : appender;
-import utilities.sequential_ranges;
-import utilities.lut;
+import utilities.sequential_ranges : ValueRange;
+import utilities.inverselist;
 
 void processEachLine(string inputText, ref TotalState state) {
     import std.algorithm : countUntil, splitter;
@@ -81,21 +57,25 @@ void processEachLine(string inputText, ref TotalState state) {
     void handleLine(ValueRange!dchar valueRange, string propertyStr) {
         Property property;
 
-        Switch:
+    Switch:
         switch(propertyStr) {
             static foreach(P; __traits(allMembers, Property)) {
-                case P:
-                    property = __traits(getMember, Property, P);
-                    break Switch;
+        case P:
+                property = __traits(getMember, Property, P);
+                break Switch;
             }
-                default:
-                assert(0, propertyStr);
+        default:
+            assert(0, propertyStr);
         }
 
-        if(valueRange.isSingle)
-        state.single[property] ~= valueRange;
-        else
-        state.range[property] ~= valueRange;
+        if(state.ranges[property].length == 0)
+            state.ranges[property] ~= valueRange;
+        else {
+            if(valueRange.start == state.ranges[property][$ - 1].end + 1)
+                state.ranges[property][$ - 1].end = valueRange.end;
+            else
+                state.ranges[property] ~= valueRange;
+        }
     }
 
     foreach(line; inputText.lineSplitter) {
@@ -103,15 +83,15 @@ void processEachLine(string inputText, ref TotalState state) {
 
         offset = line.countUntil('#');
         if(offset >= 0)
-        line = line[0 .. offset];
+            line = line[0 .. offset];
         line = line.strip;
 
         if(line.length < 5) // anything that low can't represent a functional line
-        continue;
+            continue;
 
         offset = line.countUntil(';');
         if(offset < 0) // no char range
-        continue;
+            continue;
         string charRangeStr = line[0 .. offset].strip;
         line = line[offset + 1 .. $].strip;
 
@@ -122,8 +102,7 @@ void processEachLine(string inputText, ref TotalState state) {
 }
 
 struct TotalState {
-    ValueRange!dchar[][Property.max + 1] single;
-    ValueRange!dchar[][Property.max + 1] range;
+    ValueRange!dchar[][Property.max + 1] ranges;
 }
 
 enum Property {

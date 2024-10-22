@@ -1,19 +1,6 @@
 module sidero.base.internal.unicode.hangulsyllabletype;
 
 // Generated do not modify
-export extern(C) immutable(bool) sidero_utf_lut_isHangulSyllable(dchar input) @trusted nothrow @nogc pure {
-    if (input >= 0x1100 && input <= 0x11FF)
-        return cast(bool)true;
-    else if (input >= 0xA960 && input <= 0xA97C)
-        return cast(bool)true;
-    else if (input >= 0xAC00 && input <= 0xD7A3)
-        return cast(bool)true;
-    else if (input >= 0xD7B0 && input <= 0xD7C6)
-        return cast(bool)true;
-    else if (input >= 0xD7CB && input <= 0xD7FB)
-        return cast(bool)true;
-    return typeof(return).init;
-}
 
 enum HangulSyllableType {
     LeadingConsonant, // L
@@ -40,6 +27,23 @@ struct ValueRange {
     }
 }
 
+export extern(C) bool sidero_utf_lut_isHangulSyllable(dchar against) @trusted nothrow @nogc pure {
+    static immutable dchar[] Table = cast(dchar[])x"00001100000012000000A9600000A97D0000AC000000D7A40000D7B00000D7C70000D7CB0000D7FC";
+
+    size_t low, high = Table.length;
+
+    while(low < high) {
+        size_t mid = (low + high) / 2;
+
+        if (against >= Table[mid])
+            low = mid + 1;
+        else if (against < Table[mid])
+            high = mid;
+    }
+
+    const pos = high - 1;
+    return (pos & 1) == 0;
+}
 export extern(C) immutable(void[]) sidero_utf_lut_hangulSyllables2(HangulSyllableType type) @safe nothrow @nogc pure {
     final switch(type) {
         case HangulSyllableType.LeadingConsonant:

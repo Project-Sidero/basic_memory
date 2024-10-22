@@ -1,4 +1,4 @@
-﻿module generators.unicode.hangulsyllabletype;
+module generators.unicode.hangulsyllabletype;
 import constants;
 
 void hangulSyllableType() {
@@ -11,55 +11,9 @@ void hangulSyllableType() {
 
     auto internal = appender!string();
     internal ~= "module sidero.base.internal.unicode.hangulsyllabletype;\n\n";
-    internal ~= "// Generated do not modify\n";
+    internal ~= "// Generated do not modify\n\n";
 
-    auto api = appender!string();
-
-    {
-        SequentialRanges!(bool, SequentialRangeSplitGroup, 0) sr;
-
-        foreach (entry; state.L) {
-            foreach (codepoint; entry.start .. entry.end + 1)
-                sr.add(codepoint, true);
-        }
-        foreach (entry; state.V) {
-            foreach (codepoint; entry.start .. entry.end + 1)
-                sr.add(codepoint, true);
-        }
-        foreach (entry; state.T) {
-            foreach (codepoint; entry.start .. entry.end + 1)
-                sr.add(codepoint, true);
-        }
-        foreach (entry; state.LV) {
-            foreach (codepoint; entry.start .. entry.end + 1)
-                sr.add(codepoint, true);
-        }
-        foreach (entry; state.LVT) {
-            foreach (codepoint; entry.start .. entry.end + 1)
-                sr.add(codepoint, true);
-        }
-
-        sr.calculateTrueSpread;
-        sr.joinWhenClose(null, 5, 1);
-        sr.calculateTrueSpread;
-
-        LookupTableGenerator!(bool, SequentialRangeSplitGroup, 0) lut;
-        lut.sr = sr;
-        lut.lutType = "bool";
-        lut.name = "sidero_utf_lut_isHangulSyllable";
-
-        auto gotDcode = lut.build();
-
-        api ~= "\n";
-        api ~= "/// Is character a hangul syllable?\n";
-        api ~= gotDcode[0];
-        api ~= "\n";
-
-        internal ~= gotDcode[1];
-    }
-
-    {
-        internal ~= "enum HangulSyllableType {
+    internal ~= "enum HangulSyllableType {
     LeadingConsonant, // L
     Vowel, // V
     TrailingConsonant, // T
@@ -86,6 +40,14 @@ struct ValueRange {
 
 ";
 
+    auto api = appender!string();
+
+    api ~= "\n";
+    api ~= "/// Is character a hangul syllable?\n";
+    generateIsCheck(api, internal, "sidero_utf_lut_isHangulSyllable", state.all);
+    api ~= "\n";
+
+    {
         static string[] NameOfValue = ["LeadingConsonant", "Vowel", "TrailingConsonant", "LV_Syllable", "LVT_Syllable"];
 
         api ~= "/// Gets the ranges of values in a given Hangul syllable type.\n";
@@ -97,12 +59,12 @@ struct ValueRange {
         internal ~= "export extern(C) immutable(void[]) sidero_utf_lut_hangulSyllables2(HangulSyllableType type) @safe nothrow @nogc pure {\n";
         internal ~= "    final switch(type) {\n";
 
-        static foreach (i; 0 .. state.tupleof.length) {
+        static foreach(i; 0 .. 5) {
             {
                 SequentialRanges!(bool, SequentialRangeSplitGroup, 0) sr;
 
-                foreach (entry; state.tupleof[i]) {
-                    foreach (codepoint; entry.start .. entry.end + 1)
+                foreach(entry; state.tupleof[i]) {
+                    foreach(codepoint; entry.start .. entry.end + 1)
                         sr.add(codepoint, true);
                 }
 
@@ -112,8 +74,8 @@ struct ValueRange {
                 internal ~= "        case HangulSyllableType." ~ NameOfValue[i] ~ ":\n";
                 internal ~= "            static immutable Array = [";
 
-                foreach (entry, layerIndexes; sr) {
-                    if (entry.range.isSingle)
+                foreach(entry, layerIndexes; sr) {
+                    if(entry.range.isSingle)
                         internal.formattedWrite!"ValueRange(0x%X), "(entry.range.start);
                     else
                         internal.formattedWrite!"ValueRange(0x%X, 0x%X), "(entry.range.start, entry.range.end);
@@ -135,10 +97,10 @@ struct ValueRange {
 private:
 import std.array : appender;
 import utilities.sequential_ranges;
-import utilities.lut;
+import utilities.inverselist;
 
 void processEachLine(string inputText, ref TotalState state) {
-    import std.algorithm : countUntil, splitter;
+    import std.algorithm : countUntil, splitter, sort;
     import std.string : strip, lineSplitter;
     import std.conv : parse;
 
@@ -146,7 +108,7 @@ void processEachLine(string inputText, ref TotalState state) {
         ValueRange!dchar ret;
 
         ptrdiff_t offsetOfSeperator = charRangeStr.countUntil("..");
-        if (offsetOfSeperator < 0) {
+        if(offsetOfSeperator < 0) {
             ret.start = parse!uint(charRangeStr, 16);
             ret.end = ret.start;
         } else {
@@ -162,11 +124,11 @@ void processEachLine(string inputText, ref TotalState state) {
         ptrdiff_t offset;
 
         offset = line.countUntil('#');
-        if (offset >= 0)
+        if(offset >= 0)
             line = line[0 .. offset];
         line = line.strip;
 
-        switch (line) {
+        switch(line) {
         case "L":
             state.L ~= range;
             break;
@@ -188,19 +150,19 @@ void processEachLine(string inputText, ref TotalState state) {
         }
     }
 
-    foreach (line; inputText.lineSplitter) {
+    foreach(line; inputText.lineSplitter) {
         ptrdiff_t offset;
 
         offset = line.countUntil('#');
-        if (offset >= 0)
+        if(offset >= 0)
             line = line[0 .. offset];
         line = line.strip;
 
-        if (line.length < 5) // anything that low can't represent a functional line
+        if(line.length < 5) // anything that low can't represent a functional line
             continue;
 
         offset = line.countUntil(';');
-        if (offset < 0) // no char range
+        if(offset < 0) // no char range
             continue;
         string charRangeStr = line[0 .. offset].strip;
         line = line[offset + 1 .. $].strip;
@@ -208,8 +170,32 @@ void processEachLine(string inputText, ref TotalState state) {
         ValueRange!dchar range = valueRangeFromString(charRangeStr);
         handleLine(range, line);
     }
+
+    {
+        state.all = state.L;
+        state.all ~= state.V;
+        state.all ~= state.T;
+        state.all ~= state.LV;
+        state.all ~= state.LVT;
+
+        sort!("a.start < b.start")(state.all);
+        ValueRange!dchar[] temp;
+
+        foreach(valueRange; state.all) {
+            if(temp.length == 0)
+                temp ~= valueRange;
+            else {
+                if(valueRange.start == temp[$ - 1].end + 1)
+                    temp[$ - 1].end = valueRange.end;
+                else
+                    temp ~= valueRange;
+            }
+        }
+
+        state.all = temp;
+    }
 }
 
 struct TotalState {
-    ValueRange!dchar[] L, V, T, LV, LVT;
+    ValueRange!dchar[] L, V, T, LV, LVT, all;
 }

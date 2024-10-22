@@ -1,44 +1,21 @@
 module sidero.base.internal.unicode.compositionexclusions;
 
 // Generated do not modify
-export extern(C) immutable(bool) sidero_utf_lut_isCompositionExcluded(dchar input) @trusted nothrow @nogc pure {
-    if (input >= 0x958 && input <= 0x95F)
-        return cast(bool)true;
-    else if (input >= 0x9DC && input <= 0x9DF)
-        return cast(bool)LUT_CE59E73C[cast(size_t)(0 + (input - 0x9DC))];
-    else if (input >= 0xA33 && input <= 0xA36)
-        return cast(bool)LUT_CE59E73C[cast(size_t)(4 + (input - 0xA33))];
-    else if (input >= 0xA59 && input <= 0xA5E)
-        return cast(bool)LUT_CE59E73C[cast(size_t)(8 + (input - 0xA59))];
-    else if (input >= 0xB5C && input <= 0xB5D)
-        return cast(bool)true;
-    else if (input == 0xF43)
-        return cast(bool)true;
-    else if (input >= 0xF4D && input <= 0xF5C)
-        return cast(bool)LUT_CE59E73C[cast(size_t)(14 + (input - 0xF4D))];
-    else if (input == 0xF69)
-        return cast(bool)true;
-    else if (input >= 0xF76 && input <= 0xF78)
-        return cast(bool)LUT_CE59E73C[cast(size_t)(30 + (input - 0xF76))];
-    else if (input == 0xF93)
-        return cast(bool)true;
-    else if (input >= 0xF9D && input <= 0xFAC)
-        return cast(bool)LUT_CE59E73C[cast(size_t)(33 + (input - 0xF9D))];
-    else if (input == 0xFB9)
-        return cast(bool)true;
-    else if (input == 0x2ADC)
-        return cast(bool)true;
-    else if (input >= 0xFB1D && input <= 0xFB1F)
-        return cast(bool)LUT_CE59E73C[cast(size_t)(49 + (input - 0xFB1D))];
-    else if (input >= 0xFB2A && input <= 0xFB4E)
-        return cast(bool)LUT_CE59E73C[cast(size_t)(52 + (input - 0xFB2A))];
-    else if (input >= 0x1D15E && input <= 0x1D164)
-        return cast(bool)true;
-    else if (input >= 0x1D1BB && input <= 0x1D1C0)
-        return cast(bool)true;
-    return typeof(return).init;
-}
-private {
-    static immutable LUT_CE59E73C = [true, true, false, true, true, false, false, true, true, true, true, false, false, true, true, false, false, false, false, true, false, false, false, false, true, false, false, false, false, true, true, false, true, true, false, false, false, false, true, false, false, false, false, true, false, false, false, false, true, true, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, false, true, false, true, true, false, true, true, false, true, true, true, true, true, true, true, true, true, ];
-}
 
+export extern(C) bool sidero_utf_lut_isCompositionExcluded(dchar against) @trusted nothrow @nogc pure {
+    static immutable dchar[] Table = cast(dchar[])x"0000095800000960000009DC000009DE000009DF000009E000000A3300000A3400000A3600000A3700000A5900000A5C00000A5E00000A5F00000B5C00000B5E00000F4300000F4400000F4D00000F4E00000F5200000F5300000F5700000F5800000F5C00000F5D00000F6900000F6A00000F7600000F7700000F7800000F7900000F9300000F9400000F9D00000F9E00000FA200000FA300000FA700000FA800000FAC00000FAD00000FB900000FBA00002ADC00002ADD0000FB1D0000FB1E0000FB1F0000FB200000FB2A0000FB370000FB380000FB3D0000FB3E0000FB3F0000FB400000FB420000FB430000FB450000FB460000FB4F0001D15E0001D1650001D1BB0001D1C1";
+
+    size_t low, high = Table.length;
+
+    while(low < high) {
+        size_t mid = (low + high) / 2;
+
+        if (against >= Table[mid])
+            low = mid + 1;
+        else if (against < Table[mid])
+            high = mid;
+    }
+
+    const pos = high - 1;
+    return (pos & 1) == 0;
+}

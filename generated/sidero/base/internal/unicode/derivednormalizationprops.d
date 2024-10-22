@@ -1,79 +1,20 @@
 module sidero.base.internal.unicode.derivednormalizationprops;
 
 // Generated do not modify
-export extern(C) immutable(bool) sidero_utf_lut_isFullCompositionExcluded(dchar input) @trusted nothrow @nogc pure {
-    if (input >= 0x340 && input <= 0x387) {
-        if (input <= 0x344)
-            return cast(bool)LUT_80A25785[cast(size_t)(0 + (input - 0x340))];
-        else if (input == 0x374)
-            return cast(bool)true;
-        else if (input == 0x37E)
-            return cast(bool)true;
-        else if (input == 0x387)
-            return cast(bool)true;
-    } else if (input >= 0x958 && input <= 0xFB9) {
-        if (input <= 0x95F)
-            return cast(bool)true;
-        else if (input >= 0x9DC && input <= 0x9DF)
-            return cast(bool)LUT_80A25785[cast(size_t)(5 + (input - 0x9DC))];
-        else if (input >= 0xA33 && input <= 0xA36)
-            return cast(bool)LUT_80A25785[cast(size_t)(9 + (input - 0xA33))];
-        else if (input >= 0xA59 && input <= 0xA5E)
-            return cast(bool)LUT_80A25785[cast(size_t)(13 + (input - 0xA59))];
-        else if (input >= 0xB5C && input <= 0xB5D)
-            return cast(bool)true;
-        else if (input == 0xF43)
-            return cast(bool)true;
-        else if (input >= 0xF4D && input <= 0xF5C)
-            return cast(bool)LUT_80A25785[cast(size_t)(19 + (input - 0xF4D))];
-        else if (input == 0xF69)
-            return cast(bool)true;
-        else if (input >= 0xF73 && input <= 0xF78)
-            return cast(bool)LUT_80A25785[cast(size_t)(35 + (input - 0xF73))];
-        else if (input == 0xF81)
-            return cast(bool)true;
-        else if (input == 0xF93)
-            return cast(bool)true;
-        else if (input >= 0xF9D && input <= 0xFAC)
-            return cast(bool)LUT_80A25785[cast(size_t)(41 + (input - 0xF9D))];
-        else if (input == 0xFB9)
-            return cast(bool)true;
-    } else if (input >= 0x1F71 && input <= 0x232A) {
-        if (input <= 0x1F7D)
-            return cast(bool)LUT_80A25785[cast(size_t)(57 + (input - 0x1F71))];
-        else if (input >= 0x1FBB && input <= 0x1FBE)
-            return cast(bool)LUT_80A25785[cast(size_t)(70 + (input - 0x1FBB))];
-        else if (input >= 0x1FC9 && input <= 0x1FCB)
-            return cast(bool)LUT_80A25785[cast(size_t)(74 + (input - 0x1FC9))];
-        else if (input == 0x1FD3)
-            return cast(bool)true;
-        else if (input == 0x1FDB)
-            return cast(bool)true;
-        else if (input == 0x1FE3)
-            return cast(bool)true;
-        else if (input >= 0x1FEB && input <= 0x1FEF)
-            return cast(bool)LUT_80A25785[cast(size_t)(77 + (input - 0x1FEB))];
-        else if (input >= 0x1FF9 && input <= 0x2001)
-            return cast(bool)LUT_80A25785[cast(size_t)(82 + (input - 0x1FF9))];
-        else if (input >= 0x2126 && input <= 0x212B)
-            return cast(bool)LUT_80A25785[cast(size_t)(91 + (input - 0x2126))];
-        else if (input >= 0x2329)
-            return cast(bool)true;
-    } else if (input == 0x2ADC) {
-        return cast(bool)true;
-    } else if (input >= 0xF900 && input <= 0xFB4E) {
-        return cast(bool)LUT_80A25785[cast(size_t)(97 + (input - 0xF900))];
-    } else if (input >= 0x1D15E && input <= 0x1D1C0) {
-        if (input <= 0x1D164)
-            return cast(bool)true;
-        else if (input >= 0x1D1BB)
-            return cast(bool)true;
-    } else if (input >= 0x2F800 && input <= 0x2FA1D) {
-        return cast(bool)true;
-    }
-    return typeof(return).init;
-}
-private {
-    static immutable LUT_80A25785 = [true, true, false, true, true, true, true, false, true, true, false, false, true, true, true, true, false, false, true, true, false, false, false, false, true, false, false, false, false, true, false, false, false, false, true, true, false, true, true, false, true, true, false, false, false, false, true, false, false, false, false, true, false, false, false, false, true, true, false, true, false, true, false, true, false, true, false, true, false, true, true, false, false, true, true, false, true, true, false, false, true, true, true, false, true, false, true, false, false, true, true, true, false, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, false, true, false, true, false, false, true, true, true, true, true, true, true, true, true, true, false, true, false, true, false, false, true, true, false, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, true, false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, false, true, true, true, true, true, false, true, false, true, true, false, true, true, false, true, true, true, true, true, true, true, true, true, ];
-}
+export extern(C) bool sidero_utf_lut_isFullCompositionExcluded(dchar against) @trusted nothrow @nogc pure {
+    static immutable dchar[] Table = cast(dchar[])x"0000034000000342000003430000034500000374000003750000037E0000037F00000387000003880000095800000960000009DC000009DE000009DF000009E000000A3300000A3400000A3600000A3700000A5900000A5C00000A5E00000A5F00000B5C00000B5E00000F4300000F4400000F4D00000F4E00000F5200000F5300000F5700000F5800000F5C00000F5D00000F6900000F6A00000F7300000F7400000F7500000F7700000F7800000F7900000F8100000F8200000F9300000F9400000F9D00000F9E00000FA200000FA300000FA700000FA800000FAC00000FAD00000FB900000FBA00001F7100001F7200001F7300001F7400001F7500001F7600001F7700001F7800001F7900001F7A00001F7B00001F7C00001F7D00001F7E00001FBB00001FBC00001FBE00001FBF00001FC900001FCA00001FCB00001FCC00001FD300001FD400001FDB00001FDC00001FE300001FE400001FEB00001FEC00001FEE00001FF000001FF900001FFA00001FFB00001FFC00001FFD00001FFE000020000000200200002126000021270000212A0000212C000023290000232B00002ADC00002ADD0000F9000000FA0E0000FA100000FA110000FA120000FA130000FA150000FA1F0000FA200000FA210000FA220000FA230000FA250000FA270000FA2A0000FA6E0000FA700000FADA0000FB1D0000FB1E0000FB1F0000FB200000FB2A0000FB370000FB380000FB3D0000FB3E0000FB3F0000FB400000FB420000FB430000FB450000FB460000FB4F0001D15E0001D1650001D1BB0001D1C10002F8000002FA1E";
 
+    size_t low, high = Table.length;
+
+    while(low < high) {
+        size_t mid = (low + high) / 2;
+
+        if (against >= Table[mid])
+            low = mid + 1;
+        else if (against < Table[mid])
+            high = mid;
+    }
+
+    const pos = high - 1;
+    return (pos & 1) == 0;
+}

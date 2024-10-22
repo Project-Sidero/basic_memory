@@ -1,4 +1,4 @@
-﻿module generators.unicode.compositionexclusions;
+module generators.unicode.compositionexclusions;
 import constants;
 
 __gshared ValueRange!dchar[] compositionExclusionRanges;
@@ -13,34 +13,15 @@ void compositionExclusions() {
     internal ~= "// Generated do not modify\n";
 
     auto api = appender!string();
-    import std.stdio;
 
     {
-        SequentialRanges!(bool, SequentialRangeSplitGroup, 0) sr;
-
-        foreach (entry; compositionExclusionRanges) {
-            foreach (c; entry.start .. entry.end + 1)
-                sr.add(cast(dchar)c, true);
-        }
-
-        sr.splitForSame;
-        sr.calculateTrueSpread;
-        sr.joinWhenClose(null, 5, 32);
-        sr.calculateTrueSpread;
-
-        LookupTableGenerator!(bool, SequentialRangeSplitGroup, 0) lut;
-        lut.sr = sr;
-        lut.lutType = "bool";
-        lut.name = "sidero_utf_lut_isCompositionExcluded";
-
-        auto gotDcode = lut.build();
+        internal ~= "\n";
 
         api ~= "\n";
         api ~= "/// Is excluded from composition.\n";
         api ~= "/// Returns: false if not set.\n";
-        api ~= gotDcode[0];
 
-        internal ~= gotDcode[1];
+        generateIsCheck(api, internal, "sidero_utf_lut_isCompositionExcluded", compositionExclusionRanges);
     }
 
     append(UnicodeAPIFile, api.data);
@@ -49,11 +30,11 @@ void compositionExclusions() {
 
 private:
 import std.array : appender;
-import utilities.sequential_ranges;
-import utilities.lut;
+import utilities.sequential_ranges : ValueRange;
+import utilities.inverselist;
 
 void processEachLine(string inputText) {
-    import std.algorithm : countUntil, splitter;
+    import std.algorithm : countUntil, splitter, sort;
     import std.string : strip, lineSplitter;
     import std.conv : parse;
 
@@ -61,7 +42,7 @@ void processEachLine(string inputText) {
         ValueRange!dchar ret;
 
         ptrdiff_t offsetOfSeperator = charRangeStr.countUntil("..");
-        if (offsetOfSeperator < 0) {
+        if(offsetOfSeperator < 0) {
             ret.start = parse!uint(charRangeStr, 16);
             ret.end = ret.start;
         } else {
@@ -73,18 +54,36 @@ void processEachLine(string inputText) {
         return ret;
     }
 
-    foreach (line; inputText.lineSplitter) {
+    foreach(line; inputText.lineSplitter) {
         ptrdiff_t offset;
 
         offset = line.countUntil('#');
-        if (offset >= 0)
+        if(offset >= 0)
             line = line[0 .. offset];
         line = line.strip;
 
-        if (line.length < 4 || line.countUntil(".") >= 0) // anything that low can't represent a functional line
+        if(line.length < 4 || line.countUntil(".") >= 0) // anything that low can't represent a functional line
             continue;
 
         ValueRange!dchar valueRange = valueRangeFromString(line);
         compositionExclusionRanges ~= valueRange;
+    }
+
+    {
+        sort!("a.start < b.start")(compositionExclusionRanges);
+        ValueRange!dchar[] temp;
+
+        foreach(valueRange; compositionExclusionRanges) {
+            if(temp.length == 0)
+                temp ~= valueRange;
+            else {
+                if(valueRange.start == temp[$ - 1].end + 1)
+                    temp[$ - 1].end = valueRange.end;
+                else
+                    temp ~= valueRange;
+            }
+        }
+
+        compositionExclusionRanges = temp;
     }
 }

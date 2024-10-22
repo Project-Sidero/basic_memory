@@ -16,36 +16,12 @@ void propList() {
 
     foreach(i, property; __traits(allMembers, Property)) {
         {
-            SequentialRanges!(bool, SequentialRangeSplitGroup, 2) sr;
-
-            foreach(entry; state.single[__traits(getMember, Property, property)]) {
-                foreach(dchar c; entry.start .. entry.end + 1)
-                    sr.add(c, true);
-            }
-            foreach(entry; state.range[__traits(getMember, Property, property)]) {
-                foreach(dchar c; entry.start .. entry.end + 1)
-                    sr.add(c, true);
-            }
-
-            sr.splitForSame;
-            sr.calculateTrueSpread;
-            sr.joinWithDiff(null, 256);
-            sr.calculateTrueSpread;
-            sr.layerByRangeMax(0, ushort.max / 4);
-            sr.layerByRangeMax(1, ushort.max / 2);
-
-            LookupTableGenerator!(bool, SequentialRangeSplitGroup, 2) lut;
-            lut.sr = sr;
-            lut.lutType = "bool";
-            lut.name = "sidero_utf_lut_isMemberOf" ~ property;
-
-            auto gotDcode = lut.build();
+            internal ~= "\n";
 
             api ~= "\n";
             api ~= "/// Is character member of property.\n";
-            api ~= gotDcode[0];
 
-            internal ~= gotDcode[1];
+            generateIsCheck(api, internal, "sidero_utf_lut_isMemberOf" ~ property, state.ranges[i]);
         }
     }
 
@@ -60,8 +36,8 @@ alias isUnicodeWhiteSpace = sidero_utf_lut_isMemberOfWhite_Space;
 
 private:
 import std.array : appender;
-import utilities.sequential_ranges;
-import utilities.lut;
+import utilities.sequential_ranges : ValueRange;
+import utilities.inverselist;
 
 void processEachLine(string inputText, ref TotalState state) {
     import std.algorithm : countUntil, splitter;
@@ -98,10 +74,14 @@ void processEachLine(string inputText, ref TotalState state) {
             assert(0, propertyStr);
         }
 
-        if(valueRange.isSingle)
-            state.single[property] ~= valueRange;
-        else
-            state.range[property] ~= valueRange;
+        if(state.ranges[property].length == 0)
+            state.ranges[property] ~= valueRange;
+        else {
+            if(valueRange.start == state.ranges[property][$ - 1].end + 1)
+                state.ranges[property][$ - 1].end = valueRange.end;
+            else
+                state.ranges[property] ~= valueRange;
+        }
     }
 
     foreach(line; inputText.lineSplitter) {
@@ -128,8 +108,7 @@ void processEachLine(string inputText, ref TotalState state) {
 }
 
 struct TotalState {
-    ValueRange!dchar[][Property.max + 1] single;
-    ValueRange!dchar[][Property.max + 1] range;
+    ValueRange!dchar[][Property.max + 1] ranges;
 }
 
 enum Property {

@@ -1,4 +1,4 @@
-﻿module generators.unicode.derivednormalizationprops;
+module generators.unicode.derivednormalizationprops;
 import constants;
 
 void derivedNormalizationProps() {
@@ -14,37 +14,9 @@ void derivedNormalizationProps() {
 
     auto api = appender!string();
 
-    {
-        SequentialRanges!(bool, SequentialRangeSplitGroup, 1) sr;
-
-        foreach (entry; state.fullCompositionExclusionRange) {
-            foreach (dchar c; entry.start .. entry.end + 1)
-                sr.add(c, true);
-        }
-        foreach (entry; state.fullCompositionExclusionSingle) {
-            foreach (dchar c; entry.start .. entry.end + 1)
-                sr.add(c, true);
-        }
-
-        sr.splitForSame;
-        sr.calculateTrueSpread;
-        sr.joinWhenClose();
-        sr.calculateTrueSpread;
-        sr.layerByRangeMax(0, 1024);
-
-        LookupTableGenerator!(bool, SequentialRangeSplitGroup, 1) lut;
-        lut.sr = sr;
-        lut.lutType = "bool";
-        lut.name = "sidero_utf_lut_isFullCompositionExcluded";
-
-        auto gotDcode = lut.build();
-
-        api ~= "\n";
-        api ~= "/// Is character part of full composition execlusions.\n";
-        api ~= gotDcode[0];
-
-        internal ~= gotDcode[1];
-    }
+    api ~= "\n";
+    api ~= "/// Is character part of full composition execlusions.\n";
+    generateIsCheck(api, internal, "sidero_utf_lut_isFullCompositionExcluded", state.fullCompositionExclusion);
 
     append(UnicodeAPIFile, api.data);
     write(UnicodeLUTDirectory ~ "derivednormalizationprops.d", internal.data);
@@ -52,8 +24,8 @@ void derivedNormalizationProps() {
 
 private:
 import std.array : appender, Appender;
-import utilities.sequential_ranges;
-import utilities.lut;
+import utilities.sequential_ranges : ValueRange;
+import utilities.inverselist;
 
 void processEachLine(string inputText, ref TotalState state) {
     import std.algorithm : countUntil, splitter;
@@ -64,7 +36,7 @@ void processEachLine(string inputText, ref TotalState state) {
         ValueRange!dchar ret;
 
         ptrdiff_t offsetOfSeperator = charRangeStr.countUntil("..");
-        if (offsetOfSeperator < 0) {
+        if(offsetOfSeperator < 0) {
             ret.start = parse!uint(charRangeStr, 16);
             ret.end = ret.start;
         } else {
@@ -80,7 +52,7 @@ void processEachLine(string inputText, ref TotalState state) {
         NormalizeProperty property;
         YesNoMaybe yesNoMaybe;
 
-        switch (propertyStr) {
+        switch(propertyStr) {
         case "NFD_QC":
             property = NormalizeProperty.NFD_QC;
             break;
@@ -98,7 +70,7 @@ void processEachLine(string inputText, ref TotalState state) {
             return;
         }
 
-        switch (yesNoMaybeStr) {
+        switch(yesNoMaybeStr) {
         case "Y":
             yesNoMaybe = YesNoMaybe.Yes;
             break;
@@ -112,25 +84,25 @@ void processEachLine(string inputText, ref TotalState state) {
             return;
         }
 
-        if (valueRange.isSingle)
+        if(valueRange.isSingle)
             state.single[property] ~= QuickCheck(valueRange, yesNoMaybe);
         else
             state.range[property] ~= QuickCheck(valueRange, yesNoMaybe);
     }
 
-    foreach (line; inputText.lineSplitter) {
+    foreach(line; inputText.lineSplitter) {
         ptrdiff_t offset;
 
         offset = line.countUntil('#');
-        if (offset >= 0)
+        if(offset >= 0)
             line = line[0 .. offset];
         line = line.strip;
 
-        if (line.length < 5) // anything that low can't represent a functional line
+        if(line.length < 5) // anything that low can't represent a functional line
             continue;
 
         offset = line.countUntil(';');
-        if (offset < 0) // no char range
+        if(offset < 0) // no char range
             continue;
         string charRangeStr = line[0 .. offset].strip;
         line = line[offset + 1 .. $].strip;
@@ -140,40 +112,44 @@ void processEachLine(string inputText, ref TotalState state) {
         offset = line.countUntil(';');
         string propertyStr;
 
-        if (offset > 0) {
+        if(offset > 0) {
             propertyStr = line[0 .. offset].strip;
             line = line[offset + 1 .. $].strip;
         } else
             propertyStr = line.strip;
 
-        if (propertyStr == "Changes_When_NFKC_Casefolded") {
-            if (valueRange.isSingle)
+        if(propertyStr == "Changes_When_NFKC_Casefolded") {
+            if(valueRange.isSingle)
                 state.changesSingle ~= ChangesWhenCaseFolded(valueRange);
             else
                 state.changesRange ~= ChangesWhenCaseFolded(valueRange);
-        } else if (propertyStr == "Full_Composition_Exclusion") {
-            if (valueRange.isSingle)
-                state.fullCompositionExclusionSingle ~= valueRange;
-            else
-                state.fullCompositionExclusionRange ~= valueRange;
-        } else if (propertyStr == "NFKC_CF") {
+        } else if(propertyStr == "Full_Composition_Exclusion") {
+            if(state.fullCompositionExclusion.length == 0)
+                state.fullCompositionExclusion ~= valueRange;
+            else {
+                if(valueRange.start == state.fullCompositionExclusion[$ - 1].end + 1)
+                    state.fullCompositionExclusion[$ - 1].end = valueRange.end;
+                else
+                    state.fullCompositionExclusion ~= valueRange;
+            }
+        } else if(propertyStr == "NFKC_CF") {
             dchar[] replacements;
             replacements.reserve(4);
 
-            foreach (replacement; line.splitter(' ')) {
+            foreach(replacement; line.splitter(' ')) {
                 replacement = replacement.strip;
-                if (replacement.length == 0)
+                if(replacement.length == 0)
                     continue;
 
                 replacements ~= parse!uint(replacement, 16);
             }
 
-            if (valueRange.isSingle)
+            if(valueRange.isSingle)
                 state.caseFoldSingle ~= CaseFold(valueRange, replacements);
             else
                 state.caseFoldRange ~= CaseFold(valueRange, replacements);
         } else {
-            if (line.length > 0)
+            if(line.length > 0)
                 handleLine(valueRange, propertyStr, line);
         }
     }
@@ -194,7 +170,7 @@ struct TotalState {
     CaseFold[] caseFoldSingle, caseFoldRange;
     ChangesWhenCaseFolded[] changesSingle, changesRange;
 
-    ValueRange!dchar[] fullCompositionExclusionSingle, fullCompositionExclusionRange;
+    ValueRange!dchar[] fullCompositionExclusion;
 }
 
 enum YesNoMaybe {
@@ -223,10 +199,10 @@ struct ChangesWhenCaseFolded {
 }
 
 void ymn(ref Appender!string output, YesNoMaybe yesNoMaybe) {
-    if (yesNoMaybe == YesNoMaybe.Yes)
+    if(yesNoMaybe == YesNoMaybe.Yes)
         output ~= "Y";
-    else if (yesNoMaybe == YesNoMaybe.No)
+    else if(yesNoMaybe == YesNoMaybe.No)
         output ~= "N";
-    else if (yesNoMaybe == YesNoMaybe.Maybe)
+    else if(yesNoMaybe == YesNoMaybe.Maybe)
         output ~= "M";
 }

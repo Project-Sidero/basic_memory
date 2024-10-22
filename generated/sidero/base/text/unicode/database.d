@@ -488,11 +488,10 @@ export extern(C) immutable(size_t) sidero_utf_lut_lengthOfCaseFoldingTurkic(dcha
 
 /// Is excluded from composition.
 /// Returns: false if not set.
-export extern(C) immutable(bool) sidero_utf_lut_isCompositionExcluded(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isCompositionExcluded(dchar against) @safe nothrow @nogc pure;
 
 /// Is character a hangul syllable?
-export extern(C) immutable(bool) sidero_utf_lut_isHangulSyllable(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isHangulSyllable(dchar against) @safe nothrow @nogc pure;
 /// Gets the ranges of values in a given Hangul syllable type.
 export immutable(ValueRange[]) sidero_utf_lut_hangulSyllables(HangulSyllableType type) @trusted nothrow @nogc pure {
     return cast(immutable(ValueRange[]))sidero_utf_lut_hangulSyllables2(type);
@@ -500,7 +499,7 @@ export immutable(ValueRange[]) sidero_utf_lut_hangulSyllables(HangulSyllableType
 private extern(C) immutable(void[]) sidero_utf_lut_hangulSyllables2(HangulSyllableType type) @safe nothrow @nogc pure;
 
 /// Is character part of full composition execlusions.
-export extern(C) immutable(bool) sidero_utf_lut_isFullCompositionExcluded(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isFullCompositionExcluded(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup decomposition mapping for character if in compatibility formatting tag None.
 export extern(C) immutable(dstring) sidero_utf_lut_getDecompositionMappingNone(dchar input) @trusted nothrow @nogc pure;
@@ -871,118 +870,118 @@ export bool isUnicodeTitle(dchar input) @safe nothrow @nogc pure {
 }
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfWhite_Space(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfWhite_Space(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfBidi_Control(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfBidi_Control(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfJoin_Control(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfJoin_Control(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfDash(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfDash(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfHyphen(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfHyphen(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfQuotation_Mark(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfQuotation_Mark(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfTerminal_Punctuation(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfTerminal_Punctuation(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfOther_Math(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfOther_Math(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfHex_Digit(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfHex_Digit(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfASCII_Hex_Digit(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfASCII_Hex_Digit(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfOther_Alphabetic(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfOther_Alphabetic(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfIdeographic(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfIdeographic(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfDiacritic(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfDiacritic(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfExtender(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfExtender(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfOther_Lowercase(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfOther_Lowercase(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfOther_Uppercase(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfOther_Uppercase(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfNoncharacter_Code_Point(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfNoncharacter_Code_Point(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfOther_Grapheme_Extend(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfOther_Grapheme_Extend(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfIDS_Binary_Operator(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfIDS_Binary_Operator(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfIDS_Trinary_Operator(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfIDS_Trinary_Operator(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfIDS_Unary_Operator(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfIDS_Unary_Operator(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfRadical(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfRadical(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfUnified_Ideograph(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfUnified_Ideograph(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfOther_Default_Ignorable_Code_Point(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfOther_Default_Ignorable_Code_Point(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfDeprecated(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfDeprecated(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfSoft_Dotted(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfSoft_Dotted(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfLogical_Order_Exception(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfLogical_Order_Exception(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfOther_ID_Start(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfOther_ID_Start(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfOther_ID_Continue(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfOther_ID_Continue(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfSentence_Terminal(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfSentence_Terminal(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfVariation_Selector(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfVariation_Selector(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfPattern_White_Space(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfPattern_White_Space(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfPattern_Syntax(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfPattern_Syntax(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfPrepended_Concatenation_Mark(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfPrepended_Concatenation_Mark(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfRegional_Indicator(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfRegional_Indicator(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfID_Compat_Math_Start(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfID_Compat_Math_Start(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfID_Compat_Math_Continue(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfID_Compat_Math_Continue(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfModifier_Combining_Mark(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfModifier_Combining_Mark(dchar against) @safe nothrow @nogc pure;
 
 /// Is character whitespace?
 alias isUnicodeWhiteSpace = sidero_utf_lut_isMemberOfWhite_Space;
@@ -1613,43 +1612,40 @@ export extern(C) immutable(bool) sidero_utf_lut_isScriptTulu_Tigalari(dchar inpu
 
 
 /// Is character member of grapheme break property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfGraphemePrepend(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfGraphemePrepend(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of grapheme break property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfGraphemeCR(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfGraphemeCR(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of grapheme break property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfGraphemeLF(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfGraphemeLF(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of grapheme break property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfGraphemeControl(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfGraphemeControl(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of grapheme break property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfGraphemeExtend(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfGraphemeExtend(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of grapheme break property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfGraphemeRegional_Indicator(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfGraphemeRegional_Indicator(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of grapheme break property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfGraphemeSpacingMark(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfGraphemeSpacingMark(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of grapheme break property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfGraphemeL(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfGraphemeL(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of grapheme break property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfGraphemeV(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfGraphemeV(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of grapheme break property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfGraphemeT(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfGraphemeT(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of grapheme break property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfGraphemeLV(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfGraphemeLV(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of grapheme break property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfGraphemeLVT(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_isMemberOfGraphemeLVT(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of grapheme break property.
-export extern(C) immutable(bool) sidero_utf_lut_isMemberOfGraphemeZWJ(dchar input) @trusted nothrow @nogc pure;
-
-/// Is character whitespace?
-alias isUnicodeWhiteSpace = sidero_utf_lut_isMemberOfWhite_Space;
+export extern(C) bool sidero_utf_lut_isMemberOfGraphemeZWJ(dchar against) @safe nothrow @nogc pure;
