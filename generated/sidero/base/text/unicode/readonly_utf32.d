@@ -877,6 +877,31 @@ nothrow @nogc:
         assert(ascii.length == 15);
     }
 
+    /// Underlying memory is null terminated
+    Slice!ubyte asRawSlice() return scope @trusted {
+        if(this.isEncodingChanged() || !this.isPtrNullTerminated()) {
+            typeof(this) temp = this.dup;
+
+            Slice!ubyte ret = Slice!ubyte(cast(ubyte[])temp.literal, temp.lifeTime);
+            assert(ret.length >= Char.sizeof);
+
+            auto got = ret[0 .. $ - Char.sizeof];
+            assert(got);
+            ret = got;
+
+            return ret;
+        }
+
+        return Slice!ubyte(cast(ubyte[])this.literal, this.lifeTime);
+    }
+
+    ///
+    @trusted unittest {
+        typeof(this) slice = typeof(this)("Hello Mz. Hyde!");
+        Slice!ubyte rawSlice = slice.asRawSlice;
+        assert(rawSlice.length == 15 * Char.sizeof);
+    }
+
     ///
     typeof(this) dup(RCAllocator allocator = RCAllocator.init) scope @trusted {
         if(isNull)
