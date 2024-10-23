@@ -16,80 +16,39 @@ void handleScripts() {
     auto api = appender!string();
 
     {
-        SequentialRanges!(ubyte, SequentialRangeSplitGroup, 2) sr;
-
-        foreach(range, value; state.values) {
-            foreach(c; range.start .. range.end + 1)
-                sr.add(c, cast(ubyte)value);
-        }
-
-        sr.splitForSame;
-        sr.calculateTrueSpread;
-        sr.joinWithDiff(null, 64);
-        sr.calculateTrueSpread;
-        sr.layerByRangeMax(0, ushort.max / 4);
-        sr.layerByRangeMax(1, ushort.max / 2);
-
-        LookupTableGenerator!(ubyte, SequentialRangeSplitGroup, 2) lut;
-        lut.sr = sr;
-        lut.lutType = "ubyte";
-        lut.externType = "Script";
-        lut.name = "sidero_utf_lut_getScript";
-
-        auto gotDcode = lut.build();
-
         api ~= "\n";
         api ~= "/// Get the Script for a character\n";
-        api ~= gotDcode[0];
-        api ~= "\n";
 
-        internal ~= gotDcode[1];
+        ValueRange!dchar[] ranges;
+        ubyte[] scripts;
+        seqEntries(ranges, scripts, state.pairs);
+        generateReturn(api, internal, "sidero_utf_lut_getScript", ranges, scripts, "Script");
+
+        {
+            ValueRange!dchar[] ranges2;
+
+            foreach(r; ranges) {
+                if(ranges2.length == 0)
+                    ranges2 ~= r;
+                else if(ranges2[$ - 1].end + 1 == r.start)
+                    ranges2[$ - 1].end = r.end;
+                else
+                    ranges2 ~= r;
+            }
+
+            api ~= "/// Is the character a member of the script Unknown\n";
+            generateIsCheck(api, internal, "sidero_utf_lut_isScriptUnkown", ranges2, true);
+        }
     }
 
     static foreach(Sm; __traits(allMembers, Script)) {
         {
-            SequentialRanges!(bool, SequentialRangeSplitGroup, 2) sr;
+            enum script = __traits(getMember, Script, Sm);
 
-            foreach(range, value; state.values) {
-                static if(__traits(getMember, Script, Sm) == Script.Unknown) {
-                    // inverse
-                    foreach(c; range.start .. range.end + 1)
-                        sr.add(c, false);
-                } else {
-                    if(value == __traits(getMember, Script, Sm)) {
-                        foreach(c; range.start .. range.end + 1)
-                            sr.add(c, true);
-                    }
-                }
+            static if(script != Script.Unknown) {
+                api ~= "/// Is the character a member of the script " ~ Sm ~ "\n";
+                generateIsCheck(api, internal, "sidero_utf_lut_isScript" ~ Sm, state.scriptRanges[script]);
             }
-
-            sr.splitForSame;
-            sr.calculateTrueSpread;
-            static if(__traits(getMember, Script, Sm) == Script.Unknown) {
-                sr.joinWithDiff((dchar key) => true, 64);
-            } else {
-                sr.joinWithDiff((dchar key) => false, 64);
-            }
-            sr.calculateTrueSpread;
-            sr.layerByRangeMax(0, ushort.max / 4);
-            sr.layerByRangeMax(1, ushort.max / 2);
-
-            LookupTableGenerator!(bool, SequentialRangeSplitGroup, 2) lut;
-            lut.sr = sr;
-            lut.lutType = "bool";
-            lut.name = "sidero_utf_lut_isScript" ~ Sm;
-
-            static if(__traits(getMember, Script, Sm) == Script.Unknown) {
-                lut.defaultReturn = "true";
-            }
-
-            auto gotDcode = lut.build();
-
-            api ~= "/// Is the character a member of the script " ~ Sm ~ "\n";
-            api ~= gotDcode[0];
-            api ~= "\n";
-
-            internal ~= gotDcode[1];
         }
     }
 
@@ -99,8 +58,8 @@ void handleScripts() {
 
 private:
 import std.array : appender;
-import utilities.sequential_ranges;
-import utilities.lut;
+import utilities.sequential_ranges : ValueRange;
+import utilities.inverselist;
 
 void processEachLine(string inputText, ref TotalState state) {
     import std.algorithm : countUntil, splitter;
@@ -135,7 +94,17 @@ void processEachLine(string inputText, ref TotalState state) {
         switch(line) {
             static foreach(m; __traits(allMembers, Script)) {
         case m:
-                state.values[range] = __traits(getMember, Script, m);
+                enum script = __traits(getMember, Script, m);
+                state.pairs ~= Pair(range, script);
+
+                if(state.scriptRanges[script].length == 0)
+                    state.scriptRanges[script] ~= range;
+                else {
+                    if(range.start == state.scriptRanges[script][$ - 1].end + 1)
+                        state.scriptRanges[script][$ - 1].end = range.end;
+                    else
+                        state.scriptRanges[script] ~= range;
+                }
                 break SLB;
             }
 
@@ -167,7 +136,13 @@ void processEachLine(string inputText, ref TotalState state) {
 }
 
 struct TotalState {
-    Script[ValueRange!dchar] values;
+    Pair[] pairs;
+    ValueRange!dchar[][Script.max + 1] scriptRanges;
+}
+
+struct Pair {
+    ValueRange!dchar range;
+    Script script;
 }
 
 enum Script : ubyte {
@@ -342,4 +317,19 @@ enum Script : ubyte {
     Sunuwar, ///
     Todhri, ///
     Tulu_Tigalari, ///
+}
+
+void seqEntries(out ValueRange!dchar[] ranges, out ubyte[] scripts, Pair[] entries) {
+    import std.algorithm : sort;
+
+    sort!"a.range.start < b.range.start"(entries);
+
+    ranges.reserve(entries.length);
+    scripts.reserve(entries.length);
+
+    foreach(v; entries) {
+        assert(v.range.start <= v.range.end);
+        ranges ~= v.range;
+        scripts ~= v.script;
+    }
 }

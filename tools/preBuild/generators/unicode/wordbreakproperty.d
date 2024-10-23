@@ -15,37 +15,13 @@ void wordBreakProperty() {
     auto api = appender!string();
 
     {
-        SequentialRanges!(ubyte, SequentialRangeSplitGroup, 2) sr;
-
-        foreach(entry; state.range)
-            foreach(c; entry.range.start .. entry.range.end + 1)
-                sr.add(c, cast(ubyte)entry.property);
-
-        foreach(entry; state.single) {
-            foreach(c; entry.range.start .. entry.range.end + 1)
-                sr.add(c, cast(ubyte)entry.property);
-        }
-
-        sr.splitForSame;
-        sr.calculateTrueSpread;
-        sr.joinWithDiff(null, 64);
-        sr.calculateTrueSpread;
-        sr.layerByRangeMax(0, ushort.max / 4);
-        sr.layerByRangeMax(1, ushort.max / 2);
-
-        LookupTableGenerator!(ubyte, SequentialRangeSplitGroup, 2) lut;
-        lut.sr = sr;
-        lut.externType = "WordBreakProperty";
-        lut.lutType = "ubyte";
-        lut.name = "sidero_utf_lut_getWordBreakProperty";
-
-        auto gotDcode = lut.build();
+        ValueRange!dchar[] ranges;
+        ubyte[] properties;
+        seqEntries(ranges, properties, state.ranges);
 
         api ~= "\n";
         api ~= "/// Lookup word break property for character.\n";
-        api ~= gotDcode[0];
-
-        internal ~= gotDcode[1];
+        generateReturn(api, internal, "sidero_utf_lut_getWordBreakProperty", ranges, properties, "WordBreakProperty");
     }
 
     append(UnicodeAPIFile, api.data);
@@ -54,8 +30,8 @@ void wordBreakProperty() {
 
 private:
 import std.array : appender;
-import utilities.sequential_ranges;
-import utilities.lut;
+import utilities.sequential_ranges : ValueRange;
+import utilities.inverselist;
 
 void processEachLine(string inputText, ref TotalState state) {
     import std.algorithm : countUntil, splitter;
@@ -141,22 +117,7 @@ void processEachLine(string inputText, ref TotalState state) {
             assert(0, propertyStr);
         }
 
-        foreach(index; valueRange.start .. valueRange.end + 1) {
-            foreach(value; state.single) {
-                if(index == value.range.start)
-                    assert(0, propertyStr);
-            }
-
-            foreach(value; state.single) {
-                if(index >= value.range.start && index <= value.range.end)
-                    assert(0, propertyStr);
-            }
-        }
-
-        if(valueRange.isSingle)
-            state.single ~= Entry(valueRange, property);
-        else
-            state.range ~= Entry(valueRange, property);
+        state.ranges ~= Entry(valueRange, property);
     }
 
     foreach(line; inputText.lineSplitter) {
@@ -183,8 +144,7 @@ void processEachLine(string inputText, ref TotalState state) {
 }
 
 struct TotalState {
-    Entry[] single;
-    Entry[] range;
+    Entry[] ranges;
 }
 
 struct Entry {
@@ -212,4 +172,19 @@ enum Property : ubyte {
     ExtendNumLet, ///
     ZWJ, ///
     WSegSpace, ///
+}
+
+void seqEntries(out ValueRange!dchar[] ranges, out ubyte[] lineBreaks, Entry[] entries) {
+    import std.algorithm : sort;
+
+    sort!"a.range.start < b.range.start"(entries);
+
+    ranges.reserve(entries.length);
+    lineBreaks.reserve(entries.length);
+
+    foreach(v; entries) {
+        assert(v.range.start <= v.range.end);
+        ranges ~= v.range;
+        lineBreaks ~= cast(ubyte)v.property;
+    }
 }

@@ -19,7 +19,7 @@ void lineBreak() {
         api ~= "\n";
         api ~= "/// Get the Line break class\n";
 
-        dchar[] ranges;
+        ValueRange!dchar[] ranges;
         ubyte[] values;
         seqEntries(ranges, values, state.pairs);
 
@@ -159,7 +159,7 @@ enum LineBreak : ubyte {
     AP, ///
 }
 
-void seqEntries(out dchar[] ranges, out ubyte[] lineBreaks, Pair[] entries) {
+void seqEntries(out ValueRange!dchar[] ranges, out ubyte[] lineBreaks, Pair[] entries) {
     import std.algorithm : sort;
 
     sort!"a.range.start < b.range.start"(entries);
@@ -168,9 +168,8 @@ void seqEntries(out dchar[] ranges, out ubyte[] lineBreaks, Pair[] entries) {
     lineBreaks.reserve(entries.length);
 
     foreach(v; entries) {
-        foreach(c; v.range.start .. v.range.end + 1) {
-            ranges ~= c;
-            lineBreaks ~= cast(ubyte)v.lineBreak;
-        }
+        assert(v.range.start <= v.range.end);
+        ranges ~= v.range;
+        lineBreaks ~= v.lineBreak;
     }
 }

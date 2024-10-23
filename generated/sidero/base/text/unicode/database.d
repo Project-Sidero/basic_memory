@@ -988,7 +988,7 @@ export extern(C) bool sidero_utf_lut_isMemberOfModifier_Combining_Mark(dchar aga
 alias isUnicodeWhiteSpace = sidero_utf_lut_isMemberOfWhite_Space;
 
 /// Lookup word break property for character.
-export extern(C) immutable(WordBreakProperty) sidero_utf_lut_getWordBreakProperty(dchar input) @trusted nothrow @nogc pure;
+export extern(C) WordBreakProperty sidero_utf_lut_getWordBreakProperty(dchar against) @safe nothrow @nogc pure;
 
 /// Get special casing for character.
 /// Returns: non-null for a given entry if changed from input character.
@@ -1089,521 +1089,349 @@ export extern(C) bool sidero_utf_lut_isMemberOfEmoji_Component(dchar against) @s
 export extern(C) bool sidero_utf_lut_isMemberOfExtended_Pictographic(dchar against) @safe nothrow @nogc pure;
 
 /// Get the Script for a character
-export extern(C) immutable(Script) sidero_utf_lut_getScript(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) Script sidero_utf_lut_getScript(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Unknown
-export extern(C) immutable(bool) sidero_utf_lut_isScriptUnknown(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptUnkown(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Old_Hungarian
-export extern(C) immutable(bool) sidero_utf_lut_isScriptOld_Hungarian(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptOld_Hungarian(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Coptic
-export extern(C) immutable(bool) sidero_utf_lut_isScriptCoptic(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptCoptic(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Ol_Chiki
-export extern(C) immutable(bool) sidero_utf_lut_isScriptOl_Chiki(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptOl_Chiki(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Cyrillic
-export extern(C) immutable(bool) sidero_utf_lut_isScriptCyrillic(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptCyrillic(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Thaana
-export extern(C) immutable(bool) sidero_utf_lut_isScriptThaana(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptThaana(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Inscriptional_Parthian
-export extern(C) immutable(bool) sidero_utf_lut_isScriptInscriptional_Parthian(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptInscriptional_Parthian(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Nabataean
-export extern(C) immutable(bool) sidero_utf_lut_isScriptNabataean(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptNabataean(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Ogham
-export extern(C) immutable(bool) sidero_utf_lut_isScriptOgham(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptOgham(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Meroitic_Hieroglyphs
-export extern(C) immutable(bool) sidero_utf_lut_isScriptMeroitic_Hieroglyphs(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptMeroitic_Hieroglyphs(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Makasar
-export extern(C) immutable(bool) sidero_utf_lut_isScriptMakasar(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptMakasar(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Siddham
-export extern(C) immutable(bool) sidero_utf_lut_isScriptSiddham(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptSiddham(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Old_Persian
-export extern(C) immutable(bool) sidero_utf_lut_isScriptOld_Persian(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptOld_Persian(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Imperial_Aramaic
-export extern(C) immutable(bool) sidero_utf_lut_isScriptImperial_Aramaic(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptImperial_Aramaic(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Myanmar
-export extern(C) immutable(bool) sidero_utf_lut_isScriptMyanmar(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptMyanmar(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Deseret
-export extern(C) immutable(bool) sidero_utf_lut_isScriptDeseret(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptDeseret(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Kaithi
-export extern(C) immutable(bool) sidero_utf_lut_isScriptKaithi(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptKaithi(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Medefaidrin
-export extern(C) immutable(bool) sidero_utf_lut_isScriptMedefaidrin(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptMedefaidrin(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Kayah_Li
-export extern(C) immutable(bool) sidero_utf_lut_isScriptKayah_Li(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptKayah_Li(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Hiragana
-export extern(C) immutable(bool) sidero_utf_lut_isScriptHiragana(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptHiragana(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Ahom
-export extern(C) immutable(bool) sidero_utf_lut_isScriptAhom(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptAhom(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Devanagari
-export extern(C) immutable(bool) sidero_utf_lut_isScriptDevanagari(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptDevanagari(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Tibetan
-export extern(C) immutable(bool) sidero_utf_lut_isScriptTibetan(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptTibetan(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Nko
-export extern(C) immutable(bool) sidero_utf_lut_isScriptNko(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptNko(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Brahmi
-export extern(C) immutable(bool) sidero_utf_lut_isScriptBrahmi(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptBrahmi(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Osage
-export extern(C) immutable(bool) sidero_utf_lut_isScriptOsage(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptOsage(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Nushu
-export extern(C) immutable(bool) sidero_utf_lut_isScriptNushu(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptNushu(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Cuneiform
-export extern(C) immutable(bool) sidero_utf_lut_isScriptCuneiform(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptCuneiform(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Takri
-export extern(C) immutable(bool) sidero_utf_lut_isScriptTakri(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptTakri(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Toto
-export extern(C) immutable(bool) sidero_utf_lut_isScriptToto(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptToto(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Latin
-export extern(C) immutable(bool) sidero_utf_lut_isScriptLatin(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptLatin(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Hanunoo
-export extern(C) immutable(bool) sidero_utf_lut_isScriptHanunoo(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptHanunoo(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Limbu
-export extern(C) immutable(bool) sidero_utf_lut_isScriptLimbu(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptLimbu(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Saurashtra
-export extern(C) immutable(bool) sidero_utf_lut_isScriptSaurashtra(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptSaurashtra(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Lisu
-export extern(C) immutable(bool) sidero_utf_lut_isScriptLisu(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptLisu(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Egyptian_Hieroglyphs
-export extern(C) immutable(bool) sidero_utf_lut_isScriptEgyptian_Hieroglyphs(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptEgyptian_Hieroglyphs(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Elbasan
-export extern(C) immutable(bool) sidero_utf_lut_isScriptElbasan(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptElbasan(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Palmyrene
-export extern(C) immutable(bool) sidero_utf_lut_isScriptPalmyrene(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptPalmyrene(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Tagbanwa
-export extern(C) immutable(bool) sidero_utf_lut_isScriptTagbanwa(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptTagbanwa(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Old_Italic
-export extern(C) immutable(bool) sidero_utf_lut_isScriptOld_Italic(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptOld_Italic(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Caucasian_Albanian
-export extern(C) immutable(bool) sidero_utf_lut_isScriptCaucasian_Albanian(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptCaucasian_Albanian(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Malayalam
-export extern(C) immutable(bool) sidero_utf_lut_isScriptMalayalam(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptMalayalam(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Inherited
-export extern(C) immutable(bool) sidero_utf_lut_isScriptInherited(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptInherited(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Sora_Sompeng
-export extern(C) immutable(bool) sidero_utf_lut_isScriptSora_Sompeng(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptSora_Sompeng(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Linear_B
-export extern(C) immutable(bool) sidero_utf_lut_isScriptLinear_B(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptLinear_B(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Nyiakeng_Puachue_Hmong
-export extern(C) immutable(bool) sidero_utf_lut_isScriptNyiakeng_Puachue_Hmong(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptNyiakeng_Puachue_Hmong(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Meroitic_Cursive
-export extern(C) immutable(bool) sidero_utf_lut_isScriptMeroitic_Cursive(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptMeroitic_Cursive(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Thai
-export extern(C) immutable(bool) sidero_utf_lut_isScriptThai(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptThai(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Mende_Kikakui
-export extern(C) immutable(bool) sidero_utf_lut_isScriptMende_Kikakui(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptMende_Kikakui(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Old_Sogdian
-export extern(C) immutable(bool) sidero_utf_lut_isScriptOld_Sogdian(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptOld_Sogdian(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Old_Turkic
-export extern(C) immutable(bool) sidero_utf_lut_isScriptOld_Turkic(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptOld_Turkic(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Samaritan
-export extern(C) immutable(bool) sidero_utf_lut_isScriptSamaritan(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptSamaritan(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Old_South_Arabian
-export extern(C) immutable(bool) sidero_utf_lut_isScriptOld_South_Arabian(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptOld_South_Arabian(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Hanifi_Rohingya
-export extern(C) immutable(bool) sidero_utf_lut_isScriptHanifi_Rohingya(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptHanifi_Rohingya(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Balinese
-export extern(C) immutable(bool) sidero_utf_lut_isScriptBalinese(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptBalinese(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Mandaic
-export extern(C) immutable(bool) sidero_utf_lut_isScriptMandaic(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptMandaic(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script SignWriting
-export extern(C) immutable(bool) sidero_utf_lut_isScriptSignWriting(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptSignWriting(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Tifinagh
-export extern(C) immutable(bool) sidero_utf_lut_isScriptTifinagh(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptTifinagh(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Tai_Viet
-export extern(C) immutable(bool) sidero_utf_lut_isScriptTai_Viet(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptTai_Viet(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Syriac
-export extern(C) immutable(bool) sidero_utf_lut_isScriptSyriac(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptSyriac(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Soyombo
-export extern(C) immutable(bool) sidero_utf_lut_isScriptSoyombo(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptSoyombo(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Elymaic
-export extern(C) immutable(bool) sidero_utf_lut_isScriptElymaic(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptElymaic(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Hatran
-export extern(C) immutable(bool) sidero_utf_lut_isScriptHatran(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptHatran(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Chorasmian
-export extern(C) immutable(bool) sidero_utf_lut_isScriptChorasmian(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptChorasmian(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Glagolitic
-export extern(C) immutable(bool) sidero_utf_lut_isScriptGlagolitic(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptGlagolitic(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Osmanya
-export extern(C) immutable(bool) sidero_utf_lut_isScriptOsmanya(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptOsmanya(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Linear_A
-export extern(C) immutable(bool) sidero_utf_lut_isScriptLinear_A(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptLinear_A(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Mro
-export extern(C) immutable(bool) sidero_utf_lut_isScriptMro(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptMro(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Chakma
-export extern(C) immutable(bool) sidero_utf_lut_isScriptChakma(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptChakma(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Modi
-export extern(C) immutable(bool) sidero_utf_lut_isScriptModi(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptModi(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Bassa_Vah
-export extern(C) immutable(bool) sidero_utf_lut_isScriptBassa_Vah(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptBassa_Vah(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Han
-export extern(C) immutable(bool) sidero_utf_lut_isScriptHan(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptHan(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Multani
-export extern(C) immutable(bool) sidero_utf_lut_isScriptMultani(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptMultani(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Bopomofo
-export extern(C) immutable(bool) sidero_utf_lut_isScriptBopomofo(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptBopomofo(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Adlam
-export extern(C) immutable(bool) sidero_utf_lut_isScriptAdlam(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptAdlam(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Khitan_Small_Script
-export extern(C) immutable(bool) sidero_utf_lut_isScriptKhitan_Small_Script(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptKhitan_Small_Script(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Lao
-export extern(C) immutable(bool) sidero_utf_lut_isScriptLao(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptLao(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Psalter_Pahlavi
-export extern(C) immutable(bool) sidero_utf_lut_isScriptPsalter_Pahlavi(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptPsalter_Pahlavi(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Anatolian_Hieroglyphs
-export extern(C) immutable(bool) sidero_utf_lut_isScriptAnatolian_Hieroglyphs(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptAnatolian_Hieroglyphs(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Canadian_Aboriginal
-export extern(C) immutable(bool) sidero_utf_lut_isScriptCanadian_Aboriginal(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptCanadian_Aboriginal(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Common
-export extern(C) immutable(bool) sidero_utf_lut_isScriptCommon(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptCommon(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Gothic
-export extern(C) immutable(bool) sidero_utf_lut_isScriptGothic(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptGothic(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Yi
-export extern(C) immutable(bool) sidero_utf_lut_isScriptYi(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptYi(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Sinhala
-export extern(C) immutable(bool) sidero_utf_lut_isScriptSinhala(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptSinhala(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Rejang
-export extern(C) immutable(bool) sidero_utf_lut_isScriptRejang(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptRejang(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Lepcha
-export extern(C) immutable(bool) sidero_utf_lut_isScriptLepcha(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptLepcha(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Tai_Tham
-export extern(C) immutable(bool) sidero_utf_lut_isScriptTai_Tham(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptTai_Tham(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Dives_Akuru
-export extern(C) immutable(bool) sidero_utf_lut_isScriptDives_Akuru(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptDives_Akuru(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Meetei_Mayek
-export extern(C) immutable(bool) sidero_utf_lut_isScriptMeetei_Mayek(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptMeetei_Mayek(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Tirhuta
-export extern(C) immutable(bool) sidero_utf_lut_isScriptTirhuta(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptTirhuta(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Marchen
-export extern(C) immutable(bool) sidero_utf_lut_isScriptMarchen(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptMarchen(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Wancho
-export extern(C) immutable(bool) sidero_utf_lut_isScriptWancho(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptWancho(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Phoenician
-export extern(C) immutable(bool) sidero_utf_lut_isScriptPhoenician(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptPhoenician(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Gurmukhi
-export extern(C) immutable(bool) sidero_utf_lut_isScriptGurmukhi(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptGurmukhi(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Khudawadi
-export extern(C) immutable(bool) sidero_utf_lut_isScriptKhudawadi(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptKhudawadi(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Khojki
-export extern(C) immutable(bool) sidero_utf_lut_isScriptKhojki(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptKhojki(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Newa
-export extern(C) immutable(bool) sidero_utf_lut_isScriptNewa(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptNewa(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Dogra
-export extern(C) immutable(bool) sidero_utf_lut_isScriptDogra(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptDogra(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Oriya
-export extern(C) immutable(bool) sidero_utf_lut_isScriptOriya(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptOriya(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Tagalog
-export extern(C) immutable(bool) sidero_utf_lut_isScriptTagalog(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptTagalog(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Sundanese
-export extern(C) immutable(bool) sidero_utf_lut_isScriptSundanese(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptSundanese(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Old_Permic
-export extern(C) immutable(bool) sidero_utf_lut_isScriptOld_Permic(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptOld_Permic(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Shavian
-export extern(C) immutable(bool) sidero_utf_lut_isScriptShavian(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptShavian(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Lycian
-export extern(C) immutable(bool) sidero_utf_lut_isScriptLycian(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptLycian(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Miao
-export extern(C) immutable(bool) sidero_utf_lut_isScriptMiao(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptMiao(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Tangut
-export extern(C) immutable(bool) sidero_utf_lut_isScriptTangut(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptTangut(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Bengali
-export extern(C) immutable(bool) sidero_utf_lut_isScriptBengali(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptBengali(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Inscriptional_Pahlavi
-export extern(C) immutable(bool) sidero_utf_lut_isScriptInscriptional_Pahlavi(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptInscriptional_Pahlavi(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Vithkuqi
-export extern(C) immutable(bool) sidero_utf_lut_isScriptVithkuqi(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptVithkuqi(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Armenian
-export extern(C) immutable(bool) sidero_utf_lut_isScriptArmenian(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptArmenian(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script New_Tai_Lue
-export extern(C) immutable(bool) sidero_utf_lut_isScriptNew_Tai_Lue(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptNew_Tai_Lue(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Sogdian
-export extern(C) immutable(bool) sidero_utf_lut_isScriptSogdian(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptSogdian(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Buhid
-export extern(C) immutable(bool) sidero_utf_lut_isScriptBuhid(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptBuhid(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Manichaean
-export extern(C) immutable(bool) sidero_utf_lut_isScriptManichaean(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptManichaean(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Greek
-export extern(C) immutable(bool) sidero_utf_lut_isScriptGreek(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptGreek(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Braille
-export extern(C) immutable(bool) sidero_utf_lut_isScriptBraille(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptBraille(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Avestan
-export extern(C) immutable(bool) sidero_utf_lut_isScriptAvestan(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptAvestan(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Arabic
-export extern(C) immutable(bool) sidero_utf_lut_isScriptArabic(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptArabic(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Javanese
-export extern(C) immutable(bool) sidero_utf_lut_isScriptJavanese(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptJavanese(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Lydian
-export extern(C) immutable(bool) sidero_utf_lut_isScriptLydian(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptLydian(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Pau_Cin_Hau
-export extern(C) immutable(bool) sidero_utf_lut_isScriptPau_Cin_Hau(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptPau_Cin_Hau(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Cypro_Minoan
-export extern(C) immutable(bool) sidero_utf_lut_isScriptCypro_Minoan(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptCypro_Minoan(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Buginese
-export extern(C) immutable(bool) sidero_utf_lut_isScriptBuginese(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptBuginese(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Batak
-export extern(C) immutable(bool) sidero_utf_lut_isScriptBatak(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptBatak(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Nandinagari
-export extern(C) immutable(bool) sidero_utf_lut_isScriptNandinagari(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptNandinagari(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Cham
-export extern(C) immutable(bool) sidero_utf_lut_isScriptCham(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptCham(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Gunjala_Gondi
-export extern(C) immutable(bool) sidero_utf_lut_isScriptGunjala_Gondi(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptGunjala_Gondi(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Cypriot
-export extern(C) immutable(bool) sidero_utf_lut_isScriptCypriot(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptCypriot(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Ugaritic
-export extern(C) immutable(bool) sidero_utf_lut_isScriptUgaritic(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptUgaritic(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Georgian
-export extern(C) immutable(bool) sidero_utf_lut_isScriptGeorgian(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptGeorgian(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Sharada
-export extern(C) immutable(bool) sidero_utf_lut_isScriptSharada(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptSharada(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Tamil
-export extern(C) immutable(bool) sidero_utf_lut_isScriptTamil(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptTamil(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Cherokee
-export extern(C) immutable(bool) sidero_utf_lut_isScriptCherokee(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptCherokee(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Pahawh_Hmong
-export extern(C) immutable(bool) sidero_utf_lut_isScriptPahawh_Hmong(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptPahawh_Hmong(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Syloti_Nagri
-export extern(C) immutable(bool) sidero_utf_lut_isScriptSyloti_Nagri(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptSyloti_Nagri(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Kharoshthi
-export extern(C) immutable(bool) sidero_utf_lut_isScriptKharoshthi(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptKharoshthi(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Zanabazar_Square
-export extern(C) immutable(bool) sidero_utf_lut_isScriptZanabazar_Square(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptZanabazar_Square(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Katakana
-export extern(C) immutable(bool) sidero_utf_lut_isScriptKatakana(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptKatakana(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Telugu
-export extern(C) immutable(bool) sidero_utf_lut_isScriptTelugu(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptTelugu(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Ethiopic
-export extern(C) immutable(bool) sidero_utf_lut_isScriptEthiopic(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptEthiopic(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Vai
-export extern(C) immutable(bool) sidero_utf_lut_isScriptVai(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptVai(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Bamum
-export extern(C) immutable(bool) sidero_utf_lut_isScriptBamum(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptBamum(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Hangul
-export extern(C) immutable(bool) sidero_utf_lut_isScriptHangul(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptHangul(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Mongolian
-export extern(C) immutable(bool) sidero_utf_lut_isScriptMongolian(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptMongolian(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Old_Uyghur
-export extern(C) immutable(bool) sidero_utf_lut_isScriptOld_Uyghur(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptOld_Uyghur(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Mahajani
-export extern(C) immutable(bool) sidero_utf_lut_isScriptMahajani(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptMahajani(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Khmer
-export extern(C) immutable(bool) sidero_utf_lut_isScriptKhmer(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptKhmer(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Grantha
-export extern(C) immutable(bool) sidero_utf_lut_isScriptGrantha(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptGrantha(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Kannada
-export extern(C) immutable(bool) sidero_utf_lut_isScriptKannada(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptKannada(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Yezidi
-export extern(C) immutable(bool) sidero_utf_lut_isScriptYezidi(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptYezidi(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Old_North_Arabian
-export extern(C) immutable(bool) sidero_utf_lut_isScriptOld_North_Arabian(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptOld_North_Arabian(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Tai_Le
-export extern(C) immutable(bool) sidero_utf_lut_isScriptTai_Le(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptTai_Le(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Hebrew
-export extern(C) immutable(bool) sidero_utf_lut_isScriptHebrew(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptHebrew(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Gujarati
-export extern(C) immutable(bool) sidero_utf_lut_isScriptGujarati(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptGujarati(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Tangsa
-export extern(C) immutable(bool) sidero_utf_lut_isScriptTangsa(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptTangsa(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Carian
-export extern(C) immutable(bool) sidero_utf_lut_isScriptCarian(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptCarian(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Bhaiksuki
-export extern(C) immutable(bool) sidero_utf_lut_isScriptBhaiksuki(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptBhaiksuki(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Masaram_Gondi
-export extern(C) immutable(bool) sidero_utf_lut_isScriptMasaram_Gondi(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptMasaram_Gondi(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Runic
-export extern(C) immutable(bool) sidero_utf_lut_isScriptRunic(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptRunic(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Duployan
-export extern(C) immutable(bool) sidero_utf_lut_isScriptDuployan(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptDuployan(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Warang_Citi
-export extern(C) immutable(bool) sidero_utf_lut_isScriptWarang_Citi(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptWarang_Citi(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Phags_Pa
-export extern(C) immutable(bool) sidero_utf_lut_isScriptPhags_Pa(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptPhags_Pa(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Kawi
-export extern(C) immutable(bool) sidero_utf_lut_isScriptKawi(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptKawi(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Nag_Mundari
-export extern(C) immutable(bool) sidero_utf_lut_isScriptNag_Mundari(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptNag_Mundari(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Garay
-export extern(C) immutable(bool) sidero_utf_lut_isScriptGaray(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptGaray(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Gurung_Khema
-export extern(C) immutable(bool) sidero_utf_lut_isScriptGurung_Khema(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptGurung_Khema(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Kirat_Rai
-export extern(C) immutable(bool) sidero_utf_lut_isScriptKirat_Rai(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptKirat_Rai(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Ol_Onal
-export extern(C) immutable(bool) sidero_utf_lut_isScriptOl_Onal(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptOl_Onal(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Sunuwar
-export extern(C) immutable(bool) sidero_utf_lut_isScriptSunuwar(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptSunuwar(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Todhri
-export extern(C) immutable(bool) sidero_utf_lut_isScriptTodhri(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptTodhri(dchar against) @safe nothrow @nogc pure;
 /// Is the character a member of the script Tulu_Tigalari
-export extern(C) immutable(bool) sidero_utf_lut_isScriptTulu_Tigalari(dchar input) @trusted nothrow @nogc pure;
-
+export extern(C) bool sidero_utf_lut_isScriptTulu_Tigalari(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of grapheme break property.
 export extern(C) bool sidero_utf_lut_isMemberOfGraphemePrepend(dchar against) @safe nothrow @nogc pure;
