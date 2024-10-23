@@ -3,6 +3,7 @@ import generators.unicode.unicodedata.common;
 import constants;
 import utilities.sequential_ranges;
 import utilities.lut;
+import utilities.inverselist;
 
 void unicodeData() {
     import std.file : readText, write, append;
@@ -38,34 +39,17 @@ void unicodeData() {
     Casing;
 
     {
-        SequentialRanges!(size_t, SequentialRangeSplitGroup, 2) sr;
+        dchar[] characters;
+        uint[] lengths;
 
-        foreach(character, entry; state.decompositonMappings)
-            sr.add(character, entry.fullyDecomposed.length);
-
-        sr.splitForSame;
-        sr.calculateTrueSpread;
-        sr.joinWhenClose();
-        sr.joinWithDiff(null, 64);
-        sr.calculateTrueSpread;
-        sr.layerByRangeMax(0, ushort.max / 4);
-        sr.layerJoinIfEndIsStart(0, 16);
-        sr.layerByRangeMax(1, ushort.max / 2);
-        sr.layerJoinIfEndIsStart(1, 64);
-
-        LookupTableGenerator!(size_t, SequentialRangeSplitGroup, 2) lut;
-        lut.sr = sr;
-        lut.lutType = "size_t";
-        lut.name = "sidero_utf_lut_lengthOfFullyDecomposed";
-        lut.defaultReturn = "1";
-
-        auto gotDcode = lut.build();
+        foreach(character, entry; state.decompositonMappings) {
+            characters ~= character;
+            lengths ~= cast(uint)entry.fullyDecomposed.length;
+        }
 
         apiOutput ~= "\n";
         apiOutput ~= "/// Get length of fully decomposed for character.\n";
-        apiOutput ~= gotDcode[0];
-
-        internal ~= gotDcode[1];
+        generateReturn(apiOutput, internal, "sidero_utf_lut_lengthOfFullyDecomposed", characters, lengths);
     }
 
     {
@@ -140,35 +124,13 @@ void unicodeData() {
     }
 
     {
-        SequentialRanges!(ubyte, SequentialRangeSplitGroup, 2) sr;
+        ValueRange!dchar[] ranges;
+        ubyte[] gcs;
 
         foreach(entry; state.entries) {
-            foreach(c; entry.range.start .. entry.range.end + 1)
-                sr.add(cast(dchar)c, cast(ubyte)entry.generalCategory);
+            ranges ~= entry.range;
+            gcs ~= cast(ubyte)entry.generalCategory;
         }
-
-        sr.calculateTrueSpread;
-        sr.splitForSame;
-        sr.calculateTrueSpread;
-        sr.joinWhenClose();
-        sr.joinWithDiff(null, 64);
-        sr.calculateTrueSpread;
-        sr.layerByRangeMax(0, ushort.max / 4);
-        sr.layerJoinIfEndIsStart(0, 16);
-        sr.layerByRangeMax(1, ushort.max / 2);
-        sr.layerJoinIfEndIsStart(1, 64);
-
-        LookupTableGenerator!(ubyte, SequentialRangeSplitGroup, 2) lut;
-        lut.sr = sr;
-        lut.externType = "GeneralCategory";
-        lut.lutType = "ubyte";
-        lut.name = "sidero_utf_lut_getGeneralCategory";
-
-        auto gotDcode = lut.build();
-
-        apiOutput ~= "\n";
-        apiOutput ~= "/// Lookup general category for character.\n";
-        apiOutput ~= gotDcode[0];
 
         apiOutput ~= q{
 /// Is character graphical?
@@ -294,7 +256,9 @@ export bool isUnicodeTitle(dchar input) @safe nothrow @nogc pure {
 }
 };
 
-        internal ~= gotDcode[1];
+        apiOutput ~= "\n";
+        apiOutput ~= "/// Lookup general category for character.\n";
+        generateReturn(apiOutput, internal, "sidero_utf_lut_getGeneralCategory", ranges, gcs, "GeneralCategory");
     }
 
     append(UnicodeAPIFile, apiOutput.data);

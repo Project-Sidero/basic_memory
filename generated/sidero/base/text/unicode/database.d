@@ -653,7 +653,7 @@ export immutable(SpecialCasing) sidero_utf_lut_getSimplifiedCasing(dchar input) 
 export extern(C) void sidero_utf_lut_getSimplifiedCasing2(dchar input, void*) @trusted nothrow @nogc pure;
 
 /// Get length of fully decomposed for character.
-export extern(C) immutable(size_t) sidero_utf_lut_lengthOfFullyDecomposed(dchar input) @trusted nothrow @nogc pure;
+export extern(C) uint sidero_utf_lut_lengthOfFullyDecomposed(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup decomposition mapping for character if canonical.
 alias sidero_utf_lut_getDecompositionMappingCanonical = sidero_utf_lut_getDecompositionMappingNone;
@@ -744,9 +744,6 @@ export ubyte sidero_utf_lut_lengthOfDecompositionMapping(dchar input, Compatibil
 /// Lookup numeric numerator/denominator for character.
 /// Returns: null if not set.
 export extern(C) immutable(long[]) sidero_utf_lut_getNumeric(dchar input) @trusted nothrow @nogc pure;
-
-/// Lookup general category for character.
-export extern(C) immutable(GeneralCategory) sidero_utf_lut_getGeneralCategory(dchar input) @trusted nothrow @nogc pure;
 
 /// Is character graphical?
 export bool isUnicodeGraphical(dchar input) @safe nothrow @nogc pure {
@@ -869,6 +866,9 @@ export bool isUnicodeTitle(dchar input) @safe nothrow @nogc pure {
             return false;
     }
 }
+
+/// Lookup general category for character.
+export extern(C) GeneralCategory sidero_utf_lut_getGeneralCategory(dchar against) @safe nothrow @nogc pure;
 
 /// Is character member of property.
 export extern(C) bool sidero_utf_lut_isMemberOfWhite_Space(dchar against) @safe nothrow @nogc pure;
