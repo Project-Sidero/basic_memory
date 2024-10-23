@@ -20,5 +20,5 @@ export extern(C) ubyte sidero_utf_lut_getLineBreakClass(dchar against) @trusted 
             high = mid - 1;
     }
 
-    return 0;
+    return typeof(return).init;
 }

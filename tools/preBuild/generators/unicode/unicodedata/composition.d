@@ -1,20 +1,21 @@
 module generators.unicode.unicodedata.composition;
 import generators.unicode.unicodedata.common;
 import constants;
-import utilities.sequential_ranges;
-import utilities.lut;
 import std.file : write;
 import std.array : appender;
 
 void Composition() {
     import generators.unicode.compositionexclusions;
+    import std.algorithm : sort;
 
     auto internalC = appender!string();
     internalC ~= "module sidero.base.internal.unicode.unicodedataC;\n\n";
     internalC ~= "// Generated do not modify\n";
 
     {
-        SequentialRanges!(dchar, SequentialRangeSplitGroup, 2, ulong) sr;
+        Pair[] pairs;
+        ulong[] ranges;
+        dchar[] characters;
 
         CompositionCanonical: foreach(character, entry; state.decompositonMappings) {
             if(entry.decomposed.length != 2 || entry.tag != CompatibilityFormattingTag.None)
@@ -30,24 +31,16 @@ void Composition() {
             ulong temp = C;
             temp <<= 32;
             temp |= L;
-            sr.add(temp, character);
+
+            pairs ~= Pair(temp, character);
         }
 
-        sr.calculateTrueSpread;
-        sr.joinWhenClose();
-        sr.joinWithDiff(null, 256);
-        sr.calculateTrueSpread;
-        sr.layerByRangeMax(0, ushort.max / 4);
-        sr.layerJoinIfEndIsStart(0, 16);
-        sr.layerByRangeMax(1, ushort.max / 2);
-        sr.layerJoinIfEndIsStart(1, 64);
+        sort!"a.range < b.range"(pairs);
 
-        LookupTableGenerator!(dchar, SequentialRangeSplitGroup, 2, ulong) lut;
-        lut.sr = sr;
-        lut.lutType = "dchar";
-        lut.name = "sidero_utf_lut_getCompositionCanonical2";
-
-        auto gotDcode = lut.build();
+        foreach(v; pairs) {
+            ranges ~= v.range;
+            characters ~= v.character;
+        }
 
         apiOutput ~= "\n";
         apiOutput ~= "/// Get composition for character pair.\n";
@@ -58,13 +51,14 @@ void Composition() {
         apiOutput ~= "    temp |= L;\n";
         apiOutput ~= "    return sidero_utf_lut_getCompositionCanonical2(temp);\n";
         apiOutput ~= "}\n";
-        apiOutput ~= gotDcode[0];
 
-        internalC ~= gotDcode[1];
+        generateReturn(apiOutput, internalC, "sidero_utf_lut_getCompositionCanonical2", ranges, characters);
     }
 
     {
-        SequentialRanges!(dchar, SequentialRangeSplitGroup, 2, ulong) sr;
+        Pair[] pairs;
+        ulong[] ranges;
+        dchar[] characters;
 
         CompositionCompatibility: foreach(character, entry; state.decompositonMappings) {
             if(entry.decomposed.length != 2)
@@ -80,24 +74,23 @@ void Composition() {
             ulong temp = C;
             temp <<= 32;
             temp |= L;
-            sr.add(temp, character);
+
+            foreach(ref pair; pairs) {
+                if (pair.range == temp) {
+                    pair.character = character;
+                    continue CompositionCompatibility;
+                }
+            }
+
+            pairs ~= Pair(temp, character);
         }
 
-        sr.calculateTrueSpread;
-        sr.joinWhenClose();
-        sr.joinWithDiff(null, 256);
-        sr.calculateTrueSpread;
-        sr.layerByRangeMax(0, ushort.max / 4);
-        sr.layerJoinIfEndIsStart(0, 16);
-        sr.layerByRangeMax(1, ushort.max / 2);
-        sr.layerJoinIfEndIsStart(1, 64);
+        sort!"a.range < b.range"(pairs);
 
-        LookupTableGenerator!(dchar, SequentialRangeSplitGroup, 2, ulong) lut;
-        lut.sr = sr;
-        lut.lutType = "dchar";
-        lut.name = "sidero_utf_lut_getCompositionCompatibility2";
-
-        auto gotDcode = lut.build();
+        foreach(i, v; pairs) {
+            ranges ~= v.range;
+            characters ~= v.character;
+        }
 
         apiOutput ~= "\n";
         apiOutput ~= "/// Get composition for character pair.\n";
@@ -108,10 +101,19 @@ void Composition() {
         apiOutput ~= "    temp |= L;\n";
         apiOutput ~= "    return sidero_utf_lut_getCompositionCompatibility2(temp);\n";
         apiOutput ~= "}\n";
-        apiOutput ~= gotDcode[0];
 
-        internalC ~= gotDcode[1];
+        generateReturn(apiOutput, internalC, "sidero_utf_lut_getCompositionCompatibility2", ranges, characters);
+
     }
 
     write(UnicodeLUTDirectory ~ "unicodedataC.d", internalC.data);
+}
+
+private:
+import utilities.sequential_ranges;
+import utilities.inverselist;
+
+struct Pair {
+    ulong range;
+    dchar character;
 }

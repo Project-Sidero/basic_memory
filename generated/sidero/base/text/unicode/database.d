@@ -631,7 +631,7 @@ export dchar sidero_utf_lut_getCompositionCanonical(dchar L, dchar C) @trusted n
     temp |= L;
     return sidero_utf_lut_getCompositionCanonical2(temp);
 }
-export extern(C) immutable(dchar) sidero_utf_lut_getCompositionCanonical2(ulong input) @trusted nothrow @nogc pure;
+export extern(C) dchar sidero_utf_lut_getCompositionCanonical2(ulong against) @safe nothrow @nogc pure;
 
 /// Get composition for character pair.
 /// Returns: dchar.init if not set.
@@ -641,7 +641,7 @@ export dchar sidero_utf_lut_getCompositionCompatibility(dchar L, dchar C) @trust
     temp |= L;
     return sidero_utf_lut_getCompositionCompatibility2(temp);
 }
-export extern(C) immutable(dchar) sidero_utf_lut_getCompositionCompatibility2(ulong input) @trusted nothrow @nogc pure;
+export extern(C) dchar sidero_utf_lut_getCompositionCompatibility2(ulong against) @safe nothrow @nogc pure;
 
 /// Get simplified casing for character.
 /// Returns: non-null for a given entry if changed from input character.

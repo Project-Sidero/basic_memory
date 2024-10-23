@@ -380,7 +380,7 @@ void generateReturn(ref Appender!string interfaceAppender, ref Appender!string i
             high = mid - 1;
     }
 
-    return 0;
+    return dchar.init;
 };
         }
 
@@ -467,7 +467,7 @@ void generateIntegerReturn(Type, uint SizeToPrint)(ref Appender!string interface
             high = mid - 1;
     }
 
-    return 0;
+    return typeof(return).init;
 };
         }
 
@@ -542,7 +542,7 @@ void generateIntegerReturn(Type, uint SizeToPrint)(ref Appender!string interface
             high = mid - 1;
     }
 
-    return 0;
+    return typeof(return).init;
 };
         }
 
