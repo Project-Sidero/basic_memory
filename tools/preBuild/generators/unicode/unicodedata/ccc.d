@@ -1,8 +1,6 @@
 module generators.unicode.unicodedata.ccc;
 import generators.unicode.unicodedata.common;
 import constants;
-import utilities.sequential_ranges;
-import utilities.lut;
 import std.file : write;
 import std.array : appender;
 
@@ -12,37 +10,34 @@ void CCC() {
     internalCCC ~= "// Generated do not modify\n";
 
     {
-        SequentialRanges!(ubyte, SequentialRangeSplitGroup, 2) sr;
-
-        foreach(entry; state.entries) {
-            foreach(c; entry.range.start .. entry.range.end + 1)
-                sr.add(cast(dchar)c, cast(ubyte)entry.canonicalCombiningClass);
-        }
-
-        sr.calculateTrueSpread;
-        sr.joinWhenClose(null, 5, 32);
-        sr.splitForSame;
-        sr.calculateTrueSpread;
-        sr.joinWhenClose(null, 5, 32);
-        sr.calculateTrueSpread;
-        sr.layerBySingleMulti(0);
-        sr.layerJoinIfEndIsStart(0, 1);
-        sr.layerByRangeMax(1, ushort.max / 8);
-
-        LookupTableGenerator!(ubyte, SequentialRangeSplitGroup, 2) lut;
-        lut.sr = sr;
-        lut.lutType = "ubyte";
-        lut.name = "sidero_utf_lut_getCCC";
-
-        auto gotDcode = lut.build();
-
         apiOutput ~= "\n";
         apiOutput ~= "/// Lookup CCC for character.\n";
         apiOutput ~= "/// Returns: 0 if not set.\n";
-        apiOutput ~= gotDcode[0];
 
-        internalCCC ~= gotDcode[1];
+        ValueRange!dchar[] ranges;
+        ubyte[] ccc;
+        seqEntries(ranges, ccc, state.entries);
+        generateReturn(apiOutput, internalCCC, "sidero_utf_lut_getCCC", ranges, ccc);
     }
 
     write(UnicodeLUTDirectory ~ "unicodedataCCC.d", internalCCC.data);
+}
+
+private:
+import utilities.sequential_ranges;
+import utilities.inverselist;
+
+void seqEntries(out ValueRange!dchar[] ranges, out ubyte[] cccs, Entry[] entries) {
+    import std.algorithm : sort;
+
+    sort!"a.range.start < b.range.start"(entries);
+
+    ranges.reserve(entries.length);
+    cccs.reserve(entries.length);
+
+    foreach(v; entries) {
+        assert(v.range.start <= v.range.end);
+        ranges ~= v.range;
+        cccs ~= cast(ubyte)v.canonicalCombiningClass;
+    }
 }

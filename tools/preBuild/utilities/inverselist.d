@@ -105,6 +105,16 @@ void generateReturn(ref Appender!string interfaceAppender, ref Appender!string i
 }
 
 void generateReturn(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
+    string functionName, ValueRange!dchar[] ranges, ulong[] returnValues) {
+    generateIntegerReturn!(ulong, 16)(interfaceAppender, implementationAppender, functionName, ranges, returnValues);
+}
+
+void generateReturn(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
+    string functionName, dchar[] ranges, ulong[] returnValues) {
+    generateIntegerReturn!(ulong, 16)(interfaceAppender, implementationAppender, functionName, ranges, returnValues);
+}
+
+void generateReturn(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
         string functionName, ValueRange!dchar[] ranges, dstring[] returnValues) {
     {
         interfaceAppender ~= "export extern(C) dstring ";
@@ -206,7 +216,7 @@ void generateReturn(ref Appender!string interfaceAppender, ref Appender!string i
             high = mid - 1;
     }
 
-    return 0;
+    return null;
 };
         }
 
@@ -304,6 +314,73 @@ void generateReturn(ref Appender!string interfaceAppender, ref Appender!string i
     }
 
     return null;
+};
+        }
+
+        implementationAppender ~= "}\n";
+    }
+}
+
+void generateReturn(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
+    string functionName, ulong[] ranges, dchar[] returnValues) {
+    {
+        interfaceAppender ~= "export extern(C) dchar ";
+        interfaceAppender ~= functionName;
+        interfaceAppender ~= "(ulong against) @safe nothrow @nogc pure;\n";
+    }
+
+    {
+        implementationAppender ~= "export extern(C) dchar ";
+        implementationAppender ~= functionName;
+        implementationAppender ~= "(ulong against) @trusted nothrow @nogc pure {\n";
+
+        {
+            implementationAppender ~= "    static immutable ulong[] Table = cast(ulong[])x\"";
+            const startLength = implementationAppender.data.length;
+
+            foreach(range; ranges) {
+                implementationAppender.formattedWrite!"%016X"(range);
+            }
+
+            const diff = implementationAppender.data.length - startLength;
+            assert(diff % 16 == 0);
+
+            implementationAppender ~= "\";\n";
+        }
+
+        {
+            implementationAppender ~= "    static immutable dchar[] ReturnValues = cast(dchar[])x\"";
+            const startLength = implementationAppender.data.length;
+
+            foreach(returnValue; returnValues) {
+                enum Format = "%08X";
+                implementationAppender.formattedWrite!Format(returnValue);
+            }
+
+            const diff = implementationAppender.data.length - startLength;
+            assert(diff % 8 == 0);
+
+            implementationAppender ~= "\";\n";
+        }
+
+        {
+            // classic charInSet binary search as per Unicode Demystified pg.505
+
+            implementationAppender ~= q{
+    ptrdiff_t low, high = Table.length - 1;
+
+    while(low <= high) {
+        const mid = low + ((high - low) / 2);
+
+        if (Table[mid] == against)
+            return ReturnValues[mid];
+        else if (Table[mid] < against)
+            low = mid + 1;
+        else
+            high = mid - 1;
+    }
+
+    return 0;
 };
         }
 

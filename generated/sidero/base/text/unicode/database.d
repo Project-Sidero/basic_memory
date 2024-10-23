@@ -503,112 +503,112 @@ private extern(C) immutable(void[]) sidero_utf_lut_hangulSyllables2(HangulSyllab
 export extern(C) bool sidero_utf_lut_isFullCompositionExcluded(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup decomposition mapping for character if in compatibility formatting tag None.
-export extern(C) immutable(dstring) sidero_utf_lut_getDecompositionMappingNone(dchar input) @trusted nothrow @nogc pure;
+export extern(C) dstring sidero_utf_lut_getDecompositionMappingNone(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup decomposition mapping for character if in compatibility formatting tag Font.
-export extern(C) immutable(dstring) sidero_utf_lut_getDecompositionMappingFont(dchar input) @trusted nothrow @nogc pure;
+export extern(C) dstring sidero_utf_lut_getDecompositionMappingFont(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup decomposition mapping for character if in compatibility formatting tag NoBreak.
-export extern(C) immutable(dstring) sidero_utf_lut_getDecompositionMappingNoBreak(dchar input) @trusted nothrow @nogc pure;
+export extern(C) dstring sidero_utf_lut_getDecompositionMappingNoBreak(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup decomposition mapping for character if in compatibility formatting tag Initial.
-export extern(C) immutable(dstring) sidero_utf_lut_getDecompositionMappingInitial(dchar input) @trusted nothrow @nogc pure;
+export extern(C) dstring sidero_utf_lut_getDecompositionMappingInitial(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup decomposition mapping for character if in compatibility formatting tag Medial.
-export extern(C) immutable(dstring) sidero_utf_lut_getDecompositionMappingMedial(dchar input) @trusted nothrow @nogc pure;
+export extern(C) dstring sidero_utf_lut_getDecompositionMappingMedial(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup decomposition mapping for character if in compatibility formatting tag Final.
-export extern(C) immutable(dstring) sidero_utf_lut_getDecompositionMappingFinal(dchar input) @trusted nothrow @nogc pure;
+export extern(C) dstring sidero_utf_lut_getDecompositionMappingFinal(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup decomposition mapping for character if in compatibility formatting tag Isolated.
-export extern(C) immutable(dstring) sidero_utf_lut_getDecompositionMappingIsolated(dchar input) @trusted nothrow @nogc pure;
+export extern(C) dstring sidero_utf_lut_getDecompositionMappingIsolated(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup decomposition mapping for character if in compatibility formatting tag Circle.
-export extern(C) immutable(dstring) sidero_utf_lut_getDecompositionMappingCircle(dchar input) @trusted nothrow @nogc pure;
+export extern(C) dstring sidero_utf_lut_getDecompositionMappingCircle(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup decomposition mapping for character if in compatibility formatting tag Super.
-export extern(C) immutable(dstring) sidero_utf_lut_getDecompositionMappingSuper(dchar input) @trusted nothrow @nogc pure;
+export extern(C) dstring sidero_utf_lut_getDecompositionMappingSuper(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup decomposition mapping for character if in compatibility formatting tag Sub.
-export extern(C) immutable(dstring) sidero_utf_lut_getDecompositionMappingSub(dchar input) @trusted nothrow @nogc pure;
+export extern(C) dstring sidero_utf_lut_getDecompositionMappingSub(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup decomposition mapping for character if in compatibility formatting tag Vertical.
-export extern(C) immutable(dstring) sidero_utf_lut_getDecompositionMappingVertical(dchar input) @trusted nothrow @nogc pure;
+export extern(C) dstring sidero_utf_lut_getDecompositionMappingVertical(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup decomposition mapping for character if in compatibility formatting tag Wide.
-export extern(C) immutable(dstring) sidero_utf_lut_getDecompositionMappingWide(dchar input) @trusted nothrow @nogc pure;
+export extern(C) dstring sidero_utf_lut_getDecompositionMappingWide(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup decomposition mapping for character if in compatibility formatting tag Narrow.
-export extern(C) immutable(dstring) sidero_utf_lut_getDecompositionMappingNarrow(dchar input) @trusted nothrow @nogc pure;
+export extern(C) dstring sidero_utf_lut_getDecompositionMappingNarrow(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup decomposition mapping for character if in compatibility formatting tag Small.
-export extern(C) immutable(dstring) sidero_utf_lut_getDecompositionMappingSmall(dchar input) @trusted nothrow @nogc pure;
+export extern(C) dstring sidero_utf_lut_getDecompositionMappingSmall(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup decomposition mapping for character if in compatibility formatting tag Square.
-export extern(C) immutable(dstring) sidero_utf_lut_getDecompositionMappingSquare(dchar input) @trusted nothrow @nogc pure;
+export extern(C) dstring sidero_utf_lut_getDecompositionMappingSquare(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup decomposition mapping for character if in compatibility formatting tag Fraction.
-export extern(C) immutable(dstring) sidero_utf_lut_getDecompositionMappingFraction(dchar input) @trusted nothrow @nogc pure;
+export extern(C) dstring sidero_utf_lut_getDecompositionMappingFraction(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup decomposition mapping for character if in compatibility formatting tag Compat.
-export extern(C) immutable(dstring) sidero_utf_lut_getDecompositionMappingCompat(dchar input) @trusted nothrow @nogc pure;
+export extern(C) dstring sidero_utf_lut_getDecompositionMappingCompat(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup decomposition mapping for character if compatibility.
-export extern(C) immutable(dstring) sidero_utf_lut_getDecompositionMappingCompatibility(dchar input) @trusted nothrow @nogc pure;
+export extern(C) dstring sidero_utf_lut_getDecompositionMappingCompatibility(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup length of decomposition mapping for character if in compatibility formatting tag None.
-export extern(C) immutable(ubyte) sidero_utf_lut_lengthOfDecompositionMappingNone(dchar input) @trusted nothrow @nogc pure;
+export extern(C) ubyte sidero_utf_lut_lengthOfDecompositionMappingNone(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup length of decomposition mapping for character if in compatibility formatting tag Font.
-export extern(C) immutable(ubyte) sidero_utf_lut_lengthOfDecompositionMappingFont(dchar input) @trusted nothrow @nogc pure;
+export extern(C) ubyte sidero_utf_lut_lengthOfDecompositionMappingFont(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup length of decomposition mapping for character if in compatibility formatting tag NoBreak.
-export extern(C) immutable(ubyte) sidero_utf_lut_lengthOfDecompositionMappingNoBreak(dchar input) @trusted nothrow @nogc pure;
+export extern(C) ubyte sidero_utf_lut_lengthOfDecompositionMappingNoBreak(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup length of decomposition mapping for character if in compatibility formatting tag Initial.
-export extern(C) immutable(ubyte) sidero_utf_lut_lengthOfDecompositionMappingInitial(dchar input) @trusted nothrow @nogc pure;
+export extern(C) ubyte sidero_utf_lut_lengthOfDecompositionMappingInitial(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup length of decomposition mapping for character if in compatibility formatting tag Medial.
-export extern(C) immutable(ubyte) sidero_utf_lut_lengthOfDecompositionMappingMedial(dchar input) @trusted nothrow @nogc pure;
+export extern(C) ubyte sidero_utf_lut_lengthOfDecompositionMappingMedial(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup length of decomposition mapping for character if in compatibility formatting tag Final.
-export extern(C) immutable(ubyte) sidero_utf_lut_lengthOfDecompositionMappingFinal(dchar input) @trusted nothrow @nogc pure;
+export extern(C) ubyte sidero_utf_lut_lengthOfDecompositionMappingFinal(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup length of decomposition mapping for character if in compatibility formatting tag Isolated.
-export extern(C) immutable(ubyte) sidero_utf_lut_lengthOfDecompositionMappingIsolated(dchar input) @trusted nothrow @nogc pure;
+export extern(C) ubyte sidero_utf_lut_lengthOfDecompositionMappingIsolated(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup length of decomposition mapping for character if in compatibility formatting tag Circle.
-export extern(C) immutable(ubyte) sidero_utf_lut_lengthOfDecompositionMappingCircle(dchar input) @trusted nothrow @nogc pure;
+export extern(C) ubyte sidero_utf_lut_lengthOfDecompositionMappingCircle(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup length of decomposition mapping for character if in compatibility formatting tag Super.
-export extern(C) immutable(ubyte) sidero_utf_lut_lengthOfDecompositionMappingSuper(dchar input) @trusted nothrow @nogc pure;
+export extern(C) ubyte sidero_utf_lut_lengthOfDecompositionMappingSuper(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup length of decomposition mapping for character if in compatibility formatting tag Sub.
-export extern(C) immutable(ubyte) sidero_utf_lut_lengthOfDecompositionMappingSub(dchar input) @trusted nothrow @nogc pure;
+export extern(C) ubyte sidero_utf_lut_lengthOfDecompositionMappingSub(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup length of decomposition mapping for character if in compatibility formatting tag Vertical.
-export extern(C) immutable(ubyte) sidero_utf_lut_lengthOfDecompositionMappingVertical(dchar input) @trusted nothrow @nogc pure;
+export extern(C) ubyte sidero_utf_lut_lengthOfDecompositionMappingVertical(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup length of decomposition mapping for character if in compatibility formatting tag Wide.
-export extern(C) immutable(ubyte) sidero_utf_lut_lengthOfDecompositionMappingWide(dchar input) @trusted nothrow @nogc pure;
+export extern(C) ubyte sidero_utf_lut_lengthOfDecompositionMappingWide(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup length of decomposition mapping for character if in compatibility formatting tag Narrow.
-export extern(C) immutable(ubyte) sidero_utf_lut_lengthOfDecompositionMappingNarrow(dchar input) @trusted nothrow @nogc pure;
+export extern(C) ubyte sidero_utf_lut_lengthOfDecompositionMappingNarrow(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup length of decomposition mapping for character if in compatibility formatting tag Small.
-export extern(C) immutable(ubyte) sidero_utf_lut_lengthOfDecompositionMappingSmall(dchar input) @trusted nothrow @nogc pure;
+export extern(C) ubyte sidero_utf_lut_lengthOfDecompositionMappingSmall(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup length of decomposition mapping for character if in compatibility formatting tag Square.
-export extern(C) immutable(ubyte) sidero_utf_lut_lengthOfDecompositionMappingSquare(dchar input) @trusted nothrow @nogc pure;
+export extern(C) ubyte sidero_utf_lut_lengthOfDecompositionMappingSquare(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup length of decomposition mapping for character if in compatibility formatting tag Fraction.
-export extern(C) immutable(ubyte) sidero_utf_lut_lengthOfDecompositionMappingFraction(dchar input) @trusted nothrow @nogc pure;
+export extern(C) ubyte sidero_utf_lut_lengthOfDecompositionMappingFraction(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup length of decomposition mapping for character if in compatibility formatting tag Compat.
-export extern(C) immutable(ubyte) sidero_utf_lut_lengthOfDecompositionMappingCompat(dchar input) @trusted nothrow @nogc pure;
+export extern(C) ubyte sidero_utf_lut_lengthOfDecompositionMappingCompat(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup length of decomposition mapping for character if compatibility.
-export extern(C) immutable(ubyte) sidero_utf_lut_lengthOfDecompositionMappingCompatibility(dchar input) @trusted nothrow @nogc pure;
+export extern(C) ubyte sidero_utf_lut_lengthOfDecompositionMappingCompatibility(dchar against) @safe nothrow @nogc pure;
 
 /// Get decomposition map for character.
 /// Returns: None for tag if unchanged.
@@ -621,7 +621,7 @@ export extern(C) void sidero_utf_lut_getDecompositionMap2(dchar input, void*) @t
 
 /// Lookup CCC for character.
 /// Returns: 0 if not set.
-export extern(C) immutable(ubyte) sidero_utf_lut_getCCC(dchar input) @trusted nothrow @nogc pure;
+export extern(C) ubyte sidero_utf_lut_getCCC(dchar against) @safe nothrow @nogc pure;
 
 /// Get composition for character pair.
 /// Returns: dchar.init if not set.
