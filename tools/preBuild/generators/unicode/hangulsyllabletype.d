@@ -61,24 +61,14 @@ struct ValueRange {
 
         static foreach(i; 0 .. 5) {
             {
-                SequentialRanges!(bool, SequentialRangeSplitGroup, 0) sr;
-
-                foreach(entry; state.tupleof[i]) {
-                    foreach(codepoint; entry.start .. entry.end + 1)
-                        sr.add(codepoint, true);
-                }
-
-                sr.calculateTrueSpread;
-                sr.joinWhenClose(null, 5, 1);
-
                 internal ~= "        case HangulSyllableType." ~ NameOfValue[i] ~ ":\n";
                 internal ~= "            static immutable Array = [";
 
-                foreach(entry, layerIndexes; sr) {
-                    if(entry.range.isSingle)
-                        internal.formattedWrite!"ValueRange(0x%X), "(entry.range.start);
+                foreach(entry; state.tupleof[i]) {
+                    if(entry.isSingle)
+                        internal.formattedWrite!"ValueRange(0x%X), "(entry.start);
                     else
-                        internal.formattedWrite!"ValueRange(0x%X, 0x%X), "(entry.range.start, entry.range.end);
+                        internal.formattedWrite!"ValueRange(0x%X, 0x%X), "(entry.start, entry.end);
                 }
 
                 internal ~= "];\n";
@@ -96,7 +86,7 @@ struct ValueRange {
 
 private:
 import std.array : appender;
-import utilities.sequential_ranges;
+import utilities.setops;
 import utilities.inverselist;
 
 void processEachLine(string inputText, ref TotalState state) {
@@ -104,8 +94,8 @@ void processEachLine(string inputText, ref TotalState state) {
     import std.string : strip, lineSplitter;
     import std.conv : parse;
 
-    ValueRange!dchar valueRangeFromString(string charRangeStr) {
-        ValueRange!dchar ret;
+    ValueRange valueRangeFromString(string charRangeStr) {
+        ValueRange ret;
 
         ptrdiff_t offsetOfSeperator = charRangeStr.countUntil("..");
         if(offsetOfSeperator < 0) {
@@ -120,7 +110,7 @@ void processEachLine(string inputText, ref TotalState state) {
         return ret;
     }
 
-    void handleLine(ValueRange!dchar range, string line) {
+    void handleLine(ValueRange range, string line) {
         ptrdiff_t offset;
 
         offset = line.countUntil('#');
@@ -167,7 +157,7 @@ void processEachLine(string inputText, ref TotalState state) {
         string charRangeStr = line[0 .. offset].strip;
         line = line[offset + 1 .. $].strip;
 
-        ValueRange!dchar range = valueRangeFromString(charRangeStr);
+        ValueRange range = valueRangeFromString(charRangeStr);
         handleLine(range, line);
     }
 
@@ -179,7 +169,7 @@ void processEachLine(string inputText, ref TotalState state) {
         state.all ~= state.LVT;
 
         sort!("a.start < b.start")(state.all);
-        ValueRange!dchar[] temp;
+        ValueRange[] temp;
 
         foreach(valueRange; state.all) {
             if(temp.length == 0)
@@ -197,5 +187,5 @@ void processEachLine(string inputText, ref TotalState state) {
 }
 
 struct TotalState {
-    ValueRange!dchar[] L, V, T, LV, LVT, all;
+    ValueRange[] L, V, T, LV, LVT, all;
 }

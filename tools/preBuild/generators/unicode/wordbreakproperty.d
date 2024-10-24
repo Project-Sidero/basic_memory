@@ -15,7 +15,7 @@ void wordBreakProperty() {
     auto api = appender!string();
 
     {
-        ValueRange!dchar[] ranges;
+        ValueRange[] ranges;
         ubyte[] properties;
         seqEntries(ranges, properties, state.ranges);
 
@@ -30,7 +30,7 @@ void wordBreakProperty() {
 
 private:
 import std.array : appender;
-import utilities.sequential_ranges : ValueRange;
+import utilities.setops;
 import utilities.inverselist;
 
 void processEachLine(string inputText, ref TotalState state) {
@@ -38,8 +38,8 @@ void processEachLine(string inputText, ref TotalState state) {
     import std.string : strip, lineSplitter;
     import std.conv : parse;
 
-    ValueRange!dchar valueRangeFromString(string charRangeStr) {
-        ValueRange!dchar ret;
+    ValueRange valueRangeFromString(string charRangeStr) {
+        ValueRange ret;
 
         ptrdiff_t offsetOfSeperator = charRangeStr.countUntil("..");
         if(offsetOfSeperator < 0) {
@@ -54,7 +54,7 @@ void processEachLine(string inputText, ref TotalState state) {
         return ret;
     }
 
-    void handleLine(ValueRange!dchar valueRange, string propertyStr) {
+    void handleLine(ValueRange valueRange, string propertyStr) {
         Property property;
 
         switch(propertyStr) {
@@ -137,7 +137,7 @@ void processEachLine(string inputText, ref TotalState state) {
         string charRangeStr = line[0 .. offset].strip;
         line = line[offset + 1 .. $].strip;
 
-        ValueRange!dchar valueRange = valueRangeFromString(charRangeStr);
+        ValueRange valueRange = valueRangeFromString(charRangeStr);
 
         handleLine(valueRange, line);
     }
@@ -148,7 +148,7 @@ struct TotalState {
 }
 
 struct Entry {
-    ValueRange!dchar range;
+    ValueRange range;
     Property property;
 }
 
@@ -174,7 +174,7 @@ enum Property : ubyte {
     WSegSpace, ///
 }
 
-void seqEntries(out ValueRange!dchar[] ranges, out ubyte[] lineBreaks, Entry[] entries) {
+void seqEntries(out ValueRange[] ranges, out ubyte[] lineBreaks, Entry[] entries) {
     import std.algorithm : sort;
 
     sort!"a.range.start < b.range.start"(entries);

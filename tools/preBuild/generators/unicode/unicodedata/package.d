@@ -1,7 +1,7 @@
 module generators.unicode.unicodedata;
 import generators.unicode.unicodedata.common;
 import constants;
-import utilities.sequential_ranges;
+import utilities.setops;
 import utilities.inverselist;
 
 void unicodeData() {
@@ -107,7 +107,7 @@ void unicodeData() {
     }
 
     {
-        ValueRange!dchar[] ranges;
+        ValueRange[] ranges;
         ubyte[] gcs;
 
         foreach(entry; state.entries) {

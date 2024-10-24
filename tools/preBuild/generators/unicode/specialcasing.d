@@ -2,7 +2,9 @@ module generators.unicode.specialcasing;
 import constants;
 
 void specialCasing() {
+    import std.algorithm;
     import std.file : readText, write, append;
+    import std.format : formattedWrite;
 
     TotalState state;
 
@@ -14,72 +16,101 @@ void specialCasing() {
 
     auto api = appender!string();
 
-    static foreach(language; __traits(allMembers, Language)) {
-        {
-            SequentialRanges!(Casing, SequentialRangeSplitGroup, 2) sr;
+    ValueRange[][Language] ranges;
+    DicedCasing[][Language] diceds;
+    size_t[dstring] casingsDStringMap;
+    dstring casingsText;
 
-            foreach(entry; state.range[__traits(getMember, Language, language)]) {
-                foreach(c; entry.range.start .. entry.range.end + 1) {
-                    Casing casing = entry.casing;
-                    if(casing.lowercase.length == 1 && casing.lowercase[0] == c)
-                        casing.lowercase = null;
-                    if(casing.titlecase.length == 1 && casing.titlecase[0] == c)
-                        casing.titlecase = null;
-                    if(casing.uppercase.length == 1 && casing.uppercase[0] == c)
-                        casing.uppercase = null;
-                    sr.add(c, casing);
+    {
+        static foreach(language; __traits(allMembers, Language)) {
+            {
+                foreach(entry; state.entries[__traits(getMember, Language, language)]) {
+                    DicedCasing diced;
+                    diced.condition = entry.casing.condition;
+
+                    if(entry.casing.lowercase !in casingsDStringMap) {
+                        casingsDStringMap[entry.casing.lowercase] = casingsText.length;
+                        casingsText ~= entry.casing.lowercase;
+                    }
+
+                    if(entry.casing.titlecase !in casingsDStringMap) {
+                        casingsDStringMap[entry.casing.titlecase] = casingsText.length;
+                        casingsText ~= entry.casing.titlecase;
+                    }
+
+                    if(entry.casing.uppercase !in casingsDStringMap) {
+                        casingsDStringMap[entry.casing.uppercase] = casingsText.length;
+                        casingsText ~= entry.casing.uppercase;
+                    }
+
+                    diced.lowerCaseOffset = cast(ushort)casingsDStringMap[entry.casing.lowercase];
+                    diced.lowerCaseOffset = cast(ushort)(diced.lowerCaseOffset + entry.casing.lowercase.length);
+                    diced.titleCaseOffset = cast(ushort)casingsDStringMap[entry.casing.titlecase];
+                    diced.titleCaseEnd = cast(ushort)(diced.titleCaseOffset + entry.casing.titlecase.length);
+                    diced.upperCaseOffset = cast(ushort)casingsDStringMap[entry.casing.uppercase];
+                    diced.upperCaseEnd = cast(ushort)(diced.upperCaseOffset + entry.casing.uppercase.length);
+
+                    diceds[__traits(getMember, Language, language)] ~= diced;
+                    ranges[__traits(getMember, Language, language)] ~= entry.range;
                 }
+
+                api ~= "\n";
+                api ~= "/// Get special casing for character.\n";
+                api ~= "/// Returns: non-null for a given entry if changed from input character.\n";
+                api ~= "export immutable(SpecialCasing) sidero_utf_lut_getSpecialCasing" ~ language ~
+                    "(dchar input) @trusted nothrow @nogc pure {\n";
+                api ~= "    SpecialCasing ret;\n";
+                api ~= "    sidero_utf_lut_getSpecialCasing2" ~ language ~ "(input, &ret);\n";
+                api ~= "    return cast(immutable)ret;\n";
+                api ~= "}\n";
+
+                internal ~= "export extern(C) bool sidero_utf_lut_getSpecialCasing2" ~ language ~ "(dchar input, void* outputPtr) @trusted nothrow @nogc pure {\n";
+                internal ~= "    Casing* output = cast(Casing*)outputPtr;\n";
+                internal ~= "    auto sliced = cast(DicedCasing*)sidero_utf_lut_getSpecialCasing3" ~ language ~ "(input);\n";
+                internal ~= "    if (sliced is null)\n";
+                internal ~= "        return false;\n";
+                internal ~= "    output.condition = sliced.condition;\n";
+                internal ~= "    output.lowercase = LUT_SpecialCasingDString[sliced.lowerCaseOffset .. sliced.lowerCaseEnd];\n";
+                internal ~= "    output.titlecase = LUT_SpecialCasingDString[sliced.titleCaseOffset .. sliced.titleCaseEnd];\n";
+                internal ~= "    output.uppercase = LUT_SpecialCasingDString[sliced.upperCaseOffset .. sliced.upperCaseEnd];\n";
+                internal ~= "    if (output.lowercase.length == 0)\n";
+                internal ~= "        output.lowercase = null;\n";
+                internal ~= "    if (output.titlecase.length == 0)\n";
+                internal ~= "        output.titlecase = null;\n";
+                internal ~= "    if (output.uppercase.length == 0)\n";
+                internal ~= "        output.uppercase = null;\n";
+                internal ~= "    return true;";
+                internal ~= "}\n";
+
+                api ~= "export extern(C) bool sidero_utf_lut_getSpecialCasing2" ~ language ~ "(dchar input, SpecialCasing*) @trusted nothrow @nogc pure;\n";
+
+                generateReturn(internal, "sidero_utf_lut_getSpecialCasing3" ~ language, ranges[__traits(getMember,
+                        Language, language)], diceds[__traits(getMember, Language, language)]);
             }
-
-            foreach(entry; state.single[__traits(getMember, Language, language)]) {
-                foreach(c; entry.range.start .. entry.range.end + 1) {
-                    Casing casing = entry.casing;
-                    if(casing.lowercase.length == 1 && casing.lowercase[0] == c)
-                        casing.lowercase = null;
-                    if(casing.titlecase.length == 1 && casing.titlecase[0] == c)
-                        casing.titlecase = null;
-                    if(casing.uppercase.length == 1 && casing.uppercase[0] == c)
-                        casing.uppercase = null;
-                    sr.add(c, casing);
-                }
-            }
-
-            sr.splitForSame;
-            sr.calculateTrueSpread;
-            sr.joinWithDiff(null, 64);
-            sr.calculateTrueSpread;
-            sr.layerByRangeMax(0, ushort.max / 4);
-            sr.layerByRangeMax(1, ushort.max / 2);
-
-            LookupTableGenerator!(Casing, SequentialRangeSplitGroup, 2) lut;
-            lut.sr = sr;
-            lut.lutType = "void*";
-            lut.name = "sidero_utf_lut_getSpecialCasing2" ~ language;
-            lut.typeToReplacedName["Casing"] = "Ca";
-
-            auto gotDcode = lut.build();
-
-            api ~= "\n";
-            api ~= "/// Get special casing for character.\n";
-            api ~= "/// Returns: non-null for a given entry if changed from input character.\n";
-            api ~= "export immutable(SpecialCasing) sidero_utf_lut_getSpecialCasing" ~ language ~
-                "(dchar input) @trusted nothrow @nogc pure {\n";
-            api ~= "    auto got = sidero_utf_lut_getSpecialCasing2" ~ language ~ "(input);\n";
-            api ~= "    if (got is null) return typeof(return).init;\n";
-            api ~= "    return *cast(immutable(SpecialCasing*)) got;\n";
-            api ~= "}\n";
-            api ~= gotDcode[0];
-
-            internal ~= gotDcode[1];
         }
     }
 
     {
+        internal ~= "static immutable LUT_SpecialCasingDString = cast(dstring)x\"";
+
+        foreach(i, dchar c; casingsText) {
+            internal.formattedWrite!"%08X"(c);
+        }
+
+        internal ~= "\";\n\n";
+    }
+
+    {
         internal ~= q{
-alias Ca = Casing;
+struct DicedCasing {
+    ushort lowerCaseOffset, lowerCaseEnd;
+    ushort titleCaseOffset, titleCaseEnd;
+    ushort upperCaseOffset, upperCaseEnd;
+    ubyte condition;
+}
 
 struct Casing {
-    dstring lower, title, upper;
+    dstring lowercase, titlecase, uppercase;
     ubyte condition;
 }
 };
@@ -88,25 +119,26 @@ struct Casing {
 /// Get casing for character in regards to a language or simplified mapping.
 /// Returns: non-null for a given entry if changed from input character.
 export immutable(SpecialCasing) sidero_utf_lut_getSpecialCasing(dchar input, Language language) @trusted nothrow @nogc pure {
-    void* got;
+    SpecialCasing ret;
+    bool got;
 
     final switch(language) {
         case Language.Unknown:
-            got = cast(void*)sidero_utf_lut_getSpecialCasing2None(input);
+            got = sidero_utf_lut_getSpecialCasing2None(input, &ret);
             break;
         case Language.Lithuanian:
-            got = cast(void*)sidero_utf_lut_getSpecialCasing2Lithuanian(input);
+            got = sidero_utf_lut_getSpecialCasing2Lithuanian(input, &ret);
             break;
         case Language.Turkish:
-            got = cast(void*)sidero_utf_lut_getSpecialCasing2Turkish(input);
+            got = sidero_utf_lut_getSpecialCasing2Turkish(input, &ret);
             break;
         case Language.Azeri:
-            got = cast(void*)sidero_utf_lut_getSpecialCasing2Azeri(input);
+            got = sidero_utf_lut_getSpecialCasing2Azeri(input, &ret);
             break;
     }
 
-    if (got !is null)
-        return *cast(immutable(SpecialCasing*))got;
+    if (got)
+        return cast(immutable)ret;
     else
         return sidero_utf_lut_getSimplifiedCasing(input);
 }
@@ -114,14 +146,15 @@ export immutable(SpecialCasing) sidero_utf_lut_getSpecialCasing(dchar input, Lan
 /// Get casing for character in regards to turkic or simplified mapping.
 /// Returns: non-null for a given entry if changed from input character.
 export immutable(SpecialCasing) sidero_utf_lut_getSpecialCasingTurkic(dchar input) @trusted nothrow @nogc pure {
-    void* got = cast(void*)sidero_utf_lut_getSpecialCasing2Turkish(input);
-    if (got is null)
-        got = cast(void*)sidero_utf_lut_getSpecialCasing2Azeri(input);
-    if (got is null)
-        got = cast(void*)sidero_utf_lut_getSpecialCasing2None(input);
+    SpecialCasing ret;
+    bool got = sidero_utf_lut_getSpecialCasing2Turkish(input, &ret);
+    if (!got)
+        got = sidero_utf_lut_getSpecialCasing2Azeri(input, &ret);
+    if (!got)
+        got = sidero_utf_lut_getSpecialCasing2None(input, &ret);
 
-    if (got !is null)
-        return *cast(immutable(SpecialCasing*))got;
+    if (got)
+        return cast(immutable)ret;
     else
         return sidero_utf_lut_getSimplifiedCasing(input);
 }
@@ -134,16 +167,16 @@ export immutable(SpecialCasing) sidero_utf_lut_getSpecialCasingTurkic(dchar inpu
 
 private:
 import std.array : appender;
-import utilities.sequential_ranges;
-import utilities.lut;
+import utilities.setops;
+import utilities.inverselist;
 
 void processEachLine(string inputText, ref TotalState state) {
-    import std.algorithm : countUntil, splitter, startsWith, endsWith;
+    import std.algorithm : countUntil, splitter, startsWith, endsWith, sort;
     import std.string : strip, lineSplitter;
     import std.conv : parse;
 
-    ValueRange!dchar valueRangeFromString(string charRangeStr) {
-        ValueRange!dchar ret;
+    ValueRange valueRangeFromString(string charRangeStr) {
+        ValueRange ret;
 
         ptrdiff_t offsetOfSeperator = charRangeStr.countUntil("..");
         if(offsetOfSeperator < 0) {
@@ -190,7 +223,7 @@ void processEachLine(string inputText, ref TotalState state) {
         string charRangeStr = line[0 .. offset].strip;
         line = line[offset + 1 .. $].strip;
 
-        ValueRange!dchar valueRange = valueRangeFromString(charRangeStr);
+        ValueRange valueRange = valueRangeFromString(charRangeStr);
 
         offset = line.countUntil(';');
         if(offset < 0) // no lowercase
@@ -252,27 +285,33 @@ void processEachLine(string inputText, ref TotalState state) {
             assert(0, conditionStr);
         }
 
-        if(valueRange.isSingle)
-            state.single[language] ~= Entry(valueRange, Casing(replacementsFromString(lowercaseStr),
-                    replacementsFromString(titlecaseStr), replacementsFromString(uppercaseStr), condition));
-        else
-            state.range[language] ~= Entry(valueRange, Casing(replacementsFromString(lowercaseStr),
-                    replacementsFromString(titlecaseStr), replacementsFromString(uppercaseStr), condition));
+        state.entries[language] ~= Entry(valueRange, Casing(replacementsFromString(lowercaseStr),
+                replacementsFromString(titlecaseStr), replacementsFromString(uppercaseStr), condition));
+    }
+
+    foreach(language; __traits(allMembers, Language)) {
+        sort!"a.range.start < b.range.start"(state.entries[__traits(getMember, Language, language)]);
     }
 }
 
 struct TotalState {
-    Entry[][Language.max + 1] single;
-    Entry[][Language.max + 1] range;
+    Entry[][Language.max + 1] entries;
 }
 
 struct Entry {
-    ValueRange!dchar range;
+    ValueRange range;
     Casing casing;
 }
 
 struct Casing {
     dstring lowercase, titlecase, uppercase;
+    ubyte condition;
+}
+
+struct DicedCasing {
+    ushort lowerCaseOffset, lowerCaseEnd;
+    ushort titleCaseOffset, titleCaseEnd;
+    ushort upperCaseOffset, upperCaseEnd;
     ubyte condition;
 }
 

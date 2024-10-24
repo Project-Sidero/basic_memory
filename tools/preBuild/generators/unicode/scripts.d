@@ -19,13 +19,13 @@ void handleScripts() {
         api ~= "\n";
         api ~= "/// Get the Script for a character\n";
 
-        ValueRange!dchar[] ranges;
+        ValueRange[] ranges;
         ubyte[] scripts;
         seqEntries(ranges, scripts, state.pairs);
         generateReturn(api, internal, "sidero_utf_lut_getScript", ranges, scripts, "Script");
 
         {
-            ValueRange!dchar[] ranges2;
+            ValueRange[] ranges2;
 
             foreach(r; ranges) {
                 if(ranges2.length == 0)
@@ -58,7 +58,7 @@ void handleScripts() {
 
 private:
 import std.array : appender;
-import utilities.sequential_ranges : ValueRange;
+import utilities.setops;
 import utilities.inverselist;
 
 void processEachLine(string inputText, ref TotalState state) {
@@ -66,8 +66,8 @@ void processEachLine(string inputText, ref TotalState state) {
     import std.string : strip, lineSplitter;
     import std.conv : parse;
 
-    ValueRange!dchar valueRangeFromString(string charRangeStr) {
-        ValueRange!dchar ret;
+    ValueRange valueRangeFromString(string charRangeStr) {
+        ValueRange ret;
 
         ptrdiff_t offsetOfSeperator = charRangeStr.countUntil("..");
         if(offsetOfSeperator < 0) {
@@ -82,7 +82,7 @@ void processEachLine(string inputText, ref TotalState state) {
         return ret;
     }
 
-    void handleLine(ValueRange!dchar range, string line) {
+    void handleLine(ValueRange range, string line) {
         ptrdiff_t offset;
 
         offset = line.countUntil('#');
@@ -130,18 +130,18 @@ void processEachLine(string inputText, ref TotalState state) {
         string charRangeStr = line[0 .. offset].strip;
         line = line[offset + 1 .. $].strip;
 
-        ValueRange!dchar range = valueRangeFromString(charRangeStr);
+        ValueRange range = valueRangeFromString(charRangeStr);
         handleLine(range, line);
     }
 }
 
 struct TotalState {
     Pair[] pairs;
-    ValueRange!dchar[][Script.max + 1] scriptRanges;
+    ValueRange[][Script.max + 1] scriptRanges;
 }
 
 struct Pair {
-    ValueRange!dchar range;
+    ValueRange range;
     Script script;
 }
 
@@ -319,7 +319,7 @@ enum Script : ubyte {
     Tulu_Tigalari, ///
 }
 
-void seqEntries(out ValueRange!dchar[] ranges, out ubyte[] scripts, Pair[] entries) {
+void seqEntries(out ValueRange[] ranges, out ubyte[] scripts, Pair[] entries) {
     import std.algorithm : sort;
 
     sort!"a.range.start < b.range.start"(entries);

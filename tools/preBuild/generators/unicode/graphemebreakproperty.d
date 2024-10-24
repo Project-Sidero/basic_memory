@@ -30,7 +30,7 @@ void graphemeBreakProperty() {
 
 private:
 import std.array : appender;
-import utilities.sequential_ranges : ValueRange;
+import utilities.setops;
 import utilities.inverselist;
 
 void processEachLine(string inputText, ref TotalState state) {
@@ -38,8 +38,8 @@ void processEachLine(string inputText, ref TotalState state) {
     import std.string : strip, lineSplitter;
     import std.conv : parse;
 
-    ValueRange!dchar valueRangeFromString(string charRangeStr) {
-        ValueRange!dchar ret;
+    ValueRange valueRangeFromString(string charRangeStr) {
+        ValueRange ret;
 
         ptrdiff_t offsetOfSeperator = charRangeStr.countUntil("..");
         if(offsetOfSeperator < 0) {
@@ -54,7 +54,7 @@ void processEachLine(string inputText, ref TotalState state) {
         return ret;
     }
 
-    void handleLine(ValueRange!dchar valueRange, string propertyStr) {
+    void handleLine(ValueRange valueRange, string propertyStr) {
         Property property;
 
     Switch:
@@ -95,14 +95,14 @@ void processEachLine(string inputText, ref TotalState state) {
         string charRangeStr = line[0 .. offset].strip;
         line = line[offset + 1 .. $].strip;
 
-        ValueRange!dchar valueRange = valueRangeFromString(charRangeStr);
+        ValueRange valueRange = valueRangeFromString(charRangeStr);
 
         handleLine(valueRange, line);
     }
 }
 
 struct TotalState {
-    ValueRange!dchar[][Property.max + 1] ranges;
+    ValueRange[][Property.max + 1] ranges;
 }
 
 enum Property {

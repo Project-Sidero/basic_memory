@@ -993,61 +993,62 @@ export extern(C) WordBreakProperty sidero_utf_lut_getWordBreakProperty(dchar aga
 /// Get special casing for character.
 /// Returns: non-null for a given entry if changed from input character.
 export immutable(SpecialCasing) sidero_utf_lut_getSpecialCasingNone(dchar input) @trusted nothrow @nogc pure {
-    auto got = sidero_utf_lut_getSpecialCasing2None(input);
-    if (got is null) return typeof(return).init;
-    return *cast(immutable(SpecialCasing*)) got;
+    SpecialCasing ret;
+    sidero_utf_lut_getSpecialCasing2None(input, &ret);
+    return cast(immutable)ret;
 }
-export extern(C) immutable(void*) sidero_utf_lut_getSpecialCasing2None(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_getSpecialCasing2None(dchar input, SpecialCasing*) @trusted nothrow @nogc pure;
 
 /// Get special casing for character.
 /// Returns: non-null for a given entry if changed from input character.
 export immutable(SpecialCasing) sidero_utf_lut_getSpecialCasingLithuanian(dchar input) @trusted nothrow @nogc pure {
-    auto got = sidero_utf_lut_getSpecialCasing2Lithuanian(input);
-    if (got is null) return typeof(return).init;
-    return *cast(immutable(SpecialCasing*)) got;
+    SpecialCasing ret;
+    sidero_utf_lut_getSpecialCasing2Lithuanian(input, &ret);
+    return cast(immutable)ret;
 }
-export extern(C) immutable(void*) sidero_utf_lut_getSpecialCasing2Lithuanian(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_getSpecialCasing2Lithuanian(dchar input, SpecialCasing*) @trusted nothrow @nogc pure;
 
 /// Get special casing for character.
 /// Returns: non-null for a given entry if changed from input character.
 export immutable(SpecialCasing) sidero_utf_lut_getSpecialCasingTurkish(dchar input) @trusted nothrow @nogc pure {
-    auto got = sidero_utf_lut_getSpecialCasing2Turkish(input);
-    if (got is null) return typeof(return).init;
-    return *cast(immutable(SpecialCasing*)) got;
+    SpecialCasing ret;
+    sidero_utf_lut_getSpecialCasing2Turkish(input, &ret);
+    return cast(immutable)ret;
 }
-export extern(C) immutable(void*) sidero_utf_lut_getSpecialCasing2Turkish(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_getSpecialCasing2Turkish(dchar input, SpecialCasing*) @trusted nothrow @nogc pure;
 
 /// Get special casing for character.
 /// Returns: non-null for a given entry if changed from input character.
 export immutable(SpecialCasing) sidero_utf_lut_getSpecialCasingAzeri(dchar input) @trusted nothrow @nogc pure {
-    auto got = sidero_utf_lut_getSpecialCasing2Azeri(input);
-    if (got is null) return typeof(return).init;
-    return *cast(immutable(SpecialCasing*)) got;
+    SpecialCasing ret;
+    sidero_utf_lut_getSpecialCasing2Azeri(input, &ret);
+    return cast(immutable)ret;
 }
-export extern(C) immutable(void*) sidero_utf_lut_getSpecialCasing2Azeri(dchar input) @trusted nothrow @nogc pure;
+export extern(C) bool sidero_utf_lut_getSpecialCasing2Azeri(dchar input, SpecialCasing*) @trusted nothrow @nogc pure;
 
 /// Get casing for character in regards to a language or simplified mapping.
 /// Returns: non-null for a given entry if changed from input character.
 export immutable(SpecialCasing) sidero_utf_lut_getSpecialCasing(dchar input, Language language) @trusted nothrow @nogc pure {
-    void* got;
+    SpecialCasing ret;
+    bool got;
 
     final switch(language) {
         case Language.Unknown:
-            got = cast(void*)sidero_utf_lut_getSpecialCasing2None(input);
+            got = sidero_utf_lut_getSpecialCasing2None(input, &ret);
             break;
         case Language.Lithuanian:
-            got = cast(void*)sidero_utf_lut_getSpecialCasing2Lithuanian(input);
+            got = sidero_utf_lut_getSpecialCasing2Lithuanian(input, &ret);
             break;
         case Language.Turkish:
-            got = cast(void*)sidero_utf_lut_getSpecialCasing2Turkish(input);
+            got = sidero_utf_lut_getSpecialCasing2Turkish(input, &ret);
             break;
         case Language.Azeri:
-            got = cast(void*)sidero_utf_lut_getSpecialCasing2Azeri(input);
+            got = sidero_utf_lut_getSpecialCasing2Azeri(input, &ret);
             break;
     }
 
-    if (got !is null)
-        return *cast(immutable(SpecialCasing*))got;
+    if (got)
+        return cast(immutable)ret;
     else
         return sidero_utf_lut_getSimplifiedCasing(input);
 }
@@ -1055,14 +1056,15 @@ export immutable(SpecialCasing) sidero_utf_lut_getSpecialCasing(dchar input, Lan
 /// Get casing for character in regards to turkic or simplified mapping.
 /// Returns: non-null for a given entry if changed from input character.
 export immutable(SpecialCasing) sidero_utf_lut_getSpecialCasingTurkic(dchar input) @trusted nothrow @nogc pure {
-    void* got = cast(void*)sidero_utf_lut_getSpecialCasing2Turkish(input);
-    if (got is null)
-        got = cast(void*)sidero_utf_lut_getSpecialCasing2Azeri(input);
-    if (got is null)
-        got = cast(void*)sidero_utf_lut_getSpecialCasing2None(input);
+    SpecialCasing ret;
+    bool got = sidero_utf_lut_getSpecialCasing2Turkish(input, &ret);
+    if (!got)
+        got = sidero_utf_lut_getSpecialCasing2Azeri(input, &ret);
+    if (!got)
+        got = sidero_utf_lut_getSpecialCasing2None(input, &ret);
 
-    if (got !is null)
-        return *cast(immutable(SpecialCasing*))got;
+    if (got)
+        return cast(immutable)ret;
     else
         return sidero_utf_lut_getSimplifiedCasing(input);
 }

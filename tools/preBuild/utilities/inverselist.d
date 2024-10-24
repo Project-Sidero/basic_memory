@@ -1,10 +1,10 @@
 module utilities.inverselist;
-import utilities.sequential_ranges : ValueRange;
+import utilities.setops;
 import std.array : Appender;
 import std.format;
 
 void generateIsCheck(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
-        string functionName, ValueRange!dchar[] ranges, bool invert = false) {
+        string functionName, ValueRange[] ranges, bool invert = false) {
     {
         interfaceAppender ~= "export extern(C) bool ";
         interfaceAppender ~= functionName;
@@ -65,7 +65,7 @@ void generateIsCheck(ref Appender!string interfaceAppender, ref Appender!string 
 }
 
 void generateReturn(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
-        string functionName, ValueRange!dchar[] ranges, bool[] returnValues, string returnTypeName = "bool") {
+        string functionName, ValueRange[] ranges, bool[] returnValues, string returnTypeName = "bool") {
     generateIntegerReturn!(bool, 2)(interfaceAppender, implementationAppender, functionName, ranges, returnValues, returnTypeName);
 }
 
@@ -75,7 +75,7 @@ void generateReturn(ref Appender!string interfaceAppender, ref Appender!string i
 }
 
 void generateReturn(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
-        string functionName, ValueRange!dchar[] ranges, ubyte[] returnValues, string returnTypeName = "ubyte") {
+        string functionName, ValueRange[] ranges, ubyte[] returnValues, string returnTypeName = "ubyte") {
     generateIntegerReturn!(ubyte, 2)(interfaceAppender, implementationAppender, functionName, ranges, returnValues, returnTypeName);
 }
 
@@ -85,7 +85,7 @@ void generateReturn(ref Appender!string interfaceAppender, ref Appender!string i
 }
 
 void generateReturn(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
-        string functionName, ValueRange!dchar[] ranges, dchar[] returnValues) {
+        string functionName, ValueRange[] ranges, dchar[] returnValues) {
     generateIntegerReturn!(dchar, 8)(interfaceAppender, implementationAppender, functionName, ranges, returnValues);
 }
 
@@ -95,7 +95,7 @@ void generateReturn(ref Appender!string interfaceAppender, ref Appender!string i
 }
 
 void generateReturn(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
-        string functionName, ValueRange!dchar[] ranges, uint[] returnValues) {
+        string functionName, ValueRange[] ranges, uint[] returnValues) {
     generateIntegerReturn!(uint, 8)(interfaceAppender, implementationAppender, functionName, ranges, returnValues);
 }
 
@@ -105,7 +105,7 @@ void generateReturn(ref Appender!string interfaceAppender, ref Appender!string i
 }
 
 void generateReturn(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
-        string functionName, ValueRange!dchar[] ranges, ulong[] returnValues) {
+        string functionName, ValueRange[] ranges, ulong[] returnValues) {
     generateIntegerReturn!(ulong, 16)(interfaceAppender, implementationAppender, functionName, ranges, returnValues);
 }
 
@@ -115,7 +115,7 @@ void generateReturn(ref Appender!string interfaceAppender, ref Appender!string i
 }
 
 void generateReturn(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
-        string functionName, ValueRange!dchar[] ranges, dstring[] returnValues) {
+        string functionName, ValueRange[] ranges, dstring[] returnValues) {
     {
         interfaceAppender ~= "export extern(C) dstring ";
         interfaceAppender ~= functionName;
@@ -389,7 +389,7 @@ void generateReturn(ref Appender!string interfaceAppender, ref Appender!string i
 }
 
 void generateReturn(ReturnType)(ref Appender!string implementationAppender, string functionName,
-        ValueRange!dchar[] ranges, ReturnType[] returnValues, string internalReturnTypeName = ReturnType.stringof) {
+        ValueRange[] ranges, ReturnType[] returnValues, string internalReturnTypeName = ReturnType.stringof) {
     {
         implementationAppender ~= "immutable(";
         implementationAppender ~= internalReturnTypeName;
@@ -485,7 +485,7 @@ void generateReturn(ReturnType)(ref Appender!string interfaceAppender, ref Appen
 private:
 
 void generateIntegerReturn(Type, uint SizeToPrint)(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
-        string functionName, ValueRange!dchar[] ranges, Type[] returnValues,
+        string functionName, ValueRange[] ranges, Type[] returnValues,
         string externalReturnTypeName = Type.stringof, string internalReturnTypeName = Type.stringof) {
     {
         interfaceAppender ~= "export extern(C) ";

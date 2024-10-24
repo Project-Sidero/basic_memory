@@ -14,7 +14,7 @@ void CCC() {
         apiOutput ~= "/// Lookup CCC for character.\n";
         apiOutput ~= "/// Returns: 0 if not set.\n";
 
-        ValueRange!dchar[] ranges;
+        ValueRange[] ranges;
         ubyte[] ccc;
         seqEntries(ranges, ccc, state.entries);
         generateReturn(apiOutput, internalCCC, "sidero_utf_lut_getCCC", ranges, ccc);
@@ -24,10 +24,10 @@ void CCC() {
 }
 
 private:
-import utilities.sequential_ranges;
+import utilities.setops;
 import utilities.inverselist;
 
-void seqEntries(out ValueRange!dchar[] ranges, out ubyte[] cccs, Entry[] entries) {
+void seqEntries(out ValueRange[] ranges, out ubyte[] cccs, Entry[] entries) {
     import std.algorithm : sort;
 
     sort!"a.range.start < b.range.start"(entries);

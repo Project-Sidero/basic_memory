@@ -1,7 +1,7 @@
 module generators.unicode.unicodedata.casing;
 import generators.unicode.unicodedata.common;
 import constants;
-import utilities.sequential_ranges;
+import utilities.setops;
 import utilities.inverselist;
 import std.file : write;
 import std.array : appender;
@@ -37,7 +37,7 @@ void Casing() {
     }
 
     {
-        ValueRange!dchar[] ranges;
+        ValueRange[] ranges;
         CasingDiced[] casingsDiced;
 
         foreach(entry; state.entries) {

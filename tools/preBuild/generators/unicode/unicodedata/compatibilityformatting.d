@@ -13,7 +13,7 @@ void compatibilityFormatting() {
 
     {
         foreach(tag; __traits(allMembers, CompatibilityFormattingTag)) {
-            ValueRange!dchar[] ranges;
+            ValueRange[] ranges;
             dstring[] decompositions;
 
             foreach(entry; state.entries) {
@@ -37,7 +37,7 @@ void compatibilityFormatting() {
     }
 
     {
-        ValueRange!dchar[] ranges;
+        ValueRange[] ranges;
         dstring[] decompositions;
 
         foreach(entry; state.entries) {
@@ -60,7 +60,7 @@ void compatibilityFormatting() {
     }
 
     foreach(tag; __traits(allMembers, CompatibilityFormattingTag)) {
-        ValueRange!dchar[] ranges;
+        ValueRange[] ranges;
         ubyte[] lengths;
 
         foreach(entry; state.entries) {
@@ -83,7 +83,7 @@ void compatibilityFormatting() {
     }
 
     {
-        ValueRange!dchar[] ranges;
+        ValueRange[] ranges;
         ubyte[] lengths;
 
         foreach(entry; state.entries) {
@@ -121,5 +121,5 @@ struct SliceDiced {
 }
 
 private:
-import utilities.sequential_ranges;
+import utilities.setops;
 import utilities.inverselist;

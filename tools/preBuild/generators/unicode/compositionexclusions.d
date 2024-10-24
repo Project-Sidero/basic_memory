@@ -1,7 +1,7 @@
 module generators.unicode.compositionexclusions;
 import constants;
 
-__gshared ValueRange!dchar[] compositionExclusionRanges;
+__gshared ValueRange[] compositionExclusionRanges;
 
 void compositionExclusions() {
     import std.file : readText, write, append;
@@ -30,7 +30,7 @@ void compositionExclusions() {
 
 private:
 import std.array : appender;
-import utilities.sequential_ranges : ValueRange;
+import utilities.setops;
 import utilities.inverselist;
 
 void processEachLine(string inputText) {
@@ -38,8 +38,8 @@ void processEachLine(string inputText) {
     import std.string : strip, lineSplitter;
     import std.conv : parse;
 
-    ValueRange!dchar valueRangeFromString(string charRangeStr) {
-        ValueRange!dchar ret;
+    ValueRange valueRangeFromString(string charRangeStr) {
+        ValueRange ret;
 
         ptrdiff_t offsetOfSeperator = charRangeStr.countUntil("..");
         if(offsetOfSeperator < 0) {
@@ -65,13 +65,13 @@ void processEachLine(string inputText) {
         if(line.length < 4 || line.countUntil(".") >= 0) // anything that low can't represent a functional line
             continue;
 
-        ValueRange!dchar valueRange = valueRangeFromString(line);
+        ValueRange valueRange = valueRangeFromString(line);
         compositionExclusionRanges ~= valueRange;
     }
 
     {
         sort!("a.start < b.start")(compositionExclusionRanges);
-        ValueRange!dchar[] temp;
+        ValueRange[] temp;
 
         foreach(valueRange; compositionExclusionRanges) {
             if(temp.length == 0)

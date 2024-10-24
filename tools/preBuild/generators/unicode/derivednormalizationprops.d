@@ -24,7 +24,7 @@ void derivedNormalizationProps() {
 
 private:
 import std.array : appender, Appender;
-import utilities.sequential_ranges : ValueRange;
+import utilities.setops;
 import utilities.inverselist;
 
 void processEachLine(string inputText, ref TotalState state) {
@@ -32,8 +32,8 @@ void processEachLine(string inputText, ref TotalState state) {
     import std.string : strip, lineSplitter;
     import std.conv : parse;
 
-    ValueRange!dchar valueRangeFromString(string charRangeStr) {
-        ValueRange!dchar ret;
+    ValueRange valueRangeFromString(string charRangeStr) {
+        ValueRange ret;
 
         ptrdiff_t offsetOfSeperator = charRangeStr.countUntil("..");
         if(offsetOfSeperator < 0) {
@@ -48,7 +48,7 @@ void processEachLine(string inputText, ref TotalState state) {
         return ret;
     }
 
-    void handleLine(ValueRange!dchar valueRange, string propertyStr, string yesNoMaybeStr) {
+    void handleLine(ValueRange valueRange, string propertyStr, string yesNoMaybeStr) {
         NormalizeProperty property;
         YesNoMaybe yesNoMaybe;
 
@@ -107,7 +107,7 @@ void processEachLine(string inputText, ref TotalState state) {
         string charRangeStr = line[0 .. offset].strip;
         line = line[offset + 1 .. $].strip;
 
-        ValueRange!dchar valueRange = valueRangeFromString(charRangeStr);
+        ValueRange valueRange = valueRangeFromString(charRangeStr);
 
         offset = line.countUntil(';');
         string propertyStr;
@@ -170,7 +170,7 @@ struct TotalState {
     CaseFold[] caseFoldSingle, caseFoldRange;
     ChangesWhenCaseFolded[] changesSingle, changesRange;
 
-    ValueRange!dchar[] fullCompositionExclusion;
+    ValueRange[] fullCompositionExclusion;
 }
 
 enum YesNoMaybe {
@@ -180,12 +180,12 @@ enum YesNoMaybe {
 }
 
 struct QuickCheck {
-    ValueRange!dchar range;
+    ValueRange range;
     YesNoMaybe yesNoMaybe;
 }
 
 struct CaseFold {
-    ValueRange!dchar range;
+    ValueRange range;
     dchar[] becomes;
 }
 
@@ -195,7 +195,7 @@ struct OptionalReplacement {
 }
 
 struct ChangesWhenCaseFolded {
-    ValueRange!dchar range;
+    ValueRange range;
 }
 
 void ymn(ref Appender!string output, YesNoMaybe yesNoMaybe) {

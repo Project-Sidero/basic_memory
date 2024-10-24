@@ -1,80 +1,165 @@
 module sidero.base.internal.unicode.specialcasing;
 
 // Generated do not modify
-export extern(C) immutable(void*) sidero_utf_lut_getSpecialCasing2None(dchar input) @trusted nothrow @nogc pure {
-    if (input >= 0xDF && input <= 0x1FFC) {
-        if (input == 0xDF)
-            return cast(void*)&LUT_7F14197C[cast(size_t)(0 + (input - 0xDF))];
-        else if (input >= 0x130 && input <= 0x149)
-            return cast(void*)&LUT_7F14197C[cast(size_t)(1 + (input - 0x130))];
-        else if (input == 0x1F0)
-            return cast(void*)&LUT_7F14197C[cast(size_t)(27 + (input - 0x1F0))];
-        else if (input >= 0x390 && input <= 0x3B0)
-            return cast(void*)&LUT_7F14197C[cast(size_t)(28 + (input - 0x390))];
-        else if (input == 0x587)
-            return cast(void*)&LUT_7F14197C[cast(size_t)(61 + (input - 0x587))];
-        else if (input >= 0x1E96 && input <= 0x1E9A)
-            return cast(void*)&LUT_7F14197C[cast(size_t)(62 + (input - 0x1E96))];
-        else if (input >= 0x1F50)
-            return cast(void*)&LUT_7F14197C[cast(size_t)(67 + (input - 0x1F50))];
-    } else if (input >= 0xFB00 && input <= 0xFB17) {
-        return cast(void*)&LUT_7F14197C[cast(size_t)(240 + (input - 0xFB00))];
+export extern(C) bool sidero_utf_lut_getSpecialCasing2None(dchar input, void* outputPtr) @trusted nothrow @nogc pure {
+    Casing* output = cast(Casing*)outputPtr;
+    auto sliced = cast(DicedCasing*)sidero_utf_lut_getSpecialCasing3None(input);
+    if (sliced is null)
+        return false;
+    output.condition = sliced.condition;
+    output.lowercase = LUT_SpecialCasingDString[sliced.lowerCaseOffset .. sliced.lowerCaseEnd];
+    output.titlecase = LUT_SpecialCasingDString[sliced.titleCaseOffset .. sliced.titleCaseEnd];
+    output.uppercase = LUT_SpecialCasingDString[sliced.upperCaseOffset .. sliced.upperCaseEnd];
+    if (output.lowercase.length == 0)
+        output.lowercase = null;
+    if (output.titlecase.length == 0)
+        output.titlecase = null;
+    if (output.uppercase.length == 0)
+        output.uppercase = null;
+    return true;}
+immutable(DicedCasing)* sidero_utf_lut_getSpecialCasing3None(dchar against) @trusted nothrow @nogc pure {
+    static immutable Table = cast(immutable(dchar[]))x"000000DF000000DF00000130000001300000014900000149000001F0000001F00000039000000390000003A3000003A3000003B0000003B0000005870000058700001E9600001E9600001E9700001E9700001E9800001E9800001E9900001E9900001E9A00001E9A00001F5000001F5000001F5200001F5200001F5400001F5400001F5600001F5600001F8000001F8000001F8100001F8100001F8200001F8200001F8300001F8300001F8400001F8400001F8500001F8500001F8600001F8600001F8700001F8700001F8800001F8800001F8900001F8900001F8A00001F8A00001F8B00001F8B00001F8C00001F8C00001F8D00001F8D00001F8E00001F8E00001F8F00001F8F00001F9000001F9000001F9100001F9100001F9200001F9200001F9300001F9300001F9400001F9400001F9500001F9500001F9600001F9600001F9700001F9700001F9800001F9800001F9900001F9900001F9A00001F9A00001F9B00001F9B00001F9C00001F9C00001F9D00001F9D00001F9E00001F9E00001F9F00001F9F00001FA000001FA000001FA100001FA100001FA200001FA200001FA300001FA300001FA400001FA400001FA500001FA500001FA600001FA600001FA700001FA700001FA800001FA800001FA900001FA900001FAA00001FAA00001FAB00001FAB00001FAC00001FAC00001FAD00001FAD00001FAE00001FAE00001FAF00001FAF00001FB200001FB200001FB300001FB300001FB400001FB400001FB600001FB600001FB700001FB700001FBC00001FBC00001FC200001FC200001FC300001FC300001FC400001FC400001FC600001FC600001FC700001FC700001FCC00001FCC00001FD200001FD200001FD300001FD300001FD600001FD600001FD700001FD700001FE200001FE200001FE300001FE300001FE400001FE400001FE600001FE600001FE700001FE700001FF200001FF200001FF300001FF300001FF400001FF400001FF600001FF600001FF700001FF700001FFC00001FFC0000FB000000FB000000FB010000FB010000FB020000FB020000FB030000FB030000FB040000FB040000FB050000FB050000FB060000FB060000FB130000FB130000FB140000FB140000FB150000FB150000FB160000FB160000FB170000FB17";
+    static immutable ReturnValues = x"010000000100030003000500000007000000070008000700080000000900000009000B0009000B0000000C0000000C000E000C000E0000000F0000000F0012000F0012000000130000001300140013001400010015000000150018001500180000001900000019001B001B001D0000001E0000001E0020001E00200000002100000021002300210023000000240000002400260024002600000027000000270029002700290000002A0000002A002C002A002C0000002D0000002D002F002D002F000000300000003000330030003300000034000000340037003400370000003800000038003B0038003B0000003C0000003C003D003D003F00000040000000400041004100430000004400000044004500450047000000480000004800490049004B0000004C0000004C004D004D004F00000050000000500051005100530000005400000054005500550057000000580000005800590059005B0000003C0000003C003D003D003F00000040000000400041004100430000004400000044004500450047000000480000004800490049004B0000004C0000004C004D004D004F00000050000000500051005100530000005400000054005500550057000000580000005800590059005B0000005C0000005C005D005D005F00000060000000600061006100630000006400000064006500650067000000680000006800690069006B0000006C0000006C006D006D006F00000070000000700071007100730000007400000074007500750077000000780000007800790079007B0000005C0000005C005D005D005F00000060000000600061006100630000006400000064006500650067000000680000006800690069006B0000006C0000006C006D006D006F00000070000000700071007100730000007400000074007500750077000000780000007800790079007B0000007C0000007C007D007D007F00000080000000800081008100830000008400000084008500850087000000880000008800890089008B0000008C0000008C008D008D008F00000090000000900091009100930000009400000094009500950097000000980000009800990099009B0000007C0000007C007D007D007F00000080000000800081008100830000008400000084008500850087000000880000008800890089008B0000008C0000008C008D008D008F00000090000000900091009100930000009400000094009500950097000000980000009800990099009B0000009C0000009C009E009E00A0000000A1000000A100A200A200A4000000A5000000A500A700A700A9000000AA000000AA00AC00AA00AC000000AD000000AD00B000B000B3000000A1000000A100A200A200A4000000B4000000B400B600B600B8000000B9000000B900BA00BA00BC000000BD000000BD00BF00BF00C1000000C2000000C200C400C200C4000000C5000000C500C800C800CB000000B9000000B900BA00BA00BC000000CC000000CC00CF00CC00CF000000D00000000F0012000F0012000000D1000000D100D300D100D3000000D4000000D400D700D400D7000000D8000000D800DB00D800DB000000DC00000015001800150018000000DD000000DD00DF00DD00DF000000E0000000E000E200E000E2000000E3000000E300E600E300E6000000E7000000E700E900E900EB000000EC000000EC00ED00ED00EF000000F0000000F000F200F200F4000000F5000000F500F700F500F7000000F8000000F800FB00FB00FE000000EC000000EC00ED00ED00EF000000FF000000FF00010101010301000004010000040106010601080100000901000009010B010B010D0100000E0100000E011101110114010000150100001501180118011B0100001C0100001C011E011E0120010000210100001C011E011E01200100002201000022012401240126010000270100002701290129012B0100002C0100002C012E012E01300100003101000031013301330135010000360100003601380138013A010000";
+    immutable(DicedCasing[]) ReturnValues2 = (cast(immutable(DicedCasing*))ReturnValues.ptr)[0 .. ReturnValues.length / 14];
+    immutable(dchar[2][]) Table2 = (cast(immutable(dchar[2])*)Table.ptr)[0 .. Table.length / 2];
+    ptrdiff_t low, high = Table2.length - 1;
+
+    while(low <= high) {
+        const mid = low + ((high - low) / 2);
+
+        if (Table2[mid][0] <= against && against <= Table2[mid][1])
+            return &ReturnValues2[mid];
+
+        if (Table2[mid][1] < against)
+            low = mid + 1;
+        else
+            high = mid - 1;
     }
+
     return null;
 }
-private {
-    static immutable LUT_7F14197C = [Ca(null, LUT_7F14197C_DString[0 .. 2], LUT_7F14197C_DString[2 .. 4], 0), Ca(LUT_7F14197C_DString[4 .. 6], null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, LUT_7F14197C_DString[6 .. 8], LUT_7F14197C_DString[6 .. 8], 0), Ca(null, LUT_7F14197C_DString[8 .. 10], LUT_7F14197C_DString[8 .. 10], 0), Ca(null, LUT_7F14197C_DString[10 .. 13], LUT_7F14197C_DString[10 .. 13], 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(LUT_7F14197C_DString[13 .. 14], null, null, 1), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, LUT_7F14197C_DString[14 .. 17], LUT_7F14197C_DString[14 .. 17], 0), Ca(null, LUT_7F14197C_DString[17 .. 19], LUT_7F14197C_DString[19 .. 21], 0), Ca(null, LUT_7F14197C_DString[21 .. 23], LUT_7F14197C_DString[21 .. 23], 0), Ca(null, LUT_7F14197C_DString[23 .. 25], LUT_7F14197C_DString[23 .. 25], 0), Ca(null, LUT_7F14197C_DString[25 .. 27], LUT_7F14197C_DString[25 .. 27], 0), Ca(null, LUT_7F14197C_DString[27 .. 29], LUT_7F14197C_DString[27 .. 29], 0), Ca(null, LUT_7F14197C_DString[29 .. 31], LUT_7F14197C_DString[29 .. 31], 0), Ca(null, LUT_7F14197C_DString[31 .. 33], LUT_7F14197C_DString[31 .. 33], 0), Ca(null, null, null, 0), Ca(null, LUT_7F14197C_DString[33 .. 36], LUT_7F14197C_DString[33 .. 36], 0), Ca(null, null, null, 0), Ca(null, LUT_7F14197C_DString[36 .. 39], LUT_7F14197C_DString[36 .. 39], 0), Ca(null, null, null, 0), Ca(null, LUT_7F14197C_DString[39 .. 42], LUT_7F14197C_DString[39 .. 42], 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, LUT_7F14197C_DString[42 .. 43], LUT_7F14197C_DString[43 .. 45], 0), Ca(null, LUT_7F14197C_DString[45 .. 46], LUT_7F14197C_DString[46 .. 48], 0), Ca(null, LUT_7F14197C_DString[48 .. 49], LUT_7F14197C_DString[49 .. 51], 0), Ca(null, LUT_7F14197C_DString[51 .. 52], LUT_7F14197C_DString[52 .. 54], 0), Ca(null, LUT_7F14197C_DString[54 .. 55], LUT_7F14197C_DString[55 .. 57], 0), Ca(null, LUT_7F14197C_DString[57 .. 58], LUT_7F14197C_DString[58 .. 60], 0), Ca(null, LUT_7F14197C_DString[60 .. 61], LUT_7F14197C_DString[61 .. 63], 0), Ca(null, LUT_7F14197C_DString[63 .. 64], LUT_7F14197C_DString[64 .. 66], 0), Ca(LUT_7F14197C_DString[66 .. 67], null, LUT_7F14197C_DString[43 .. 45], 0), Ca(LUT_7F14197C_DString[67 .. 68], null, LUT_7F14197C_DString[46 .. 48], 0), Ca(LUT_7F14197C_DString[68 .. 69], null, LUT_7F14197C_DString[49 .. 51], 0), Ca(LUT_7F14197C_DString[69 .. 70], null, LUT_7F14197C_DString[52 .. 54], 0), Ca(LUT_7F14197C_DString[70 .. 71], null, LUT_7F14197C_DString[55 .. 57], 0), Ca(LUT_7F14197C_DString[71 .. 72], null, LUT_7F14197C_DString[58 .. 60], 0), Ca(LUT_7F14197C_DString[72 .. 73], null, LUT_7F14197C_DString[61 .. 63], 0), Ca(LUT_7F14197C_DString[73 .. 74], null, LUT_7F14197C_DString[64 .. 66], 0), Ca(null, LUT_7F14197C_DString[74 .. 75], LUT_7F14197C_DString[75 .. 77], 0), Ca(null, LUT_7F14197C_DString[77 .. 78], LUT_7F14197C_DString[78 .. 80], 0), Ca(null, LUT_7F14197C_DString[80 .. 81], LUT_7F14197C_DString[81 .. 83], 0), Ca(null, LUT_7F14197C_DString[83 .. 84], LUT_7F14197C_DString[84 .. 86], 0), Ca(null, LUT_7F14197C_DString[86 .. 87], LUT_7F14197C_DString[87 .. 89], 0), Ca(null, LUT_7F14197C_DString[89 .. 90], LUT_7F14197C_DString[90 .. 92], 0), Ca(null, LUT_7F14197C_DString[92 .. 93], LUT_7F14197C_DString[93 .. 95], 0), Ca(null, LUT_7F14197C_DString[95 .. 96], LUT_7F14197C_DString[96 .. 98], 0), Ca(LUT_7F14197C_DString[98 .. 99], null, LUT_7F14197C_DString[75 .. 77], 0), Ca(LUT_7F14197C_DString[99 .. 100], null, LUT_7F14197C_DString[78 .. 80], 0), Ca(LUT_7F14197C_DString[100 .. 101], null, LUT_7F14197C_DString[81 .. 83], 0), Ca(LUT_7F14197C_DString[101 .. 102], null, LUT_7F14197C_DString[84 .. 86], 0), Ca(LUT_7F14197C_DString[102 .. 103], null, LUT_7F14197C_DString[87 .. 89], 0), Ca(LUT_7F14197C_DString[103 .. 104], null, LUT_7F14197C_DString[90 .. 92], 0), Ca(LUT_7F14197C_DString[104 .. 105], null, LUT_7F14197C_DString[93 .. 95], 0), Ca(LUT_7F14197C_DString[105 .. 106], null, LUT_7F14197C_DString[96 .. 98], 0), Ca(null, LUT_7F14197C_DString[106 .. 107], LUT_7F14197C_DString[107 .. 109], 0), Ca(null, LUT_7F14197C_DString[109 .. 110], LUT_7F14197C_DString[110 .. 112], 0), Ca(null, LUT_7F14197C_DString[112 .. 113], LUT_7F14197C_DString[113 .. 115], 0), Ca(null, LUT_7F14197C_DString[115 .. 116], LUT_7F14197C_DString[116 .. 118], 0), Ca(null, LUT_7F14197C_DString[118 .. 119], LUT_7F14197C_DString[119 .. 121], 0), Ca(null, LUT_7F14197C_DString[121 .. 122], LUT_7F14197C_DString[122 .. 124], 0), Ca(null, LUT_7F14197C_DString[124 .. 125], LUT_7F14197C_DString[125 .. 127], 0), Ca(null, LUT_7F14197C_DString[127 .. 128], LUT_7F14197C_DString[128 .. 130], 0), Ca(LUT_7F14197C_DString[130 .. 131], null, LUT_7F14197C_DString[107 .. 109], 0), Ca(LUT_7F14197C_DString[131 .. 132], null, LUT_7F14197C_DString[110 .. 112], 0), Ca(LUT_7F14197C_DString[132 .. 133], null, LUT_7F14197C_DString[113 .. 115], 0), Ca(LUT_7F14197C_DString[133 .. 134], null, LUT_7F14197C_DString[116 .. 118], 0), Ca(LUT_7F14197C_DString[134 .. 135], null, LUT_7F14197C_DString[119 .. 121], 0), Ca(LUT_7F14197C_DString[135 .. 136], null, LUT_7F14197C_DString[122 .. 124], 0), Ca(LUT_7F14197C_DString[136 .. 137], null, LUT_7F14197C_DString[125 .. 127], 0), Ca(LUT_7F14197C_DString[137 .. 138], null, LUT_7F14197C_DString[128 .. 130], 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, LUT_7F14197C_DString[138 .. 140], LUT_7F14197C_DString[140 .. 142], 0), Ca(null, LUT_7F14197C_DString[142 .. 143], LUT_7F14197C_DString[143 .. 145], 0), Ca(null, LUT_7F14197C_DString[145 .. 147], LUT_7F14197C_DString[147 .. 149], 0), Ca(null, null, null, 0), Ca(null, LUT_7F14197C_DString[149 .. 151], LUT_7F14197C_DString[149 .. 151], 0), Ca(null, LUT_7F14197C_DString[151 .. 154], LUT_7F14197C_DString[154 .. 157], 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(LUT_7F14197C_DString[157 .. 158], null, LUT_7F14197C_DString[143 .. 145], 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, LUT_7F14197C_DString[158 .. 160], LUT_7F14197C_DString[160 .. 162], 0), Ca(null, LUT_7F14197C_DString[162 .. 163], LUT_7F14197C_DString[163 .. 165], 0), Ca(null, LUT_7F14197C_DString[165 .. 167], LUT_7F14197C_DString[167 .. 169], 0), Ca(null, null, null, 0), Ca(null, LUT_7F14197C_DString[169 .. 171], LUT_7F14197C_DString[169 .. 171], 0), Ca(null, LUT_7F14197C_DString[171 .. 174], LUT_7F14197C_DString[174 .. 177], 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(LUT_7F14197C_DString[177 .. 178], null, LUT_7F14197C_DString[163 .. 165], 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, LUT_7F14197C_DString[178 .. 181], LUT_7F14197C_DString[178 .. 181], 0), Ca(null, LUT_7F14197C_DString[10 .. 13], LUT_7F14197C_DString[10 .. 13], 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, LUT_7F14197C_DString[181 .. 183], LUT_7F14197C_DString[181 .. 183], 0), Ca(null, LUT_7F14197C_DString[183 .. 186], LUT_7F14197C_DString[183 .. 186], 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, LUT_7F14197C_DString[186 .. 189], LUT_7F14197C_DString[186 .. 189], 0), Ca(null, LUT_7F14197C_DString[14 .. 17], LUT_7F14197C_DString[14 .. 17], 0), Ca(null, LUT_7F14197C_DString[189 .. 191], LUT_7F14197C_DString[189 .. 191], 0), Ca(null, null, null, 0), Ca(null, LUT_7F14197C_DString[191 .. 193], LUT_7F14197C_DString[191 .. 193], 0), Ca(null, LUT_7F14197C_DString[193 .. 196], LUT_7F14197C_DString[193 .. 196], 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, LUT_7F14197C_DString[196 .. 198], LUT_7F14197C_DString[198 .. 200], 0), Ca(null, LUT_7F14197C_DString[200 .. 201], LUT_7F14197C_DString[201 .. 203], 0), Ca(null, LUT_7F14197C_DString[203 .. 205], LUT_7F14197C_DString[205 .. 207], 0), Ca(null, null, null, 0), Ca(null, LUT_7F14197C_DString[207 .. 209], LUT_7F14197C_DString[207 .. 209], 0), Ca(null, LUT_7F14197C_DString[209 .. 212], LUT_7F14197C_DString[212 .. 215], 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(LUT_7F14197C_DString[215 .. 216], null, LUT_7F14197C_DString[201 .. 203], 0), Ca(null, LUT_7F14197C_DString[216 .. 218], LUT_7F14197C_DString[218 .. 220], 0), Ca(null, LUT_7F14197C_DString[220 .. 222], LUT_7F14197C_DString[222 .. 224], 0), Ca(null, LUT_7F14197C_DString[224 .. 226], LUT_7F14197C_DString[226 .. 228], 0), Ca(null, LUT_7F14197C_DString[228 .. 231], LUT_7F14197C_DString[231 .. 234], 0), Ca(null, LUT_7F14197C_DString[234 .. 237], LUT_7F14197C_DString[237 .. 240], 0), Ca(null, LUT_7F14197C_DString[240 .. 242], LUT_7F14197C_DString[242 .. 244], 0), Ca(null, LUT_7F14197C_DString[240 .. 242], LUT_7F14197C_DString[242 .. 244], 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, LUT_7F14197C_DString[244 .. 246], LUT_7F14197C_DString[246 .. 248], 0), Ca(null, LUT_7F14197C_DString[248 .. 250], LUT_7F14197C_DString[250 .. 252], 0), Ca(null, LUT_7F14197C_DString[252 .. 254], LUT_7F14197C_DString[254 .. 256], 0), Ca(null, LUT_7F14197C_DString[256 .. 258], LUT_7F14197C_DString[258 .. 260], 0), Ca(null, LUT_7F14197C_DString[260 .. 262], LUT_7F14197C_DString[262 .. 264], 0), ];
-    static immutable dstring LUT_7F14197C_DString = cast(dstring)[cast(uint)0x53, 0x73, 0x53, 0x53, 0x69, 0x0307, 0x02BC, 0x4E, 0x4A, 0x030C, 0x0399, 0x0308, 0x0301, 0x03C2, 0x03A5, 0x0308, 0x0301, 0x0535, 0x0582, 0x0535, 0x0552, 0x48, 0x0331, 0x54, 0x0308, 0x57, 0x030A, 0x59, 0x030A, 0x41, 0x02BE, 0x03A5, 0x0313, 0x03A5, 0x0313, 0x0300, 0x03A5, 0x0313, 0x0301, 0x03A5, 0x0313, 0x0342, 0x1F88, 0x1F08, 0x0399, 0x1F89, 0x1F09, 0x0399, 0x1F8A, 0x1F0A, 0x0399, 0x1F8B, 0x1F0B, 0x0399, 0x1F8C, 0x1F0C, 0x0399, 0x1F8D, 0x1F0D, 0x0399, 0x1F8E, 0x1F0E, 0x0399, 0x1F8F, 0x1F0F, 0x0399, 0x1F80, 0x1F81, 0x1F82, 0x1F83, 0x1F84, 0x1F85, 0x1F86, 0x1F87, 0x1F98, 0x1F28, 0x0399, 0x1F99, 0x1F29, 0x0399, 0x1F9A, 0x1F2A, 0x0399, 0x1F9B, 0x1F2B, 0x0399, 0x1F9C, 0x1F2C, 0x0399, 0x1F9D, 0x1F2D, 0x0399, 0x1F9E, 0x1F2E, 0x0399, 0x1F9F, 0x1F2F, 0x0399, 0x1F90, 0x1F91, 0x1F92, 0x1F93, 0x1F94, 0x1F95, 0x1F96, 0x1F97, 0x1FA8, 0x1F68, 0x0399, 0x1FA9, 0x1F69, 0x0399, 0x1FAA, 0x1F6A, 0x0399, 0x1FAB, 0x1F6B, 0x0399, 0x1FAC, 0x1F6C, 0x0399, 0x1FAD, 0x1F6D, 0x0399, 0x1FAE, 0x1F6E, 0x0399, 0x1FAF, 0x1F6F, 0x0399, 0x1FA0, 0x1FA1, 0x1FA2, 0x1FA3, 0x1FA4, 0x1FA5, 0x1FA6, 0x1FA7, 0x1FBA, 0x0345, 0x1FBA, 0x0399, 0x1FBC, 0x0391, 0x0399, 0x0386, 0x0345, 0x0386, 0x0399, 0x0391, 0x0342, 0x0391, 0x0342, 0x0345, 0x0391, 0x0342, 0x0399, 0x1FB3, 0x1FCA, 0x0345, 0x1FCA, 0x0399, 0x1FCC, 0x0397, 0x0399, 0x0389, 0x0345, 0x0389, 0x0399, 0x0397, 0x0342, 0x0397, 0x0342, 0x0345, 0x0397, 0x0342, 0x0399, 0x1FC3, 0x0399, 0x0308, 0x0300, 0x0399, 0x0342, 0x0399, 0x0308, 0x0342, 0x03A5, 0x0308, 0x0300, 0x03A1, 0x0313, 0x03A5, 0x0342, 0x03A5, 0x0308, 0x0342, 0x1FFA, 0x0345, 0x1FFA, 0x0399, 0x1FFC, 0x03A9, 0x0399, 0x038F, 0x0345, 0x038F, 0x0399, 0x03A9, 0x0342, 0x03A9, 0x0342, 0x0345, 0x03A9, 0x0342, 0x0399, 0x1FF3, 0x46, 0x66, 0x46, 0x46, 0x46, 0x69, 0x46, 0x49, 0x46, 0x6C, 0x46, 0x4C, 0x46, 0x66, 0x69, 0x46, 0x46, 0x49, 0x46, 0x66, 0x6C, 0x46, 0x46, 0x4C, 0x53, 0x74, 0x53, 0x54, 0x0544, 0x0576, 0x0544, 0x0546, 0x0544, 0x0565, 0x0544, 0x0535, 0x0544, 0x056B, 0x0544, 0x053B, 0x054E, 0x0576, 0x054E, 0x0546, 0x0544, 0x056D, 0x0544, 0x053D, ];
-}
+export extern(C) bool sidero_utf_lut_getSpecialCasing2Lithuanian(dchar input, void* outputPtr) @trusted nothrow @nogc pure {
+    Casing* output = cast(Casing*)outputPtr;
+    auto sliced = cast(DicedCasing*)sidero_utf_lut_getSpecialCasing3Lithuanian(input);
+    if (sliced is null)
+        return false;
+    output.condition = sliced.condition;
+    output.lowercase = LUT_SpecialCasingDString[sliced.lowerCaseOffset .. sliced.lowerCaseEnd];
+    output.titlecase = LUT_SpecialCasingDString[sliced.titleCaseOffset .. sliced.titleCaseEnd];
+    output.uppercase = LUT_SpecialCasingDString[sliced.upperCaseOffset .. sliced.upperCaseEnd];
+    if (output.lowercase.length == 0)
+        output.lowercase = null;
+    if (output.titlecase.length == 0)
+        output.titlecase = null;
+    if (output.uppercase.length == 0)
+        output.uppercase = null;
+    return true;}
+immutable(DicedCasing)* sidero_utf_lut_getSpecialCasing3Lithuanian(dchar against) @trusted nothrow @nogc pure {
+    static immutable Table = cast(immutable(dchar[]))x"00000049000000490000004A0000004A000000CC000000CC000000CD000000CD00000128000001280000012E0000012E0000030700000307";
+    static immutable ReturnValues = x"070000003A013B013A013B0104003D0100003D013E013D013E010400410100004101420141014201000045010000450146014501460100004901000049014A0149014A0100004C0100004C014D014C014D0104004E0100004E014E014E014E010300";
+    immutable(DicedCasing[]) ReturnValues2 = (cast(immutable(DicedCasing*))ReturnValues.ptr)[0 .. ReturnValues.length / 14];
+    immutable(dchar[2][]) Table2 = (cast(immutable(dchar[2])*)Table.ptr)[0 .. Table.length / 2];
+    ptrdiff_t low, high = Table2.length - 1;
 
-export extern(C) immutable(void*) sidero_utf_lut_getSpecialCasing2Lithuanian(dchar input) @trusted nothrow @nogc pure {
-    if (input >= 0x49 && input <= 0x4A)
-        return cast(void*)&LUT_C8B9F92E[cast(size_t)(0 + (input - 0x49))];
-    else if (input >= 0xCC && input <= 0xCD)
-        return cast(void*)&LUT_C8B9F92E[cast(size_t)(2 + (input - 0xCC))];
-    else if (input >= 0x128 && input <= 0x12E)
-        return cast(void*)&LUT_C8B9F92E[cast(size_t)(4 + (input - 0x128))];
-    else if (input == 0x307)
-        return cast(void*)&LUT_C8B9F92E[cast(size_t)(11 + (input - 0x307))];
+    while(low <= high) {
+        const mid = low + ((high - low) / 2);
+
+        if (Table2[mid][0] <= against && against <= Table2[mid][1])
+            return &ReturnValues2[mid];
+
+        if (Table2[mid][1] < against)
+            low = mid + 1;
+        else
+            high = mid - 1;
+    }
+
     return null;
 }
-private {
-    static immutable LUT_C8B9F92E = [Ca(LUT_C8B9F92E_DString[0 .. 2], null, null, 4), Ca(LUT_C8B9F92E_DString[2 .. 4], null, null, 4), Ca(LUT_C8B9F92E_DString[4 .. 7], null, null, 0), Ca(LUT_C8B9F92E_DString[7 .. 10], null, null, 0), Ca(LUT_C8B9F92E_DString[10 .. 13], null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(LUT_C8B9F92E_DString[13 .. 15], null, null, 4), Ca(null, null, null, 3), ];
-    static immutable dstring LUT_C8B9F92E_DString = cast(dstring)[cast(uint)0x69, 0x0307, 0x6A, 0x0307, 0x69, 0x0307, 0x0300, 0x69, 0x0307, 0x0301, 0x69, 0x0307, 0x0303, 0x012F, 0x0307, ];
-}
+export extern(C) bool sidero_utf_lut_getSpecialCasing2Turkish(dchar input, void* outputPtr) @trusted nothrow @nogc pure {
+    Casing* output = cast(Casing*)outputPtr;
+    auto sliced = cast(DicedCasing*)sidero_utf_lut_getSpecialCasing3Turkish(input);
+    if (sliced is null)
+        return false;
+    output.condition = sliced.condition;
+    output.lowercase = LUT_SpecialCasingDString[sliced.lowerCaseOffset .. sliced.lowerCaseEnd];
+    output.titlecase = LUT_SpecialCasingDString[sliced.titleCaseOffset .. sliced.titleCaseEnd];
+    output.uppercase = LUT_SpecialCasingDString[sliced.upperCaseOffset .. sliced.upperCaseEnd];
+    if (output.lowercase.length == 0)
+        output.lowercase = null;
+    if (output.titlecase.length == 0)
+        output.titlecase = null;
+    if (output.uppercase.length == 0)
+        output.uppercase = null;
+    return true;}
+immutable(DicedCasing)* sidero_utf_lut_getSpecialCasing3Turkish(dchar against) @trusted nothrow @nogc pure {
+    static immutable Table = cast(immutable(dchar[]))x"0000004900000049000000690000006900000130000001300000030700000307";
+    static immutable ReturnValues = x"4F0100003A013B013A013B010600500100000700080007000800000050010000070008000700080000004E0100004D014E014D014E010500";
+    immutable(DicedCasing[]) ReturnValues2 = (cast(immutable(DicedCasing*))ReturnValues.ptr)[0 .. ReturnValues.length / 14];
+    immutable(dchar[2][]) Table2 = (cast(immutable(dchar[2])*)Table.ptr)[0 .. Table.length / 2];
+    ptrdiff_t low, high = Table2.length - 1;
 
-export extern(C) immutable(void*) sidero_utf_lut_getSpecialCasing2Turkish(dchar input) @trusted nothrow @nogc pure {
-    if (input >= 0x49 && input <= 0x69)
-        return cast(void*)&LUT_4E6901CD[cast(size_t)(0 + (input - 0x49))];
-    else if (input == 0x130)
-        return cast(void*)&LUT_4E6901CD[cast(size_t)(33 + (input - 0x130))];
-    else if (input == 0x307)
-        return cast(void*)&LUT_4E6901CD[cast(size_t)(34 + (input - 0x307))];
+    while(low <= high) {
+        const mid = low + ((high - low) / 2);
+
+        if (Table2[mid][0] <= against && against <= Table2[mid][1])
+            return &ReturnValues2[mid];
+
+        if (Table2[mid][1] < against)
+            low = mid + 1;
+        else
+            high = mid - 1;
+    }
+
     return null;
 }
-private {
-    static immutable LUT_4E6901CD = [Ca(LUT_4E6901CD_DString[0 .. 1], null, null, 6), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, LUT_4E6901CD_DString[1 .. 2], LUT_4E6901CD_DString[1 .. 2], 0), Ca(LUT_4E6901CD_DString[2 .. 3], null, null, 0), Ca(null, null, null, 5), ];
-    static immutable dstring LUT_4E6901CD_DString = cast(dstring)[cast(uint)0x0131, 0x0130, 0x69, ];
-}
+export extern(C) bool sidero_utf_lut_getSpecialCasing2Azeri(dchar input, void* outputPtr) @trusted nothrow @nogc pure {
+    Casing* output = cast(Casing*)outputPtr;
+    auto sliced = cast(DicedCasing*)sidero_utf_lut_getSpecialCasing3Azeri(input);
+    if (sliced is null)
+        return false;
+    output.condition = sliced.condition;
+    output.lowercase = LUT_SpecialCasingDString[sliced.lowerCaseOffset .. sliced.lowerCaseEnd];
+    output.titlecase = LUT_SpecialCasingDString[sliced.titleCaseOffset .. sliced.titleCaseEnd];
+    output.uppercase = LUT_SpecialCasingDString[sliced.upperCaseOffset .. sliced.upperCaseEnd];
+    if (output.lowercase.length == 0)
+        output.lowercase = null;
+    if (output.titlecase.length == 0)
+        output.titlecase = null;
+    if (output.uppercase.length == 0)
+        output.uppercase = null;
+    return true;}
+immutable(DicedCasing)* sidero_utf_lut_getSpecialCasing3Azeri(dchar against) @trusted nothrow @nogc pure {
+    static immutable Table = cast(immutable(dchar[]))x"0000004900000049000000690000006900000130000001300000030700000307";
+    static immutable ReturnValues = x"4F0100003A013B013A013B010600500100000700080007000800000050010000070008000700080000004E0100004D014E014D014E010500";
+    immutable(DicedCasing[]) ReturnValues2 = (cast(immutable(DicedCasing*))ReturnValues.ptr)[0 .. ReturnValues.length / 14];
+    immutable(dchar[2][]) Table2 = (cast(immutable(dchar[2])*)Table.ptr)[0 .. Table.length / 2];
+    ptrdiff_t low, high = Table2.length - 1;
 
-export extern(C) immutable(void*) sidero_utf_lut_getSpecialCasing2Azeri(dchar input) @trusted nothrow @nogc pure {
-    if (input >= 0x49 && input <= 0x69)
-        return cast(void*)&LUT_627EDE0E[cast(size_t)(0 + (input - 0x49))];
-    else if (input == 0x130)
-        return cast(void*)&LUT_627EDE0E[cast(size_t)(33 + (input - 0x130))];
-    else if (input == 0x307)
-        return cast(void*)&LUT_627EDE0E[cast(size_t)(34 + (input - 0x307))];
+    while(low <= high) {
+        const mid = low + ((high - low) / 2);
+
+        if (Table2[mid][0] <= against && against <= Table2[mid][1])
+            return &ReturnValues2[mid];
+
+        if (Table2[mid][1] < against)
+            low = mid + 1;
+        else
+            high = mid - 1;
+    }
+
     return null;
 }
-private {
-    static immutable LUT_627EDE0E = [Ca(LUT_627EDE0E_DString[0 .. 1], null, null, 6), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, null, null, 0), Ca(null, LUT_627EDE0E_DString[1 .. 2], LUT_627EDE0E_DString[1 .. 2], 0), Ca(LUT_627EDE0E_DString[2 .. 3], null, null, 0), Ca(null, null, null, 5), ];
-    static immutable dstring LUT_627EDE0E_DString = cast(dstring)[cast(uint)0x0131, 0x0130, 0x69, ];
+static immutable LUT_SpecialCasingDString = cast(dstring)x"000000DF0000005300000073000000530000005300000069000003070000013000000149000002BC0000004E000001F00000004A0000030C00000390000003990000030800000301000003C2000003A3000003B0000003A50000030800000301000005870000053500000582000005350000055200001E96000000480000033100001E97000000540000030800001E98000000570000030A00001E99000000590000030A00001E9A00000041000002BE00001F50000003A50000031300001F52000003A5000003130000030000001F54000003A5000003130000030100001F56000003A5000003130000034200001F8000001F8800001F080000039900001F8100001F8900001F090000039900001F8200001F8A00001F0A0000039900001F8300001F8B00001F0B0000039900001F8400001F8C00001F0C0000039900001F8500001F8D00001F0D0000039900001F8600001F8E00001F0E0000039900001F8700001F8F00001F0F0000039900001F9000001F9800001F280000039900001F9100001F9900001F290000039900001F9200001F9A00001F2A0000039900001F9300001F9B00001F2B0000039900001F9400001F9C00001F2C0000039900001F9500001F9D00001F2D0000039900001F9600001F9E00001F2E0000039900001F9700001F9F00001F2F0000039900001FA000001FA800001F680000039900001FA100001FA900001F690000039900001FA200001FAA00001F6A0000039900001FA300001FAB00001F6B0000039900001FA400001FAC00001F6C0000039900001FA500001FAD00001F6D0000039900001FA600001FAE00001F6E0000039900001FA700001FAF00001F6F0000039900001FB200001FBA0000034500001FBA0000039900001FB300001FBC000003910000039900001FB40000038600000345000003860000039900001FB6000003910000034200001FB700000391000003420000034500000391000003420000039900001FC200001FCA0000034500001FCA0000039900001FC300001FCC000003970000039900001FC40000038900000345000003890000039900001FC6000003970000034200001FC700000397000003420000034500000397000003420000039900001FD200000399000003080000030000001FD300001FD6000003990000034200001FD700000399000003080000034200001FE2000003A5000003080000030000001FE300001FE4000003A10000031300001FE6000003A50000034200001FE7000003A5000003080000034200001FF200001FFA0000034500001FFA0000039900001FF300001FFC000003A90000039900001FF40000038F000003450000038F0000039900001FF6000003A90000034200001FF7000003A90000034200000345000003A900000342000003990000FB00000000460000006600000046000000460000FB01000000460000006900000046000000490000FB02000000460000006C000000460000004C0000FB030000004600000066000000690000004600000046000000490000FB0400000046000000660000006C00000046000000460000004C0000FB05000000530000007400000053000000540000FB060000FB13000005440000057600000544000005460000FB14000005440000056500000544000005350000FB15000005440000056B000005440000053B0000FB160000054E000005760000054E000005460000FB17000005440000056D000005440000053D000000490000006A000003070000004A000000690000030700000300000000CC000000690000030700000301000000CD000000690000030700000303000001280000012F000003070000012E000003070000013100000069";
+
+
+struct DicedCasing {
+    ushort lowerCaseOffset, lowerCaseEnd;
+    ushort titleCaseOffset, titleCaseEnd;
+    ushort upperCaseOffset, upperCaseEnd;
+    ubyte condition;
 }
-
-
-alias Ca = Casing;
 
 struct Casing {
-    dstring lower, title, upper;
+    dstring lowercase, titlecase, uppercase;
     ubyte condition;
 }

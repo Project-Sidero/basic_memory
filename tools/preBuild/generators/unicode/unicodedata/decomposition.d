@@ -1,7 +1,7 @@
 module generators.unicode.unicodedata.decomposition;
 import generators.unicode.unicodedata.common;
 import constants;
-import utilities.sequential_ranges;
+import utilities.setops;
 import utilities.inverselist;
 import std.file : write;
 import std.array : appender;

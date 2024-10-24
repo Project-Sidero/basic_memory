@@ -29,7 +29,7 @@ void emojiData() {
 
 private:
 import std.array : appender;
-import utilities.sequential_ranges : ValueRange;
+import utilities.setops;
 import utilities.inverselist;
 
 void processEachLine(string inputText, ref TotalState state) {
@@ -37,8 +37,8 @@ void processEachLine(string inputText, ref TotalState state) {
     import std.string : strip, lineSplitter;
     import std.conv : parse;
 
-    ValueRange!dchar valueRangeFromString(string charRangeStr) {
-        ValueRange!dchar ret;
+    ValueRange valueRangeFromString(string charRangeStr) {
+        ValueRange ret;
 
         ptrdiff_t offsetOfSeperator = charRangeStr.countUntil("..");
         if(offsetOfSeperator < 0) {
@@ -53,7 +53,7 @@ void processEachLine(string inputText, ref TotalState state) {
         return ret;
     }
 
-    void handleLine(ValueRange!dchar range, string line) {
+    void handleLine(ValueRange range, string line) {
         ptrdiff_t offset;
 
         offset = line.countUntil('#');
@@ -99,13 +99,13 @@ void processEachLine(string inputText, ref TotalState state) {
         string charRangeStr = line[0 .. offset].strip;
         line = line[offset + 1 .. $].strip;
 
-        ValueRange!dchar range = valueRangeFromString(charRangeStr);
+        ValueRange range = valueRangeFromString(charRangeStr);
         handleLine(range, line);
     }
 }
 
 struct TotalState {
-    ValueRange!dchar[][EmojiClass.max + 1] values;
+    ValueRange[][EmojiClass.max + 1] values;
 }
 
 enum EmojiClass {

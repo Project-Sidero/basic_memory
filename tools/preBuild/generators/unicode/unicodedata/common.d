@@ -1,5 +1,5 @@
 module generators.unicode.unicodedata.common;
-import utilities.sequential_ranges;
+import utilities.setops;
 import std.array : Appender;
 
 __gshared Appender!string apiOutput;
@@ -312,7 +312,7 @@ void fullyDecompose() {
 struct Entry {
 @safe:
 
-    ValueRange!dchar range;
+    ValueRange range;
     string name;
     GeneralCategory generalCategory;
 
