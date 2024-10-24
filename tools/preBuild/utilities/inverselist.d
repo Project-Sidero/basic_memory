@@ -65,22 +65,22 @@ void generateIsCheck(ref Appender!string interfaceAppender, ref Appender!string 
 }
 
 void generateReturn(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
-    string functionName, ValueRange!dchar[] ranges, bool[] returnValues, string returnTypeName="bool") {
+        string functionName, ValueRange!dchar[] ranges, bool[] returnValues, string returnTypeName = "bool") {
     generateIntegerReturn!(bool, 2)(interfaceAppender, implementationAppender, functionName, ranges, returnValues, returnTypeName);
 }
 
 void generateReturn(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
-    string functionName, dchar[] ranges, bool[] returnValues, string returnTypeName="bool") {
+        string functionName, dchar[] ranges, bool[] returnValues, string returnTypeName = "bool") {
     generateIntegerReturn!(bool, 2)(interfaceAppender, implementationAppender, functionName, ranges, returnValues, returnTypeName);
 }
 
 void generateReturn(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
-        string functionName, ValueRange!dchar[] ranges, ubyte[] returnValues, string returnTypeName="ubyte") {
+        string functionName, ValueRange!dchar[] ranges, ubyte[] returnValues, string returnTypeName = "ubyte") {
     generateIntegerReturn!(ubyte, 2)(interfaceAppender, implementationAppender, functionName, ranges, returnValues, returnTypeName);
 }
 
 void generateReturn(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
-        string functionName, dchar[] ranges, ubyte[] returnValues, string returnTypeName="ubyte") {
+        string functionName, dchar[] ranges, ubyte[] returnValues, string returnTypeName = "ubyte") {
     generateIntegerReturn!(ubyte, 2)(interfaceAppender, implementationAppender, functionName, ranges, returnValues, returnTypeName);
 }
 
@@ -105,12 +105,12 @@ void generateReturn(ref Appender!string interfaceAppender, ref Appender!string i
 }
 
 void generateReturn(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
-    string functionName, ValueRange!dchar[] ranges, ulong[] returnValues) {
+        string functionName, ValueRange!dchar[] ranges, ulong[] returnValues) {
     generateIntegerReturn!(ulong, 16)(interfaceAppender, implementationAppender, functionName, ranges, returnValues);
 }
 
 void generateReturn(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
-    string functionName, dchar[] ranges, ulong[] returnValues) {
+        string functionName, dchar[] ranges, ulong[] returnValues) {
     generateIntegerReturn!(ulong, 16)(interfaceAppender, implementationAppender, functionName, ranges, returnValues);
 }
 
@@ -322,7 +322,7 @@ void generateReturn(ref Appender!string interfaceAppender, ref Appender!string i
 }
 
 void generateReturn(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
-    string functionName, ulong[] ranges, dchar[] returnValues) {
+        string functionName, ulong[] ranges, dchar[] returnValues) {
     {
         interfaceAppender ~= "export extern(C) dchar ";
         interfaceAppender ~= functionName;
@@ -388,13 +388,163 @@ void generateReturn(ref Appender!string interfaceAppender, ref Appender!string i
     }
 }
 
+void generateTupleReturn(ReturnType)(ref Appender!string implementationAppender, string functionName, ValueRange!dchar[] ranges,
+        ReturnType[] returnValues, string internalReturnTypeName = ReturnType.stringof) {
+    {
+        implementationAppender ~= "immutable(";
+        implementationAppender ~= internalReturnTypeName;
+        implementationAppender ~= ")* ";
+        implementationAppender ~= functionName;
+        implementationAppender ~= "(dchar against) @trusted nothrow @nogc pure {\n";
+
+        {
+            int lastOut = -1;
+            implementationAppender ~= "    static immutable Table = cast(immutable(dchar[]))x\"";
+            const startLength = implementationAppender.data.length;
+
+            foreach(range; ranges) {
+                version(none) {
+                    import std.stdio;
+
+                    writeln(lastOut, " < ", cast(uint)range.start, " < ", cast(uint)range.end);
+                }
+
+                assert(range.start <= range.end);
+                assert(lastOut < cast(int)range.start);
+                implementationAppender.formattedWrite!"%08X%08X"(range.start, range.end);
+                lastOut = range.end;
+            }
+
+            const diff = implementationAppender.data.length - startLength;
+            assert(diff % 8 == 0);
+
+            implementationAppender ~= "\";\n";
+        }
+
+        {
+            implementationAppender ~= "    static immutable ReturnValues = x\"";
+            const startLength = implementationAppender.data.length;
+
+            foreach(returnValue; returnValues) {
+                ubyte[] data = (cast(ubyte*)&returnValue)[0 .. ReturnType.sizeof];
+                foreach(v; data)
+                    implementationAppender.formattedWrite!"%02X"(v);
+            }
+
+            const diff = implementationAppender.data.length - startLength;
+            assert(diff % ReturnType.sizeof == 0);
+
+            implementationAppender ~= "\";\n";
+        }
+
+
+        {
+            implementationAppender ~= "    immutable(";
+            implementationAppender ~= internalReturnTypeName;
+            implementationAppender ~= "[]) ReturnValues2 = (cast(immutable(";
+            implementationAppender ~= internalReturnTypeName;
+            formattedWrite!"*))ReturnValues.ptr)[0 .. ReturnValues.length / %d];"(implementationAppender, ReturnType.sizeof);
+
+            implementationAppender ~= q{
+    immutable(dchar[2][]) Table2 = (cast(immutable(dchar[2])*)Table.ptr)[0 .. Table.length / 2];
+    ptrdiff_t low, high = Table2.length - 1;
+
+    while(low <= high) {
+        const mid = low + ((high - low) / 2);
+
+        if (Table2[mid][0] <= against && against <= Table2[mid][1])
+            return &ReturnValues2[mid];
+
+        if (Table2[mid][1] < against)
+            low = mid + 1;
+        else
+            high = mid - 1;
+    }
+
+    return null;
+};
+        }
+
+        implementationAppender ~= "}\n";
+    }
+}
+
+void generateTupleReturn(ReturnType)(ref Appender!string implementationAppender, string functionName, dchar[] ranges,
+        ReturnType[] returnValues, string internalReturnTypeName = ReturnType.stringof) {
+    {
+        implementationAppender ~= "immutable(";
+        implementationAppender ~= internalReturnTypeName;
+        implementationAppender ~= ")* ";
+        implementationAppender ~= functionName;
+        implementationAppender ~= "(dchar against) @trusted nothrow @nogc pure {\n";
+
+        {
+            implementationAppender ~= "    static immutable dchar[] Table = cast(dchar[])x\"";
+            const startLength = implementationAppender.data.length;
+
+            foreach(range; ranges) {
+                implementationAppender.formattedWrite!"%08X"(range);
+            }
+
+            const diff = implementationAppender.data.length - startLength;
+            assert(diff % 8 == 0);
+
+            implementationAppender ~= "\";\n";
+        }
+
+        {
+            implementationAppender ~= "    static immutable ReturnValues = x\"";
+            const startLength = implementationAppender.data.length;
+
+            foreach(returnValue; returnValues) {
+                ubyte[] data = (cast(ubyte*)&returnValue)[0 .. ReturnType.sizeof];
+                foreach(v; data)
+                    implementationAppender.formattedWrite!"%02X"(v);
+            }
+
+            const diff = implementationAppender.data.length - startLength;
+            assert(diff % ReturnType.sizeof == 0);
+
+            implementationAppender ~= "\";\n";
+        }
+
+        {
+            implementationAppender ~= "    immutable(";
+            implementationAppender ~= internalReturnTypeName;
+            implementationAppender ~= "[]) ReturnValues2 = (cast(immutable(";
+            implementationAppender ~= internalReturnTypeName;
+            formattedWrite!"*))ReturnValues.ptr)[0 .. ReturnValues.length / %d];"(implementationAppender, ReturnType.sizeof);
+
+            implementationAppender ~= q{
+    ptrdiff_t low, high = Table.length - 1;
+
+    while(low <= high) {
+        const mid = low + ((high - low) / 2);
+
+        if (Table[mid] == against)
+            return &ReturnValues2[mid];
+        else if (Table[mid] < against)
+            low = mid + 1;
+        else
+            high = mid - 1;
+    }
+
+    return null;
+};
+        }
+
+        implementationAppender ~= "}\n";
+    }
+}
+
 private:
 
-void generateIntegerReturn(Type, uint SizeToPrint)(ref Appender!string interfaceAppender,
-        ref Appender!string implementationAppender, string functionName, ValueRange!dchar[] ranges, Type[] returnValues, string returnTypeName = Type.stringof) {
+void generateIntegerReturn(Type, uint SizeToPrint)(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
+        string functionName, ValueRange!dchar[] ranges, Type[] returnValues,
+        string externalReturnTypeName = Type.stringof, string internalReturnTypeName = Type.stringof) {
     {
         interfaceAppender ~= "export extern(C) ";
-        interfaceAppender ~= returnTypeName;
+        interfaceAppender ~= externalReturnTypeName;
         interfaceAppender ~= " ";
         interfaceAppender ~= functionName;
         interfaceAppender ~= "(dchar against) @safe nothrow @nogc pure;\n";
@@ -402,7 +552,7 @@ void generateIntegerReturn(Type, uint SizeToPrint)(ref Appender!string interface
 
     {
         implementationAppender ~= "export extern(C) ";
-        implementationAppender ~= Type.stringof;
+        implementationAppender ~= internalReturnTypeName;
         implementationAppender ~= " ";
         implementationAppender ~= functionName;
         implementationAppender ~= "(dchar against) @trusted nothrow @nogc pure {\n";
@@ -433,9 +583,9 @@ void generateIntegerReturn(Type, uint SizeToPrint)(ref Appender!string interface
 
         {
             implementationAppender ~= "    static immutable ";
-            implementationAppender ~= Type.stringof;
+            implementationAppender ~= internalReturnTypeName;
             implementationAppender ~= "[] ReturnValues = cast(";
-            implementationAppender ~= Type.stringof;
+            implementationAppender ~= internalReturnTypeName;
             implementationAppender ~= "[])x\"";
             const startLength = implementationAppender.data.length;
 
@@ -476,10 +626,11 @@ void generateIntegerReturn(Type, uint SizeToPrint)(ref Appender!string interface
 }
 
 void generateIntegerReturn(Type, uint SizeToPrint)(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
-        string functionName, dchar[] ranges, Type[] returnValues, string returnTypeName = Type.stringof) {
+        string functionName, dchar[] ranges, Type[] returnValues, string externalReturnTypeName = Type.stringof,
+        string internalReturnTypeName = Type.stringof) {
     {
         interfaceAppender ~= "export extern(C) ";
-        interfaceAppender ~= returnTypeName;
+        interfaceAppender ~= externalReturnTypeName;
         interfaceAppender ~= " ";
         interfaceAppender ~= functionName;
         interfaceAppender ~= "(dchar against) @safe nothrow @nogc pure;\n";
@@ -487,7 +638,7 @@ void generateIntegerReturn(Type, uint SizeToPrint)(ref Appender!string interface
 
     {
         implementationAppender ~= "export extern(C) ";
-        implementationAppender ~= Type.stringof;
+        implementationAppender ~= internalReturnTypeName;
         implementationAppender ~= " ";
         implementationAppender ~= functionName;
         implementationAppender ~= "(dchar against) @trusted nothrow @nogc pure {\n";
@@ -508,9 +659,9 @@ void generateIntegerReturn(Type, uint SizeToPrint)(ref Appender!string interface
 
         {
             implementationAppender ~= "    static immutable ";
-            implementationAppender ~= Type.stringof;
+            implementationAppender ~= internalReturnTypeName;
             implementationAppender ~= "[] ReturnValues = cast(";
-            implementationAppender ~= Type.stringof;
+            implementationAppender ~= internalReturnTypeName;
             implementationAppender ~= "[])x\"";
             const startLength = implementationAppender.data.length;
 
