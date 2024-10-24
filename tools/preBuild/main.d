@@ -40,6 +40,8 @@ void main() {
         import generators.unicode.emoji_data;
         import generators.unicode.scripts;
         import generators.unicode.graphemebreakproperty;
+        import generators.unicode.derivedcoreproperties;
+        import generators.unicode.uax31;
 
         writeln("Running generation of Unicode database");
         createAPIfile;
@@ -59,6 +61,10 @@ void main() {
         handleScripts;
 
         graphemeBreakProperty;
+        parseDerivedCoreProperties;
+
+        // must be after parseDerivedCoreProperties
+        uax31Tables;
     }
 
     {

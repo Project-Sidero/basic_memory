@@ -1473,3 +1473,19 @@ export extern(C) bool sidero_utf_lut_isMemberOfGraphemeLVT(dchar against) @safe 
 
 /// Is character member of grapheme break property.
 export extern(C) bool sidero_utf_lut_isMemberOfGraphemeZWJ(dchar against) @safe nothrow @nogc pure;
+
+/// Is UAX31 for C start set.
+/// Returns: false if not set.
+export extern(C) bool sidero_utf_lut_isUAX31_C_Start(dchar against) @safe nothrow @nogc pure;
+
+/// Is UAX31 for C continue set.
+/// Returns: false if not set.
+export extern(C) bool sidero_utf_lut_isUAX31_C_Continue(dchar against) @safe nothrow @nogc pure;
+
+/// Is UAX31 for Javascript start set.
+/// Returns: false if not set.
+export extern(C) bool sidero_utf_lut_isUAX31_JS_Start(dchar against) @safe nothrow @nogc pure;
+
+/// Is UAX31 for Javascript continue set.
+/// Returns: false if not set.
+export extern(C) bool sidero_utf_lut_isUAX31_JS_Continue(dchar against) @safe nothrow @nogc pure;

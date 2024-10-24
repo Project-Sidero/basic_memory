@@ -68,7 +68,7 @@ struct ValueRanges
 
     void add(ValueRange toAdd)
     {
-        if (ranges.length > 0 && (ranges[$ - 1].end >= toAdd.start || ranges[$ - 1].end + 1 == toAdd.start))
+        if (ranges.length > 0 && (ranges[$ - 1].end + 1 == toAdd.start))
         {
             ranges[$ - 1].end = toAdd.end;
         }
