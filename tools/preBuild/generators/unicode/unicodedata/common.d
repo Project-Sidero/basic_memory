@@ -1,6 +1,5 @@
 module generators.unicode.unicodedata.common;
 import utilities.sequential_ranges;
-import utilities.lut;
 import std.array : Appender;
 
 __gshared Appender!string apiOutput;

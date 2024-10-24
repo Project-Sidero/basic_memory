@@ -64,7 +64,7 @@ void Casing() {
             }
         }
 
-        generateTupleReturn(internalCa, "sidero_utf_lut_getSimplifiedCasing3", ranges, casingsDiced);
+        generateReturn(internalCa, "sidero_utf_lut_getSimplifiedCasing3", ranges, casingsDiced);
     }
 
     {

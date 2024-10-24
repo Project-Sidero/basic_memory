@@ -65,7 +65,7 @@ void decompositionMap() {
             dmDiceds ~= pair.diced;
         }
 
-        generateTupleReturn(internalDM, "sidero_utf_lut_getDecompositionMap3", characters, dmDiceds);
+        generateReturn(internalDM, "sidero_utf_lut_getDecompositionMap3", characters, dmDiceds);
     }
 
     {

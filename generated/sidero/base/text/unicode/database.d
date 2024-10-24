@@ -743,7 +743,7 @@ export ubyte sidero_utf_lut_lengthOfDecompositionMapping(dchar input, Compatibil
 
 /// Lookup numeric numerator/denominator for character.
 /// Returns: null if not set.
-export extern(C) immutable(long[]) sidero_utf_lut_getNumeric(dchar input) @trusted nothrow @nogc pure;
+export extern(C) immutable(long[2])* sidero_utf_lut_getNumeric(dchar against) @safe nothrow @nogc pure;
 
 /// Is character graphical?
 export bool isUnicodeGraphical(dchar input) @safe nothrow @nogc pure {

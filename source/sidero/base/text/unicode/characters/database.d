@@ -110,7 +110,5 @@ long[2] getNumericValue(dchar input) {
 
     if(got is null)
         return [0, 0];
-
-    assert(got.length == 2);
-    return got[0 .. 2];
+    return *got;
 }

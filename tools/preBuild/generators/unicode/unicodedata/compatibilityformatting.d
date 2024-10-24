@@ -1,8 +1,6 @@
 module generators.unicode.unicodedata.compatibilityformatting;
 import generators.unicode.unicodedata.common;
 import constants;
-import utilities.sequential_ranges;
-import utilities.lut;
 import std.file : write;
 import std.array : appender;
 
@@ -123,4 +121,5 @@ struct SliceDiced {
 }
 
 private:
+import utilities.sequential_ranges;
 import utilities.inverselist;

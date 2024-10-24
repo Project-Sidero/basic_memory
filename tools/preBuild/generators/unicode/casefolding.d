@@ -71,7 +71,6 @@ void caseFolding() {
 private:
 import std.array : appender;
 import utilities.sequential_ranges;
-import utilities.lut;
 import utilities.inverselist;
 
 void processEachLine(string inputText, ref TotalState state) {
