@@ -97,15 +97,13 @@ void Casing() {
     }
 
     {
-        internalCa ~= "static immutable dstring LUT_CasingDString = cast(dstring)[";
+        internalCa ~= "static immutable LUT_CasingDString = cast(dstring)x\"";
 
         foreach(i, dchar c; casingText) {
-            if(i > 0)
-                internalCa ~= ", ";
-            internalCa.formattedWrite!"0x%X"(c);
+            internalCa.formattedWrite!"%08X"(c);
         }
 
-        internalCa ~= "];\n";
+        internalCa ~= "\";\n";
     }
 
     {

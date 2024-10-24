@@ -2,11 +2,12 @@ module generators.unicode.unicodedata.decomposition;
 import generators.unicode.unicodedata.common;
 import constants;
 import utilities.sequential_ranges;
-import utilities.lut;
+import utilities.inverselist;
 import std.file : write;
 import std.array : appender;
 
 void decompositionMap() {
+    import std.algorithm : sort;
     import std.format : formattedWrite;
 
     auto internalDM = appender!string();
@@ -37,7 +38,9 @@ void decompositionMap() {
     }
 
     {
-        SequentialRanges!(DMdiced, SequentialRangeSplitGroup, 2) sr;
+        Pair[] pairs;
+        dchar[] characters;
+        DMdiced[] dmDiceds;
 
         foreach(character, entry; state.decompositonMappings) {
             DMdiced diced;
@@ -50,27 +53,19 @@ void decompositionMap() {
             diced.fullyDecomposedCompatibilityEnd = cast(ushort)(
                     diced.fullyDecomposedCompatibilityOffset + entry.fullyDecomposedCompatibility.length);
 
-            sr.add(character, diced);
+            pairs ~= Pair(character, diced);
         }
 
-        sr.splitForSame;
-        sr.calculateTrueSpread;
-        sr.joinWhenClose();
-        sr.joinWithDiff(null, 64);
-        sr.calculateTrueSpread;
-        sr.layerByRangeMax(0, ushort.max / 4);
-        sr.layerJoinIfEndIsStart(0, 16);
-        sr.layerByRangeMax(1, ushort.max / 2);
-        sr.layerJoinIfEndIsStart(1, 64);
+        sort!"a.range < b.range"(pairs);
+        characters.reserve(pairs.length);
+        dmDiceds.reserve(pairs.length);
 
-        LookupTableGenerator!(DMdiced, SequentialRangeSplitGroup, 2) lut;
-        lut.sr = sr;
-        lut.lutType = "void*";
-        lut.name = "sidero_utf_lut_getDecompositionMap3";
-        lut.typeToReplacedName["DMdiced"] = "DM2";
+        foreach(pair; pairs) {
+            characters ~= pair.range;
+            dmDiceds ~= pair.diced;
+        }
 
-        auto gotDcode = lut.build();
-        internalDM ~= gotDcode[1];
+        generateTupleReturn(internalDM, "sidero_utf_lut_getDecompositionMap3", characters, dmDiceds);
     }
 
     {
@@ -104,79 +99,13 @@ void decompositionMap() {
     }
 
     {
-        internalDM ~= "static immutable dstring LUT_DecompositionDString = cast(dstring)[";
+        internalDM ~= "static immutable LUT_DecompositionDString = cast(dstring)x\"";
 
         foreach(i, dchar c; decompositionText) {
-            if(i > 0)
-                internalDM ~= ", ";
-            internalDM.formattedWrite!"0x%X"(c);
+            internalDM.formattedWrite!"%08X"(c);
         }
 
-        internalDM ~= "];\n\n";
-    }
-
-    version(none) {
-        SequentialRanges!(DecompositionMapping, SequentialRangeSplitGroup, 2) sr;
-
-        foreach(character, entry; state.decompositonMappings)
-            sr.add(character, entry);
-
-        sr.splitForSame;
-        sr.calculateTrueSpread;
-        sr.joinWhenClose();
-        sr.joinWithDiff(null, 64);
-        sr.calculateTrueSpread;
-        sr.layerByRangeMax(0, ushort.max / 4);
-        sr.layerJoinIfEndIsStart(0, 16);
-        sr.layerByRangeMax(1, ushort.max / 2);
-        sr.layerJoinIfEndIsStart(1, 64);
-
-        LookupTableGenerator!(DecompositionMapping, SequentialRangeSplitGroup, 2) lut;
-        lut.sr = sr;
-        lut.lutType = "void*";
-        lut.name = "sidero_utf_lut_getDecompositionMap2";
-        lut.typeToReplacedName["DecompositionMapping"] = "DM";
-        lut.typeToReplacedName["CompatibilityFormattingTag"] = "CFT";
-
-        auto gotDcode = lut.build();
-
-        size_t foundIt;
-        foreach(entry, layerIndex; sr) {
-            if(entry.range.within(0xF96B)) {
-                version(none) {
-                    import std.stdio;
-
-                    writefln!"%X < input < %X"(entry.range.start, entry.range.end);
-
-                    foreach(c; entry.metadataEntries[0xF96B - entry.range.start].decomposed)
-                        writef!"%X"(c);
-                    writeln;
-                    debug stdout.flush;
-                }
-
-                foundIt++;
-                assert(entry.metadataEntries[0xF96B - entry.range.start].decomposed == "\u53C3"d);
-            }
-        }
-        assert(foundIt == 1);
-
-        apiOutput ~= "\n";
-        apiOutput ~= "/// Get decomposition map for character.\n";
-        apiOutput ~= "/// Returns: null if unchanged.\n";
-        apiOutput ~= "export immutable(DecompositionMapping) sidero_utf_lut_getDecompositionMap(dchar input) @trusted nothrow @nogc pure {\n";
-        apiOutput ~= "    auto got = sidero_utf_lut_getDecompositionMap2(input);\n";
-        apiOutput ~= "    if (got is null) return typeof(return).init;\n";
-        apiOutput ~= "    return *cast(immutable(DecompositionMapping*)) got;\n";
-        apiOutput ~= "}\n";
-        apiOutput ~= gotDcode[0];
-
-        version(none) {
-            apiOutput ~= "shared static this() {\n";
-            apiOutput ~= "    assert(sidero_utf_lut_getDecompositionMap(0xF96B).decomposed == \"\\u53C3\"d);\n";
-            apiOutput ~= "}\n";
-        }
-
-        internalDM ~= gotDcode[1];
+        internalDM ~= "\";\n\n";
     }
 
     internalDM ~= q{
@@ -206,7 +135,6 @@ struct DM {
     dstring fullyDecomposed, fullyDecomposedCompatibility;
 }
 
-alias DM2 = DMdiced;
 struct DMdiced {
     ushort tag;
     ushort decomposedOffset, decomposedEnd;
@@ -216,6 +144,11 @@ struct DMdiced {
 };
 
     write(UnicodeLUTDirectory ~ "unicodedataDM.d", internalDM.data);
+}
+
+struct Pair {
+    dchar range;
+    DMdiced diced;
 }
 
 struct DMdiced {
