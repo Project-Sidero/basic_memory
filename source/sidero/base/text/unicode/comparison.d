@@ -129,7 +129,7 @@ export @safe nothrow @nogc:
             size_t inputLength;
 
             foreach(c; input) {
-                size_t proposed = sidero_utf_lut_lengthOfFullyDecomposed(c);
+                ushort proposed = sidero_utf_lut_lengthOfFullyDecomposed(c);
                 if(proposed == 0)
                     proposed = 1;
                 inputLength += proposed;

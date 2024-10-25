@@ -653,7 +653,7 @@ export immutable(SpecialCasing) sidero_utf_lut_getSimplifiedCasing(dchar input) 
 export extern(C) void sidero_utf_lut_getSimplifiedCasing2(dchar input, void*) @trusted nothrow @nogc pure;
 
 /// Get length of fully decomposed for character.
-export extern(C) uint sidero_utf_lut_lengthOfFullyDecomposed(dchar against) @safe nothrow @nogc pure;
+export extern(C) ushort sidero_utf_lut_lengthOfFullyDecomposed(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup decomposition mapping for character if canonical.
 alias sidero_utf_lut_getDecompositionMappingCanonical = sidero_utf_lut_getDecompositionMappingNone;

@@ -95,6 +95,16 @@ void generateReturn(ref Appender!string interfaceAppender, ref Appender!string i
 }
 
 void generateReturn(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
+    string functionName, ValueRange[] ranges, ushort[] returnValues) {
+    generateIntegerReturn!(ushort, 4)(interfaceAppender, implementationAppender, functionName, ranges, returnValues);
+}
+
+void generateReturn(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
+    string functionName, dchar[] ranges, ushort[] returnValues) {
+    generateIntegerReturn!(ushort, 4)(interfaceAppender, implementationAppender, functionName, ranges, returnValues);
+}
+
+void generateReturn(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
         string functionName, ValueRange[] ranges, uint[] returnValues) {
     generateIntegerReturn!(uint, 8)(interfaceAppender, implementationAppender, functionName, ranges, returnValues);
 }

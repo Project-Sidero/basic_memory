@@ -44,7 +44,7 @@ void specialCasing() {
                     }
 
                     diced.lowerCaseOffset = cast(ushort)casingsDStringMap[entry.casing.lowercase];
-                    diced.lowerCaseOffset = cast(ushort)(diced.lowerCaseOffset + entry.casing.lowercase.length);
+                    diced.lowerCaseEnd = cast(ushort)(diced.lowerCaseOffset + entry.casing.lowercase.length);
                     diced.titleCaseOffset = cast(ushort)casingsDStringMap[entry.casing.titlecase];
                     diced.titleCaseEnd = cast(ushort)(diced.titleCaseOffset + entry.casing.titlecase.length);
                     diced.upperCaseOffset = cast(ushort)casingsDStringMap[entry.casing.uppercase];

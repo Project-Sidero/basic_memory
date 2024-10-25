@@ -7,6 +7,7 @@ import utilities.inverselist;
 void unicodeData() {
     import std.file : readText, write, append;
     import std.array : appender;
+    import std.algorithm : sort;
 
     apiOutput = appender!string();
 
@@ -38,12 +39,19 @@ void unicodeData() {
     Casing;
 
     {
+        CharacterLength[] pairs;
         dchar[] characters;
-        uint[] lengths;
+        ushort[] lengths;
 
         foreach(character, entry; state.decompositonMappings) {
-            characters ~= character;
-            lengths ~= cast(uint)entry.fullyDecomposed.length;
+            pairs ~= CharacterLength(character, cast(ushort)entry.fullyDecomposed.length);
+        }
+
+        sort!"a.character < b.character"(pairs);
+
+        foreach(pair; pairs) {
+            characters ~= pair.character;
+            lengths ~= pair.length;
         }
 
         apiOutput ~= "\n";
@@ -256,3 +264,10 @@ If a decomposition mapping (codepoints) are empty or its the original codepoint,
 
 canonical mappings maybe have decomposition mappings
 */
+
+private:
+
+struct CharacterLength {
+    dchar character;
+    ushort length;
+}

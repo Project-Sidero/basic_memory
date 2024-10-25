@@ -12,6 +12,8 @@ export @safe nothrow @nogc pure:
 alias UnicodeLanguage = unidb.Language;
 ///
 alias UnicodeLanguageFlags = BitFlags.For!UnicodeLanguage;
+///
+alias GeneralCategory = unidb.GeneralCategory;
 
 ///
 bool isTurkic(UnicodeLanguage input) {
@@ -111,4 +113,9 @@ long[2] getNumericValue(dchar input) {
     if(got is null)
         return [0, 0];
     return *got;
+}
+
+///
+GeneralCategory getGeneralCategory(dchar input) {
+    return unidb.sidero_utf_lut_getGeneralCategory(input);
 }
