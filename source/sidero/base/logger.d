@@ -134,7 +134,7 @@ struct Logger {
         RCAllocator allocator;
         String_UTF8 name_;
 
-        SystemLock mutex;
+        SystemReaderWriterLock mutex;
         LogLevel logLevel;
         uint targets;
 
@@ -203,30 +203,27 @@ export:
 
     ///
     void setLevel(LogLevel level) scope {
-        auto err = mutex.lock;
-        logAssert(cast(bool)err, "Failed to lock", err.getError());
+        mutex.writeLock;
         scope(exit)
-            mutex.unlock;
+            mutex.pureWriteUnlock;
 
         logLevel = level;
     }
 
     /// See_Also: LoggingTargets
     void setTargets(uint targets = LoggingTargets.None) scope {
-        auto err = mutex.lock;
-        logAssert(cast(bool)err, "Failed to lock", err.getError());
+        mutex.writeLock;
         scope(exit)
-            mutex.unlock;
+            mutex.pureWriteUnlock;
 
         this.targets = targets;
     }
 
     ///
     void setTags(scope return String_UTF8 tags) scope {
-        auto err = mutex.lock;
-        logAssert(cast(bool)err, "Failed to lock", err.getError());
+        mutex.writeLock;
         scope(exit)
-            mutex.unlock;
+            mutex.pureWriteUnlock;
 
         this.tags = tags;
     }
@@ -243,10 +240,9 @@ export:
 
     /// Set console stream back to the default
     void setToDefaultConsoleStream() scope {
-        auto err = mutex.lock;
-        logAssert(cast(bool)err, "Failed to lock", err.getError());
+        mutex.writeLock;
         scope(exit)
-            mutex.unlock;
+            mutex.pureWriteUnlock;
 
         foreach(i, ref v; this.consoleTarget.useErrorStream)
             v = ConsoleTarget.DefaultErrorStream[i];
@@ -254,10 +250,9 @@ export:
 
     /// Will console stream be stderr instead of stdout?
     void setConsoleStream(bool useError) scope {
-        auto err = mutex.lock;
-        logAssert(cast(bool)err, "Failed to lock", err.getError());
+        mutex.writeLock;
         scope(exit)
-            mutex.unlock;
+            mutex.pureWriteUnlock;
 
         foreach(ref v; this.consoleTarget.useErrorStream)
             v = useError;
@@ -265,20 +260,18 @@ export:
 
     ///
     void setToDefaultConsoleColors() scope {
-        auto err = mutex.lock;
-        logAssert(cast(bool)err, "Failed to lock", err.getError());
+        mutex.writeLock;
         scope(exit)
-            mutex.unlock;
+            mutex.pureWriteUnlock;
 
         consoleTarget.colors = ConsoleTarget.DefaultConsoleColors;
     }
 
     ///
     void setConsoleColor(LogLevel level, ConsoleColor foreground = ConsoleColor.Unknown, ConsoleColor background = ConsoleColor.Unknown) {
-        auto err = mutex.lock;
-        logAssert(cast(bool)err, "Failed to lock", err.getError());
+        mutex.writeLock;
         scope(exit)
-            mutex.unlock;
+            mutex.pureWriteUnlock;
 
         consoleTarget.colors[level] = [foreground, background];
     }
@@ -292,10 +285,9 @@ export:
         } else
             return ErrorResult(MalformedInputException("Expected a log directory path that could be made absolute"));
 
-        auto err = mutex.lock;
-        logAssert(cast(bool)err, "Failed to lock", err.getError());
+        mutex.writeLock;
         scope(exit)
-            mutex.unlock;
+            mutex.pureWriteUnlock;
 
         fileTarget.rootLogDirectory = rootLogDirectory;
         fileTarget.filePrefix = filePrefix;
@@ -311,10 +303,9 @@ export:
         if(messageDel is null && onRemoveDel is null)
             return;
 
-        auto err = mutex.lock;
-        logAssert(cast(bool)err, "Failed to lock", err.getError());
+        mutex.writeLock;
         scope(exit)
-            mutex.unlock;
+            mutex.pureWriteUnlock;
 
         customTargets ~= CustomTarget();
         customTargets.unsafeGetLiteral[$ - 1] = CustomTarget(messageDel, onRemoveDel);
@@ -322,10 +313,9 @@ export:
 
     ///
     void clearCustomTargets() {
-        auto err = mutex.lock;
-        logAssert(cast(bool)err, "Failed to lock", err.getError());
+        mutex.writeLock;
         scope(exit)
-            mutex.unlock;
+            mutex.pureWriteUnlock;
 
         customTargets = typeof(customTargets)();
     }
@@ -389,10 +379,9 @@ export:
         if(logLevel > LogLevel.Trace)
             return;
 
-        auto err = mutex.lock;
-        logAssert(cast(bool)err, "Failed to lock", err.getError());
+        mutex.readLock;
         scope(exit)
-            mutex.unlock;
+            mutex.readUnlock;
 
         message!(moduleName, line)(LogLevel.Trace, args);
     }
@@ -402,10 +391,9 @@ export:
         if(logLevel > LogLevel.Debug)
             return;
 
-        auto err = mutex.lock;
-        logAssert(cast(bool)err, "Failed to lock", err.getError());
+        mutex.readLock;
         scope(exit)
-            mutex.unlock;
+            mutex.readUnlock;
 
         message!(moduleName, line)(LogLevel.Debug, args);
     }
@@ -418,10 +406,9 @@ export:
         if(logLevel > LogLevel.Info)
             return;
 
-        auto err = mutex.lock;
-        logAssert(cast(bool)err, "Failed to lock", err.getError());
+        mutex.readLock;
         scope(exit)
-            mutex.unlock;
+            mutex.readUnlock;
 
         message!(moduleName, line)(LogLevel.Info, args);
     }
@@ -431,10 +418,9 @@ export:
         if(logLevel > LogLevel.Notice)
             return;
 
-        auto err = mutex.lock;
-        logAssert(cast(bool)err, "Failed to lock", err.getError());
+        mutex.readLock;
         scope(exit)
-            mutex.unlock;
+            mutex.readUnlock;
 
         message!(moduleName, line)(LogLevel.Notice, args);
     }
@@ -447,10 +433,9 @@ export:
         if(logLevel > LogLevel.Warning)
             return;
 
-        auto err = mutex.lock;
-        logAssert(cast(bool)err, "Failed to lock", err.getError());
+        mutex.readLock;
         scope(exit)
-            mutex.unlock;
+            mutex.readUnlock;
 
         message!(moduleName, line)(LogLevel.Warning, args);
     }
@@ -460,10 +445,9 @@ export:
         if(logLevel > LogLevel.Error)
             return;
 
-        auto err = mutex.lock;
-        logAssert(cast(bool)err, "Failed to lock", err.getError());
+        mutex.readLock;
         scope(exit)
-            mutex.unlock;
+            mutex.readUnlock;
 
         message!(moduleName, line)(LogLevel.Error, args);
     }
@@ -473,22 +457,29 @@ export:
         if(logLevel > LogLevel.Critical)
             return;
 
-        auto err = mutex.lock;
-        logAssert(cast(bool)err, "Failed to lock", err.getError());
+        mutex.readLock;
         scope(exit)
-            mutex.unlock;
+            mutex.readUnlock;
 
         message!(moduleName, line)(LogLevel.Critical, args);
     }
 
     ///
     void fatal(string moduleName = __MODULE__, int line = __LINE__, Args...)(Args args) scope {
-        auto err = mutex.lock;
-        logAssert(cast(bool)err, "Failed to lock", err.getError());
+        mutex.readLock;
         scope(exit)
-            mutex.unlock;
+            mutex.readUnlock;
 
         message!(moduleName, line)(LogLevel.Fatal, args);
+    }
+
+    ///
+    void opCall(string moduleName = __MODULE__, int line = __LINE__, Args...)(LogLevel level, Args args) {
+        mutex.readLock;
+        scope(exit)
+            mutex.readUnlock;
+
+        message!(moduleName, line)(level, args);
     }
 
     ///
@@ -567,7 +558,7 @@ export:
                         const(wchar)*[2] messages = [ModuleLine2.ptr, text.ptr];
 
                         ReportEventW(needWindowsEventHandle(), WTypes[level], dwEventID[level], 0, cast(void*)null, 2,
-                        0, &messages[0], cast(void*)null);
+                            0, &messages[0], cast(void*)null);
                     });
                 }
             }
@@ -582,15 +573,15 @@ export:
                     // check based upon last date/time
 
                     final switch(fileTarget.logRotateFrequency) {
-                        case LogRotateFrequency.None:
-                        case LogRotateFrequency.OnStart:
-                            break;
-                        case LogRotateFrequency.Hourly:
-                            triggered = currentDateTime.hour != fileTarget.logRotateLastDateTime.hour;
-                            break;
-                        case LogRotateFrequency.Daily:
-                            triggered = currentDateTime.day != fileTarget.logRotateLastDateTime.day;
-                            break;
+                    case LogRotateFrequency.None:
+                    case LogRotateFrequency.OnStart:
+                        break;
+                    case LogRotateFrequency.Hourly:
+                        triggered = currentDateTime.hour != fileTarget.logRotateLastDateTime.hour;
+                        break;
+                    case LogRotateFrequency.Daily:
+                        triggered = currentDateTime.day != fileTarget.logRotateLastDateTime.day;
+                        break;
                     }
                 }
 
@@ -641,7 +632,7 @@ export:
             if(targets & LoggingTargets.Custom) {
                 foreach(ref ct; customTargets.unsafeGetLiteral()) {
                     ct.messageDel(level, currentDateTime, String_UTF8(ModuleLine), String_UTF16(ModuleLine2), tags,
-                    String_UTF8(LevelTag[level + (tags.isNull ? 0 : 6)]), contentUTF8);
+                            String_UTF8(LevelTag[level + (tags.isNull ? 0 : 6)]), contentUTF8);
                 }
             }
         }
@@ -771,6 +762,7 @@ version(Windows) {
 private:
 import sidero.base.containers.map.concurrenthashmap;
 import sidero.base.synchronization.system.lock;
+import sidero.base.synchronization.system.rwmutex;
 import sidero.base.internal.filesystem;
 import sidero.base.datetime : GDateTime;
 
