@@ -1013,6 +1013,42 @@ nothrow @nogc:
 
     @disable auto opCast(T)();
 
+    /// Compare the literals by pointer only.
+    bool equalsByPointer(String_UTF8 other) scope const {
+        return this.compareByPointer(other) == 0;
+    }
+
+    ///
+    unittest {
+        string literal1 = "Hello!", literal2 = "nothin :(";
+        assert(typeof(this)(literal1).equalsByPointer(String_UTF8(literal1)));
+        assert(!typeof(this)(literal1).equalsByPointer(String_UTF8(literal2)));
+    }
+
+    /// Ditto
+    bool equalsByPointer(String_UTF16 other) scope const {
+        return this.compareByPointer(other) == 0;
+    }
+
+    ///
+    unittest {
+        string literal1 = "Hello!", literal2 = "nothin :(";
+        assert(typeof(this)(literal1).equalsByPointer(String_UTF16(literal1)));
+        assert(!typeof(this)(literal1).equalsByPointer(String_UTF16(literal2)));
+    }
+
+    /// Ditto
+    bool equalsByPointer(String_UTF32 other) scope const {
+        return this.compareByPointer(other) == 0;
+    }
+
+    ///
+    unittest {
+        string literal1 = "Hello!", literal2 = "nothin :(";
+        assert(typeof(this)(literal1).equalsByPointer(String_UTF32(literal1)));
+        assert(!typeof(this)(literal1).equalsByPointer(String_UTF32(literal2)));
+    }
+
     ///
     alias equals = opEquals;
 
@@ -1154,6 +1190,69 @@ nothrow @nogc:
     ///
     bool ignoreCaseEquals(scope StringBuilder_ASCII other, UnicodeLanguage language = UnicodeLanguage.Unknown) scope const @trusted {
         return this.ignoreCaseCompare(other, language) == 0;
+    }
+
+    /// Compare the literals by pointer only.
+    int compareByPointer(String_UTF8 other) scope const {
+        if(this.literal.ptr < other.literal.ptr)
+            return -1;
+        else if(this.literal.ptr > other.literal.ptr)
+            return 1;
+        else if(this.literal.length < other.literal.length)
+            return -1;
+        else if(this.literal.length > other.literal.length)
+            return 1;
+        else
+            return 0;
+    }
+
+    ///
+    unittest {
+        string literal1 = "Hello!", literal2 = "nothin :(";
+        assert(typeof(this)(literal1).compareByPointer(String_UTF8(literal1)) == 0);
+        assert(typeof(this)(literal1).compareByPointer(String_UTF8(literal2)) != 0);
+    }
+
+    /// Ditto
+    int compareByPointer(String_UTF16 other) scope const {
+        if(this.literal.ptr < other.literal.ptr)
+            return -1;
+        else if(this.literal.ptr > other.literal.ptr)
+            return 1;
+        else if(this.literal.length < other.literal.length)
+            return -1;
+        else if(this.literal.length > other.literal.length)
+            return 1;
+        else
+            return 0;
+    }
+
+    ///
+    unittest {
+        string literal1 = "Hello!", literal2 = "nothin :(";
+        assert(typeof(this)(literal1).compareByPointer(String_UTF16(literal1)) == 0);
+        assert(typeof(this)(literal1).compareByPointer(String_UTF16(literal2)) != 0);
+    }
+
+    /// Ditto
+    int compareByPointer(String_UTF32 other) scope const {
+        if(this.literal.ptr < other.literal.ptr)
+            return -1;
+        else if(this.literal.ptr > other.literal.ptr)
+            return 1;
+        else if(this.literal.length < other.literal.length)
+            return -1;
+        else if(this.literal.length > other.literal.length)
+            return 1;
+        else
+            return 0;
+    }
+
+    ///
+    unittest {
+        string literal1 = "Hello!", literal2 = "nothin :(";
+        assert(typeof(this)(literal1).compareByPointer(String_UTF32(literal1)) == 0);
+        assert(typeof(this)(literal1).compareByPointer(String_UTF32(literal2)) != 0);
     }
 
     ///

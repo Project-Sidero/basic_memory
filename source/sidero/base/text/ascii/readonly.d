@@ -348,7 +348,7 @@ nothrow @nogc:
         if(haveIterator)
             this.iterator.rc(false);
 
-        if (this.lifeTime !is null)
+        if(this.lifeTime !is null)
             this.lifeTime.rcExternal(false);
     }
 
@@ -544,6 +544,18 @@ nothrow @nogc:
 
     @disable auto opCast(T)();
 
+    /// Compare the literals by pointer only.
+    bool equalsByPointer(String_ASCII other) scope const {
+        return this.compareByPointer(other) == 0;
+    }
+
+    ///
+    unittest {
+        string literal1 = "Hello!", literal2 = "nothin :(";
+        assert(String_ASCII(literal1).equalsByPointer(String_ASCII(literal1)));
+        assert(!String_ASCII(literal1).equalsByPointer(String_ASCII(literal2)));
+    }
+
     ///
     alias equals = opEquals;
 
@@ -637,6 +649,27 @@ nothrow @nogc:
     ///
     bool ignoreCaseEquals(scope StringBuilder_ASCII other) scope const @trusted {
         return other.ignoreCaseEquals(*cast(String_ASCII*)&this);
+    }
+
+    /// Compare the literals by pointer only.
+    int compareByPointer(String_ASCII other) scope const {
+        if(this.literal.ptr < other.literal.ptr)
+            return -1;
+        else if(this.literal.ptr > other.literal.ptr)
+            return 1;
+        else if(this.literal.length < other.literal.length)
+            return -1;
+        else if(this.literal.length > other.literal.length)
+            return 1;
+        else
+            return 0;
+    }
+
+    ///
+    unittest {
+        string literal1 = "Hello!", literal2 = "nothin :(";
+        assert(String_ASCII(literal1).compareByPointer(String_ASCII(literal1)) == 0);
+        assert(String_ASCII(literal1).compareByPointer(String_ASCII(literal2)) != 0);
     }
 
     ///
