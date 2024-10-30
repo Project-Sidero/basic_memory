@@ -22,7 +22,7 @@ This will be made available to the memory mapper when forwarding calls.
 Be aware that this library will not call destructors for you as part of the allocator itself.
 
 License: Artistic v2
-Authors: Richard (Rikki) Andrew Cattermole
+Authors: Richard (Rikki) Andrew Cattermole <firstname@lastname.co.nz>
 Copyright: 2022-2024 Richard Andrew Cattermole
 */
 module sidero.base.allocators;

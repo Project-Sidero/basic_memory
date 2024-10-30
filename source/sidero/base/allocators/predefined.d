@@ -7,8 +7,8 @@ There are multiple categories of allocators defined here, they are:
 - House keeping: used for fixed sized memory allocations (not arrays) and are meant for internals to data structures.
 
 License: Artistic v2
-Authors: Richard (Rikki) Andrew Cattermole
-Copyright: 2022 Richard Andrew Cattermole
+Authors: Richard (Rikki) Andrew Cattermole <firstname@lastname.co.nz>
+Copyright: 2022-2024 Richard Andrew Cattermole
 */
 module sidero.base.allocators.predefined;
 import sidero.base.allocators.api;

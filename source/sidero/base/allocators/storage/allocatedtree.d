@@ -6,7 +6,7 @@ Prefer this over `AllocatedList` by default.
 See_Also: AllocatedList
 
 License: Artistic v2
-Authors: Richard (Rikki) Andrew Cattermole
+Authors: Richard (Rikki) Andrew Cattermole <firstname@lastname.co.nz>
 Copyright: 2022-2024 Richard Andrew Cattermole
 */module sidero.base.allocators.storage.allocatedtree;
 public import sidero.base.allocators.predefined : HouseKeepingAllocator;

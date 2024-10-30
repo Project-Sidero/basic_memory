@@ -2,7 +2,7 @@
 Allows splitting of allocations between two sizes of allocations.
 
 License: Artistic v2
-Authors: Richard (Rikki) Andrew Cattermole
+Authors: Richard (Rikki) Andrew Cattermole <firstname@lastname.co.nz>
 Copyright: 2022-2024 Richard Andrew Cattermole
 */
 module sidero.base.allocators.alternatives.segregator;

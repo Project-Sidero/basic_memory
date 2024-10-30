@@ -2,7 +2,7 @@
 Attempts to use one memory allocator and if that fails uses another.
 
 License: Artistic v2
-Authors: Richard (Rikki) Andrew Cattermole
+Authors: Richard (Rikki) Andrew Cattermole <firstname@lastname.co.nz>
 Copyright: 2022-2024 Richard Andrew Cattermole
 */
 module sidero.base.allocators.alternatives.fallback;

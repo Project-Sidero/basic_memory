@@ -2,7 +2,7 @@
 Registration of hooks for garbage collection.
 
 License: Boost
-Authors: Richard (Rikki) Andrew Cattermole
+Authors: Richard (Rikki) Andrew Cattermole <firstname@lastname.co.nz>
 Copyright: 2022-2024 Richard Andrew Cattermole
 */
 module sidero.base.allocators.gc_hook;

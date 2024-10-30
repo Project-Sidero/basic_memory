@@ -2,7 +2,7 @@
 Provides an allocator wrapper that performs locking to make it thread-safe.
 
 License: Artistic v2
-Authors: Richard (Rikki) Andrew Cattermole
+Authors: Richard (Rikki) Andrew Cattermole <firstname@lastname.co.nz>
 Copyright: 2022-2024 Richard Andrew Cattermole
  */
 module sidero.base.allocators.locking;

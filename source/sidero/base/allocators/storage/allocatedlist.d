@@ -6,7 +6,7 @@ Prefer this over `AllocatedTree` if you do not need to lookup the true range of 
 See_Also: AllocatedTree
 
 License: Artistic v2
-Authors: Richard (Rikki) Andrew Cattermole
+Authors: Richard (Rikki) Andrew Cattermole <firstname@lastname.co.nz>
 Copyright: 2022-2024 Richard Andrew Cattermole
 */
 module sidero.base.allocators.storage.allocatedlist;
