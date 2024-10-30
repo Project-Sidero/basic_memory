@@ -3,7 +3,7 @@ Provides an allocator wrapper that performs locking to make it thread-safe.
 
 License: Artistic v2
 Authors: Richard (Rikki) Andrew Cattermole
-Copyright: 2022 Richard Andrew Cattermole
+Copyright: 2022-2024 Richard Andrew Cattermole
  */
 module sidero.base.allocators.locking;
 import sidero.base.attributes;
@@ -13,8 +13,8 @@ import sidero.base.internal.logassert;
 export:
 
 /**
-    Adds a lock around all allocator operations to make it thread safe.
- */
+Adds a lock around all allocator operations to make it thread safe.
+*/
 struct AllocatorLocking(PoolAllocator) {
     ///
     PoolAllocator poolAllocator;
@@ -110,8 +110,8 @@ scope @safe @nogc pure nothrow:
 }
 
 /**
-    Hooks allocations and add then remove ranges as allocations/deallocations/reallocations occur.
- */
+Hooks allocations and add then remove ranges as allocations/deallocations/reallocations occur.
+*/
 struct GCAllocatorLock(PoolAllocator) {
     import sidero.base.allocators.gc;
     import sidero.base.allocators.storage.allocatedtree;
@@ -199,7 +199,7 @@ pure:
             const pointerDifference = array.ptr - trueArray.ptr;
             const lengthAvailable = trueArray.length - pointerDifference;
 
-            if (lengthAvailable >= newSize) {
+            if(lengthAvailable >= newSize) {
                 got = true;
                 array = trueArray[0 .. newSize];
             }

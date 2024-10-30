@@ -1,3 +1,14 @@
+/*
+A list of allocations.
+
+Prefer this over `AllocatedTree` if you do not need to lookup the true range of a memory.
+
+See_Also: AllocatedTree
+
+License: Artistic v2
+Authors: Richard (Rikki) Andrew Cattermole
+Copyright: 2022-2024 Richard Andrew Cattermole
+*/
 module sidero.base.allocators.storage.allocatedlist;
 public import sidero.base.allocators.predefined : HouseKeepingAllocator;
 import sidero.base.allocators.api;
@@ -8,12 +19,14 @@ private {
 }
 
 /**
-    A list of all allocated memory, optionally supports a pool allocator that can be used to automatically deallocate all stored memory.
+A list of all allocated memory, optionally supports a pool allocator that can be used to automatically deallocate all stored memory.
 
-    Warning: You must remove all memory (i.e. by deallocateAll) prior to destruction or you will get an error.
+Warning: You must remove all memory (i.e. by deallocateAll) prior to destruction or you will get an error.
+
+Warning: does not destroy on deallocation.
 */
 struct AllocatedList(InternalAllocator = HouseKeepingAllocator!(), PoolAllocator = void) {
-    export:
+export:
     ///
     InternalAllocator internalAllocator;
 
@@ -42,10 +55,10 @@ struct AllocatedList(InternalAllocator = HouseKeepingAllocator!(), PoolAllocator
         }
     }
 
-    scope @safe @nogc pure nothrow:
+scope @safe @nogc pure nothrow:
 
     ///
-    ~this() {
+     ~this() {
         static if(!is(PoolAllocator == void)) {
             if(!poolAllocator.isNull)
                 deallocateAll();
@@ -59,7 +72,7 @@ struct AllocatedList(InternalAllocator = HouseKeepingAllocator!(), PoolAllocator
         return internalAllocator.isNull;
     }
 
-    @trusted:
+@trusted:
 
     ///
     this(return scope ref AllocatedList other) {
@@ -104,8 +117,8 @@ struct AllocatedList(InternalAllocator = HouseKeepingAllocator!(), PoolAllocator
 
             if(current.matches(array.ptr)) {
                 void* actualStartPtr = current.array.ptr < array.ptr ? current.array.ptr : array.ptr,
-                actualEndPtr = (current.array.ptr + current.array.length) > (array.ptr + array.length) ? (
-                    current.array.ptr + current.array.length) : (array.ptr + array.length);
+                    actualEndPtr = (current.array.ptr + current.array.length) > (array.ptr + array.length) ? (
+                            current.array.ptr + current.array.length) : (array.ptr + array.length);
                 size_t actualLength = actualEndPtr - actualStartPtr;
 
                 if(current.array.ptr !is actualStartPtr) {

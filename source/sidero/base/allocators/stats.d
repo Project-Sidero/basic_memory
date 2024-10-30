@@ -3,8 +3,8 @@ Provides statistics about a given allocator that it wraps.
 
 License: Artistic v2
 Authors: Richard (Rikki) Andrew Cattermole
-Copyright: 2022 Richard Andrew Cattermole
- */
+Copyright: 2022-2024 Richard Andrew Cattermole
+*/
 module sidero.base.allocators.stats;
 import sidero.base.attributes;
 import sidero.base.typecons : Ternary;
@@ -32,7 +32,7 @@ struct StatsAllocator(PoolAllocator) {
     }
 
     ///
-    __gshared StatsAllocator instance;
+    __gshared RCAllocatorInstance!StatsAllocator instance;
 
     ///
     struct Info {

@@ -1,3 +1,10 @@
+/**
+Some utility code needed for memory allocators to operate.
+
+License: Artistic v2
+Authors: Richard (Rikki) Andrew Cattermole
+Copyright: 2022-2024 Richard Andrew Cattermole
+*/
 module sidero.base.allocators.utils;
 
 export @safe nothrow @nogc:

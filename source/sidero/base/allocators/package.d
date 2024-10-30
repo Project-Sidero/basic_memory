@@ -1,5 +1,4 @@
 /**
-
 Memory allocators handle memory mapping (mapping of memory address ranges onto hardware), guaranteeing alignment and optimizing for memory usage patterns.
 
 A good memory allocator fit for purpose can improve a programs preformance quite significantly.
@@ -17,9 +16,14 @@ It is highly recommended by the author that when a type owns memory to not pass 
 For types that are designed to be aggregated, these should take a memory allocator but default to the global allocator.
 When data structures accept aggregatable types, it should also optionally support a memory allocator to deallocate its memory when removing.
 
+When allocating, the `TypeInfo` parameter may not be used.
+This will be made available to the memory mapper when forwarding calls.
+
+Be aware that this library will not call destructors for you as part of the allocator itself.
+
 License: Artistic v2
 Authors: Richard (Rikki) Andrew Cattermole
-Copyright: 2022 Richard Andrew Cattermole
- */
+Copyright: 2022-2024 Richard Andrew Cattermole
+*/
 module sidero.base.allocators;
 public import sidero.base.allocators.api;

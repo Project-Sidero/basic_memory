@@ -3,8 +3,8 @@ List based memory allocation and storage strategies.
 
 License: Artistic v2
 Authors: Richard (Rikki) Andrew Cattermole
-Copyright: 2022 Richard Andrew Cattermole
- */
+Copyright: 2022-2024 Richard Andrew Cattermole
+*/
 module sidero.base.allocators.buffers.freelist;
 import sidero.base.allocators.mapping : GoodAlignment;
 public import sidero.base.allocators.buffers.defs : FitsStrategy;
@@ -29,10 +29,12 @@ private {
 export:
 
 /**
-    A free list dedicated for house keeping tasks.
+A free list dedicated for house keeping tasks.
 
-    Fixed sized allocations, does not handle alignment, coalesce blocks of memory together nor splitting.
- */
+Fixed sized allocations, does not handle alignment, coalesce blocks of memory together nor splitting.
+
+Does not use `TypeInfo`, but will be forwarded on allocation.
+*/
 struct HouseKeepingFreeList(PoolAllocator) {
 export:
     /// Source for all memory
@@ -199,12 +201,16 @@ unittest {
 }
 
 /**
-    A simple straight forward free list that supports first-fit, next-fit and best-fit strategies, with optional alignment and minimum stored size.
+A simple straight forward free list that supports first-fit, next-fit and best-fit strategies, with optional alignment and minimum stored size.
 
-    This is not designed to be fast, it exists to be a base line. Use FreeTree if you care about performance.
+This is not designed to be fast, it exists to be a base line. Use FreeTree if you care about performance.
 
-    See_Also: FreeTree
- */
+Does not use `TypeInfo`, but will be forwarded on allocation.
+
+Warning: does not destroy on deallocation.
+
+See_Also: FreeTree
+*/
 struct FreeList(PoolAllocator, FitsStrategy Strategy = FitsStrategy.NextFit, size_t DefaultAlignment = GoodAlignment,
         size_t DefaultMinimumStoredSize = 0) {
 export:

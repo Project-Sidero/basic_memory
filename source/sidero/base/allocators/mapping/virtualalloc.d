@@ -3,16 +3,25 @@ Windows specific memory mappers.
 
 License: Artistic v2
 Authors: Richard (Rikki) Andrew Cattermole
-Copyright: 2022 Richard Andrew Cattermole
- */
+Copyright: 2022-2024 Richard Andrew Cattermole
+*/
 module sidero.base.allocators.mapping.virtualalloc;
+import sidero.base.allocators.api : RCAllocatorInstance;
+
 export:
 
 version(Windows) {
     /**
-        Note: this is designed for 4k increments! It will do 4k increments regardless of what you want.
-        It cannot reallocate, use HeapAllocMapper instead.
-     */
+    Maps using the Windows `VirtualAlloc` function.
+
+    Does not use `TypeInfo` argument on allocation.
+
+    Note: this is designed for 4k increments! It will do 4k increments regardless of what you want.
+
+    Warning: It cannot reallocate, use HeapAllocMapper instead.
+
+    Warning: does not destroy on deallocation.
+    */
     struct VirtualAllocMapper {
     export:
         ///
@@ -22,7 +31,7 @@ version(Windows) {
         enum isNull = false;
 
         ///
-        __gshared VirtualAllocMapper instance;
+        __gshared RCAllocatorInstance!VirtualAllocMapper instance;
 
     @nogc scope pure nothrow @trusted:
 
@@ -59,15 +68,19 @@ version(Windows) {
     }
 
     /**
-        Windows HeapAlloc family of mappers.
-     */
+    An instance of the Windows `HeapAlloc` allocator.
+
+    Does not use `TypeInfo` argument on allocation.
+
+    Warning: does not destroy on deallocation.
+    */
     struct HeapAllocMapper {
     export:
         ///
-        enum NeedsLocking = false;
+        enum NeedsLocking = true;
 
         ///
-        __gshared HeapAllocMapper instance;
+        __gshared RCAllocatorInstance!HeapAllocMapper instance;
 
         private {
             HANDLE heap;

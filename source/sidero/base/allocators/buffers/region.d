@@ -4,8 +4,8 @@ Can allocate and deallocate by using another memory mapper if one is provided.
 
 License: Artistic v2
 Authors: Richard (Rikki) Andrew Cattermole
-Copyright: 2022 Richard Andrew Cattermole
- */
+Copyright: 2022-2024 Richard Andrew Cattermole
+*/
 module sidero.base.allocators.buffers.region;
 import sidero.base.allocators.mapping : GoodAlignment;
 import sidero.base.attributes : hidden;
@@ -19,7 +19,13 @@ private {
 
 export:
 
-/// A bump the pointer allocator for a set slice of memory, will automically allocate if required and can guarantee alignment.
+/**
+A bump the pointer allocator for a set slice of memory, will automically allocate if required and can guarantee alignment.
+
+Does not use `TypeInfo`, will not be forwarded on allocation.
+
+Warning: does not destroy on deallocation.
+*/
 struct Region(PoolAllocator = void, size_t DefaultAlignment = GoodAlignment, size_t DefaultSize = 0) {
 export:
     ///

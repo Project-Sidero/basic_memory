@@ -3,8 +3,8 @@ Groups similar sized allocations together into buckets.
 
 License: Artistic v2
 Authors: Richard (Rikki) Andrew Cattermole
-Copyright: 2022 Richard Andrew Cattermole
- */
+Copyright: 2022-2024 Richard Andrew Cattermole
+*/
 module sidero.base.allocators.alternatives.bucketizer;
 import sidero.base.attributes : hidden;
 import sidero.base.typecons : Ternary;
@@ -18,8 +18,10 @@ private {
 export:
 
 /**
-    Uses buckets to segregate memory.
- */
+Uses buckets to segregate memory.
+
+Does not use `TypeInfo`, but will be forwarded on allocation.
+*/
 struct Bucketizer(PoolAllocator, size_t min, size_t max, size_t step) {
 export:
     PoolAllocator[((max + 1) - min) / step] poolAllocators;

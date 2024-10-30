@@ -3,8 +3,8 @@ Provides a growable list of memory allocator instances.
 
 License: Artistic v2
 Authors: Richard (Rikki) Andrew Cattermole
-Copyright: 2022 Richard Andrew Cattermole
- */
+Copyright: 2022-2024 Richard Andrew Cattermole
+*/
 module sidero.base.allocators.alternatives.allocatorlist;
 import sidero.base.attributes : hidden;
 import sidero.base.typecons : Ternary;
@@ -19,10 +19,12 @@ private {
 export:
 
 /**
-    A simple allocator list that relies on a given allocators (as provided by the factory function) to provide its own memory.
+A simple allocator list that relies on a given allocators (as provided by the factory function) to provide its own memory.
 
-    Supports isOnlyOneAllocationOfSize method on the pool allocator to allow knowing if it can free a given allocator instance.
- */
+Supports isOnlyOneAllocationOfSize method on the pool allocator to allow knowing if it can free a given allocator instance.
+
+Does not use `TypeInfo`, but will be forwarded on allocation.
+*/
 struct AllocatorList(PoolAllocator, alias factory) {
 export:
     static assert(__traits(hasMember, TypeOfAllocator, "deallocateAll"),

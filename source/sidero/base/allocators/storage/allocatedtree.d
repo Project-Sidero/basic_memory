@@ -1,4 +1,14 @@
-module sidero.base.allocators.storage.allocatedtree;
+/*
+A list of allocations stored in a tree for fast lookup.
+
+Prefer this over `AllocatedList` by default.
+
+See_Also: AllocatedList
+
+License: Artistic v2
+Authors: Richard (Rikki) Andrew Cattermole
+Copyright: 2022-2024 Richard Andrew Cattermole
+*/module sidero.base.allocators.storage.allocatedtree;
 public import sidero.base.allocators.predefined : HouseKeepingAllocator;
 import sidero.base.allocators.api;
 import sidero.base.attributes : hidden;
@@ -8,9 +18,11 @@ private {
 }
 
 /**
-    A tree of all allocated memory, optionally supports a pool allocator that can be used to automatically deallocate all stored memory.
+A tree of all allocated memory, optionally supports a pool allocator that can be used to automatically deallocate all stored memory.
 
-    Warning: You must remove all memory (i.e. by deallocateAll) prior to destruction or you will get an error.
+Warning: You must remove all memory (i.e. by deallocateAll) prior to destruction or you will get an error.
+
+Warning: does not destroy on deallocation.
 */
 struct AllocatedTree(InternalAllocator = HouseKeepingAllocator!(), PoolAllocator = void) {
 export:

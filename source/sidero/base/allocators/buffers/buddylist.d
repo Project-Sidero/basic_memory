@@ -3,7 +3,7 @@ A buddy list for general purpose memory allocation.
 
 License: Artistic v2
 Authors: Richard (Rikki) Andrew Cattermole
-Copyright: 2022 Richard Andrew Cattermole
+Copyright: 2022-2024 Richard Andrew Cattermole
  */
 module sidero.base.allocators.buffers.buddylist;
 import sidero.base.attributes : hidden;
@@ -18,15 +18,22 @@ private {
 export:
 
 /**
-    The famous buddy list!
-    It keeps your memory close to its buddies!
-    Perfact for all of your allocations needs.
+The famous buddy list!
+It keeps your memory close to its buddies!
+Perfact for all of your allocations needs.
 
-    Default exponent range is designed for 32bit coverage, with a maximum allocation size for internal storage at 1gb.
+Default exponent range is designed for 32bit coverage, with a maximum allocation size for internal storage at 1gb.
 
-    https://en.wikipedia.org/wiki/Buddy_memory_allocation
- */
-struct BuddyList(PoolAllocator, size_t minExponent = 3, size_t maxExponent = 20, bool storeAllocated = true) {
+Set `storeAllocated` to `true` if you need the buddy list to handle getting true range of memory.
+This is only required if you do not have another allocator wrapping this one.
+
+Does not use `TypeInfo`, but will be forwarded on allocation.
+
+Warning: does not destroy on deallocation.
+
+https://en.wikipedia.org/wiki/Buddy_memory_allocation
+*/
+struct BuddyList(PoolAllocator, size_t minExponent = 3, size_t maxExponent = 20, bool storeAllocated = false) {
 export:
     static assert(minExponent >= calculatePower2Size((void*).sizeof, 0)[1], "Minimum exponent must be large enough to fit a pointer in.");
     static assert(minExponent < maxExponent, "Maxinum exponent must be larger than minimum exponent.");
@@ -305,7 +312,7 @@ unittest {
     import sidero.base.allocators.mapping.malloc;
     import sidero.base.allocators.buffers.region;
 
-    alias BL = BuddyList!(Region!Mallocator);
+    alias BL = BuddyList!(Region!Mallocator, 3, 20, true);
 
     BL bl;
     assert(!bl.empty);

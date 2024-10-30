@@ -25,7 +25,9 @@ private {
     size_t PAGESIZE_;
 }
 
-pragma(crt_constructor) extern (C) void initializeMappingVariables() {
+private:
+
+void initializeMappingVariables() {
     // COPIED FROM druntime core.thread.types
     version(Windows) {
         import core.sys.windows.winbase;

@@ -3,8 +3,8 @@ Allows splitting of allocations between two sizes of allocations.
 
 License: Artistic v2
 Authors: Richard (Rikki) Andrew Cattermole
-Copyright: 2022 Richard Andrew Cattermole
- */
+Copyright: 2022-2024 Richard Andrew Cattermole
+*/
 module sidero.base.allocators.alternatives.segregator;
 import sidero.base.typecons : Ternary;
 
@@ -17,8 +17,10 @@ private {
 export:
 
 /**
-    Splits memory allocations based upon size. Uses small <= threshold < large.
- */
+Splits memory allocations based upon size. Uses small <= threshold < large.
+
+Does not use `TypeInfo`, but will be forwarded on allocation.
+*/
 struct Segregator(SmallAllocator, LargeAllocator, size_t threshold) {
 export:
     ///

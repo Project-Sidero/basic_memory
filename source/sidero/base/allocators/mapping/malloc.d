@@ -3,16 +3,22 @@ Provides memory mapping via the libc malloc/realloc/free functions.
 
 License: Artistic v2
 Authors: Richard (Rikki) Andrew Cattermole
-Copyright: 2022 Richard Andrew Cattermole
- */
+Copyright: 2022-2024 Richard Andrew Cattermole
+*/
 module sidero.base.allocators.mapping.malloc;
+import sidero.base.allocators.api : RCAllocatorInstance;
+
 export:
 
 /**
-    LibC malloc/free/realloc based memory mapping allocator.
+Libc malloc + realloc + free based memory allocator, should be treated as a mapping allocator but can be used as an allocator.
 
-    Warning: Deallocating using this without keeping track of roots will fail.
- */
+Does not use `TypeInfo` argument on allocation.
+
+Warning: Deallocating using this without keeping track of roots will fail.
+
+Warning: does not destroy on deallocation.
+*/
 struct Mallocator {
 export:
 
@@ -23,7 +29,7 @@ export:
     enum isNull = false;
 
     ///
-    __gshared Mallocator instance;
+    __gshared RCAllocatorInstance!Mallocator instance;
 
 @nogc scope pure nothrow @trusted:
 
@@ -35,7 +41,8 @@ export:
     ///
     void[] allocate(size_t length, TypeInfo ti = null) {
         // implementation defined behavior == bad
-        assert(length != 0);
+        if(length == 0)
+            return null;
 
         void* ret = pureMalloc(length);
 
@@ -48,7 +55,8 @@ export:
     ///
     bool reallocate(scope ref void[] array, size_t newSize) {
         // implementation defined behavior == bad
-        assert(newSize != 0);
+        if(newSize == 0)
+            return false;
 
         void* ret = pureRealloc(array.ptr, newSize);
 
@@ -71,6 +79,7 @@ export:
 }
 
 private:
+
 // copied from druntime
 extern (C) pure @system @nogc nothrow {
     pragma(mangle, "malloc") void* pureMalloc(size_t);

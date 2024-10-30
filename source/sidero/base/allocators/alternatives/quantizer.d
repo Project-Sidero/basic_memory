@@ -3,8 +3,8 @@ Rounds up memory allocation sizes based upon a size.
 
 License: Artistic v2
 Authors: Richard (Rikki) Andrew Cattermole
-Copyright: 2022 Richard Andrew Cattermole
- */
+Copyright: 2022-2024 Richard Andrew Cattermole
+*/
 module sidero.base.allocators.alternatives.quantizer;
 import sidero.base.typecons : Ternary;
 
@@ -17,8 +17,10 @@ private {
 export:
 
 /**
-    Applies rounding (up) function to all sizes provided, but will not return it complete.
- */
+Applies rounding (up) function to all sizes provided, but will not return it complete.
+
+Does not use `TypeInfo`, but will be forwarded on allocation.
+*/
 struct Quantizer(PoolAllocator, alias roundFunction) {
 export:
     ///

@@ -3,7 +3,7 @@ Garbage collector instance registration and control.
 
 License: Artistic v2
 Authors: Richard (Rikki) Andrew Cattermole
-Copyright: 2022 Richard Andrew Cattermole
+Copyright: 2022-2024 Richard Andrew Cattermole
 */
 module sidero.base.allocators.gc;
 export:

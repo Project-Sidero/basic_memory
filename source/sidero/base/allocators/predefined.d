@@ -81,5 +81,5 @@ struct GeneralPurposeAllocator {
     alias impl this;
 
     ///
-    __gshared GeneralPurposeAllocator instance;
+    __gshared RCAllocatorInstance!GeneralPurposeAllocator instance;
 }
