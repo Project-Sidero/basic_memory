@@ -13,6 +13,7 @@ module sidero.base.allocators.storage.allocatedlist;
 public import sidero.base.allocators.predefined : HouseKeepingAllocator;
 import sidero.base.allocators.api;
 import sidero.base.attributes : hidden;
+import sidero.base.typecons : Ternary;
 
 private {
     alias AL = AllocatedList!(RCAllocator, RCAllocator);
@@ -172,9 +173,9 @@ scope @safe @nogc pure nothrow:
     }
 
     ///
-    bool owns(scope void[] array) {
+    Ternary owns(scope void[] array) {
         if(array is null)
-            return false;
+            return Ternary.No;
 
         Node* previous = &head;
 
@@ -182,12 +183,12 @@ scope @safe @nogc pure nothrow:
             Node* current = previous.next;
 
             if(current.matches(array.ptr))
-                return true;
+                return Ternary.Yes;
 
             previous = current;
         }
 
-        return false;
+        return Ternary.No;
     }
 
     ///
@@ -231,13 +232,13 @@ unittest {
     al.store(someArray);
     assert(!al.empty);
 
-    assert(!al.owns(null));
-    assert(al.owns(someArray));
-    assert(al.owns(someArray[10 .. 20]));
+    assert(al.owns(null) == Ternary.No);
+    assert(al.owns(someArray) == Ternary.Yes);
+    assert(al.owns(someArray[10 .. 20]) == Ternary.Yes);
     assert(al.getTrueRegionOfMemory(someArray[10 .. 20]) is someArray);
 
     al.remove(someArray);
-    assert(!al.owns(someArray));
+    assert(al.owns(someArray) == Ternary.No);
     assert(al.empty);
 
     al.store(someArray);

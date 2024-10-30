@@ -351,7 +351,7 @@ export:
     ///
     Ternary owns(scope void[] array) {
         static if (storeAllocated) {
-            return fullAllocations.owns(array) ? Ternary.Yes : Ternary.No;
+            return fullAllocations.owns(array);
         } else
             return poolAllocator.owns(array);
     }

@@ -46,6 +46,13 @@ export:
 
         void* ret = pureMalloc(length);
 
+        version(none) {
+            import core.stdc.stdio;
+
+            debug printf("allocate length %zd, got pointer %p\n", length, ret);
+            debug fflush(stdout);
+        }
+
         if(ret is null)
             return null;
         else
@@ -60,6 +67,14 @@ export:
 
         void* ret = pureRealloc(array.ptr, newSize);
 
+        version(none) {
+            import core.stdc.stdio;
+
+            debug printf("reallocate old length %zd, new length %zd, old pointer %p, new pointer %p\n", array.length,
+                    newSize, array.ptr, ret);
+            debug fflush(stdout);
+        }
+
         if(ret !is null) {
             array = ret[0 .. newSize];
             return true;
@@ -70,6 +85,13 @@ export:
 
     ///
     bool deallocate(scope void[] data) @trusted {
+        version(none) {
+            import core.stdc.stdio;
+
+            debug printf("deallocate length %zd, pointer %p\n", data.length, data.ptr);
+            debug fflush(stdout);
+        }
+
         if(data.ptr !is null) {
             pureFree(data.ptr);
             return true;

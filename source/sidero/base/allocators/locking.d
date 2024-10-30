@@ -238,26 +238,27 @@ pure:
         return got;
     }
 
-    static if(__traits(hasMember, PoolAllocator, "owns")) {
-        ///
-        Ternary owns(scope void[] array) {
-            readLockImpl;
-            scope(exit)
-                readUnlockImpl;
+    ///
+    Ternary owns(scope void[] array) {
+        readLockImpl;
+        scope(exit)
+            readUnlockImpl;
 
-            return poolAllocator.owns(array);
-        }
+        return allocatedTree.owns(array);
     }
 
-    static if(__traits(hasMember, PoolAllocator, "deallocateAll")) {
-        ///
-        bool deallocateAll() {
-            writeLockImpl;
-            scope(exit)
-                writeUnlockImpl;
+    ///
+    bool deallocateAll() {
+        writeLockImpl;
+        scope(exit)
+            writeUnlockImpl;
 
+        static if(__traits(hasMember, PoolAllocator, "deallocateAll")) {
             allocatedTree.deallocateAll((array) { removeRangeImpl(array); return true; });
             return poolAllocator.deallocateAll();
+        } else {
+            allocatedTree.deallocateAll((array) { removeRangeImpl(array); return poolAllocator.deallocate(array); });
+            return true;
         }
     }
 

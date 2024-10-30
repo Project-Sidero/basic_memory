@@ -465,7 +465,7 @@ scope @safe @nogc pure nothrow:
 
     ///
     Ternary owns(scope void[] array) {
-        return fullAllocations.owns(array) ? Ternary.Yes : Ternary.No;
+        return fullAllocations.owns(array);
     }
 
     ///

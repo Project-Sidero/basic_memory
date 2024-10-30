@@ -71,6 +71,62 @@ void globalAllocator(RCAllocator allocator) @system nothrow @nogc {
     globalAllocator_ = allocator;
 }
 
+/**
+Gives a memory allocator suitable to allocate a given type.
+
+If that memory allocator can contain GC memory, it will be a compatible to GC allocator.
+
+If GC compatibility is not needed, it will use malloc instead of the general purpose allocator.
+*/
+RCAllocator allocatorGivenType(T)(bool canContainGCMemory=true) {
+    import sidero.base.traits : hasIndirections;
+
+    enum HasIndirections = hasIndirections!T;
+
+    static if (HasIndirections) {
+        if (canContainGCMemory) {
+            import sidero.base.allocators.predefined;
+
+            return RCAllocator.instanceOf!GeneralPurposeAllocator();
+        } else {
+            import sidero.base.allocators.mapping.malloc;
+
+            return RCAllocator.instanceOf!Mallocator();
+        }
+    } else {
+        import sidero.base.allocators.mapping.malloc;
+
+        return RCAllocator.instanceOf!Mallocator();
+    }
+}
+
+///
+unittest {
+    struct A {
+        int x;
+    }
+
+    struct B {
+        int* ptr;
+    }
+
+    RCAllocator aAllocator = allocatorGivenType!A;
+    RCAllocator bAllocatorGC = allocatorGivenType!B(true);
+    RCAllocator bAllocatorNonGC = allocatorGivenType!B(false);
+
+    A* a = aAllocator.make!A;
+    B* bGC = bAllocatorGC.make!B;
+    B* bNonGC = bAllocatorNonGC.make!B;
+
+    assert(a !is null);
+    assert(bGC !is null);
+    assert(bNonGC !is null);
+
+    aAllocator.dispose(a);
+    aAllocator.dispose(bGC);
+    aAllocator.dispose(bNonGC);
+}
+
 /// Reference counted memory allocator interface.
 struct RCAllocator {
     private @PrettyPrintIgnore {

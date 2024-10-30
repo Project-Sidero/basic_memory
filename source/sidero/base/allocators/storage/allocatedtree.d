@@ -12,6 +12,7 @@ Copyright: 2022-2024 Richard Andrew Cattermole
 public import sidero.base.allocators.predefined : HouseKeepingAllocator;
 import sidero.base.allocators.api;
 import sidero.base.attributes : hidden;
+import sidero.base.typecons : Ternary;
 
 private {
     alias AT = AllocatedTree!(RCAllocator, RCAllocator);
@@ -111,16 +112,16 @@ scope @safe @nogc pure nothrow:
     }
 
     ///
-    bool owns(scope void[] array) @trusted {
+    Ternary owns(scope void[] array) @trusted {
         if(array is null)
-            return false;
+            return Ternary.No;
 
         Node** nodeInParent = findPointerToNodeInParentGivenArray(array);
 
         if(*nodeInParent is null)
-            return false;
+            return Ternary.No;
 
-        return (*nodeInParent).matches(array.ptr);
+        return (*nodeInParent).matches(array.ptr) ? Ternary.Yes : Ternary.No;
     }
 
     /// If memory is stored by us, will return the true region of memory associated with it.
@@ -333,39 +334,39 @@ unittest {
     void[] someArray = new void[1024];
     at.store(someArray);
     assert(!at.empty);
-    assert(!at.owns(null));
-    assert(at.owns(someArray));
-    assert(at.owns(someArray[10 .. 20]));
+    assert(at.owns(null) == Ternary.No);
+    assert(at.owns(someArray) == Ternary.Yes);
+    assert(at.owns(someArray[10 .. 20]) == Ternary.Yes);
     assert(at.getTrueRegionOfMemory(someArray[10 .. 20]) is someArray);
 
     void[] someArray2 = new void[512];
     at.store(someArray2);
     assert(!at.empty);
-    assert(!at.owns(null));
-    assert(at.owns(someArray2));
-    assert(at.owns(someArray2[10 .. 20]));
+    assert(at.owns(null) == Ternary.No);
+    assert(at.owns(someArray2) == Ternary.Yes);
+    assert(at.owns(someArray2[10 .. 20]) == Ternary.Yes);
     assert(at.getTrueRegionOfMemory(someArray2[10 .. 20]) is someArray2);
 
     void[] someArray3 = new void[1024];
     at.store(someArray3);
     assert(!at.empty);
-    assert(!at.owns(null));
-    assert(at.owns(someArray3));
-    assert(at.owns(someArray3[10 .. 20]));
+    assert(at.owns(null) == Ternary.No);
+    assert(at.owns(someArray3) == Ternary.Yes);
+    assert(at.owns(someArray3[10 .. 20]) == Ternary.Yes);
     assert(at.getTrueRegionOfMemory(someArray3[10 .. 20]) is someArray3);
 
     at.remove(someArray);
-    assert(!at.owns(someArray));
-    assert(at.owns(someArray2));
-    assert(at.owns(someArray3));
+    assert(at.owns(someArray) == Ternary.No);
+    assert(at.owns(someArray2) == Ternary.Yes);
+    assert(at.owns(someArray3) == Ternary.Yes);
     at.remove(someArray2);
-    assert(!at.owns(someArray));
-    assert(!at.owns(someArray2));
-    assert(at.owns(someArray3));
+    assert(at.owns(someArray) == Ternary.No);
+    assert(at.owns(someArray2) == Ternary.No);
+    assert(at.owns(someArray3) == Ternary.Yes);
     at.remove(someArray3);
-    assert(!at.owns(someArray));
-    assert(!at.owns(someArray2));
-    assert(!at.owns(someArray3));
+    assert(at.owns(someArray) == Ternary.No);
+    assert(at.owns(someArray2) == Ternary.No);
+    assert(at.owns(someArray3) == Ternary.No);
     assert(at.empty);
 
     at.store(someArray);

@@ -143,11 +143,11 @@ export @safe nothrow @nogc:
 }
 
 /// A ternary type
-enum Ternary {
+enum Ternary : byte {
     ///
-    Unknown,
+    Unknown = -1,
     ///
-    Yes,
+    No = 0,
     ///
-    No
+    Yes = 1
 }

@@ -280,7 +280,7 @@ scope @safe @nogc pure nothrow:
     ///
     Ternary owns(scope void[] array) {
         static if(storeAllocated) {
-            return allocations.owns(array) ? Ternary.Yes : Ternary.No;
+            return allocations.owns(array);
         } else {
             return poolAllocator.owns(array);
         }
