@@ -327,6 +327,11 @@ export:
 
     ///
     ErrorResult opIndexAssign(T input, ptrdiff_t index) scope @trusted {
+        const oldLength = this.length;
+        this.ensureSetup(true, index + 1);
+
+        this.state.expand(this._offset, oldLength, index + 1);
+
         ErrorInfo errorInfo = changeIndexToOffset(index);
         if(errorInfo.isSet())
             return typeof(return)(errorInfo);
