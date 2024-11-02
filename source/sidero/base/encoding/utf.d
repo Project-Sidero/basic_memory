@@ -754,7 +754,8 @@ dchar decode(Char)(scope bool delegate() @safe nothrow @nogc empty, scope Char d
             consumed = 1;
             popFront();
             break;
-        }
+        } else
+            static assert(0, "Unknown character type " ~ Char.stringof);
     }
 
     return result;
