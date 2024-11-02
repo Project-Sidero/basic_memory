@@ -1,6 +1,7 @@
 module sidero.base.math.bigint;
 import sidero.base.errors;
 import sidero.base.text;
+import sidero.base.containers.dynamicarray;
 import std.meta : AliasSeq;
 import core.bitop : bsr;
 
@@ -56,9 +57,12 @@ alias BigInteger_Double = BigInteger!309;
 alias BigInteger_1024 = BigInteger!320;
 
 /// Number of digits is base 10, internally the base is target dependent
-struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
+struct BigInteger(PerIntegerType NumberOfDigits_) if (NumberOfDigits_ > 0) {
     ///
-    PerIntegerType[(NumberOfDigits + MaxDigitsPerInteger - 1) / MaxDigitsPerInteger] storage;
+    enum NumberOfDigits = NumberOfDigits_;
+
+    ///
+    PerIntegerType[neededStorageGivenDigits(NumberOfDigits)] storage;
     ///
     bool isNegative;
     ///
@@ -67,68 +71,7 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
     private {
         static BigInteger parseHexImpl(Str)(Str input, out bool truncated, out size_t used) @safe nothrow @nogc {
             BigInteger ret;
-
-            PerIntegerType temp;
-            size_t count, totalBitCount;
-            ptrdiff_t offset = ret.storage.length - 1;
-
-            void store() {
-                if(count >= BitsPerInteger) {
-                    count -= BitsPerInteger;
-                    ret.storage[offset] = temp >> count;
-                    offset--;
-
-                    temp &= (1 << count) - 1;
-                    totalBitCount += BitsPerInteger;
-                }
-            }
-
-            foreach(c; input) {
-                if(offset < 0)
-                    break;
-
-                if(used == 0 && c == '-') {
-                    used++;
-                    ret.isNegative = true;
-                } else if(c >= '0' && c <= '9') {
-                    used++;
-
-                    temp <<= 4;
-                    temp |= cast(PerIntegerType)(c - '0');
-                    count += 4;
-                } else if(c >= 'a' && c <= 'f') {
-                    used++;
-
-                    temp <<= 4;
-                    temp |= cast(PerIntegerType)(c - 'a') + 10;
-                    count += 4;
-                } else if(c >= 'A' && c <= 'F') {
-                    used++;
-
-                    temp <<= 4;
-                    temp |= cast(PerIntegerType)(c - 'A') + 10;
-                    count += 4;
-                } else
-                    break;
-
-                store();
-            }
-
-            if(count > 0 && offset >= 0) {
-                const toSet = temp << (BitsPerInteger - count);
-
-                ret.storage[offset] = toSet;
-                offset--;
-                totalBitCount += count;
-            }
-
-            ret >>= (ret.storage.length * BitsPerInteger) - totalBitCount;
-
-            if(used == 1 && ret.isNegative) {
-                used = 0;
-                ret.isNegative = false;
-            }
-
+            used = parse16Impl(ret.storage[], ret.isNegative, input, truncated);
             return ret;
         }
 
@@ -145,9 +88,9 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
             {
                 BigInteger temp = this;
                 BigInteger div = BigInteger(10);
+                BigInteger quotient, modulas;
 
                 while(temp != 0) {
-                    BigInteger quotient, modulas;
                     bool overflow;
                     cast(void)unsignedDivide(quotient.storage[], modulas.storage[], temp.storage[], div.storage[], overflow);
 
@@ -230,11 +173,6 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
                     this.storage[i] = v;
                 }
             }
-        }
-
-        ///
-        bool hasOverflowed() scope const {
-            return wasOverflown;
         }
 
         static {
@@ -516,21 +454,13 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
         size_t lastNonZeroBitLSB() scope const {
             return .lastNonZeroBitLSB(this.storage[]);
         }
-
-        ///
-        void opAssign(scope const(PerIntegerType)[] input, bool isNegative, out bool truncated) scope {
-            if(input.length > this.storage.length)
-                truncated = true;
-
-            foreach(i, v; input) {
-                this.storage[i] = v;
-            }
-        }
     }
 
     ///
     void opAssign(size_t OtherDigits)(scope const BigInteger!OtherDigits other) scope {
         static assert(OtherDigits <= NumberOfDigits, "Argument number of digits must be less than ours");
+
+        this.isNegative = other.isNegative;
 
         foreach(i, v; other.storage) {
             this.storage[i] = v;
@@ -647,8 +577,6 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
 
         ///
         static BigInteger parseHex(scope ref String_UTF8 input, out bool truncated) @trusted {
-            String_UTF32 s32 = input.byUTF32;
-
             BigInteger ret;
             const used = parse16Impl(ret.storage[], ret.isNegative, input, truncated);
 
@@ -664,8 +592,6 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
 
         ///
         static BigInteger parseHex(scope ref String_UTF16 input, out bool truncated) @trusted {
-            String_UTF32 s32 = input.byUTF32;
-
             BigInteger ret;
             const used = parse16Impl(ret.storage[], ret.isNegative, input, truncated);
 
@@ -681,8 +607,6 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
 
         ///
         static BigInteger parseHex(scope ref String_UTF32 input, out bool truncated) @trusted {
-            String_UTF32 s32 = input.byUTF32;
-
             BigInteger ret;
             const used = parse16Impl(ret.storage[], ret.isNegative, input, truncated);
 
@@ -737,8 +661,6 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
 
         ///
         static BigInteger parse(scope ref String_UTF8 input, out bool truncated) @trusted {
-            String_UTF32 s32 = input.byUTF32;
-
             BigInteger ret;
             const used = parse10Impl(ret.storage[], ret.isNegative, input, truncated);
 
@@ -754,8 +676,6 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
 
         ///
         static BigInteger parse(scope ref String_UTF16 input, out bool truncated) @trusted {
-            String_UTF32 s32 = input.byUTF32;
-
             BigInteger ret;
             const used = parse10Impl(ret.storage[], ret.isNegative, input, truncated);
 
@@ -771,14 +691,802 @@ struct BigInteger(PerIntegerType NumberOfDigits) if (NumberOfDigits > 0) {
 
         ///
         static BigInteger parse(scope ref String_UTF32 input, out bool truncated) @trusted {
-            String_UTF32 s32 = input.byUTF32;
-
             BigInteger ret;
             const used = parse10Impl(ret.storage[], ret.isNegative, input, truncated);
 
             input = input[used .. $];
             return ret;
         }
+    }
+}
+
+///
+struct DynamicBigInteger {
+    ///
+    bool isNegative;
+    ///
+    bool wasOverflown;
+
+    private {
+        DynamicArray!long storage_;
+        size_t digitCount_;
+
+        void makeStorable(T)(T input) scope @safe nothrow @nogc {
+            size_t neededDigits;
+
+            if(input < 0)
+                input *= -1;
+
+            do {
+                input /= 10;
+                neededDigits++;
+            }
+            while(input > 0);
+
+            this.needDigits(neededDigits);
+        }
+
+        static DynamicBigInteger parseDecImpl(Str)(scope Str input, out size_t used) @trusted nothrow @nogc {
+            bool truncated;
+
+            DynamicBigInteger ret;
+            ret.digitCount_ = (((input.length / 2) + 1) * 8) / BitsPerInteger;
+            ret.needDigits(ret.digitCount_);
+
+            used = parse10Impl(ret.storage.unsafeGetLiteral, ret.isNegative, input, truncated);
+            return ret;
+        }
+
+        static DynamicBigInteger parseHexImpl(Str)(scope Str input, out size_t used) @trusted nothrow @nogc {
+            bool truncated;
+
+            DynamicBigInteger ret;
+            ret.digitCount_ = (((input.length / 2) + 1) * 8) / BitsPerInteger;
+            ret.needDigits(ret.digitCount_);
+
+            used = parse16Impl(ret.storage.unsafeGetLiteral, ret.isNegative, input, truncated);
+            return ret;
+        }
+
+        void toStringImpl(scope void delegate(scope const(char)[]) @safe nothrow @nogc del) scope @trusted nothrow @nogc {
+            import sidero.base.algorithm : reverse;
+
+            if (this.digitCount_ == 0) {
+                del("0");
+                return;
+            }
+
+            DynamicArray!char buffer;
+            buffer.length = this.digitCount_ + 1;
+
+            cast(void)(buffer[0] = '-');
+            cast(void)(buffer[1] = '0');
+
+            size_t offset = 1;
+            bool hitNonZero;
+
+            {
+                DynamicBigInteger temp = this.dup;
+                DynamicBigInteger div = DynamicBigInteger(10);
+
+                DynamicBigInteger quotient, modulas;
+                quotient.needDigits(this.digitCount_);
+                modulas.needDigits(this.digitCount_);
+
+                while(temp != 0) {
+                    bool overflow;
+                    cast(void)unsignedDivide(quotient.storage_.unsafeGetLiteral, modulas.storage_.unsafeGetLiteral,
+                            temp.storage_.unsafeGetLiteral, div.storage_.unsafeGetLiteral, overflow);
+
+                    const digit = modulas.storage[0] & 0xFF;
+                    assert(digit < 10);
+
+                    if(digit != 0 || hitNonZero) {
+                        cast(void)(buffer[offset++] = cast(char)('0' + digit));
+                        hitNonZero = true;
+                    }
+
+                    temp = quotient;
+                }
+
+                reverse(buffer.unsafeGetLiteral[1 .. offset]);
+            }
+
+            bool excludeNegative = !this.isNegative;
+
+            if(offset == 1) {
+                offset++;
+                excludeNegative = true;
+            }
+
+            del(buffer.unsafeGetLiteral[excludeNegative .. offset]);
+        }
+    }
+
+export @safe nothrow @nogc:
+
+    static foreach(T; AliasSeq!(ubyte, ushort, uint, ulong)) {
+        ///
+        this(T input) scope @trusted {
+            makeStorable(input);
+
+            bool truncated;
+            importValue(this.storage_.unsafeGetLiteral, input, truncated);
+        }
+    }
+
+    static foreach(T; AliasSeq!(byte, short, int, long)) {
+        ///
+        this(T input) scope @trusted {
+            makeStorable(input);
+
+            bool truncated;
+            importSignedValue(this.storage_.unsafeGetLiteral, this.isNegative, input, truncated);
+        }
+    }
+
+    ///
+    this(size_t OtherDigits)(return scope ref const BigInteger!OtherDigits other) scope {
+        this.isNegative = other.isNegative;
+        this.storage_ = DynamicArray!long(other.storage[]);
+    }
+
+    this(return scope ref DynamicBigInteger other) scope {
+        this.tupleof = other.tupleof;
+    }
+
+    ~this() scope {
+    }
+
+    ///
+    bool isNull() scope const {
+        return this.storage_.isNull;
+    }
+
+    ///
+    DynamicBigInteger dup() return scope {
+        DynamicBigInteger ret = this;
+        ret.storage_ = ret.storage_.dup;
+        return ret;
+    }
+
+    ///
+    size_t haveDigits() scope const {
+        return this.digitCount_;
+    }
+
+    ///
+    void needDigits(size_t count) scope @trusted nothrow @nogc {
+        if(count == 0)
+            count = 1;
+        if(this.digitCount_ >= count)
+            return;
+
+        const oldSize = this.storage_.length;
+        const newSize = neededStorageGivenDigits(count);
+        const diffSize = newSize - oldSize;
+
+        this.digitCount_ = count;
+        if(diffSize == 0)
+            return;
+
+        this.storage_.length = newSize;
+        long[] slice = this.storage_.unsafeGetLiteral;
+
+        foreach_reverse(i; 0 .. oldSize) {
+            slice[i + diffSize] = slice[i];
+        }
+
+        foreach(i; 0 .. diffSize) {
+            slice[i] = 0;
+        }
+    }
+
+    ///
+    DynamicArray!long storage() return scope {
+        return this.storage_;
+    }
+
+    ///
+    DynamicBigInteger min() {
+        DynamicBigInteger ret;
+        ret.digitCount_ = this.digitCount_;
+        ret.needDigits(this.digitCount_);
+        ret.isNegative = true;
+
+        foreach(ref v; ret.storage) {
+            v = PerIntegerMask;
+        }
+
+        return ret;
+    }
+
+    ///
+    DynamicBigInteger max() {
+        DynamicBigInteger ret;
+        ret.digitCount_ = this.digitCount_;
+        ret.needDigits(this.digitCount_);
+
+        foreach(ref v; ret.storage_) {
+            v = PerIntegerMask;
+        }
+
+        return ret;
+    }
+
+    static {
+        ///
+        DynamicBigInteger negativeOne() {
+            return DynamicBigInteger(-1);
+        }
+
+        ///
+        DynamicBigInteger zero() {
+            return DynamicBigInteger(0);
+        }
+
+        ///
+        DynamicBigInteger one() {
+            return DynamicBigInteger(1);
+        }
+    }
+
+    ///
+    size_t numberOfBits() {
+        return this.storage_.length * BitsPerInteger;
+    }
+
+    /// Returns zero if all are zero
+    size_t firstNonZeroBitLSB() scope const @trusted {
+        return .firstNonZeroBitLSB(this.storage_.unsafeGetLiteral);
+    }
+
+    /// Returns zero if all are zero
+    size_t lastNonZeroBitLSB() scope const @trusted {
+        return .lastNonZeroBitLSB(this.storage_.unsafeGetLiteral);
+    }
+
+    ///
+    void opOpAssign(string op : "/", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope {
+        bool tempWasOverflown = this.wasOverflown;
+
+        this = this.opBinary!op(other);
+
+        this.wasOverflown = this.wasOverflown || tempWasOverflown;
+    }
+
+    ///
+    BigIntegerReference opBinary(string op : "/", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope {
+        BigIntegerReference ret, remainder;
+        ret.needDigits(OtherDigits);
+        remainder.needDigits(OtherDigits);
+
+        auto errorResult = signedDivision(ret.storage_.unsafeGetLiteral, ret.isNegative,
+                remainder.storage_.unsafeGetLiteral, ret.isNegative, this.storage_.unsafeGetLiteral, this.isNegative,
+                other.storage[], other.isNegative, ret.wasOverflown);
+        assert(errorResult);
+
+        return ret;
+    }
+
+    ///
+    void opOpAssign(string op : "/")(scope BigIntegerReference other) scope {
+        bool tempWasOverflown = this.wasOverflown;
+
+        this = this.opBinary!op(other);
+
+        this.wasOverflown = this.wasOverflown || tempWasOverflown;
+    }
+
+    ///
+    BigIntegerReference opBinary(string op : "/")(scope BigIntegerReference other) scope {
+        BigIntegerReference ret, remainder;
+        ret.needDigits(OtherDigits);
+        remainder.needDigits(OtherDigits);
+
+        auto errorResult = signedDivision(ret.storage_.unsafeGetLiteral, ret.isNegative,
+                remainder.storage_.unsafeGetLiteral, ret.isNegative, this.storage_.unsafeGetLiteral, this.isNegative,
+                other.storage_.unsafeGetLiteral, other.isNegative, ret.wasOverflown);
+        assert(errorResult);
+
+        return ret;
+    }
+
+    ///
+    void opOpAssign(string op : "*", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope {
+        bool tempWasOverflown = this.wasOverflown;
+
+        this = this.opBinary!op(other);
+
+        this.wasOverflown = this.wasOverflown || tempWasOverflown;
+    }
+
+    ///
+    BigIntegerReference opBinary(string op : "*", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope {
+        BigIntegerReference ret;
+        ret.needDigits(OtherDigits);
+
+        auto errorResult = signedMultiply(ret.storage_.unsafeGetLiteral, ret.isNegative,
+                this.storage_.unsafeGetLiteral, this.isNegative, other.storage[], other.isNegative, ret.wasOverflown);
+        assert(errorResult);
+
+        return ret;
+    }
+
+    ///
+    void opOpAssign(string op : "*")(scope BigIntegerReference other) scope {
+        bool tempWasOverflown = this.wasOverflown;
+
+        this = this.opBinary!op(other);
+
+        this.wasOverflown = this.wasOverflown || tempWasOverflown;
+    }
+
+    ///
+    BigIntegerReference opBinary(string op : "*")(scope BigIntegerReference other) scope {
+        BigIntegerReference ret;
+        ret.needDigits(OtherDigits);
+
+        auto errorResult = signedMultiply(ret.storage_.unsafeGetLiteral, ret.isNegative,
+                this.storage_.unsafeGetLiteral, this.isNegative, other.storage_.unsafeGetLiteral, other.isNegative, ret.wasOverflown);
+        assert(errorResult);
+
+        return ret;
+    }
+
+    ///
+    BigIntegerReference opUnary(string op : "-")() scope {
+        BigIntegerReference ret = this.dup;
+        ret.isNegative = !ret.isNegative;
+        return ret;
+    }
+
+    ///
+    BigIntegerReference opUnary(string op : "++")() scope {
+        this.opOpAssign!"+"(BigInteger!1(1));
+        return this;
+    }
+
+    ///
+    BigIntegerReference opUnary(string op : "--")() scope {
+        this.opOpAssign!"-"(BigInteger!1(1));
+        return this;
+    }
+
+    ///
+    void opOpAssign(string op : "+", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope {
+        bool tempWasOverflown = this.wasOverflown;
+
+        this = this.opBinary!op(other);
+
+        this.wasOverflown = this.wasOverflown || tempWasOverflown;
+    }
+
+    ///
+    BigIntegerReference opBinary(string op : "+", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope {
+        static assert(OtherDigits <= NumberOfDigits, "Argument number of digits must be less than ours");
+
+        DynamicBigInteger ret;
+        ret.needDigits(OtherDigits);
+
+        auto errorResult = signedAddition(ret.storage_.unsafeGetLiteral, ret.isNegative,
+                this.storage_.unsafeGetLiteral, this.isNegative, other.storage[], other.isNegative, ret.wasOverflown);
+        assert(errorResult);
+
+        return ret;
+    }
+
+    ///
+    void opOpAssign(string op : "+")(scope BigIntegerReference other) scope {
+        bool tempWasOverflown = this.wasOverflown;
+
+        this = this.opBinary!op(other);
+
+        this.wasOverflown = this.wasOverflown || tempWasOverflown;
+    }
+
+    ///
+    BigIntegerReference opBinary(string op : "+")(scope BigIntegerReference other) scope {
+        static assert(OtherDigits <= NumberOfDigits, "Argument number of digits must be less than ours");
+
+        DynamicBigInteger ret;
+        ret.needDigits(OtherDigits);
+
+        auto errorResult = signedAddition(ret.storage_.unsafeGetLiteral, ret.isNegative,
+                this.storage_.unsafeGetLiteral, this.isNegative, other.storage_.unsafeGetLiteral, other.isNegative, ret.wasOverflown);
+        assert(errorResult);
+
+        return ret;
+    }
+
+    ///
+    void opOpAssign(string op : "-", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope {
+        bool tempWasOverflown = this.wasOverflown;
+
+        this = this.opBinary!op(other);
+
+        this.wasOverflown = this.wasOverflown || tempWasOverflown;
+    }
+
+    ///
+    BigIntegerReference opBinary(string op : "-", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope {
+        DynamicBigInteger ret;
+        ret.needDigits(OtherDigits);
+
+        auto errorResult = signedSubtraction(ret.storage_.unsafeGetLiteral, ret.isNegative,
+                this.storage_.unsafeGetLiteral, this.isNegative, other.storage[], other.isNegative, ret.wasOverflown);
+        assert(errorResult);
+
+        return ret;
+    }
+
+    ///
+    void opOpAssign(string op : "-")(scope BigIntegerReference other) scope {
+        bool tempWasOverflown = this.wasOverflown;
+
+        this = this.opBinary!op(other);
+
+        this.wasOverflown = this.wasOverflown || tempWasOverflown;
+    }
+
+    ///
+    BigIntegerReference opBinary(string op : "-")(scope BigIntegerReference other) scope {
+        DynamicBigInteger ret;
+        ret.needDigits(OtherDigits);
+
+        auto errorResult = signedSubtraction(ret.storage_.unsafeGetLiteral, ret.isNegative,
+                this.storage_.unsafeGetLiteral, this.isNegative, other.storage_.unsafeGetLiteral, other.isNegative, ret.wasOverflown);
+        assert(errorResult);
+
+        return ret;
+    }
+
+    ///
+    void opOpAssign(string op : "<<")(scope size_t amount) scope {
+        leftShift(this.storage_.unsafeGetLiteral, amount);
+    }
+
+    ///
+    BigIntegerReference opBinary(string op : "<<")(scope size_t amount) scope {
+        DynamicBigInteger ret = this.dup;
+        leftShift(ret.storage_.unsafeGetLiteral, amount);
+        return ret;
+    }
+
+    ///
+    void opOpAssign(string op : ">>")(scope size_t amount) scope {
+        rightShift(this.storage_.unsafeGetLiteral, amount);
+    }
+
+    ///
+    DynamicBigInteger opBinary(string op : ">>")(scope size_t amount) scope {
+        DynamicBigInteger ret = this.dup;
+        rightShift(ret.storage_.unsafeGetLiteral, amount);
+        return ret;
+    }
+
+    ///
+    void opOpAssign(string op : "|", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope {
+        auto errorInfo = bitwiseOr(this.storage_.unsafeGetLiteral, other.storage[]);
+        assert(errorInfo);
+    }
+
+    ///
+    DynamicBigInteger opBinary(string op : "|", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope {
+        DynamicBigInteger ret = this.dup;
+        ret.needDigits(OtherDigits);
+
+        auto errorInfo = bitwiseOr(ret.storage_.unsafeGetLiteral, other.storage[]);
+        assert(errorInfo);
+
+        return ret;
+    }
+
+    ///
+    void opOpAssign(string op : "|")(scope DynamicBigInteger other) scope {
+        auto errorInfo = bitwiseOr(this.storage_.unsafeGetLiteral, other.storage_.unsafeGetLiteral);
+        assert(errorInfo);
+    }
+
+    ///
+    DynamicBigInteger opBinary(string op : "|")(scope DynamicBigInteger other) scope {
+        DynamicBigInteger ret = this.dup;
+        ret.needDigits(OtherDigits);
+
+        auto errorInfo = bitwiseOr(ret.storage_.unsafeGetLiteral, other.storage_.unsafeGetLiteral);
+        assert(errorInfo);
+
+        return ret;
+    }
+
+    ///
+    void opOpAssign(string op : "&", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope {
+        auto errorInfo = bitwiseAnd(this.storage_.unsafeGetLiteral, other.storage[]);
+        assert(errorInfo);
+    }
+
+    ///
+    DynamicBigInteger opBinary(string op : "&", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope {
+        DynamicBigInteger ret = this.dup;
+        ret.needDigits(OtherDigits);
+
+        auto errorInfo = bitwiseAnd(ret.storage_.unsafeGetLiteral, other.storage[]);
+        assert(errorInfo);
+
+        return ret;
+    }
+
+    ///
+    void opOpAssign(string op : "&")(scope DynamicBigInteger other) scope {
+        auto errorInfo = bitwiseAnd(this.storage_.unsafeGetLiteral, other.storage_.unsafeGetLiteral);
+        assert(errorInfo);
+    }
+
+    ///
+    DynamicBigInteger opBinary(string op : "&")(scope DynamicBigInteger other) scope {
+        DynamicBigInteger ret = this.dup;
+        ret.needDigits(OtherDigits);
+
+        auto errorInfo = bitwiseAnd(ret.storage_.unsafeGetLiteral, other.storage_.unsafeGetLiteral);
+        assert(errorInfo);
+
+        return ret;
+    }
+
+    ///
+    void opOpAssign(string op : "^", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope {
+        auto errorInfo = bitwiseXor(this.storage_.unsafeGetLiteral, other.storage[]);
+        assert(errorInfo);
+    }
+
+    ///
+    DynamicBigInteger opBinary(string op : "^", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope {
+        DynamicBigInteger ret = this.dup;
+        ret.needDigits(OtherDigits);
+
+        auto errorInfo = bitwiseXor(ret.storage_.unsafeGetLiteral, other.storage[]);
+        assert(errorInfo);
+
+        return ret;
+    }
+
+    ///
+    void opOpAssign(string op : "^")(scope DynamicBigInteger other) scope {
+        auto errorInfo = bitwiseXor(this.storage_.unsafeGetLiteral, other.storage_.unsafeGetLiteral);
+        assert(errorInfo);
+    }
+
+    ///
+    DynamicBigInteger opBinary(string op : "^")(scope DynamicBigInteger other) scope {
+        DynamicBigInteger ret = this.dup;
+        ret.needDigits(OtherDigits);
+
+        auto errorInfo = bitwiseXor(ret.storage_.unsafeGetLiteral, other.storage_.unsafeGetLiteral);
+        assert(errorInfo);
+
+        return ret;
+    }
+
+    ///
+    void opOpAssign(string op : "^^", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope {
+        this.needDigits(OtherDigits);
+
+        auto errorInfo = signedPower(this.storage_.unsafeGetLiteral, this.isNegative, temp.storage_.unsafeGetLiteral,
+                temp.isNegative, other.storage[], other.isNegative, ret.overflow);
+        assert(errorInfo);
+    }
+
+    ///
+    DynamicBigInteger opBinary(string op : "^^", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope {
+        DynamicBigInteger ret = this.dup;
+        ret.needDigits(OtherDigits);
+
+        auto errorInfo = signedPower(ret.storage_.unsafeGetLiteral, ret.isNegative, this.storage_.unsafeGetLiteral,
+                this.isNegative, other.storage[], other.isNegative, ret.overflow);
+        assert(errorInfo);
+
+        return ret;
+    }
+
+    ///
+    void opOpAssign(string op : "^^")(scope DynamicBigInteger other) scope {
+        this.needDigits(other.digitCount_);
+
+        auto errorInfo = signedPower(this.storage_.unsafeGetLiteral, this.isNegative, temp.storage_.unsafeGetLiteral,
+                temp.isNegative, other.storage_.unsafeGetLiteral, other.isNegative, ret.overflow);
+        assert(errorInfo);
+    }
+
+    ///
+    DynamicBigInteger opBinary(string op : "^^")(scope DynamicBigInteger other) scope {
+        DynamicBigInteger ret = this.dup;
+        ret.needDigits(other.digitCount_);
+
+        auto errorInfo = signedPower(ret.storage_.unsafeGetLiteral, ret.isNegative, this.storage_.unsafeGetLiteral,
+                this.isNegative, other.storage_.unsafeGetLiteral, other.isNegative, ret.overflow);
+        assert(errorInfo);
+
+        return ret;
+    }
+
+    ///
+    void opAssign(size_t OtherDigits)(scope const BigInteger!OtherDigits other) scope {
+        this.destroy;
+        this.needDigits(OtherDigits);
+
+        this.isNegative = other.isNegative;
+
+        foreach(i, v; other.storage) {
+            this.storage_[i] = v;
+        }
+    }
+
+    ///
+    void opAssign(return scope DynamicBigInteger other) scope {
+        this.destroy;
+        this.__ctor(other);
+    }
+
+    ///
+    void opOpAssign(string op)(long other) scope {
+        this.opOpAssign!op(BigInteger_64(other));
+    }
+
+    ///
+    BigInteger opBinary(string op)(long other) scope const {
+        return this.opBinary!op(BigInteger_64(other));
+    }
+
+    ///
+    export int opEquals(long other) scope const {
+        return opCmp(BigInteger_64(other)) == 0;
+    }
+
+    ///
+    int opEquals(size_t OtherDigits)(scope const BigInteger!OtherDigits other) scope const @trusted {
+        return signedCompare(this.storage_.unsafeGetLiteral, this.isNegative, other.storage[], other.isNegative) == 0;
+    }
+
+    ///
+    int opEquals(scope DynamicBigInteger other) scope const @trusted {
+        return signedCompare(this.storage_.unsafeGetLiteral, this.isNegative, other.storage_.unsafeGetLiteral, other.isNegative) == 0;
+    }
+
+    ///
+    export int opCmp(long other) scope const {
+        return opCmp(BigInteger_64(other));
+    }
+
+    ///
+    int opCmp(size_t OtherDigits)(scope const BigInteger!OtherDigits other) scope const @trusted {
+        return signedCompare(this.storage_.unsafeGetLiteral, this.isNegative, other.storage[], other.isNegative);
+    }
+
+    ///
+    int opCmp(scope const DynamicBigInteger other) scope const @trusted {
+        return signedCompare(this.storage_.unsafeGetLiteral, this.isNegative, other.storage_.unsafeGetLiteral, other.isNegative);
+    }
+
+    ///
+    ulong toHash() scope const @trusted {
+        import sidero.base.hash.utils : hashOf;
+
+        scope temp = this.storage_.unsafeGetLiteral;
+        return hashOf(temp);
+    }
+
+    ///
+    String_UTF8 toString() scope {
+        String_UTF8 ret;
+
+        toStringImpl((scope const(char)[] buffer) @trusted { ret = String_UTF8(buffer).dup; });
+
+        return ret;
+    }
+
+    ///
+    void toString(scope ref StringBuilder_UTF8 builder) scope {
+        toStringImpl((scope const(char)[] buffer) @trusted { builder ~= String_UTF8(buffer); });
+    }
+
+    ///
+    void toString(scope ref StringBuilder_UTF16 builder) scope {
+        toStringImpl((scope const(char)[] buffer) @trusted { builder ~= String_UTF8(buffer); });
+    }
+
+    ///
+    void toString(scope ref StringBuilder_UTF32 builder) scope {
+        toStringImpl((scope const(char)[] buffer) @trusted { builder ~= String_UTF8(buffer); });
+    }
+
+    ///
+    static DynamicBigInteger parseHex(scope String_UTF8.LiteralType input) {
+        size_t used;
+        DynamicBigInteger ret = DynamicBigInteger.parseHexImpl(input, used);
+        return ret;
+    }
+
+    ///
+    static DynamicBigInteger parseHex(scope String_UTF16.LiteralType input) {
+        size_t used;
+        DynamicBigInteger ret = DynamicBigInteger.parseHexImpl(input, used);
+        return ret;
+    }
+
+    ///
+    static DynamicBigInteger parseHex(scope String_UTF32.LiteralType input) {
+        size_t used;
+        DynamicBigInteger ret = DynamicBigInteger.parseHexImpl(input, used);
+        return ret;
+    }
+
+    ///
+    static DynamicBigInteger parseHex(scope ref String_UTF8 input) {
+        size_t used;
+        DynamicBigInteger ret = DynamicBigInteger.parseHexImpl(input, used);
+        input = input[used .. $];
+        return ret;
+    }
+
+    ///
+    static DynamicBigInteger parseHex(scope ref String_UTF16 input) {
+        size_t used;
+        DynamicBigInteger ret = DynamicBigInteger.parseHexImpl(input, used);
+        input = input[used .. $];
+        return ret;
+    }
+
+    ///
+    static DynamicBigInteger parseHex(scope ref String_UTF32 input) {
+        size_t used;
+        DynamicBigInteger ret = DynamicBigInteger.parseHexImpl(input, used);
+        input = input[used .. $];
+        return ret;
+    }
+
+    ///
+    static DynamicBigInteger parse(scope String_UTF8.LiteralType input) {
+        size_t used;
+        DynamicBigInteger ret = DynamicBigInteger.parseDecImpl(input, used);
+        return ret;
+    }
+
+    ///
+    static DynamicBigInteger parse(scope String_UTF16.LiteralType input) {
+        size_t used;
+        DynamicBigInteger ret = DynamicBigInteger.parseDecImpl(input, used);
+        return ret;
+    }
+
+    ///
+    static DynamicBigInteger parse(scope String_UTF32.LiteralType input) {
+        size_t used;
+        DynamicBigInteger ret = DynamicBigInteger.parseDecImpl(input, used);
+        return ret;
+    }
+
+    ///
+    static DynamicBigInteger parse(scope ref String_UTF8 input) {
+        size_t used;
+        DynamicBigInteger ret = DynamicBigInteger.parseDecImpl(input, used);
+        input = input[used .. $];
+        return ret;
+    }
+
+    ///
+    static DynamicBigInteger parse(scope ref String_UTF16 input) {
+        size_t used;
+        DynamicBigInteger ret = DynamicBigInteger.parseDecImpl(input, used);
+        input = input[used .. $];
+        return ret;
+    }
+
+    ///
+    static DynamicBigInteger parse(scope ref String_UTF32 input) {
+        size_t used;
+        DynamicBigInteger ret = DynamicBigInteger.parseDecImpl(input, used);
+        input = input[used .. $];
+        return ret;
     }
 }
 
@@ -2386,4 +3094,8 @@ void unsignedSubtractionImpl(scope PerIntegerType[] output, PerIntegerType toSub
         output[i] = temp;
         zero += temp;
     }
+}
+
+size_t neededStorageGivenDigits(size_t neededDigits) {
+    return (neededDigits + MaxDigitsPerInteger - 1) / MaxDigitsPerInteger;
 }
