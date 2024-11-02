@@ -42,13 +42,20 @@ version(Windows) {
 
         ///
         void[] allocate(size_t length, TypeInfo ti = null) {
-            enum FourKb = 4 * 1024 * 1024;
+            enum FourKb = 4 * 1024;
 
             size_t leftOver;
             if((leftOver = length % FourKb) != 0)
                 length += FourKb - leftOver;
 
             void* ret = VirtualAlloc(null, length, MEM_COMMIT, PAGE_READWRITE);
+
+            version(none) {
+                import core.stdc.stdio;
+
+                debug printf("allocate length %zd, got pointer %p\n", length, ret);
+                debug fflush(stdout);
+            }
 
             if(ret !is null)
                 return ret[0 .. length];
@@ -63,6 +70,13 @@ version(Windows) {
 
         ///
         bool deallocate(scope void[] array) {
+            version(none) {
+                import core.stdc.stdio;
+
+                debug printf("deallocate length %zd, pointer %p\n", array.length, array.ptr);
+                debug fflush(stdout);
+            }
+
             return VirtualFree(array.ptr, 0, MEM_RELEASE) != 0;
         }
     }

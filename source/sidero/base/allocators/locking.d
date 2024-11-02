@@ -40,6 +40,9 @@ scope @safe @nogc pure nothrow:
         other.poolAllocator = PoolAllocator.init;
     }
 
+    ~this() @safe {
+    }
+
     ///
     bool isNull() const {
         return poolAllocator.isNull;
@@ -191,10 +194,10 @@ pure:
         bool got = poolAllocator.reallocate(array, newSize);
 
         if(got) {
+            array = array[0 .. newSize];
+
             allocatedTree.store(array);
             addRangeImpl(array);
-
-            array = array[0 .. newSize];
         } else {
             const pointerDifference = array.ptr - trueArray.ptr;
             const lengthAvailable = trueArray.length - pointerDifference;

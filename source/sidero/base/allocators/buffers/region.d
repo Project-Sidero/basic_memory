@@ -108,6 +108,14 @@ export:
                     toAllocateSize = size + alignedTo;
 
                 memory = poolAllocator.allocate(toAllocateSize, null);
+
+                version(none) {
+                    import core.stdc.stdio;
+
+                    debug printf("allocate requested length %zd, actual length %zd, got pointer %p, got length %zd\n",
+                            size, toAllocateSize, memory.ptr, memory.length);
+                    debug fflush(stdout);
+                }
             }
         }
 

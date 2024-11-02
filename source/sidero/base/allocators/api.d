@@ -77,14 +77,16 @@ Gives a memory allocator suitable to allocate a given type.
 If that memory allocator can contain GC memory, it will be a compatible to GC allocator.
 
 If GC compatibility is not needed, it will use malloc instead of the general purpose allocator.
+
+Warning: not all allocators returned by this offer ownership tests. Therefore you must be careful to match deallocation to allocation allocator.
 */
-RCAllocator allocatorGivenType(T)(bool canContainGCMemory=true) {
+RCAllocator allocatorGivenType(T)(bool canContainGCMemory = true) {
     import sidero.base.traits : hasIndirections;
 
     enum HasIndirections = hasIndirections!T;
 
-    static if (HasIndirections) {
-        if (canContainGCMemory) {
+    static if(HasIndirections) {
+        if(canContainGCMemory) {
             import sidero.base.allocators.predefined;
 
             return RCAllocator.instanceOf!GeneralPurposeAllocator();
@@ -123,8 +125,8 @@ unittest {
     assert(bNonGC !is null);
 
     aAllocator.dispose(a);
-    aAllocator.dispose(bGC);
-    aAllocator.dispose(bNonGC);
+    bAllocatorGC.dispose(bGC);
+    bAllocatorNonGC.dispose(bNonGC);
 }
 
 /// Reference counted memory allocator interface.
@@ -596,7 +598,8 @@ void dispose(Type, Allocator)(auto ref Allocator alloc, scope auto ref Type* mem
 }
 
 /// Ditto
-void dispose(Type, Allocator)(auto ref Allocator alloc, scope auto ref Type memory) if (is(Type == class) || is(Type == interface)) {
+void dispose(Type, Allocator)(auto ref Allocator alloc, scope auto ref Type memory)
+        if (is(Type == class) || is(Type == interface)) {
     if(memory is null)
         return;
 
