@@ -365,23 +365,27 @@ struct BlockListImpl(Char) {
 
     void debugMe() @trusted {
         version(none) {
-            version(D_BetterC) {
-            } else {
-                debug {
-                    try {
-                        import std.stdio;
+            debug {
+                import core.stdc.stdio;
 
-                        Block* current = &head;
+                Block* current = &head;
 
-                        while(current !is null) {
-                            writefln!"Block(0x%X) length=%s"(current, current.length);
+                while(current !is null) {
+                    printf("Block(0x%p) length=%02zd:    ", current, current.length);
 
-                            current = current.next;
-                        }
-
-                    } catch(Exception) {
+                    foreach(c; current.get()) {
+                        if((c >= '!' && c <= '-') || (c >= '/' && c <= '~'))
+                            printf("%c", c);
+                        else
+                            printf(".");
                     }
+
+                    printf("\n");
+
+                    current = current.next;
                 }
+
+                fflush(stdout);
             }
         }
     }

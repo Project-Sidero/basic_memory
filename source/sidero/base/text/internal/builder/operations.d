@@ -660,11 +660,15 @@ mixin template StringBuilderOperations() {
 
         debug {
             foreach(iterator; iteratorList) {
+                iterator.debugMe("before insert operation", true);
+
                 assert(iterator.forwards.offsetIntoBlock <= iterator.forwards.block.length);
                 if(!(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length)) {
                     assert(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length);
                 }
             }
+
+            blockList.debugMe;
         }
 
         void ensureNotInFullBlock() {
@@ -672,10 +676,17 @@ mixin template StringBuilderOperations() {
                 // we are maxed out, oh noes
 
                 if(cursor.offsetIntoBlock == BlockList.Count) {
-                    // at end of the current block,
-                    // new block time!
-                    Block* newBlock = blockList.insert(cursor.block);
-                    cursor.block = newBlock;
+                    // at end of the current block
+
+                    if (cursor.block.next.length > 0 && cursor.block.next.length < BlockList.Count) {
+                        // move into next as it has space
+                        cursor.block = cursor.block.next;
+                    } else {
+                        // new block time!
+                        Block* newBlock = blockList.insert(cursor.block);
+                        cursor.block = newBlock;
+                    }
+
                     cursor.offsetIntoBlock = 0;
                 } else {
                     // split everything at and to the right

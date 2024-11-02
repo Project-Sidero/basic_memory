@@ -136,10 +136,17 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
     @safe nothrow @nogc @hidden:
 
         export invariant () {
+            import core.stdc.stdio;
+
+            version(none) {
+                debug printf("min %zd, forwards %zd\n", minimumOffsetFromHead, forwards.offsetFromHead);
+                debug fflush(stdout);
+            }
+
             assert(minimumOffsetFromHead <= forwards.offsetFromHead);
             assert(backwards.offsetFromHead <= cast(ptrdiff_t)maximumOffsetFromHead);
 
-            if (primedBackwards) {
+            if(primedBackwards) {
                 assert(forwards.offsetFromHead <= backwards.offsetFromHead + 1);
             } else {
                 assert(forwards.offsetFromHead <= maximumOffsetFromHead);
@@ -643,7 +650,16 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
             if(this.maximumOffsetFromHead <= ifFromOffsetFromHead)
                 return;
 
+            version(none) {
+                import core.stdc.stdio;
+
+                debug printf("iff %zd, +delta %zd, min %zd, max %zd, forwards %zd, backwards %zd\n", ifFromOffsetFromHead, amount,
+                this.minimumOffsetFromHead, this.maximumOffsetFromHead, this.forwards.offsetFromHead, this.backwards.offsetFromHead);
+                debug fflush(stdout);
+            }
+
             debugMe("before onInsert");
+            blockList.debugMe;
 
             if(this.minimumOffsetFromHead >= ifFromOffsetFromHead)
                 this.minimumOffsetFromHead += amount;
@@ -653,6 +669,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
             backwards.onInsertIncreaseFromHead(ifFromOffsetFromHead, amount, this.maximumOffsetFromHead);
 
             debugMe("after onInsert");
+            blockList.debugMe;
         }
 
         unittest {
@@ -922,7 +939,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
             debugMe("before popFrontInternal");
             primedForwards = true;
 
-            if (primedBackwards) {
+            if(primedBackwards) {
                 forwards.advanceForward(1, backwards.offsetFromHead + 1, true);
             } else {
                 forwards.advanceForward(1, maximumOffsetFromHead, true);
@@ -952,87 +969,76 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
 
         void debugMe(string prefix, bool force = false) {
             version(none) {
-                version(D_BetterC) {
-                } else {
-                    debug {
-                        try {
-                            import std.stdio;
+                debug {
+                    import core.stdc.stdio;
 
-                            Cursor cursorF, cursorB;
-                            bool blockF, blockB, offsetF, offsetB, offsetHF, offsetHB;
+                    Cursor cursorF, cursorB;
+                    bool blockF, blockB, offsetF, offsetB, offsetHF, offsetHB;
 
-                            {
-                                cursorF.setup(blockList, 0);
-                                cursorF.advanceForward(forwards.offsetFromHead, maximumOffsetFromHead, true);
+                    {
+                        cursorF.setup(blockList, 0);
+                        cursorF.advanceForward(forwards.offsetFromHead, maximumOffsetFromHead, true);
 
-                                if(backwards.offsetFromHead >= 0) {
-                                    cursorB.setup(blockList, 0);
-                                    cursorB.advanceForward(backwards.offsetFromHead, maximumOffsetFromHead, true);
-                                }
+                        if(backwards.offsetFromHead >= 0) {
+                            cursorB.setup(blockList, 0);
+                            cursorB.advanceForward(backwards.offsetFromHead, maximumOffsetFromHead, true);
+                        }
 
-                                if(forwards.offsetFromHead == 0 && backwards.offsetFromHead == 0) {
-                                } else if(forwards.block.next is cursorF.block && forwards.offsetIntoBlock == forwards.block.length) {
-                                } else if(cursorB.block !is null && backwards.block.next is cursorB.block &&
-                                        backwards.offsetIntoBlock == backwards.block.length) {
-                                } else if(cursorF.block.next is forwards.block && forwards.offsetIntoBlock == 0 &&
-                                        cursorF.offsetIntoBlock == cursorF.block.length) {
-                                } else if(cursorB.block !is null && cursorB.block.next is backwards.block &&
-                                        backwards.offsetIntoBlock == 0 && cursorB.offsetIntoBlock == cursorB.block.length) {
-                                } else {
-                                    blockF = forwards.block !is cursorF.block;
-                                    offsetF = forwards.offsetIntoBlock != cursorF.offsetIntoBlock;
-                                    offsetHF = forwards.offsetFromHead != cursorF.offsetFromHead;
+                        if(forwards.offsetFromHead == 0 && backwards.offsetFromHead == 0) {
+                        } else if(forwards.block.next is cursorF.block && forwards.offsetIntoBlock == forwards.block.length) {
+                        } else if(cursorB.block !is null && backwards.block.next is cursorB.block &&
+                                backwards.offsetIntoBlock == backwards.block.length) {
+                        } else if(cursorF.block.next is forwards.block && forwards.offsetIntoBlock == 0 &&
+                                cursorF.offsetIntoBlock == cursorF.block.length) {
+                        } else if(cursorB.block !is null && cursorB.block.next is backwards.block &&
+                                backwards.offsetIntoBlock == 0 && cursorB.offsetIntoBlock == cursorB.block.length) {
+                        } else {
+                            blockF = forwards.block !is cursorF.block;
+                            offsetF = forwards.offsetIntoBlock != cursorF.offsetIntoBlock;
+                            offsetHF = forwards.offsetFromHead != cursorF.offsetFromHead;
 
-                                    if(cursorB.block is null || (backwards.block.next is null &&
-                                            cursorB.block.next is backwards.block && cursorB.offsetIntoBlock == cursorB.block.length)) {
-                                    } else {
-                                        blockB = backwards.block !is cursorB.block;
-                                        offsetB = backwards.offsetIntoBlock != cursorB.offsetIntoBlock;
-                                        offsetHB = backwards.offsetFromHead != cursorB.offsetFromHead;
-                                    }
-                                }
+                            if(cursorB.block is null || (backwards.block.next is null &&
+                                    cursorB.block.next is backwards.block && cursorB.offsetIntoBlock == cursorB.block.length)) {
+                            } else {
+                                blockB = backwards.block !is cursorB.block;
+                                offsetB = backwards.offsetIntoBlock != cursorB.offsetIntoBlock;
+                                offsetHB = backwards.offsetFromHead != cursorB.offsetFromHead;
                             }
+                        }
+                    }
 
-                            if(force || blockF || blockB || offsetF || offsetB || offsetHF || offsetHB ||
-                                    forwards.offsetFromHead > backwards.offsetFromHead) {
-                                writeln("\\/-----\\/");
-                                writefln!"%s Iterator(0x%X): primedBackwards=%s, minimumOffsetFromHead=%s, maximumOffsetFromHead=%s"(
-                                        prefix, cast(size_t)&this, primedBackwards, this.minimumOffsetFromHead,
-                                        this.maximumOffsetFromHead);
+                    if(force || blockF || blockB || offsetF || offsetB || offsetHF || offsetHB ||
+                            forwards.offsetFromHead > backwards.offsetFromHead) {
+                        printf("\\/-----\\/\n");
+                        printf("%s Iterator(0x%zX): primedBackwards=%d, minimumOffsetFromHead=%zd, maximumOffsetFromHead=%zd\n",
+                                prefix.ptr, cast(size_t)&this, primedBackwards, this.minimumOffsetFromHead, this.maximumOffsetFromHead);
 
-                                forwards.debugPosition("forwards");
-                                backwards.debugPosition("backwards");
+                        forwards.debugPosition("forwards");
+                        backwards.debugPosition("backwards");
 
-                                if(forwards.offsetFromHead > backwards.offsetFromHead + 1) {
-                                    writeln("FAIL FAIL FAIL");
-                                }
+                        if(forwards.offsetFromHead > backwards.offsetFromHead + 1) {
+                            printf("FAIL FAIL FAIL\n");
+                        }
 
-                                {
-                                    if(blockF) {
-                                        writefln!"NOT RIGHT FORWARDS BLOCK 0x%X instead of 0x%X"(forwards.block, cursorF.block);
-                                    }
-                                    if(offsetF) {
-                                        writefln!"NOT RIGHT FORWARDS offsetIntoBlock %s instead of %s"(forwards.offsetIntoBlock,
-                                                cursorF.offsetIntoBlock);
-                                    }
-                                }
+                        {
+                            if(blockF)
+                                printf("NOT RIGHT FORWARDS BLOCK 0x%p instead of 0x%p\n", forwards.block, cursorF.block);
+                            if(offsetF)
+                                printf("NOT RIGHT FORWARDS offsetIntoBlock %zd instead of %zd\n",
+                                        forwards.offsetIntoBlock, cursorF.offsetIntoBlock);
+                        }
 
-                                {
-                                    if(blockB) {
-                                        writefln!"NOT RIGHT BACKWARDS BLOCK 0x%X instead of 0x%X"(backwards.block, cursorB.block);
-                                    }
-                                    if(offsetB) {
-                                        writefln!"NOT RIGHT BACKWARDS offsetIntoBlock %s instead of %s"(backwards.offsetIntoBlock,
-                                                cursorB.offsetIntoBlock);
-                                    }
-                                }
+                        {
+                            if(blockB)
+                                printf("NOT RIGHT BACKWARDS BLOCK 0x%p instead of 0x%p\n", backwards.block, cursorB.block);
+                            if(offsetB)
+                                printf("NOT RIGHT BACKWARDS offsetIntoBlock %zd instead of %zd\n",
+                                        backwards.offsetIntoBlock, cursorB.offsetIntoBlock);
 
-                                blockList.debugMe();
+                            blockList.debugMe();
 
-                                writeln("/\\-----/\\");
-                                stdout.flush;
-                            }
-                        } catch(Exception) {
+                            printf("/\\-----/\\\n");
+                            fflush(stdout);
                         }
                     }
                 }
@@ -1354,21 +1360,15 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
 
         void debugPosition(string prefix) {
             version(none) {
-                version(D_BetterC) {
-                } else {
-                    debug {
-                        try {
-                            import std.stdio;
+                debug {
+                    import core.stdc.stdio;
 
-                            if (this.block !is null)
-                                writefln!"%s Cursor: block=0x%X, offsetIntoBlock=%s, offsetFromHead=%s, length=%s"(prefix,
-                                this.block, this.offsetIntoBlock, this.offsetFromHead, this.block.length);
-                            else
-                                writefln!"%s Cursor: block=0x%X, offsetIntoBlock=%s, offsetFromHead=%s"(prefix, this.block,
-                                this.offsetIntoBlock, this.offsetFromHead);
-                        } catch(Exception) {
-                        }
-                    }
+                    if (this.block !is null)
+                    printf("%s Cursor: block=0x%p, offsetIntoBlock=%zd, offsetFromHead=%zd, length=%zd\n", prefix.ptr,
+                    this.block, this.offsetIntoBlock, this.offsetFromHead, this.block.length);
+                    else
+                    printf("%s Cursor: block=0x%p, offsetIntoBlock=%zd, offsetFromHead=%zd\n", prefix.ptr, this.block,
+                    this.offsetIntoBlock, this.offsetFromHead);
                 }
             }
         }
@@ -1380,34 +1380,25 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
 
         enum Text1 = "take me to";
         enum Text2 = "do or die";
-
         Cursor.Block* a = ilt.blockList.insert(&ilt.blockList.head);
         Cursor.Block* b = ilt.blockList.insert(a);
-
         a.length = Text1.length;
         foreach(i, v; Text1)
             a.get()[i] = v;
-
         b.length = Text2.length;
         foreach(i, v; Text2)
             b.get()[i] = v;
-
         ilt.blockList.numberOfItems = Text1.length + Text2.length;
-
         static struct CustomIterator {
             Cursor cursor;
             size_t max;
-
             int opApply(Del)(scope Del del) {
                 int result;
-
                 while(!cursor.isOutOfRange(0, max)) {
                     Char c = cursor.get();
-
                     result = del(c);
                     if(result)
                         return result;
-
                     cursor.advanceForward(1, max, true);
                 }
 
@@ -1417,12 +1408,9 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
 
         CustomIterator ci;
         ci.max = ilt.blockList.numberOfItems;
-
         () @trusted { ci.cursor.setup(&ilt.blockList, 0); }();
-
         bool matches(CustomIterator iterator) {
             size_t count;
-
             foreach(Char c; iterator) {
                 if(count == 0 && !(c == 't' || c == 'd'))
                     return false;
@@ -1430,7 +1418,6 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
                     return false;
                 else if(count > 1)
                     break;
-
                 count++;
             }
 
@@ -1438,7 +1425,6 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
         }
 
         size_t matched;
-
         foreach(Char c; ci) {
             if(matches(ci)) {
                 matched++;
@@ -1460,8 +1446,8 @@ struct IteratorListTest(Char) {
     alias BlockList = BlockListImpl!Char;
 
     BlockList blockList;
-
     IteratorListImpl!(Char, void) iteratorList;
+
     alias Iterator = iteratorList.Iterator;
 
 @safe nothrow @nogc @hidden:
