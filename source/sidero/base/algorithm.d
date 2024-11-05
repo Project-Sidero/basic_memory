@@ -341,8 +341,8 @@ void reverse(T)(scope T[] slice) @trusted {
     foreach(offset; 0 .. slice.length / 2) {
         auto temp = slice[offset];
 
-        slice[offset] = slice[$ - offset];
-        slice[$ - offset] = temp;
+        slice[offset] = slice[$ - (offset + 1)];
+        slice[$ - (offset + 1)] = temp;
     }
 }
 

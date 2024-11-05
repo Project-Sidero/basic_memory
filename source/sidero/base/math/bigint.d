@@ -751,7 +751,7 @@ struct DynamicBigInteger {
         void toStringImpl(scope void delegate(scope const(char)[]) @safe nothrow @nogc del) scope @trusted nothrow @nogc {
             import sidero.base.algorithm : reverse;
 
-            if (this.digitCount_ == 0) {
+            if(this.digitCount_ == 0) {
                 del("0");
                 return;
             }
@@ -778,7 +778,9 @@ struct DynamicBigInteger {
                     cast(void)unsignedDivide(quotient.storage_.unsafeGetLiteral, modulas.storage_.unsafeGetLiteral,
                             temp.storage_.unsafeGetLiteral, div.storage_.unsafeGetLiteral, overflow);
 
-                    const digit = modulas.storage[0] & 0xFF;
+                    auto mc = modulas.storage_[0];
+                    assert(mc);
+                    const digit = mc & 0xFF;
                     assert(digit < 10);
 
                     if(digit != 0 || hitNonZero) {
@@ -2900,7 +2902,9 @@ size_t parse10Impl(Str)(scope PerIntegerType[] output, out bool isNegative, scop
 
             temp *= 10;
             temp += cast(PerIntegerType)(c - '0');
-        } else
+        } else if(c == '_')
+            continue;
+        else
             break;
 
         store(false);
@@ -2957,7 +2961,9 @@ size_t parse16Impl(Str)(scope PerIntegerType[] output, out bool isNegative, Str 
             temp <<= 4;
             temp |= cast(PerIntegerType)(c - 'A') + 10;
             count += 4;
-        } else
+        } else if(c == '_')
+            continue;
+        else
             break;
 
         store();
