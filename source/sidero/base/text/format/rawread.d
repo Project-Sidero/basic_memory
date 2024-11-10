@@ -123,6 +123,38 @@ unittest {
     assert(value.x == 123);
 }
 
+///
+void skipWhiteSpaceRead(Input)(scope ref Input input) {
+    import sidero.base.text.unicode.characters.database : isWhiteSpace;
+
+    const startOffset = input.length;
+
+    static if(isASCII!Input) {
+        auto iterator = input.save;
+    } else {
+        auto iterator = input.byUTF32;
+    }
+
+    while(!iterator.empty) {
+        if (!isWhiteSpace(iterator.front))
+            break;
+        iterator.popFront;
+    }
+
+    const endOffset = iterator.length;
+    input = input[startOffset - endOffset .. $];
+}
+
+///
+unittest {
+    String_UTF8 from = String_UTF8("    \t\n a");
+    String_UTF8 text;
+
+    auto got = formattedRead(from, "{:/}{:s}", text);
+    assert(got);
+    assert(text == "a");
+}
+
 /*private:*/
 
 bool removeAlternativeFormPrefix(Input)(scope ref Input input, scope FormatSpecifier format) {
@@ -141,6 +173,7 @@ bool removeAlternativeFormPrefix(Input)(scope ref Input input, scope FormatSpeci
     case FormatSpecifier.Type.FloatScientificCapital:
     case FormatSpecifier.Type.FloatShortest:
     case FormatSpecifier.Type.FloatShortestCapital:
+    case FormatSpecifier.Type.WhiteSpace:
         break;
 
     case FormatSpecifier.Type.Binary: // 0b
@@ -313,6 +346,7 @@ bool readIntegral(Input, Output)(scope ref Input input, scope ref Output output,
     case FormatSpecifier.Type.FloatScientificCapital:
     case FormatSpecifier.Type.FloatShortest:
     case FormatSpecifier.Type.FloatShortestCapital:
+    case FormatSpecifier.Type.WhiteSpace:
         break;
 
     case FormatSpecifier.Type.Binary:
@@ -523,19 +557,19 @@ bool readStructClass(Input, Output)(scope ref Input input, scope ref Output outp
             bool got = Output.formattedRead(input, value, FormatSpecifier.init);
         });
 
-    //static if (haveFormattedRead) {
-    Input input2 = input.save;
+    static if(haveFormattedRead) {
+        Input input2 = input.save;
 
-    static if(__traits(hasMember, Output, "DefaultFormat")) {
-        if(format.fullFormatSpec.length == 0)
-            format.fullFormatSpec = Output.DefaultFormat;
-    }
+        static if(__traits(hasMember, Output, "DefaultFormat")) {
+            if(format.fullFormatSpec.length == 0)
+                format.fullFormatSpec = Output.DefaultFormat;
+        }
 
-    if(Output.formattedRead(input2, output, format)) {
-        input = input2;
-        return true;
+        if(Output.formattedRead(input2, output, format)) {
+            input = input2;
+            return true;
+        }
     }
-    //}
 
     return false;
 }

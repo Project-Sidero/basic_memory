@@ -274,6 +274,7 @@ void addPrefix(Builder)(scope ref Builder output, scope FormatSpecifier format) 
     case FormatSpecifier.Type.FloatScientificCapital:
     case FormatSpecifier.Type.FloatShortest:
     case FormatSpecifier.Type.FloatShortestCapital:
+    case FormatSpecifier.Type.WhiteSpace:
         break;
 
     case FormatSpecifier.Type.Binary: // 0b
@@ -408,6 +409,7 @@ bool writeIntegral(Builder, Input)(scope ref Builder output, scope Input input, 
     case FormatSpecifier.Type.FloatScientificCapital:
     case FormatSpecifier.Type.FloatShortest:
     case FormatSpecifier.Type.FloatShortestCapital:
+    case FormatSpecifier.Type.WhiteSpace:
         return false;
 
     case FormatSpecifier.Type.Binary:

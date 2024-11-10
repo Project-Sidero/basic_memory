@@ -81,12 +81,12 @@ unittest {
 private:
 
 Expected formattedReadImpl(Input, Args...)(scope ref Input input, scope String_UTF32 formatString, scope ref Args args) @trusted {
+    import sidero.base.text.format.rawread;
+
     Input inputTemp = input.save;
     size_t successfullyHandled;
 
     bool handleArg(size_t id)(scope FormatSpecifier format) {
-        import sidero.base.text.format.rawread;
-
         alias ArgType = Args[id];
 
         static if(isASCII!ArgType || isUTF!ArgType) {
@@ -168,7 +168,10 @@ Expected formattedReadImpl(Input, Args...)(scope ref Input input, scope String_U
 
             static foreach(I; 0 .. Args.length) {
         case I:
-                if(handleArg!I(format)) {
+                if(format.type == FormatSpecifier.Type.WhiteSpace) {
+                    skipWhiteSpaceRead(*&inputTemp);
+                    break ArgSwitch;
+                } else if(handleArg!I(format)) {
                     if(!areArgsHandled[argId]) {
                         areArgsHandled[argId] = true;
                         successfullyHandled++;

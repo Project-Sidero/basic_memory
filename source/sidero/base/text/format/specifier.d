@@ -263,6 +263,8 @@ export @safe nothrow @nogc:
         FloatShortestCapital, /// G shortest representation of a float, defaults to 6 places
 
         Pointer, /// p, includes the prefix 0x and is in hex
+
+        WhiteSpace, /// Skips white space
     }
 
     static FormatSpecifier defaults() {
@@ -311,14 +313,14 @@ private @hidden:
             while(!leftOver.empty) {
                 ptrdiff_t index = leftOver.indexOf("}"c);
 
-                if (index > 0) {
+                if(index > 0) {
                     countBracketPairs += leftOver[0 .. index].count("{"c);
 
                     auto prev = leftOver[index - 1];
                     leftOver = leftOver[index + 1 .. $];
 
-                    if (prev.startsWith("\\"c) || prev.startsWith("}"c)) {
-                    } else if (countBracketPairs > 1) {
+                    if(prev.startsWith("\\"c) || prev.startsWith("}"c)) {
+                    } else if(countBracketPairs > 1) {
                         countBracketPairs--;
                     } else {
                         break;
@@ -326,7 +328,7 @@ private @hidden:
                 } else {
                     leftOver = leftOver[1 .. $];
 
-                    if (countBracketPairs > 1) {
+                    if(countBracketPairs > 1) {
                         countBracketPairs--;
                     } else {
                         break;
@@ -337,8 +339,8 @@ private @hidden:
             ret.fullFormatSpec = format[0 .. $ - leftOver.length].byUTF8;
             format = leftOver;
 
-            if (ret.fullFormatSpec.endsWith("}"c))
-                ret.fullFormatSpec = ret.fullFormatSpec[0 .. $-1];
+            if(ret.fullFormatSpec.endsWith("}"c))
+                ret.fullFormatSpec = ret.fullFormatSpec[0 .. $ - 1];
         }
 
         if(ret.useIterableCharacters)
@@ -412,156 +414,162 @@ private @hidden:
             }
         }
 
-        // Alignment|opt
-        //    "<"
-        //    ">"
-        //    "="
-        //    "^"
-        if(!format.empty) {
-            dchar temp;
+        if(format.startsWith("/")) {
+            format.popFront;
+            this.type = Type.WhiteSpace;
+            return;
+        } else {
+            // Alignment|opt
+            //    "<"
+            //    ">"
+            //    "="
+            //    "^"
+            if(!format.empty) {
+                dchar temp;
 
-            if(peekNext(temp) && (this.alignment = parseAlignment(temp)) != Alignment.None) {
-                this.fillCharacter = format.front;
-                format.popFront;
-                format.popFront;
-            } else if((this.alignment = parseAlignment(format.front)) != Alignment.None) {
-                // no fill
-                // ok all parsed out, nothing to do except pop.
-                format.popFront;
-            }
-        }
-
-        // Sign|opt
-        //    "+"
-        //    "-"
-        //    " "
-        if(!format.empty) {
-            switch(format.front) {
-            case '+':
-                this.sign = Sign.PositiveAndNegative;
-                format.popFront;
-                break;
-            case '-':
-                this.sign = Sign.NegativeOnly;
-                format.popFront;
-                break;
-            case ' ':
-                this.sign = Sign.SpaceForPositiveAndNegative;
-                format.popFront;
-                break;
-            default:
-                break;
-            }
-        }
-
-        // AlternativeForm|opt
-        //    "#"
-        if(!format.empty) {
-            if(format.front == '#') {
-                this.useAlternativeForm = true;
-                format.popFront;
-            }
-        }
-
-        // MinimumWidth|opt
-        //    "0" Integer
-        //    Integer
-        if(!format.empty) {
-            if(format.front == '0') {
-                this.requireSignAwarePadding = true;
-                format.popFront;
+                if(peekNext(temp) && (this.alignment = parseAlignment(temp)) != Alignment.None) {
+                    this.fillCharacter = format.front;
+                    format.popFront;
+                    format.popFront;
+                } else if((this.alignment = parseAlignment(format.front)) != Alignment.None) {
+                    // no fill
+                    // ok all parsed out, nothing to do except pop.
+                    format.popFront;
+                }
             }
 
-            if(!readInt(format, this.minimumWidth) || this.minimumWidth < 0) {
-                this.minimumWidth = 0;
+            // Sign|opt
+            //    "+"
+            //    "-"
+            //    " "
+            if(!format.empty) {
+                switch(format.front) {
+                case '+':
+                    this.sign = Sign.PositiveAndNegative;
+                    format.popFront;
+                    break;
+                case '-':
+                    this.sign = Sign.NegativeOnly;
+                    format.popFront;
+                    break;
+                case ' ':
+                    this.sign = Sign.SpaceForPositiveAndNegative;
+                    format.popFront;
+                    break;
+                default:
+                    break;
+                }
             }
-        }
 
-        // Precision|opt
-        //    "." Integer
-        if(!format.empty) {
-            this.precision = 0;
+            // AlternativeForm|opt
+            //    "#"
+            if(!format.empty) {
+                if(format.front == '#') {
+                    this.useAlternativeForm = true;
+                    format.popFront;
+                }
+            }
 
-            if(format.front == '.') {
-                format.popFront;
+            // MinimumWidth|opt
+            //    "0" Integer
+            //    Integer
+            if(!format.empty) {
+                if(format.front == '0') {
+                    this.requireSignAwarePadding = true;
+                    format.popFront;
+                }
 
-                if(!readInt(format, this.precision) || this.precision < 0) {
+                if(!readInt(format, this.minimumWidth) || this.minimumWidth < 0) {
+                    this.minimumWidth = 0;
+                }
+            }
+
+            // Precision|opt
+            //    "." Integer
+            if(!format.empty) {
+                this.precision = 0;
+
+                if(format.front == '.') {
+                    format.popFront;
+
+                    if(!readInt(format, this.precision) || this.precision < 0) {
+                        this.precision = int.max;
+                    }
+                } else {
                     this.precision = int.max;
                 }
-            } else {
-                this.precision = int.max;
             }
-        }
 
-        // Type|opt
-        if(!format.empty) {
-            switch(format.front) {
-            case 'b':
-                this.type = Type.Binary;
-                format.popFront;
-                break;
-            case 'B':
-                this.type = Type.BinaryCapital;
-                format.popFront;
-                break;
-            case 'd':
-                this.type = Type.Decimal;
-                format.popFront;
-                break;
-            case 'o':
-                this.type = Type.Octal;
-                format.popFront;
-                break;
-            case 'x':
-                this.type = Type.Hex;
-                format.popFront;
-                break;
-            case 'X':
-                this.type = Type.HexCapital;
-                format.popFront;
-                break;
+            // Type|opt
+            if(!format.empty) {
+                switch(format.front) {
+                case 'b':
+                    this.type = Type.Binary;
+                    format.popFront;
+                    break;
+                case 'B':
+                    this.type = Type.BinaryCapital;
+                    format.popFront;
+                    break;
+                case 'd':
+                    this.type = Type.Decimal;
+                    format.popFront;
+                    break;
+                case 'o':
+                    this.type = Type.Octal;
+                    format.popFront;
+                    break;
+                case 'x':
+                    this.type = Type.Hex;
+                    format.popFront;
+                    break;
+                case 'X':
+                    this.type = Type.HexCapital;
+                    format.popFront;
+                    break;
 
-            case 'f':
-                this.type = Type.Float;
-                format.popFront;
-                break;
-            case 'a':
-                this.type = Type.FloatHex;
-                format.popFront;
-                break;
-            case 'A':
-                this.type = Type.FloatHexCapital;
-                format.popFront;
-                break;
-            case 'e':
-                this.type = Type.FloatScientific;
-                format.popFront;
-                break;
-            case 'E':
-                this.type = Type.FloatScientificCapital;
-                format.popFront;
-                break;
-            case 'g':
-                this.type = Type.FloatShortest;
-                format.popFront;
-                break;
-            case 'G':
-                this.type = Type.FloatShortestCapital;
-                format.popFront;
-                break;
+                case 'f':
+                    this.type = Type.Float;
+                    format.popFront;
+                    break;
+                case 'a':
+                    this.type = Type.FloatHex;
+                    format.popFront;
+                    break;
+                case 'A':
+                    this.type = Type.FloatHexCapital;
+                    format.popFront;
+                    break;
+                case 'e':
+                    this.type = Type.FloatScientific;
+                    format.popFront;
+                    break;
+                case 'E':
+                    this.type = Type.FloatScientificCapital;
+                    format.popFront;
+                    break;
+                case 'g':
+                    this.type = Type.FloatShortest;
+                    format.popFront;
+                    break;
+                case 'G':
+                    this.type = Type.FloatShortestCapital;
+                    format.popFront;
+                    break;
 
-            case 'p':
-                this.type = Type.Pointer;
-                format.popFront;
-                break;
+                case 'p':
+                    this.type = Type.Pointer;
+                    format.popFront;
+                    break;
 
-            case 's':
-                // default
-                format.popFront;
-                break;
+                case 's':
+                    // default
+                    format.popFront;
+                    break;
 
-            default:
-                break;
+                default:
+                    break;
+                }
             }
         }
 
@@ -572,8 +580,8 @@ private @hidden:
             //     Character Character Character
             bool wantIterableCharacters = useIterableCharacters;
 
-            if (expectingCloseBrace) {
-                if (!format.empty && format.front == '}') {
+            if(expectingCloseBrace) {
+                if(!format.empty && format.front == '}') {
                     format.popFront;
                 } else
                     wantIterableCharacters = false;
