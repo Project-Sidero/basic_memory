@@ -975,7 +975,7 @@ bool writeStructClass(Builder, Input)(scope ref Builder output, scope Input inpu
                             else
                                 isFirst = false;
 
-                            formattedWrite(output, FormatSpecifier.init, true, __traits(getMember, cast(Base)input, name));
+                            rawWrite(output, __traits(getMember, cast(Base)input, name), FormatSpecifier.init, true);
                         }
                     }
                 }

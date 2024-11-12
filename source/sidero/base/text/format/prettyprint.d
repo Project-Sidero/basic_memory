@@ -434,7 +434,7 @@ export @safe nothrow @nogc:
             }
 
             static if (is(Type == class)) {
-                static foreach (i, Base; BaseClassesTuple!ActualType) {
+                static foreach (i, Base; BaseClassesTuple!Type) {
                     handlePrefix(builder, false, true, false);
                     builder ~= "---- "c;
                     builder ~= __traits(fullyQualifiedName, Base);
