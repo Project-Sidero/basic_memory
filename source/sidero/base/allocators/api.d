@@ -619,8 +619,16 @@ void dispose(Type, Allocator)(auto ref Allocator alloc, scope auto ref Type memo
 
     void[] toDeallocate = () @trusted { return (cast(void*)ob)[0 .. __traits(classInstanceSize, Type)]; }();
 
-    (cast(void delegate()nothrow @nogc)&memory.__xdtor)();
-    memory = null;
+    version(D_BetterC) {
+        static if(__traits(hasMember, Type, "__xdtor")) {
+            (cast(void delegate()nothrow @nogc)&memory.__xdtor)();
+        } else static if(__traits(hasMember, Type, "__dtor")) {
+            (cast(void delegate()nothrow @nogc)&memory.__dtor)();
+        }
+        memory = null;
+    } else {
+        memory.destroy;
+    }
 
     alloc.deallocate(toDeallocate);
 }
