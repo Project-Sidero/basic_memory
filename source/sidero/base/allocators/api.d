@@ -355,12 +355,15 @@ auto make(T, Allocator, Args...)(scope auto ref Allocator alloc, return scope au
         void[] array = alloc.allocate(sizeToAllocate, typeid(T));
     }
 
-    if(array is null)
-        return (T*).init;
-
     static if(is(T == class)) {
+        if(array is null)
+            return (T).init;
+
         auto ret = cast(T)array.ptr;
     } else {
+        if(array is null)
+            return (T*).init;
+
         auto ret = cast(T*)array.ptr;
     }
 
@@ -376,6 +379,7 @@ auto make(T, Allocator, Args...)(scope auto ref Allocator alloc, return scope au
             ret = null;
         }
     }
+
     return ret;
 }
 
@@ -613,9 +617,11 @@ void dispose(Type, Allocator)(auto ref Allocator alloc, scope auto ref Type memo
     } else
         alias ob = memory;
 
-    void[] toDeallocate = () @trusted { return (cast(void*)ob)[0 .. typeid(ob).initializer.length]; }();
+    void[] toDeallocate = () @trusted { return (cast(void*)ob)[0 .. __traits(classInstanceSize, Type)]; }();
 
-    memory.destroy;
+    (cast(void delegate()nothrow @nogc)&memory.__xdtor)();
+    memory = null;
+
     alloc.deallocate(toDeallocate);
 }
 
