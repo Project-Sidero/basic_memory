@@ -11,10 +11,10 @@ import sidero.base.hash.fnv : fnv_64_1a;
 import sidero.base.internal.logassert;
 
 ///
-extern (C++) interface IRootRefRC {
+extern (C++) interface IRootRefRC() {
 @safe nothrow @nogc:
     ///
-    CRef!IRootRefRC self() return scope;
+    CRef!(IRootRefRC!()) self() return scope;
 
     protected {
         void opRC(bool addRef) scope;
@@ -26,12 +26,12 @@ extern (C++) interface IRootRefRC {
 }
 
 ///
-export extern (C++) class RootRefRCClass : IRootRefRC {
+export extern (C++) class RootRefRCClass() : IRootRefRC!() {
     private {
         shared(ptrdiff_t) refCount = 1;
         RCAllocator allocator;
-        IRootRefRC rootInterfaceInstance;
-        immutable(ClassHierachy)* ci;
+        IRootRefRC!() rootInterfaceInstance;
+        immutable(void)* ci;
     }
 
 export @safe nothrow @nogc:
@@ -45,27 +45,30 @@ export @safe nothrow @nogc:
             else if(atomicDecrementAndLoad(this.refCount, 1) == 0) {
                 RCAllocator allocator = this.allocator;
                 this.__xdtor;
-                allocator.deallocate(U!RootRefRCClass(this).objPtr[0 .. ci.instanceSize]);
+
+                immutable(ClassHierachy!())* ci2 = cast(immutable(ClassHierachy!())*)this.ci;
+                allocator.deallocate(U!(RootRefRCClass!())(this).objPtr[0 .. ci2.instanceSize]);
             }
         }
 
         void opOnCreate(RealType)(RCAllocator allocator, RealType realValue) scope {
             this.allocator = allocator;
             this.ci = buildClassHierachy!RealType;
-            this.rootInterfaceInstance = cast(IRootRefRC)realValue;
+            this.rootInterfaceInstance = cast(IRootRefRC!())realValue;
         }
 
         void opClassDownCast(ulong targetHash, out void* obj) @trusted {
             ptrdiff_t delta;
+            immutable(ClassHierachy!())* ci2 = cast(immutable(ClassHierachy!())*)this.ci;
 
-            foreach(c; ci.classes) {
+            foreach(c; ci2.classes) {
                 if(c.nameHash == targetHash) {
                     delta = c.deltaFromRootRef;
                     goto Success;
                 }
             }
 
-            foreach(i; ci.interfaces) {
+            foreach(i; ci2.interfaces) {
                 if(i.nameHash == targetHash) {
                     delta = i.deltaFromRootRef;
                     goto Success;
@@ -75,7 +78,7 @@ export @safe nothrow @nogc:
             return;
 
         Success:
-            U!IRootRefRC temp = U!IRootRefRC(this.rootInterfaceInstance);
+            U!(IRootRefRC!()) temp = U!(IRootRefRC!())(this.rootInterfaceInstance);
             temp.diff += delta;
 
             obj = temp.objPtr;
@@ -84,8 +87,8 @@ export @safe nothrow @nogc:
     }
 
     ///
-    CRef!IRootRefRC self() return scope {
-        CRef!IRootRefRC ret;
+    CRef!(IRootRefRC!()) self() return scope {
+        CRef!(IRootRefRC!()) ret;
         ret.instance = this;
         this.opRC(true);
         return ret;
@@ -93,12 +96,12 @@ export @safe nothrow @nogc:
 
     ///
     ulong toHash() scope const @trusted {
-        return U!IRootRefRC(cast(immutable)this).diff;
+        return U!(IRootRefRC!())(cast(immutable)this).diff;
     }
 }
 
 ///
-struct CRef(ObjectType : IRootRefRC) {
+struct CRef(ObjectType : IRootRefRC!()) {
     private {
         ObjectType instance;
         bool checked;
@@ -143,7 +146,7 @@ export @safe nothrow @nogc:
                 ret.instance.opRC(true);
 
             return ret;
-        } else static if(is(NewObjectType : IRootRefRC)) {
+        } else static if(is(NewObjectType : IRootRefRC!())) {
             enum FQN = __traits(fullyQualifiedName, NewObjectType);
             enum hash = fnv_64_1a(cast(ubyte[])FQN);
 
@@ -177,6 +180,10 @@ export @safe nothrow @nogc:
         return instance;
     }
 
+    static CRef make(ToAllocate : CRef!ToAllocateType, ToAllocateType, Args...)(Args args) {
+        return CRef.make!ToAllocateType(args);
+    }
+
     static CRef make(ToAllocateType, Args...)(Args args) @trusted {
         RCAllocator allocator = globalAllocator();
         CRef ret;
@@ -197,11 +204,11 @@ export @safe nothrow @nogc:
 
 ///
 unittest {
-    static extern (C++) interface I : IRootRefRC {
+    static extern (C++) interface I : IRootRefRC!() {
         void thing(int);
     }
 
-    static extern (C++) class Child : RootRefRCClass, I {
+    static extern (C++) class Child : RootRefRCClass!(), I {
         int counter;
 
     @safe nothrow @nogc:
@@ -234,15 +241,15 @@ unittest {
 
 private:
 
-immutable(ClassHierachy)* buildClassHierachy(ActualType)() @trusted {
+immutable(ClassHierachy!())* buildClassHierachy(ActualType)() @trusted {
     import std.traits : TransitiveBaseTypeTuple;
 
     alias TBTT = TransitiveBaseTypeTuple!ActualType;
 
     enum Base = () {
-        ClassHierachy ret;
+        ClassHierachy!() ret;
         ret.instanceSize = __traits(classInstanceSize, ActualType);
-        ClassInHierachy cih;
+        ClassInHierachy!() cih;
 
         cih.name = __traits(fullyQualifiedName, ActualType);
         cih.nameHash = fnv_64_1a(cast(ubyte[])cih.name);
@@ -252,7 +259,7 @@ immutable(ClassHierachy)* buildClassHierachy(ActualType)() @trusted {
             cih.name = __traits(fullyQualifiedName, T);
             cih.nameHash = fnv_64_1a(cast(ubyte[])cih.name);
 
-            static if(is(T == IRootRefRC)) {
+            static if(is(T == IRootRefRC!())) {
             } else static if(is(T == class)) {
                 ret.classes ~= cih;
             } else static if(is(T == interface)) {
@@ -272,16 +279,16 @@ immutable(ClassHierachy)* buildClassHierachy(ActualType)() @trusted {
         ptrdiff_t t, r, delta;
 
         t = U!ActualType(actual).diff;
-        r = U!IRootRefRC(cast(IRootRefRC)actual).diff;
+        r = U!(IRootRefRC!())(cast(IRootRefRC!())actual).diff;
         delta = t - r;
         ret.classes[classOffset++].deltaFromRootRef = delta;
 
         static foreach(T; TBTT) {
             t = U!T(cast(T)actual).diff;
-            r = U!IRootRefRC(cast(IRootRefRC)actual).diff;
+            r = U!(IRootRefRC!())(cast(IRootRefRC!())actual).diff;
             delta = t - r;
 
-            static if(is(T == IRootRefRC)) {
+            static if(is(T == IRootRefRC!())) {
             } else static if(is(T == class)) {
                 ret.classes[classOffset++].deltaFromRootRef = delta;
             } else static if(is(T == interface)) {
@@ -295,13 +302,13 @@ immutable(ClassHierachy)* buildClassHierachy(ActualType)() @trusted {
     return cast(immutable)&ret;
 }
 
-struct ClassHierachy {
+struct ClassHierachy() {
     size_t instanceSize;
-    ClassInHierachy[] classes;
-    ClassInHierachy[] interfaces;
+    ClassInHierachy!()[] classes;
+    ClassInHierachy!()[] interfaces;
 }
 
-struct ClassInHierachy {
+struct ClassInHierachy() {
     string name;
     ulong nameHash;
     ptrdiff_t deltaFromRootRef;
