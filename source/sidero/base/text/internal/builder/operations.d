@@ -402,6 +402,7 @@ mixin template StringBuilderOperations() {
                     }
                 } else {
                     block.moveFromInto(offsetIntoBlock + canDo, amountBeingMoved, intoBlock, newOffset);
+                    block.moveLeft(offsetIntoBlock + canDo, offsetIntoBlock);
 
                     iteratorList.opApply((scope iterator) @trusted {
                         iterator.onRemoveDecreaseFromHead(block, offsetFromHead, canDo);
@@ -763,6 +764,7 @@ mixin template StringBuilderOperations() {
                         if(cursor.offsetIntoBlock < cursor.block.length) {
                             // oh noes, there stuff on the right!
                             const oldOffsetInBlock = cursor.offsetIntoBlock, newOffsetInBlock = cursor.offsetIntoBlock + canDo;
+
                             cursor.block.moveRight(oldOffsetInBlock, newOffsetInBlock);
                         } else
                             cursor.block.length += canDo;
@@ -778,15 +780,26 @@ mixin template StringBuilderOperations() {
 
                         onInsert(cA[0 .. canDo]);
 
+                        if (amountToInsert < canDo) {
+                            debug {
+                                foreach(iterator; iteratorList) {
+                                    iterator.debugMe("inserted", true);
+                                }
+
+                                blockList.debugMe;
+                            }
+
+                            assert(0);
+                        }
+
                         cA = cA[canDo .. $];
-                        assert(amountToInsert >= canDo);
                         amountToInsert -= canDo;
 
                         maximumOffsetFromHead += canDo;
                         blockList.numberOfItems += canDo;
 
-                        size_t oldOffsetFromHead = cursor.offsetFromHead;
-                        cursor.advanceForward(canDo, maximumOffsetFromHead, false);
+                        const oldOffsetFromHead = cursor.offsetFromHead;
+                        cursor.advanceForward(canDo, oldOffsetFromHead + canDo, false);
                         assert(cursor.offsetFromHead == oldOffsetFromHead + canDo);
                     }
 

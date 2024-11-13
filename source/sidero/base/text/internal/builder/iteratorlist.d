@@ -1189,9 +1189,13 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
                 amount -= canDo;
             }
 
-            if(offsetIntoBlock == block.length && block.next !is null && block.next.next !is null && limitToData) {
-                block = block.next;
-                offsetIntoBlock = 0;
+            if (offsetIntoBlock == block.length) {
+                if (limitToData) {
+                    if (block.next !is null && block.next.next !is null) {
+                        block = block.next;
+                        offsetIntoBlock = 0;
+                    }
+                }
             }
         }
 
