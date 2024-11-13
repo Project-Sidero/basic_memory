@@ -192,7 +192,7 @@ export @safe nothrow @nogc:
         if(temp is null)
             return CRef.init;
 
-        ret.instance = temp;
+        ret.instance = cast(ObjectType)temp;
 
         static if(__traits(hasMember, ToAllocateType, "opOnCreate")) {
             temp.opOnCreate!ToAllocateType(allocator, temp);
