@@ -236,7 +236,7 @@ export:
     }
 
     ///
-    bool remove(scope RealKeyType key, scope ValueType value) scope {
+    bool remove(scope RealKeyType key, scope ValueType value) scope @trusted {
         if(isNull)
             return false;
         willModify;
