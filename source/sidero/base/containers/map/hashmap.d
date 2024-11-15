@@ -19,27 +19,27 @@ struct HashMap(RealKeyType, ValueType) {
         import sidero.base.internal.meta : OpApplyCombos;
 
         int opApplyImpl(Del)(scope Del del) scope @trusted {
-            if (isNull)
+            if(isNull)
                 return 0;
 
             auto iterator = state.createIteratorExternal();
             assert(iterator !is null);
-            scope (exit)
+            scope(exit)
                 state.rcIteratorExternal(false, iterator);
 
             int result;
 
-            while (result == 0 && !state.iteratorEmptyExternal(iterator)) {
+            while(result == 0 && !state.iteratorEmptyExternal(iterator)) {
                 Result!KeyType gotKey;
                 Result!ValueType gotValue;
 
-                if (state.iteratorGetExternal(iterator, gotKey, gotValue)) {
-                    static if (__traits(compiles, del(gotKey, gotValue)))
+                if(state.iteratorGetExternal(iterator, gotKey, gotValue)) {
+                    static if(__traits(compiles, del(gotKey, gotValue)))
                         result = del(gotKey, gotValue);
                     else
                         result = del(gotValue);
 
-                    if (state.iteratorAdvanceExternal(iterator)) {
+                    if(state.iteratorAdvanceExternal(iterator)) {
                         break;
                     }
                 }
@@ -61,7 +61,7 @@ export:
 
         int count;
 
-        foreach (k, v; cll) {
+        foreach(k, v; cll) {
             assert(k);
             assert(v);
             assert(k == KeyType.init);
@@ -76,7 +76,7 @@ export:
 
     ///
     this(RCAllocator allocator, RCAllocator valueAllocator = RCAllocator.init) scope @trusted {
-        if (allocator.isNull)
+        if(allocator.isNull)
             allocator = globalAllocator();
 
         state = allocator.make!(HashMapImpl!(RealKeyType, ValueType))(allocator, valueAllocator);
@@ -92,7 +92,7 @@ export:
     this(return scope ref HashMap other) scope @trusted {
         this.tupleof = other.tupleof;
 
-        if (!isNull)
+        if(!isNull)
             state.rcExternal(true);
     }
 
@@ -105,7 +105,7 @@ export:
     @disable this(ref return scope const HashMap other) scope const;
 
     ~this() scope {
-        if (!isNull)
+        if(!isNull)
             state.rcExternal(false);
     }
 
@@ -124,14 +124,14 @@ export:
 
     ///
     size_t length() scope {
-        if (isNull)
+        if(isNull)
             return 0;
         return state.nodeList.aliveNodes;
     }
 
     ///
     HashMap dup(RCAllocator allocator = RCAllocator.init, RCAllocator valueAllocator = RCAllocator.init) scope {
-        if (isNull)
+        if(isNull)
             return HashMap.init;
 
         HashMap ret;
@@ -155,13 +155,13 @@ export:
 
     ///
     void copyOnWrite() {
-        if (!isNull)
+        if(!isNull)
             state.copyOnWrite = true;
     }
 
     ///
     void cleanupUnreferencedNodes() {
-        if (!isNull)
+        if(!isNull)
             state.keepNoExternalReferences = false;
     }
 
@@ -170,7 +170,7 @@ export:
         setupState;
         willModify;
 
-        static if (!is(KeyType == RealKeyType)) {
+        static if(!is(KeyType == RealKeyType)) {
             return this.insert(key.asReadOnly(), value);
         } else {
             return state.insertExternal(key, value, false);
@@ -182,7 +182,7 @@ export:
         setupState;
         willModify;
 
-        static if (!is(KeyType == RealKeyType)) {
+        static if(!is(KeyType == RealKeyType)) {
             return this.update(key.asReadOnly(), value);
         } else {
             return state.insertExternal(key, value, true);
@@ -194,7 +194,7 @@ export:
         setupState;
         willModify;
 
-        static if (!is(KeyType == RealKeyType)) {
+        static if(!is(KeyType == RealKeyType)) {
             this.opIndexAssign(value, key.asReadOnly());
             return;
         } else {
@@ -204,18 +204,18 @@ export:
 
     ///
     Result!ValueType opIndex(scope RealKeyType key) scope {
-        if (isNull)
+        if(isNull)
             return typeof(return)(NullPointerException);
 
         typeof(return) ret;
 
-        static if (!is(KeyType == RealKeyType)) {
+        static if(!is(KeyType == RealKeyType)) {
             ret = state.getValueExternal(key.asReadOnly);
         } else {
             ret = state.getValueExternal(key);
         }
 
-        if (!ret)
+        if(!ret)
             ret = typeof(return)(NonMatchingStateToArgumentException);
 
         return ret;
@@ -240,13 +240,13 @@ export:
         setupState;
         typeof(return) ret;
 
-        static if (!is(KeyType == RealKeyType)) {
+        static if(!is(KeyType == RealKeyType)) {
             ret = state.getValueExternal(key.asReadOnly);
         } else {
             ret = state.getValueExternal(key);
         }
 
-        if (!ret || ret.isNull) {
+        if(!ret || ret.isNull) {
             ret = typeof(return)(fallback);
         }
 
@@ -255,10 +255,10 @@ export:
 
     ///
     bool opBinaryRight(string op : "in")(scope RealKeyType key) scope {
-        if (isNull)
+        if(isNull)
             return false;
 
-        static if (!is(KeyType == RealKeyType)) {
+        static if(!is(KeyType == RealKeyType)) {
             return state.containsExternal(key.asReadOnly);
         } else {
             return state.containsExternal(key);
@@ -279,11 +279,11 @@ export:
 
     ///
     bool remove(scope RealKeyType key) scope {
-        if (isNull)
+        if(isNull)
             return false;
         willModify;
 
-        static if (!is(KeyType == RealKeyType)) {
+        static if(!is(KeyType == RealKeyType)) {
             return state.removeExternal(key.asReadOnly);
         } else {
             return state.removeExternal(key);
@@ -310,11 +310,11 @@ export:
 
     ///
     void clear() scope {
-        if (!isNull)
+        if(!isNull)
             state.clearExternal;
     }
 
-    static if (!is(KeyType == RealKeyType)) {
+    static if(!is(KeyType == RealKeyType)) {
         /// Will insert if not already in map
         bool insert(return scope KeyType key, return scope ValueType value) scope {
             setupState;
@@ -341,12 +341,12 @@ export:
 
         ///
         Result!ValueType opIndex(scope KeyType key) scope {
-            if (isNull)
+            if(isNull)
                 return typeof(return)(NullPointerException);
 
             Result!ValueType ret = state.getValueExternal(key);
 
-            if (!ret || ret.isNull)
+            if(!ret || ret.isNull)
                 ret = typeof(return)(NonMatchingStateToArgumentException);
 
             return ret;
@@ -357,7 +357,7 @@ export:
             setupState;
             Result!ValueType ret = state.getValueExternal(key);
 
-            if (!ret || ret.isNull)
+            if(!ret || ret.isNull)
                 ret = fallback;
 
             return ret;
@@ -365,7 +365,7 @@ export:
 
         ///
         bool opBinaryRight(string op : "in")(scope KeyType key) scope {
-            if (isNull)
+            if(isNull)
                 return false;
 
             return state.containsExternal(key);
@@ -373,7 +373,7 @@ export:
 
         ///
         bool remove(scope KeyType key) scope {
-            if (isNull)
+            if(isNull)
                 return false;
 
             willModify;
@@ -387,7 +387,7 @@ export:
     ulong toHash() scope const @trusted {
         import sidero.base.hash.utils : hashOf;
 
-        if (isNull)
+        if(isNull)
             return hashOf();
 
         return (cast(HashMapImpl!(RealKeyType, ValueType)*)state).hashExternal;
@@ -406,9 +406,9 @@ export:
 
     ///
     int opCmp(scope HashMap other) scope const @trusted {
-        if (isNull)
+        if(isNull)
             return other.isNull ? 0 : -1;
-        else if (other.isNull)
+        else if(other.isNull)
             return 1;
         return (cast(HashMapImpl!(RealKeyType, ValueType)*)state).compareExternal((cast(HashMapImpl!(RealKeyType,
                 ValueType)*)other.state));
@@ -418,7 +418,7 @@ export:
         @PrettyPrintIgnore HashMapImpl!(RealKeyType, ValueType)* state;
 
         void setupState() scope @trusted {
-            if (!isNull)
+            if(!isNull)
                 return;
 
             RCAllocator allocator = globalAllocator();
@@ -426,13 +426,13 @@ export:
         }
 
         void willModify() scope {
-            if (state.copyOnWrite) {
+            if(state.copyOnWrite) {
                 this = this.dup;
             }
         }
 
         void debugPosition() scope {
-            if (!isNull)
+            if(!isNull)
                 state.debugPosition(null);
         }
     }
@@ -467,18 +467,18 @@ struct HashMapImpl(RealKeyType, ValueType) {
     void rcIteratorExternal(bool addRef, scope Iterator* iterator) {
         assert(!addRef);
 
-        if (!iterator.rc(addRef, nodeList, iteratorList) || rcInternal(addRef)) {
+        if(!iterator.rc(addRef, nodeList, iteratorList) || rcInternal(addRef)) {
         }
     }
 
     void rcNodeExternal(bool addRef, scope Node* node) scope {
-        if (node !is null) {
-            if (addRef)
+        if(node !is null) {
+            if(addRef)
                 node.onIteratorIn;
             else
                 node.onIteratorOut;
 
-            if (node.refCount == 0 && (node.isDeleted || !this.keepNoExternalReferences))
+            if(node.refCount == 0 && (node.isDeleted || !this.keepNoExternalReferences))
                 nodeList.removeNode(node);
         }
 
@@ -497,15 +497,18 @@ struct HashMapImpl(RealKeyType, ValueType) {
     }
 
     bool iteratorGetExternal(scope Iterator* iterator, scope out Result!KeyType key, scope out Result!ValueType value) scope @trusted {
-        if (iterator.forwards.isOutOfRange()) {
+        if(iterator.forwards.isOutOfRange()) {
             return false;
         }
 
         Node* node = iterator.forwards.node;
 
-        node.onIteratorIn;
+        // key
         node.onIteratorIn;
         this.rcInternal(true);
+
+        // value
+        node.onIteratorIn;
         this.rcInternal(true);
 
         key = typeof(key)(node.key);
@@ -525,24 +528,24 @@ struct HashMapImpl(RealKeyType, ValueType) {
 
         assert(other !is null);
 
-        if (&this is other)
+        if(&this is other)
             return 0;
 
         int result = genericCompare(nodeList.aliveNodes, other.nodeList.aliveNodes);
 
-        if (result != 0) {
+        if(result != 0) {
             Cursor cursor = iteratorList.cursorFor(nodeList);
 
-            foreach (otherNode; other.nodeList) {
-                if (result != 0)
+            foreach(otherNode; other.nodeList) {
+                if(result != 0)
                     break;
 
-                if (!cursor.isOutOfRange()) {
+                if(!cursor.isOutOfRange()) {
                     result = genericCompare(cursor.node.hash, otherNode.hash);
 
-                    if (result == 0)
+                    if(result == 0)
                         result = genericCompare(cursor.node.key, otherNode.key);
-                    if (result == 0)
+                    if(result == 0)
                         result = genericCompare(cursor.node.value, otherNode.value);
 
                     cursor.advanceForward(nodeList);
@@ -571,12 +574,12 @@ struct HashMapImpl(RealKeyType, ValueType) {
     }
 
     HashMapImpl* dupExternal(scope RCAllocator allocator, scope RCAllocator valueAllocator) scope @trusted {
-        if (allocator.isNull)
+        if(allocator.isNull)
             allocator = globalAllocator();
 
         HashMapImpl* ret = allocator.make!HashMapImpl(allocator, valueAllocator);
 
-        foreach (node; nodeList) {
+        foreach(node; nodeList) {
             ret.tryInsertInternal(node.key, node.value);
         }
         return ret;
@@ -594,7 +597,7 @@ struct HashMapImpl(RealKeyType, ValueType) {
 
         typeof(return) ret;
 
-        if (node is null) {
+        if(node is null) {
             ret = typeof(return)(NullPointerException);
         } else {
             ret = typeof(return)(node.value);
@@ -608,7 +611,7 @@ struct HashMapImpl(RealKeyType, ValueType) {
 
         ulong ret = hashOf();
 
-        foreach (node; nodeList) {
+        foreach(node; nodeList) {
             ret = hashOf(node.key, ret);
             ret = hashOf(node.value, ret);
         }
@@ -619,9 +622,9 @@ struct HashMapImpl(RealKeyType, ValueType) {
     // \/ internal
 
     bool rcInternal(bool addRef) scope @trusted {
-        if (addRef) {
+        if(addRef) {
             nodeList.refCount++;
-        } else if (nodeList.refCount == 1) {
+        } else if(nodeList.refCount == 1) {
             this.clearAllInternal;
 
             assert(iteratorList.head is null);
@@ -640,10 +643,10 @@ struct HashMapImpl(RealKeyType, ValueType) {
     }
 
     void clearAllInternal() scope @trusted {
-        foreach (ref bucket; nodeList.buckets) {
+        foreach(ref bucket; nodeList.buckets) {
             Node** currentPtr = &bucket.head.next;
 
-            while (*currentPtr !is &bucket.tail) {
+            while(*currentPtr !is &bucket.tail) {
                 Node* current = *currentPtr;
                 nodeList.removeNode(current);
             }
@@ -654,14 +657,14 @@ struct HashMapImpl(RealKeyType, ValueType) {
         const hash = nodeList.getHash(key);
         Node* prior = nodeList.priorNodeFor(hash);
 
-        if (prior.next.next !is null && prior.next.hash == hash) {
+        if(prior.next.next !is null && prior.next.hash == hash) {
             // just update
 
-            if (canUpdate) {
+            if(canUpdate) {
                 prior.next.key = key;
 
-                static if (isAnyPointer!ValueType) {
-                    if (!nodeList.valueAllocator.isNull)
+                static if(isAnyPointer!ValueType) {
+                    if(!nodeList.valueAllocator.isNull)
                         nodeList.valueAllocator.dispose(prior.next.value);
                 }
 
@@ -681,7 +684,7 @@ struct HashMapImpl(RealKeyType, ValueType) {
     bool tryRemoveInternal(ulong hash) {
         Node* node = nodeList.nodeFor(hash);
 
-        if (node !is null) {
+        if(node !is null) {
             nodeList.removeNode(node);
             return true;
         } else
@@ -694,7 +697,7 @@ struct HashMapImpl(RealKeyType, ValueType) {
         assert(toAdd !is null);
         assert(!toAdd.isDeleted);
 
-        if (toAdd.previousReadyToBeDeleted !is null)
+        if(toAdd.previousReadyToBeDeleted !is null)
             nodeList.mergeDeletedListToNewParent(toAdd, parent);
         assert(toAdd.previousReadyToBeDeleted is null);
 
@@ -703,7 +706,7 @@ struct HashMapImpl(RealKeyType, ValueType) {
         toAdd.previous.next = toAdd.next;
         toAdd.next.previous = toAdd.previous;
 
-        if (parent.previousReadyToBeDeleted !is null) {
+        if(parent.previousReadyToBeDeleted !is null) {
             // we already have a list of nodes
             // we just need to inject on the end
 
@@ -725,14 +728,14 @@ struct HashMapImpl(RealKeyType, ValueType) {
         int result;
         Cursor cursor;
 
-        if (iterator is null)
+        if(iterator is null)
             cursor = iteratorList.cursorFor(nodeList);
         else {
             cursor = iterator.forwards;
             cursor.node.onIteratorIn;
         }
 
-        while (result == 0 && !cursor.isOutOfRange()) {
+        while(result == 0 && !cursor.isOutOfRange()) {
             result = del(cursor.node.key, cursor.node.value);
             cursor.advanceForward(nodeList);
         }
@@ -746,17 +749,17 @@ struct HashMapImpl(RealKeyType, ValueType) {
 
         size_t seenAlive, seenTotal;
 
-        foreach (ref bucket; nodeList.buckets) {
+        foreach(ref bucket; nodeList.buckets) {
             Node* currentInBucket = &bucket.head;
 
-            while (currentInBucket !is null) {
-                if (currentInBucket.previous !is null && currentInBucket.next !is null) {
+            while(currentInBucket !is null) {
+                if(currentInBucket.previous !is null && currentInBucket.next !is null) {
                     seenAlive++;
                     seenTotal++;
                 }
 
                 Node* currentInDeleted = currentInBucket.previousReadyToBeDeleted;
-                while (currentInDeleted !is null) {
+                while(currentInDeleted !is null) {
                     seenTotal++;
                     currentInDeleted = currentInDeleted.previous;
                 }
@@ -765,7 +768,7 @@ struct HashMapImpl(RealKeyType, ValueType) {
             }
         }
 
-        if (seenAlive != nodeList.aliveNodes || seenTotal != nodeList.allNodes) {
+        if(seenAlive != nodeList.aliveNodes || seenTotal != nodeList.allNodes) {
             printf("seen alive: %zd total: %zd at %s:%d\n", seenAlive, seenTotal, func.ptr, line);
             debugPosition;
             assert(0);
@@ -778,28 +781,28 @@ struct HashMapImpl(RealKeyType, ValueType) {
         printf("refCount: %zd aliveNodes: %zd allNodes: %zd\n", nodeList.refCount, nodeList.aliveNodes, nodeList.allNodes);
 
         void printNode(Node* node) {
-            if ((node.previous is null || node.previous.previous is null) && (node.next is null || node.next.next is null))
+            if((node.previous is null || node.previous.previous is null) && (node.next is null || node.next.next is null))
                 printf("%p = refcount %zd\n", node, node.refCount);
-            else if (node.previous is null || node.previous.previous is null)
+            else if(node.previous is null || node.previous.previous is null)
                 printf("%p =$ refcount %zd\n", node, node.refCount);
-            else if (node.next is null || node.next.next is null)
-                    printf("%p $= refcount %zd\n", node, node.refCount);
-                else
-                    printf("%p $=$ refcount %zd\n", node, node.refCount);
+            else if(node.next is null || node.next.next is null)
+                printf("%p $= refcount %zd\n", node, node.refCount);
+            else
+                printf("%p $=$ refcount %zd\n", node, node.refCount);
         }
 
-        foreach (ref bucket; nodeList.buckets) {
+        foreach(ref bucket; nodeList.buckets) {
             Node* currentInBucket = &bucket.head;
 
-            if (iterator !is null && iterator.forwards.node is currentInBucket)
+            if(iterator !is null && iterator.forwards.node is currentInBucket)
                 printf(">");
 
-            while (currentInBucket !is null) {
-                if (currentInBucket.previous !is null && currentInBucket.next !is null)
+            while(currentInBucket !is null) {
+                if(currentInBucket.previous !is null && currentInBucket.next !is null)
                     printNode(currentInBucket);
 
                 Node* currentInDeleted = currentInBucket.previousReadyToBeDeleted;
-                while (currentInDeleted !is null) {
+                while(currentInDeleted !is null) {
                     printf("    DEL ");
                     printNode(currentInDeleted);
 
@@ -829,7 +832,7 @@ struct HashMapIterator(RealKeyType, ValueType) {
         ret.refCount = 1;
 
         ret.next = head;
-        if (head !is null)
+        if(head !is null)
             head.previous = ret;
         head = ret;
 
@@ -850,7 +853,7 @@ struct HashMapIterator(RealKeyType, ValueType) {
         Iterator* iterator = head;
         int result;
 
-        while (iterator !is null && result == 0) {
+        while(iterator !is null && result == 0) {
             result = del(iterator);
             iterator = iterator.next;
         }
@@ -866,22 +869,22 @@ struct HashMapIterator(RealKeyType, ValueType) {
     @safe nothrow @nogc:
 
         bool rc(bool addRef, scope ref NodeList nodeList, scope ref IteratorList iteratorList) scope @trusted {
-            if (addRef)
+            if(addRef)
                 refCount++;
             else {
                 refCount--;
 
-                if (refCount == 0) {
+                if(refCount == 0) {
                     forwards.onEOL(nodeList);
 
-                    if (iteratorList.head is &this) {
+                    if(iteratorList.head is &this) {
                         iteratorList.head = this.next;
                         assert(this.previous is null);
                     }
 
-                    if (this.previous !is null)
+                    if(this.previous !is null)
                         this.previous.next = this.next;
-                    if (this.next !is null)
+                    if(this.next !is null)
                         this.next.previous = this.previous;
 
                     nodeList.allocator.dispose(&this);
@@ -909,7 +912,7 @@ struct HashMapIterator(RealKeyType, ValueType) {
         void onEOL(scope ref NodeList nodeList) scope {
             node.onIteratorOut;
 
-            if (node.isDeleted && node.refCount == 0) {
+            if(node.isDeleted && node.refCount == 0) {
                 nodeList.removeNode(node);
             }
 
@@ -920,7 +923,7 @@ struct HashMapIterator(RealKeyType, ValueType) {
             ifDeletedBringIntoLife();
             node.onIteratorOut;
 
-            if (node.next !is null && node.next.next !is null) {
+            if(node.next !is null && node.next.next !is null) {
                 // well that was easy :D
                 node = node.next;
             } else {
@@ -929,10 +932,10 @@ struct HashMapIterator(RealKeyType, ValueType) {
                 // just in case we are already at the end.
                 node = &nodeList.buckets[$ - 1].tail;
 
-                while (bucketId < nodeList.buckets.length) {
+                while(bucketId < nodeList.buckets.length) {
                     auto bucket = &nodeList.buckets[bucketId];
 
-                    if (bucket.head.next.next !is null) {
+                    if(bucket.head.next.next !is null) {
                         node = bucket.head.next;
                         break;
                     }
@@ -948,7 +951,7 @@ struct HashMapIterator(RealKeyType, ValueType) {
             assert(node !is null);
             node.onIteratorOut;
 
-            while (node.isDeleted && node.next !is null) {
+            while(node.isDeleted && node.next !is null) {
                 node = node.next;
             }
 
@@ -958,7 +961,7 @@ struct HashMapIterator(RealKeyType, ValueType) {
 }
 
 struct HashMapNode(RealKeyType, ValueType) {
-    static if (__traits(hasMember, RealKeyType, "asReadOnly")) {
+    static if(__traits(hasMember, RealKeyType, "asReadOnly")) {
         alias KeyType = typeof(RealKeyType.init.asReadOnly());
         enum KeyIsReadOnly = !is(RealKeyType == KeyType);
     } else {
@@ -988,12 +991,12 @@ struct HashMapNode(RealKeyType, ValueType) {
     }
 
     void cleanup() scope {
-        if (buckets.ptr !is smallBucketOptimization.ptr)
+        if(buckets.ptr !is smallBucketOptimization.ptr)
             allocator.dispose(buckets);
     }
 
     size_t getBucketId(ulong hash, scope Bucket[] buckets = null) scope {
-        if (buckets.length == 0)
+        if(buckets.length == 0)
             buckets = this.buckets;
         assert(buckets.length > 0);
 
@@ -1015,7 +1018,7 @@ struct HashMapNode(RealKeyType, ValueType) {
         return hashOf(key);
     }
 
-    static if (KeyIsReadOnly) {
+    static if(KeyIsReadOnly) {
         ulong getHash(KeyType key) scope {
             import sidero.base.hash.utils : hashOf;
 
@@ -1036,7 +1039,7 @@ struct HashMapNode(RealKeyType, ValueType) {
 
         // obivously we can't append to the tail node
         // so we move to the previous one and append to that
-        if (prior.next is null)
+        if(prior.next is null)
             prior = prior.previous;
 
         Node* ret = allocator.make!Node();
@@ -1057,28 +1060,28 @@ struct HashMapNode(RealKeyType, ValueType) {
         assert(node.previous !is null);
         assert(node.next !is null);
 
-        if (node.previous !is null)
+        if(node.previous !is null)
             node.previous.next = node.next;
 
-        if (node.next.previousReadyToBeDeleted is node)
+        if(node.next.previousReadyToBeDeleted is node)
             node.next.previousReadyToBeDeleted = node.previous;
         else {
             node.next.previous = node.previous;
 
-            if (node.previousReadyToBeDeleted !is null)
+            if(node.previousReadyToBeDeleted !is null)
                 mergeDeletedListToNewParent(node, node.next);
         }
 
-        if (node.refCount > 0) {
+        if(node.refCount > 0) {
             node.isDeleted = true;
             this.aliveNodes--;
         } else {
-            static if (isAnyPointer!ValueType) {
-                if (!valueAllocator.isNull)
+            static if(isAnyPointer!ValueType) {
+                if(!valueAllocator.isNull)
                     valueAllocator.dispose(node.value);
             }
 
-            if (!node.isDeleted)
+            if(!node.isDeleted)
                 this.aliveNodes--;
 
             this.allNodes--;
@@ -1094,10 +1097,10 @@ struct HashMapNode(RealKeyType, ValueType) {
 
         // Putting all conditions in while condition,
         //  has a tendency to cause bad codegen.
-        while (currentNode.next !is null) {
-            if (currentNode.next.next is null)
+        while(currentNode.next !is null) {
+            if(currentNode.next.next is null)
                 break;
-            else if (currentNode.next.hash > hash)
+            else if(currentNode.next.hash > hash)
                 break;
 
             currentNode = currentNode.next;
@@ -1112,7 +1115,7 @@ struct HashMapNode(RealKeyType, ValueType) {
         Bucket* bucket = &buckets[getBucketId(hash)];
         Node* currentNode = &bucket.head;
 
-        while (currentNode.next.next !is null && currentNode.next.hash < hash) {
+        while(currentNode.next.next !is null && currentNode.next.hash < hash) {
             currentNode = currentNode.next;
         }
 
@@ -1121,7 +1124,7 @@ struct HashMapNode(RealKeyType, ValueType) {
 
     void moveIntoBiggerBuckets() scope @trusted {
         size_t nextCountOfBuckets() {
-            switch (buckets.length) {
+            switch(buckets.length) {
             case 0:
                 return 16;
             case 16:
@@ -1131,7 +1134,7 @@ struct HashMapNode(RealKeyType, ValueType) {
             case 0xFFF:
                 return 0xFFFF;
             default:
-                if (buckets.length > 0xFFFF && buckets.length < 0xFFFFFF)
+                if(buckets.length > 0xFFFF && buckets.length < 0xFFFFFF)
                     return buckets.length * 2;
                 else
                     return buckets.length;
@@ -1142,14 +1145,14 @@ struct HashMapNode(RealKeyType, ValueType) {
             Bucket* lastIntoBucket;
             Node* priorNode;
 
-            foreach (ref oldBucket; old) {
+            foreach(ref oldBucket; old) {
                 Node* currentNode = oldBucket.head.next;
 
-                while (currentNode.next !is null) {
+                while(currentNode.next !is null) {
                     Node* nextNode = currentNode.next;
                     Bucket* intoBucket = &into[getBucketId(currentNode.hash, into)];
 
-                    if (intoBucket is lastIntoBucket) {
+                    if(intoBucket is lastIntoBucket) {
                         intoBucket.tail.previous = currentNode;
                         priorNode.next = currentNode;
 
@@ -1170,20 +1173,20 @@ struct HashMapNode(RealKeyType, ValueType) {
                     currentNode = nextNode;
                 }
 
-                if (oldBucket.head.previousReadyToBeDeleted !is null) {
+                if(oldBucket.head.previousReadyToBeDeleted !is null) {
                     mergeDeletedListToNewParent(&oldBucket.head, &into[0].head);
                 }
 
-                if (oldBucket.tail.previousReadyToBeDeleted !is null) {
+                if(oldBucket.tail.previousReadyToBeDeleted !is null) {
                     mergeDeletedListToNewParent(&oldBucket.tail, &into[$ - 1].tail);
                 }
             }
         }
 
-        if (buckets.length * 32 <= aliveNodes) {
+        if(buckets.length * 32 <= aliveNodes) {
             size_t nextCount = nextCountOfBuckets();
 
-            if (nextCount == buckets.length)
+            if(nextCount == buckets.length)
                 return;
 
             Bucket[] oldBuckets = buckets;
@@ -1192,16 +1195,16 @@ struct HashMapNode(RealKeyType, ValueType) {
             {
                 buckets = newBuckets;
 
-                foreach (ref b; newBuckets) {
+                foreach(ref b; newBuckets) {
                     b.head.next = &b.tail;
                     b.tail.previous = &b.head;
                 }
             }
 
-            if (oldBuckets.length > 0) {
+            if(oldBuckets.length > 0) {
                 copyOldIntoNew(oldBuckets, newBuckets);
 
-                if (oldBuckets.ptr !is smallBucketOptimization.ptr) {
+                if(oldBuckets.ptr !is smallBucketOptimization.ptr) {
                     allocator.dispose(oldBuckets);
                 }
             }
@@ -1221,7 +1224,7 @@ struct HashMapNode(RealKeyType, ValueType) {
 
         Node* endOfNewList = newParent.previousReadyToBeDeleted;
 
-        if (endOfNewList !is null) {
+        if(endOfNewList !is null) {
             assert(endOfNewList.isDeleted);
             assert(endOfNewList.previousReadyToBeDeleted is null);
 
@@ -1230,7 +1233,7 @@ struct HashMapNode(RealKeyType, ValueType) {
             // which allows us to append it to the new list
             Node* startOfOldList = endOfOldList;
 
-            while (startOfOldList.previous !is null)
+            while(startOfOldList.previous !is null)
                 startOfOldList = startOfOldList.previous;
             assert(startOfOldList !is null);
 
@@ -1249,15 +1252,15 @@ struct HashMapNode(RealKeyType, ValueType) {
     int opApply(int delegate(scope Node* node) @safe nothrow @nogc del) scope @trusted {
         int result;
 
-        foreach (ref bucket; buckets) {
+        foreach(ref bucket; buckets) {
             Node* currentNode = bucket.head.next;
 
-            while (result == 0 && currentNode.next !is null) {
+            while(result == 0 && currentNode.next !is null) {
                 result = del(currentNode);
                 currentNode = currentNode.next;
             }
 
-            if (result != 0)
+            if(result != 0)
                 break;
         }
 
