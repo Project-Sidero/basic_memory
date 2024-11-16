@@ -180,10 +180,17 @@ export @safe nothrow @nogc:
         return instance;
     }
 
+    ///
+    static CRef make(Args...)(Args args) {
+        return CRef.make!ObjectType(args);
+    }
+
+    ///
     static CRef make(ToAllocate : CRef!ToAllocateType, ToAllocateType, Args...)(Args args) {
         return CRef.make!ToAllocateType(args);
     }
 
+    ///
     static CRef make(ToAllocateType, Args...)(Args args) @trusted {
         RCAllocator allocator = globalAllocator();
         CRef ret;
