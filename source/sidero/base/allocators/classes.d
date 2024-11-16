@@ -141,10 +141,9 @@ export @safe nothrow @nogc:
             NewType ret;
 
             ret.instance = cast(NewObjectType)this.instance;
+            assert(ret.instance !is null);
 
-            if(ret.instance !is null)
-                ret.instance.opRC(true);
-
+            ret.instance.opRC(true);
             return ret;
         } else static if(is(NewObjectType : IRootRefRC!())) {
             enum FQN = __traits(fullyQualifiedName, NewObjectType);
