@@ -30,13 +30,18 @@ ulong hashOf(Type)(scope ref Type value, ulong previousHash) @trusted {
         } else {
             import std.traits : isArray, isBasicType;
 
-            static if(isArray!Type2 && !isBasicType!(typeof(Type2.init[0]))) {
-                foreach(ref v; input) {
-                    handle(v);
+            static if (isArray!Type2) {
+                static if (isBasicType!(typeof(Type2.init[0]))) {
+                    ret = fnv_64_1a(cast(ubyte[])input, ret);
+                } else {
+                    foreach (ref v; input) {
+                        handle(v);
+                    }
                 }
             } else {
-                ubyte* ptr = cast(ubyte*)&value;
-                ret = fnv_64_1a(ptr[0 .. Type.sizeof], ret);
+                ubyte* ptr = cast(ubyte*)&input;
+                scope array = ptr[0 .. Type2.sizeof];
+                ret = fnv_64_1a(array, ret);
             }
         }
     }

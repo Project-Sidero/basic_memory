@@ -3112,10 +3112,13 @@ nothrow @nogc:
     }
 
     ///
-    ulong toHash() scope const {
+    ulong toHash() scope const @trusted {
         import sidero.base.hash.utils : hashOf;
 
-        return hashOf(this.literal);
+        auto temp = cast()this;
+        temp.stripZeroTerminator;
+
+        return hashOf(temp.literal);
     }
 
     ///
