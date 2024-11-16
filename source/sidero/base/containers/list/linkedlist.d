@@ -385,6 +385,29 @@ nothrow @nogc:
     }
 
     ///
+    bool opEquals(Slice!Type other) scope {
+        return this.opCmp(other) == 0;
+    }
+
+    ///
+    bool opEquals(DynamicArray!Type other) scope {
+        return this.opCmp(other) == 0;
+    }
+
+    ///
+    bool opEquals(scope Type[] other...) scope {
+        return this.opCmp(other) == 0;
+    }
+
+    ///
+    unittest {
+        LinkedList cll;
+        cll ~= Type.init;
+        cll ~= Type.init;
+        assert(cll.equals(Type.init, Type.init));
+    }
+
+    ///
     alias compare = opCmp;
 
     ///
@@ -428,6 +451,16 @@ nothrow @nogc:
     }
 
     ///
+    int opCmp(Slice!Type other) scope @trusted {
+        return this.opCmp(cast(Type[])other.unsafeGetLiteral);
+    }
+
+    ///
+    int opCmp(DynamicArray!Type other) scope @trusted {
+        return this.opCmp(cast(Type[])other.unsafeGetLiteral);
+    }
+
+    ///
     int opCmp(scope Type[] other...) scope {
         if(isNull)
             return other.length == 0 ? 0 : -1;
@@ -438,7 +471,8 @@ nothrow @nogc:
     unittest {
         LinkedList cll;
         cll ~= Type.init;
-        assert(cll.compare(Type.init) == 0);
+        cll ~= Type.init;
+        assert(cll.compare(Type.init, Type.init) == 0);
     }
 
     ///
