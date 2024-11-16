@@ -355,6 +355,11 @@ nothrow @nogc:
         assert(cll.equals(thing));
     }
 
+    ///
+    bool opEquals(ConcurrentLinkedList!Type other) scope {
+        return this.opCmp(other) == 0;
+    }
+
     /// Takes in an opApply
     bool opEquals(scope int delegate(scope int delegate(ref Type) @safe nothrow @nogc) @safe nothrow @nogc del) {
         return opCmp(del) == 0;
@@ -429,6 +434,28 @@ nothrow @nogc:
 
         cll ~= Type.init;
         assert(cll.compare(thing) == 0);
+    }
+
+    ///
+    int opCmp(ConcurrentLinkedList!Type other) scope {
+        other = other.save;
+
+        int handle(scope int delegate(ref Type) @safe nothrow @nogc del) {
+            if(other.empty)
+            return 1;
+
+            if(auto v = other.front) {
+                int ret = del(v);
+
+                if(ret)
+                return ret;
+            }
+
+            other.popFront;
+            return 0;
+        }
+
+        return this.opCmp(&handle);
     }
 
     /// Takes in an opApply
