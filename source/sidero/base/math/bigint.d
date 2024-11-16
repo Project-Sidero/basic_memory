@@ -958,8 +958,8 @@ export @safe nothrow @nogc:
     }
 
     ///
-    BigIntegerReference opBinary(string op : "/", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope {
-        BigIntegerReference ret, remainder;
+    DynamicBigInteger opBinary(string op : "/", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope {
+        DynamicBigInteger ret, remainder;
         ret.needDigits(OtherDigits);
         remainder.needDigits(OtherDigits);
 
@@ -972,7 +972,7 @@ export @safe nothrow @nogc:
     }
 
     ///
-    void opOpAssign(string op : "/")(scope BigIntegerReference other) scope {
+    void opOpAssign(string op : "/")(scope DynamicBigInteger other) scope {
         bool tempWasOverflown = this.wasOverflown;
 
         this = this.opBinary!op(other);
@@ -981,8 +981,8 @@ export @safe nothrow @nogc:
     }
 
     ///
-    BigIntegerReference opBinary(string op : "/")(scope BigIntegerReference other) scope {
-        BigIntegerReference ret, remainder;
+    DynamicBigInteger opBinary(string op : "/")(scope DynamicBigInteger other) scope {
+        DynamicBigInteger ret, remainder;
         ret.needDigits(OtherDigits);
         remainder.needDigits(OtherDigits);
 
@@ -1004,8 +1004,8 @@ export @safe nothrow @nogc:
     }
 
     ///
-    BigIntegerReference opBinary(string op : "*", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope {
-        BigIntegerReference ret;
+    DynamicBigInteger opBinary(string op : "*", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope {
+        DynamicBigInteger ret;
         ret.needDigits(OtherDigits);
 
         auto errorResult = signedMultiply(ret.storage_.unsafeGetLiteral, ret.isNegative,
@@ -1016,7 +1016,7 @@ export @safe nothrow @nogc:
     }
 
     ///
-    void opOpAssign(string op : "*")(scope BigIntegerReference other) scope {
+    void opOpAssign(string op : "*")(scope DynamicBigInteger other) scope {
         bool tempWasOverflown = this.wasOverflown;
 
         this = this.opBinary!op(other);
@@ -1025,8 +1025,8 @@ export @safe nothrow @nogc:
     }
 
     ///
-    BigIntegerReference opBinary(string op : "*")(scope BigIntegerReference other) scope {
-        BigIntegerReference ret;
+    DynamicBigInteger opBinary(string op : "*")(scope DynamicBigInteger other) scope {
+        DynamicBigInteger ret;
         ret.needDigits(OtherDigits);
 
         auto errorResult = signedMultiply(ret.storage_.unsafeGetLiteral, ret.isNegative,
@@ -1037,20 +1037,20 @@ export @safe nothrow @nogc:
     }
 
     ///
-    BigIntegerReference opUnary(string op : "-")() scope {
-        BigIntegerReference ret = this.dup;
+    DynamicBigInteger opUnary(string op : "-")() scope @trusted {
+        DynamicBigInteger ret = this.dup;
         ret.isNegative = !ret.isNegative;
         return ret;
     }
 
     ///
-    BigIntegerReference opUnary(string op : "++")() scope {
+    DynamicBigInteger opUnary(string op : "++")() scope @trusted {
         this.opOpAssign!"+"(BigInteger!1(1));
         return this;
     }
 
     ///
-    BigIntegerReference opUnary(string op : "--")() scope {
+    DynamicBigInteger opUnary(string op : "--")() scope @trusted {
         this.opOpAssign!"-"(BigInteger!1(1));
         return this;
     }
@@ -1065,7 +1065,7 @@ export @safe nothrow @nogc:
     }
 
     ///
-    BigIntegerReference opBinary(string op : "+", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope {
+    DynamicBigInteger opBinary(string op : "+", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope {
         static assert(OtherDigits <= NumberOfDigits, "Argument number of digits must be less than ours");
 
         DynamicBigInteger ret;
@@ -1079,7 +1079,7 @@ export @safe nothrow @nogc:
     }
 
     ///
-    void opOpAssign(string op : "+")(scope BigIntegerReference other) scope {
+    void opOpAssign(string op : "+")(scope DynamicBigInteger other) scope {
         bool tempWasOverflown = this.wasOverflown;
 
         this = this.opBinary!op(other);
@@ -1088,7 +1088,7 @@ export @safe nothrow @nogc:
     }
 
     ///
-    BigIntegerReference opBinary(string op : "+")(scope BigIntegerReference other) scope {
+    DynamicBigInteger opBinary(string op : "+")(scope DynamicBigInteger other) scope {
         static assert(OtherDigits <= NumberOfDigits, "Argument number of digits must be less than ours");
 
         DynamicBigInteger ret;
@@ -1111,7 +1111,7 @@ export @safe nothrow @nogc:
     }
 
     ///
-    BigIntegerReference opBinary(string op : "-", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope {
+    DynamicBigInteger opBinary(string op : "-", size_t OtherDigits)(scope BigInteger!OtherDigits other) scope {
         DynamicBigInteger ret;
         ret.needDigits(OtherDigits);
 
@@ -1123,7 +1123,7 @@ export @safe nothrow @nogc:
     }
 
     ///
-    void opOpAssign(string op : "-")(scope BigIntegerReference other) scope {
+    void opOpAssign(string op : "-")(scope DynamicBigInteger other) scope {
         bool tempWasOverflown = this.wasOverflown;
 
         this = this.opBinary!op(other);
@@ -1132,7 +1132,7 @@ export @safe nothrow @nogc:
     }
 
     ///
-    BigIntegerReference opBinary(string op : "-")(scope BigIntegerReference other) scope {
+    DynamicBigInteger opBinary(string op : "-")(scope DynamicBigInteger other) scope {
         DynamicBigInteger ret;
         ret.needDigits(OtherDigits);
 
@@ -1149,7 +1149,7 @@ export @safe nothrow @nogc:
     }
 
     ///
-    BigIntegerReference opBinary(string op : "<<")(scope size_t amount) scope {
+    DynamicBigInteger opBinary(string op : "<<")(scope size_t amount) scope {
         DynamicBigInteger ret = this.dup;
         leftShift(ret.storage_.unsafeGetLiteral, amount);
         return ret;
