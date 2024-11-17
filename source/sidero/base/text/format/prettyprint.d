@@ -6,7 +6,26 @@ import sidero.base.attributes;
 
 export @safe nothrow @nogc:
 
-/// Formats arguments based upon format and configuration, ignores fields with PrettyPrintIgnore UDA.
+/**
+Formats arguments based upon format and configuration, ignores fields with PrettyPrintIgnore UDA.
+
+The expectation of the depth and where the previous builder will be at:
+
+```
+[...prefix...] [...text...]
+----^ depth will always be 0 relatively
+---------------^ previously written text
+----------------------------^ there will be a new line here if `startWithoutPrefix` is `false`
+```
+
+Always call ``emitPrefix`` prior to writing anything that could be on a new line.
+Calling a formatting or to string function should never require a call to ``emitPrefix`` before it.
+Let the called function do it, and set ``startWithoutPrefix`` instead.
+
+Always increase your depth after doing a newline when you give a new category of information.
+
+Never end what you write in a new line.
+*/
 struct PrettyPrint {
     /// For each line emit: prefix? prefixToRepeat{depth} prefixSuffix?
     String_UTF8 prefix, prefixToRepeat, prefixSuffix;
@@ -34,7 +53,7 @@ export @safe nothrow @nogc:
         ret.betweenValueDivider = String_UTF8(", ");
 
         return ret;
-    };
+    }
 
     ///
     this(return scope ref PrettyPrint other) scope {
@@ -62,6 +81,11 @@ export @safe nothrow @nogc:
 
             this.handle(builder, arg, useQuotes);
         }
+    }
+
+    ///
+    void emitPrefix(scope StringBuilder_UTF8 builder, bool useSuffix = false) {
+        this.handlePrefix(builder, false, true, useSuffix);
     }
 
     /*private:*/
@@ -96,8 +120,10 @@ export @safe nothrow @nogc:
             }) || __traits(compiles, { StringBuilder_UTF8 builder; T value; value.toStringPretty(&builder.put); }));
 
     void handlePrefix(scope StringBuilder_UTF8 builder, bool onlyRepeat = false, bool usePrefix = true, bool useSuffix = true) {
-        if(builder.length == 0 && this.startWithoutPrefix)
+        if(this.startWithoutPrefix) {
+            this.startWithoutPrefix = false;
             return;
+        }
 
         if(!onlyRepeat && usePrefix)
             builder ~= this.prefix;
