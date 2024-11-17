@@ -39,7 +39,11 @@ struct PrettyPrint {
     ///
     bool useQuotes;
     ///
+    bool useInitialTypeName;
+    ///
     bool startWithoutPrefix;
+    ///
+    bool startWithoutThePrefixSuffix;
 
 export @safe nothrow @nogc:
 
@@ -51,6 +55,7 @@ export @safe nothrow @nogc:
         ret.prefixSuffix = String_UTF8("- ");
         ret.betweenArgumentDivider = String_UTF8(", ");
         ret.betweenValueDivider = String_UTF8(", ");
+        ret.useInitialTypeName = true;
 
         return ret;
     }
@@ -79,7 +84,7 @@ export @safe nothrow @nogc:
             if(i > 0 && !this.betweenArgumentDivider.isNull)
                 builder ~= this.betweenArgumentDivider;
 
-            this.handle(builder, arg, useQuotes);
+            this.handle(builder, arg, this.useQuotes, this.useInitialTypeName);
         }
     }
 
@@ -134,7 +139,9 @@ export @safe nothrow @nogc:
             }
         }
 
-        if(!onlyRepeat && useSuffix)
+        if (startWithoutThePrefixSuffix)
+            startWithoutThePrefixSuffix = false;
+        else if(!onlyRepeat && useSuffix)
             builder ~= this.prefixSuffix;
     }
 

@@ -391,7 +391,9 @@ export:
             }
 
             sink.formattedWrite(FQN ~ "@{:p}(length={:d} => ", cast(void*)this.state.sliceMemory, this.length);
+
             pp.startWithoutPrefix = true;
+            pp.useInitialTypeName = false;
 
             pp(sink, this.unsafeGetLiteral());
             sink ~= ")";
