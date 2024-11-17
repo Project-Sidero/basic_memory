@@ -3,6 +3,7 @@ import sidero.base.allocators;
 import sidero.base.traits;
 import sidero.base.errors;
 import sidero.base.attributes;
+import sidero.base.text;
 
 export:
 
@@ -414,27 +415,75 @@ export:
                 ValueType)*)other.state));
     }
 
-    private {
-        @PrettyPrintIgnore HashMapImpl!(RealKeyType, ValueType)* state;
+    ///
+    String_UTF8 toString(RCAllocator allocator = RCAllocator.init) @trusted {
+        StringBuilder_UTF8 ret = StringBuilder_UTF8(allocator);
+        toString(ret);
+        return ret.asReadOnly;
+    }
 
-        void setupState() scope @trusted {
-            if(!isNull)
-                return;
+    ///
+    void toString(Sink)(scope ref Sink sink) @trusted {
+        if(isNull)
+            sink ~= "HashMap!(" ~ KeyType.stringof ~ ", " ~ ValueType.stringof ~ ")@null";
+        else
+            sink.formattedWrite("HashMap!(" ~ KeyType.stringof ~ ", " ~ ValueType.stringof ~ ")@{:p}(length={:d}",
+                    cast(void*)this.state, this.length);
+    }
 
-            RCAllocator allocator = globalAllocator();
-            state = allocator.make!(HashMapImpl!(RealKeyType, ValueType))(allocator, RCAllocator.init);
+    ///
+    String_UTF8 toStringPretty(RCAllocator allocator = RCAllocator.init) @trusted {
+        StringBuilder_UTF8 ret = StringBuilder_UTF8(allocator);
+        toStringPretty(ret);
+        return ret.asReadOnly;
+    }
+
+    ///
+    void toStringPretty(Sink)(scope ref Sink sink) @trusted {
+        enum FQN = __traits(fullyQualifiedName, HashMap);
+
+        if(isNull) {
+            sink ~= FQN ~ "@null";
+            return;
         }
 
-        void willModify() scope {
-            if(state.copyOnWrite) {
-                this = this.dup;
-            }
+        sink.formattedWrite(FQN ~ "@{:p}(length={:d} =>\n", cast(void*)this.state, this.length);
+
+        PrettyPrint pp = PrettyPrint.defaults;
+        pp.useQuotes = true;
+
+        foreach(ref k, ref v; this) {
+            assert(k);
+            assert(v);
+
+            sink.formattedWrite("    {:s}: ", k);
+            pp(sink, v);
+            sink ~= "\n";
         }
 
-        void debugPosition() scope {
-            if(!isNull)
-                state.debugPosition(null);
+        sink ~= ")";
+    }
+
+private:
+    @PrettyPrintIgnore HashMapImpl!(RealKeyType, ValueType)* state;
+
+    void setupState() scope @trusted {
+        if(!isNull)
+            return;
+
+        RCAllocator allocator = globalAllocator();
+        state = allocator.make!(HashMapImpl!(RealKeyType, ValueType))(allocator, RCAllocator.init);
+    }
+
+    void willModify() scope {
+        if(state.copyOnWrite) {
+            this = this.dup;
         }
+    }
+
+    void debugPosition() scope {
+        if(!isNull)
+            state.debugPosition(null);
     }
 }
 
@@ -782,13 +831,15 @@ struct HashMapImpl(RealKeyType, ValueType) {
 
         void printNode(Node* node) {
             if((node.previous is null || node.previous.previous is null) && (node.next is null || node.next.next is null))
-                printf("%p = refcount %zd\n", node, node.refCount);
+                printf("%p = refcount %zd", node, node.refCount);
             else if(node.previous is null || node.previous.previous is null)
-                printf("%p =$ refcount %zd\n", node, node.refCount);
+                printf("%p =$ refcount %zd", node, node.refCount);
             else if(node.next is null || node.next.next is null)
-                printf("%p $= refcount %zd\n", node, node.refCount);
+                printf("%p $= refcount %zd", node, node.refCount);
             else
-                printf("%p $=$ refcount %zd\n", node, node.refCount);
+                printf("%p $=$ refcount %zd", node, node.refCount);
+
+            printf("\n");
         }
 
         foreach(ref bucket; nodeList.buckets) {

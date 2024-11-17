@@ -3,6 +3,7 @@ import sidero.base.allocators;
 import sidero.base.attributes;
 import sidero.base.traits;
 import sidero.base.errors;
+import sidero.base.text;
 
 export:
 
@@ -306,6 +307,61 @@ export:
             return 1;
         return (cast(DuplicateHashMapImpl!(RealKeyType, ValueType)*)state).compareExternal((cast(DuplicateHashMapImpl!(RealKeyType,
                 ValueType)*)other.state));
+    }
+
+    ///
+    String_UTF8 toString(RCAllocator allocator = RCAllocator.init) @trusted {
+        StringBuilder_UTF8 ret = StringBuilder_UTF8(allocator);
+        toString(ret);
+        return ret.asReadOnly;
+    }
+
+    ///
+    void toString(Sink)(scope ref Sink sink) @trusted {
+        if(isNull)
+            sink ~= "DuplicateHashMap!(" ~ KeyType.stringof ~ ", " ~ ValueType.stringof ~ ")@null";
+        else
+            sink.formattedWrite("DuplicateHashMap!(" ~ KeyType.stringof ~ ", " ~ ValueType.stringof ~ ")@{:p}(length={:d}",
+                    cast(void*)this.state, this.length);
+    }
+
+    ///
+    String_UTF8 toStringPretty(RCAllocator allocator = RCAllocator.init) @trusted {
+        StringBuilder_UTF8 ret = StringBuilder_UTF8(allocator);
+        toStringPretty(ret);
+        return ret.asReadOnly;
+    }
+
+    ///
+    void toStringPretty(Sink)(scope ref Sink sink) @trusted {
+        enum FQN = __traits(fullyQualifiedName, DuplicateHashMap);
+
+        if(isNull) {
+            sink ~= FQN ~ "@null";
+            return;
+        }
+
+        sink.formattedWrite(FQN ~ "@{:p}(length={:d} =>\n", cast(void*)this.state, this.length);
+
+        PrettyPrint pp = PrettyPrint.defaults;
+        pp.useQuotes = true;
+        pp.depth = 2;
+
+        foreach(ref k; this) {
+            assert(k);
+
+            sink.formattedWrite("    {:s}:\n", k);
+
+            foreach(ref v; this[k]) {
+                sink ~= "        - ";
+                pp(sink, v);
+                sink ~= "\n";
+            }
+
+            sink ~= "\n";
+        }
+
+        sink ~= ")";
     }
 
     ///

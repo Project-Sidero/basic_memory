@@ -5,6 +5,7 @@ import sidero.base.allocators;
 import sidero.base.traits;
 import sidero.base.errors;
 import sidero.base.attributes;
+import sidero.base.text;
 
 export:
 
@@ -442,13 +443,13 @@ nothrow @nogc:
 
         int handle(scope int delegate(ref Type) @safe nothrow @nogc del) {
             if(other.empty)
-            return 1;
+                return 1;
 
             if(auto v = other.front) {
                 int ret = del(v);
 
                 if(ret)
-                return ret;
+                    return ret;
             }
 
             other.popFront;
@@ -754,13 +755,13 @@ nothrow @nogc:
 
         int handle(scope int delegate(ref Type) @safe nothrow @nogc del) {
             if(other.empty)
-            return 1;
+                return 1;
 
             if(auto v = other.front) {
                 int ret = del(v);
 
                 if(ret)
-                return ret;
+                    return ret;
             }
 
             other.popFront;
@@ -855,13 +856,13 @@ nothrow @nogc:
 
         int handle(scope int delegate(ref Type) @safe nothrow @nogc del) {
             if(other.empty)
-            return 1;
+                return 1;
 
             if(auto v = other.front) {
                 int ret = del(v);
 
                 if(ret)
-                return ret;
+                    return ret;
             }
 
             other.popFront;
@@ -962,13 +963,13 @@ nothrow @nogc:
 
         int handle(scope int delegate(ref Type) @safe nothrow @nogc del) {
             if(other.empty)
-            return 1;
+                return 1;
 
             if(auto v = other.front) {
                 int ret = del(v);
 
                 if(ret)
-                return ret;
+                    return ret;
             }
 
             other.popFront;
@@ -1094,6 +1095,56 @@ nothrow @nogc:
 
         cll.remove(0, 2);
         assert(cll.length == 0);
+    }
+
+    @PrintIgnore @PrettyPrintIgnore {
+        ///
+        String_UTF8 toString(RCAllocator allocator = RCAllocator.init) @trusted {
+            StringBuilder_UTF8 ret = StringBuilder_UTF8(allocator);
+            toString(ret);
+            return ret.asReadOnly;
+        }
+
+        ///
+        void toString(Sink)(scope ref Sink sink) @trusted {
+            if(isNull)
+                sink ~= "ConcurrentLinkedList!(" ~ Type.stringof ~ ")@null";
+            else
+                sink.formattedWrite("ConcurrentLinkedList!(" ~ Type.stringof ~ ")@{:p}(length={:d})", cast(void*)this.state, this.length);
+        }
+
+        ///
+        String_UTF8 toStringPretty(RCAllocator allocator = RCAllocator.init) @trusted {
+            StringBuilder_UTF8 ret = StringBuilder_UTF8(allocator);
+            toStringPretty(ret);
+            return ret.asReadOnly;
+        }
+
+        ///
+        void toStringPretty(Sink)(scope ref Sink sink) @trusted {
+            enum FQN = __traits(fullyQualifiedName, ConcurrentLinkedList);
+
+            if(isNull) {
+                sink ~= FQN ~ "@null";
+                return;
+            }
+
+            sink.formattedWrite(FQN ~ "@{:p}(length={:d} =>\n", cast(void*)this.state, this.length);
+
+            ConcurrentLinkedList self = this.save;
+            PrettyPrint pp = PrettyPrint.defaults;
+            pp.useQuotes = true;
+
+            foreach(ref v; self) {
+                assert(v);
+
+                sink ~= "    - ";
+                pp(sink, v);
+                sink ~= "\n";
+            }
+
+            sink ~= ")";
+        }
     }
 
 private:
