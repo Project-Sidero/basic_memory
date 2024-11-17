@@ -7,29 +7,30 @@ import sidero.base.traits;
 
 struct Writer {
     uint prettyPrintDepth;
-    bool prettyPrintActive, deliminateArguments, setPrettyDelim;
+    bool prettyPrintActive, deliminateArguments;
+    bool haveSetDeliminateArguments;
     bool isFirstPrettyPrint;
     bool useErrorStream;
+
+    bool wasDeliminted;
+    bool gotPrintable;
 
 export @safe nothrow @nogc:
 
     void handle(Args...)(scope Args args) @trusted {
         static if (Args.length == 1) {
             alias ArgType = typeof(args[0]);
-            handleOneWrite!ArgType(this, 0, args[0]);
+            handleOneWrite!ArgType(this, args[0]);
         } else {
-            size_t gotPrintable, printing;
-            bool wasDeliminted;
-
             static foreach (i; 0 .. Args.length) {
                 {
                     alias ArgType = typeof(args[i]);
 
                     static if (!is(ArgType == InBandInfo)) {
                         if (deliminateArguments) {
-                            if (gotPrintable > 0)
+                            if (gotPrintable)
                                 rawWriteImpl(String_UTF8(", "), useErrorStream);
-                            gotPrintable++;
+                            gotPrintable = true;
                             wasDeliminted = true;
                         } else if (wasDeliminted) {
                             static if (!(isAnyString!ArgType)) {
@@ -43,13 +44,10 @@ export @safe nothrow @nogc:
                         }
                     }
 
-                    handleOneWrite!ArgType(this, printing, args[i]);
-
-                    static if (!is(ArgType == InBandInfo))
-                        printing++;
+                    handleOneWrite!ArgType(this, args[i]);
 
                     if (!deliminateArguments && is(ArgType == InBandInfo))
-                        gotPrintable = 0;
+                        gotPrintable = false;
                 }
             }
         }
@@ -60,8 +58,8 @@ export @safe nothrow @nogc:
 
 private:
 
-void handleOneWrite(Type)(scope ref Writer writer, size_t argumentId, scope ref Type arg) {
-    static void perform(scope ref Writer writer, size_t argumentId, scope ref Type arg) {
+void handleOneWrite(Type)(scope ref Writer writer, scope ref Type arg) {
+    static void perform(scope ref Writer writer, scope ref Type arg) {
         static if (isAnyString!Type) {
             if (writer.deliminateArguments) {
                 StringBuilder_UTF8 builder;
@@ -88,20 +86,23 @@ void handleOneWrite(Type)(scope ref Writer writer, size_t argumentId, scope ref 
                 writer.prettyPrintDepth = 0;
                 writer.prettyPrintActive = false;
                 writer.deliminateArguments = false;
-                writer.setPrettyDelim = false;
                 writer.isFirstPrettyPrint = true;
+                writer.haveSetDeliminateArguments = false;
+
+                writer.wasDeliminted = false;
             }
 
             if (!arg.prettyPrintActive.isNull)
                 writer.prettyPrintActive = arg.prettyPrintActive.get;
-            if (!arg.deliminateArguments.isNull)
+            if (!arg.deliminateArguments.isNull) {
                 writer.deliminateArguments = arg.deliminateArguments.get;
-            if (!writer.setPrettyDelim && !arg.prettyPrintActive.isNull && arg.deliminateArguments.isNull) {
-                writer.deliminateArguments = arg.prettyPrintActive.get;
-                writer.setPrettyDelim = true;
+                writer.haveSetDeliminateArguments = true;
             }
             if (!arg.useError.isNull)
                 writer.useErrorStream = arg.useError.get;
+
+            if (!writer.haveSetDeliminateArguments && !arg.prettyPrintActive.isNull && arg.deliminateArguments.isNull)
+                writer.deliminateArguments = writer.prettyPrintActive;
 
             rawWriteImpl(arg, writer.useErrorStream);
         } else {
@@ -110,7 +111,7 @@ void handleOneWrite(Type)(scope ref Writer writer, size_t argumentId, scope ref 
             if (writer.prettyPrintActive) {
                 PrettyPrint prettyPrint = PrettyPrint.defaults;
                 prettyPrint.useQuotes = writer.deliminateArguments;
-                prettyPrint.startWithoutPrefix = argumentId == 0 || !writer.deliminateArguments;
+                prettyPrint.startWithoutPrefix = !writer.deliminateArguments;
 
                 if (!writer.isFirstPrettyPrint)
                     builder ~= "\n";
@@ -126,5 +127,5 @@ void handleOneWrite(Type)(scope ref Writer writer, size_t argumentId, scope ref 
         }
     }
 
-    (cast(void function(scope ref Writer, size_t, scope ref Type)@safe nothrow @nogc)&perform)(writer, argumentId, arg);
+    (cast(void function(scope ref Writer, scope ref Type)@safe nothrow @nogc)&perform)(writer, arg);
 }
