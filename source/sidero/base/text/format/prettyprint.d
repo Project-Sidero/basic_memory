@@ -716,82 +716,66 @@ export @safe nothrow @nogc:
     void handleSlice(Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useName) @trusted {
         alias SubType = Unqual!(typeof(input[0]));
         enum EntryName = __traits(fullyQualifiedName, SubType);
+        this.handlePrefix(builder);
 
-        bool handled;
+        if(useName) {
+            builder ~= EntryName;
 
-        static if(isBasicType!SubType) {
-            if(input.length <= 5) {
-                if(useName) {
-                    builder ~= EntryName;
-
-                    static if(isDynamicArray!Type) {
-                        if(input is null)
-                            builder ~= "@null"c;
-                        else
-                            builder.formattedWrite("@{:p}", cast(void*)input.ptr);
-                    }
-                }
-
-                static if(!is(SubType == void)) {
-                    builder ~= "["c;
-
-                    foreach(i, ref entry; input) {
-                        if(i > 0 && !this.betweenValueDivider.isNull)
-                            builder ~= this.betweenValueDivider;
-                        this.handle(builder, entry);
-                    }
-
-                    builder ~= "]"c;
-                } else {
-                    builder ~= "=0x["c;
-                    auto temp = cast()input[];
-
-                    while(temp.length > 0) {
-                        builder.formattedWrite("{:.2X}", *cast(const(ubyte)*)&temp[0]);
-                        temp = temp[1 .. $];
-                    }
-
-                    builder ~= "]"c;
-                }
-
-                handled = true;
+            static if(isDynamicArray!Type) {
+                if(input is null)
+                    builder ~= "@null"c;
+                else
+                    builder.formattedWrite("@{:p}", cast(void*)input.ptr);
             }
         }
 
-        if(!handled) {
-            if(useName) {
-                builder ~= EntryName;
+        static if(!is(SubType == void)) {
+            builder ~= "[\n"c;
+            this.depth++;
 
-                static if(isDynamicArray!Type) {
-                    if(input is null)
-                        builder ~= "@null"c;
-                    else
-                        builder.formattedWrite("@{:p}", cast(void*)input.ptr);
-                }
-            }
-
-            static if(!is(SubType == void)) {
-                builder ~= "[\n"c;
-                this.depth++;
-
-                foreach(i, ref entry; input) {
-                    handlePrefix(builder);
-                    this.handle(builder, entry, true, true, true);
+            foreach(i, ref entry; input) {
+                if(i > 0 && !this.betweenValueDivider.isNull) {
+                    builder ~= this.betweenValueDivider;
                     builder ~= "\n"c;
                 }
 
-                this.depth--;
-                builder ~= "]"c;
-            } else {
-                builder ~= "=0x"c;
-                auto temp = cast()input[];
+                handlePrefix(builder);
+                this.handle(builder, entry, true, true, true);
+            }
+
+            this.depth--;
+            builder ~= "]"c;
+        } else {
+            builder ~= "=0x"c;
+            auto temp = cast()input[];
+
+            if(temp.length <= 20) {
+                // fairly random number (40) / 2
 
                 while(temp.length > 0) {
                     builder.formattedWrite("{:.2X}", *cast(const(ubyte)*)&temp[0]);
                     temp = temp[1 .. $];
                 }
+            } else {
+                size_t count;
+                this.depth++;
 
-                builder ~= "]"c;
+                builder ~= "\n"c;
+                handlePrefix(builder);
+
+                while(temp.length > 0) {
+                    if(count == 20) {
+                        count = 0;
+                        builder ~= "\n"c;
+                        handlePrefix(builder);
+                    } else
+                        count++;
+
+                    builder.formattedWrite("{:.2X}", *cast(const(ubyte)*)&temp[0]);
+                    temp = temp[1 .. $];
+                }
+
+                this.depth--;
             }
         }
     }
