@@ -348,8 +348,6 @@ export:
         pp.depth = 2;
 
         foreach(ref k; this) {
-            assert(k);
-
             sink.formattedWrite("    {:s}:\n", k);
 
             foreach(ref v; this[k]) {

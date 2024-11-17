@@ -644,7 +644,7 @@ bool writePointer(Builder, Input)(scope ref Builder output, scope Input input, s
             } else static if(__traits(compiles, typeof(*(Input.init)))) {
                 alias PointerAt = typeof(*(Input.init));
 
-                static if(isCopyable!PointerAt) {
+                static if(isCopyable!PointerAt && __traits(compiles, PointerAt.sizeof) && PointerAt.sizeof > 0) {
                     output ~= "("c;
                     formattedWriteImpl(output, String_UTF32.init, true, *input);
                     output ~= ")"c;
