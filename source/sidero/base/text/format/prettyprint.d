@@ -585,8 +585,8 @@ export @safe nothrow @nogc:
 
                                     PrettyPrint toCallPrettyPrint = this;
                                     toCallPrettyPrint.startWithoutPrefix = true;
-                                    toCallPrettyPrint.depth++;
                                     toCallPrettyPrint.useQuotes = true;
+                                    toCallPrettyPrint.depth--;
 
                                     static if(__traits(compiles, __traits(child, input, Symbols[SymbolId])(builder, toCallPrettyPrint))) {
                                         __traits(child, input, Symbols[SymbolId])(builder, toCallPrettyPrint);
