@@ -326,15 +326,16 @@ export:
     }
 
     ///
-    String_UTF8 toStringPretty() @trusted {
+    String_UTF8 toStringPretty(PrettyPrint pp) @trusted {
         StringBuilder_UTF8 ret = StringBuilder_UTF8();
-        toStringPretty(ret);
+        toStringPretty(ret, pp);
         return ret.asReadOnly;
     }
 
     ///
-    void toStringPretty(Sink)(scope ref Sink sink) @trusted {
+    void toStringPretty(Sink)(scope ref Sink sink, PrettyPrint pp) @trusted {
         enum FQN = __traits(fullyQualifiedName, DuplicateHashMap);
+        pp.emitPrefix(sink);
 
         if(isNull) {
             sink ~= FQN ~ "@null";
@@ -342,23 +343,30 @@ export:
         }
 
         sink.formattedWrite(FQN ~ "@{:p}(length={:d} =>\n", cast(void*)this.state, this.length);
-
-        PrettyPrint pp = PrettyPrint.defaults;
+        pp.depth++;
         pp.useQuotes = true;
-        pp.depth = 2;
 
         foreach(ref k; this) {
-            sink.formattedWrite("    {:s}:\n", k);
+            pp.startWithoutPrefix = false;
+            pp.emitPrefix(sink);
+            sink.formattedWrite("{:s}: ", k);
 
             foreach(ref v; this[k]) {
-                sink ~= "        - ";
+                pp.depth++;
+
+                pp.startWithoutPrefix = true;
                 pp(sink, v);
                 sink ~= "\n";
+
+                pp.depth--;
             }
 
             sink ~= "\n";
         }
 
+        pp.depth--;
+        pp.startWithoutPrefix = false;
+        pp.emitPrefix(sink);
         sink ~= ")";
     }
 

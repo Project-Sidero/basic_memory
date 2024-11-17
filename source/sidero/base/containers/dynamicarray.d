@@ -632,20 +632,36 @@ export:
 
         ///
         void toString(Sink)(scope ref Sink sink) @trusted {
-            sink.formattedWrite("", this.unsafeGetLiteral());
+            if (isNull) {
+                sink ~= "DynamicArray!(" ~ T.stringof ~ ")@null";
+                return;
+            }
+
+            sink.formattedWrite("DynamicArray!(" ~ T.stringof ~ ")@{:p}(length={:d})", cast(void*)this.state.sliceMemory, this.length);
         }
 
         ///
-        String_UTF8 toStringPretty() @trusted {
+        String_UTF8 toStringPretty(PrettyPrint pp) @trusted {
             StringBuilder_UTF8 ret = StringBuilder_UTF8();
-            toStringPretty(ret);
+            toStringPretty(ret, pp);
             return ret.asReadOnly;
         }
 
         ///
-        void toStringPretty(Sink)(scope ref Sink sink) @trusted {
-            PrettyPrint prettyPrint = PrettyPrint.defaults;
-            prettyPrint(sink, this.unsafeGetLiteral());
+        void toStringPretty(Sink)(scope ref Sink sink, PrettyPrint pp) @trusted {
+            enum FQN = __traits(fullyQualifiedName, DynamicArray);
+            pp.emitPrefix(sink);
+
+            if (isNull) {
+                sink ~= FQN ~ "@null";
+                return;
+            }
+
+            sink.formattedWrite(FQN ~ "@{:p}(length={:d} => ", cast(void*)this.state.sliceMemory, this.length);
+            pp.startWithoutPrefix = true;
+
+            pp(sink, this.unsafeGetLiteral());
+            sink ~= ")";
         }
     }
 
@@ -1008,7 +1024,6 @@ unittest {
 
         da1 = [1, 2, 3, 4, 5];
         assert(da1 == [1, 2, 3, 4, 5]);
-        assert(da1.toString().endsWith("[1, 2, 3, 4, 5]"));
 
         da1.reserve(64);
         assert(da1.capacity == 64 + 5);

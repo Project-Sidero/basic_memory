@@ -365,20 +365,36 @@ export:
 
         ///
         void toString(Sink)(scope ref Sink sink) @trusted {
-            sink.formattedWrite("", this.unsafeGetLiteral());
+            if (isNull) {
+                sink ~= "Slice!(" ~ T.stringof ~ ")@null";
+                return;
+            }
+
+            sink.formattedWrite("Slice!(" ~ T.stringof ~ ")@{:p}(length={:d})", cast(void*)this.state.sliceMemory, this.length);
         }
 
         ///
-        String_UTF8 toStringPretty() @trusted {
+        String_UTF8 toStringPretty(PrettyPrint pp) scope @trusted {
             StringBuilder_UTF8 ret = StringBuilder_UTF8();
-            toStringPretty(ret);
+            toStringPretty(ret, pp);
             return ret.asReadOnly;
         }
 
         ///
-        void toStringPretty(Sink)(scope ref Sink sink) @trusted {
-            PrettyPrint prettyPrint = PrettyPrint.defaults;
-            prettyPrint(sink, this.unsafeGetLiteral());
+        void toStringPretty(Sink)(scope ref Sink sink, PrettyPrint pp) scope @trusted {
+            enum FQN = __traits(fullyQualifiedName, Slice);
+            pp.emitPrefix(sink);
+
+            if (isNull) {
+                sink ~= FQN ~ "@null";
+                return;
+            }
+
+            sink.formattedWrite(FQN ~ "@{:p}(length={:d} => ", cast(void*)this.state.sliceMemory, this.length);
+            pp.startWithoutPrefix = true;
+
+            pp(sink, this.unsafeGetLiteral());
+            sink ~= ")";
         }
     }
 
