@@ -1015,7 +1015,7 @@ export @safe nothrow @nogc:
     }
 
     ///
-    String_UTF8 toString(return scope RCAllocator allocator = RCAllocator.init) scope const @trusted {
+    String_UTF8 toString() scope const @trusted {
         if(isNull)
             return String_UTF8.init;
         FilePathState* state = cast(FilePathState*)this.state;
@@ -1024,7 +1024,7 @@ export @safe nothrow @nogc:
         scope(exit)
             state.mutex.unlock;
 
-        return state.storage.asReadOnly(allocator);
+        return state.storage.asReadOnly();
     }
 
     ///

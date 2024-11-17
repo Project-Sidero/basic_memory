@@ -416,55 +416,53 @@ export:
                 (cast(ConcurrentHashMapImpl!(RealKeyType, ValueType)*)other.state));
     }
 
-    @PrintIgnore @PrettyPrintIgnore {
-        ///
-        String_UTF8 toString(RCAllocator allocator = RCAllocator.init) @trusted {
-            StringBuilder_UTF8 ret = StringBuilder_UTF8(allocator);
-            toString(ret);
-            return ret.asReadOnly;
+    ///
+    String_UTF8 toString() @trusted {
+        StringBuilder_UTF8 ret = StringBuilder_UTF8();
+        toString(ret);
+        return ret.asReadOnly;
+    }
+
+    ///
+    void toString(Sink)(scope ref Sink sink) @trusted {
+        if(isNull)
+            sink ~= "ConcurrentHashMapImpl!(" ~ KeyType.stringof ~ ", " ~ ValueType.stringof ~ ")@null";
+        else
+            sink.formattedWrite("ConcurrentHashMapImpl!(" ~ KeyType.stringof ~ ", " ~ ValueType.stringof ~ ")@{:p}(length={:d}",
+                    cast(void*)this.state, this.length);
+    }
+
+    ///
+    String_UTF8 toStringPretty() @trusted {
+        StringBuilder_UTF8 ret = StringBuilder_UTF8();
+        toStringPretty(ret);
+        return ret.asReadOnly;
+    }
+
+    ///
+    void toStringPretty(Sink)(scope ref Sink sink) @trusted {
+        enum FQN = __traits(fullyQualifiedName, ConcurrentHashMapImpl);
+
+        if(isNull) {
+            sink ~= FQN ~ "@null";
+            return;
         }
 
-        ///
-        void toString(Sink)(scope ref Sink sink) @trusted {
-            if(isNull)
-                sink ~= "ConcurrentHashMapImpl!(" ~ KeyType.stringof ~ ", " ~ ValueType.stringof ~ ")@null";
-            else
-                sink.formattedWrite("ConcurrentHashMapImpl!(" ~ KeyType.stringof ~ ", " ~ ValueType.stringof ~ ")@{:p}(length={:d}",
-                        cast(void*)this.state, this.length);
+        sink.formattedWrite(FQN ~ "@{:p}(length={:d} =>\n", cast(void*)this.state, this.length);
+
+        PrettyPrint pp = PrettyPrint.defaults;
+        pp.useQuotes = true;
+
+        foreach(ref k, ref v; this) {
+            assert(k);
+            assert(v);
+
+            sink.formattedWrite("    {:s}: ", k);
+            pp(sink, v);
+            sink ~= "\n";
         }
 
-        ///
-        String_UTF8 toStringPretty(RCAllocator allocator = RCAllocator.init) @trusted {
-            StringBuilder_UTF8 ret = StringBuilder_UTF8(allocator);
-            toStringPretty(ret);
-            return ret.asReadOnly;
-        }
-
-        ///
-        void toStringPretty(Sink)(scope ref Sink sink) @trusted {
-            enum FQN = __traits(fullyQualifiedName, ConcurrentHashMapImpl);
-
-            if(isNull) {
-                sink ~= FQN ~ "@null";
-                return;
-            }
-
-            sink.formattedWrite(FQN ~ "@{:p}(length={:d} =>\n", cast(void*)this.state, this.length);
-
-            PrettyPrint pp = PrettyPrint.defaults;
-            pp.useQuotes = true;
-
-            foreach(ref k, ref v; this) {
-                assert(k);
-                assert(v);
-
-                sink.formattedWrite("    {:s}: ", k);
-                pp(sink, v);
-                sink ~= "\n";
-            }
-
-            sink ~= ")";
-        }
+        sink ~= ")";
     }
 
 private:
