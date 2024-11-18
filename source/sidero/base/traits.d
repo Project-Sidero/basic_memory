@@ -23,6 +23,13 @@ enum isUTFBuilder(String) = is(String == StringBuilder_UTF8) || is(String == Str
 enum isUTF(String) = isUTFReadOnly!String || isUTFBuilder!String;
 
 ///
+enum isUTF8(String) = is(String : const(char)[]) || is(String == String_UTF8) || is(String == StringBuilder_UTF8);
+///
+enum isUTF16(String) = is(String : const(wchar)[]) || is(String == String_UTF16) || is(String == StringBuilder_UTF16);
+///
+enum isUTF32(String) = is(String : const(dchar)[]) || is(String == String_UTF32) || is(String == StringBuilder_UTF32);
+
+///
 enum isAnyPointer(Type) = (isPointer!Type && !(isFunctionPointer!Type || isDelegate!Type)) || isDynamicArray!Type ||
     isAssociativeArray!Type || is(Type == class);
 

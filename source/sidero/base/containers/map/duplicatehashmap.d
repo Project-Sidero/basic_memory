@@ -344,7 +344,6 @@ export:
 
         sink.formattedWrite(FQN ~ "@{:p}(length={:d} =>\n", cast(void*)this.state, this.length);
         pp.depth++;
-        pp.useQuotes = true;
 
         foreach(ref k; this) {
             pp.startWithoutPrefix = false;

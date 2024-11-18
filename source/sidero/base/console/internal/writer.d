@@ -110,7 +110,6 @@ void handleOneWrite(Type)(scope ref Writer writer, scope ref Type arg) {
 
             if (writer.prettyPrintActive) {
                 PrettyPrint prettyPrint = PrettyPrint.defaults;
-                prettyPrint.useQuotes = writer.deliminateArguments;
                 prettyPrint.startWithoutPrefix = !writer.deliminateArguments;
 
                 if (!writer.isFirstPrettyPrint)

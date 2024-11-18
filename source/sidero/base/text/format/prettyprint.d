@@ -4,6 +4,22 @@ import sidero.base.errors;
 import sidero.base.traits;
 import sidero.base.attributes;
 
+unittest {
+    import sidero.base.console;
+    import sidero.base.allocators;
+
+    StringBuilder_UTF8 builder = StringBuilder_UTF8(RCAllocator.init);
+    PrettyPrint pp = PrettyPrint.defaults;
+
+    int[] array = [1, 2, 3];
+    string str = "abc";
+    void function() funcptr;
+    void delegate() del;
+
+    pp(builder, array, str, funcptr, del);
+    writeln(builder);
+}
+
 export @safe nothrow @nogc:
 
 /**
@@ -36,8 +52,6 @@ struct PrettyPrint {
 
     ///
     uint depth;
-    ///
-    bool useQuotes;
     ///
     bool useInitialTypeName;
     ///
@@ -77,14 +91,15 @@ export @safe nothrow @nogc:
 
     ///
     void opCall(Args...)(scope StringBuilder_UTF8 builder, scope Args args) @trusted {
-        if(builder.length == 0 || builder.endsWith("\n"))
-            this.handlePrefix(builder);
-
         foreach(i, ref arg; args) {
-            if(i > 0 && !this.betweenArgumentDivider.isNull)
-                builder ~= this.betweenArgumentDivider;
+            if(i > 0) {
+                if (!this.betweenArgumentDivider.isNull)
+                    builder ~= this.betweenArgumentDivider;
 
-            this.handle(builder, arg, this.useQuotes, this.useInitialTypeName);
+                builder ~= "\n";
+            }
+
+            this.handle(builder, arg, this.useInitialTypeName);
         }
     }
 
@@ -145,7 +160,7 @@ export @safe nothrow @nogc:
             builder ~= this.prefixSuffix;
     }
 
-    void handle(Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useQuotes = true, bool useName = true,
+    void handle(Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useName = true,
             bool forcePrint = false) @trusted {
         import sidero.base.text.format.rawwrite;
 
@@ -162,83 +177,63 @@ export @safe nothrow @nogc:
                     builder ~= this.betweenValueDivider;
             }
 
-            static if(isSomeString!ActualType) {
-                handleStringSlice(builder, input, useQuotes);
-            } else static if(isReadOnlyString!ActualType || isBuilderString!ActualType) {
-                handleString(builder, input, useQuotes);
+            static if(isAnyString!ActualType) {
+                handleString(builder, input);
             } else static if(isStaticArray!ActualType && (isSomeString!(typeof(ActualType.init[])))) {
                 auto temp = input[];
-                this.handle(builder, temp, useQuotes, useName, forcePrint);
-            } else static if(isFunctionPointer!ActualType) {
+                this.handle(builder, temp, useName, forcePrint);
+            } else static if(isFunctionPointer!ActualType || isDelegate!ActualType) {
                 handleFunctionPointer(builder, input);
             } else static if(isPointer!ActualType && __traits(compiles, typeof(*input))) {
                 handlePointer(builder, input);
             } else static if(is(ActualType : Result!WrappedType, WrappedType) || is(ActualType : ResultReference!WrappedType, WrappedType)) {
-                handleResult!WrappedType(builder, input, useQuotes, useName, forcePrint);
+                handleResult!WrappedType(builder, input, useName, forcePrint);
             } else static if(is(ActualType == struct) || is(ActualType == class)) {
-                handleStructClass(builder, input, useQuotes, useName, forcePrint);
+                handleStructClass(builder, input, useName, forcePrint);
             } else static if(isArray!ActualType) {
                 handleSlice(builder, input, useName);
             } else static if(isAssociativeArray!ActualType) {
                 handleAA(builder, input, useName);
             } else static if(is(ActualType == enum)) {
-                handleEnum(builder, input, useQuotes, useName, forcePrint);
+                handleEnum(builder, input, useName, forcePrint);
             } else static if(is(ActualType == char) || is(ActualType == wchar) || is(ActualType == dchar)) {
-                rawWrite(builder, input, FormatSpecifier.init, useQuotes);
+                rawWrite(builder, input, FormatSpecifier.init);
             } else {
                 builder.formattedWrite(""c, input);
             }
         } else {
-            handle(builder, *cast(ActualType*)&input, useQuotes, useName, forcePrint);
+            handle(builder, *cast(ActualType*)&input, useName, forcePrint);
         }
     }
 
-    void handleStringSlice(Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useQuotes = true) {
-        if(input is null) {
-            builder ~= "null"c;
-            return;
-        }
-
-        if(useQuotes)
-            builder ~= "\""c;
+    void handleString(Type)(scope StringBuilder_UTF8 builder, scope ref Type input) {
+        this.handlePrefix(builder);
+        builder ~= "\""c;
 
         size_t oldOffset = builder.length;
         builder ~= cast()input;
-        builder[oldOffset .. $].escape(useQuotes ? '"' : 0);
+        builder[oldOffset .. $].escape('"');
 
-        if(useQuotes)
+        static if (isUTF8!Type)
+            builder ~= "\"c"c;
+        else static if (isUTF16!Type)
+            builder ~= "\"w"c;
+        else static if (isUTF32!Type)
+            builder ~= "\"d"c;
+        else
             builder ~= "\""c;
     }
 
-    void handleString(Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useQuotes = true) {
-        if(input.isNull) {
-            builder ~= "null"c;
-            return;
-        }
+    void handleFunctionPointer(Type)(scope StringBuilder_UTF8 builder, scope ref Type input) @trusted {
+        enum FQN = __traits(fullyQualifiedName, Type);
 
-        if(useQuotes)
-            builder ~= "\""c;
+        this.handlePrefix(builder);
+        builder ~= "(" ~ FQN;
 
-        size_t oldOffset = builder.length;
-        builder ~= cast()input;
-        builder[oldOffset .. $].escape(useQuotes ? '"' : 0);
-
-        if(useQuotes)
-            builder ~= "\""c;
-    }
-
-    void handleFunctionPointer(Type)(scope StringBuilder_UTF8 builder, scope ref Type input) {
-        builder ~= Type.stringof;
-
-        if(input is null) {
-            builder ~= "@null"c;
-            return;
-        }
-
-        static if(is(Type == function)) {
-            builder.formattedWrite("@{:p}"c, cast(void*)input);
-        } else static if(is(Type == delegate)) {
-            builder.formattedWrite("@(ptr={:p}, funcptr={:p})"c, input.ptr, input.funcptr);
+        static if(isFunctionPointer!Type) {
+            builder.formattedWrite(")@{:p}"c, cast(void*)input);
+        } else {
+            builder.formattedWrite(")@(ptr={:p}, funcptr={:p})"c, input.ptr, input.funcptr);
         }
     }
 
@@ -278,14 +273,14 @@ export @safe nothrow @nogc:
         }
     }
 
-    void handleResult(WrappedType, Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useQuotes,
+    void handleResult(WrappedType, Type)(scope StringBuilder_UTF8 builder, scope ref Type input,
             bool useName, bool forcePrint) {
         if(input && !input.isNull) {
             // ok print the thing
 
             static if(!is(WrappedType == void)) {
                 if(input) {
-                    this.handle(builder, input.get(), true, useName, forcePrint);
+                    this.handle(builder, input.get(), useName, forcePrint);
                 }
                 return;
             }
@@ -294,7 +289,7 @@ export @safe nothrow @nogc:
         builder.formattedWrite(""c, input);
     }
 
-    void handleStructClass(Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useQuotes, bool useName, bool forcePrint) @trusted {
+    void handleStructClass(Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useName, bool forcePrint) @trusted {
         import std.meta : Filter;
 
         static FQN = __traits(fullyQualifiedName, Type);
@@ -592,7 +587,6 @@ export @safe nothrow @nogc:
 
                                     PrettyPrint toCallPrettyPrint = this;
                                     toCallPrettyPrint.startWithoutPrefix = true;
-                                    toCallPrettyPrint.useQuotes = true;
                                     toCallPrettyPrint.depth--;
 
                                     static if(__traits(compiles, __traits(child, input, Symbols[SymbolId])(builder, toCallPrettyPrint))) {
@@ -747,7 +741,7 @@ export @safe nothrow @nogc:
                 }
 
                 handlePrefix(builder);
-                this.handle(builder, entry, true, true, true);
+                this.handle(builder, entry, true, true);
             }
 
             this.depth--;
@@ -822,7 +816,7 @@ export @safe nothrow @nogc:
         builder ~= "]"c;
     }
 
-    void handleEnum(Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useQuotes, bool useName, bool forcePrint) {
+    void handleEnum(Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useName, bool forcePrint) {
         enum FQN = __traits(fullyQualifiedName, Type);
         builder ~= FQN;
         auto actualValue = cast(OriginalType!Type)input;
@@ -836,7 +830,7 @@ export @safe nothrow @nogc:
         }
 
         builder ~= "("c;
-        this.handle(builder, actualValue, useQuotes, useName, forcePrint);
+        this.handle(builder, actualValue, useName, forcePrint);
         builder ~= ")"c;
     }
 }

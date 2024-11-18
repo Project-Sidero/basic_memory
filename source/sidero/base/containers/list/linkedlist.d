@@ -1129,7 +1129,6 @@ nothrow @nogc:
 
             LinkedList self = this.save;
             pp.depth++;
-            pp.useQuotes = true;
 
             foreach(ref v; self) {
                 assert(v);
