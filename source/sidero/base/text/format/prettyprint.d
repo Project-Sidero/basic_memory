@@ -16,7 +16,34 @@ unittest {
     void function() funcptr;
     void delegate() del;
 
-    pp(builder, array, str, funcptr, del);
+    int i = 42;
+    int* iptr = &i;
+
+    Result!int r = 2;
+
+    int[int] aa;
+    aa[1] = 99;
+
+    enum E {
+        A,
+        B
+    }
+
+    struct S1 {
+        int field;
+        E e;
+    }
+
+    class C1 {
+        int field;
+        E e;
+    }
+
+    E e;
+    S1 s1;
+    C1 c1 = new C1;
+
+    pp(builder, array, str, funcptr, del, iptr, r, aa, e, s1, c1);
     writeln(builder);
 }
 
@@ -45,8 +72,6 @@ Never end what you write in a new line.
 struct PrettyPrint {
     /// For each line emit: prefix? prefixToRepeat{depth} prefixSuffix?
     String_UTF8 prefix, prefixToRepeat, prefixSuffix;
-    /// The text divider to emit for between arguments to pretty printer
-    String_UTF8 betweenArgumentDivider;
     /// The text divider to emit for between sequential values
     String_UTF8 betweenValueDivider;
 
@@ -67,7 +92,6 @@ export @safe nothrow @nogc:
 
         ret.prefixToRepeat = String_UTF8("\t");
         ret.prefixSuffix = String_UTF8("- ");
-        ret.betweenArgumentDivider = String_UTF8(", ");
         ret.betweenValueDivider = String_UTF8(", ");
         ret.useInitialTypeName = true;
 
@@ -93,8 +117,8 @@ export @safe nothrow @nogc:
     void opCall(Args...)(scope StringBuilder_UTF8 builder, scope Args args) @trusted {
         foreach(i, ref arg; args) {
             if(i > 0) {
-                if (!this.betweenArgumentDivider.isNull)
-                    builder ~= this.betweenArgumentDivider;
+                if(!this.betweenValueDivider.isNull)
+                    builder ~= this.betweenValueDivider;
 
                 builder ~= "\n";
             }
@@ -154,14 +178,13 @@ export @safe nothrow @nogc:
             }
         }
 
-        if (startWithoutThePrefixSuffix)
+        if(startWithoutThePrefixSuffix)
             startWithoutThePrefixSuffix = false;
         else if(!onlyRepeat && useSuffix)
             builder ~= this.prefixSuffix;
     }
 
-    void handle(Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useName = true,
-            bool forcePrint = false) @trusted {
+    void handle(Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useName = true, bool forcePrint = false) @trusted {
         import sidero.base.text.format.rawwrite;
 
         alias ActualType = Unqual!Type;
@@ -214,11 +237,11 @@ export @safe nothrow @nogc:
         builder ~= cast()input;
         builder[oldOffset .. $].escape('"');
 
-        static if (isUTF8!Type)
+        static if(isUTF8!Type)
             builder ~= "\"c"c;
-        else static if (isUTF16!Type)
+        else static if(isUTF16!Type)
             builder ~= "\"w"c;
-        else static if (isUTF32!Type)
+        else static if(isUTF32!Type)
             builder ~= "\"d"c;
         else
             builder ~= "\""c;
@@ -232,8 +255,10 @@ export @safe nothrow @nogc:
 
         static if(isFunctionPointer!Type) {
             builder.formattedWrite(")@{:p}"c, cast(void*)input);
+        } else if(input.ptr is input.funcptr) {
+            builder.formattedWrite(")@{:p}"c, input.ptr);
         } else {
-            builder.formattedWrite(")@(ptr={:p}, funcptr={:p})"c, input.ptr, input.funcptr);
+            builder.formattedWrite(")@{:p}:{:p}"c, input.ptr, input.funcptr);
         }
     }
 
@@ -241,40 +266,25 @@ export @safe nothrow @nogc:
         alias SubType = typeof(*input);
         enum EntryName = __traits(fullyQualifiedName, SubType);
 
+        this.handlePrefix(builder);
         builder ~= EntryName;
 
-        if(input !is null) {
-            static if(is(SubType == class) || isAssociativeArray!SubType || isDynamicArray!SubType) {
-                if(*input is null) {
-                    builder ~= "@null"c;
-                } else {
-                    static if(is(SubType == class) || isAssociativeArray!SubType) {
-                        builder.formattedWrite("@{:p}", cast(void*)input);
-                    } else static if(isArray!SubType) {
-                        builder.formattedWrite("@{:p}", cast(void*)input.ptr);
-                    }
-                }
-            }
+        static if(isArray!Type) {
+            builder.formattedWrite("@{:p}", cast(void*)input.ptr);
+        } else {
+            builder.formattedWrite("@{:p}", cast(void*)input);
         }
 
-        static if(!(is(SubType == struct) || isBasicType!SubType))
-            builder ~= "*"c;
-
-        if(input is null)
-            builder ~= "@null"c;
-        else {
-            builder.formattedWrite("@{:p}", cast(void*)input);
-
-            static if(!is(SubType == void)) {
-                builder ~= "("c;
-                this.handle(builder, *input, true, false);
-                builder ~= ")"c;
-            }
+        static if(!is(SubType == void)) {
+            builder ~= "("c;
+            this.handle(builder, *input, true);
+            builder ~= ")"c;
         }
     }
 
-    void handleResult(WrappedType, Type)(scope StringBuilder_UTF8 builder, scope ref Type input,
-            bool useName, bool forcePrint) {
+    void handleResult(WrappedType, Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useName, bool forcePrint) {
+        this.handlePrefix(builder);
+
         if(input && !input.isNull) {
             // ok print the thing
 
@@ -282,6 +292,7 @@ export @safe nothrow @nogc:
                 if(input) {
                     this.handle(builder, input.get(), useName, forcePrint);
                 }
+
                 return;
             }
         }
@@ -295,14 +306,13 @@ export @safe nothrow @nogc:
         static FQN = __traits(fullyQualifiedName, Type);
         static TypeIdentifierName = __traits(identifier, Type);
 
+        this.handlePrefix(builder);
+
         if(useName) {
             builder ~= FQN;
 
             static if(is(Type == class)) {
-                if(input is null)
-                    builder ~= "@null"c;
-                else
-                    builder.formattedWrite("@{:p}", cast(void*)input);
+                builder.formattedWrite("@{:p}", cast(void*)input);
             }
         }
 
@@ -314,106 +324,9 @@ export @safe nothrow @nogc:
         builder ~= "("c;
         this.depth++;
 
-        {
-            bool isFirst = true;
+        handleStructClassFields(builder, input);
 
-            static foreach(name; FieldNameTuple!Type) {
-                {
-                    alias member = __traits(getMember, input, name);
-                    enum accessible = __traits(getVisibility, member) != "private" && () {
-                        bool ret = true;
-
-                        foreach(attr; __traits(getAttributes, member)) {
-                            if(is(attr == PrettyPrintIgnore))
-                                ret = false;
-                        }
-
-                        return ret;
-                    }();
-                    bool ignore = !accessible;
-
-                    static foreach(name2; FieldNameTuple!Type) {
-                        {
-                            alias member2 = __traits(getMember, input, name2);
-
-                            if(name != name2) {
-                                ignore = ignore || member.offsetof == member2.offsetof;
-                            }
-                        }
-                    }
-
-                    static if(accessible) {
-                        if(!ignore) {
-                            if(!isFirst)
-                                builder ~= ", "c;
-                            else
-                                isFirst = false;
-
-                            builder ~= "\n"c;
-
-                            this.handlePrefix(builder, false, true, false);
-                            builder ~= name;
-                            builder ~= ": "c;
-                            this.handle(builder, __traits(getMember, input, name), true);
-                        }
-                    }
-                }
-            }
-
-            static if(is(Type == class)) {
-                static foreach(i, Base; BaseClassesTuple!Type) {
-                    handlePrefix(builder, false, true, false);
-                    builder ~= "---- "c;
-                    builder ~= __traits(fullyQualifiedName, Base);
-                    builder ~= " ----\n"c;
-                    isFirst = true;
-
-                    static foreach(name; FieldNameTuple!Base) {
-                        {
-                            alias member = __traits(getMember, input, name);
-                            enum accessible = __traits(getVisibility, member) != "private" && () {
-                                bool ret = true;
-
-                                foreach(attr; __traits(getAttributes, member)) {
-                                    if(is(attr == PrettyPrintIgnore))
-                                        ret = false;
-                                }
-
-                                return ret;
-                            }();
-                            bool ignore = !accessible;
-
-                            static foreach(name2; FieldNameTuple!Type) {
-                                {
-                                    alias member2 = __traits(getMember, input, name2);
-
-                                    if(name != name2) {
-                                        ignore = ignore || member.offsetof == member2.offsetof;
-                                    }
-                                }
-                            }
-
-                            static if(accessible) {
-                                if(!ignore) {
-                                    if(!isFirst)
-                                        builder ~= ", "c;
-                                    else
-                                        isFirst = false;
-
-                                    builder ~= "\n";
-                                    handlePrefix(builder, false, true, false);
-                                    builder ~= name;
-                                    builder ~= ": "c;
-                                    handle(builder, __traits(getMember, input, name), true);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        {
+        /+{
             bool isFirst = true;
 
             static foreach(name; FieldNameTuple!Type) {
@@ -529,9 +442,9 @@ export @safe nothrow @nogc:
                     }
                 }
             }
-        }
+        }+/
 
-        static if(isIterable!Type && (HaveNonStaticOpApply!Type || !__traits(hasMember, Type, "opApply"))) {
+        /+static if(isIterable!Type && (HaveNonStaticOpApply!Type || !__traits(hasMember, Type, "opApply"))) {
             if(builder.endsWith("("c))
                 builder ~= "["c;
             else
@@ -568,9 +481,9 @@ export @safe nothrow @nogc:
                 builder.clobberInsert(builder.length - 1, "]"c);
             else
                 builder ~= "]"c;
-        }
+        }+/
 
-        {
+        /+{
             bool hadToString;
 
             static if(haveToStringPretty!Type) {
@@ -704,7 +617,7 @@ export @safe nothrow @nogc:
                     }
                 }
             }
-        }
+        }+/
 
         this.depth--;
 
@@ -712,6 +625,80 @@ export @safe nothrow @nogc:
             builder.clobberInsert(builder.length - 1, ")"c);
         else
             builder ~= ")"c;
+    }
+
+    void handleStructClassFields(Type)(scope StringBuilder_UTF8 builder, scope ref Type input) {
+        bool isFirst = true;
+
+        enum IsFieldAccessible(Type2, string name, string[] FieldNames) = __traits(getVisibility, __traits(getMember, input, name)) == "private" || () {
+            alias member = __traits(getMember, cast(Type)input, name);
+            bool accessible = true;
+
+            foreach(attr; __traits(getAttributes, member)) {
+                if(is(attr == PrettyPrintIgnore))
+                    accessible = false;
+            }
+
+            if(accessible) {
+                static foreach(name2; FieldNames) {
+                    {
+                        alias member2 = __traits(getMember, cast(Type)input, name2);
+
+                        if(name != name2)
+                            accessible = accessible && member.offsetof != member2.offsetof;
+                    }
+                }
+            }
+
+            return accessible;
+        }();
+
+        void handleField(Type2, string name)() {
+            if(!isFirst)
+                builder ~= this.betweenValueDivider;
+            else
+                isFirst = false;
+
+            builder ~= "\n"c;
+            this.handlePrefix(builder, false, true, false);
+            builder ~= name;
+            builder ~= ": "c;
+
+            this.startWithoutPrefix = true;
+            this.handle(builder, __traits(getMember, cast(Type2)input, name));
+            this.startWithoutPrefix = false;
+        }
+
+        {
+            enum FieldNames = [FieldNameTuple!Type];
+
+            static foreach(name; FieldNames) {
+                if(IsFieldAccessible!(Type, name, FieldNames))
+                    handleField!(Type, name)();
+            }
+        }
+
+        static if(is(Type == class)) {
+            static foreach(i, Base; BaseClassesTuple!Type) {
+                builder ~= "\n";
+                handlePrefix(builder, false, true, false);
+                builder ~= "---- "c;
+                builder ~= __traits(fullyQualifiedName, Base);
+                builder ~= " ----"c;
+                isFirst = true;
+
+                enum FieldNames = [FieldNameTuple!Type];
+
+                static foreach(name; FieldNames) {
+                    if(IsFieldAccessible!(Base, name, FieldNames))
+                        handleField!(Base, name)();
+                }
+            }
+        }
+    }
+
+    void handleStructClassOverlappedFields(Type)(scope StringBuilder_UTF8 builder, scope ref Type input) {
+
     }
 
     void handleSlice(Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useName) @trusted {
@@ -781,13 +768,14 @@ export @safe nothrow @nogc:
         }
     }
 
-    void handleAA(Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useName) {
+    void handleAA(Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useName) @trusted {
         alias Key = KeyType!Type;
         alias Value = ValueType!Type;
         enum KeyName = __traits(fullyQualifiedName, Key);
         enum ValueName = __traits(fullyQualifiedName, Value);
 
         enum EntryName = ValueName ~ "[" ~ KeyName ~ "]";
+        this.handlePrefix(builder);
 
         if(useName) {
             builder ~= EntryName;
@@ -800,26 +788,29 @@ export @safe nothrow @nogc:
         version(D_BetterC) {
         } else {
             try {
-                foreach(key, ref value; input) {
-                    handlePrefix(builder);
-                    this.handle(key, true, true, true);
+                foreach(ref key, ref value; input) {
+                    this.emitPrefix(builder, false);
+                    this.handle(builder, key, true, true);
                     builder ~= ": "c;
 
-                    this.handle(value, true, true, true);
-                    builder ~= "\n"c;
+                    this.startWithoutPrefix = true;
+                    this.handle(builder, value, true, true);
                 }
             } catch(Exception) {
             }
         }
 
+        this.startWithoutPrefix = false;
         this.depth--;
         builder ~= "]"c;
     }
 
     void handleEnum(Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useName, bool forcePrint) {
         enum FQN = __traits(fullyQualifiedName, Type);
-        builder ~= FQN;
         auto actualValue = cast(OriginalType!Type)input;
+
+        this.handlePrefix(builder);
+        builder ~= FQN;
 
         static foreach(m; __traits(allMembers, Type)) {
             if(__traits(getMember, Type, m) == input) {
