@@ -13,7 +13,7 @@ export @safe nothrow @nogc:
 
 ///
 struct URIAddress {
-    private {
+    private @PrettyPrintIgnore {
         URIAddressState* state;
     }
 
@@ -22,12 +22,12 @@ export @safe nothrow @nogc:
     this(return scope ref URIAddress other) scope @trusted {
         this.state = other.state;
 
-        if (state !is null)
+        if(state !is null)
             atomicIncrementAndLoad(state.refCount, 1);
     }
 
     ~this() scope {
-        if (state !is null && atomicDecrementAndLoad(state.refCount, 1) == 0) {
+        if(state !is null && atomicDecrementAndLoad(state.refCount, 1) == 0) {
             RCAllocator alloc = state.allocator;
             alloc.dispose(state);
         }

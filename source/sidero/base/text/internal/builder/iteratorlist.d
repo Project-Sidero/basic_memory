@@ -647,28 +647,28 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
         }
 
         void onInsertIncreaseFromHead(size_t ifFromOffsetFromHead, size_t amount) {
-            if(this.maximumOffsetFromHead <= ifFromOffsetFromHead)
-                return;
-
-            version(none) {
+           version(none) {
                 import core.stdc.stdio;
 
-                debug printf("iff %zd, +delta %zd, min %zd, max %zd, forwards %zd, backwards %zd\n", ifFromOffsetFromHead, amount,
+                debug printf("%p: iff %zd, +delta %zd, min %zd, max %zd, forwards %zd, backwards %zd\n", &this, ifFromOffsetFromHead, amount,
                 this.minimumOffsetFromHead, this.maximumOffsetFromHead, this.forwards.offsetFromHead, this.backwards.offsetFromHead);
                 debug fflush(stdout);
             }
 
-            debugMe("before onInsert");
+            if(this.maximumOffsetFromHead <= ifFromOffsetFromHead)
+                return;
+
+            debugMe("before onInsert2", true);
             blockList.debugMe;
 
-            if(this.minimumOffsetFromHead >= ifFromOffsetFromHead)
-                this.minimumOffsetFromHead += amount;
+            if (this.minimumOffsetFromHead >= ifFromOffsetFromHead)
+            this.minimumOffsetFromHead += amount;
             this.maximumOffsetFromHead += amount;
 
             forwards.onInsertIncreaseFromHead(ifFromOffsetFromHead, amount, this.maximumOffsetFromHead);
             backwards.onInsertIncreaseFromHead(ifFromOffsetFromHead, amount, this.maximumOffsetFromHead);
 
-            debugMe("after onInsert");
+            debugMe("after onInsert2", true);
             blockList.debugMe;
         }
 
@@ -1034,8 +1034,6 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
                             if(offsetB)
                                 printf("NOT RIGHT BACKWARDS offsetIntoBlock %zd instead of %zd\n",
                                         backwards.offsetIntoBlock, cursorB.offsetIntoBlock);
-
-                            blockList.debugMe();
 
                             printf("/\\-----/\\\n");
                             fflush(stdout);
