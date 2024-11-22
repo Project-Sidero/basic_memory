@@ -423,11 +423,11 @@ export:
     }
 
     ///
-    void toString(Sink)(scope ref Sink sink) @trusted {
+    void toString(scope ref StringBuilder_UTF8 builder) @trusted {
         if(isNull)
-            sink ~= "HashMap!(" ~ KeyType.stringof ~ ", " ~ ValueType.stringof ~ ")@null";
+            builder ~= "HashMap!(" ~ KeyType.stringof ~ ", " ~ ValueType.stringof ~ ")@null";
         else
-            sink.formattedWrite("HashMap!(" ~ KeyType.stringof ~ ", " ~ ValueType.stringof ~ ")@{:p}(length={:d}",
+            builder.formattedWrite("HashMap!(" ~ KeyType.stringof ~ ", " ~ ValueType.stringof ~ ")@{:p}(length={:d}",
                     cast(void*)this.state, this.length);
     }
 
@@ -439,16 +439,16 @@ export:
     }
 
     ///
-    void toStringPretty(Sink)(scope ref Sink sink, PrettyPrint pp) @trusted {
+    void toStringPretty(scope ref StringBuilder_UTF8 builder, PrettyPrint pp) @trusted {
         enum FQN = __traits(fullyQualifiedName, HashMap);
-        pp.emitPrefix(sink);
+        pp.emitPrefix(builder);
 
         if(isNull) {
-            sink ~= FQN ~ "@null";
+            builder ~= FQN ~ "@null";
             return;
         }
 
-        sink.formattedWrite(FQN ~ "@{:p}(length={:d} =>\n", cast(void*)this.state, this.length);
+        builder.formattedWrite(FQN ~ "@{:p}(length={:d} =>\n", cast(void*)this.state, this.length);
         pp.depth++;
 
         foreach(ref k, ref v; this) {
@@ -456,18 +456,18 @@ export:
             assert(v);
 
             pp.startWithoutPrefix = false;
-            pp.emitPrefix(sink);
-            sink.formattedWrite("{:s}: ", k);
+            pp.emitPrefix(builder);
+            builder.formattedWrite("{:s}: ", k);
 
             pp.startWithoutPrefix = true;
-            pp(sink, v);
-            sink ~= "\n";
+            pp(builder, v);
+            builder ~= "\n";
         }
 
         pp.depth--;
         pp.startWithoutPrefix = false;
-        pp.emitPrefix(sink);
-        sink ~= ")";
+        pp.emitPrefix(builder);
+        builder ~= ")";
     }
 
 private:

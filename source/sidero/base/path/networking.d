@@ -421,27 +421,28 @@ export @safe nothrow @nogc:
     }
 
     ///
-    void toString(Sink)(scope ref Sink sink) scope const @trusted {
+    void toString(scope ref StringBuilder_UTF8 builder) scope const @trusted {
         bool doPort = true;
 
         (cast(NetworkAddress*)&this).onNetworkOrder((uint address) {
             // ipv4
-            sink.formattedWrite("{:d}.{:d}.{:d}.{:d}", address & 0xFF, (address >> 8) & 0xFF, (address >> 16) & 0xFF, (address >> 24) & 0xFF);
+            builder.formattedWrite("{:d}.{:d}.{:d}.{:d}", address & 0xFF, (address >> 8) & 0xFF, (address >> 16) & 0xFF,
+                (address >> 24) & 0xFF);
         }, (ushort[8] address) {
             // ipv6
-            sink.formattedWrite("[{:4X}:{:4X}:{:4X}:{:4X}:{:4X}:{:4X}:{:4X}:{:4X}]", swapEndian(address[0]),
+            builder.formattedWrite("[{:4X}:{:4X}:{:4X}:{:4X}:{:4X}:{:4X}:{:4X}:{:4X}]", swapEndian(address[0]),
                 swapEndian(address[1]), swapEndian(address[2]), swapEndian(address[3]), swapEndian(address[4]),
                 swapEndian(address[5]), swapEndian(address[6]), swapEndian(address[7]));
         }, () {
             // any ipv4
-            sink ~= "0.0.0.0"c;
+            builder ~= "0.0.0.0"c;
         }, () {
             // any ipv6
-            sink ~= "[::]"c;
+            builder ~= "[::]"c;
         }, (scope Hostname hostname) {
             import sidero.base.encoding.bootstring;
 
-            if(!IDNAPunycode.decode(sink, hostname.get))
+            if(!IDNAPunycode.decode(builder, hostname.get))
                 doPort = false;
         }, () {
             // invalid
@@ -449,7 +450,7 @@ export @safe nothrow @nogc:
         });
 
         if(doPort)
-            sink.formattedWrite(":{:d}", this.port());
+            builder.formattedWrite(":{:d}", this.port());
     }
 
     ///

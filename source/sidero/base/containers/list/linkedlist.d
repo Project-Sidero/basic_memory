@@ -1101,11 +1101,11 @@ nothrow @nogc:
         }
 
         ///
-        void toString(Sink)(scope ref Sink sink) @trusted {
+        void toString(scope ref StringBuilder_UTF8 builder) @trusted {
             if(isNull)
-                sink ~= "LinkedList!(" ~ Type.stringof ~ ")(null)";
+                builder ~= "LinkedList!(" ~ Type.stringof ~ ")(null)";
             else
-                sink.formattedWrite("LinkedList!(" ~ Type.stringof ~ ")@{:p}(length={:d})", cast(void*)this.state, this.length);
+                builder.formattedWrite("LinkedList!(" ~ Type.stringof ~ ")@{:p}(length={:d})", cast(void*)this.state, this.length);
         }
 
         ///
@@ -1116,16 +1116,16 @@ nothrow @nogc:
         }
 
         ///
-        void toStringPretty(Sink)(scope ref Sink sink, PrettyPrint pp) @trusted {
+        void toStringPretty(scope ref StringBuilder_UTF8 builder, PrettyPrint pp) @trusted {
             enum FQN = __traits(fullyQualifiedName, LinkedList);
-            pp.emitPrefix(sink);
+            pp.emitPrefix(builder);
 
             if(isNull) {
-                sink ~= FQN ~ "@null";
+                builder ~= FQN ~ "@null";
                 return;
             }
 
-            sink.formattedWrite(FQN ~ "@{:p}(length={:d} =>\n", cast(void*)this.state, this.length);
+            builder.formattedWrite(FQN ~ "@{:p}(length={:d} =>\n", cast(void*)this.state, this.length);
 
             LinkedList self = this.save;
             pp.depth++;
@@ -1134,15 +1134,15 @@ nothrow @nogc:
                 assert(v);
 
                 pp.startWithoutPrefix = false;
-                pp.emitPrefix(sink, true);
-                pp(sink, v);
-                sink ~= "\n";
+                pp.emitPrefix(builder, true);
+                pp(builder, v);
+                builder ~= "\n";
             }
 
             pp.depth--;
             pp.startWithoutPrefix = false;
-            pp.emitPrefix(sink);
-            sink ~= ")";
+            pp.emitPrefix(builder);
+            builder ~= ")";
         }
     }
 

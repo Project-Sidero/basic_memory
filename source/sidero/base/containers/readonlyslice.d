@@ -363,13 +363,13 @@ export:
     }
 
     ///
-    void toString(Sink)(scope ref Sink sink) @trusted {
+    void toString(scope ref StringBuilder_UTF8 builder) @trusted {
         if(isNull) {
-            sink ~= "Slice!(" ~ T.stringof ~ ")@null";
+            builder ~= "Slice!(" ~ T.stringof ~ ")@null";
             return;
         }
 
-        sink.formattedWrite("Slice!(" ~ T.stringof ~ ")@{:p}(length={:d})", cast(void*)this.state.sliceMemory, this.length);
+        builder.formattedWrite("Slice!(" ~ T.stringof ~ ")@{:p}(length={:d})", cast(void*)this.state.sliceMemory, this.length);
     }
 
     ///
@@ -380,22 +380,22 @@ export:
     }
 
     ///
-    void toStringPretty(Sink)(scope ref Sink sink, PrettyPrint pp) scope @trusted {
+    void toStringPretty(scope ref StringBuilder_UTF8 builder, PrettyPrint pp) scope @trusted {
         enum FQN = __traits(fullyQualifiedName, Slice);
-        pp.emitPrefix(sink);
+        pp.emitPrefix(builder);
 
         if(isNull) {
-            sink ~= FQN ~ "@null";
+            builder ~= FQN ~ "@null";
             return;
         }
 
-        sink.formattedWrite(FQN ~ "@{:p}(length={:d} => ", cast(void*)this.state.sliceMemory, this.length);
+        builder.formattedWrite(FQN ~ "@{:p}(length={:d} => ", cast(void*)this.state.sliceMemory, this.length);
 
         pp.startWithoutPrefix = true;
         pp.useInitialTypeName = false;
 
-        pp(sink, this.unsafeGetLiteral());
-        sink ~= ")";
+        pp(builder, this.unsafeGetLiteral());
+        builder ~= ")";
     }
 
     ///
