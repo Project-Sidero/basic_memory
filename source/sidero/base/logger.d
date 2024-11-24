@@ -493,7 +493,7 @@ export:
     }
 
     ///
-    ulong toHash() const {
+    ulong toHash() scope const {
         return this.name_.toHash();
     }
 

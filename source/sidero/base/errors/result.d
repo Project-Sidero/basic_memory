@@ -46,15 +46,6 @@ export:
                 return value.opAssign(args);
             }
         }
-
-        static if(__traits(hasMember, Type, "toHash") && !__traits(isDisabled, Type.toHash)) {
-            ///
-            auto toHash() const {
-                if(error__.info.id !is null)
-                    return 0;
-                return value.toHash();
-            }
-        }
     }
 
     package(sidero.base) ErrorInfo error__;
@@ -166,6 +157,18 @@ scope nothrow @nogc @safe:
             return value is null;
         } else
             return false;
+    }
+
+    ///
+    auto toHash() const {
+        import sidero.base.hash.utils;
+
+        if(error__.info.id !is null)
+            return hashOf(error__.info);
+        static if(__traits(hasMember, Type, "toHash") && !__traits(isDisabled, Type.toHash)) {
+            return value.toHash();
+        } else
+            return hashOf();
     }
 
     ///
@@ -343,13 +346,16 @@ scope nothrow @nogc @safe:
         return ret;
     }
 
-    static if(__traits(hasMember, Type, "toHash") && !__traits(isDisabled, Type.toHash)) {
-        ///
-        auto toHash() const {
-            if(!this)
-                return 0;
+    ///
+    auto toHash() const {
+        import sidero.base.hash.utils;
+
+        if(error__.info.id !is null)
+            return hashOf(error__.info);
+        static if(__traits(hasMember, Type, "toHash") && !__traits(isDisabled, Type.toHash)) {
             return _value.toHash();
-        }
+        } else
+            return hashOf();
     }
 
     ///
