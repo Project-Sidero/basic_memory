@@ -2781,7 +2781,7 @@ unittest {
     assert(unsignedCompare(storage[], storageExpected[]) == 0);
 }
 
-/// Uses exponent as counter
+/// Will heap allocate and mutates exponent
 ErrorResult signedPower(scope PerIntegerType[] output, scope out bool outputIsNegative, scope const(PerIntegerType)[] input,
         bool inputIsNegative, scope PerIntegerType[] exponent, bool exponentIsNegative, out bool overflow) {
 
@@ -2798,21 +2798,62 @@ ErrorResult signedPower(scope PerIntegerType[] output, scope out bool outputIsNe
     }
 
     outputIsNegative = inputIsNegative;
-    unsignedPower(output, input, exponent, overflow);
-
-    return ErrorResult.init;
+    return unsignedPower(output, input, exponent, overflow);
 }
 
-/// Uses exponent as counter
-void unsignedPower(scope PerIntegerType[] output, scope const(PerIntegerType)[] input, scope PerIntegerType[] exponent, out bool overflow) {
-    foreach(ref v; output) {
-        v = 0;
+/// Will heap allocate and mutates exponent
+ErrorResult unsignedPower(scope PerIntegerType[] output, scope const(PerIntegerType)[] input,
+        scope PerIntegerType[] exponent, out bool overflow) {
+    foreach(i, ref v; output) {
+        v = input[i];
     }
 
-    while(unsignedCompare(exponent, null) != 0) {
-        unsignedMultiplyAddImpl(output, output, input, overflow);
-        unsignedSubtractionImpl(exponent, 1, 0);
+    ErrorResult ret;
+
+    void bySquare(scope PerIntegerType[] mantissa, scope PerIntegerType[] exponent) {
+        bool allZero = true;
+        foreach(b; exponent) {
+            if(b > 0) {
+                allZero = false;
+                break;
+            }
+        }
+
+        if(allZero) {
+            mantissa[0] = 1;
+
+            foreach(ref b; mantissa[1 .. $])
+                b = 0;
+        } else if((exponent[0] & 1) == 0) {
+            rightShift(exponent, 1);
+            leftShift(mantissa, 1);
+            bySquare(mantissa, exponent);
+        } else {
+            import sidero.base.algorithm : max;
+
+            static immutable one = [1L];
+
+            SmallArrayPerInteger temp1 = SmallArrayPerInteger(max(exponent.length, mantissa.length));
+            ret = unsignedSubtraction(temp1.buffer, exponent, one);
+            if(!ret)
+                return;
+
+            rightShift(exponent, 1);
+            ret = unsignedMultiply(temp1.buffer, mantissa, mantissa, overflow);
+            if(!ret)
+                return;
+
+            SmallArrayPerInteger temp2 = SmallArrayPerInteger(temp1.buffer);
+            bySquare(temp2.buffer, exponent);
+            ret = unsignedMultiply(mantissa, temp1.buffer, temp2.buffer, overflow);
+            if(!ret)
+                return;
+        }
     }
+
+    bySquare(output, exponent);
+
+    return ret;
 }
 
 private:
@@ -3104,4 +3145,30 @@ void unsignedSubtractionImpl(scope PerIntegerType[] output, PerIntegerType toSub
 
 size_t neededStorageGivenDigits(size_t neededDigits) {
     return (neededDigits + MaxDigitsPerInteger - 1) / MaxDigitsPerInteger;
+}
+
+struct SmallArrayPerInteger {
+    import sidero.base.containers.dynamicarray;
+
+    PerIntegerType[] buffer;
+    PerIntegerType[64] stackBuffer;
+    DynamicArray!PerIntegerType heapBuffer;
+
+@safe nothrow @nogc:
+
+    this(size_t needed) @trusted {
+        if(needed > stackBuffer.length) {
+            heapBuffer.length = needed;
+            buffer = heapBuffer.unsafeGetLiteral;
+        } else
+            buffer = stackBuffer[0 .. needed];
+    }
+
+    this(const(PerIntegerType)[] needed) @trusted {
+        this.__ctor(needed.length);
+
+        foreach(i; 0 .. needed.length) {
+            buffer[i] = needed[i];
+        }
+    }
 }
