@@ -574,7 +574,7 @@ struct BlockListImpl(Char) {
 
     enum CacheSize = 64;
     enum Count = () {
-        enum Minimum = 16;
+        enum Minimum = 48;
 
         size_t accumulator;
 

@@ -35,18 +35,18 @@ struct Appender(Type) {
             size_t offset;
             int result;
 
-            while (current !is null) {
-                foreach (i; 0 .. current.used) {
+            while(current !is null) {
+                foreach(i; 0 .. current.used) {
                     Type got = current.data[i];
 
-                    static if (__traits(compiles, del(offset, got)))
+                    static if(__traits(compiles, del(offset, got)))
                         result = del(offset, got);
-                    else static if (__traits(compiles, del(got)))
+                    else static if(__traits(compiles, del(got)))
                         result = del(got);
                     else
                         static assert(0);
 
-                    if (result)
+                    if(result)
                         return result;
                     offset++;
                 }
@@ -62,18 +62,18 @@ struct Appender(Type) {
             size_t offset = count - 1;
             int result;
 
-            while (current !is null) {
-                foreach_reverse (i; 0 .. current.used) {
+            while(current !is null) {
+                foreach_reverse(i; 0 .. current.used) {
                     Type got = current.data[i];
 
-                    static if (__traits(compiles, del(offset, got)))
+                    static if(__traits(compiles, del(offset, got)))
                         result = del(offset, got);
-                    else static if (__traits(compiles, del(got)))
+                    else static if(__traits(compiles, del(got)))
                         result = del(got);
                     else
                         static assert(0);
 
-                    if (result)
+                    if(result)
                         return result;
                     offset--;
                 }
@@ -99,17 +99,17 @@ export:
     ///
     alias LiteralType = const(Type)[];
 
-    static if (is(Type == char)) {
+    static if(is(Type == char)) {
         ///
         alias ReadOnlyType = String_UTF8;
         ///
         alias MutableType = StringBuilder_UTF8;
-    } else static if (is(Type == wchar)) {
+    } else static if(is(Type == wchar)) {
         ///
         alias ReadOnlyType = String_UTF16;
         ///
         alias MutableType = StringBuilder_UTF16;
-    } else static if (is(Type == dchar)) {
+    } else static if(is(Type == dchar)) {
         ///
         alias ReadOnlyType = String_UTF32;
         ///
@@ -131,7 +131,7 @@ export:
     ~this() @trusted {
         Block* current = head;
 
-        while (current !is null) {
+        while(current !is null) {
             Block* next = current.next;
             allocator.dispose(current);
             current = next;
@@ -155,14 +155,44 @@ export:
         return count;
     }
 
+    /// Traversal (consuming) of the underlying storage, returning of data
+    const(Type)[] peekFirstBlock() scope return @system {
+        if(head is null)
+            return null;
+        return head.data.ptr[0 .. head.used];
+    }
+
+    /// Traversal (consuming) of the underlying storage, consumption
+    void consumeFirstBlock() scope @system {
+        Block* block = this.head;
+
+        if(block !is null) {
+            this.head = block.next;
+            allocator.dispose(block);
+
+            if (this.head is null)
+                this.tail = null;
+        }
+    }
+
+    ///
+    @system unittest {
+        Appender appender;
+        appender ~= Type.init;
+
+        assert(appender.peekFirstBlock.length == 1);
+        appender.consumeFirstBlock;
+        assert(appender.peekFirstBlock.length == 0);
+    }
+
     ///
     Result!Type opIndex(ptrdiff_t index) scope @trusted const {
         auto error = changeIndexToOffset(index);
-        if (error.isSet)
+        if(error.isSet)
             return typeof(return)(error);
 
         Block* current = cast(Block*)head;
-        while (current !is null && index >= current.used) {
+        while(current !is null && index >= current.used) {
             index -= current.used;
             current = current.next;
         }
@@ -182,29 +212,29 @@ export:
     ///
     void append(scope ref Appender other, size_t offset = 0, size_t length = size_t.max) @trusted {
         const canDoLength = length > other.count ? other.count : length;
-        if (canDoLength <= offset)
+        if(canDoLength <= offset)
             return;
         length = canDoLength;
 
         Block* current = cast(Block*)other.head;
         size_t soFar;
 
-        while (current !is null && current.used <= offset) {
+        while(current !is null && current.used <= offset) {
             offset -= current.used;
             soFar += current.used;
             current = current.next;
         }
 
-        while (current !is null && length > 0) {
+        while(current !is null && length > 0) {
             const canDo = length < current.used ? length : current.used;
             this.append(current.data.ptr[offset .. canDo]);
 
-            if (offset > current.used)
+            if(offset > current.used)
                 offset -= current.used;
             else
                 offset = 0;
 
-            if (length > 0)
+            if(length > 0)
                 length -= canDo;
             current = current.next;
         }
@@ -217,19 +247,19 @@ export:
 
     ///
     void append(scope const(Type)[] input...) scope @trusted {
-        while (input.length > 0) {
+        while(input.length > 0) {
             Block* into = tail;
 
-            if (into is null || into.used == Count)
+            if(into is null || into.used == Count)
                 into = newNode();
 
             size_t canDo = Count - into.used;
             assert(canDo > 0);
 
-            if (input.length < canDo)
+            if(input.length < canDo)
                 canDo = input.length;
 
-            foreach (offset; 0 .. canDo) {
+            foreach(offset; 0 .. canDo) {
                 into.data.ptr[into.used + offset] = cast(Type)input[offset];
             }
 
@@ -246,11 +276,11 @@ export:
 
     ///
     void append(scope ReadOnlyType input) scope @trusted {
-        static if (is(Type == char) || is(Type == wchar) || is(Type == dchar)) {
-            if (!input.isEncodingChanged())
+        static if(is(Type == char) || is(Type == wchar) || is(Type == dchar)) {
+            if(!input.isEncodingChanged())
                 append(input.unsafeGetLiteral());
             else {
-                foreach (c; input) {
+                foreach(c; input) {
                     append(c);
                 }
             }
@@ -266,12 +296,12 @@ export:
 
     ///
     void append(scope MutableType input) scope {
-        foreach (v; input) {
+        foreach(v; input) {
             append(v);
         }
     }
 
-    static if (is(Type == char)) {
+    static if(is(Type == char)) {
         ///
         void opOpAssign(string op : "~")(scope StringBuilder_UTF16 input) scope {
             this.append(input.byUTF8);
@@ -381,7 +411,7 @@ export:
         void append(scope DynamicArray!dchar input) scope @trusted {
             this.append(String_UTF8(input.unsafeGetLiteral()));
         }
-    } else static if (is(Type == wchar)) {
+    } else static if(is(Type == wchar)) {
         ///
         void opOpAssign(string op : "~")(scope StringBuilder_UTF8 input) scope {
             this.append(input.byUTF16);
@@ -491,7 +521,7 @@ export:
         void append(scope DynamicArray!dchar input) scope @trusted {
             this.append(String_UTF16(input.unsafeGetLiteral()));
         }
-    } else static if (is(Type == dchar)) {
+    } else static if(is(Type == dchar)) {
         ///
         void opOpAssign(string op : "~")(scope StringBuilder_UTF8 input) scope {
             this.append(input.byUTF32);
@@ -610,35 +640,35 @@ export:
 
     ///
     ReadOnlyType asReadOnly(size_t offset, size_t length, RCAllocator allocator = RCAllocator.init) scope @trusted const {
-        if (allocator.isNull)
+        if(allocator.isNull)
             allocator = globalAllocator();
 
         const canDoLength = length > this.count ? this.count : length;
-        if (canDoLength <= offset)
+        if(canDoLength <= offset)
             return typeof(return).init;
 
         Type[] ret = allocator.makeArray!Type(canDoLength - offset);
         Block* current = cast(Block*)head;
         size_t soFar;
 
-        while (current !is null && current.used <= offset) {
+        while(current !is null && current.used <= offset) {
             offset -= current.used;
             soFar += current.used;
             current = current.next;
         }
 
-        while (current !is null && length > 0) {
+        while(current !is null && length > 0) {
             const canDo = (length > 0 && length < current.used) ? length : current.used;
 
-            foreach (i; offset .. canDo)
+            foreach(i; offset .. canDo)
                 ret[soFar++] = current.data.ptr[i];
 
-            if (offset > current.used)
+            if(offset > current.used)
                 offset -= current.used;
             else
                 offset = 0;
 
-            if (length > 0)
+            if(length > 0)
                 length -= canDo;
             current = current.next;
         }
@@ -651,12 +681,12 @@ export:
         MutableType ret = MutableType(allocator);
         assert(!ret.isNull);
 
-        static if (__traits(hasMember, MutableType, "reserve"))
+        static if(__traits(hasMember, MutableType, "reserve"))
             ret.reserve(count);
 
         Block* current = cast(Block*)head;
 
-        while (current !is null) {
+        while(current !is null) {
             ret ~= current.data.ptr[0 .. current.used];
             current = current.next;
         }
@@ -669,7 +699,7 @@ export:
 
 private:
     Block* newNode() @trusted {
-        if (allocator.isNull)
+        if(allocator.isNull)
             allocator = globalAllocator();
 
         Block* block = cast(Block*)allocator.allocate(Block.sizeof + ByteLength).ptr;
@@ -677,9 +707,9 @@ private:
 
         block.previous = tail;
 
-        if (tail !is null)
+        if(tail !is null)
             tail.next = block;
-        if (head is null)
+        if(head is null)
             head = block;
 
         tail = block;
@@ -691,8 +721,8 @@ private:
 
         const actualLength = count;
 
-        if (a < 0) {
-            if (actualLength < -a) {
+        if(a < 0) {
+            if(actualLength < -a) {
                 a = actualLength;
                 return ErrorInfo(RangeException("Offset must be smaller than length"));
             }
@@ -705,13 +735,13 @@ private:
 
     enum CacheSize = 64;
     enum Count = () {
-        enum Minimum = 16;
+        enum Minimum = 128;
 
         size_t accumulator;
 
         accumulator = CacheSize - (Block.sizeof % CacheSize);
 
-        while (accumulator < Type.sizeof * Minimum) {
+        while(accumulator < Type.sizeof * Minimum) {
             accumulator += CacheSize;
         }
 
