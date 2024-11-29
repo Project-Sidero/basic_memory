@@ -442,17 +442,19 @@ nothrow @nogc:
         other = other.save;
 
         int handle(scope int delegate(ref Type) @safe nothrow @nogc del) {
-            if(other.empty)
-                return 1;
+            while(!other.empty) {
+                auto v = other.front;
 
-            if(auto v = other.front) {
-                int ret = del(v);
+                if(v) {
+                    int ret = del(v);
 
-                if(ret)
-                    return ret;
+                    if(ret)
+                        return ret;
+                }
+
+                other.popFront;
             }
 
-            other.popFront;
             return 0;
         }
 
@@ -754,17 +756,19 @@ nothrow @nogc:
         other = other.save;
 
         int handle(scope int delegate(ref Type) @safe nothrow @nogc del) {
-            if(other.empty)
-                return 1;
+            while(!other.empty) {
+                auto v = other.front;
 
-            if(auto v = other.front) {
-                int ret = del(v);
+                if(v) {
+                    int ret = del(v);
 
-                if(ret)
-                    return ret;
+                    if(ret)
+                        return ret;
+                }
+
+                other.popFront;
             }
 
-            other.popFront;
             return 0;
         }
 
@@ -855,17 +859,19 @@ nothrow @nogc:
         other = other.save;
 
         int handle(scope int delegate(ref Type) @safe nothrow @nogc del) {
-            if(other.empty)
-                return 1;
+            while(!other.empty) {
+                auto v = other.front;
 
-            if(auto v = other.front) {
-                int ret = del(v);
+                if(v) {
+                    int ret = del(v);
 
-                if(ret)
-                    return ret;
+                    if(ret)
+                        return ret;
+                }
+
+                other.popFront;
             }
 
-            other.popFront;
             return 0;
         }
 
@@ -938,17 +944,19 @@ nothrow @nogc:
         other = other.save;
 
         int handle(scope int delegate(ref Type) @safe nothrow @nogc del) {
-            if(other.empty)
-                return 1;
+            while(!other.empty) {
+                auto v = other.front;
 
-            if(auto v = other.front) {
-                int ret = del(v);
+                if(v) {
+                    int ret = del(v);
 
-                if(ret)
-                    return ret;
+                    if(ret)
+                        return ret;
+                }
+
+                other.popFront;
             }
 
-            other.popFront;
             return 0;
         }
 
