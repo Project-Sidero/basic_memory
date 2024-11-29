@@ -340,8 +340,6 @@ private:
     }
 
     void handleResult(WrappedType, Type)(scope StringBuilder_UTF8 builder, scope ref Type input, bool useName, bool forcePrint) {
-        this.handlePrefix(builder);
-
         if(input && !input.isNull) {
             // ok print the thing
 
@@ -354,6 +352,7 @@ private:
             }
         }
 
+        this.handlePrefix(builder);
         builder.formattedWrite(""c, input);
     }
 
