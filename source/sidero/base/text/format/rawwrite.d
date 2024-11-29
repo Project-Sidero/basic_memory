@@ -554,6 +554,9 @@ bool writeFloat(Builder, Input)(scope ref Builder output, scope Input input, sco
             auto did = snprintf(&formatText[used], formatText.length - (used + 2), ".%d", format.precision);
             if(did > 0)
                 used += did;
+        } else {
+            formatText[used++] = '.';
+            formatText[used++] = '0';
         }
 
         foreach(c; FormatSize) {
