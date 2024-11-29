@@ -1138,18 +1138,21 @@ nothrow @nogc:
             LinkedList self = this.save;
             pp.depth++;
 
+            bool haveOne;
+
             foreach(ref v; self) {
                 assert(v);
 
-                pp.startWithoutPrefix = false;
+                if(haveOne)
+                    builder ~= "\n";
+                haveOne = true;
+
                 pp.emitPrefix(builder, true);
+                pp.startWithoutPrefix = true;
                 pp(builder, v);
-                builder ~= "\n";
             }
 
             pp.depth--;
-            pp.startWithoutPrefix = false;
-            pp.emitPrefix(builder);
             builder ~= ")";
         }
     }

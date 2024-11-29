@@ -345,7 +345,13 @@ export:
         builder.formattedWrite(FQN ~ "@{:p}(length={:d} =>\n", cast(void*)this.state, this.length);
         pp.depth++;
 
+        bool haveOne;
+
         foreach(ref k; this) {
+            if(haveOne)
+                builder ~= "\n";
+            haveOne = true;
+
             pp.startWithoutPrefix = false;
             pp.emitPrefix(builder);
             builder.formattedWrite("{:s}: ", k);
@@ -359,13 +365,9 @@ export:
 
                 pp.depth--;
             }
-
-            builder ~= "\n";
         }
 
         pp.depth--;
-        pp.startWithoutPrefix = false;
-        pp.emitPrefix(builder);
         builder ~= ")";
     }
 

@@ -1142,18 +1142,19 @@ nothrow @nogc:
             ConcurrentLinkedList self = this.save;
             pp.depth++;
 
+            bool haveOne;
+
             foreach(ref v; self) {
                 assert(v);
 
-                pp.startWithoutPrefix = false;
-                pp.emitPrefix(builder, true);
+                if(haveOne)
+                    builder ~= "\n";
+                haveOne = true;
+
                 pp(builder, v);
-                builder ~= "\n";
             }
 
             pp.depth--;
-            pp.startWithoutPrefix = false;
-            pp.emitPrefix(builder);
             builder ~= ")";
         }
     }

@@ -452,9 +452,15 @@ export:
         builder.formattedWrite(FQN ~ "@{:p}(length={:d} =>\n", cast(void*)this.state, this.length);
         pp.depth++;
 
+        bool haveOne;
+
         foreach(ref k, ref v; this) {
             assert(k);
             assert(v);
+
+            if(haveOne)
+                builder ~= "\n";
+            haveOne = true;
 
             pp.startWithoutPrefix = false;
             pp.emitPrefix(builder);
@@ -462,12 +468,9 @@ export:
 
             pp.startWithoutPrefix = true;
             pp(builder, v);
-            builder ~= "\n";
         }
 
         pp.depth--;
-        pp.startWithoutPrefix = false;
-        pp.emitPrefix(builder);
         builder ~= ")";
     }
 
