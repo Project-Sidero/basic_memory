@@ -378,16 +378,16 @@ private:
         builder ~= "("c;
         this.depth++;
 
-        bool hadAField = handleStructClassFields(builder, input);
-        hadAField = handleStructClassOverlappedFields(builder, input) || hadAField;
-
         enum CanIterate = isIterable!Type && (HaveNonStaticOpApply!Type || !__traits(hasMember, Type, "opApply"));
         enum HaveToString = haveToString!Type;
         enum HaveToStringPretty = haveToStringPretty!Type;
 
         static if(HaveToStringPretty) {
-            handleStructClassToString!true(builder, input, hadAField);
+            handleStructClassToString!true(builder, input, false);
         } else {
+            bool hadAField = handleStructClassFields(builder, input);
+            hadAField = handleStructClassOverlappedFields(builder, input) || hadAField;
+
             static if(HaveToString) {
                 handleStructClassToString!false(builder, input, hadAField);
             }
