@@ -5,7 +5,6 @@ import sidero.base.traits;
 import sidero.base.attributes;
 
 unittest {
-    import sidero.base.console;
     import sidero.base.allocators;
 
     StringBuilder_UTF8 builder = StringBuilder_UTF8(RCAllocator.init);
@@ -669,12 +668,10 @@ private:
             if(hadFields) {
                 const startBuilderLength = builder.length;
 
-                // this is in reverse order
-                before ~= ":: text ::\n";
-                this.handlePrefix(before, false, true, false);
                 before ~= ",\n";
+                this.handlePrefix(before, false, true, false);
+                before ~= ":: text ::\n";
 
-                before = before[0 .. before.length + builder.length - startBuilderLength];
                 this.handlePrefix(before, false, true, false);
             }
         }

@@ -646,7 +646,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
             ilt.iteratorList.rcIteratorInternal(false, iterator4);
         }
 
-        void onInsertIncreaseFromHead(size_t ifFromOffsetFromHead, size_t amount) {
+        void onInsertIncreaseFromHead(size_t ifFromOffsetFromHead, size_t amount, bool adjustMaxIfEqual) {
            version(none) {
                 import core.stdc.stdio;
 
@@ -655,14 +655,18 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
                 debug fflush(stdout);
             }
 
-            if(this.maximumOffsetFromHead <= ifFromOffsetFromHead)
+            if(this.maximumOffsetFromHead < ifFromOffsetFromHead)
                 return;
+            else if (this.maximumOffsetFromHead == ifFromOffsetFromHead) {
+                if (!adjustMaxIfEqual)
+                    return;
+            }
 
             debugMe("before onInsert2", true);
             blockList.debugMe;
 
             if (this.minimumOffsetFromHead >= ifFromOffsetFromHead)
-            this.minimumOffsetFromHead += amount;
+                this.minimumOffsetFromHead += amount;
             this.maximumOffsetFromHead += amount;
 
             forwards.onInsertIncreaseFromHead(ifFromOffsetFromHead, amount, this.maximumOffsetFromHead);
@@ -738,9 +742,9 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
                     a.get()[i + OffsetStart] = v;
                 assert(a.get() == Text3);
 
-                iterator1.onInsertIncreaseFromHead(OffsetStart, Text2.length);
-                iterator2.onInsertIncreaseFromHead(OffsetStart, Text2.length);
-                iterator3.onInsertIncreaseFromHead(OffsetStart, Text2.length);
+                iterator1.onInsertIncreaseFromHead(OffsetStart, Text2.length, false);
+                iterator2.onInsertIncreaseFromHead(OffsetStart, Text2.length, false);
+                iterator3.onInsertIncreaseFromHead(OffsetStart, Text2.length, false);
 
                 assert(iterator1.forwards.offsetIntoBlock == 0);
                 assert(iterator2.forwards.offsetIntoBlock == OffsetStart + Text2.length);

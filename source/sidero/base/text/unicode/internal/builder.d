@@ -1537,7 +1537,7 @@ struct UTF_State(Char) {
         //  we unfortunately cannot call it, since this is dependent on the iterator,
         //  rather than using any comparison.
 
-        insertOperation(cursor, lengthToRemove, osat);
+        insertOperation(iterator, cursor, lengthToRemove, osat);
         removeOperation(iterator, cursor, lengthToRemove);
 
         allocator.dispose(cast(void[])got);
@@ -1967,7 +1967,7 @@ struct UTF_State(Char) {
             scope LiteralAsTargetChar!(dchar, Char) latc;
             latc.literal = text;
             auto osat = latc.get;
-            maximumOffsetFromHead += insertOperation(cursor, maximumOffsetFromHead, osat);
+            maximumOffsetFromHead += insertOperation(iterator, cursor, maximumOffsetFromHead, osat);
             removedOrInserted = true;
         }
 

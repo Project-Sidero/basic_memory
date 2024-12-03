@@ -88,7 +88,7 @@ mixin template StringBuilderOperations() {
         size_t maximumOffsetFromHead;
         Cursor cursor = cursorFor(iterator, maximumOffsetFromHead, offset);
         assert(other.length() > 0);
-        insertOperation(cursor, maximumOffsetFromHead, other, clobber);
+        insertOperation(iterator, cursor, maximumOffsetFromHead, other, clobber);
         assert(other.length() > 0);
 
         blockList.mutex.unlock;
@@ -602,11 +602,11 @@ mixin template StringBuilderOperations() {
         if(iterator !is null)
             maximumOffsetFromHead = iterator.maximumOffsetFromHead;
 
-        return insertOperation(cursor, maximumOffsetFromHead, toInsert, clobber);
+        return insertOperation(iterator, cursor, maximumOffsetFromHead, toInsert, clobber);
     }
 
     // advances to end of inserted content
-    size_t insertOperation(scope ref Cursor cursor, size_t maximumOffsetFromHead,
+    size_t insertOperation(scope Iterator* insertingIterator, scope ref Cursor cursor, size_t maximumOffsetFromHead,
             scope ref OtherStateAsTarget!Char toInsert, bool clobber = false) {
         size_t amountInserted = toInsert.length(), amountToInsert = amountInserted, startOffsetFromHead = cursor.offsetFromHead;
 
@@ -819,7 +819,7 @@ mixin template StringBuilderOperations() {
 
         if(amountInserted > 0) {
             foreach(iterator; iteratorList) {
-                iterator.onInsertIncreaseFromHead(startOffsetFromHead, amountInserted);
+                iterator.onInsertIncreaseFromHead(startOffsetFromHead, amountInserted, insertingIterator is iterator);
             }
         }
 
@@ -954,7 +954,7 @@ mixin template StringBuilderOperations() {
             literalAsTarget.literal = ReplaceFor;
             scope osat = literalAsTarget.get;
 
-            opTest.insertOperation(cursor, Max, osat, true);
+            opTest.insertOperation(null, cursor, Max, osat, true);
         }
 
         {
