@@ -70,14 +70,16 @@ version(Windows) {
 
         ///
         bool deallocate(scope void[] array) {
+            auto err = VirtualFree(array.ptr, 0, MEM_RELEASE);
+
             version(none) {
                 import core.stdc.stdio;
 
-                debug printf("deallocate length %zd, pointer %p\n", array.length, array.ptr);
+                debug printf("deallocate length %zd, pointer %p, error %d\n", array.length, array.ptr, err);
                 debug fflush(stdout);
             }
 
-            return VirtualFree(array.ptr, 0, MEM_RELEASE) != 0;
+            return err != 0;
         }
     }
 

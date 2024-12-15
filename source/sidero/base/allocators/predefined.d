@@ -32,6 +32,9 @@ alias HouseKeepingAllocator(MappingAllocator = DefaultMapper, size_t AlignedTo =
 alias MemoryRegionsAllocator(size_t DefaultSize = 0, MappingAllocator = DefaultMapper) = AllocatorList!(
         Region!(MappingAllocator, GoodAlignment, DefaultSize), () => Region!(MappingAllocator, GoodAlignment, DefaultSize)());
 
+/// A fixed sized allocator, useful for quick deallocate all nodes in a data structure
+alias FreeableFixedSizeAllocator = FreeList!(MemoryRegionsAllocator!(), FitsStrategy.FirstFit);
+
 /**
 A house keeping allocator that will ensure there are LSB bits available for tags
 
@@ -68,7 +71,7 @@ struct GeneralPurposeAllocator {
     // This is the best possible use of a free tree, which should be more efficient than a buddylist.
     version (all) {
         alias GeneralPurposeAllocatorImpl = GCAllocatorLock!(FreeTree!(MemoryRegionsAllocator!(0),
-                FitsStrategy.BestFit, GoodAlignment, 0, false));
+                FitsStrategy.BestFit, GoodAlignment, 1, false));
     }
 
     // for debugging issues

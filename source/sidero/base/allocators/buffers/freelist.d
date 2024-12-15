@@ -212,7 +212,9 @@ Warning: does not destroy on deallocation.
 See_Also: FreeTree
 */
 struct FreeList(PoolAllocator, FitsStrategy Strategy = FitsStrategy.NextFit, size_t DefaultAlignment = GoodAlignment,
-        size_t DefaultMinimumStoredSize = 0) {
+        size_t DefaultMinimumStoredSize = 1) {
+    static assert(DefaultMinimumStoredSize > 0, "Cannot store memory that has zero size");
+
 export:
     /// Source for all memory
     PoolAllocator poolAllocator;
@@ -526,7 +528,7 @@ private @hidden:
         if(toAddAlignment == alignedTo)
             toAddAlignment = 0;
 
-        size_t remainderAvailable = current.available - (toAddAlignment + size);
+        const remainderAvailable = current.available - (toAddAlignment + size);
 
         if(shouldSplit(current.available, size, alignedTo) && remainderAvailable >= minimumStoredSize) {
             allocations.store(result.recreate()[toAddAlignment .. toAddAlignment + size]);

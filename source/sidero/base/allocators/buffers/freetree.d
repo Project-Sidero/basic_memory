@@ -41,7 +41,9 @@ Warning: does not destroy on deallocation.
 See_Also: FreeList
 */
 struct FreeTree(PoolAllocator, FitsStrategy Strategy, size_t DefaultAlignment = GoodAlignment,
-        size_t DefaultMinimumStoredSize = 0, bool storeAllocated = false) {
+        size_t DefaultMinimumStoredSize = 1, bool storeAllocated = false) {
+    static assert(DefaultMinimumStoredSize > 0, "Cannot store memory that has zero size");
+
 export:
     /// Source for all memory
     PoolAllocator poolAllocator;
