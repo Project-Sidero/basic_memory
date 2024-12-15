@@ -19,7 +19,7 @@ Appender!string output;
 bool[State] seenState;
 
 struct State {
-    bool hasSafe, hasNothrow, hasNogc, hasPure, hasKey, hasReverse, hasStatic;
+    bool hasSafe, hasNothrow, hasNogc, hasPure, hasKey, hasReverse, hasStatic, keyNotValue;
 }
 
 void withSafe(State input) {
@@ -50,6 +50,8 @@ void withKey(State input) {
     withReverse(input);
     input.hasKey = true;
     withReverse(input);
+    input.keyNotValue = true;
+    withReverse(input);
 }
 
 void withReverse(State input) {
@@ -69,8 +71,8 @@ void emit(State input) {
         return;
     seenState[input] = true;
 
-    output.formattedWrite!"mixin template OpApplyCombos(ValueType, KeyType%s, string Name:\"%s\", bool UseSafe:%s, bool UseNothrow:%s, bool UseNogc:%s, bool UsePure:%s, bool UseStatic:%s) {\n"(
-            input.hasKey ? "" : ":void", input.hasReverse ? "opApplyReverse" : "opApply", input.hasSafe, input.hasNothrow,
+    output.formattedWrite!"mixin template OpApplyCombos%s(ValueType, KeyType%s, string Name:\"%s\", bool UseSafe:%s, bool UseNothrow:%s, bool UseNogc:%s, bool UsePure:%s, bool UseStatic:%s) {\n"(
+            input.keyNotValue ? "KeyNotValue" : "", input.hasKey ? "" : ":void", input.hasReverse ? "opApplyReverse" : "opApply", input.hasSafe, input.hasNothrow,
             input.hasNogc, input.hasPure, input.hasStatic);
 
     ptrdiff_t safeOffset = -1;
@@ -108,10 +110,22 @@ void emit(State input) {
     void handle(size_t depth) {
         if(depth == attributes.length) {
             output.formattedWrite!"    int opApply%s(scope int delegate("(input.hasReverse ? "Reverse" : "");
-            if(withKeyOffset >= 0 && active[withKeyOffset])
-                output ~= "ref KeyType, ";
 
-            output ~= "ref ValueType)";
+            if (input.keyNotValue) {
+                output ~= "ref KeyType";
+
+                if (withKeyOffset >= 0 && active[withKeyOffset]) {
+                    output ~= ", ref ValueType";
+                }
+
+                output ~= ")";
+            } else {
+                if (withKeyOffset >= 0 && active[withKeyOffset]) {
+                    output ~= "ref KeyType, ";
+                }
+
+                output ~= "ref ValueType)";
+            }
 
             foreach(i, attribute; attributes) {
                 if(withKeyOffset == i)

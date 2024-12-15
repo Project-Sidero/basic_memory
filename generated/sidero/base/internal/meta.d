@@ -37,6 +37,26 @@ mixin template OpApplyCombos(ValueType, KeyType, string Name:"opApplyReverse", b
     int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) del) => opApplyReverseImpl(del);
 }
 
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApply", bool UseSafe:false, bool UseNothrow:false, bool UseNogc:false, bool UsePure:false, bool UseStatic:false) {
+    int opApply(scope int delegate(ref KeyType) del) scope => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) del) scope => opApplyImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApply", bool UseSafe:false, bool UseNothrow:false, bool UseNogc:false, bool UsePure:false, bool UseStatic:true) {
+    int opApply(scope int delegate(ref KeyType) del) => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) del) => opApplyImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:false, bool UseNothrow:false, bool UseNogc:false, bool UsePure:false, bool UseStatic:false) {
+    int opApplyReverse(scope int delegate(ref KeyType) del) scope => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) del) scope => opApplyReverseImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:false, bool UseNothrow:false, bool UseNogc:false, bool UsePure:false, bool UseStatic:true) {
+    int opApplyReverse(scope int delegate(ref KeyType) del) => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) del) => opApplyReverseImpl(del);
+}
+
 mixin template OpApplyCombos(ValueType, KeyType:void, string Name:"opApply", bool UseSafe:false, bool UseNothrow:false, bool UseNogc:false, bool UsePure:true, bool UseStatic:false) {
     int opApply(scope int delegate(ref ValueType) del) scope => opApplyImpl(del);
     int opApply(scope int delegate(ref ValueType) pure del) scope pure => opApplyImpl(del);
@@ -85,6 +105,34 @@ mixin template OpApplyCombos(ValueType, KeyType, string Name:"opApplyReverse", b
     int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) pure del) pure => opApplyReverseImpl(del);
 }
 
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApply", bool UseSafe:false, bool UseNothrow:false, bool UseNogc:false, bool UsePure:true, bool UseStatic:false) {
+    int opApply(scope int delegate(ref KeyType) del) scope => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) pure del) scope pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) del) scope => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) pure del) scope pure => opApplyImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApply", bool UseSafe:false, bool UseNothrow:false, bool UseNogc:false, bool UsePure:true, bool UseStatic:true) {
+    int opApply(scope int delegate(ref KeyType) del) => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) pure del) pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) del) => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) pure del) pure => opApplyImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:false, bool UseNothrow:false, bool UseNogc:false, bool UsePure:true, bool UseStatic:false) {
+    int opApplyReverse(scope int delegate(ref KeyType) del) scope => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) pure del) scope pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) del) scope => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) pure del) scope pure => opApplyReverseImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:false, bool UseNothrow:false, bool UseNogc:false, bool UsePure:true, bool UseStatic:true) {
+    int opApplyReverse(scope int delegate(ref KeyType) del) => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) pure del) pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) del) => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) pure del) pure => opApplyReverseImpl(del);
+}
+
 mixin template OpApplyCombos(ValueType, KeyType:void, string Name:"opApply", bool UseSafe:false, bool UseNothrow:false, bool UseNogc:true, bool UsePure:false, bool UseStatic:false) {
     int opApply(scope int delegate(ref ValueType) del) scope => opApplyImpl(del);
     int opApply(scope int delegate(ref ValueType) @nogc del) scope @nogc => opApplyImpl(del);
@@ -129,6 +177,34 @@ mixin template OpApplyCombos(ValueType, KeyType, string Name:"opApplyReverse", b
 mixin template OpApplyCombos(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:false, bool UseNothrow:false, bool UseNogc:true, bool UsePure:false, bool UseStatic:true) {
     int opApplyReverse(scope int delegate(ref ValueType) del) => opApplyReverseImpl(del);
     int opApplyReverse(scope int delegate(ref ValueType) @nogc del) @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) del) => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @nogc del) @nogc => opApplyReverseImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApply", bool UseSafe:false, bool UseNothrow:false, bool UseNogc:true, bool UsePure:false, bool UseStatic:false) {
+    int opApply(scope int delegate(ref KeyType) del) scope => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @nogc del) scope @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) del) scope => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @nogc del) scope @nogc => opApplyImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApply", bool UseSafe:false, bool UseNothrow:false, bool UseNogc:true, bool UsePure:false, bool UseStatic:true) {
+    int opApply(scope int delegate(ref KeyType) del) => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @nogc del) @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) del) => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @nogc del) @nogc => opApplyImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:false, bool UseNothrow:false, bool UseNogc:true, bool UsePure:false, bool UseStatic:false) {
+    int opApplyReverse(scope int delegate(ref KeyType) del) scope => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @nogc del) scope @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) del) scope => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @nogc del) scope @nogc => opApplyReverseImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:false, bool UseNothrow:false, bool UseNogc:true, bool UsePure:false, bool UseStatic:true) {
+    int opApplyReverse(scope int delegate(ref KeyType) del) => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @nogc del) @nogc => opApplyReverseImpl(del);
     int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) del) => opApplyReverseImpl(del);
     int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @nogc del) @nogc => opApplyReverseImpl(del);
 }
@@ -205,6 +281,50 @@ mixin template OpApplyCombos(ValueType, KeyType, string Name:"opApplyReverse", b
     int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @nogc pure del) @nogc pure => opApplyReverseImpl(del);
 }
 
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApply", bool UseSafe:false, bool UseNothrow:false, bool UseNogc:true, bool UsePure:true, bool UseStatic:false) {
+    int opApply(scope int delegate(ref KeyType) del) scope => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) pure del) scope pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @nogc del) scope @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @nogc pure del) scope @nogc pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) del) scope => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) pure del) scope pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @nogc del) scope @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @nogc pure del) scope @nogc pure => opApplyImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApply", bool UseSafe:false, bool UseNothrow:false, bool UseNogc:true, bool UsePure:true, bool UseStatic:true) {
+    int opApply(scope int delegate(ref KeyType) del) => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) pure del) pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @nogc del) @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @nogc pure del) @nogc pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) del) => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) pure del) pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @nogc del) @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @nogc pure del) @nogc pure => opApplyImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:false, bool UseNothrow:false, bool UseNogc:true, bool UsePure:true, bool UseStatic:false) {
+    int opApplyReverse(scope int delegate(ref KeyType) del) scope => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) pure del) scope pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @nogc del) scope @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @nogc pure del) scope @nogc pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) del) scope => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) pure del) scope pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @nogc del) scope @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @nogc pure del) scope @nogc pure => opApplyReverseImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:false, bool UseNothrow:false, bool UseNogc:true, bool UsePure:true, bool UseStatic:true) {
+    int opApplyReverse(scope int delegate(ref KeyType) del) => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) pure del) pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @nogc del) @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @nogc pure del) @nogc pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) del) => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) pure del) pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @nogc del) @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @nogc pure del) @nogc pure => opApplyReverseImpl(del);
+}
+
 mixin template OpApplyCombos(ValueType, KeyType:void, string Name:"opApply", bool UseSafe:false, bool UseNothrow:true, bool UseNogc:false, bool UsePure:false, bool UseStatic:false) {
     int opApply(scope int delegate(ref ValueType) del) scope => opApplyImpl(del);
     int opApply(scope int delegate(ref ValueType) nothrow del) scope nothrow => opApplyImpl(del);
@@ -249,6 +369,34 @@ mixin template OpApplyCombos(ValueType, KeyType, string Name:"opApplyReverse", b
 mixin template OpApplyCombos(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:false, bool UseNothrow:true, bool UseNogc:false, bool UsePure:false, bool UseStatic:true) {
     int opApplyReverse(scope int delegate(ref ValueType) del) => opApplyReverseImpl(del);
     int opApplyReverse(scope int delegate(ref ValueType) nothrow del) nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) del) => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) nothrow del) nothrow => opApplyReverseImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApply", bool UseSafe:false, bool UseNothrow:true, bool UseNogc:false, bool UsePure:false, bool UseStatic:false) {
+    int opApply(scope int delegate(ref KeyType) del) scope => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) nothrow del) scope nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) del) scope => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) nothrow del) scope nothrow => opApplyImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApply", bool UseSafe:false, bool UseNothrow:true, bool UseNogc:false, bool UsePure:false, bool UseStatic:true) {
+    int opApply(scope int delegate(ref KeyType) del) => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) nothrow del) nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) del) => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) nothrow del) nothrow => opApplyImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:false, bool UseNothrow:true, bool UseNogc:false, bool UsePure:false, bool UseStatic:false) {
+    int opApplyReverse(scope int delegate(ref KeyType) del) scope => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) nothrow del) scope nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) del) scope => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) nothrow del) scope nothrow => opApplyReverseImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:false, bool UseNothrow:true, bool UseNogc:false, bool UsePure:false, bool UseStatic:true) {
+    int opApplyReverse(scope int delegate(ref KeyType) del) => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) nothrow del) nothrow => opApplyReverseImpl(del);
     int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) del) => opApplyReverseImpl(del);
     int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) nothrow del) nothrow => opApplyReverseImpl(del);
 }
@@ -325,6 +473,50 @@ mixin template OpApplyCombos(ValueType, KeyType, string Name:"opApplyReverse", b
     int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) nothrow pure del) nothrow pure => opApplyReverseImpl(del);
 }
 
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApply", bool UseSafe:false, bool UseNothrow:true, bool UseNogc:false, bool UsePure:true, bool UseStatic:false) {
+    int opApply(scope int delegate(ref KeyType) del) scope => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) pure del) scope pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) nothrow del) scope nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) nothrow pure del) scope nothrow pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) del) scope => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) pure del) scope pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) nothrow del) scope nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) nothrow pure del) scope nothrow pure => opApplyImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApply", bool UseSafe:false, bool UseNothrow:true, bool UseNogc:false, bool UsePure:true, bool UseStatic:true) {
+    int opApply(scope int delegate(ref KeyType) del) => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) pure del) pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) nothrow del) nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) nothrow pure del) nothrow pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) del) => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) pure del) pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) nothrow del) nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) nothrow pure del) nothrow pure => opApplyImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:false, bool UseNothrow:true, bool UseNogc:false, bool UsePure:true, bool UseStatic:false) {
+    int opApplyReverse(scope int delegate(ref KeyType) del) scope => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) pure del) scope pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) nothrow del) scope nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) nothrow pure del) scope nothrow pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) del) scope => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) pure del) scope pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) nothrow del) scope nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) nothrow pure del) scope nothrow pure => opApplyReverseImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:false, bool UseNothrow:true, bool UseNogc:false, bool UsePure:true, bool UseStatic:true) {
+    int opApplyReverse(scope int delegate(ref KeyType) del) => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) pure del) pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) nothrow del) nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) nothrow pure del) nothrow pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) del) => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) pure del) pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) nothrow del) nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) nothrow pure del) nothrow pure => opApplyReverseImpl(del);
+}
+
 mixin template OpApplyCombos(ValueType, KeyType:void, string Name:"opApply", bool UseSafe:false, bool UseNothrow:true, bool UseNogc:true, bool UsePure:false, bool UseStatic:false) {
     int opApply(scope int delegate(ref ValueType) del) scope => opApplyImpl(del);
     int opApply(scope int delegate(ref ValueType) @nogc del) scope @nogc => opApplyImpl(del);
@@ -391,6 +583,50 @@ mixin template OpApplyCombos(ValueType, KeyType, string Name:"opApplyReverse", b
     int opApplyReverse(scope int delegate(ref ValueType) @nogc del) @nogc => opApplyReverseImpl(del);
     int opApplyReverse(scope int delegate(ref ValueType) nothrow del) nothrow => opApplyReverseImpl(del);
     int opApplyReverse(scope int delegate(ref ValueType) nothrow @nogc del) nothrow @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) del) => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @nogc del) @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) nothrow del) nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) nothrow @nogc del) nothrow @nogc => opApplyReverseImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApply", bool UseSafe:false, bool UseNothrow:true, bool UseNogc:true, bool UsePure:false, bool UseStatic:false) {
+    int opApply(scope int delegate(ref KeyType) del) scope => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @nogc del) scope @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) nothrow del) scope nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) nothrow @nogc del) scope nothrow @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) del) scope => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @nogc del) scope @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) nothrow del) scope nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) nothrow @nogc del) scope nothrow @nogc => opApplyImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApply", bool UseSafe:false, bool UseNothrow:true, bool UseNogc:true, bool UsePure:false, bool UseStatic:true) {
+    int opApply(scope int delegate(ref KeyType) del) => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @nogc del) @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) nothrow del) nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) nothrow @nogc del) nothrow @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) del) => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @nogc del) @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) nothrow del) nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) nothrow @nogc del) nothrow @nogc => opApplyImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:false, bool UseNothrow:true, bool UseNogc:true, bool UsePure:false, bool UseStatic:false) {
+    int opApplyReverse(scope int delegate(ref KeyType) del) scope => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @nogc del) scope @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) nothrow del) scope nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) nothrow @nogc del) scope nothrow @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) del) scope => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @nogc del) scope @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) nothrow del) scope nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) nothrow @nogc del) scope nothrow @nogc => opApplyReverseImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:false, bool UseNothrow:true, bool UseNogc:true, bool UsePure:false, bool UseStatic:true) {
+    int opApplyReverse(scope int delegate(ref KeyType) del) => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @nogc del) @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) nothrow del) nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) nothrow @nogc del) nothrow @nogc => opApplyReverseImpl(del);
     int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) del) => opApplyReverseImpl(del);
     int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @nogc del) @nogc => opApplyReverseImpl(del);
     int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) nothrow del) nothrow => opApplyReverseImpl(del);
@@ -517,6 +753,82 @@ mixin template OpApplyCombos(ValueType, KeyType, string Name:"opApplyReverse", b
     int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) nothrow @nogc pure del) nothrow @nogc pure => opApplyReverseImpl(del);
 }
 
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApply", bool UseSafe:false, bool UseNothrow:true, bool UseNogc:true, bool UsePure:true, bool UseStatic:false) {
+    int opApply(scope int delegate(ref KeyType) del) scope => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) pure del) scope pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @nogc del) scope @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @nogc pure del) scope @nogc pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) nothrow del) scope nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) nothrow pure del) scope nothrow pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) nothrow @nogc del) scope nothrow @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) nothrow @nogc pure del) scope nothrow @nogc pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) del) scope => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) pure del) scope pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @nogc del) scope @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @nogc pure del) scope @nogc pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) nothrow del) scope nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) nothrow pure del) scope nothrow pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) nothrow @nogc del) scope nothrow @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) nothrow @nogc pure del) scope nothrow @nogc pure => opApplyImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApply", bool UseSafe:false, bool UseNothrow:true, bool UseNogc:true, bool UsePure:true, bool UseStatic:true) {
+    int opApply(scope int delegate(ref KeyType) del) => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) pure del) pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @nogc del) @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @nogc pure del) @nogc pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) nothrow del) nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) nothrow pure del) nothrow pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) nothrow @nogc del) nothrow @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) nothrow @nogc pure del) nothrow @nogc pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) del) => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) pure del) pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @nogc del) @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @nogc pure del) @nogc pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) nothrow del) nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) nothrow pure del) nothrow pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) nothrow @nogc del) nothrow @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) nothrow @nogc pure del) nothrow @nogc pure => opApplyImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:false, bool UseNothrow:true, bool UseNogc:true, bool UsePure:true, bool UseStatic:false) {
+    int opApplyReverse(scope int delegate(ref KeyType) del) scope => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) pure del) scope pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @nogc del) scope @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @nogc pure del) scope @nogc pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) nothrow del) scope nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) nothrow pure del) scope nothrow pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) nothrow @nogc del) scope nothrow @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) nothrow @nogc pure del) scope nothrow @nogc pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) del) scope => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) pure del) scope pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @nogc del) scope @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @nogc pure del) scope @nogc pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) nothrow del) scope nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) nothrow pure del) scope nothrow pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) nothrow @nogc del) scope nothrow @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) nothrow @nogc pure del) scope nothrow @nogc pure => opApplyReverseImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:false, bool UseNothrow:true, bool UseNogc:true, bool UsePure:true, bool UseStatic:true) {
+    int opApplyReverse(scope int delegate(ref KeyType) del) => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) pure del) pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @nogc del) @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @nogc pure del) @nogc pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) nothrow del) nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) nothrow pure del) nothrow pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) nothrow @nogc del) nothrow @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) nothrow @nogc pure del) nothrow @nogc pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) del) => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) pure del) pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @nogc del) @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @nogc pure del) @nogc pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) nothrow del) nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) nothrow pure del) nothrow pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) nothrow @nogc del) nothrow @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) nothrow @nogc pure del) nothrow @nogc pure => opApplyReverseImpl(del);
+}
+
 mixin template OpApplyCombos(ValueType, KeyType:void, string Name:"opApply", bool UseSafe:true, bool UseNothrow:false, bool UseNogc:false, bool UsePure:false, bool UseStatic:false) {
     int opApply(scope int delegate(ref ValueType) @system del) scope @system => opApplyImpl(del);
     int opApply(scope int delegate(ref ValueType) @safe del) scope @safe => opApplyImpl(del);
@@ -561,6 +873,34 @@ mixin template OpApplyCombos(ValueType, KeyType, string Name:"opApplyReverse", b
 mixin template OpApplyCombos(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:true, bool UseNothrow:false, bool UseNogc:false, bool UsePure:false, bool UseStatic:true) {
     int opApplyReverse(scope int delegate(ref ValueType) @system del) @system => opApplyReverseImpl(del);
     int opApplyReverse(scope int delegate(ref ValueType) @safe del) @safe => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system del) @system => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe del) @safe => opApplyReverseImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApply", bool UseSafe:true, bool UseNothrow:false, bool UseNogc:false, bool UsePure:false, bool UseStatic:false) {
+    int opApply(scope int delegate(ref KeyType) @system del) scope @system => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe del) scope @safe => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system del) scope @system => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe del) scope @safe => opApplyImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApply", bool UseSafe:true, bool UseNothrow:false, bool UseNogc:false, bool UsePure:false, bool UseStatic:true) {
+    int opApply(scope int delegate(ref KeyType) @system del) @system => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe del) @safe => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system del) @system => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe del) @safe => opApplyImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:true, bool UseNothrow:false, bool UseNogc:false, bool UsePure:false, bool UseStatic:false) {
+    int opApplyReverse(scope int delegate(ref KeyType) @system del) scope @system => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe del) scope @safe => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system del) scope @system => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe del) scope @safe => opApplyReverseImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:true, bool UseNothrow:false, bool UseNogc:false, bool UsePure:false, bool UseStatic:true) {
+    int opApplyReverse(scope int delegate(ref KeyType) @system del) @system => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe del) @safe => opApplyReverseImpl(del);
     int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system del) @system => opApplyReverseImpl(del);
     int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe del) @safe => opApplyReverseImpl(del);
 }
@@ -637,6 +977,50 @@ mixin template OpApplyCombos(ValueType, KeyType, string Name:"opApplyReverse", b
     int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe pure del) @safe pure => opApplyReverseImpl(del);
 }
 
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApply", bool UseSafe:true, bool UseNothrow:false, bool UseNogc:false, bool UsePure:true, bool UseStatic:false) {
+    int opApply(scope int delegate(ref KeyType) @system del) scope @system => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system pure del) scope @system pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe del) scope @safe => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe pure del) scope @safe pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system del) scope @system => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system pure del) scope @system pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe del) scope @safe => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe pure del) scope @safe pure => opApplyImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApply", bool UseSafe:true, bool UseNothrow:false, bool UseNogc:false, bool UsePure:true, bool UseStatic:true) {
+    int opApply(scope int delegate(ref KeyType) @system del) @system => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system pure del) @system pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe del) @safe => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe pure del) @safe pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system del) @system => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system pure del) @system pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe del) @safe => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe pure del) @safe pure => opApplyImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:true, bool UseNothrow:false, bool UseNogc:false, bool UsePure:true, bool UseStatic:false) {
+    int opApplyReverse(scope int delegate(ref KeyType) @system del) scope @system => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system pure del) scope @system pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe del) scope @safe => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe pure del) scope @safe pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system del) scope @system => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system pure del) scope @system pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe del) scope @safe => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe pure del) scope @safe pure => opApplyReverseImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:true, bool UseNothrow:false, bool UseNogc:false, bool UsePure:true, bool UseStatic:true) {
+    int opApplyReverse(scope int delegate(ref KeyType) @system del) @system => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system pure del) @system pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe del) @safe => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe pure del) @safe pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system del) @system => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system pure del) @system pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe del) @safe => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe pure del) @safe pure => opApplyReverseImpl(del);
+}
+
 mixin template OpApplyCombos(ValueType, KeyType:void, string Name:"opApply", bool UseSafe:true, bool UseNothrow:false, bool UseNogc:true, bool UsePure:false, bool UseStatic:false) {
     int opApply(scope int delegate(ref ValueType) @system del) scope @system => opApplyImpl(del);
     int opApply(scope int delegate(ref ValueType) @system @nogc del) scope @system @nogc => opApplyImpl(del);
@@ -703,6 +1087,50 @@ mixin template OpApplyCombos(ValueType, KeyType, string Name:"opApplyReverse", b
     int opApplyReverse(scope int delegate(ref ValueType) @system @nogc del) @system @nogc => opApplyReverseImpl(del);
     int opApplyReverse(scope int delegate(ref ValueType) @safe del) @safe => opApplyReverseImpl(del);
     int opApplyReverse(scope int delegate(ref ValueType) @safe @nogc del) @safe @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system del) @system => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system @nogc del) @system @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe del) @safe => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe @nogc del) @safe @nogc => opApplyReverseImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApply", bool UseSafe:true, bool UseNothrow:false, bool UseNogc:true, bool UsePure:false, bool UseStatic:false) {
+    int opApply(scope int delegate(ref KeyType) @system del) scope @system => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system @nogc del) scope @system @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe del) scope @safe => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe @nogc del) scope @safe @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system del) scope @system => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system @nogc del) scope @system @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe del) scope @safe => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe @nogc del) scope @safe @nogc => opApplyImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApply", bool UseSafe:true, bool UseNothrow:false, bool UseNogc:true, bool UsePure:false, bool UseStatic:true) {
+    int opApply(scope int delegate(ref KeyType) @system del) @system => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system @nogc del) @system @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe del) @safe => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe @nogc del) @safe @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system del) @system => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system @nogc del) @system @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe del) @safe => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe @nogc del) @safe @nogc => opApplyImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:true, bool UseNothrow:false, bool UseNogc:true, bool UsePure:false, bool UseStatic:false) {
+    int opApplyReverse(scope int delegate(ref KeyType) @system del) scope @system => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system @nogc del) scope @system @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe del) scope @safe => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe @nogc del) scope @safe @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system del) scope @system => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system @nogc del) scope @system @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe del) scope @safe => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe @nogc del) scope @safe @nogc => opApplyReverseImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:true, bool UseNothrow:false, bool UseNogc:true, bool UsePure:false, bool UseStatic:true) {
+    int opApplyReverse(scope int delegate(ref KeyType) @system del) @system => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system @nogc del) @system @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe del) @safe => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe @nogc del) @safe @nogc => opApplyReverseImpl(del);
     int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system del) @system => opApplyReverseImpl(del);
     int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system @nogc del) @system @nogc => opApplyReverseImpl(del);
     int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe del) @safe => opApplyReverseImpl(del);
@@ -829,6 +1257,82 @@ mixin template OpApplyCombos(ValueType, KeyType, string Name:"opApplyReverse", b
     int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe @nogc pure del) @safe @nogc pure => opApplyReverseImpl(del);
 }
 
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApply", bool UseSafe:true, bool UseNothrow:false, bool UseNogc:true, bool UsePure:true, bool UseStatic:false) {
+    int opApply(scope int delegate(ref KeyType) @system del) scope @system => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system pure del) scope @system pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system @nogc del) scope @system @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system @nogc pure del) scope @system @nogc pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe del) scope @safe => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe pure del) scope @safe pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe @nogc del) scope @safe @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe @nogc pure del) scope @safe @nogc pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system del) scope @system => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system pure del) scope @system pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system @nogc del) scope @system @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system @nogc pure del) scope @system @nogc pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe del) scope @safe => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe pure del) scope @safe pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe @nogc del) scope @safe @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe @nogc pure del) scope @safe @nogc pure => opApplyImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApply", bool UseSafe:true, bool UseNothrow:false, bool UseNogc:true, bool UsePure:true, bool UseStatic:true) {
+    int opApply(scope int delegate(ref KeyType) @system del) @system => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system pure del) @system pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system @nogc del) @system @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system @nogc pure del) @system @nogc pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe del) @safe => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe pure del) @safe pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe @nogc del) @safe @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe @nogc pure del) @safe @nogc pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system del) @system => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system pure del) @system pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system @nogc del) @system @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system @nogc pure del) @system @nogc pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe del) @safe => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe pure del) @safe pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe @nogc del) @safe @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe @nogc pure del) @safe @nogc pure => opApplyImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:true, bool UseNothrow:false, bool UseNogc:true, bool UsePure:true, bool UseStatic:false) {
+    int opApplyReverse(scope int delegate(ref KeyType) @system del) scope @system => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system pure del) scope @system pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system @nogc del) scope @system @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system @nogc pure del) scope @system @nogc pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe del) scope @safe => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe pure del) scope @safe pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe @nogc del) scope @safe @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe @nogc pure del) scope @safe @nogc pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system del) scope @system => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system pure del) scope @system pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system @nogc del) scope @system @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system @nogc pure del) scope @system @nogc pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe del) scope @safe => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe pure del) scope @safe pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe @nogc del) scope @safe @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe @nogc pure del) scope @safe @nogc pure => opApplyReverseImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:true, bool UseNothrow:false, bool UseNogc:true, bool UsePure:true, bool UseStatic:true) {
+    int opApplyReverse(scope int delegate(ref KeyType) @system del) @system => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system pure del) @system pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system @nogc del) @system @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system @nogc pure del) @system @nogc pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe del) @safe => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe pure del) @safe pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe @nogc del) @safe @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe @nogc pure del) @safe @nogc pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system del) @system => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system pure del) @system pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system @nogc del) @system @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system @nogc pure del) @system @nogc pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe del) @safe => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe pure del) @safe pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe @nogc del) @safe @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe @nogc pure del) @safe @nogc pure => opApplyReverseImpl(del);
+}
+
 mixin template OpApplyCombos(ValueType, KeyType:void, string Name:"opApply", bool UseSafe:true, bool UseNothrow:true, bool UseNogc:false, bool UsePure:false, bool UseStatic:false) {
     int opApply(scope int delegate(ref ValueType) @system del) scope @system => opApplyImpl(del);
     int opApply(scope int delegate(ref ValueType) @system nothrow del) scope @system nothrow => opApplyImpl(del);
@@ -895,6 +1399,50 @@ mixin template OpApplyCombos(ValueType, KeyType, string Name:"opApplyReverse", b
     int opApplyReverse(scope int delegate(ref ValueType) @system nothrow del) @system nothrow => opApplyReverseImpl(del);
     int opApplyReverse(scope int delegate(ref ValueType) @safe del) @safe => opApplyReverseImpl(del);
     int opApplyReverse(scope int delegate(ref ValueType) @safe nothrow del) @safe nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system del) @system => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system nothrow del) @system nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe del) @safe => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe nothrow del) @safe nothrow => opApplyReverseImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApply", bool UseSafe:true, bool UseNothrow:true, bool UseNogc:false, bool UsePure:false, bool UseStatic:false) {
+    int opApply(scope int delegate(ref KeyType) @system del) scope @system => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system nothrow del) scope @system nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe del) scope @safe => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe nothrow del) scope @safe nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system del) scope @system => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system nothrow del) scope @system nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe del) scope @safe => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe nothrow del) scope @safe nothrow => opApplyImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApply", bool UseSafe:true, bool UseNothrow:true, bool UseNogc:false, bool UsePure:false, bool UseStatic:true) {
+    int opApply(scope int delegate(ref KeyType) @system del) @system => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system nothrow del) @system nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe del) @safe => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe nothrow del) @safe nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system del) @system => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system nothrow del) @system nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe del) @safe => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe nothrow del) @safe nothrow => opApplyImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:true, bool UseNothrow:true, bool UseNogc:false, bool UsePure:false, bool UseStatic:false) {
+    int opApplyReverse(scope int delegate(ref KeyType) @system del) scope @system => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system nothrow del) scope @system nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe del) scope @safe => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe nothrow del) scope @safe nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system del) scope @system => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system nothrow del) scope @system nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe del) scope @safe => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe nothrow del) scope @safe nothrow => opApplyReverseImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:true, bool UseNothrow:true, bool UseNogc:false, bool UsePure:false, bool UseStatic:true) {
+    int opApplyReverse(scope int delegate(ref KeyType) @system del) @system => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system nothrow del) @system nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe del) @safe => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe nothrow del) @safe nothrow => opApplyReverseImpl(del);
     int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system del) @system => opApplyReverseImpl(del);
     int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system nothrow del) @system nothrow => opApplyReverseImpl(del);
     int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe del) @safe => opApplyReverseImpl(del);
@@ -1021,6 +1569,82 @@ mixin template OpApplyCombos(ValueType, KeyType, string Name:"opApplyReverse", b
     int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe nothrow pure del) @safe nothrow pure => opApplyReverseImpl(del);
 }
 
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApply", bool UseSafe:true, bool UseNothrow:true, bool UseNogc:false, bool UsePure:true, bool UseStatic:false) {
+    int opApply(scope int delegate(ref KeyType) @system del) scope @system => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system pure del) scope @system pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system nothrow del) scope @system nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system nothrow pure del) scope @system nothrow pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe del) scope @safe => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe pure del) scope @safe pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe nothrow del) scope @safe nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe nothrow pure del) scope @safe nothrow pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system del) scope @system => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system pure del) scope @system pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system nothrow del) scope @system nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system nothrow pure del) scope @system nothrow pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe del) scope @safe => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe pure del) scope @safe pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe nothrow del) scope @safe nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe nothrow pure del) scope @safe nothrow pure => opApplyImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApply", bool UseSafe:true, bool UseNothrow:true, bool UseNogc:false, bool UsePure:true, bool UseStatic:true) {
+    int opApply(scope int delegate(ref KeyType) @system del) @system => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system pure del) @system pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system nothrow del) @system nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system nothrow pure del) @system nothrow pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe del) @safe => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe pure del) @safe pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe nothrow del) @safe nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe nothrow pure del) @safe nothrow pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system del) @system => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system pure del) @system pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system nothrow del) @system nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system nothrow pure del) @system nothrow pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe del) @safe => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe pure del) @safe pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe nothrow del) @safe nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe nothrow pure del) @safe nothrow pure => opApplyImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:true, bool UseNothrow:true, bool UseNogc:false, bool UsePure:true, bool UseStatic:false) {
+    int opApplyReverse(scope int delegate(ref KeyType) @system del) scope @system => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system pure del) scope @system pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system nothrow del) scope @system nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system nothrow pure del) scope @system nothrow pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe del) scope @safe => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe pure del) scope @safe pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe nothrow del) scope @safe nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe nothrow pure del) scope @safe nothrow pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system del) scope @system => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system pure del) scope @system pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system nothrow del) scope @system nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system nothrow pure del) scope @system nothrow pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe del) scope @safe => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe pure del) scope @safe pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe nothrow del) scope @safe nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe nothrow pure del) scope @safe nothrow pure => opApplyReverseImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:true, bool UseNothrow:true, bool UseNogc:false, bool UsePure:true, bool UseStatic:true) {
+    int opApplyReverse(scope int delegate(ref KeyType) @system del) @system => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system pure del) @system pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system nothrow del) @system nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system nothrow pure del) @system nothrow pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe del) @safe => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe pure del) @safe pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe nothrow del) @safe nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe nothrow pure del) @safe nothrow pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system del) @system => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system pure del) @system pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system nothrow del) @system nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system nothrow pure del) @system nothrow pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe del) @safe => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe pure del) @safe pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe nothrow del) @safe nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe nothrow pure del) @safe nothrow pure => opApplyReverseImpl(del);
+}
+
 mixin template OpApplyCombos(ValueType, KeyType:void, string Name:"opApply", bool UseSafe:true, bool UseNothrow:true, bool UseNogc:true, bool UsePure:false, bool UseStatic:false) {
     int opApply(scope int delegate(ref ValueType) @system del) scope @system => opApplyImpl(del);
     int opApply(scope int delegate(ref ValueType) @system @nogc del) scope @system @nogc => opApplyImpl(del);
@@ -1131,6 +1755,82 @@ mixin template OpApplyCombos(ValueType, KeyType, string Name:"opApplyReverse", b
     int opApplyReverse(scope int delegate(ref ValueType) @safe @nogc del) @safe @nogc => opApplyReverseImpl(del);
     int opApplyReverse(scope int delegate(ref ValueType) @safe nothrow del) @safe nothrow => opApplyReverseImpl(del);
     int opApplyReverse(scope int delegate(ref ValueType) @safe nothrow @nogc del) @safe nothrow @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system del) @system => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system @nogc del) @system @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system nothrow del) @system nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system nothrow @nogc del) @system nothrow @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe del) @safe => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe @nogc del) @safe @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe nothrow del) @safe nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe nothrow @nogc del) @safe nothrow @nogc => opApplyReverseImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApply", bool UseSafe:true, bool UseNothrow:true, bool UseNogc:true, bool UsePure:false, bool UseStatic:false) {
+    int opApply(scope int delegate(ref KeyType) @system del) scope @system => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system @nogc del) scope @system @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system nothrow del) scope @system nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system nothrow @nogc del) scope @system nothrow @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe del) scope @safe => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe @nogc del) scope @safe @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe nothrow del) scope @safe nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe nothrow @nogc del) scope @safe nothrow @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system del) scope @system => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system @nogc del) scope @system @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system nothrow del) scope @system nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system nothrow @nogc del) scope @system nothrow @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe del) scope @safe => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe @nogc del) scope @safe @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe nothrow del) scope @safe nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe nothrow @nogc del) scope @safe nothrow @nogc => opApplyImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApply", bool UseSafe:true, bool UseNothrow:true, bool UseNogc:true, bool UsePure:false, bool UseStatic:true) {
+    int opApply(scope int delegate(ref KeyType) @system del) @system => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system @nogc del) @system @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system nothrow del) @system nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system nothrow @nogc del) @system nothrow @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe del) @safe => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe @nogc del) @safe @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe nothrow del) @safe nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe nothrow @nogc del) @safe nothrow @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system del) @system => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system @nogc del) @system @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system nothrow del) @system nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system nothrow @nogc del) @system nothrow @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe del) @safe => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe @nogc del) @safe @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe nothrow del) @safe nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe nothrow @nogc del) @safe nothrow @nogc => opApplyImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:true, bool UseNothrow:true, bool UseNogc:true, bool UsePure:false, bool UseStatic:false) {
+    int opApplyReverse(scope int delegate(ref KeyType) @system del) scope @system => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system @nogc del) scope @system @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system nothrow del) scope @system nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system nothrow @nogc del) scope @system nothrow @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe del) scope @safe => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe @nogc del) scope @safe @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe nothrow del) scope @safe nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe nothrow @nogc del) scope @safe nothrow @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system del) scope @system => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system @nogc del) scope @system @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system nothrow del) scope @system nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system nothrow @nogc del) scope @system nothrow @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe del) scope @safe => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe @nogc del) scope @safe @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe nothrow del) scope @safe nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe nothrow @nogc del) scope @safe nothrow @nogc => opApplyReverseImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:true, bool UseNothrow:true, bool UseNogc:true, bool UsePure:false, bool UseStatic:true) {
+    int opApplyReverse(scope int delegate(ref KeyType) @system del) @system => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system @nogc del) @system @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system nothrow del) @system nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system nothrow @nogc del) @system nothrow @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe del) @safe => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe @nogc del) @safe @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe nothrow del) @safe nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe nothrow @nogc del) @safe nothrow @nogc => opApplyReverseImpl(del);
     int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system del) @system => opApplyReverseImpl(del);
     int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system @nogc del) @system @nogc => opApplyReverseImpl(del);
     int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system nothrow del) @system nothrow => opApplyReverseImpl(del);
@@ -1339,6 +2039,146 @@ mixin template OpApplyCombos(ValueType, KeyType, string Name:"opApplyReverse", b
     int opApplyReverse(scope int delegate(ref ValueType) @safe nothrow pure del) @safe nothrow pure => opApplyReverseImpl(del);
     int opApplyReverse(scope int delegate(ref ValueType) @safe nothrow @nogc del) @safe nothrow @nogc => opApplyReverseImpl(del);
     int opApplyReverse(scope int delegate(ref ValueType) @safe nothrow @nogc pure del) @safe nothrow @nogc pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system del) @system => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system pure del) @system pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system @nogc del) @system @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system @nogc pure del) @system @nogc pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system nothrow del) @system nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system nothrow pure del) @system nothrow pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system nothrow @nogc del) @system nothrow @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system nothrow @nogc pure del) @system nothrow @nogc pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe del) @safe => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe pure del) @safe pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe @nogc del) @safe @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe @nogc pure del) @safe @nogc pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe nothrow del) @safe nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe nothrow pure del) @safe nothrow pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe nothrow @nogc del) @safe nothrow @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe nothrow @nogc pure del) @safe nothrow @nogc pure => opApplyReverseImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApply", bool UseSafe:true, bool UseNothrow:true, bool UseNogc:true, bool UsePure:true, bool UseStatic:false) {
+    int opApply(scope int delegate(ref KeyType) @system del) scope @system => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system pure del) scope @system pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system @nogc del) scope @system @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system @nogc pure del) scope @system @nogc pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system nothrow del) scope @system nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system nothrow pure del) scope @system nothrow pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system nothrow @nogc del) scope @system nothrow @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system nothrow @nogc pure del) scope @system nothrow @nogc pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe del) scope @safe => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe pure del) scope @safe pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe @nogc del) scope @safe @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe @nogc pure del) scope @safe @nogc pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe nothrow del) scope @safe nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe nothrow pure del) scope @safe nothrow pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe nothrow @nogc del) scope @safe nothrow @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe nothrow @nogc pure del) scope @safe nothrow @nogc pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system del) scope @system => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system pure del) scope @system pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system @nogc del) scope @system @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system @nogc pure del) scope @system @nogc pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system nothrow del) scope @system nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system nothrow pure del) scope @system nothrow pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system nothrow @nogc del) scope @system nothrow @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system nothrow @nogc pure del) scope @system nothrow @nogc pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe del) scope @safe => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe pure del) scope @safe pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe @nogc del) scope @safe @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe @nogc pure del) scope @safe @nogc pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe nothrow del) scope @safe nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe nothrow pure del) scope @safe nothrow pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe nothrow @nogc del) scope @safe nothrow @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe nothrow @nogc pure del) scope @safe nothrow @nogc pure => opApplyImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApply", bool UseSafe:true, bool UseNothrow:true, bool UseNogc:true, bool UsePure:true, bool UseStatic:true) {
+    int opApply(scope int delegate(ref KeyType) @system del) @system => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system pure del) @system pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system @nogc del) @system @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system @nogc pure del) @system @nogc pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system nothrow del) @system nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system nothrow pure del) @system nothrow pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system nothrow @nogc del) @system nothrow @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @system nothrow @nogc pure del) @system nothrow @nogc pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe del) @safe => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe pure del) @safe pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe @nogc del) @safe @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe @nogc pure del) @safe @nogc pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe nothrow del) @safe nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe nothrow pure del) @safe nothrow pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe nothrow @nogc del) @safe nothrow @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType) @safe nothrow @nogc pure del) @safe nothrow @nogc pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system del) @system => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system pure del) @system pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system @nogc del) @system @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system @nogc pure del) @system @nogc pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system nothrow del) @system nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system nothrow pure del) @system nothrow pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system nothrow @nogc del) @system nothrow @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @system nothrow @nogc pure del) @system nothrow @nogc pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe del) @safe => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe pure del) @safe pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe @nogc del) @safe @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe @nogc pure del) @safe @nogc pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe nothrow del) @safe nothrow => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe nothrow pure del) @safe nothrow pure => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe nothrow @nogc del) @safe nothrow @nogc => opApplyImpl(del);
+    int opApply(scope int delegate(ref KeyType, ref ValueType) @safe nothrow @nogc pure del) @safe nothrow @nogc pure => opApplyImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:true, bool UseNothrow:true, bool UseNogc:true, bool UsePure:true, bool UseStatic:false) {
+    int opApplyReverse(scope int delegate(ref KeyType) @system del) scope @system => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system pure del) scope @system pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system @nogc del) scope @system @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system @nogc pure del) scope @system @nogc pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system nothrow del) scope @system nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system nothrow pure del) scope @system nothrow pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system nothrow @nogc del) scope @system nothrow @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system nothrow @nogc pure del) scope @system nothrow @nogc pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe del) scope @safe => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe pure del) scope @safe pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe @nogc del) scope @safe @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe @nogc pure del) scope @safe @nogc pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe nothrow del) scope @safe nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe nothrow pure del) scope @safe nothrow pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe nothrow @nogc del) scope @safe nothrow @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe nothrow @nogc pure del) scope @safe nothrow @nogc pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system del) scope @system => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system pure del) scope @system pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system @nogc del) scope @system @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system @nogc pure del) scope @system @nogc pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system nothrow del) scope @system nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system nothrow pure del) scope @system nothrow pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system nothrow @nogc del) scope @system nothrow @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system nothrow @nogc pure del) scope @system nothrow @nogc pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe del) scope @safe => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe pure del) scope @safe pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe @nogc del) scope @safe @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe @nogc pure del) scope @safe @nogc pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe nothrow del) scope @safe nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe nothrow pure del) scope @safe nothrow pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe nothrow @nogc del) scope @safe nothrow @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @safe nothrow @nogc pure del) scope @safe nothrow @nogc pure => opApplyReverseImpl(del);
+}
+
+mixin template OpApplyCombosKeyNotValue(ValueType, KeyType, string Name:"opApplyReverse", bool UseSafe:true, bool UseNothrow:true, bool UseNogc:true, bool UsePure:true, bool UseStatic:true) {
+    int opApplyReverse(scope int delegate(ref KeyType) @system del) @system => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system pure del) @system pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system @nogc del) @system @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system @nogc pure del) @system @nogc pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system nothrow del) @system nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system nothrow pure del) @system nothrow pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system nothrow @nogc del) @system nothrow @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @system nothrow @nogc pure del) @system nothrow @nogc pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe del) @safe => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe pure del) @safe pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe @nogc del) @safe @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe @nogc pure del) @safe @nogc pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe nothrow del) @safe nothrow => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe nothrow pure del) @safe nothrow pure => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe nothrow @nogc del) @safe nothrow @nogc => opApplyReverseImpl(del);
+    int opApplyReverse(scope int delegate(ref KeyType) @safe nothrow @nogc pure del) @safe nothrow @nogc pure => opApplyReverseImpl(del);
     int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system del) @system => opApplyReverseImpl(del);
     int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system pure del) @system pure => opApplyReverseImpl(del);
     int opApplyReverse(scope int delegate(ref KeyType, ref ValueType) @system @nogc del) @system @nogc => opApplyReverseImpl(del);
