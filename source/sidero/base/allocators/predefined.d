@@ -32,7 +32,7 @@ alias HouseKeepingAllocator(MappingAllocator = DefaultMapper, size_t AlignedTo =
 alias MemoryRegionsAllocator(size_t DefaultSize = 0, MappingAllocator = DefaultMapper) = AllocatorList!(
         Region!(MappingAllocator, GoodAlignment, DefaultSize), () => Region!(MappingAllocator, GoodAlignment, DefaultSize)());
 
-/// A fixed sized allocator, useful for quick deallocate all nodes in a data structure
+/// A fixed sized allocator, useful for quick deallocate all nodes in a data structure, when you have a lot of nodes (think 4kb worth).
 alias FreeableFixedSizeAllocator = FreeList!(MemoryRegionsAllocator!(), FitsStrategy.FirstFit);
 
 /**

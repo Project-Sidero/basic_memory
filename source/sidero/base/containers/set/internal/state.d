@@ -9,7 +9,7 @@ mixin template SetInternals(KeyType, ValueType) {
     void checkInit() scope {
         if(state is null) {
             RCAllocator allocator = globalAllocator();
-            state = allocator.make!State(1, allocator);
+            state = allocator.make!State(1, allocator, allocatorGivenType!Node);
         }
     }
 
@@ -91,15 +91,15 @@ mixin template SetInternals(KeyType, ValueType) {
                     // now find the left most node
                     while(current.left !is null || current.right !is null) {
                         if(current.left !is null)
-                        current = current.left;
+                            current = current.left;
                         else
-                        current = current.right;
+                            current = current.right;
                     }
                 } else {
                     current = current.parent;
                 }
             } else
-            current = null;
+                current = null;
         }
     }
 
@@ -143,8 +143,7 @@ mixin template SetInternals(KeyType, ValueType) {
         import sidero.base.allocators.predefined : FreeableFixedSizeAllocator;
 
         ptrdiff_t refCount;
-        RCAllocator allocator;
-        FreeableFixedSizeAllocator nodeAllocator;
+        RCAllocator allocator, nodeAllocator;
 
         Link head;
         size_t count, nodeCount;
@@ -153,12 +152,22 @@ mixin template SetInternals(KeyType, ValueType) {
     @safe nothrow @nogc:
 
         void rc(bool addRef) scope @trusted {
+            void deallocate(Link node) {
+                if (node is null)
+                    return;
+
+                deallocate(node.left);
+                deallocate(node.right);
+                nodeAllocator.dispose(node);
+            }
+
             if(addRef)
                 this.refCount++;
             else if(this.refCount == 1) {
                 if(head !is null)
                     head.cleanup;
-                nodeAllocator.deallocateAll;
+
+                deallocate(head);
                 head = null;
 
                 RCAllocator allocator = this.allocator;
