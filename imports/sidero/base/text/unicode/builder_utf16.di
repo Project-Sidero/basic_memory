@@ -12,6 +12,20 @@ export struct StringBuilder_UTF16
 	private
 	{
 		import sidero.base.internal.meta : OpApplyCombos;
+		template opApplyImpl(Del)
+		{
+			@(hidden)scope int opApplyImpl(scope Del del)
+			{
+				return state.opApplyImpl!Char(del);
+			}
+		}
+		template opApplyReverseImpl(Del)
+		{
+			@(hidden)scope int opApplyReverseImpl(scope Del del)
+			{
+				return state.opApplyReverseImpl!Char(del);
+			}
+		}
 	}
 	export
 	{
@@ -24,24 +38,24 @@ export struct StringBuilder_UTF16
 			@disable const scope void opAssign(ref return scope typeof(this) other);
 			@disable const scope void opAssign(return scope typeof(this) other);
 			auto @disable opCast(T)();
-			scope @nogc @trusted this(ref return scope typeof(this) other);
-			scope @disable const @safe this(ref return scope typeof(this) other);
+			scope @nogc scope @trusted this(ref return scope typeof(this) other);
+			scope @disable const scope @safe this(ref return scope typeof(this) other);
 			@disable const this(const ref typeof(this) other);
-			scope @nogc this(RCAllocator allocator);
-			scope @nogc this(RCAllocator allocator, scope const(char)[] input...);
-			scope @nogc this(RCAllocator allocator, scope const(wchar)[] input...);
-			scope @nogc this(RCAllocator allocator, scope const(dchar)[] input...);
-			scope @nogc this(RCAllocator allocator, scope String_ASCII input);
-			scope @nogc this(RCAllocator allocator, scope String_UTF8 input = String_UTF8.init);
-			scope @nogc this(RCAllocator allocator, scope String_UTF16 input = String_UTF16.init);
-			scope @nogc this(RCAllocator allocator, scope String_UTF32 input = String_UTF32.init);
-			scope @nogc this(scope const(char)[] input, RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.init);
-			scope @nogc this(scope const(wchar)[] input, RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.init);
-			scope @nogc this(scope const(dchar)[] input, RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.init);
-			scope @nogc @trusted this(scope String_ASCII input, RCAllocator allocator = RCAllocator.init);
-			scope @nogc @trusted this(scope String_UTF8 input, RCAllocator allocator = RCAllocator.init);
-			scope @nogc @trusted this(scope String_UTF16 input, RCAllocator allocator = RCAllocator.init);
-			scope @nogc @trusted this(scope String_UTF32 input, RCAllocator allocator = RCAllocator.init);
+			scope @nogc scope this(RCAllocator allocator);
+			scope @nogc scope this(RCAllocator allocator, scope const(char)[] input...);
+			scope @nogc scope this(RCAllocator allocator, scope const(wchar)[] input...);
+			scope @nogc scope this(RCAllocator allocator, scope const(dchar)[] input...);
+			scope @nogc scope this(RCAllocator allocator, scope String_ASCII input);
+			scope @nogc scope this(RCAllocator allocator, scope String_UTF8 input = String_UTF8.init);
+			scope @nogc scope this(RCAllocator allocator, scope String_UTF16 input = String_UTF16.init);
+			scope @nogc scope this(RCAllocator allocator, scope String_UTF32 input = String_UTF32.init);
+			scope @nogc scope this(scope const(char)[] input, RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.init);
+			scope @nogc scope this(scope const(wchar)[] input, RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.init);
+			scope @nogc scope this(scope const(dchar)[] input, RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.init);
+			scope @nogc scope @trusted this(scope String_ASCII input, RCAllocator allocator = RCAllocator.init);
+			scope @nogc scope @trusted this(scope String_UTF8 input, RCAllocator allocator = RCAllocator.init);
+			scope @nogc scope @trusted this(scope String_UTF16 input, RCAllocator allocator = RCAllocator.init);
+			scope @nogc scope @trusted this(scope String_UTF32 input, RCAllocator allocator = RCAllocator.init);
 			scope @nogc ~this();
 			const @nogc scope @trusted bool isNull();
 			@nogc scope bool haveIterator();

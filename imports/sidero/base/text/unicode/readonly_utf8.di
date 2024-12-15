@@ -9,6 +9,10 @@ import sidero.base.errors;
 import sidero.base.traits : isUTFReadOnly;
 import sidero.base.attributes : hidden;
 import sidero.base.internal.atomic;
+import sidero.base.containers.internal.slice;
+import sidero.base.containers.readonlyslice;
+import sidero.base.containers.dynamicarray;
+pragma(msg, "seen");
 export struct String_UTF8
 {
 	package(sidero.base.text.unicode)
@@ -16,12 +20,124 @@ export struct String_UTF8
 		const(void)[] literal;
 		UnicodeEncoding literalEncoding;
 		UnicodeLanguage language;
-		size_t lifeTime;
-		size_t iterator;
+		SliceMemory* lifeTime;
+		Iterator* iterator;
+		static struct Iterator
+		{
+			shared(ptrdiff_t) refCount;
+			RCAllocator allocator;
+			void[4] forwardBuffer;
+			void[4] backwardBuffer;
+			void[] forwardItems;
+			void[] backwardItems;
+			bool primedForwards;
+			bool primedBackwards;
+			bool primedForwardsNeedPop;
+			bool primedBackwardsNeedPop;
+			size_t amountFromInputForwards;
+			size_t amountFromInputBackwards;
+			scope nothrow @nogc
+			{
+				@(hidden)@trusted void rc(bool add);
+				export
+				{
+					const ulong toHash();
+					const bool opEquals(scope const Iterator other);
+					const int opCmp(scope const Iterator other);
+				}
+			}
+		}
 	}
 	private @(hidden)
 	{
 		import sidero.base.internal.meta : OpApplyCombos;
+		scope @trusted int opApplyImpl(Del)(scope Del del)
+		{
+			if (isNull)
+				return 0;
+			Iterator* oldIterator = this.iterator;
+			auto oldLiteral = this.literal;
+			this.iterator = null;
+			setupIterator;
+			if (oldIterator !is null)
+			{
+				foreach (i; 0 .. oldIterator.forwardItems.length)
+				{
+					(cast(ubyte[])this.iterator.forwardBuffer)[i] = (cast(ubyte[])oldIterator.forwardItems)[i];
+				}
+				this.iterator.forwardItems = this.iterator.forwardBuffer[0..oldIterator.forwardItems.length];
+				foreach (i; 0 .. oldIterator.backwardItems.length)
+				{
+					(cast(ubyte[])this.iterator.backwardBuffer)[i] = (cast(ubyte[])oldIterator.backwardItems)[i];
+				}
+				this.iterator.backwardItems = this.iterator.backwardBuffer[0..oldIterator.backwardItems.length];
+				this.iterator.amountFromInputForwards = oldIterator.amountFromInputForwards;
+				this.iterator.amountFromInputBackwards = oldIterator.amountFromInputBackwards;
+				this.iterator.primedForwardsNeedPop = oldIterator.primedForwardsNeedPop;
+				this.iterator.primedBackwardsNeedPop = oldIterator.primedBackwardsNeedPop;
+				this.iterator.primedForwards = oldIterator.primedForwards;
+				this.iterator.primedBackwards = oldIterator.primedBackwards;
+			}
+			scope(exit) {
+				this.iterator.rc(false);
+				this.iterator = oldIterator;
+				this.literal = oldLiteral;
+			}
+			int result;
+			while (!empty)
+			{
+				Char temp = front();
+				result = del(temp);
+				if (result)
+					return result;
+				popFront();
+			}
+			return result;
+		}
+		scope @trusted int opApplyReverseImpl(Del)(scope Del del)
+		{
+			if (isNull)
+				return 0;
+			Iterator* oldIterator = this.iterator;
+			auto oldLiteral = this.literal;
+			this.iterator = null;
+			setupIterator;
+			if (oldIterator !is null)
+			{
+				foreach (i; 0 .. oldIterator.forwardItems.length)
+				{
+					(cast(ubyte[])this.iterator.forwardBuffer)[i] = (cast(ubyte[])oldIterator.forwardItems)[i];
+				}
+				this.iterator.forwardItems = this.iterator.forwardBuffer[0..oldIterator.forwardItems.length];
+				foreach (i; 0 .. oldIterator.backwardItems.length)
+				{
+					(cast(ubyte[])this.iterator.backwardBuffer)[i] = (cast(ubyte[])oldIterator.backwardItems)[i];
+				}
+				this.iterator.backwardItems = this.iterator.backwardBuffer[0..oldIterator.backwardItems.length];
+				this.iterator.amountFromInputForwards = oldIterator.amountFromInputForwards;
+				this.iterator.amountFromInputBackwards = oldIterator.amountFromInputBackwards;
+				this.iterator.primedForwardsNeedPop = oldIterator.primedForwardsNeedPop;
+				this.iterator.primedBackwardsNeedPop = oldIterator.primedBackwardsNeedPop;
+				this.iterator.primedForwards = oldIterator.primedForwards;
+				this.iterator.primedBackwards = oldIterator.primedBackwards;
+			}
+			scope(exit) {
+				this.iterator.rc(false);
+				this.iterator = oldIterator;
+				this.literal = oldLiteral;
+			}
+			Char temp;
+			int result;
+			while (!empty)
+			{
+				temp = back();
+				result = del(temp);
+				if (result)
+					return result;
+				popBack();
+			}
+			return result;
+		}
 	}
 	export
 	{
@@ -48,12 +164,48 @@ export struct String_UTF8
 				@disable const scope void opAssign(scope const(dchar)[] other);
 				@disable const scope void opAssign(return scope typeof(this) other);
 				scope @trusted this(ref return scope typeof(this) other);
-				scope @disable const this(ref return scope const typeof(this) other);
+				scope @disable const scope this(ref return scope const typeof(this) other);
 				scope @trusted
 				{
 					this(return scope const(char)[] literal, return scope RCAllocator allocator = RCAllocator.init, return scope const(char)[] toDeallocate = null, UnicodeLanguage language = UnicodeLanguage.Unknown);
 					this(return scope const(wchar)[] literal, return scope RCAllocator allocator = RCAllocator.init, return scope const(wchar)[] toDeallocate = null, UnicodeLanguage language = UnicodeLanguage.Unknown);
 					this(return scope const(dchar)[] literal, return scope RCAllocator allocator = RCAllocator.init, return scope const(dchar)[] toDeallocate = null, UnicodeLanguage language = UnicodeLanguage.Unknown);
+					private void initForLiteral(T, U)(return scope T input, return scope RCAllocator allocator, return scope U toDeallocate, UnicodeLanguage language)
+					{
+						import sidero.base.traits : Unqual;
+						if (input.length > 0 || toDeallocate.length > 0 && !allocator.isNull)
+						{
+							version (D_BetterC)
+							{
+							}
+							else
+							{
+								if (__ctfe && (input[$ - 1] != '\0'))
+								{
+									static T justDoIt(T input)
+									{
+										return input ~ '\0';
+									}
+									input = (cast(T function(T) nothrow @nogc @safe)&justDoIt)(input);
+								}
+							}
+							alias InputChar = Unqual!(typeof(T.init[0]));
+							this.literal = input;
+							assert(input.length * InputChar.sizeof == this.literal.length);
+							this.literalEncoding = UnicodeEncoding.For!T;
+							this.language = language;
+							if (!allocator.isNull)
+							{
+								if (toDeallocate is null)
+									toDeallocate = input;
+								lifeTime = allocator.make!SliceMemory;
+								*lifeTime = SliceMemory.configureFor!InputChar(allocator, cast(void[])toDeallocate, toDeallocate.length * InputChar.sizeof);
+							}
+						}
+					}
+					scope this(return scope const(char)[] literal, SliceMemory* sliceMemory);
+					scope this(return scope const(wchar)[] literal, SliceMemory* sliceMemory);
+					scope this(return scope const(dchar)[] literal, SliceMemory* sliceMemory);
 					~this();
 				}
 				const scope bool isNull();
@@ -83,6 +235,10 @@ export struct String_UTF8
 						}
 					}
 				}
+				scope Slice!Char asSlice();
+				scope DynamicArray!Char asDynamic();
+				scope @system String_ASCII asASCII();
+				scope @trusted Slice!ubyte asRawSlice() return;
 				scope @trusted typeof(this) dup(RCAllocator allocator = RCAllocator.init);
 				scope @trusted typeof(this) normalize(bool compatibility = false, bool compose = false, UnicodeLanguage language = UnicodeLanguage.Unknown, RCAllocator allocator = RCAllocator.init);
 				typeof(this) toNFD(UnicodeLanguage language = UnicodeLanguage.Unknown, RCAllocator allocator = RCAllocator.init);
@@ -95,6 +251,9 @@ export struct String_UTF8
 					return !isNull;
 				}
 				auto @disable opCast(T)();
+				const scope bool equalsByPointer(String_UTF8 other);
+				const scope bool equalsByPointer(String_UTF16 other);
+				const scope bool equalsByPointer(String_UTF32 other);
 				alias equals = opEquals;
 				const scope bool opEquals(scope const(char)[] other);
 				const scope bool opEquals(scope const(wchar)[] other);
@@ -118,6 +277,9 @@ export struct String_UTF8
 				const scope @trusted bool ignoreCaseEquals(scope StringBuilder_UTF16 other, UnicodeLanguage language = UnicodeLanguage.Unknown);
 				const scope @trusted bool ignoreCaseEquals(scope StringBuilder_UTF32 other, UnicodeLanguage language = UnicodeLanguage.Unknown);
 				const scope @trusted bool ignoreCaseEquals(scope StringBuilder_ASCII other, UnicodeLanguage language = UnicodeLanguage.Unknown);
+				const scope int compareByPointer(String_UTF8 other);
+				const scope int compareByPointer(String_UTF16 other);
+				const scope int compareByPointer(String_UTF32 other);
 				alias compare = opCmp;
 				const scope @trusted int opCmp(scope const(char)[] other);
 				const scope @trusted int opCmp(scope const(wchar)[] other);
@@ -316,10 +478,22 @@ export struct String_UTF8
 				const scope StringBuilder_UTF!Char toLower(RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.Unknown);
 				const scope StringBuilder_UTF!Char toUpper(RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.Unknown);
 				const scope StringBuilder_UTF!Char toTitle(RCAllocator allocator = RCAllocator.init, UnicodeLanguage language = UnicodeLanguage.Unknown);
-				const scope ulong toHash();
+				const scope @trusted ulong toHash();
 				scope void stripZeroTerminator();
 				package(sidero.base.text) @(hidden)
 				{
+					scope @trusted void setupIterator()()
+					{
+						if (isNull || haveIterator)
+							return ;
+						RCAllocator allocator;
+						if (lifeTime is null)
+							allocator = globalAllocator();
+						else
+							allocator = lifeTime.allocator;
+						this.iterator = allocator.make!Iterator(1, allocator);
+						assert(this.iterator !is null);
+					}
 					const scope @trusted RCAllocator pickAllocator(return scope RCAllocator given);
 					const scope UnicodeLanguage pickLanguage(UnicodeLanguage input = UnicodeLanguage.Unknown);
 					scope
@@ -356,6 +530,8 @@ export struct String_UTF8
 								other = other[0..$ - 1];
 							if (isNull)
 								return other.length > 0 ? -1 : 0;
+							else if (other.ptr is this.literal.ptr && (other.length == this.literal.length))
+								return 0;
 							int matches(Type)(Type us)
 							{
 								if (us.length > 0 && (us[$ - 1] == '\0'))
