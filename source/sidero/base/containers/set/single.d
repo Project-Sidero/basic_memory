@@ -19,10 +19,13 @@ struct Set(KeyType, ValueType = void) {
             if(state is null || state.head is null)
                 return 0;
 
+            state.mutex.lock;
             Iterator iterator = Iterator(state);
 
             while(iterator.current !is null) {
                 iterator.before;
+                state.mutex.unlock;
+
                 KeyType key = iterator.key;
 
                 static if(!is(ValueType == void) && __traits(compiles, del(key, iterator.value))) {
@@ -34,9 +37,11 @@ struct Set(KeyType, ValueType = void) {
                 if(ret)
                     return ret;
 
+                state.mutex.lock;
                 iterator.after;
             }
 
+            state.mutex.unlock;
             return 0;
         }
     }
@@ -65,7 +70,7 @@ export:
     }
 
     ///
-    bool isNull() scope {
+    bool isNull() scope const {
         return state is null;
     }
 
@@ -78,6 +83,10 @@ export:
         ///
         void insert(KeyType key, bool update = false) scope {
             checkInit;
+
+            state.mutex.lock;
+            scope(exit)
+                state.mutex.unlock;
 
             Link containing;
             Link* parent = state.findParentOfKey(&state.head, key, containing);
@@ -118,6 +127,10 @@ export:
         void insert(KeyType key, ValueType value, bool update = true) scope {
             checkInit;
 
+            state.mutex.lock;
+            scope(exit)
+                state.mutex.unlock;
+
             Link containing;
             Link* parent = state.findParentOfKey(&state.head, key, containing);
             Link c;
@@ -153,19 +166,50 @@ export:
 
     ///
     Set dup() scope {
+        if(isNull)
+            return Set.init;
+
+        state.mutex.lock;
+        scope(exit)
+            state.mutex.unlock;
+
         Set ret;
         ret.checkInit;
 
-        static if(is(ValueType == void)) {
-            foreach(KeyType k; this) {
-                ret ~= k;
+        Link create(Link newParent, Link old) {
+            Link retL;
+
+            static if(is(ValueType == void)) {
+                retL = ret.state.nodeAllocator.make!Node(newParent, null, null, 0, old.key);
+            } else {
+                retL = ret.state.nodeAllocator.make!Node(newParent, null, null, 0, old.key, old.value);
             }
-        } else {
-            foreach(KeyType k, ValueType v; this) {
-                ret[k] = v;
-            }
+
+            retL.countChildren = old.countChildren;
+
+            if(old.left !is null)
+                retL.left = create(retL, old.left);
+            if(old.right !is null)
+                retL.right = create(retL, old.right);
+
+            return retL;
         }
+
+        ret.state.head = create(null, state.head);
+        ret.state.count = state.count;
+        ret.state.nodeCount = state.nodeCount;
+
         return ret;
+    }
+
+    ///
+    void copyOnWrite() scope {
+        import sidero.base.internal.atomic;
+
+        if(isNull)
+            return;
+
+        atomicStore(state.copyOnWrite, true);
     }
 
     ///
@@ -252,6 +296,10 @@ export:
         if(isNull)
             return;
 
+        state.mutex.lock;
+        scope(exit)
+            state.mutex.unlock;
+
         Link* parent = state.findParentOfKey(&state.head, key);
         Link c;
 
@@ -264,11 +312,17 @@ export:
     }
 
     ///
-    size_t count() scope {
+    size_t count() scope const @trusted {
         if(isNull || state.head is null)
             return 0;
-        else
-            return state.head.countChildren + 1;
+
+        State* self = cast(State*)state;
+
+        self.mutex.lock;
+        scope(exit)
+            self.mutex.unlock;
+
+        return self.head.countChildren + 1;
     }
 
     ///
@@ -281,6 +335,10 @@ export:
         if(isNull)
             return false;
 
+        state.mutex.lock;
+        scope(exit)
+            state.mutex.unlock;
+
         Link* parent = state.findParentOfKey(&state.head, key);
         return *parent !is null && (*parent).key == key;
     }
@@ -291,6 +349,10 @@ export:
         bool contains(KeyType key, out ValueType value) scope {
             if(isNull)
                 return false;
+
+            state.mutex.lock;
+            scope(exit)
+                state.mutex.unlock;
 
             Link* parent = state.findParentOfKey(&state.head, key);
             if(*parent !is null && (*parent).key == key) {
@@ -317,8 +379,47 @@ export:
     ///
     void popFront() scope {
         needIterator();
+
+        state.mutex.lock;
         iterator.after;
         iterator.before;
+        state.mutex.unlock;
+    }
+
+    ///
+    bool opEquals(scope Set other) scope const {
+        return this.opCmp(other) == 0;
+    }
+
+    ///
+    int opCmp(scope Set other) scope const {
+        const c1 = this.count, c2 = other.count;
+
+        if(c1 < c2)
+            return -1;
+        else if(c2 > c1)
+            return 1;
+        else if(c1 == 0)
+            return 0;
+
+        ulong a = this.toHash(), b = this.toHash();
+        return a < b ? -1 : (a > b ? 1 : 0);
+    }
+
+    ///
+    ulong toHash() scope const @trusted {
+        import sidero.base.hash.utils : hashOf;
+
+        if(isNull)
+            return toHash();
+
+        State* self = cast(State*)state;
+
+        self.mutex.lock;
+        scope(exit)
+            self.mutex.unlock;
+
+        return self.calculateHash();
     }
 
 private:

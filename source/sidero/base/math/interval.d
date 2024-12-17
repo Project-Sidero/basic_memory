@@ -70,6 +70,19 @@ export:
     }
 
     ///
+    ulong toHash() scope const {
+        import sidero.base.hash.utils : hashOf;
+
+        ulong ret = hashOf(this.start);
+        return hashOf(this.end, ret);
+    }
+
+    ///
+    bool opEquals(const Interval other) scope const {
+        return this.opCmp(other) == 0;
+    }
+
+    ///
     int opCmp(const Interval other) scope const {
         return this.start < other.start ? -1 : (this.start > other.start ? 1 : 0);
     }

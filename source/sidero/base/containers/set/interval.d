@@ -22,13 +22,16 @@ struct IntervalSet(RealKeyType, ValueType = void) {
             if(state is null || state.head is null)
                 return 0;
 
+            state.mutex.lock;
             Iterator iterator = Iterator(state);
 
             while(iterator.current !is null) {
                 iterator.before;
+                state.mutex.unlock;
+
                 KeyType key = iterator.key;
 
-                static if (is(ValueType == void)) {
+                static if(is(ValueType == void)) {
                     int ret = del(key);
                 } else {
                     static if(!is(ValueType == void) && __traits(compiles, del(key, iterator.value))) {
@@ -41,9 +44,11 @@ struct IntervalSet(RealKeyType, ValueType = void) {
                 if(ret)
                     return ret;
 
+                state.mutex.lock;
                 iterator.after;
             }
 
+            state.mutex.unlock;
             return 0;
         }
     }
@@ -72,34 +77,38 @@ export:
     }
 
     ///
-    bool isNull() scope {
+    bool isNull() scope const {
         return state is null;
     }
 
     static if(is(ValueType == void)) {
         ///
-        void opOpAssign(string op : "~")(RealKeyType key) {
+        void opOpAssign(string op : "~")(RealKeyType key) scope {
             this.insert(KeyType(key));
         }
 
         ///
-        void opOpAssign(string op : "~")(KeyType key) {
+        void opOpAssign(string op : "~")(KeyType key) scope {
             this.insert(key);
         }
 
         ///
-        void insert(RealKeyType startEnd, bool update = false) {
+        void insert(RealKeyType startEnd, bool update = false) scope {
             this.insert(KeyType(startEnd), update);
         }
 
         ///
-        void insert(RealKeyType start, RealKeyType end, bool update = false) {
+        void insert(RealKeyType start, RealKeyType end, bool update = false) scope {
             this.insert(KeyType(start, end), update);
         }
 
         ///
         void insert(KeyType key, bool update = false) scope {
             checkInit;
+
+            state.mutex.lock;
+            scope(exit)
+                state.mutex.unlock;
 
             Link containing;
             Link* parent = state.findParentOfKey(&state.head, key, containing);
@@ -156,28 +165,32 @@ export:
         }
     } else {
         ///
-        void opIndexAssign(ValueType value, RealKeyType key) {
+        void opIndexAssign(ValueType value, RealKeyType key) scope {
             this.insert(KeyType(key), value);
         }
 
         ///
-        void opIndexAssign(ValueType value, KeyType key) {
+        void opIndexAssign(ValueType value, KeyType key) scope {
             this.insert(key, value);
         }
 
         ///
-        void insert(RealKeyType startEnd, ValueType value, bool update = false) {
+        void insert(RealKeyType startEnd, ValueType value, bool update = false) scope {
             this.insert(KeyType(startEnd), value, update);
         }
 
         ///
-        void insert(RealKeyType start, RealKeyType end, ValueType value, bool update = false) {
+        void insert(RealKeyType start, RealKeyType end, ValueType value, bool update = false) scope {
             this.insert(KeyType(start, end), value, update);
         }
 
         ///
         void insert(KeyType key, ValueType value, bool update = true) scope {
             checkInit;
+
+            state.mutex.lock;
+            scope(exit)
+                state.mutex.unlock;
 
             Link containing;
             Link* parent = state.findParentOfKey(&state.head, key, containing);
@@ -242,23 +255,54 @@ export:
 
     ///
     IntervalSet dup() scope {
+        if(isNull)
+            return IntervalSet.init;
+
+        state.mutex.lock;
+        scope(exit)
+            state.mutex.unlock;
+
         IntervalSet ret;
         ret.checkInit;
 
-        static if(is(ValueType == void)) {
-            foreach(KeyType k; this) {
-                ret ~= k;
+        Link create(Link newParent, Link old) {
+            Link retL;
+
+            static if(is(ValueType == void)) {
+                retL = ret.state.nodeAllocator.make!Node(newParent, null, null, 0, old.key);
+            } else {
+                retL = ret.state.nodeAllocator.make!Node(newParent, null, null, 0, old.key, old.value);
             }
-        } else {
-            foreach(KeyType k, ValueType v; this) {
-                ret[k] = v;
-            }
+
+            retL.countChildren = old.countChildren;
+
+            if(old.left !is null)
+                retL.left = create(retL, old.left);
+            if(old.right !is null)
+                retL.right = create(retL, old.right);
+
+            return retL;
         }
+
+        ret.state.head = create(null, state.head);
+        ret.state.count = state.count;
+        ret.state.nodeCount = state.nodeCount;
+
         return ret;
     }
 
     ///
-    IntervalSet difference(IntervalSet other) {
+    void copyOnWrite() scope {
+        import sidero.base.internal.atomic;
+
+        if(isNull)
+            return;
+
+        atomicStore(state.copyOnWrite, true);
+    }
+
+    ///
+    IntervalSet difference(IntervalSet other) scope {
         IntervalSet ret;
         ret.checkInit;
 
@@ -282,7 +326,7 @@ export:
     }
 
     ///
-    IntervalSet intersect(IntervalSet other) {
+    IntervalSet intersect(IntervalSet other) scope {
         IntervalSet ret;
         ret.checkInit;
 
@@ -314,7 +358,7 @@ export:
     }
 
     ///
-    IntervalSet union_(IntervalSet other) {
+    IntervalSet union_(IntervalSet other) scope {
         IntervalSet ret = this.dup;
 
         static if(is(ValueType == void)) {
@@ -353,14 +397,16 @@ export:
     }
 
     ///
-    void remove(RealKeyType key) {
+    void remove(RealKeyType key) scope {
         this.remove(KeyType(key));
     }
 
     ///
-    void remove(KeyType key) {
+    void remove(KeyType key) scope @trusted {
         if(isNull)
             return;
+
+        state.mutex.lock;
 
         Link containing;
         Link* containingParent, parent = state.findParentOfKey(&state.head, key, containing, containingParent);
@@ -383,6 +429,7 @@ export:
 
         static if(is(ValueType == void)) {
             state.patchRemove(parent);
+            state.mutex.unlock;
 
             if(key2.start < key.start)
                 this.insert(KeyType(key2.start, key.start - 1));
@@ -392,6 +439,7 @@ export:
         } else {
             ValueType value = c.value;
             state.patchRemove(parent);
+            state.mutex.unlock;
 
             if(key2.start < key.start)
                 this.insert(KeyType(key2.start, key.start - 1), value);
@@ -402,32 +450,42 @@ export:
     }
 
     ///
-    size_t count() {
+    size_t count() scope const @trusted {
         if(isNull || state.head is null)
             return 0;
-        else
-            return state.count;
+
+        State* self = cast(State*)state;
+
+        self.mutex.lock;
+        scope(exit)
+            self.mutex.unlock;
+
+        return self.count;
     }
 
     ///
-    bool opBinaryRight(string op : "in")(RealKeyType key) {
+    bool opBinaryRight(string op : "in")(RealKeyType key) scope {
         return this.contains(KeyType(key));
     }
 
     ///
-    bool opBinaryRight(string op : "in")(KeyType key) {
+    bool opBinaryRight(string op : "in")(KeyType key) scope {
         return this.contains(key);
     }
 
     ///
-    bool contains(RealKeyType key, bool requireAll = false) {
+    bool contains(RealKeyType key, bool requireAll = false) scope {
         return this.contains(KeyType(key), requireAll);
     }
 
     ///
-    bool contains(KeyType key, bool requireAll = false) {
+    bool contains(KeyType key, bool requireAll = false) scope {
         if(isNull)
             return false;
+
+        state.mutex.lock;
+        scope(exit)
+            state.mutex.unlock;
 
         Link containing;
         Link* parent = state.findParentOfKey(&state.head, key, containing);
@@ -443,9 +501,13 @@ export:
     static if(is(ValueType == void)) {
     } else {
         ///
-        bool contains(KeyType key, out ValueType value, bool requireAll = false) {
+        bool contains(KeyType key, out ValueType value, bool requireAll = false) scope {
             if(isNull)
                 return false;
+
+            state.mutex.lock;
+            scope(exit)
+                state.mutex.unlock;
 
             Link containing;
             Link* parent = state.findParentOfKey(&state.head, key, containing);
@@ -482,8 +544,47 @@ export:
     ///
     void popFront() scope {
         needIterator();
+
+        state.mutex.lock;
         iterator.after;
         iterator.before;
+        state.mutex.unlock;
+    }
+
+    ///
+    bool opEquals(scope IntervalSet other) scope const {
+        return this.opCmp(other) == 0;
+    }
+
+    ///
+    int opCmp(scope IntervalSet other) scope const {
+        const c1 = this.count, c2 = other.count;
+
+        if(c1 < c2)
+            return -1;
+        else if(c2 > c1)
+            return 1;
+        else if(c1 == 0)
+            return 0;
+
+        ulong a = this.toHash(), b = this.toHash();
+        return a < b ? -1 : (a > b ? 1 : 0);
+    }
+
+    ///
+    ulong toHash() scope const @trusted {
+        import sidero.base.hash.utils : hashOf;
+
+        if(isNull)
+            return toHash();
+
+        State* self = cast(State*)state;
+
+        self.mutex.lock;
+        scope(exit)
+            self.mutex.unlock;
+
+        return self.calculateHash();
     }
 
 private:

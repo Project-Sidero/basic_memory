@@ -6,6 +6,33 @@ import std.format;
 void generateIsCheck(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
         string functionName, ValueRange[] ranges, bool invert = false) {
     {
+        int lastOut = -1;
+
+        implementationAppender ~= "static immutable dchar[] Table_";
+        implementationAppender ~= functionName;
+        implementationAppender ~= " = cast(dchar[])x\"";
+
+        const startLength = implementationAppender.data.length;
+
+        foreach(range; ranges) {
+            version(none) {
+                import std.stdio;
+
+                writeln(lastOut, " < ", cast(uint)range.start, " < ", cast(uint)range.end);
+            }
+
+            assert(lastOut < cast(int)range.start);
+            implementationAppender.formattedWrite!"%08X%08X"(range.start, range.end + 1);
+            lastOut = range.end + 1;
+        }
+
+        const diff = implementationAppender.data.length - startLength;
+        assert(diff % 8 == 0);
+
+        implementationAppender ~= "\";\n\n";
+    }
+
+    {
         interfaceAppender ~= "export extern(C) bool ";
         interfaceAppender ~= functionName;
         interfaceAppender ~= "(dchar against) @safe nothrow @nogc pure;\n";
@@ -17,45 +44,21 @@ void generateIsCheck(ref Appender!string interfaceAppender, ref Appender!string 
         implementationAppender ~= "(dchar against) @trusted nothrow @nogc pure {\n";
 
         {
-            int lastOut = -1;
-            implementationAppender ~= "    static immutable dchar[] Table = cast(dchar[])x\"";
-            const startLength = implementationAppender.data.length;
-
-            foreach(range; ranges) {
-                version(none) {
-                    import std.stdio;
-
-                    writeln(lastOut, " < ", cast(uint)range.start, " < ", cast(uint)range.end);
-                }
-
-                assert(lastOut < cast(int)range.start);
-                implementationAppender.formattedWrite!"%08X%08X"(range.start, range.end + 1);
-                lastOut = range.end + 1;
-            }
-
-            const diff = implementationAppender.data.length - startLength;
-            assert(diff % 8 == 0);
-
-            implementationAppender ~= "\";\n";
-        }
-
-        {
             // classic charInSet binary search as per Unicode Demystified pg.505
 
-            implementationAppender ~= q{
-    ptrdiff_t low, high = Table.length;
+            implementationAppender.formattedWrite!(q{    ptrdiff_t low, high = Table_%s.length;
 
     while(low < high) {
         const mid = low + ((high - low) / 2);
 
-        if (against >= Table[mid])
+        if (against >= Table_%s[mid])
             low = mid + 1;
-        else if (against < Table[mid])
+        else if (against < Table_%s[mid])
             high = mid;
     }
 
     const pos = high - 1;
-    return (pos & 1) };
+    return (pos & 1) })(functionName, functionName, functionName);
 
             implementationAppender ~= invert ? "!= 0;\n" : "== 0;\n";
         }

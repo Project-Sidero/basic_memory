@@ -1,5 +1,4 @@
 module sidero.base.containers.set.internal.state;
-
 mixin template SetInternals(KeyType, ValueType) {
     alias Link = Node*;
 
@@ -7,9 +6,18 @@ mixin template SetInternals(KeyType, ValueType) {
     Iterator iterator;
 
     void checkInit() scope {
+        import sidero.base.internal.atomic : atomicLoad;
+
         if(state is null) {
             RCAllocator allocator = globalAllocator();
             state = allocator.make!State(1, allocator, allocatorGivenType!Node);
+        } else if (atomicLoad(state.copyOnWrite)) {
+            auto temp = this.dup;
+            state.rc(false);
+
+            state = temp.state;
+            iterator = Iterator.init;
+            temp.state.rc(true);
         }
     }
 
@@ -17,8 +25,12 @@ mixin template SetInternals(KeyType, ValueType) {
         if(state is null || state.head is null || iterator.isSetup)
             return;
 
+        state.mutex.lock;
+
         iterator = Iterator(state);
         iterator.before;
+
+        state.mutex.unlock;
     }
 
     static struct Iterator {
@@ -137,23 +149,41 @@ mixin template SetInternals(KeyType, ValueType) {
             if(right !is null)
                 right.cleanup;
         }
+
+        void calculateHash(ref ulong hash) {
+            import sidero.base.hash.utils : hashOf;
+
+            if(left !is null)
+                left.calculateHash(hash);
+
+            hash = hashOf(this.key, hash);
+
+            if(right !is null)
+                right.calculateHash(hash);
+        }
     }
 
     static struct State {
         import sidero.base.allocators.predefined : FreeableFixedSizeAllocator;
+        import sidero.base.synchronization.mutualexclusion : TestTestSetLockInline;
 
-        ptrdiff_t refCount;
+        shared(ptrdiff_t) refCount;
         RCAllocator allocator, nodeAllocator;
+        TestTestSetLockInline mutex;
 
         Link head;
         size_t count, nodeCount;
         bool mutated;
 
+        shared(bool) copyOnWrite;
+
     @safe nothrow @nogc:
 
         void rc(bool addRef) scope @trusted {
+            import sidero.base.internal.atomic;
+
             void deallocate(Link node) {
-                if (node is null)
+                if(node is null)
                     return;
 
                 deallocate(node.left);
@@ -162,8 +192,8 @@ mixin template SetInternals(KeyType, ValueType) {
             }
 
             if(addRef)
-                this.refCount++;
-            else if(this.refCount == 1) {
+                atomicIncrementAndLoad(this.refCount, 1);
+            else if(atomicDecrementAndLoad(this.refCount, 1) == 0) {
                 if(head !is null)
                     head.cleanup;
 
@@ -172,8 +202,7 @@ mixin template SetInternals(KeyType, ValueType) {
 
                 RCAllocator allocator = this.allocator;
                 allocator.dispose(&this);
-            } else
-                this.refCount--;
+            }
         }
 
         Link getMinKey(Link root) scope {
@@ -185,6 +214,17 @@ mixin template SetInternals(KeyType, ValueType) {
             }
 
             return current;
+        }
+
+        ulong calculateHash() {
+            import sidero.base.hash.utils : hashOf;
+
+            ulong ret = hashOf();
+
+            if(head !is null)
+                head.calculateHash(ret);
+
+            return ret;
         }
 
         void debugMe() scope @trusted {
