@@ -28,16 +28,15 @@ struct ValueRange {
 }
 
 export extern(C) bool sidero_utf_lut_isHangulSyllable(dchar against) @trusted nothrow @nogc pure {
-    static immutable dchar[] Table = cast(dchar[])x"00001100000012000000A9600000A97D0000AC000000D7A40000D7B00000D7C70000D7CB0000D7FC";
-
-    ptrdiff_t low, high = Table.length;
+    static immutable dchar[] Table_sidero_utf_lut_isHangulSyllable = cast(dchar[])x"00001100000012000000A9600000A97D0000AC000000D7A40000D7B00000D7C70000D7CB0000D7FC";
+    ptrdiff_t low, high = Table_sidero_utf_lut_isHangulSyllable.length;
 
     while(low < high) {
         const mid = low + ((high - low) / 2);
 
-        if (against >= Table[mid])
+        if (against >= Table_sidero_utf_lut_isHangulSyllable[mid])
             low = mid + 1;
-        else if (against < Table[mid])
+        else if (against < Table_sidero_utf_lut_isHangulSyllable[mid])
             high = mid;
     }
 

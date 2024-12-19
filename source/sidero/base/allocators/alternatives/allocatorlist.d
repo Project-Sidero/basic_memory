@@ -203,6 +203,7 @@ private @hidden:
         TypeOfAllocator current;
 
         static if(isPointer!PoolAllocator || (__traits(compiles, factory!PoolAllocator) &&
+                __traits(compiles, ParameterStorageClassTuple!(factory!PoolAllocator)) &&
                 ParameterStorageClassTuple!(factory!PoolAllocator)[0] == ParameterStorageClass.ref_))
             current = factory(poolAllocator);
         else static if(__traits(compiles, typeof(factory())))

@@ -11,6 +11,7 @@ void createAPIfile() {
     api ~= " License: Artistic-v2\n";
     api ~= "*/\n";
     api ~= "module sidero.base.text.unicode.database;\n";
+    api ~= "import sidero.base.containers.set.interval;\n";
     api ~= "// Generated do not modify\n";
 
     api ~= `

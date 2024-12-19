@@ -11,6 +11,7 @@ void propList() {
     auto internal = appender!string();
     internal ~= "module sidero.base.internal.unicode.proplist;\n\n";
     internal ~= "// Generated do not modify\n";
+    internal ~= "import sidero.base.containers.set.interval;\n";
 
     auto api = appender!string();
 
@@ -21,7 +22,7 @@ void propList() {
             api ~= "\n";
             api ~= "/// Is character member of property.\n";
 
-            generateIsCheck(api, internal, "sidero_utf_lut_isMemberOf" ~ property, state.ranges[i]);
+            generateIsCheck(api, internal, "sidero_utf_lut_isMemberOf" ~ property, state.ranges[i], true);
         }
     }
 
@@ -38,6 +39,7 @@ private:
 import std.array : appender;
 import utilities.setops;
 import utilities.inverselist;
+import utilities.intervallist;
 
 void processEachLine(string inputText, ref TotalState state) {
     import std.algorithm : countUntil, splitter;

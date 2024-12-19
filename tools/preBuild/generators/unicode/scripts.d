@@ -12,6 +12,7 @@ void handleScripts() {
     auto internal = appender!string();
     internal ~= "module sidero.base.internal.unicode.scripts;\n\n";
     internal ~= "// Generated do not modify\n";
+    internal ~= "import sidero.base.containers.set.interval;\n";
 
     auto api = appender!string();
 
@@ -37,7 +38,7 @@ void handleScripts() {
             }
 
             api ~= "/// Is the character a member of the script Unknown\n";
-            generateIsCheck(api, internal, "sidero_utf_lut_isScriptUnkown", ranges2, true);
+            generateIsCheck(api, internal, "sidero_utf_lut_isScriptUnknown", ranges2, true, true);
         }
     }
 
@@ -47,7 +48,7 @@ void handleScripts() {
 
             static if(script != Script.Unknown) {
                 api ~= "/// Is the character a member of the script " ~ Sm ~ "\n";
-                generateIsCheck(api, internal, "sidero_utf_lut_isScript" ~ Sm, state.scriptRanges[script]);
+                generateIsCheck(api, internal, "sidero_utf_lut_isScript" ~ Sm, state.scriptRanges[script], true);
             }
         }
     }
@@ -60,6 +61,7 @@ private:
 import std.array : appender;
 import utilities.setops;
 import utilities.inverselist;
+import utilities.intervallist;
 
 void processEachLine(string inputText, ref TotalState state) {
     import std.algorithm : countUntil, splitter;

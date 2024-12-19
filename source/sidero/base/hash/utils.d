@@ -39,9 +39,21 @@ ulong hashOf(Type)(scope ref Type value, ulong previousHash) @trusted {
                     }
                 }
             } else {
-                ubyte* ptr = cast(ubyte*)&input;
-                scope array = ptr[0 .. Type2.sizeof];
-                ret = fnv_64_1a(array, ret);
+                static if (__traits(isIntegral, Type2)) {
+                    ubyte[Type2.sizeof] buffer;
+                    auto temp = cast()input;
+
+                    static foreach(i; 0 .. Type2.sizeof) {
+                        buffer[i] = temp & 0xFF;
+                        temp >>= 8;
+                    }
+
+                    ret = fnv_64_1a(buffer[], ret);
+                } else {
+                    ubyte* ptr = cast(ubyte*)&input;
+                    scope array = ptr[0 .. Type2.sizeof];
+                    ret = fnv_64_1a(array, ret);
+                }
             }
         }
     }

@@ -44,7 +44,7 @@ struct ValueRange {
 
     api ~= "\n";
     api ~= "/// Is character a hangul syllable?\n";
-    generateIsCheck(api, internal, "sidero_utf_lut_isHangulSyllable", state.all);
+    generateIsCheck(api, internal, "sidero_utf_lut_isHangulSyllable", state.all, false);
     api ~= "\n";
 
     {
@@ -88,6 +88,7 @@ private:
 import std.array : appender;
 import utilities.setops;
 import utilities.inverselist;
+import utilities.intervallist;
 
 void processEachLine(string inputText, ref TotalState state) {
     import std.algorithm : countUntil, splitter, sort;

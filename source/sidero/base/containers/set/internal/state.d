@@ -11,14 +11,26 @@ mixin template SetInternals(KeyType, ValueType) {
         if(state is null) {
             RCAllocator allocator = globalAllocator();
             state = allocator.make!State(1, allocator, allocatorGivenType!Node);
-        } else if (atomicLoad(state.copyOnWrite)) {
+        } else if(atomicLoad(state.copyOnWrite)) {
             auto temp = this.dup;
+            temp.state.rc(true);
             state.rc(false);
 
             state = temp.state;
             iterator = Iterator.init;
-            temp.state.rc(true);
         }
+    }
+
+    void cannotBeSlice() scope {
+        if(state is null || state.sliceOfKeys.length == 0)
+            return;
+
+        auto temp = this.dup;
+        temp.state.rc(true);
+        state.rc(false);
+
+        state = temp.state;
+        iterator = Iterator.init;
     }
 
     void needIterator() scope {
@@ -171,6 +183,11 @@ mixin template SetInternals(KeyType, ValueType) {
         RCAllocator allocator, nodeAllocator;
         TestTestSetLockInline mutex;
 
+        // used for ROM tables
+        immutable(RealKeyType)[] sliceOfKeys;
+        immutable(ValueType)[] sliceOfValues;
+        ulong sliceOfKeysHash;
+
         Link head;
         size_t count, nodeCount;
         bool mutated;
@@ -181,6 +198,9 @@ mixin template SetInternals(KeyType, ValueType) {
 
         void rc(bool addRef) scope @trusted {
             import sidero.base.internal.atomic;
+
+            if(this.allocator.isNull)
+                return;
 
             void deallocate(Link node) {
                 if(node is null)

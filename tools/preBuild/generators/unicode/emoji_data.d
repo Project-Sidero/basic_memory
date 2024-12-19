@@ -12,6 +12,7 @@ void emojiData() {
     auto internal = appender!string();
     internal ~= "module sidero.base.internal.unicode.emoji_data;\n\n";
     internal ~= "// Generated do not modify\n";
+    internal ~= "import sidero.base.containers.set.interval;\n";
 
     auto api = appender!string();
 
@@ -19,7 +20,7 @@ void emojiData() {
         {
             api ~= "\n";
             api ~= "/// Is member of " ~ Em ~ " class?\n";
-            generateIsCheck(api, internal, "sidero_utf_lut_isMemberOf" ~ Em, state.values[__traits(getMember, EmojiClass, Em)]);
+            generateIsCheck(api, internal, "sidero_utf_lut_isMemberOf" ~ Em, state.values[__traits(getMember, EmojiClass, Em)], true);
         }
     }
 
@@ -31,6 +32,7 @@ private:
 import std.array : appender;
 import utilities.setops;
 import utilities.inverselist;
+import utilities.intervallist;
 
 void processEachLine(string inputText, ref TotalState state) {
     import std.algorithm : countUntil, splitter;

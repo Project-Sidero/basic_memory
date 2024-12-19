@@ -9,6 +9,7 @@ void uax31Tables() {
     auto internal = appender!string();
     internal ~= "module sidero.base.internal.unicode.uax31;\n\n";
     internal ~= "// Generated do not modify\n";
+    internal ~= "import sidero.base.containers.set.interval;\n";
 
     auto api = appender!string();
 
@@ -23,7 +24,7 @@ void uax31Tables() {
         api ~= "/// Is UAX31 for C start set.\n";
         api ~= "/// Returns: false if not set.\n";
 
-        generateIsCheck(api, internal, "sidero_utf_lut_isUAX31_C_Start", ranges.ranges);
+        generateIsCheck(api, internal, "sidero_utf_lut_isUAX31_C_Start", ranges.ranges, true);
     }
 
     {
@@ -33,7 +34,7 @@ void uax31Tables() {
         api ~= "/// Is UAX31 for C continue set.\n";
         api ~= "/// Returns: false if not set.\n";
 
-        generateIsCheck(api, internal, "sidero_utf_lut_isUAX31_C_Continue", propertyXID_ContinueRanges.ranges);
+        generateIsCheck(api, internal, "sidero_utf_lut_isUAX31_C_Continue", propertyXID_ContinueRanges.ranges, true);
     }
 
     {
@@ -48,7 +49,7 @@ void uax31Tables() {
         api ~= "/// Is UAX31 for Javascript start set.\n";
         api ~= "/// Returns: false if not set.\n";
 
-        generateIsCheck(api, internal, "sidero_utf_lut_isUAX31_JS_Start", ranges.ranges);
+        generateIsCheck(api, internal, "sidero_utf_lut_isUAX31_JS_Start", ranges.ranges, true);
     }
 
     {
@@ -64,7 +65,7 @@ void uax31Tables() {
         api ~= "/// Is UAX31 for Javascript continue set.\n";
         api ~= "/// Returns: false if not set.\n";
 
-        generateIsCheck(api, internal, "sidero_utf_lut_isUAX31_JS_Continue", ranges.ranges);
+        generateIsCheck(api, internal, "sidero_utf_lut_isUAX31_JS_Continue", ranges.ranges, true);
     }
 
     append(UnicodeAPIFile, api.data);
@@ -75,3 +76,4 @@ private:
 import std.array : appender;
 import utilities.setops;
 import utilities.inverselist;
+import utilities.intervallist;

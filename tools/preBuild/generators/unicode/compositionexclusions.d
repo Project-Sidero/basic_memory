@@ -21,7 +21,7 @@ void compositionExclusions() {
         api ~= "/// Is excluded from composition.\n";
         api ~= "/// Returns: false if not set.\n";
 
-        generateIsCheck(api, internal, "sidero_utf_lut_isCompositionExcluded", compositionExclusionRanges);
+        generateIsCheck(api, internal, "sidero_utf_lut_isCompositionExcluded", compositionExclusionRanges, false);
     }
 
     append(UnicodeAPIFile, api.data);
@@ -32,6 +32,7 @@ private:
 import std.array : appender;
 import utilities.setops;
 import utilities.inverselist;
+import utilities.intervallist;
 
 void processEachLine(string inputText) {
     import std.algorithm : countUntil, splitter, sort;

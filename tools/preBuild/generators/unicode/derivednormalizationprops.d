@@ -16,7 +16,7 @@ void derivedNormalizationProps() {
 
     api ~= "\n";
     api ~= "/// Is character part of full composition execlusions.\n";
-    generateIsCheck(api, internal, "sidero_utf_lut_isFullCompositionExcluded", state.fullCompositionExclusion);
+    generateIsCheck(api, internal, "sidero_utf_lut_isFullCompositionExcluded", state.fullCompositionExclusion, false);
 
     append(UnicodeAPIFile, api.data);
     write(UnicodeLUTDirectory ~ "derivednormalizationprops.d", internal.data);
@@ -26,6 +26,7 @@ private:
 import std.array : appender, Appender;
 import utilities.setops;
 import utilities.inverselist;
+import utilities.intervallist;
 
 void processEachLine(string inputText, ref TotalState state) {
     import std.algorithm : countUntil, splitter;

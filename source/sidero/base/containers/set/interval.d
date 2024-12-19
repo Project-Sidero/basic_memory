@@ -19,6 +19,7 @@ struct IntervalSet(RealKeyType, ValueType = void) {
         import sidero.base.internal.meta;
 
         int opApplyImpl(Del)(Del del) scope @trusted {
+            cannotBeSlice;
             if(state is null || state.head is null)
                 return 0;
 
@@ -61,7 +62,78 @@ export:
         mixin OpApplyCombosKeyNotValue!(ValueType, KeyType, "opApply", true, true, true, false, false);
     }
 
-@safe nothrow @nogc:
+@safe nothrow:
+
+    static if(is(ValueType == void)) {
+        /// Start + end pairs will construct into a set at CTFE, must be sorted and coalesced.
+        static IntervalSet constructCTFE(immutable(RealKeyType)[] allKeys) {
+            import sidero.base.hash.utils : hashOf;
+
+            if(allKeys.length == 0)
+                return IntervalSet.init;
+
+            assert(allKeys.length % 2 == 0);
+            const count = allKeys.length / 2;
+
+            IntervalSet ret;
+
+            if(__ctfe) {
+                ret.state = new State;
+                ret.state.copyOnWrite = true;
+
+                ret.state.count = count;
+                ret.state.nodeCount = count;
+
+                ret.state.sliceOfKeys = allKeys;
+                ret.state.sliceOfKeysHash = hashOf();
+
+                for(size_t i; i < allKeys.length; i += 2) {
+                    KeyType k = KeyType(allKeys[i], allKeys[i + 1]);
+                    ret.state.sliceOfKeysHash = hashOf(k, ret.state.sliceOfKeysHash);
+                }
+
+                return ret;
+            }
+
+            assert(0);
+        }
+    } else {
+        /// Start + end pairs will construct into a set at CTFE, must be sorted and coalesced.
+        static IntervalSet constructCTFE(immutable(RealKeyType)[] allKeys, immutable(ValueType)[] allValues) {
+            import sidero.base.hash.utils : hashOf;
+
+            if(allKeys.length == 0)
+                return IntervalSet.init;
+
+            assert(allKeys.length % 2 == 0);
+            const count = allKeys.length / 2;
+
+            IntervalSet ret;
+
+            if(__ctfe) {
+                ret.state = new State;
+                ret.state.copyOnWrite = true;
+
+                ret.state.count = count;
+                ret.state.nodeCount = count;
+
+                ret.state.sliceOfKeys = allKeys;
+                ret.state.sliceOfValues = allValues;
+                ret.state.sliceOfKeysHash = hashOf();
+
+                for(size_t i; i < allKeys.length; i += 2) {
+                    KeyType k = KeyType(allKeys[i], allKeys[i + 1]);
+                    ret.state.sliceOfKeysHash = hashOf(k, ret.state.sliceOfKeysHash);
+                }
+
+                return ret;
+            }
+
+            assert(0);
+        }
+    }
+
+@nogc:
 
     ///
     this(return scope ref IntervalSet other) scope {
@@ -265,7 +337,7 @@ export:
         IntervalSet ret;
         ret.checkInit;
 
-        Link create(Link newParent, Link old) {
+        Link createFromNode(Link newParent, Link old) {
             Link retL;
 
             static if(is(ValueType == void)) {
@@ -277,16 +349,49 @@ export:
             retL.countChildren = old.countChildren;
 
             if(old.left !is null)
-                retL.left = create(retL, old.left);
+                retL.left = createFromNode(retL, old.left);
             if(old.right !is null)
-                retL.right = create(retL, old.right);
+                retL.right = createFromNode(retL, old.right);
 
             return retL;
         }
 
-        ret.state.head = create(null, state.head);
-        ret.state.count = state.count;
-        ret.state.nodeCount = state.nodeCount;
+        Link createFromSlice(Link newParent, immutable(RealKeyType)[] toGoKey, immutable(ValueType)[] toGoValue) @trusted {
+            assert(toGoKey.length == toGoValue.length * 2);
+            if(toGoKey.length < 2)
+                return null;
+
+            const mid = toGoKey.length / 2;
+
+            static if(is(ValueType == void)) {
+                Link retL = ret.state.nodeAllocator.make!Node(newParent, null, null, 0,
+                        KeyType(cast(RealKeyType)toGoKey[mid], cast(RealKeyType)toGoKey[mid + 1]));
+                immutable(ValueType[]) leftValues, rightValues;
+            } else {
+                Link retL = ret.state.nodeAllocator.make!Node(newParent, null, null, 0,
+                        KeyType(cast(RealKeyType)toGoKey[mid], cast(RealKeyType)toGoKey[mid + 1]), cast(ValueType)toGoValue[mid]);
+                immutable(ValueType)[] leftValues = toGoValue[0 .. mid], rightValues = toGoValue[mid + 2 .. $];
+            }
+
+            retL.left = createFromSlice(retL, toGoKey[0 .. mid], leftValues);
+            retL.right = createFromSlice(retL, toGoKey[mid + 2 .. $], rightValues);
+
+            if(newParent !is null)
+                newParent.countChildren += retL.countChildren + 1;
+
+            ret.state.count += toGoKey[mid + 1] - toGoKey[mid];
+            return retL;
+        }
+
+        if(state.sliceOfKeys is null) {
+            ret.state.head = createFromNode(null, state.head);
+            ret.state.count = state.count;
+            ret.state.nodeCount = state.nodeCount;
+        } else {
+            ret.state.head = createFromSlice(null, state.sliceOfKeys, state.sliceOfValues);
+            ret.state.count = state.sliceOfKeys.length / 2;
+            ret.state.nodeCount = state.sliceOfKeys.length;
+        }
 
         return ret;
     }
@@ -406,6 +511,7 @@ export:
         if(isNull)
             return;
 
+        cannotBeSlice;
         state.mutex.lock;
 
         Link containing;
@@ -487,15 +593,32 @@ export:
         scope(exit)
             state.mutex.unlock;
 
-        Link containing;
-        Link* parent = state.findParentOfKey(&state.head, key, containing);
+        if(state.sliceOfKeys.length == 0) {
+            Link containing;
+            Link* parent = state.findParentOfKey(&state.head, key, containing);
 
-        if(*parent !is null) {
-            return requireAll ? (key.start >= (*parent).key.start && key.end <= (*parent).key.end) : (*parent).key.within(key);
-        } else if(containing !is null) {
-            return requireAll ? (key.start >= containing.key.start && key.end <= containing.key.end) : containing.key.within(key);
-        } else
-            return false;
+            if(*parent !is null) {
+                return requireAll ? (key.start >= (*parent).key.start && key.end <= (*parent).key.end) : (*parent).key.within(key);
+            } else if(containing !is null) {
+                return requireAll ? (key.start >= containing.key.start && key.end <= containing.key.end) : containing.key.within(key);
+            }
+        } else {
+            ptrdiff_t low, high = state.sliceOfKeys.length / 2;
+
+            while(low < high) {
+                const mid = low + (high - low) / 2;
+                const start = state.sliceOfKeys[mid << 1], end = state.sliceOfKeys[(mid << 1) | 1];
+
+                if(key.start >= start && key.start <= end)
+                    return requireAll ? (key.end <= end) : true;
+                else if(key.start > end)
+                    low = mid + 1;
+                else if(key.start < start)
+                    high = mid;
+            }
+        }
+
+        return false;
     }
 
     static if(is(ValueType == void)) {
@@ -509,18 +632,38 @@ export:
             scope(exit)
                 state.mutex.unlock;
 
-            Link containing;
-            Link* parent = state.findParentOfKey(&state.head, key, containing);
+            if(state.sliceOfKeys.length == 0) {
+                Link containing;
+                Link* parent = state.findParentOfKey(&state.head, key, containing);
 
-            if(*parent !is null) {
-                if(requireAll ? (key.start >= (*parent).key.start && key.end <= (*parent).key.end) : (*parent).key.within(key)) {
-                    value = (*parent).value;
-                    return true;
+                if(*parent !is null) {
+                    if(requireAll ? (key.start >= (*parent).key.start && key.end <= (*parent).key.end) : (*parent).key.within(key)) {
+                        value = (*parent).value;
+                        return true;
+                    }
+                } else if(containing !is null) {
+                    if(requireAll ? (key.start >= containing.key.start && key.end <= containing.key.end) : containing.key.within(key)) {
+                        value = containing.value;
+                        return true;
+                    }
                 }
-            } else if(containing !is null) {
-                if(requireAll ? (key.start >= containing.key.start && key.end <= containing.key.end) : containing.key.within(key)) {
-                    value = containing.value;
-                    return true;
+            } else {
+                ptrdiff_t low, high = state.sliceOfKeys.length / 2;
+
+                while(low < high) {
+                    const mid = low + (high - low) / 2;
+                    const start = state.sliceOfKeys[mid << 1], end = state.sliceOfKeys[(mid << 1) | 1];
+
+                    if(key.start >= start && key.start <= end) {
+                        if(requireAll && key.end > end)
+                            return false;
+
+                        value = state.sliceOfValues[mid];
+                        return true;
+                    } else if(key.start > end)
+                        low = mid + 1;
+                    else if(key.start < start)
+                        high = mid;
                 }
             }
 
@@ -530,20 +673,25 @@ export:
 
     ///
     KeyType front() scope {
-        needIterator();
+        cannotBeSlice;
+        needIterator;
+
         assert(iterator.current !is null);
         return iterator.key;
     }
 
     ///
     bool empty() scope {
-        needIterator();
+        cannotBeSlice;
+        needIterator;
+
         return !iterator.isSetup() || iterator.current is null;
     }
 
     ///
     void popFront() scope {
-        needIterator();
+        cannotBeSlice;
+        needIterator;
 
         state.mutex.lock;
         iterator.after;
@@ -579,6 +727,9 @@ export:
             return toHash();
 
         State* self = cast(State*)state;
+
+        if(self.sliceOfKeys.length > 0)
+            return self.sliceOfKeysHash;
 
         self.mutex.lock;
         scope(exit)
