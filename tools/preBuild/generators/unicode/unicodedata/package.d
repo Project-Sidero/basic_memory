@@ -15,8 +15,8 @@ void unicodeData() {
     fullyDecompose;
 
     auto internal = appender!string();
-    internal ~= "module sidero.base.internal.unicode.unicodedata;\n\n";
-    internal ~= "// Generated do not modify\n";
+    internal ~= "module sidero.base.internal.unicode.unicodedata;\n";
+    internal ~= "// Generated do not modify\n\n";
 
     import generators.unicode.unicodedata.compatibilityformatting;
 

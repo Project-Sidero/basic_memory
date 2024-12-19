@@ -9,14 +9,12 @@ void compositionExclusions() {
     processEachLine(readText(UnicodeDatabaseDirectory ~ "CompositionExclusions.txt"));
 
     auto internal = appender!string();
-    internal ~= "module sidero.base.internal.unicode.compositionexclusions;\n\n";
-    internal ~= "// Generated do not modify\n";
+    internal ~= "module sidero.base.internal.unicode.compositionexclusions;\n";
+    internal ~= "// Generated do not modify\n\n";
 
     auto api = appender!string();
 
     {
-        internal ~= "\n";
-
         api ~= "\n";
         api ~= "/// Is excluded from composition.\n";
         api ~= "/// Returns: false if not set.\n";

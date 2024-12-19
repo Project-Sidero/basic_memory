@@ -10,8 +10,8 @@ void Casing() {
     import std.format : formattedWrite;
 
     auto internalCa = appender!string();
-    internalCa ~= "module sidero.base.internal.unicode.unicodedataCa;\n\n";
-    internalCa ~= "// Generated do not modify\n";
+    internalCa ~= "module sidero.base.internal.unicode.unicodedataCa;\n";
+    internalCa ~= "// Generated do not modify\n\n";
 
     size_t[dstring] casingDStringMap;
     dstring casingText;

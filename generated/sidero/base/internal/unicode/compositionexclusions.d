@@ -1,5 +1,4 @@
 module sidero.base.internal.unicode.compositionexclusions;
-
 // Generated do not modify
 
 export extern(C) bool sidero_utf_lut_isCompositionExcluded(dchar against) @trusted nothrow @nogc pure {

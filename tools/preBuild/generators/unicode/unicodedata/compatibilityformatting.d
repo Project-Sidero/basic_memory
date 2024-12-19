@@ -8,8 +8,8 @@ void compatibilityFormatting() {
     import std.format : formattedWrite;
 
     auto internalCF = appender!string();
-    internalCF ~= "module sidero.base.internal.unicode.unicodedataCF;\n\n";
-    internalCF ~= "// Generated do not modify\n";
+    internalCF ~= "module sidero.base.internal.unicode.unicodedataCF;\n";
+    internalCF ~= "// Generated do not modify\n\n";
 
     {
         foreach(tag; __traits(allMembers, CompatibilityFormattingTag)) {

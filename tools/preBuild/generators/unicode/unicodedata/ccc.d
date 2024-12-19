@@ -6,8 +6,8 @@ import std.array : appender;
 
 void CCC() {
     auto internalCCC = appender!string();
-    internalCCC ~= "module sidero.base.internal.unicode.unicodedataCCC;\n\n";
-    internalCCC ~= "// Generated do not modify\n";
+    internalCCC ~= "module sidero.base.internal.unicode.unicodedataCCC;\n";
+    internalCCC ~= "// Generated do not modify\n\n";
 
     {
         apiOutput ~= "\n";

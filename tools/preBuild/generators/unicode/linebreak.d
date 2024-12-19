@@ -10,8 +10,8 @@ void lineBreak() {
     processEachLine(readText(UnicodeDatabaseDirectory ~ "LineBreak.txt"), state);
 
     auto internal = appender!string();
-    internal ~= "module sidero.base.internal.unicode.linebreak;\n\n";
-    internal ~= "// Generated do not modify\n";
+    internal ~= "module sidero.base.internal.unicode.linebreak;\n";
+    internal ~= "// Generated do not modify\n\n";
 
     auto api = appender!string();
 

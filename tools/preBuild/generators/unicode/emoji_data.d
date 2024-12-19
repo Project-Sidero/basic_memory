@@ -10,9 +10,9 @@ void emojiData() {
     processEachLine(readText(UnicodeDatabaseDirectory ~ "emoji/emoji-data.txt"), state);
 
     auto internal = appender!string();
-    internal ~= "module sidero.base.internal.unicode.emoji_data;\n\n";
+    internal ~= "module sidero.base.internal.unicode.emoji_data;\n";
     internal ~= "// Generated do not modify\n";
-    internal ~= "import sidero.base.containers.set.interval;\n";
+    internal ~= "import sidero.base.containers.set.interval;\n\n";
 
     auto api = appender!string();
 

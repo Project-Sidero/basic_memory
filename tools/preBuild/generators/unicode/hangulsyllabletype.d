@@ -10,7 +10,7 @@ void hangulSyllableType() {
     processEachLine(readText(UnicodeDatabaseDirectory ~ "HangulSyllableType.txt"), state);
 
     auto internal = appender!string();
-    internal ~= "module sidero.base.internal.unicode.hangulsyllabletype;\n\n";
+    internal ~= "module sidero.base.internal.unicode.hangulsyllabletype;\n";
     internal ~= "// Generated do not modify\n\n";
 
     internal ~= "enum HangulSyllableType {

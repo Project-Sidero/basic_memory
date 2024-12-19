@@ -9,8 +9,8 @@ void wordBreakProperty() {
     processEachLine(readText(UnicodeDatabaseDirectory ~ "auxiliary/WordBreakProperty.txt"), state);
 
     auto internal = appender!string();
-    internal ~= "module sidero.base.internal.unicode.wordbreakproperty;\n\n";
-    internal ~= "// Generated do not modify\n";
+    internal ~= "module sidero.base.internal.unicode.wordbreakproperty;\n";
+    internal ~= "// Generated do not modify\n\n";
 
     auto api = appender!string();
 

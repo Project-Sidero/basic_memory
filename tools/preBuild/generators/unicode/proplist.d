@@ -9,9 +9,9 @@ void propList() {
     processEachLine(readText(UnicodeDatabaseDirectory ~ "PropList.txt"), state);
 
     auto internal = appender!string();
-    internal ~= "module sidero.base.internal.unicode.proplist;\n\n";
-    internal ~= "// Generated do not modify\n";
+    internal ~= "module sidero.base.internal.unicode.proplist;\n";
     internal ~= "import sidero.base.containers.set.interval;\n";
+    internal ~= "// Generated do not modify\n\n";
 
     auto api = appender!string();
 

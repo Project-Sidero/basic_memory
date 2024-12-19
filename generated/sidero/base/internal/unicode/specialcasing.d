@@ -1,6 +1,6 @@
 module sidero.base.internal.unicode.specialcasing;
-
 // Generated do not modify
+
 export extern(C) bool sidero_utf_lut_getSpecialCasing2None(dchar input, void* outputPtr) @trusted nothrow @nogc pure {
     Casing* output = cast(Casing*)outputPtr;
     auto sliced = cast(DicedCasing*)sidero_utf_lut_getSpecialCasing3None(input);

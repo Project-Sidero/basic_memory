@@ -1,5 +1,4 @@
 module sidero.base.internal.unicode.hangulsyllabletype;
-
 // Generated do not modify
 
 enum HangulSyllableType {

@@ -11,8 +11,8 @@ void specialCasing() {
     processEachLine(readText(UnicodeDatabaseDirectory ~ "SpecialCasing.txt"), state);
 
     auto internal = appender!string();
-    internal ~= "module sidero.base.internal.unicode.specialcasing;\n\n";
-    internal ~= "// Generated do not modify\n";
+    internal ~= "module sidero.base.internal.unicode.specialcasing;\n";
+    internal ~= "// Generated do not modify\n\n";
 
     auto api = appender!string();
 

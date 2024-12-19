@@ -7,9 +7,9 @@ void uax31Tables() {
     import std.algorithm : sort;
 
     auto internal = appender!string();
-    internal ~= "module sidero.base.internal.unicode.uax31;\n\n";
-    internal ~= "// Generated do not modify\n";
+    internal ~= "module sidero.base.internal.unicode.uax31;\n";
     internal ~= "import sidero.base.containers.set.interval;\n";
+    internal ~= "// Generated do not modify\n\n";
 
     auto api = appender!string();
 

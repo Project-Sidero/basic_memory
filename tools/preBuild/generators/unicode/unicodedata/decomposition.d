@@ -11,8 +11,8 @@ void decompositionMap() {
     import std.format : formattedWrite;
 
     auto internalDM = appender!string();
-    internalDM ~= "module sidero.base.internal.unicode.unicodedataDM;\n\n";
-    internalDM ~= "// Generated do not modify\n";
+    internalDM ~= "module sidero.base.internal.unicode.unicodedataDM;\n";
+    internalDM ~= "// Generated do not modify\n\n";
 
     size_t[dstring] decompositionDStringMap;
     dstring decompositionText;

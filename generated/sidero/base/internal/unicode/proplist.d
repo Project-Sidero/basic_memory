@@ -1,7 +1,7 @@
 module sidero.base.internal.unicode.proplist;
-
-// Generated do not modify
 import sidero.base.containers.set.interval;
+// Generated do not modify
+
 
 static immutable dchar[] Table_sidero_utf_lut_isMemberOfWhite_Space = cast(dchar[])x"000000090000000D00000020000000200000008500000085000000A0000000A00000168000001680000020000000200A00002028000020290000202F0000202F0000205F0000205F0000300000003000";
 

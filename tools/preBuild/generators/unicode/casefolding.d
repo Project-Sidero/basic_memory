@@ -9,8 +9,8 @@ void caseFolding() {
     processEachLine(readText(UnicodeDatabaseDirectory ~ "CaseFolding.txt"), state);
 
     auto internal = appender!string();
-    internal ~= "module sidero.base.internal.unicode.casefolding;\n\n";
-    internal ~= "// Generated do not modify\n";
+    internal ~= "module sidero.base.internal.unicode.casefolding;\n";
+    internal ~= "// Generated do not modify\n\n";
 
     auto api = appender!string();
 

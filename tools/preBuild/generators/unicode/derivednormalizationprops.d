@@ -9,8 +9,8 @@ void derivedNormalizationProps() {
     processEachLine(readText(UnicodeDatabaseDirectory ~ "DerivedNormalizationProps.txt"), state);
 
     auto internal = appender!string();
-    internal ~= "module sidero.base.internal.unicode.derivednormalizationprops;\n\n";
-    internal ~= "// Generated do not modify\n";
+    internal ~= "module sidero.base.internal.unicode.derivednormalizationprops;\n";
+    internal ~= "// Generated do not modify\n\n";
 
     auto api = appender!string();
 

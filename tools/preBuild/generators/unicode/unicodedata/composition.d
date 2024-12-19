@@ -9,8 +9,8 @@ void Composition() {
     import std.algorithm : sort;
 
     auto internalC = appender!string();
-    internalC ~= "module sidero.base.internal.unicode.unicodedataC;\n\n";
-    internalC ~= "// Generated do not modify\n";
+    internalC ~= "module sidero.base.internal.unicode.unicodedataC;\n";
+    internalC ~= "// Generated do not modify\n\n";
 
     {
         Pair[] pairs;

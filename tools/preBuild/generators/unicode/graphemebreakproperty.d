@@ -9,15 +9,13 @@ void graphemeBreakProperty() {
 
     auto internal = appender!string();
     internal ~= "module sidero.base.internal.unicode.graphemebreakproperty;\n";
-    internal ~= "// Generated do not modify\n";
     internal ~= "import sidero.base.containers.set.interval;\n";
+    internal ~= "// Generated do not modify\n\n";
 
     auto api = appender!string();
 
     foreach(i, property; __traits(allMembers, Property)) {
         {
-            internal ~= "\n";
-
             api ~= "\n";
             api ~= "/// Is character member of grapheme break property.\n";
 
