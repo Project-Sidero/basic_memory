@@ -61,12 +61,10 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
 
     Loop: for(;;) {
         version(DebugWordBreak) {
-            debugWritefln!"lastLeft: %d %X, left: %d %X, right: %d %X, lookahead: %d %X, amountSkipped: %s %s"(
-                lastLeft.entriesForValue, lastLeft.value,
-                left.entriesForValue, left.value,
-                right.entriesForValue, right.value,
-                lookahead.entriesForValue, lookahead.value,
-                amountSkipped1, amountSkipped2);
+            debugWritefln!"lastLeft: %d %X, left: %d %X, right: %d %X, lookahead: %d %X, amountSkipped: %s %s"(lastLeft.entriesForValue,
+                    lastLeft.value, left.entriesForValue,
+                    left.value, right.entriesForValue, right.value, lookahead.entriesForValue, lookahead.value,
+                    amountSkipped1, amountSkipped2);
         }
 
         if(left == sot) {
@@ -342,7 +340,7 @@ ptrdiff_t findNextWordBreakUnicode(alias Us)(scope ref WordBreaker!(dchar, Us) w
     assert(0);
 }
 
-@safe nothrow @nogc pure:
+@safe nothrow @nogc:
 
 version(DebugWordBreak) {
     void debugWritefln(string fmt, Args...)(scope Args args, int line = __LINE__) {
@@ -401,15 +399,15 @@ bool isALetter(dchar input) {
             return false;
 
         auto wbp = sidero_utf_lut_getWordBreakProperty(input);
-        return !(sidero_utf_lut_isMemberOfIdeographic(input) || wbp == WordBreakProperty.Katakana || wbp == WordBreakProperty.Extend ||
+        return !(input in sidero_utf_lut_isMemberOfIdeographic_Set || wbp == WordBreakProperty.Katakana || wbp == WordBreakProperty.Extend ||
                 wbp == WordBreakProperty.Hebrew_Letter || sidero_utf_lut_getLineBreakClass(input) == LineBreakClass.SA ||
-                sidero_utf_lut_isScriptHiragana(input));
+                input in sidero_utf_lut_isScriptHiragana_Set);
     }
 }
 
 ///
 bool isHebrewLetter(dchar input) {
-    return sidero_utf_lut_isScriptHebrew(input) && sidero_utf_lut_getGeneralCategory(input) == GeneralCategory.Lo;
+    return input in sidero_utf_lut_isScriptHebrew_Set && sidero_utf_lut_getGeneralCategory(input) == GeneralCategory.Lo;
 }
 
 ///
@@ -490,7 +488,7 @@ bool isKatakana(dchar input) {
         return true;
 
     default:
-        return sidero_utf_lut_isScriptKatakana(input);
+        return input in sidero_utf_lut_isScriptKatakana_Set;
     }
 }
 
@@ -505,7 +503,8 @@ bool isNumeric(dchar input) {
     case 0x066C:
         return false;
     default:
-        return sidero_utf_lut_getWordBreakProperty(input) == WordBreakProperty.Numeric || sidero_utf_lut_getGeneralCategory(input) == GeneralCategory.Nd;
+        return sidero_utf_lut_getWordBreakProperty(input) == WordBreakProperty.Numeric ||
+            sidero_utf_lut_getGeneralCategory(input) == GeneralCategory.Nd;
     }
 }
 
@@ -514,7 +513,7 @@ bool isExtend(dchar input) {
     if(input == 0x200D)
         return false;
     return isUnicodeGraphemeExtend(input) || sidero_utf_lut_getGeneralCategory(input) == GeneralCategory.Mc ||
-        sidero_utf_lut_isMemberOfEmoji_Modifier(input);
+        input in sidero_utf_lut_isMemberOfEmoji_Modifier_Set;
 }
 
 ///
@@ -525,7 +524,7 @@ bool isFormat(dchar input) {
     case 0x200D:
         return false;
     default:
-        return sidero_utf_lut_getGeneralCategory(input) == GeneralCategory.Cf && !sidero_utf_lut_isMemberOfGraphemePrepend(input);
+        return sidero_utf_lut_getGeneralCategory(input) == GeneralCategory.Cf && input !in sidero_utf_lut_isMemberOfGraphemePrepend_Set;
     }
 }
 

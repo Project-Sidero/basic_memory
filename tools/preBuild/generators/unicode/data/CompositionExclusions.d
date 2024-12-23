@@ -1,38 +1,9 @@
-module generators.unicode.compositionexclusions;
-import constants;
-
-__gshared ValueRange[] compositionExclusionRanges;
-
-void compositionExclusions() {
-    import std.file : readText, write, append;
-
-    processEachLine(readText(UnicodeDatabaseDirectory ~ "CompositionExclusions.txt"));
-
-    auto internal = appender!string();
-    internal ~= "module sidero.base.internal.unicode.compositionexclusions;\n";
-    internal ~= "// Generated do not modify\n\n";
-
-    auto api = appender!string();
-
-    {
-        api ~= "\n";
-        api ~= "/// Is excluded from composition.\n";
-        api ~= "/// Returns: false if not set.\n";
-
-        generateIsCheck(api, internal, "sidero_utf_lut_isCompositionExcluded", compositionExclusionRanges, false);
-    }
-
-    append(UnicodeAPIFile, api.data);
-    write(UnicodeLUTDirectory ~ "compositionexclusions.d", internal.data);
-}
-
-private:
-import std.array : appender;
+module generators.unicode.data.CompositionExclusions;
 import utilities.setops;
-import utilities.inverselist;
-import utilities.intervallist;
 
-void processEachLine(string inputText) {
+__gshared ValueRange[] CompositionExclusions;
+
+void processCompositionExclusions(string inputText) {
     import std.algorithm : countUntil, splitter, sort;
     import std.string : strip, lineSplitter;
     import std.conv : parse;
@@ -65,14 +36,14 @@ void processEachLine(string inputText) {
             continue;
 
         ValueRange valueRange = valueRangeFromString(line);
-        compositionExclusionRanges ~= valueRange;
+        CompositionExclusions ~= valueRange;
     }
 
     {
-        sort!("a.start < b.start")(compositionExclusionRanges);
+        sort!("a.start < b.start")(CompositionExclusions);
         ValueRange[] temp;
 
-        foreach(valueRange; compositionExclusionRanges) {
+        foreach(valueRange; CompositionExclusions) {
             if(temp.length == 0)
                 temp ~= valueRange;
             else {
@@ -83,6 +54,6 @@ void processEachLine(string inputText) {
             }
         }
 
-        compositionExclusionRanges = temp;
+        CompositionExclusions = temp;
     }
 }

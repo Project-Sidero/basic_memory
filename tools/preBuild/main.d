@@ -27,44 +27,35 @@ void main() {
     }
 
     {
-        import generators.unicode.external;
+        import generators.unicode.data;
+        import generators.unicode.genfor;
+
         import generators.unicode.casefolding;
-        import generators.unicode.compositionexclusions;
         import generators.unicode.hangulsyllabletype;
         import generators.unicode.derivednormalizationprops;
-        import generators.unicode.unicodedata;
-        import generators.unicode.proplist;
         import generators.unicode.wordbreakproperty;
-        import generators.unicode.specialcasing;
         import generators.unicode.linebreak;
         import generators.unicode.emoji_data;
         import generators.unicode.scripts;
         import generators.unicode.graphemebreakproperty;
         import generators.unicode.derivedcoreproperties;
-        import generators.unicode.uax31;
 
         writeln("Running generation of Unicode database");
-        createAPIfile;
+        loadUnicodeData;
+        genForUnicode;
 
         caseFolding;
         // must be before unicodeData
-        compositionExclusions;
         hangulSyllableType;
         derivedNormalizationProps;
         // must be after compositionExclusions
-        unicodeData;
-        propList;
         wordBreakProperty;
-        specialCasing;
         lineBreak;
         emojiData;
         handleScripts;
 
         graphemeBreakProperty;
         parseDerivedCoreProperties;
-
-        // must be after parseDerivedCoreProperties
-        uax31Tables;
     }
 
     {

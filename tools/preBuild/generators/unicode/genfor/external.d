@@ -1,20 +1,15 @@
-module generators.unicode.external;
-import constants;
+module generators.unicode.genfor.external;
+import generators.unicode.defs;
 
-void createAPIfile() {
-    import std.array : appender;
-    import std.file : write;
+void genForExternal() {
+    apiOutput ~= q{/**
+Unicode database access routines
+License: Artistic-v2
+*/
+module sidero.base.text.unicode.database;
+import sidero.base.containers.set.interval;
+// Generated do not modify
 
-    auto api = appender!string();
-    api ~= "/**\n";
-    api ~= " Unicode database access routines\n";
-    api ~= " License: Artistic-v2\n";
-    api ~= "*/\n";
-    api ~= "module sidero.base.text.unicode.database;\n";
-    api ~= "import sidero.base.containers.set.interval;\n";
-    api ~= "// Generated do not modify\n";
-
-    api ~= `
 /// Add 1 to end to foreach
 struct ValueRange {
     ///
@@ -475,7 +470,132 @@ bool isUnicodeGraphemeExtend(dchar input) @safe nothrow @nogc pure {
     }
 }
 
-`;
+/// Lookup decomposition mapping for character if canonical.
+alias sidero_utf_lut_getDecompositionMappingCanonical = sidero_utf_lut_getDecompositionMappingNone;
 
-    write(UnicodeAPIFile, api.data);
+/// Lookup decomposition mapping length for character if canonical.
+alias sidero_utf_lut_lengthOfDecompositionMappingCanonical = sidero_utf_lut_lengthOfDecompositionMappingNone;
+
+/// Is character graphical?
+export bool isUnicodeGraphical(dchar input) @safe nothrow @nogc pure {
+    GeneralCategory got = sidero_utf_lut_getGeneralCategory(input);
+
+    switch(got) {
+        case GeneralCategory.L:
+        case GeneralCategory.M:
+        case GeneralCategory.N:
+        case GeneralCategory.P:
+        case GeneralCategory.S:
+        case GeneralCategory.Zs:
+            return true;
+
+        default:
+            return false;
+    }
+}
+
+/// Is character a control?
+export bool isUnicodeControl(dchar input) @safe nothrow @nogc pure {
+    GeneralCategory got = sidero_utf_lut_getGeneralCategory(input);
+
+    switch(got) {
+        case GeneralCategory.Cc:
+            return true;
+
+        default:
+            return false;
+    }
+}
+
+/// Is character a alpha?
+export bool isUnicodeAlpha(dchar input) @safe nothrow @nogc pure {
+    GeneralCategory got = sidero_utf_lut_getGeneralCategory(input);
+
+    switch(got) {
+        case GeneralCategory.Lu:
+        case GeneralCategory.Ll:
+        case GeneralCategory.Lt:
+        case GeneralCategory.Lm:
+        case GeneralCategory.Lo:
+            return true;
+
+        default:
+            return false;
+    }
+}
+
+/// Is character a number?
+export bool isUnicodeNumber(dchar input) @safe nothrow @nogc pure {
+    GeneralCategory got = sidero_utf_lut_getGeneralCategory(input);
+
+    switch(got) {
+        case GeneralCategory.Nd:
+        case GeneralCategory.Nl:
+        case GeneralCategory.No:
+            return true;
+
+        default:
+            return false;
+    }
+}
+
+/// Is character a alpha or number?
+export bool isUnicodeAlphaOrNumber(dchar input) @safe nothrow @nogc pure {
+    GeneralCategory got = sidero_utf_lut_getGeneralCategory(input);
+
+    switch(got) {
+        case GeneralCategory.Lu:
+        case GeneralCategory.Ll:
+        case GeneralCategory.Lt:
+        case GeneralCategory.Lm:
+        case GeneralCategory.Lo:
+        case GeneralCategory.Nd:
+        case GeneralCategory.Nl:
+        case GeneralCategory.No:
+            return true;
+
+        default:
+            return false;
+    }
+}
+
+/// Is character uppercase?
+export bool isUnicodeUpper(dchar input) @safe nothrow @nogc pure {
+    GeneralCategory got = sidero_utf_lut_getGeneralCategory(input);
+
+    switch(got) {
+        case GeneralCategory.Lu:
+            return true;
+
+        default:
+            return false;
+    }
+}
+
+/// Is character lowercase?
+export bool isUnicodeLower(dchar input) @safe nothrow @nogc pure {
+    GeneralCategory got = sidero_utf_lut_getGeneralCategory(input);
+
+    switch(got) {
+        case GeneralCategory.Ll:
+            return true;
+
+        default:
+            return false;
+    }
+}
+
+/// Is character titlecase?
+export bool isUnicodeTitle(dchar input) @safe nothrow @nogc pure {
+    GeneralCategory got = sidero_utf_lut_getGeneralCategory(input);
+
+    switch(got) {
+        case GeneralCategory.Lt:
+            return true;
+
+        default:
+            return false;
+    }
+}
+};
 }

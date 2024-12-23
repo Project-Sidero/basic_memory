@@ -2,7 +2,7 @@ module sidero.base.text.unicode.characters.database;
 import sidero.base.bitmanip : BitFlags;
 import unidb = sidero.base.text.unicode.database;
 
-export @safe nothrow @nogc pure:
+export @safe nothrow @nogc:
 
 /**
     Enum members: Unknown, Lithuanian, Turkish, Azeri.
@@ -93,7 +93,7 @@ bool isGraphical(dchar input) {
 
 ///
 bool isWhiteSpace(dchar input) {
-    return unidb.isUnicodeWhiteSpace(input);
+    return input in unidb.sidero_utf_lut_isMemberOfWhite_Space_Set;
 }
 
 ///

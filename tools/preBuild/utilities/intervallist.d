@@ -41,6 +41,7 @@ void generateIsCheck(ref Appender!string interfaceAppender, ref Appender!string 
     }
 
     {
+        interfaceAppender ~= "deprecated ";
         interfaceAppender ~= "export extern(C) bool ";
         interfaceAppender ~= functionName;
         interfaceAppender ~= "(dchar against) @safe nothrow @nogc pure;\n";

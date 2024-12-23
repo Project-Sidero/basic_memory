@@ -83,7 +83,7 @@ ErrorResult toUnicodeTitleCase(scope ForeachOverUTF32Delegate primaryForwards, s
 
 private:
 import sidero.base.text.unicode.database : SpecialCasing, SpecialCasingCondition, sidero_utf_lut_getSpecialCasing,
-    sidero_utf_lut_isMemberOfSoft_Dotted, sidero_utf_lut_getCCC;
+    sidero_utf_lut_isMemberOfSoft_Dotted_Set, sidero_utf_lut_getCCC;
 
 ErrorResult caseImpl(scope ForeachOverUTF32Delegate primaryForwards, scope ForeachOverUTF32Delegate secondaryForwards,
         scope ForeachOverUTF32Delegate secondaryBackwards,
@@ -155,7 +155,7 @@ ErrorResult caseImpl(scope ForeachOverUTF32Delegate primaryForwards, scope Forea
              */
 
             foreach(secondary; secondaryBackwards) {
-                if(sidero_utf_lut_isMemberOfSoft_Dotted(secondary))
+                if(secondary in sidero_utf_lut_isMemberOfSoft_Dotted_Set)
                     break;
 
                 auto ccc = sidero_utf_lut_getCCC(secondary);

@@ -20,7 +20,7 @@ import sidero.base.internal.unicode.linebreak;
 import sidero.base.internal.unicode.proplist;
 import sidero.base.internal.unicode.scripts;
 import sidero.base.internal.unicode.specialcasing;
-import sidero.base.internal.unicode.unicodedata;
+import sidero.base.internal.unicode.other;
 import sidero.base.internal.unicode.unicodedataC;
 import sidero.base.internal.unicode.unicodedataCa;
 import sidero.base.internal.unicode.unicodedataCCC;

@@ -1,11 +1,156 @@
-module generators.unicode.unicodedata.common;
+module generators.unicode.data.UnicodeData;
 import utilities.setops;
-import std.array : Appender;
 
-__gshared Appender!string apiOutput;
-__gshared TotalState state;
+__gshared UnicodeData_State UnicodeData;
 
-void processEachLine(string inputText) {
+struct UnicodeData_State {
+    UnicodeData_Entry[] entries;
+
+    dstring[dchar] decompositionMaps, decompositionMapsCompatibility;
+    DecompositionMapping[dchar] decompositonMappings;
+}
+
+struct UnicodeData_Entry {
+@safe:
+
+    ValueRange range;
+    string name;
+    GeneralCategory generalCategory;
+
+    // DerivedCombiningClass.txt
+    int canonicalCombiningClass;
+
+    // DerivedBidiClass.txt
+    string bidiClass;
+
+    CompatibilityFormattingTag compatibilityTag;
+    dstring decompositionMapping;
+
+    bool isDecimal, isDigit, isNumeric;
+    long numericValueNumerator, numericValueDenominator;
+
+    bool bidiMirrored;
+
+    // ignore
+    // ignore
+
+    dchar simpleUppercaseMapping;
+    dchar simpleLowercaseMapping;
+    dchar simpleTitlecaseMapping;
+
+    bool haveSimpleUppercaseMapping() {
+        return simpleUppercaseMapping != dchar.init;
+    }
+
+    bool haveSimpleLowercaseMapping() {
+        return simpleLowercaseMapping != dchar.init;
+    }
+
+    bool haveSimpleTitlecaseMapping() {
+        return simpleTitlecaseMapping != dchar.init;
+    }
+}
+
+enum GeneralCategory {
+    None, ///
+    Lu, ///
+    Ll, ///
+    Lt, ///
+    LC, ///
+    Lm, ///
+    Lo, ///
+    L, ///
+    Mn, ///
+    Mc, ///
+    Me, ///
+    M, ///
+    Nd, ///
+    Nl, ///
+    No, ///
+    N, ///
+    Pc, ///
+    Pd, ///
+    Ps, ///
+    Pe, ///
+    Pi, ///
+    Pf, ///
+    Po, ///
+    P, ///
+    Sm, ///
+    Sc, ///
+    Sk, ///
+    So, ///
+    S, ///
+    Zs, ///
+    Zl, ///
+    Zp, ///
+    Z, ///
+    Cc, ///
+    Cf, ///
+    Cs, ///
+    Co, ///
+    Cn, ///
+    C, ///
+}
+
+enum BidiClass {
+    None, ///
+    L, ///
+    R, ///
+    AL, ///
+    EN, ///
+    ES, ///
+    ET, ///
+    AN, ///
+    CS, ///
+    NSM, ///
+    BN, ///
+    B, ///
+    S, ///
+    WS, ///
+    ON, ///
+    LRE, ///
+    LRO, ///
+    RLE, ///
+    RLO, ///
+    PDF, ///
+    LRI, ///
+    RLI, ///
+    FSI, ///
+    PDI, ///
+}
+
+enum CompatibilityFormattingTag {
+    None, ///
+    Font, ///
+    NoBreak, ///
+    Initial, ///
+    Medial, ///
+    Final, ///
+    Isolated, ///
+    Circle, ///
+    Super, ///
+    Sub, ///
+    Vertical, ///
+    Wide, ///
+    Narrow, ///
+    Small, ///
+    Square, ///
+    Fraction, ///
+    Compat, ///
+}
+
+struct DecompositionMapping {
+    CompatibilityFormattingTag tag;
+    dstring decomposed;
+    dstring fullyDecomposed, fullyDecomposedCompatibility;
+}
+
+struct SimplifiedCasing {
+    dstring lowercase, titlecase, uppercase;
+}
+
+void processUnicodeData(string inputText) {
     import std.algorithm : countUntil, splitter, startsWith, endsWith;
     import std.string : strip, lineSplitter;
     import std.conv : parse;
@@ -80,11 +225,11 @@ How first field ranges are specified (the First, Last bit):
         if(expectedRangeEnd) {
             // use last entry
 
-            state.entries[$ - 1].range.end = character;
+            UnicodeData.entries[$ - 1].range.end = character;
             expectedRangeEnd = false;
         } else {
             // create a new entry
-            Entry entry;
+            UnicodeData_Entry entry;
 
             entry.range.start = character;
             entry.range.end = character;
@@ -209,25 +354,29 @@ How first field ranges are specified (the First, Last bit):
             else
                 entry.simpleTitlecaseMapping = entry.simpleUppercaseMapping;
 
-            state.entries ~= entry;
+            UnicodeData.entries ~= entry;
             expectedRangeEnd = nextRangeEnd;
         }
     }
+
+    fullyDecompose;
 }
 
+private:
+
 void fullyDecompose() {
-    foreach(entry; state.entries) {
+    foreach(entry; UnicodeData.entries) {
         if(entry.decompositionMapping.length > 0) {
             foreach(v; entry.range.start .. entry.range.end + 1) {
                 if(entry.compatibilityTag == CompatibilityFormattingTag.None)
-                    state.decompositionMaps[v] = entry.decompositionMapping;
+                    UnicodeData.decompositionMaps[v] = entry.decompositionMapping;
                 else
-                    state.decompositionMapsCompatibility[v] = entry.decompositionMapping;
+                    UnicodeData.decompositionMapsCompatibility[v] = entry.decompositionMapping;
             }
         }
     }
 
-    foreach(entry; state.entries) {
+    foreach(entry; UnicodeData.entries) {
         DecompositionMapping value;
         value.tag = entry.compatibilityTag;
         value.decomposed = entry.decompositionMapping;
@@ -243,16 +392,16 @@ void fullyDecompose() {
 
                 foreach(dchar c; last) {
                     if(canonical) {
-                        if(c in state.decompositionMaps) {
-                            temp ~= state.decompositionMaps[c];
+                        if(c in UnicodeData.decompositionMaps) {
+                            temp ~= UnicodeData.decompositionMaps[c];
                             continue;
                         }
                     } else {
-                        if(c in state.decompositionMapsCompatibility) {
-                            temp ~= state.decompositionMapsCompatibility[c];
+                        if(c in UnicodeData.decompositionMapsCompatibility) {
+                            temp ~= UnicodeData.decompositionMapsCompatibility[c];
                             continue;
-                        } else if(c in state.decompositionMaps) {
-                            temp ~= state.decompositionMaps[c];
+                        } else if(c in UnicodeData.decompositionMaps) {
+                            temp ~= UnicodeData.decompositionMaps[c];
                             continue;
                         }
                     }
@@ -279,11 +428,11 @@ void fullyDecompose() {
                 temp.reserve = last.length;
 
                 foreach(dchar c; last) {
-                    if(c in state.decompositionMapsCompatibility) {
-                        temp ~= state.decompositionMapsCompatibility[c];
+                    if(c in UnicodeData.decompositionMapsCompatibility) {
+                        temp ~= UnicodeData.decompositionMapsCompatibility[c];
                         continue;
-                    } else if(c in state.decompositionMaps) {
-                        temp ~= state.decompositionMaps[c];
+                    } else if(c in UnicodeData.decompositionMaps) {
+                        temp ~= UnicodeData.decompositionMaps[c];
                         continue;
                     } else
                         temp ~= c;
@@ -304,154 +453,7 @@ void fullyDecompose() {
 
         if(value.decomposed.length > 0) {
             foreach(dchar c; entry.range.start .. entry.range.end + 1)
-                state.decompositonMappings[c] = value;
+                UnicodeData.decompositonMappings[c] = value;
         }
     }
-}
-
-struct Entry {
-@safe:
-
-    ValueRange range;
-    string name;
-    GeneralCategory generalCategory;
-
-    // DerivedCombiningClass.txt
-    int canonicalCombiningClass;
-
-    // DerivedBidiClass.txt
-    string bidiClass;
-
-    CompatibilityFormattingTag compatibilityTag;
-    dstring decompositionMapping;
-
-    bool isDecimal, isDigit, isNumeric;
-    long numericValueNumerator, numericValueDenominator;
-
-    bool bidiMirrored;
-
-    // ignore
-    // ignore
-
-    dchar simpleUppercaseMapping;
-    dchar simpleLowercaseMapping;
-    dchar simpleTitlecaseMapping;
-
-    bool haveSimpleUppercaseMapping() {
-        return simpleUppercaseMapping != dchar.init;
-    }
-
-    bool haveSimpleLowercaseMapping() {
-        return simpleLowercaseMapping != dchar.init;
-    }
-
-    bool haveSimpleTitlecaseMapping() {
-        return simpleTitlecaseMapping != dchar.init;
-    }
-}
-
-struct TotalState {
-    Entry[] entries;
-
-    dstring[dchar] decompositionMaps, decompositionMapsCompatibility;
-    DecompositionMapping[dchar] decompositonMappings;
-}
-
-enum GeneralCategory {
-    None, ///
-    Lu, ///
-    Ll, ///
-    Lt, ///
-    LC, ///
-    Lm, ///
-    Lo, ///
-    L, ///
-    Mn, ///
-    Mc, ///
-    Me, ///
-    M, ///
-    Nd, ///
-    Nl, ///
-    No, ///
-    N, ///
-    Pc, ///
-    Pd, ///
-    Ps, ///
-    Pe, ///
-    Pi, ///
-    Pf, ///
-    Po, ///
-    P, ///
-    Sm, ///
-    Sc, ///
-    Sk, ///
-    So, ///
-    S, ///
-    Zs, ///
-    Zl, ///
-    Zp, ///
-    Z, ///
-    Cc, ///
-    Cf, ///
-    Cs, ///
-    Co, ///
-    Cn, ///
-    C, ///
-}
-
-enum BidiClass {
-    None, ///
-    L, ///
-    R, ///
-    AL, ///
-    EN, ///
-    ES, ///
-    ET, ///
-    AN, ///
-    CS, ///
-    NSM, ///
-    BN, ///
-    B, ///
-    S, ///
-    WS, ///
-    ON, ///
-    LRE, ///
-    LRO, ///
-    RLE, ///
-    RLO, ///
-    PDF, ///
-    LRI, ///
-    RLI, ///
-    FSI, ///
-    PDI, ///
-}
-
-enum CompatibilityFormattingTag {
-    None, ///
-    Font, ///
-    NoBreak, ///
-    Initial, ///
-    Medial, ///
-    Final, ///
-    Isolated, ///
-    Circle, ///
-    Super, ///
-    Sub, ///
-    Vertical, ///
-    Wide, ///
-    Narrow, ///
-    Small, ///
-    Square, ///
-    Fraction, ///
-    Compat, ///
-}
-
-struct DecompositionMapping {
-    CompatibilityFormattingTag tag;
-    dstring decomposed;
-    dstring fullyDecomposed, fullyDecomposedCompatibility;
-}
-
-struct SimplifiedCasing {
-    dstring lowercase, titlecase, uppercase;
 }

@@ -1,47 +1,9 @@
-module generators.unicode.proplist;
-import constants;
-
-void propList() {
-    import std.file : readText, write, append;
-
-    TotalState state;
-
-    processEachLine(readText(UnicodeDatabaseDirectory ~ "PropList.txt"), state);
-
-    auto internal = appender!string();
-    internal ~= "module sidero.base.internal.unicode.proplist;\n";
-    internal ~= "import sidero.base.containers.set.interval;\n";
-    internal ~= "// Generated do not modify\n\n";
-
-    auto api = appender!string();
-
-    foreach(i, property; __traits(allMembers, Property)) {
-        {
-            internal ~= "\n";
-
-            api ~= "\n";
-            api ~= "/// Is character member of property.\n";
-
-            generateIsCheck(api, internal, "sidero_utf_lut_isMemberOf" ~ property, state.ranges[i], true);
-        }
-    }
-
-    api ~= q{
-/// Is character whitespace?
-alias isUnicodeWhiteSpace = sidero_utf_lut_isMemberOfWhite_Space;
-};
-
-    append(UnicodeAPIFile, api.data);
-    write(UnicodeLUTDirectory ~ "proplist.d", internal.data);
-}
-
-private:
-import std.array : appender;
+module generators.unicode.data.PropList;
 import utilities.setops;
-import utilities.inverselist;
-import utilities.intervallist;
 
-void processEachLine(string inputText, ref TotalState state) {
+__gshared PropList_State PropList;
+
+void processPropList(string inputText) {
     import std.algorithm : countUntil, splitter;
     import std.string : strip, lineSplitter;
     import std.conv : parse;
@@ -65,24 +27,24 @@ void processEachLine(string inputText, ref TotalState state) {
     void handleLine(ValueRange valueRange, string propertyStr) {
         Property property;
 
-    Switch:
+        Switch:
         switch(propertyStr) {
             static foreach(P; __traits(allMembers, Property)) {
-        case P:
-                property = __traits(getMember, Property, P);
-                break Switch;
+                case P:
+                    property = __traits(getMember, Property, P);
+                    break Switch;
             }
-        default:
-            assert(0, propertyStr);
+                default:
+                assert(0, propertyStr);
         }
 
-        if(state.ranges[property].length == 0)
-            state.ranges[property] ~= valueRange;
+        if(PropList.ranges[property].length == 0)
+        PropList.ranges[property] ~= valueRange;
         else {
-            if(valueRange.start == state.ranges[property][$ - 1].end + 1)
-                state.ranges[property][$ - 1].end = valueRange.end;
+            if(valueRange.start == PropList.ranges[property][$ - 1].end + 1)
+            PropList.ranges[property][$ - 1].end = valueRange.end;
             else
-                state.ranges[property] ~= valueRange;
+            PropList.ranges[property] ~= valueRange;
         }
     }
 
@@ -91,15 +53,15 @@ void processEachLine(string inputText, ref TotalState state) {
 
         offset = line.countUntil('#');
         if(offset >= 0)
-            line = line[0 .. offset];
+        line = line[0 .. offset];
         line = line.strip;
 
         if(line.length < 5) // anything that low can't represent a functional line
-            continue;
+        continue;
 
         offset = line.countUntil(';');
         if(offset < 0) // no char range
-            continue;
+        continue;
         string charRangeStr = line[0 .. offset].strip;
         line = line[offset + 1 .. $].strip;
 
@@ -109,7 +71,7 @@ void processEachLine(string inputText, ref TotalState state) {
     }
 }
 
-struct TotalState {
+struct PropList_State {
     ValueRange[][Property.max + 1] ranges;
 }
 
