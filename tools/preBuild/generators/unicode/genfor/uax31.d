@@ -1,5 +1,5 @@
 module generators.unicode.genfor.uax31;
-import generators.unicode.derivedcoreproperties;
+import generators.unicode.data.DerivedCoreProperties;
 import generators.unicode.defs;
 import utilities.setops;
 import utilities.inverselist;
@@ -20,7 +20,7 @@ void genForUAX31Tables() {
 private:
 
 void start_C() {
-    ValueRanges ranges = ValueRanges(propertyXID_StartRanges.ranges.dup);
+    ValueRanges ranges = ValueRanges(DerivedCoreProperties_Binary[DerivedCorePropertyBinary.XID_Start].dup);
     ranges.add(ValueRange(0x5F)); // add _
     ranges.ranges.sort!((a, b) => a.start < b.start);
 
@@ -40,11 +40,11 @@ void continue_C() {
     apiOutput ~= "/// Is UAX31 for C continue set.\n";
     apiOutput ~= "/// Returns: false if not set.\n";
 
-    generateIsCheck(apiOutput, implOutput, "sidero_utf_lut_isUAX31_C_Continue", propertyXID_ContinueRanges.ranges, true);
+    generateIsCheck(apiOutput, implOutput, "sidero_utf_lut_isUAX31_C_Continue", DerivedCoreProperties_Binary[DerivedCorePropertyBinary.XID_Continue], true);
 }
 
 void start_JS() {
-    ValueRanges ranges = ValueRanges(propertyID_StartRanges.ranges.dup);
+    ValueRanges ranges = ValueRanges(DerivedCoreProperties_Binary[DerivedCorePropertyBinary.ID_Start].dup);
     ranges.add(ValueRange(0x24)); // add $
     ranges.add(ValueRange(0x5F)); // add _
     ranges.ranges.sort!((a, b) => a.start < b.start);
@@ -59,7 +59,7 @@ void start_JS() {
 }
 
 void continue_JS() {
-    ValueRanges ranges = ValueRanges(propertyID_ContinueRanges.ranges.dup);
+    ValueRanges ranges = ValueRanges(DerivedCoreProperties_Binary[DerivedCorePropertyBinary.ID_Continue].dup);
     ranges.add(ValueRange(0x24)); // add $
     // ranges.add(ValueRange(0x5F)); // add _, already in ID_Continue
     //ranges.add(ValueRange(0x200C, 0x200D)); // add ZWJ and ZWNJ, already exists in ID_Continue

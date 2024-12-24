@@ -10,48 +10,38 @@ void genForUnicode() {
         write(UnicodeAPIFile, apiOutput.data);
 
     import generators.unicode.genfor.external;
+    import generators.unicode.genfor.casing;
+    import generators.unicode.genfor.ccc;
+    import generators.unicode.genfor.casing_special;
+    import generators.unicode.genfor.casing_folding;
+    import generators.unicode.genfor.properties;
+    import generators.unicode.genfor.properties_normalization;
+    import generators.unicode.genfor.properties_graphemebreak;
+    import generators.unicode.genfor.properties_wordbreak;
+    import generators.unicode.genfor.compatibility_formatting;
+    import generators.unicode.genfor.decomposition;
+    import generators.unicode.genfor.composition;
+    import generators.unicode.genfor.composition_exclusions;
+    import generators.unicode.genfor.uax31;
+    import generators.unicode.genfor.other;
+    import generators.unicode.genfor.emoji_data;
 
     genForExternal();
-
-    import generators.unicode.genfor.casing;
-
     handle!genForCasing("unicodedataCa.d");
-
-    import generators.unicode.genfor.ccc;
-
     handle!genForCCC("unicodedataCCC.d");
-
-    import generators.unicode.genfor.casing_special;
-
     handle!genForSpecialCasing("specialcasing.d");
-
-    import generators.unicode.genfor.properties;
-
+    handle!genForCaseFolding("casefolding.d");
     handle!genForProperties("proplist.d");
-
-    import generators.unicode.genfor.compatibility_formatting;
-
+    handle!genForNormalizationProps("derivednormalizationprops.d");
+    handle!genForGraphemeBreakProperty("graphemebreakproperty.d");
+    handle!genForWordBreakProperty("wordbreakproperty.d");
     handle!genForCompatibilityFormatting("unicodedataCF.d");
-
-    import generators.unicode.genfor.decomposition;
-
     handle!genForDecomposition("unicodedataDM.d");
-
-    import generators.unicode.genfor.composition;
-
     handle!genForComposition("unicodedataC.d");
-
-    import generators.unicode.genfor.composition_exclusions;
-
     handle!genForCompositionExclusions("compositionexclusions.d");
-
-    import generators.unicode.genfor.uax31;
-
     handle!genForUAX31Tables("uax31.d");
-
-    import generators.unicode.genfor.other;
-
     handle!genForOther("other.d");
+    handle!genForEmojiData("emoji_data.d");
 }
 
 private:

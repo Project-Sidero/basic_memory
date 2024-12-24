@@ -30,32 +30,19 @@ void main() {
         import generators.unicode.data;
         import generators.unicode.genfor;
 
-        import generators.unicode.casefolding;
         import generators.unicode.hangulsyllabletype;
-        import generators.unicode.derivednormalizationprops;
-        import generators.unicode.wordbreakproperty;
         import generators.unicode.linebreak;
-        import generators.unicode.emoji_data;
         import generators.unicode.scripts;
-        import generators.unicode.graphemebreakproperty;
-        import generators.unicode.derivedcoreproperties;
 
         writeln("Running generation of Unicode database");
         loadUnicodeData;
         genForUnicode;
 
-        caseFolding;
         // must be before unicodeData
         hangulSyllableType;
-        derivedNormalizationProps;
         // must be after compositionExclusions
-        wordBreakProperty;
         lineBreak;
-        emojiData;
         handleScripts;
-
-        graphemeBreakProperty;
-        parseDerivedCoreProperties;
     }
 
     {

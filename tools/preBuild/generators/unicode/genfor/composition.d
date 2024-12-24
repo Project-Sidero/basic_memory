@@ -1,7 +1,7 @@
 module generators.unicode.genfor.composition;
 import generators.unicode.data.CompositionExclusions;
-import generators.unicode.defs;
 import generators.unicode.data.UnicodeData;
+import generators.unicode.defs;
 import utilities.setops;
 import utilities.inverselist;
 import std.algorithm : sort;

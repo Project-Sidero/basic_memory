@@ -1,34 +1,51 @@
-module generators.unicode.derivednormalizationprops;
-import constants;
+module generators.unicode.data.DerivedNormalizationProps;
+import utilities.setops;
 
-void derivedNormalizationProps() {
-    import std.file : readText, write, append;
+__gshared DerivedNormalizationProps_State DerivedNormalizationProps;
 
-    TotalState state;
-
-    processEachLine(readText(UnicodeDatabaseDirectory ~ "DerivedNormalizationProps.txt"), state);
-
-    auto internal = appender!string();
-    internal ~= "module sidero.base.internal.unicode.derivednormalizationprops;\n";
-    internal ~= "// Generated do not modify\n\n";
-
-    auto api = appender!string();
-
-    api ~= "\n";
-    api ~= "/// Is character part of full composition execlusions.\n";
-    generateIsCheck(api, internal, "sidero_utf_lut_isFullCompositionExcluded", state.fullCompositionExclusion, false);
-
-    append(UnicodeAPIFile, api.data);
-    write(UnicodeLUTDirectory ~ "derivednormalizationprops.d", internal.data);
+enum NormalizeProperty {
+    NFD_QC,
+    NFC_QC,
+    NFKD_QC,
+    NFKC_QC
 }
 
-private:
-import std.array : appender, Appender;
-import utilities.setops;
-import utilities.inverselist;
-import utilities.intervallist;
+struct DerivedNormalizationProps_State {
+    QuickCheck[][4] single;
+    QuickCheck[][4] range;
 
-void processEachLine(string inputText, ref TotalState state) {
+    CaseFold[] caseFoldSingle, caseFoldRange;
+    ChangesWhenCaseFolded[] changesSingle, changesRange;
+
+    ValueRange[] fullCompositionExclusion;
+}
+
+enum YesNoMaybe {
+    Yes,
+    No,
+    Maybe
+}
+
+struct QuickCheck {
+    ValueRange range;
+    YesNoMaybe yesNoMaybe;
+}
+
+struct CaseFold {
+    ValueRange range;
+    dchar[] becomes;
+}
+
+struct OptionalReplacement {
+    dchar[] becomes;
+    bool haveValue;
+}
+
+struct ChangesWhenCaseFolded {
+    ValueRange range;
+}
+
+void processDerivedNormalizationProps(string inputText) {
     import std.algorithm : countUntil, splitter;
     import std.string : strip, lineSplitter;
     import std.conv : parse;
@@ -86,9 +103,9 @@ void processEachLine(string inputText, ref TotalState state) {
         }
 
         if(valueRange.isSingle)
-            state.single[property] ~= QuickCheck(valueRange, yesNoMaybe);
+            DerivedNormalizationProps.single[property] ~= QuickCheck(valueRange, yesNoMaybe);
         else
-            state.range[property] ~= QuickCheck(valueRange, yesNoMaybe);
+            DerivedNormalizationProps.range[property] ~= QuickCheck(valueRange, yesNoMaybe);
     }
 
     foreach(line; inputText.lineSplitter) {
@@ -121,17 +138,17 @@ void processEachLine(string inputText, ref TotalState state) {
 
         if(propertyStr == "Changes_When_NFKC_Casefolded") {
             if(valueRange.isSingle)
-                state.changesSingle ~= ChangesWhenCaseFolded(valueRange);
+                DerivedNormalizationProps.changesSingle ~= ChangesWhenCaseFolded(valueRange);
             else
-                state.changesRange ~= ChangesWhenCaseFolded(valueRange);
+                DerivedNormalizationProps.changesRange ~= ChangesWhenCaseFolded(valueRange);
         } else if(propertyStr == "Full_Composition_Exclusion") {
-            if(state.fullCompositionExclusion.length == 0)
-                state.fullCompositionExclusion ~= valueRange;
+            if(DerivedNormalizationProps.fullCompositionExclusion.length == 0)
+                DerivedNormalizationProps.fullCompositionExclusion ~= valueRange;
             else {
-                if(valueRange.start == state.fullCompositionExclusion[$ - 1].end + 1)
-                    state.fullCompositionExclusion[$ - 1].end = valueRange.end;
+                if(valueRange.start == DerivedNormalizationProps.fullCompositionExclusion[$ - 1].end + 1)
+                    DerivedNormalizationProps.fullCompositionExclusion[$ - 1].end = valueRange.end;
                 else
-                    state.fullCompositionExclusion ~= valueRange;
+                    DerivedNormalizationProps.fullCompositionExclusion ~= valueRange;
             }
         } else if(propertyStr == "NFKC_CF") {
             dchar[] replacements;
@@ -146,64 +163,12 @@ void processEachLine(string inputText, ref TotalState state) {
             }
 
             if(valueRange.isSingle)
-                state.caseFoldSingle ~= CaseFold(valueRange, replacements);
+                DerivedNormalizationProps.caseFoldSingle ~= CaseFold(valueRange, replacements);
             else
-                state.caseFoldRange ~= CaseFold(valueRange, replacements);
+                DerivedNormalizationProps.caseFoldRange ~= CaseFold(valueRange, replacements);
         } else {
             if(line.length > 0)
                 handleLine(valueRange, propertyStr, line);
         }
     }
-}
-
-static string[] PropertyText = ["NFD_QC", "NFC_QC", "NFKD_QC", "NFKC_QC", "NFx"];
-enum NormalizeProperty {
-    NFD_QC,
-    NFC_QC,
-    NFKD_QC,
-    NFKC_QC
-}
-
-struct TotalState {
-    QuickCheck[][4] single;
-    QuickCheck[][4] range;
-
-    CaseFold[] caseFoldSingle, caseFoldRange;
-    ChangesWhenCaseFolded[] changesSingle, changesRange;
-
-    ValueRange[] fullCompositionExclusion;
-}
-
-enum YesNoMaybe {
-    Yes,
-    No,
-    Maybe
-}
-
-struct QuickCheck {
-    ValueRange range;
-    YesNoMaybe yesNoMaybe;
-}
-
-struct CaseFold {
-    ValueRange range;
-    dchar[] becomes;
-}
-
-struct OptionalReplacement {
-    dchar[] becomes;
-    bool haveValue;
-}
-
-struct ChangesWhenCaseFolded {
-    ValueRange range;
-}
-
-void ymn(ref Appender!string output, YesNoMaybe yesNoMaybe) {
-    if(yesNoMaybe == YesNoMaybe.Yes)
-        output ~= "Y";
-    else if(yesNoMaybe == YesNoMaybe.No)
-        output ~= "N";
-    else if(yesNoMaybe == YesNoMaybe.Maybe)
-        output ~= "M";
 }

@@ -686,6 +686,26 @@ export immutable(SpecialCasing) sidero_utf_lut_getSpecialCasingAzeri(dchar input
 }
 export extern(C) bool sidero_utf_lut_getSpecialCasing2Azeri(dchar input, SpecialCasing*) @trusted nothrow @nogc pure;
 
+/// Lookup Casefolding for character.
+/// Returns: null if unchanged.
+export extern(C) dstring sidero_utf_lut_getCaseFolding(dchar against) @safe nothrow @nogc pure;
+
+/// Lookup Casefolding for character.
+/// Returns: null if unchanged.
+export extern(C) dstring sidero_utf_lut_getCaseFoldingTurkic(dchar against) @safe nothrow @nogc pure;
+
+/// Lookup Casefolding (simple) for character.
+/// Returns: The casefolded character.
+export extern(C) dchar sidero_utf_lut_getCaseFoldingFast(dchar against) @safe nothrow @nogc pure;
+
+/// Lookup Casefolding length for character.
+/// Returns: 0 if unchanged.
+export extern(C) uint sidero_utf_lut_lengthOfCaseFolding(dchar against) @safe nothrow @nogc pure;
+
+/// Lookup Casefolding length for character.
+/// Returns: 0 if unchanged.
+export extern(C) uint sidero_utf_lut_lengthOfCaseFoldingTurkic(dchar against) @safe nothrow @nogc pure;
+
 /// Is character member of property.
 deprecated export extern(C) bool sidero_utf_lut_isMemberOfWhite_Space(dchar against) @safe nothrow @nogc pure;
 ///
@@ -878,6 +898,77 @@ export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfModifier_Combining_M
 
 /// Is character whitespace?
 alias isUnicodeWhiteSpace = sidero_utf_lut_isMemberOfWhite_Space;
+
+/// Is character part of full composition execlusions.
+export extern(C) bool sidero_utf_lut_isFullCompositionExcluded(dchar against) @safe nothrow @nogc pure;
+
+/// Is character member of grapheme break property.
+deprecated export extern(C) bool sidero_utf_lut_isMemberOfGraphemePrepend(dchar against) @safe nothrow @nogc pure;
+///
+export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfGraphemePrepend_Set() @safe nothrow @nogc;
+
+/// Is character member of grapheme break property.
+deprecated export extern(C) bool sidero_utf_lut_isMemberOfGraphemeCR(dchar against) @safe nothrow @nogc pure;
+///
+export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfGraphemeCR_Set() @safe nothrow @nogc;
+
+/// Is character member of grapheme break property.
+deprecated export extern(C) bool sidero_utf_lut_isMemberOfGraphemeLF(dchar against) @safe nothrow @nogc pure;
+///
+export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfGraphemeLF_Set() @safe nothrow @nogc;
+
+/// Is character member of grapheme break property.
+deprecated export extern(C) bool sidero_utf_lut_isMemberOfGraphemeControl(dchar against) @safe nothrow @nogc pure;
+///
+export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfGraphemeControl_Set() @safe nothrow @nogc;
+
+/// Is character member of grapheme break property.
+deprecated export extern(C) bool sidero_utf_lut_isMemberOfGraphemeExtend(dchar against) @safe nothrow @nogc pure;
+///
+export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfGraphemeExtend_Set() @safe nothrow @nogc;
+
+/// Is character member of grapheme break property.
+deprecated export extern(C) bool sidero_utf_lut_isMemberOfGraphemeRegional_Indicator(dchar against) @safe nothrow @nogc pure;
+///
+export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfGraphemeRegional_Indicator_Set() @safe nothrow @nogc;
+
+/// Is character member of grapheme break property.
+deprecated export extern(C) bool sidero_utf_lut_isMemberOfGraphemeSpacingMark(dchar against) @safe nothrow @nogc pure;
+///
+export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfGraphemeSpacingMark_Set() @safe nothrow @nogc;
+
+/// Is character member of grapheme break property.
+deprecated export extern(C) bool sidero_utf_lut_isMemberOfGraphemeL(dchar against) @safe nothrow @nogc pure;
+///
+export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfGraphemeL_Set() @safe nothrow @nogc;
+
+/// Is character member of grapheme break property.
+deprecated export extern(C) bool sidero_utf_lut_isMemberOfGraphemeV(dchar against) @safe nothrow @nogc pure;
+///
+export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfGraphemeV_Set() @safe nothrow @nogc;
+
+/// Is character member of grapheme break property.
+deprecated export extern(C) bool sidero_utf_lut_isMemberOfGraphemeT(dchar against) @safe nothrow @nogc pure;
+///
+export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfGraphemeT_Set() @safe nothrow @nogc;
+
+/// Is character member of grapheme break property.
+deprecated export extern(C) bool sidero_utf_lut_isMemberOfGraphemeLV(dchar against) @safe nothrow @nogc pure;
+///
+export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfGraphemeLV_Set() @safe nothrow @nogc;
+
+/// Is character member of grapheme break property.
+deprecated export extern(C) bool sidero_utf_lut_isMemberOfGraphemeLVT(dchar against) @safe nothrow @nogc pure;
+///
+export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfGraphemeLVT_Set() @safe nothrow @nogc;
+
+/// Is character member of grapheme break property.
+deprecated export extern(C) bool sidero_utf_lut_isMemberOfGraphemeZWJ(dchar against) @safe nothrow @nogc pure;
+///
+export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfGraphemeZWJ_Set() @safe nothrow @nogc;
+
+/// Lookup word break property for character.
+export extern(C) WordBreakProperty sidero_utf_lut_getWordBreakProperty(dchar against) @safe nothrow @nogc pure;
 
 /// Lookup decomposition mapping for character if in compatibility formatting tag None.
 export extern(C) dstring sidero_utf_lut_getDecompositionMappingNone(dchar against) @safe nothrow @nogc pure;
@@ -1134,44 +1225,6 @@ export extern(C) immutable(long[2])* sidero_utf_lut_getNumeric(dchar against) @s
 /// Lookup general category for character.
 export extern(C) GeneralCategory sidero_utf_lut_getGeneralCategory(dchar against) @safe nothrow @nogc pure;
 
-/// Lookup Casefolding for character.
-/// Returns: null if unchanged.
-export extern(C) dstring sidero_utf_lut_getCaseFolding(dchar against) @safe nothrow @nogc pure;
-
-/// Lookup Casefolding for character.
-/// Returns: null if unchanged.
-export extern(C) dstring sidero_utf_lut_getCaseFoldingTurkic(dchar against) @safe nothrow @nogc pure;
-
-/// Lookup Casefolding (simple) for character.
-/// Returns: The casefolded character.
-export extern(C) dchar sidero_utf_lut_getCaseFoldingFast(dchar against) @safe nothrow @nogc pure;
-
-/// Lookup Casefolding length for character.
-/// Returns: 0 if unchanged.
-export extern(C) uint sidero_utf_lut_lengthOfCaseFolding(dchar against) @safe nothrow @nogc pure;
-
-/// Lookup Casefolding length for character.
-/// Returns: 0 if unchanged.
-export extern(C) uint sidero_utf_lut_lengthOfCaseFoldingTurkic(dchar against) @safe nothrow @nogc pure;
-
-/// Is character a hangul syllable?
-export extern(C) bool sidero_utf_lut_isHangulSyllable(dchar against) @safe nothrow @nogc pure;
-
-/// Gets the ranges of values in a given Hangul syllable type.
-export immutable(ValueRange[]) sidero_utf_lut_hangulSyllables(HangulSyllableType type) @trusted nothrow @nogc pure {
-    return cast(immutable(ValueRange[]))sidero_utf_lut_hangulSyllables2(type);
-}
-private extern(C) immutable(void[]) sidero_utf_lut_hangulSyllables2(HangulSyllableType type) @safe nothrow @nogc pure;
-
-/// Is character part of full composition execlusions.
-export extern(C) bool sidero_utf_lut_isFullCompositionExcluded(dchar against) @safe nothrow @nogc pure;
-
-/// Lookup word break property for character.
-export extern(C) WordBreakProperty sidero_utf_lut_getWordBreakProperty(dchar against) @safe nothrow @nogc pure;
-
-/// Get the Line break class
-export extern(C) LineBreakClass sidero_utf_lut_getLineBreakClass(dchar against) @safe nothrow @nogc pure;
-
 /// Is member of Emoji class?
 deprecated export extern(C) bool sidero_utf_lut_isMemberOfEmoji(dchar against) @safe nothrow @nogc pure;
 ///
@@ -1201,6 +1254,18 @@ export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfEmoji_Component_Set(
 deprecated export extern(C) bool sidero_utf_lut_isMemberOfExtended_Pictographic(dchar against) @safe nothrow @nogc pure;
 ///
 export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfExtended_Pictographic_Set() @safe nothrow @nogc;
+
+/// Is character a hangul syllable?
+export extern(C) bool sidero_utf_lut_isHangulSyllable(dchar against) @safe nothrow @nogc pure;
+
+/// Gets the ranges of values in a given Hangul syllable type.
+export immutable(ValueRange[]) sidero_utf_lut_hangulSyllables(HangulSyllableType type) @trusted nothrow @nogc pure {
+    return cast(immutable(ValueRange[]))sidero_utf_lut_hangulSyllables2(type);
+}
+private extern(C) immutable(void[]) sidero_utf_lut_hangulSyllables2(HangulSyllableType type) @safe nothrow @nogc pure;
+
+/// Get the Line break class
+export extern(C) LineBreakClass sidero_utf_lut_getLineBreakClass(dchar against) @safe nothrow @nogc pure;
 
 /// Get the Script for a character
 export extern(C) Script sidero_utf_lut_getScript(dchar against) @safe nothrow @nogc pure;
@@ -1888,68 +1953,3 @@ export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptTodhri_Set() @safe not
 deprecated export extern(C) bool sidero_utf_lut_isScriptTulu_Tigalari(dchar against) @safe nothrow @nogc pure;
 ///
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptTulu_Tigalari_Set() @safe nothrow @nogc;
-
-/// Is character member of grapheme break property.
-deprecated export extern(C) bool sidero_utf_lut_isMemberOfGraphemePrepend(dchar against) @safe nothrow @nogc pure;
-///
-export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfGraphemePrepend_Set() @safe nothrow @nogc;
-
-/// Is character member of grapheme break property.
-deprecated export extern(C) bool sidero_utf_lut_isMemberOfGraphemeCR(dchar against) @safe nothrow @nogc pure;
-///
-export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfGraphemeCR_Set() @safe nothrow @nogc;
-
-/// Is character member of grapheme break property.
-deprecated export extern(C) bool sidero_utf_lut_isMemberOfGraphemeLF(dchar against) @safe nothrow @nogc pure;
-///
-export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfGraphemeLF_Set() @safe nothrow @nogc;
-
-/// Is character member of grapheme break property.
-deprecated export extern(C) bool sidero_utf_lut_isMemberOfGraphemeControl(dchar against) @safe nothrow @nogc pure;
-///
-export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfGraphemeControl_Set() @safe nothrow @nogc;
-
-/// Is character member of grapheme break property.
-deprecated export extern(C) bool sidero_utf_lut_isMemberOfGraphemeExtend(dchar against) @safe nothrow @nogc pure;
-///
-export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfGraphemeExtend_Set() @safe nothrow @nogc;
-
-/// Is character member of grapheme break property.
-deprecated export extern(C) bool sidero_utf_lut_isMemberOfGraphemeRegional_Indicator(dchar against) @safe nothrow @nogc pure;
-///
-export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfGraphemeRegional_Indicator_Set() @safe nothrow @nogc;
-
-/// Is character member of grapheme break property.
-deprecated export extern(C) bool sidero_utf_lut_isMemberOfGraphemeSpacingMark(dchar against) @safe nothrow @nogc pure;
-///
-export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfGraphemeSpacingMark_Set() @safe nothrow @nogc;
-
-/// Is character member of grapheme break property.
-deprecated export extern(C) bool sidero_utf_lut_isMemberOfGraphemeL(dchar against) @safe nothrow @nogc pure;
-///
-export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfGraphemeL_Set() @safe nothrow @nogc;
-
-/// Is character member of grapheme break property.
-deprecated export extern(C) bool sidero_utf_lut_isMemberOfGraphemeV(dchar against) @safe nothrow @nogc pure;
-///
-export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfGraphemeV_Set() @safe nothrow @nogc;
-
-/// Is character member of grapheme break property.
-deprecated export extern(C) bool sidero_utf_lut_isMemberOfGraphemeT(dchar against) @safe nothrow @nogc pure;
-///
-export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfGraphemeT_Set() @safe nothrow @nogc;
-
-/// Is character member of grapheme break property.
-deprecated export extern(C) bool sidero_utf_lut_isMemberOfGraphemeLV(dchar against) @safe nothrow @nogc pure;
-///
-export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfGraphemeLV_Set() @safe nothrow @nogc;
-
-/// Is character member of grapheme break property.
-deprecated export extern(C) bool sidero_utf_lut_isMemberOfGraphemeLVT(dchar against) @safe nothrow @nogc pure;
-///
-export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfGraphemeLVT_Set() @safe nothrow @nogc;
-
-/// Is character member of grapheme break property.
-deprecated export extern(C) bool sidero_utf_lut_isMemberOfGraphemeZWJ(dchar against) @safe nothrow @nogc pure;
-///
-export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfGraphemeZWJ_Set() @safe nothrow @nogc;

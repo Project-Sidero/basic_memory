@@ -4,14 +4,24 @@ import std.file : readText;
 
 void loadUnicodeData() {
     import generators.unicode.data.UnicodeData;
-    processUnicodeData(readText(UnicodeDatabaseDirectory ~ "UnicodeData.txt"));
-
     import generators.unicode.data.PropList;
-    processPropList(readText(UnicodeDatabaseDirectory ~ "PropList.txt"));
-
     import generators.unicode.data.SpecialCasing;
-    processSpecialCasing(readText(UnicodeDatabaseDirectory ~ "SpecialCasing.txt"));
-
     import generators.unicode.data.CompositionExclusions;
+    import generators.unicode.data.CaseFolding;
+    import generators.unicode.data.DerivedCoreProperties;
+    import generators.unicode.data.DerivedNormalizationProps;
+    import generators.unicode.data.GraphemeBreakProperty;
+    import generators.unicode.data.WordBreakProperty;
+    import generators.unicode.data.EmojiData;
+
+    processUnicodeData(readText(UnicodeDatabaseDirectory ~ "UnicodeData.txt"));
+    processPropList(readText(UnicodeDatabaseDirectory ~ "PropList.txt"));
+    processSpecialCasing(readText(UnicodeDatabaseDirectory ~ "SpecialCasing.txt"));
     processCompositionExclusions(readText(UnicodeDatabaseDirectory ~ "CompositionExclusions.txt"));
+    processCaseFolding(readText(UnicodeDatabaseDirectory ~ "CaseFolding.txt"));
+    processDerivedCoreProperties(readText(UnicodeDatabaseDirectory ~ "DerivedCoreProperties.txt"));
+    processDerivedNormalizationProps(readText(UnicodeDatabaseDirectory ~ "DerivedNormalizationProps.txt"));
+    processGraphemeBreakProperty(readText(UnicodeDatabaseDirectory ~ "GraphemeBreakProperty.txt"));
+    processWordBreakProperty(readText(UnicodeDatabaseDirectory ~ "auxiliary/WordBreakProperty.txt"));
+    processEmojiData(readText(UnicodeDatabaseDirectory ~ "emoji/emoji-data.txt"));
 }

@@ -1,39 +1,29 @@
-module generators.unicode.graphemebreakproperty;
-import constants;
+module generators.unicode.data.GraphemeBreakProperty;
+import utilities.setops;
 
-void graphemeBreakProperty() {
-    import std.file : readText, write, append;
+__gshared GraphemeBreakProperty_State GraphemeBreakProperty;
 
-    TotalState state;
-    processEachLine(readText(UnicodeDatabaseDirectory ~ "GraphemeBreakProperty.txt"), state);
-
-    auto internal = appender!string();
-    internal ~= "module sidero.base.internal.unicode.graphemebreakproperty;\n";
-    internal ~= "import sidero.base.containers.set.interval;\n";
-    internal ~= "// Generated do not modify\n\n";
-
-    auto api = appender!string();
-
-    foreach(i, property; __traits(allMembers, Property)) {
-        {
-            api ~= "\n";
-            api ~= "/// Is character member of grapheme break property.\n";
-
-            generateIsCheck(api, internal, "sidero_utf_lut_isMemberOfGrapheme" ~ property, state.ranges[i], true);
-        }
-    }
-
-    append(UnicodeAPIFile, api.data);
-    write(UnicodeLUTDirectory ~ "graphemebreakproperty.d", internal.data);
+struct GraphemeBreakProperty_State {
+    ValueRange[][Property.max + 1] ranges;
 }
 
-private:
-import std.array : appender;
-import utilities.setops;
-import utilities.inverselist;
-import utilities.intervallist;
+enum Property {
+    Prepend,
+    CR,
+    LF,
+    Control,
+    Extend,
+    Regional_Indicator,
+    SpacingMark,
+    L,
+    V,
+    T,
+    LV,
+    LVT,
+    ZWJ,
+}
 
-void processEachLine(string inputText, ref TotalState state) {
+void processGraphemeBreakProperty(string inputText) {
     import std.algorithm : countUntil, splitter;
     import std.string : strip, lineSplitter;
     import std.conv : parse;
@@ -68,13 +58,13 @@ void processEachLine(string inputText, ref TotalState state) {
             assert(0, propertyStr);
         }
 
-        if(state.ranges[property].length == 0)
-            state.ranges[property] ~= valueRange;
+        if(GraphemeBreakProperty.ranges[property].length == 0)
+            GraphemeBreakProperty.ranges[property] ~= valueRange;
         else {
-            if(valueRange.start == state.ranges[property][$ - 1].end + 1)
-                state.ranges[property][$ - 1].end = valueRange.end;
+            if(valueRange.start == GraphemeBreakProperty.ranges[property][$ - 1].end + 1)
+                GraphemeBreakProperty.ranges[property][$ - 1].end = valueRange.end;
             else
-                state.ranges[property] ~= valueRange;
+                GraphemeBreakProperty.ranges[property] ~= valueRange;
         }
     }
 
@@ -99,24 +89,4 @@ void processEachLine(string inputText, ref TotalState state) {
 
         handleLine(valueRange, line);
     }
-}
-
-struct TotalState {
-    ValueRange[][Property.max + 1] ranges;
-}
-
-enum Property {
-    Prepend, ///
-    CR, ///
-    LF, ///
-    Control, ///
-    Extend, ///
-    Regional_Indicator, ///
-    SpacingMark, ///
-    L, ///
-    V, ///
-    T, ///
-    LV, ///
-    LVT, ///
-    ZWJ, ///
 }
