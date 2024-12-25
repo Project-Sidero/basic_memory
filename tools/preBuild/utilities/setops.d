@@ -7,37 +7,31 @@ License:     $(LINK2 https://www.boost.org/LICENSE_1_0.txt, Boost License 1.0)
 */
 module utilities.setops;
 
-struct ValueRange
-{
+struct ValueRange {
     dchar start, end;
-    @safe:
+@safe:
 
-    this(dchar index)
-    {
+    this(dchar index) {
         this.start = index;
         this.end = index;
     }
 
-    this(dchar start, dchar end)
-    {
+    this(dchar start, dchar end) {
         assert(end >= start);
 
         this.start = start;
         this.end = end;
     }
 
-    bool isSingle() const
-    {
+    bool isSingle() const {
         return start == end;
     }
 
-    bool within(dchar index) const
-    {
+    bool within(dchar index) const {
         return start <= index && end >= index;
     }
 
-    uint count() const
-    {
+    uint count() const {
         return end + 1 - start;
     }
 
@@ -45,56 +39,56 @@ struct ValueRange
         return this.start < other.start ? -1 : (this.start > other.start ? 1 : 0);
     }
 
-    int opApply(scope int delegate(dchar) @safe del) const
-    {
+    int opApply(scope int delegate(dchar) @safe del) const {
         int result;
 
-        foreach (dchar index; start .. end + 1)
-        {
+        foreach(dchar index; start .. end + 1) {
             result = del(index);
-            if (result)
-            return result;
+            if(result)
+                return result;
         }
 
         return result;
     }
 }
 
-struct ValueRanges
-{
+struct ValueRanges {
     ValueRange[] ranges;
 
-    @safe:
+@safe:
 
-    void add(ValueRange toAdd)
-    {
-        if (ranges.length > 0 && (ranges[$ - 1].end + 1 == toAdd.start))
-        {
-            ranges[$ - 1].end = toAdd.end;
+    void add(ValueRange toAdd) {
+        import std.algorithm : sort;
+
+        foreach(ref r; ranges) {
+            if(toAdd.start >= r.start && toAdd.start <= r.end + 1) {
+                r.end = toAdd.end;
+                return;
+            } else if(toAdd.end <= r.end && toAdd.end + 1 >= r.start) {
+                r.start = toAdd.start;
+                return;
+            }
         }
-        else
-        {
-            ranges ~= toAdd;
-        }
+
+        ranges ~= toAdd;
+        sort(this.ranges);
     }
 
-    ValueRanges not(const ref ValueRanges butNotThis) const
-    {
+    ValueRanges not(const ref ValueRanges butNotThis) const {
         ValueRanges ret;
 
-        foreach (toAdd; this)
-        {
-            if (butNotThis.within(toAdd))
-            continue;
+        foreach(toAdd; this) {
+            if(butNotThis.within(toAdd))
+                continue;
             ret.add(ValueRange(toAdd));
         }
 
         return ret;
     }
 
-    ValueRanges merge(const ref ValueRanges andThis) const
-    {
+    ValueRanges merge(const ref ValueRanges andThis) const {
         import std.algorithm : sort;
+
         ValueRanges ret;
 
         auto sorted = sort((this.ranges ~ andThis.ranges).dup);
@@ -106,38 +100,32 @@ struct ValueRanges
         return ret;
     }
 
-    bool within(dchar index) const
-    {
-        foreach (range; ranges)
-        {
-            if (range.within(index))
-            return true;
+    bool within(dchar index) const {
+        foreach(range; ranges) {
+            if(range.within(index))
+                return true;
         }
 
         return false;
     }
 
-    uint count() const
-    {
+    uint count() const {
         uint ret;
 
-        foreach (range; ranges)
-        {
+        foreach(range; ranges) {
             ret += range.count;
         }
 
         return ret;
     }
 
-    int opApply(scope int delegate(dchar) @safe del) const
-    {
+    int opApply(scope int delegate(dchar) @safe del) const {
         int result;
 
-        foreach (range; ranges)
-        {
+        foreach(range; ranges) {
             result = range.opApply(del);
-            if (result)
-            return result;
+            if(result)
+                return result;
         }
 
         return result;

@@ -18,10 +18,12 @@ void main() {
 
     {
         import generators.unicode_text_representations : generateUnicodeTextRepresentations;
+
         writeln("Running generation of Unicode text representations");
         generateUnicodeTextRepresentations;
 
         import generators.internal_meta_opapplycombos : generateInternalMetaOpApplyCombos;
+
         writeln("Running generation of op apply combos");
         generateInternalMetaOpApplyCombos;
     }
@@ -30,19 +32,9 @@ void main() {
         import generators.unicode.data;
         import generators.unicode.genfor;
 
-        import generators.unicode.hangulsyllabletype;
-        import generators.unicode.linebreak;
-        import generators.unicode.scripts;
-
         writeln("Running generation of Unicode database");
         loadUnicodeData;
         genForUnicode;
-
-        // must be before unicodeData
-        hangulSyllableType;
-        // must be after compositionExclusions
-        lineBreak;
-        handleScripts;
     }
 
     {
@@ -57,6 +49,7 @@ void main() {
 
     {
         import generators.all_generated;
+
         generateAllGeneratedFiles();
     }
 

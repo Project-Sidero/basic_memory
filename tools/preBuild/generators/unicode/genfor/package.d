@@ -5,7 +5,7 @@ import std.array : appender;
 import std.file : write;
 
 void genForUnicode() {
-    implOutput = appender!string();
+    apiOutput = appender!string();
     scope(exit)
         write(UnicodeAPIFile, apiOutput.data);
 
@@ -22,6 +22,9 @@ void genForUnicode() {
     import generators.unicode.genfor.decomposition;
     import generators.unicode.genfor.composition;
     import generators.unicode.genfor.composition_exclusions;
+    import generators.unicode.genfor.hangul_syllable_type;
+    import generators.unicode.genfor.break_line;
+    import generators.unicode.genfor.scripts;
     import generators.unicode.genfor.uax31;
     import generators.unicode.genfor.other;
     import generators.unicode.genfor.emoji_data;
@@ -39,6 +42,9 @@ void genForUnicode() {
     handle!genForDecomposition("unicodedataDM.d");
     handle!genForComposition("unicodedataC.d");
     handle!genForCompositionExclusions("compositionexclusions.d");
+    handle!genForHangulSyllableType("hangulsyllabletype.d");
+    handle!genForLineBreak("linebreak.d");
+    handle!genForScripts("scripts.d");
     handle!genForUAX31Tables("uax31.d");
     handle!genForOther("other.d");
     handle!genForEmojiData("emoji_data.d");

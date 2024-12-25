@@ -1194,72 +1194,11 @@ export extern(C) dchar sidero_utf_lut_getCompositionCompatibility2(ulong against
 /// Returns: false if not set.
 export extern(C) bool sidero_utf_lut_isCompositionExcluded(dchar against) @safe nothrow @nogc pure;
 
-/// Is UAX31 for C start set.
-/// Returns: false if not set.
-deprecated export extern(C) bool sidero_utf_lut_isUAX31_C_Start(dchar against) @safe nothrow @nogc pure;
-///
-export extern(C) IntervalSet!dchar sidero_utf_lut_isUAX31_C_Start_Set() @safe nothrow @nogc;
-
-/// Is UAX31 for C continue set.
-/// Returns: false if not set.
-deprecated export extern(C) bool sidero_utf_lut_isUAX31_C_Continue(dchar against) @safe nothrow @nogc pure;
-///
-export extern(C) IntervalSet!dchar sidero_utf_lut_isUAX31_C_Continue_Set() @safe nothrow @nogc;
-
-/// Is UAX31 for Javascript start set.
-/// Returns: false if not set.
-deprecated export extern(C) bool sidero_utf_lut_isUAX31_JS_Start(dchar against) @safe nothrow @nogc pure;
-///
-export extern(C) IntervalSet!dchar sidero_utf_lut_isUAX31_JS_Start_Set() @safe nothrow @nogc;
-
-/// Is UAX31 for Javascript continue set.
-/// Returns: false if not set.
-deprecated export extern(C) bool sidero_utf_lut_isUAX31_JS_Continue(dchar against) @safe nothrow @nogc pure;
-///
-export extern(C) IntervalSet!dchar sidero_utf_lut_isUAX31_JS_Continue_Set() @safe nothrow @nogc;
-
-/// Lookup numeric numerator/denominator for character.
-/// Returns: null if not set.
-export extern(C) immutable(long[2])* sidero_utf_lut_getNumeric(dchar against) @safe nothrow @nogc pure;
-
-/// Lookup general category for character.
-export extern(C) GeneralCategory sidero_utf_lut_getGeneralCategory(dchar against) @safe nothrow @nogc pure;
-
-/// Is member of Emoji class?
-deprecated export extern(C) bool sidero_utf_lut_isMemberOfEmoji(dchar against) @safe nothrow @nogc pure;
-///
-export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfEmoji_Set() @safe nothrow @nogc;
-
-/// Is member of Emoji_Presentation class?
-deprecated export extern(C) bool sidero_utf_lut_isMemberOfEmoji_Presentation(dchar against) @safe nothrow @nogc pure;
-///
-export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfEmoji_Presentation_Set() @safe nothrow @nogc;
-
-/// Is member of Emoji_Modifier class?
-deprecated export extern(C) bool sidero_utf_lut_isMemberOfEmoji_Modifier(dchar against) @safe nothrow @nogc pure;
-///
-export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfEmoji_Modifier_Set() @safe nothrow @nogc;
-
-/// Is member of Emoji_Modifier_Base class?
-deprecated export extern(C) bool sidero_utf_lut_isMemberOfEmoji_Modifier_Base(dchar against) @safe nothrow @nogc pure;
-///
-export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfEmoji_Modifier_Base_Set() @safe nothrow @nogc;
-
-/// Is member of Emoji_Component class?
-deprecated export extern(C) bool sidero_utf_lut_isMemberOfEmoji_Component(dchar against) @safe nothrow @nogc pure;
-///
-export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfEmoji_Component_Set() @safe nothrow @nogc;
-
-/// Is member of Extended_Pictographic class?
-deprecated export extern(C) bool sidero_utf_lut_isMemberOfExtended_Pictographic(dchar against) @safe nothrow @nogc pure;
-///
-export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfExtended_Pictographic_Set() @safe nothrow @nogc;
-
 /// Is character a hangul syllable?
 export extern(C) bool sidero_utf_lut_isHangulSyllable(dchar against) @safe nothrow @nogc pure;
 
 /// Gets the ranges of values in a given Hangul syllable type.
-export immutable(ValueRange[]) sidero_utf_lut_hangulSyllables(HangulSyllableType type) @trusted nothrow @nogc pure {
+deprecated export immutable(ValueRange[]) sidero_utf_lut_hangulSyllables(HangulSyllableType type) @trusted nothrow @nogc pure {
     return cast(immutable(ValueRange[]))sidero_utf_lut_hangulSyllables2(type);
 }
 private extern(C) immutable(void[]) sidero_utf_lut_hangulSyllables2(HangulSyllableType type) @safe nothrow @nogc pure;
@@ -1953,3 +1892,64 @@ export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptTodhri_Set() @safe not
 deprecated export extern(C) bool sidero_utf_lut_isScriptTulu_Tigalari(dchar against) @safe nothrow @nogc pure;
 ///
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptTulu_Tigalari_Set() @safe nothrow @nogc;
+
+/// Is UAX31 for C start set.
+/// Returns: false if not set.
+deprecated export extern(C) bool sidero_utf_lut_isUAX31_C_Start(dchar against) @safe nothrow @nogc pure;
+///
+export extern(C) IntervalSet!dchar sidero_utf_lut_isUAX31_C_Start_Set() @safe nothrow @nogc;
+
+/// Is UAX31 for C continue set.
+/// Returns: false if not set.
+deprecated export extern(C) bool sidero_utf_lut_isUAX31_C_Continue(dchar against) @safe nothrow @nogc pure;
+///
+export extern(C) IntervalSet!dchar sidero_utf_lut_isUAX31_C_Continue_Set() @safe nothrow @nogc;
+
+/// Is UAX31 for Javascript start set.
+/// Returns: false if not set.
+deprecated export extern(C) bool sidero_utf_lut_isUAX31_JS_Start(dchar against) @safe nothrow @nogc pure;
+///
+export extern(C) IntervalSet!dchar sidero_utf_lut_isUAX31_JS_Start_Set() @safe nothrow @nogc;
+
+/// Is UAX31 for Javascript continue set.
+/// Returns: false if not set.
+deprecated export extern(C) bool sidero_utf_lut_isUAX31_JS_Continue(dchar against) @safe nothrow @nogc pure;
+///
+export extern(C) IntervalSet!dchar sidero_utf_lut_isUAX31_JS_Continue_Set() @safe nothrow @nogc;
+
+/// Lookup numeric numerator/denominator for character.
+/// Returns: null if not set.
+export extern(C) immutable(long[2])* sidero_utf_lut_getNumeric(dchar against) @safe nothrow @nogc pure;
+
+/// Lookup general category for character.
+export extern(C) GeneralCategory sidero_utf_lut_getGeneralCategory(dchar against) @safe nothrow @nogc pure;
+
+/// Is member of Emoji class?
+deprecated export extern(C) bool sidero_utf_lut_isMemberOfEmoji(dchar against) @safe nothrow @nogc pure;
+///
+export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfEmoji_Set() @safe nothrow @nogc;
+
+/// Is member of Emoji_Presentation class?
+deprecated export extern(C) bool sidero_utf_lut_isMemberOfEmoji_Presentation(dchar against) @safe nothrow @nogc pure;
+///
+export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfEmoji_Presentation_Set() @safe nothrow @nogc;
+
+/// Is member of Emoji_Modifier class?
+deprecated export extern(C) bool sidero_utf_lut_isMemberOfEmoji_Modifier(dchar against) @safe nothrow @nogc pure;
+///
+export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfEmoji_Modifier_Set() @safe nothrow @nogc;
+
+/// Is member of Emoji_Modifier_Base class?
+deprecated export extern(C) bool sidero_utf_lut_isMemberOfEmoji_Modifier_Base(dchar against) @safe nothrow @nogc pure;
+///
+export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfEmoji_Modifier_Base_Set() @safe nothrow @nogc;
+
+/// Is member of Emoji_Component class?
+deprecated export extern(C) bool sidero_utf_lut_isMemberOfEmoji_Component(dchar against) @safe nothrow @nogc pure;
+///
+export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfEmoji_Component_Set() @safe nothrow @nogc;
+
+/// Is member of Extended_Pictographic class?
+deprecated export extern(C) bool sidero_utf_lut_isMemberOfExtended_Pictographic(dchar against) @safe nothrow @nogc pure;
+///
+export extern(C) IntervalSet!dchar sidero_utf_lut_isMemberOfExtended_Pictographic_Set() @safe nothrow @nogc;
