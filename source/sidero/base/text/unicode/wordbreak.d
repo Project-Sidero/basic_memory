@@ -512,7 +512,7 @@ bool isNumeric(dchar input) {
 bool isExtend(dchar input) {
     if(input == 0x200D)
         return false;
-    return isUnicodeGraphemeExtend(input) || sidero_utf_lut_getGeneralCategory(input) == GeneralCategory.Mc ||
+    return input in sidero_utf_lut_isMemberOfGraphemeExtend_Set || sidero_utf_lut_getGeneralCategory(input) == GeneralCategory.Mc ||
         input in sidero_utf_lut_isMemberOfEmoji_Modifier_Set;
 }
 

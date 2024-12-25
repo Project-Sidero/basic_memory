@@ -1,12 +1,15 @@
 module generators.unicode.genfor.casing;
 import generators.unicode.data.UnicodeData;
+import generators.unicode.data.PropList;
 import generators.unicode.defs;
 import utilities.setops;
 import utilities.inverselist;
+import utilities.intervallist;
 import std.format : formattedWrite;
 
 void genForCasing() {
     implOutput ~= q{module sidero.base.internal.unicode.unicodedataCa;
+import sidero.base.containers.set.interval;
 // Generated do not modify
 
 struct Casing {
@@ -134,17 +137,25 @@ void isCased() {
 
     foreach(entry; UnicodeData.entries) {
         switch(entry.generalCategory) {
-            case GeneralCategory.Lt:
-            case GeneralCategory.Ll:
-            case GeneralCategory.Lu:
-                break;
+        case GeneralCategory.Lt:
+        case GeneralCategory.Ll:
+        case GeneralCategory.Lu:
+            break;
 
-                default:
-                continue;
+        default:
+            continue;
         }
 
         ranges.ranges ~= entry.range;
     }
 
-    // TODO
+    foreach(r; PropList.ranges[Property.Other_Lowercase]) {
+        ranges.add(r);
+    }
+
+    foreach(r; PropList.ranges[Property.Other_Uppercase]) {
+        ranges.add(r);
+    }
+
+    generateIsCheck(apiOutput, implOutput, "sidero_utf_lut_isCased", ranges.ranges, true, false);
 }

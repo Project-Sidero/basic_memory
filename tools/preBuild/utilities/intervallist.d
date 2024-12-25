@@ -4,7 +4,7 @@ import std.array : Appender;
 import std.format;
 
 void generateIsCheck(ref Appender!string interfaceAppender, ref Appender!string implementationAppender,
-        string functionName, ValueRange[] ranges, bool emitSet, bool invert = false) {
+        string functionName, ValueRange[] ranges, bool emitSet, bool emitIsCheck, bool invert = false) {
 
     if(!emitSet) {
         import utilities.inverselist;
@@ -40,19 +40,11 @@ void generateIsCheck(ref Appender!string interfaceAppender, ref Appender!string 
         implementationAppender ~= "\";\n\n";
     }
 
-    {
-        interfaceAppender ~= "deprecated ";
+    if(emitIsCheck) {
         interfaceAppender ~= "export extern(C) bool ";
         interfaceAppender ~= functionName;
         interfaceAppender ~= "(dchar against) @safe nothrow @nogc pure;\n";
 
-        interfaceAppender ~= "///\n";
-        interfaceAppender ~= "export extern(C) IntervalSet!dchar ";
-        interfaceAppender ~= functionName;
-        interfaceAppender ~= "_Set() @safe nothrow @nogc;\n";
-    }
-
-    {
         implementationAppender ~= "export extern(C) bool ";
         implementationAppender ~= functionName;
         implementationAppender ~= "(dchar against) @trusted nothrow @nogc pure {\n";
@@ -83,6 +75,13 @@ void generateIsCheck(ref Appender!string interfaceAppender, ref Appender!string 
     }
 
     {
+        if(emitIsCheck)
+            interfaceAppender ~= "///\n";
+
+        interfaceAppender ~= "export extern(C) IntervalSet!dchar ";
+        interfaceAppender ~= functionName;
+        interfaceAppender ~= "_Set() @safe nothrow @nogc;\n";
+
         implementationAppender ~= "export extern(C) IntervalSet!dchar ";
         implementationAppender ~= functionName;
         implementationAppender ~= "_Set() @trusted nothrow @nogc {\n";

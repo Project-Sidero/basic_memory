@@ -12,6 +12,6 @@ void genForCompositionExclusions() {
         apiOutput ~= "/// Is excluded from composition.\n";
         apiOutput ~= "/// Returns: false if not set.\n";
 
-        generateIsCheck(apiOutput, implOutput, "sidero_utf_lut_isCompositionExcluded", CompositionExclusions, false);
+        generateIsCheck(apiOutput, implOutput, "sidero_utf_lut_isCompositionExcluded", CompositionExclusions, false, false);
     }
 }

@@ -11,6 +11,6 @@ void genForEmojiData() {
     static foreach(Em; __traits(allMembers, EmojiClass)) {
             apiOutput ~= "\n";
             apiOutput ~= "/// Is member of " ~ Em ~ " class?\n";
-            generateIsCheck(apiOutput, implOutput, "sidero_utf_lut_isMemberOf" ~ Em, EmojiData.values[__traits(getMember, EmojiClass, Em)], true);
+            generateIsCheck(apiOutput, implOutput, "sidero_utf_lut_isMemberOf" ~ Em, EmojiData.values[__traits(getMember, EmojiClass, Em)], true, false);
     }
 }

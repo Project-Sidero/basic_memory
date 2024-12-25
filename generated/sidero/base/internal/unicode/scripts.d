@@ -25,3933 +25,1026 @@ export extern(C) ubyte sidero_utf_lut_getScript(dchar against) @trusted nothrow 
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptUnknown = cast(dchar[])x"00000000000003770000037A0000037F000003840000038A0000038C0000038C0000038E000003A1000003A30000052F0000053100000556000005590000058A0000058D0000058F00000591000005C7000005D0000005EA000005EF000005F4000006000000070D0000070F0000074A0000074D000007B1000007C0000007FA000007FD0000082D000008300000083E000008400000085B0000085E0000085E000008600000086A000008700000088E00000890000008910000089700000983000009850000098C0000098F0000099000000993000009A8000009AA000009B0000009B2000009B2000009B6000009B9000009BC000009C4000009C7000009C8000009CB000009CE000009D7000009D7000009DC000009DD000009DF000009E3000009E6000009FE00000A0100000A0300000A0500000A0A00000A0F00000A1000000A1300000A2800000A2A00000A3000000A3200000A3300000A3500000A3600000A3800000A3900000A3C00000A3C00000A3E00000A4200000A4700000A4800000A4B00000A4D00000A5100000A5100000A5900000A5C00000A5E00000A5E00000A6600000A7600000A8100000A8300000A8500000A8D00000A8F00000A9100000A9300000AA800000AAA00000AB000000AB200000AB300000AB500000AB900000ABC00000AC500000AC700000AC900000ACB00000ACD00000AD000000AD000000AE000000AE300000AE600000AF100000AF900000AFF00000B0100000B0300000B0500000B0C00000B0F00000B1000000B1300000B2800000B2A00000B3000000B3200000B3300000B3500000B3900000B3C00000B4400000B4700000B4800000B4B00000B4D00000B5500000B5700000B5C00000B5D00000B5F00000B6300000B6600000B7700000B8200000B8300000B8500000B8A00000B8E00000B9000000B9200000B9500000B9900000B9A00000B9C00000B9C00000B9E00000B9F00000BA300000BA400000BA800000BAA00000BAE00000BB900000BBE00000BC200000BC600000BC800000BCA00000BCD00000BD000000BD000000BD700000BD700000BE600000BFA00000C0000000C0C00000C0E00000C1000000C1200000C2800000C2A00000C3900000C3C00000C4400000C4600000C4800000C4A00000C4D00000C5500000C5600000C5800000C5A00000C5D00000C5D00000C6000000C6300000C6600000C6F00000C7700000C8C00000C8E00000C9000000C9200000CA800000CAA00000CB300000CB500000CB900000CBC00000CC400000CC600000CC800000CCA00000CCD00000CD500000CD600000CDD00000CDE00000CE000000CE300000CE600000CEF00000CF100000CF300000D0000000D0C00000D0E00000D1000000D1200000D4400000D4600000D4800000D4A00000D4F00000D5400000D6300000D6600000D7F00000D8100000D8300000D8500000D9600000D9A00000DB100000DB300000DBB00000DBD00000DBD00000DC000000DC600000DCA00000DCA00000DCF00000DD400000DD600000DD600000DD800000DDF00000DE600000DEF00000DF200000DF400000E0100000E3A00000E3F00000E5B00000E8100000E8200000E8400000E8400000E8600000E8A00000E8C00000EA300000EA500000EA500000EA700000EBD00000EC000000EC400000EC600000EC600000EC800000ECE00000ED000000ED900000EDC00000EDF00000F0000000F4700000F4900000F6C00000F7100000F9700000F9900000FBC00000FBE00000FCC00000FCE00000FDA00001000000010C5000010C7000010C7000010CD000010CD000010D0000012480000124A0000124D000012500000125600001258000012580000125A0000125D00001260000012880000128A0000128D00001290000012B0000012B2000012B5000012B8000012BE000012C0000012C0000012C2000012C5000012C8000012D6000012D8000013100000131200001315000013180000135A0000135D0000137C0000138000001399000013A0000013F5000013F8000013FD000014000000169C000016A0000016F800001700000017150000171F000017360000174000001753000017600000176C0000176E00001770000017720000177300001780000017DD000017E0000017E9000017F0000017F90000180000001819000018200000187800001880000018AA000018B0000018F5000019000000191E000019200000192B000019300000193B0000194000001940000019440000196D000019700000197400001980000019AB000019B0000019C9000019D0000019DA000019DE00001A1B00001A1E00001A5E00001A6000001A7C00001A7F00001A8900001A9000001A9900001AA000001AAD00001AB000001ACE00001B0000001B4C00001B4E00001BF300001BFC00001C3700001C3B00001C4900001C4D00001C8A00001C9000001CBA00001CBD00001CC700001CD000001CFA00001D0000001F1500001F1800001F1D00001F2000001F4500001F4800001F4D00001F5000001F5700001F5900001F5900001F5B00001F5B00001F5D00001F5D00001F5F00001F7D00001F8000001FB400001FB600001FC400001FC600001FD300001FD600001FDB00001FDD00001FEF00001FF200001FF400001FF600001FFE00002000000020640000206600002071000020740000208E000020900000209C000020A0000020C0000020D0000020F0000021000000218B0000219000002429000024400000244A0000246000002B7300002B7600002B9500002B9700002CF300002CF900002D2500002D2700002D2700002D2D00002D2D00002D3000002D6700002D6F00002D7000002D7F00002D9600002DA000002DA600002DA800002DAE00002DB000002DB600002DB800002DBE00002DC000002DC600002DC800002DCE00002DD000002DD600002DD800002DDE00002DE000002E5D00002E8000002E9900002E9B00002EF300002F0000002FD500002FF00000303F000030410000309600003099000030FF000031050000312F000031310000318E00003190000031E5000031EF0000321E000032200000A48C0000A4900000A4C60000A4D00000A62B0000A6400000A6F70000A7000000A7CD0000A7D00000A7D10000A7D30000A7D30000A7D50000A7DC0000A7F20000A82C0000A8300000A8390000A8400000A8770000A8800000A8C50000A8CE0000A8D90000A8E00000A9530000A95F0000A97C0000A9800000A9CD0000A9CF0000A9D90000A9DE0000A9FE0000AA000000AA360000AA400000AA4D0000AA500000AA590000AA5C0000AAC20000AADB0000AAF60000AB010000AB060000AB090000AB0E0000AB110000AB160000AB200000AB260000AB280000AB2E0000AB300000AB6B0000AB700000ABED0000ABF00000ABF90000AC000000D7A30000D7B00000D7C60000D7CB0000D7FB0000F9000000FA6D0000FA700000FAD90000FB000000FB060000FB130000FB170000FB1D0000FB360000FB380000FB3C0000FB3E0000FB3E0000FB400000FB410000FB430000FB440000FB460000FBC20000FBD30000FD8F0000FD920000FDC70000FDCF0000FDCF0000FDF00000FE190000FE200000FE520000FE540000FE660000FE680000FE6B0000FE700000FE740000FE760000FEFC0000FEFF0000FEFF0000FF010000FFBE0000FFC20000FFC70000FFCA0000FFCF0000FFD20000FFD70000FFDA0000FFDC0000FFE00000FFE60000FFE80000FFEE0000FFF90000FFFD000100000001000B0001000D00010026000100280001003A0001003C0001003D0001003F0001004D000100500001005D00010080000100FA00010100000101020001010700010133000101370001018E000101900001019C000101A0000101A0000101D0000101FD000102800001029C000102A0000102D0000102E0000102FB00010300000103230001032D0001034A000103500001037A000103800001039D0001039F000103C3000103C8000103D5000104000001049D000104A0000104A9000104B0000104D3000104D8000104FB000105000001052700010530000105630001056F0001057A0001057C0001058A0001058C00010592000105940001059500010597000105A1000105A3000105B1000105B3000105B9000105BB000105BC000105C0000105F3000106000001073600010740000107550001076000010767000107800001078500010787000107B0000107B2000107BA000108000001080500010808000108080001080A0001083500010837000108380001083C0001083C0001083F00010855000108570001089E000108A7000108AF000108E0000108F2000108F4000108F5000108FB0001091B0001091F000109390001093F0001093F00010980000109B7000109BC000109CF000109D200010A0300010A0500010A0600010A0C00010A1300010A1500010A1700010A1900010A3500010A3800010A3A00010A3F00010A4800010A5000010A5800010A6000010A9F00010AC000010AE600010AEB00010AF600010B0000010B3500010B3900010B5500010B5800010B7200010B7800010B9100010B9900010B9C00010BA900010BAF00010C0000010C4800010C8000010CB200010CC000010CF200010CFA00010D2700010D3000010D3900010D4000010D6500010D6900010D8500010D8E00010D8F00010E6000010E7E00010E8000010EA900010EAB00010EAD00010EB000010EB100010EC200010EC400010EFC00010F2700010F3000010F5900010F7000010F8900010FB000010FCB00010FE000010FF6000110000001104D00011052000110750001107F000110C2000110CD000110CD000110D0000110E8000110F0000110F900011100000111340001113600011147000111500001117600011180000111DF000111E1000111F400011200000112110001121300011241000112800001128600011288000112880001128A0001128D0001128F0001129D0001129F000112A9000112B0000112EA000112F0000112F90001130000011303000113050001130C0001130F0001131000011313000113280001132A00011330000113320001133300011335000113390001133B0001134400011347000113480001134B0001134D000113500001135000011357000113570001135D00011363000113660001136C000113700001137400011380000113890001138B0001138B0001138E0001138E00011390000113B5000113B7000113C0000113C2000113C2000113C5000113C5000113C7000113CA000113CC000113D5000113D7000113D8000113E1000113E2000114000001145B0001145D0001146100011480000114C7000114D0000114D900011580000115B5000115B8000115DD00011600000116440001165000011659000116600001166C00011680000116B9000116C0000116C9000116D0000116E3000117000001171A0001171D0001172B0001173000011746000118000001183B000118A0000118F2000118FF0001190600011909000119090001190C000119130001191500011916000119180001193500011937000119380001193B000119460001195000011959000119A0000119A7000119AA000119D7000119DA000119E400011A0000011A4700011A5000011AA200011AB000011AF800011B0000011B0900011BC000011BE100011BF000011BF900011C0000011C0800011C0A00011C3600011C3800011C4500011C5000011C6C00011C7000011C8F00011C9200011CA700011CA900011CB600011D0000011D0600011D0800011D0900011D0B00011D3600011D3A00011D3A00011D3C00011D3D00011D3F00011D4700011D5000011D5900011D6000011D6500011D6700011D6800011D6A00011D8E00011D9000011D9100011D9300011D9800011DA000011DA900011EE000011EF800011F0000011F1000011F1200011F3A00011F3E00011F5A00011FB000011FB000011FC000011FF100011FFF00012399000124000001246E0001247000012474000124800001254300012F9000012FF2000130000001345500013460000143FA000144000001464600016100000161390001680000016A3800016A4000016A5E00016A6000016A6900016A6E00016ABE00016AC000016AC900016AD000016AED00016AF000016AF500016B0000016B4500016B5000016B5900016B5B00016B6100016B6300016B7700016B7D00016B8F00016D4000016D7900016E4000016E9A00016F0000016F4A00016F4F00016F8700016F8F00016F9F00016FE000016FE400016FF000016FF100017000000187F70001880000018CD500018CFF00018D080001AFF00001AFF30001AFF50001AFFB0001AFFD0001AFFE0001B0000001B1220001B1320001B1320001B1500001B1520001B1550001B1550001B1640001B1670001B1700001B2FB0001BC000001BC6A0001BC700001BC7C0001BC800001BC880001BC900001BC990001BC9C0001BCA30001CC000001CCF90001CD000001CEB30001CF000001CF2D0001CF300001CF460001CF500001CFC30001D0000001D0F50001D1000001D1260001D1290001D1EA0001D2000001D2450001D2C00001D2D30001D2E00001D2F30001D3000001D3560001D3600001D3780001D4000001D4540001D4560001D49C0001D49E0001D49F0001D4A20001D4A20001D4A50001D4A60001D4A90001D4AC0001D4AE0001D4B90001D4BB0001D4BB0001D4BD0001D4C30001D4C50001D5050001D5070001D50A0001D50D0001D5140001D5160001D51C0001D51E0001D5390001D53B0001D53E0001D5400001D5440001D5460001D5460001D54A0001D5500001D5520001D6A50001D6A80001D7CB0001D7CE0001DA8B0001DA9B0001DA9F0001DAA10001DAAF0001DF000001DF1E0001DF250001DF2A0001E0000001E0060001E0080001E0180001E01B0001E0210001E0230001E0240001E0260001E02A0001E0300001E06D0001E08F0001E08F0001E1000001E12C0001E1300001E13D0001E1400001E1490001E14E0001E14F0001E2900001E2AE0001E2C00001E2F90001E2FF0001E2FF0001E4D00001E4F90001E5D00001E5FA0001E5FF0001E5FF0001E7E00001E7E60001E7E80001E7EB0001E7ED0001E7EE0001E7F00001E7FE0001E8000001E8C40001E8C70001E8D60001E9000001E94B0001E9500001E9590001E95E0001E95F0001EC710001ECB40001ED010001ED3D0001EE000001EE030001EE050001EE1F0001EE210001EE220001EE240001EE240001EE270001EE270001EE290001EE320001EE340001EE370001EE390001EE390001EE3B0001EE3B0001EE420001EE420001EE470001EE470001EE490001EE490001EE4B0001EE4B0001EE4D0001EE4F0001EE510001EE520001EE540001EE540001EE570001EE570001EE590001EE590001EE5B0001EE5B0001EE5D0001EE5D0001EE5F0001EE5F0001EE610001EE620001EE640001EE640001EE670001EE6A0001EE6C0001EE720001EE740001EE770001EE790001EE7C0001EE7E0001EE7E0001EE800001EE890001EE8B0001EE9B0001EEA10001EEA30001EEA50001EEA90001EEAB0001EEBB0001EEF00001EEF10001F0000001F02B0001F0300001F0930001F0A00001F0AE0001F0B10001F0BF0001F0C10001F0CF0001F0D10001F0F50001F1000001F1AD0001F1E60001F2020001F2100001F23B0001F2400001F2480001F2500001F2510001F2600001F2650001F3000001F6D70001F6DC0001F6EC0001F6F00001F6FC0001F7000001F7760001F77B0001F7D90001F7E00001F7EB0001F7F00001F7F00001F8000001F80B0001F8100001F8470001F8500001F8590001F8600001F8870001F8900001F8AD0001F8B00001F8BB0001F8C00001F8C10001F9000001FA530001FA600001FA6D0001FA700001FA7C0001FA800001FA890001FA8F0001FAC60001FACE0001FADC0001FADF0001FAE90001FAF00001FAF80001FB000001FB920001FB940001FBF9000200000002A6DF0002A7000002B7390002B7400002B81D0002B8200002CEA10002CEB00002EBE00002EBF00002EE5D0002F8000002FA1D000300000003134A00031350000323AF000E0001000E0001000E0020000E007F000E0100000E01EF";
 
-export extern(C) bool sidero_utf_lut_isScriptUnknown(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptUnknown.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptUnknown[mid << 1], end = Table_sidero_utf_lut_isScriptUnknown[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return false;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return true;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptUnknown_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptUnknown);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptOld_Hungarian = cast(dchar[])x"00010C8000010CB200010CC000010CF200010CFA00010CFF";
 
-export extern(C) bool sidero_utf_lut_isScriptOld_Hungarian(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptOld_Hungarian.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptOld_Hungarian[mid << 1], end = Table_sidero_utf_lut_isScriptOld_Hungarian[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptOld_Hungarian_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptOld_Hungarian);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptCoptic = cast(dchar[])x"000003E2000003EF00002C8000002CF300002CF900002CFF";
 
-export extern(C) bool sidero_utf_lut_isScriptCoptic(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptCoptic.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptCoptic[mid << 1], end = Table_sidero_utf_lut_isScriptCoptic[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptCoptic_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptCoptic);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptOl_Chiki = cast(dchar[])x"00001C5000001C7F";
 
-export extern(C) bool sidero_utf_lut_isScriptOl_Chiki(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptOl_Chiki.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptOl_Chiki[mid << 1], end = Table_sidero_utf_lut_isScriptOl_Chiki[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptOl_Chiki_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptOl_Chiki);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptCyrillic = cast(dchar[])x"0000040000000484000004870000052F00001C8000001C8A00001D2B00001D2B00001D7800001D7800002DE000002DFF0000A6400000A69F0000FE2E0000FE2F0001E0300001E06D0001E08F0001E08F";
 
-export extern(C) bool sidero_utf_lut_isScriptCyrillic(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptCyrillic.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptCyrillic[mid << 1], end = Table_sidero_utf_lut_isScriptCyrillic[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptCyrillic_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptCyrillic);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptThaana = cast(dchar[])x"00000780000007B1";
 
-export extern(C) bool sidero_utf_lut_isScriptThaana(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptThaana.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptThaana[mid << 1], end = Table_sidero_utf_lut_isScriptThaana[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptThaana_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptThaana);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptInscriptional_Parthian = cast(dchar[])x"00010B4000010B5500010B5800010B5F";
 
-export extern(C) bool sidero_utf_lut_isScriptInscriptional_Parthian(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptInscriptional_Parthian.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptInscriptional_Parthian[mid << 1], end = Table_sidero_utf_lut_isScriptInscriptional_Parthian[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptInscriptional_Parthian_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptInscriptional_Parthian);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptNabataean = cast(dchar[])x"000108800001089E000108A7000108AF";
 
-export extern(C) bool sidero_utf_lut_isScriptNabataean(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptNabataean.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptNabataean[mid << 1], end = Table_sidero_utf_lut_isScriptNabataean[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptNabataean_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptNabataean);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptOgham = cast(dchar[])x"000016800000169C";
 
-export extern(C) bool sidero_utf_lut_isScriptOgham(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptOgham.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptOgham[mid << 1], end = Table_sidero_utf_lut_isScriptOgham[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptOgham_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptOgham);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptMeroitic_Hieroglyphs = cast(dchar[])x"000109800001099F";
 
-export extern(C) bool sidero_utf_lut_isScriptMeroitic_Hieroglyphs(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptMeroitic_Hieroglyphs.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptMeroitic_Hieroglyphs[mid << 1], end = Table_sidero_utf_lut_isScriptMeroitic_Hieroglyphs[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptMeroitic_Hieroglyphs_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptMeroitic_Hieroglyphs);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptMakasar = cast(dchar[])x"00011EE000011EF8";
 
-export extern(C) bool sidero_utf_lut_isScriptMakasar(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptMakasar.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptMakasar[mid << 1], end = Table_sidero_utf_lut_isScriptMakasar[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptMakasar_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptMakasar);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptSiddham = cast(dchar[])x"00011580000115B5000115B8000115DD";
 
-export extern(C) bool sidero_utf_lut_isScriptSiddham(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptSiddham.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptSiddham[mid << 1], end = Table_sidero_utf_lut_isScriptSiddham[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptSiddham_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptSiddham);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptOld_Persian = cast(dchar[])x"000103A0000103C3000103C8000103D5";
 
-export extern(C) bool sidero_utf_lut_isScriptOld_Persian(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptOld_Persian.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptOld_Persian[mid << 1], end = Table_sidero_utf_lut_isScriptOld_Persian[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptOld_Persian_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptOld_Persian);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptImperial_Aramaic = cast(dchar[])x"0001084000010855000108570001085F";
 
-export extern(C) bool sidero_utf_lut_isScriptImperial_Aramaic(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptImperial_Aramaic.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptImperial_Aramaic[mid << 1], end = Table_sidero_utf_lut_isScriptImperial_Aramaic[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptImperial_Aramaic_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptImperial_Aramaic);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptMyanmar = cast(dchar[])x"000010000000109F0000A9E00000A9FE0000AA600000AA7F000116D0000116E3";
 
-export extern(C) bool sidero_utf_lut_isScriptMyanmar(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptMyanmar.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptMyanmar[mid << 1], end = Table_sidero_utf_lut_isScriptMyanmar[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptMyanmar_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptMyanmar);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptDeseret = cast(dchar[])x"000104000001044F";
 
-export extern(C) bool sidero_utf_lut_isScriptDeseret(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptDeseret.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptDeseret[mid << 1], end = Table_sidero_utf_lut_isScriptDeseret[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptDeseret_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptDeseret);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptKaithi = cast(dchar[])x"00011080000110C2000110CD000110CD";
 
-export extern(C) bool sidero_utf_lut_isScriptKaithi(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptKaithi.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptKaithi[mid << 1], end = Table_sidero_utf_lut_isScriptKaithi[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptKaithi_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptKaithi);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptMedefaidrin = cast(dchar[])x"00016E4000016E9A";
 
-export extern(C) bool sidero_utf_lut_isScriptMedefaidrin(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptMedefaidrin.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptMedefaidrin[mid << 1], end = Table_sidero_utf_lut_isScriptMedefaidrin[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptMedefaidrin_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptMedefaidrin);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptKayah_Li = cast(dchar[])x"0000A9000000A92D0000A92F0000A92F";
 
-export extern(C) bool sidero_utf_lut_isScriptKayah_Li(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptKayah_Li.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptKayah_Li[mid << 1], end = Table_sidero_utf_lut_isScriptKayah_Li[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptKayah_Li_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptKayah_Li);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptHiragana = cast(dchar[])x"00003041000030960000309D0000309F0001B0010001B11F0001B1320001B1320001B1500001B1520001F2000001F200";
 
-export extern(C) bool sidero_utf_lut_isScriptHiragana(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptHiragana.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptHiragana[mid << 1], end = Table_sidero_utf_lut_isScriptHiragana[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptHiragana_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptHiragana);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptAhom = cast(dchar[])x"000117000001171A0001171D0001172B0001173000011746";
 
-export extern(C) bool sidero_utf_lut_isScriptAhom(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptAhom.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptAhom[mid << 1], end = Table_sidero_utf_lut_isScriptAhom[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptAhom_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptAhom);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptDevanagari = cast(dchar[])x"00000900000009500000095500000963000009660000097F0000A8E00000A8FF00011B0000011B09";
 
-export extern(C) bool sidero_utf_lut_isScriptDevanagari(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptDevanagari.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptDevanagari[mid << 1], end = Table_sidero_utf_lut_isScriptDevanagari[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptDevanagari_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptDevanagari);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptTibetan = cast(dchar[])x"00000F0000000F4700000F4900000F6C00000F7100000F9700000F9900000FBC00000FBE00000FCC00000FCE00000FD400000FD900000FDA";
 
-export extern(C) bool sidero_utf_lut_isScriptTibetan(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptTibetan.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptTibetan[mid << 1], end = Table_sidero_utf_lut_isScriptTibetan[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptTibetan_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptTibetan);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptNko = cast(dchar[])x"000007C0000007FA000007FD000007FF";
 
-export extern(C) bool sidero_utf_lut_isScriptNko(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptNko.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptNko[mid << 1], end = Table_sidero_utf_lut_isScriptNko[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptNko_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptNko);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptBrahmi = cast(dchar[])x"000110000001104D00011052000110750001107F0001107F";
 
-export extern(C) bool sidero_utf_lut_isScriptBrahmi(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptBrahmi.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptBrahmi[mid << 1], end = Table_sidero_utf_lut_isScriptBrahmi[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptBrahmi_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptBrahmi);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptOsage = cast(dchar[])x"000104B0000104D3000104D8000104FB";
 
-export extern(C) bool sidero_utf_lut_isScriptOsage(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptOsage.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptOsage[mid << 1], end = Table_sidero_utf_lut_isScriptOsage[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptOsage_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptOsage);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptNushu = cast(dchar[])x"00016FE100016FE10001B1700001B2FB";
 
-export extern(C) bool sidero_utf_lut_isScriptNushu(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptNushu.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptNushu[mid << 1], end = Table_sidero_utf_lut_isScriptNushu[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptNushu_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptNushu);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptCuneiform = cast(dchar[])x"0001200000012399000124000001246E00012470000124740001248000012543";
 
-export extern(C) bool sidero_utf_lut_isScriptCuneiform(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptCuneiform.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptCuneiform[mid << 1], end = Table_sidero_utf_lut_isScriptCuneiform[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptCuneiform_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptCuneiform);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptTakri = cast(dchar[])x"00011680000116B9000116C0000116C9";
 
-export extern(C) bool sidero_utf_lut_isScriptTakri(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptTakri.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptTakri[mid << 1], end = Table_sidero_utf_lut_isScriptTakri[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptTakri_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptTakri);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptToto = cast(dchar[])x"0001E2900001E2AE";
 
-export extern(C) bool sidero_utf_lut_isScriptToto(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptToto.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptToto[mid << 1], end = Table_sidero_utf_lut_isScriptToto[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptToto_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptToto);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptLatin = cast(dchar[])x"000000410000005A000000610000007A000000AA000000AA000000BA000000BA000000C0000000D6000000D8000000F6000000F8000002B8000002E0000002E400001D0000001D2500001D2C00001D5C00001D6200001D6500001D6B00001D7700001D7900001DBE00001E0000001EFF00002071000020710000207F0000207F000020900000209C0000212A0000212B00002132000021320000214E0000214E000021600000218800002C6000002C7F0000A7220000A7870000A78B0000A7CD0000A7D00000A7D10000A7D30000A7D30000A7D50000A7DC0000A7F20000A7FF0000AB300000AB5A0000AB5C0000AB640000AB660000AB690000FB000000FB060000FF210000FF3A0000FF410000FF5A000107800001078500010787000107B0000107B2000107BA0001DF000001DF1E0001DF250001DF2A";
 
-export extern(C) bool sidero_utf_lut_isScriptLatin(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptLatin.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptLatin[mid << 1], end = Table_sidero_utf_lut_isScriptLatin[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptLatin_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptLatin);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptHanunoo = cast(dchar[])x"0000172000001734";
 
-export extern(C) bool sidero_utf_lut_isScriptHanunoo(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptHanunoo.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptHanunoo[mid << 1], end = Table_sidero_utf_lut_isScriptHanunoo[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptHanunoo_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptHanunoo);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptLimbu = cast(dchar[])x"000019000000191E000019200000192B000019300000193B0000194000001940000019440000194F";
 
-export extern(C) bool sidero_utf_lut_isScriptLimbu(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptLimbu.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptLimbu[mid << 1], end = Table_sidero_utf_lut_isScriptLimbu[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptLimbu_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptLimbu);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptSaurashtra = cast(dchar[])x"0000A8800000A8C50000A8CE0000A8D9";
 
-export extern(C) bool sidero_utf_lut_isScriptSaurashtra(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptSaurashtra.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptSaurashtra[mid << 1], end = Table_sidero_utf_lut_isScriptSaurashtra[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptSaurashtra_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptSaurashtra);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptLisu = cast(dchar[])x"0000A4D00000A4FF00011FB000011FB0";
 
-export extern(C) bool sidero_utf_lut_isScriptLisu(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptLisu.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptLisu[mid << 1], end = Table_sidero_utf_lut_isScriptLisu[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptLisu_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptLisu);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptEgyptian_Hieroglyphs = cast(dchar[])x"000130000001345500013460000143FA";
 
-export extern(C) bool sidero_utf_lut_isScriptEgyptian_Hieroglyphs(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptEgyptian_Hieroglyphs.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptEgyptian_Hieroglyphs[mid << 1], end = Table_sidero_utf_lut_isScriptEgyptian_Hieroglyphs[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptEgyptian_Hieroglyphs_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptEgyptian_Hieroglyphs);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptElbasan = cast(dchar[])x"0001050000010527";
 
-export extern(C) bool sidero_utf_lut_isScriptElbasan(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptElbasan.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptElbasan[mid << 1], end = Table_sidero_utf_lut_isScriptElbasan[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptElbasan_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptElbasan);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptPalmyrene = cast(dchar[])x"000108600001087F";
 
-export extern(C) bool sidero_utf_lut_isScriptPalmyrene(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptPalmyrene.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptPalmyrene[mid << 1], end = Table_sidero_utf_lut_isScriptPalmyrene[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptPalmyrene_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptPalmyrene);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptTagbanwa = cast(dchar[])x"000017600000176C0000176E000017700000177200001773";
 
-export extern(C) bool sidero_utf_lut_isScriptTagbanwa(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptTagbanwa.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptTagbanwa[mid << 1], end = Table_sidero_utf_lut_isScriptTagbanwa[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptTagbanwa_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptTagbanwa);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptOld_Italic = cast(dchar[])x"00010300000103230001032D0001032F";
 
-export extern(C) bool sidero_utf_lut_isScriptOld_Italic(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptOld_Italic.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptOld_Italic[mid << 1], end = Table_sidero_utf_lut_isScriptOld_Italic[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptOld_Italic_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptOld_Italic);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptCaucasian_Albanian = cast(dchar[])x"00010530000105630001056F0001056F";
 
-export extern(C) bool sidero_utf_lut_isScriptCaucasian_Albanian(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptCaucasian_Albanian.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptCaucasian_Albanian[mid << 1], end = Table_sidero_utf_lut_isScriptCaucasian_Albanian[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptCaucasian_Albanian_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptCaucasian_Albanian);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptMalayalam = cast(dchar[])x"00000D0000000D0C00000D0E00000D1000000D1200000D4400000D4600000D4800000D4A00000D4F00000D5400000D6300000D6600000D7F";
 
-export extern(C) bool sidero_utf_lut_isScriptMalayalam(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptMalayalam.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptMalayalam[mid << 1], end = Table_sidero_utf_lut_isScriptMalayalam[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptMalayalam_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptMalayalam);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptInherited = cast(dchar[])x"000003000000036F00000485000004860000064B000006550000067000000670000009510000095400001AB000001ACE00001CD000001CD200001CD400001CE000001CE200001CE800001CED00001CED00001CF400001CF400001CF800001CF900001DC000001DFF0000200C0000200D000020D0000020F00000302A0000302D000030990000309A0000FE000000FE0F0000FE200000FE2D000101FD000101FD000102E0000102E00001133B0001133B0001CF000001CF2D0001CF300001CF460001D1670001D1690001D17B0001D1820001D1850001D18B0001D1AA0001D1AD000E0100000E01EF";
 
-export extern(C) bool sidero_utf_lut_isScriptInherited(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptInherited.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptInherited[mid << 1], end = Table_sidero_utf_lut_isScriptInherited[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptInherited_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptInherited);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptSora_Sompeng = cast(dchar[])x"000110D0000110E8000110F0000110F9";
 
-export extern(C) bool sidero_utf_lut_isScriptSora_Sompeng(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptSora_Sompeng.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptSora_Sompeng[mid << 1], end = Table_sidero_utf_lut_isScriptSora_Sompeng[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptSora_Sompeng_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptSora_Sompeng);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptLinear_B = cast(dchar[])x"000100000001000B0001000D00010026000100280001003A0001003C0001003D0001003F0001004D000100500001005D00010080000100FA";
 
-export extern(C) bool sidero_utf_lut_isScriptLinear_B(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptLinear_B.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptLinear_B[mid << 1], end = Table_sidero_utf_lut_isScriptLinear_B[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptLinear_B_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptLinear_B);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptNyiakeng_Puachue_Hmong = cast(dchar[])x"0001E1000001E12C0001E1300001E13D0001E1400001E1490001E14E0001E14F";
 
-export extern(C) bool sidero_utf_lut_isScriptNyiakeng_Puachue_Hmong(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptNyiakeng_Puachue_Hmong.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptNyiakeng_Puachue_Hmong[mid << 1], end = Table_sidero_utf_lut_isScriptNyiakeng_Puachue_Hmong[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptNyiakeng_Puachue_Hmong_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptNyiakeng_Puachue_Hmong);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptMeroitic_Cursive = cast(dchar[])x"000109A0000109B7000109BC000109CF000109D2000109FF";
 
-export extern(C) bool sidero_utf_lut_isScriptMeroitic_Cursive(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptMeroitic_Cursive.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptMeroitic_Cursive[mid << 1], end = Table_sidero_utf_lut_isScriptMeroitic_Cursive[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptMeroitic_Cursive_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptMeroitic_Cursive);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptThai = cast(dchar[])x"00000E0100000E3A00000E4000000E5B";
 
-export extern(C) bool sidero_utf_lut_isScriptThai(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptThai.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptThai[mid << 1], end = Table_sidero_utf_lut_isScriptThai[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptThai_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptThai);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptMende_Kikakui = cast(dchar[])x"0001E8000001E8C40001E8C70001E8D6";
 
-export extern(C) bool sidero_utf_lut_isScriptMende_Kikakui(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptMende_Kikakui.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptMende_Kikakui[mid << 1], end = Table_sidero_utf_lut_isScriptMende_Kikakui[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptMende_Kikakui_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptMende_Kikakui);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptOld_Sogdian = cast(dchar[])x"00010F0000010F27";
 
-export extern(C) bool sidero_utf_lut_isScriptOld_Sogdian(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptOld_Sogdian.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptOld_Sogdian[mid << 1], end = Table_sidero_utf_lut_isScriptOld_Sogdian[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptOld_Sogdian_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptOld_Sogdian);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptOld_Turkic = cast(dchar[])x"00010C0000010C48";
 
-export extern(C) bool sidero_utf_lut_isScriptOld_Turkic(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptOld_Turkic.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptOld_Turkic[mid << 1], end = Table_sidero_utf_lut_isScriptOld_Turkic[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptOld_Turkic_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptOld_Turkic);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptSamaritan = cast(dchar[])x"000008000000082D000008300000083E";
 
-export extern(C) bool sidero_utf_lut_isScriptSamaritan(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptSamaritan.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptSamaritan[mid << 1], end = Table_sidero_utf_lut_isScriptSamaritan[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptSamaritan_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptSamaritan);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptOld_South_Arabian = cast(dchar[])x"00010A6000010A7F";
 
-export extern(C) bool sidero_utf_lut_isScriptOld_South_Arabian(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptOld_South_Arabian.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptOld_South_Arabian[mid << 1], end = Table_sidero_utf_lut_isScriptOld_South_Arabian[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptOld_South_Arabian_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptOld_South_Arabian);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptHanifi_Rohingya = cast(dchar[])x"00010D0000010D2700010D3000010D39";
 
-export extern(C) bool sidero_utf_lut_isScriptHanifi_Rohingya(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptHanifi_Rohingya.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptHanifi_Rohingya[mid << 1], end = Table_sidero_utf_lut_isScriptHanifi_Rohingya[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptHanifi_Rohingya_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptHanifi_Rohingya);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptBalinese = cast(dchar[])x"00001B0000001B4C00001B4E00001B7F";
 
-export extern(C) bool sidero_utf_lut_isScriptBalinese(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptBalinese.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptBalinese[mid << 1], end = Table_sidero_utf_lut_isScriptBalinese[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptBalinese_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptBalinese);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptMandaic = cast(dchar[])x"000008400000085B0000085E0000085E";
 
-export extern(C) bool sidero_utf_lut_isScriptMandaic(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptMandaic.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptMandaic[mid << 1], end = Table_sidero_utf_lut_isScriptMandaic[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptMandaic_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptMandaic);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptSignWriting = cast(dchar[])x"0001D8000001DA8B0001DA9B0001DA9F0001DAA10001DAAF";
 
-export extern(C) bool sidero_utf_lut_isScriptSignWriting(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptSignWriting.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptSignWriting[mid << 1], end = Table_sidero_utf_lut_isScriptSignWriting[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptSignWriting_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptSignWriting);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptTifinagh = cast(dchar[])x"00002D3000002D6700002D6F00002D7000002D7F00002D7F";
 
-export extern(C) bool sidero_utf_lut_isScriptTifinagh(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptTifinagh.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptTifinagh[mid << 1], end = Table_sidero_utf_lut_isScriptTifinagh[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptTifinagh_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptTifinagh);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptTai_Viet = cast(dchar[])x"0000AA800000AAC20000AADB0000AADF";
 
-export extern(C) bool sidero_utf_lut_isScriptTai_Viet(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptTai_Viet.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptTai_Viet[mid << 1], end = Table_sidero_utf_lut_isScriptTai_Viet[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptTai_Viet_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptTai_Viet);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptSyriac = cast(dchar[])x"000007000000070D0000070F0000074A0000074D0000074F000008600000086A";
 
-export extern(C) bool sidero_utf_lut_isScriptSyriac(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptSyriac.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptSyriac[mid << 1], end = Table_sidero_utf_lut_isScriptSyriac[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptSyriac_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptSyriac);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptSoyombo = cast(dchar[])x"00011A5000011AA2";
 
-export extern(C) bool sidero_utf_lut_isScriptSoyombo(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptSoyombo.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptSoyombo[mid << 1], end = Table_sidero_utf_lut_isScriptSoyombo[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptSoyombo_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptSoyombo);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptElymaic = cast(dchar[])x"00010FE000010FF6";
 
-export extern(C) bool sidero_utf_lut_isScriptElymaic(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptElymaic.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptElymaic[mid << 1], end = Table_sidero_utf_lut_isScriptElymaic[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptElymaic_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptElymaic);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptHatran = cast(dchar[])x"000108E0000108F2000108F4000108F5000108FB000108FF";
 
-export extern(C) bool sidero_utf_lut_isScriptHatran(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptHatran.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptHatran[mid << 1], end = Table_sidero_utf_lut_isScriptHatran[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptHatran_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptHatran);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptChorasmian = cast(dchar[])x"00010FB000010FCB";
 
-export extern(C) bool sidero_utf_lut_isScriptChorasmian(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptChorasmian.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptChorasmian[mid << 1], end = Table_sidero_utf_lut_isScriptChorasmian[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptChorasmian_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptChorasmian);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptGlagolitic = cast(dchar[])x"00002C0000002C5F0001E0000001E0060001E0080001E0180001E01B0001E0210001E0230001E0240001E0260001E02A";
 
-export extern(C) bool sidero_utf_lut_isScriptGlagolitic(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptGlagolitic.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptGlagolitic[mid << 1], end = Table_sidero_utf_lut_isScriptGlagolitic[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptGlagolitic_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptGlagolitic);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptOsmanya = cast(dchar[])x"000104800001049D000104A0000104A9";
 
-export extern(C) bool sidero_utf_lut_isScriptOsmanya(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptOsmanya.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptOsmanya[mid << 1], end = Table_sidero_utf_lut_isScriptOsmanya[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptOsmanya_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptOsmanya);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptLinear_A = cast(dchar[])x"000106000001073600010740000107550001076000010767";
 
-export extern(C) bool sidero_utf_lut_isScriptLinear_A(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptLinear_A.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptLinear_A[mid << 1], end = Table_sidero_utf_lut_isScriptLinear_A[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptLinear_A_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptLinear_A);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptMro = cast(dchar[])x"00016A4000016A5E00016A6000016A6900016A6E00016A6F";
 
-export extern(C) bool sidero_utf_lut_isScriptMro(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptMro.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptMro[mid << 1], end = Table_sidero_utf_lut_isScriptMro[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptMro_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptMro);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptChakma = cast(dchar[])x"00011100000111340001113600011147";
 
-export extern(C) bool sidero_utf_lut_isScriptChakma(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptChakma.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptChakma[mid << 1], end = Table_sidero_utf_lut_isScriptChakma[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptChakma_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptChakma);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptModi = cast(dchar[])x"00011600000116440001165000011659";
 
-export extern(C) bool sidero_utf_lut_isScriptModi(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptModi.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptModi[mid << 1], end = Table_sidero_utf_lut_isScriptModi[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptModi_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptModi);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptBassa_Vah = cast(dchar[])x"00016AD000016AED00016AF000016AF5";
 
-export extern(C) bool sidero_utf_lut_isScriptBassa_Vah(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptBassa_Vah.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptBassa_Vah[mid << 1], end = Table_sidero_utf_lut_isScriptBassa_Vah[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptBassa_Vah_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptBassa_Vah);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptHan = cast(dchar[])x"00002E8000002E9900002E9B00002EF300002F0000002FD5000030050000300500003007000030070000302100003029000030380000303B0000340000004DBF00004E0000009FFF0000F9000000FA6D0000FA700000FAD900016FE200016FE300016FF000016FF1000200000002A6DF0002A7000002B7390002B7400002B81D0002B8200002CEA10002CEB00002EBE00002EBF00002EE5D0002F8000002FA1D000300000003134A00031350000323AF";
 
-export extern(C) bool sidero_utf_lut_isScriptHan(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptHan.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptHan[mid << 1], end = Table_sidero_utf_lut_isScriptHan[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptHan_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptHan);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptMultani = cast(dchar[])x"000112800001128600011288000112880001128A0001128D0001128F0001129D0001129F000112A9";
 
-export extern(C) bool sidero_utf_lut_isScriptMultani(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptMultani.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptMultani[mid << 1], end = Table_sidero_utf_lut_isScriptMultani[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptMultani_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptMultani);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptBopomofo = cast(dchar[])x"000002EA000002EB000031050000312F000031A0000031BF";
 
-export extern(C) bool sidero_utf_lut_isScriptBopomofo(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptBopomofo.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptBopomofo[mid << 1], end = Table_sidero_utf_lut_isScriptBopomofo[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptBopomofo_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptBopomofo);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptAdlam = cast(dchar[])x"0001E9000001E94B0001E9500001E9590001E95E0001E95F";
 
-export extern(C) bool sidero_utf_lut_isScriptAdlam(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptAdlam.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptAdlam[mid << 1], end = Table_sidero_utf_lut_isScriptAdlam[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptAdlam_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptAdlam);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptKhitan_Small_Script = cast(dchar[])x"00016FE400016FE400018B0000018CD500018CFF00018CFF";
 
-export extern(C) bool sidero_utf_lut_isScriptKhitan_Small_Script(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptKhitan_Small_Script.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptKhitan_Small_Script[mid << 1], end = Table_sidero_utf_lut_isScriptKhitan_Small_Script[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptKhitan_Small_Script_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptKhitan_Small_Script);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptLao = cast(dchar[])x"00000E8100000E8200000E8400000E8400000E8600000E8A00000E8C00000EA300000EA500000EA500000EA700000EBD00000EC000000EC400000EC600000EC600000EC800000ECE00000ED000000ED900000EDC00000EDF";
 
-export extern(C) bool sidero_utf_lut_isScriptLao(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptLao.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptLao[mid << 1], end = Table_sidero_utf_lut_isScriptLao[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptLao_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptLao);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptPsalter_Pahlavi = cast(dchar[])x"00010B8000010B9100010B9900010B9C00010BA900010BAF";
 
-export extern(C) bool sidero_utf_lut_isScriptPsalter_Pahlavi(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptPsalter_Pahlavi.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptPsalter_Pahlavi[mid << 1], end = Table_sidero_utf_lut_isScriptPsalter_Pahlavi[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptPsalter_Pahlavi_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptPsalter_Pahlavi);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptAnatolian_Hieroglyphs = cast(dchar[])x"0001440000014646";
 
-export extern(C) bool sidero_utf_lut_isScriptAnatolian_Hieroglyphs(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptAnatolian_Hieroglyphs.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptAnatolian_Hieroglyphs[mid << 1], end = Table_sidero_utf_lut_isScriptAnatolian_Hieroglyphs[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptAnatolian_Hieroglyphs_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptAnatolian_Hieroglyphs);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptCanadian_Aboriginal = cast(dchar[])x"000014000000167F000018B0000018F500011AB000011ABF";
 
-export extern(C) bool sidero_utf_lut_isScriptCanadian_Aboriginal(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptCanadian_Aboriginal.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptCanadian_Aboriginal[mid << 1], end = Table_sidero_utf_lut_isScriptCanadian_Aboriginal[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptCanadian_Aboriginal_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptCanadian_Aboriginal);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptCommon = cast(dchar[])x"00000000000000400000005B000000600000007B000000A9000000AB000000B9000000BB000000BF000000D7000000D7000000F7000000F7000002B9000002DF000002E5000002E9000002EC000002FF00000374000003740000037E0000037E0000038500000385000003870000038700000605000006050000060C0000060C0000061B0000061B0000061F0000061F0000064000000640000006DD000006DD000008E2000008E2000009640000096500000E3F00000E3F00000FD500000FD8000010FB000010FB000016EB000016ED00001735000017360000180200001803000018050000180500001CD300001CD300001CE100001CE100001CE900001CEC00001CEE00001CF300001CF500001CF700001CFA00001CFA000020000000200B0000200E000020640000206600002070000020740000207E000020800000208E000020A0000020C0000021000000212500002127000021290000212C00002131000021330000214D0000214F0000215F000021890000218B0000219000002429000024400000244A00002460000027FF0000290000002B7300002B7600002B9500002B9700002BFF00002E0000002E5D00002FF0000030040000300600003006000030080000302000003030000030370000303C0000303F0000309B0000309C000030A0000030A0000030FB000030FC000031900000319F000031C0000031E5000031EF000031EF000032200000325F0000327F000032CF000032FF000032FF00003358000033FF00004DC000004DFF0000A7000000A7210000A7880000A78A0000A8300000A8390000A92E0000A92E0000A9CF0000A9CF0000AB5B0000AB5B0000AB6A0000AB6B0000FD3E0000FD3F0000FE100000FE190000FE300000FE520000FE540000FE660000FE680000FE6B0000FEFF0000FEFF0000FF010000FF200000FF3B0000FF400000FF5B0000FF650000FF700000FF700000FF9E0000FF9F0000FFE00000FFE60000FFE80000FFEE0000FFF90000FFFD00010100000101020001010700010133000101370001013F000101900001019C000101D0000101FC000102E1000102FB0001BCA00001BCA30001CC000001CCF90001CD000001CEB30001CF500001CFC30001D0000001D0F50001D1000001D1260001D1290001D1660001D16A0001D17A0001D1830001D1840001D18C0001D1A90001D1AE0001D1EA0001D2C00001D2D30001D2E00001D2F30001D3000001D3560001D3600001D3780001D4000001D4540001D4560001D49C0001D49E0001D49F0001D4A20001D4A20001D4A50001D4A60001D4A90001D4AC0001D4AE0001D4B90001D4BB0001D4BB0001D4BD0001D4C30001D4C50001D5050001D5070001D50A0001D50D0001D5140001D5160001D51C0001D51E0001D5390001D53B0001D53E0001D5400001D5440001D5460001D5460001D54A0001D5500001D5520001D6A50001D6A80001D7CB0001D7CE0001D7FF0001EC710001ECB40001ED010001ED3D0001F0000001F02B0001F0300001F0930001F0A00001F0AE0001F0B10001F0BF0001F0C10001F0CF0001F0D10001F0F50001F1000001F1AD0001F1E60001F1FF0001F2010001F2020001F2100001F23B0001F2400001F2480001F2500001F2510001F2600001F2650001F3000001F6D70001F6DC0001F6EC0001F6F00001F6FC0001F7000001F7760001F77B0001F7D90001F7E00001F7EB0001F7F00001F7F00001F8000001F80B0001F8100001F8470001F8500001F8590001F8600001F8870001F8900001F8AD0001F8B00001F8BB0001F8C00001F8C10001F9000001FA530001FA600001FA6D0001FA700001FA7C0001FA800001FA890001FA8F0001FAC60001FACE0001FADC0001FADF0001FAE90001FAF00001FAF80001FB000001FB920001FB940001FBF9000E0001000E0001000E0020000E007F";
 
-export extern(C) bool sidero_utf_lut_isScriptCommon(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptCommon.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptCommon[mid << 1], end = Table_sidero_utf_lut_isScriptCommon[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptCommon_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptCommon);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptGothic = cast(dchar[])x"000103300001034A";
 
-export extern(C) bool sidero_utf_lut_isScriptGothic(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptGothic.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptGothic[mid << 1], end = Table_sidero_utf_lut_isScriptGothic[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptGothic_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptGothic);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptYi = cast(dchar[])x"0000A0000000A48C0000A4900000A4C6";
 
-export extern(C) bool sidero_utf_lut_isScriptYi(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptYi.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptYi[mid << 1], end = Table_sidero_utf_lut_isScriptYi[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptYi_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptYi);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptSinhala = cast(dchar[])x"00000D8100000D8300000D8500000D9600000D9A00000DB100000DB300000DBB00000DBD00000DBD00000DC000000DC600000DCA00000DCA00000DCF00000DD400000DD600000DD600000DD800000DDF00000DE600000DEF00000DF200000DF4000111E1000111F4";
 
-export extern(C) bool sidero_utf_lut_isScriptSinhala(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptSinhala.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptSinhala[mid << 1], end = Table_sidero_utf_lut_isScriptSinhala[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptSinhala_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptSinhala);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptRejang = cast(dchar[])x"0000A9300000A9530000A95F0000A95F";
 
-export extern(C) bool sidero_utf_lut_isScriptRejang(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptRejang.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptRejang[mid << 1], end = Table_sidero_utf_lut_isScriptRejang[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptRejang_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptRejang);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptLepcha = cast(dchar[])x"00001C0000001C3700001C3B00001C4900001C4D00001C4F";
 
-export extern(C) bool sidero_utf_lut_isScriptLepcha(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptLepcha.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptLepcha[mid << 1], end = Table_sidero_utf_lut_isScriptLepcha[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptLepcha_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptLepcha);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptTai_Tham = cast(dchar[])x"00001A2000001A5E00001A6000001A7C00001A7F00001A8900001A9000001A9900001AA000001AAD";
 
-export extern(C) bool sidero_utf_lut_isScriptTai_Tham(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptTai_Tham.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptTai_Tham[mid << 1], end = Table_sidero_utf_lut_isScriptTai_Tham[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptTai_Tham_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptTai_Tham);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptDives_Akuru = cast(dchar[])x"000119000001190600011909000119090001190C000119130001191500011916000119180001193500011937000119380001193B000119460001195000011959";
 
-export extern(C) bool sidero_utf_lut_isScriptDives_Akuru(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptDives_Akuru.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptDives_Akuru[mid << 1], end = Table_sidero_utf_lut_isScriptDives_Akuru[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptDives_Akuru_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptDives_Akuru);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptMeetei_Mayek = cast(dchar[])x"0000AAE00000AAF60000ABC00000ABED0000ABF00000ABF9";
 
-export extern(C) bool sidero_utf_lut_isScriptMeetei_Mayek(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptMeetei_Mayek.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptMeetei_Mayek[mid << 1], end = Table_sidero_utf_lut_isScriptMeetei_Mayek[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptMeetei_Mayek_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptMeetei_Mayek);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptTirhuta = cast(dchar[])x"00011480000114C7000114D0000114D9";
 
-export extern(C) bool sidero_utf_lut_isScriptTirhuta(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptTirhuta.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptTirhuta[mid << 1], end = Table_sidero_utf_lut_isScriptTirhuta[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptTirhuta_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptTirhuta);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptMarchen = cast(dchar[])x"00011C7000011C8F00011C9200011CA700011CA900011CB6";
 
-export extern(C) bool sidero_utf_lut_isScriptMarchen(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptMarchen.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptMarchen[mid << 1], end = Table_sidero_utf_lut_isScriptMarchen[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptMarchen_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptMarchen);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptWancho = cast(dchar[])x"0001E2C00001E2F90001E2FF0001E2FF";
 
-export extern(C) bool sidero_utf_lut_isScriptWancho(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptWancho.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptWancho[mid << 1], end = Table_sidero_utf_lut_isScriptWancho[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptWancho_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptWancho);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptPhoenician = cast(dchar[])x"000109000001091B0001091F0001091F";
 
-export extern(C) bool sidero_utf_lut_isScriptPhoenician(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptPhoenician.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptPhoenician[mid << 1], end = Table_sidero_utf_lut_isScriptPhoenician[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptPhoenician_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptPhoenician);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptGurmukhi = cast(dchar[])x"00000A0100000A0300000A0500000A0A00000A0F00000A1000000A1300000A2800000A2A00000A3000000A3200000A3300000A3500000A3600000A3800000A3900000A3C00000A3C00000A3E00000A4200000A4700000A4800000A4B00000A4D00000A5100000A5100000A5900000A5C00000A5E00000A5E00000A6600000A76";
 
-export extern(C) bool sidero_utf_lut_isScriptGurmukhi(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptGurmukhi.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptGurmukhi[mid << 1], end = Table_sidero_utf_lut_isScriptGurmukhi[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptGurmukhi_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptGurmukhi);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptKhudawadi = cast(dchar[])x"000112B0000112EA000112F0000112F9";
 
-export extern(C) bool sidero_utf_lut_isScriptKhudawadi(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptKhudawadi.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptKhudawadi[mid << 1], end = Table_sidero_utf_lut_isScriptKhudawadi[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptKhudawadi_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptKhudawadi);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptKhojki = cast(dchar[])x"00011200000112110001121300011241";
 
-export extern(C) bool sidero_utf_lut_isScriptKhojki(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptKhojki.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptKhojki[mid << 1], end = Table_sidero_utf_lut_isScriptKhojki[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptKhojki_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptKhojki);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptNewa = cast(dchar[])x"000114000001145B0001145D00011461";
 
-export extern(C) bool sidero_utf_lut_isScriptNewa(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptNewa.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptNewa[mid << 1], end = Table_sidero_utf_lut_isScriptNewa[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptNewa_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptNewa);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptDogra = cast(dchar[])x"000118000001183B";
 
-export extern(C) bool sidero_utf_lut_isScriptDogra(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptDogra.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptDogra[mid << 1], end = Table_sidero_utf_lut_isScriptDogra[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptDogra_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptDogra);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptOriya = cast(dchar[])x"00000B0100000B0300000B0500000B0C00000B0F00000B1000000B1300000B2800000B2A00000B3000000B3200000B3300000B3500000B3900000B3C00000B4400000B4700000B4800000B4B00000B4D00000B5500000B5700000B5C00000B5D00000B5F00000B6300000B6600000B77";
 
-export extern(C) bool sidero_utf_lut_isScriptOriya(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptOriya.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptOriya[mid << 1], end = Table_sidero_utf_lut_isScriptOriya[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptOriya_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptOriya);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptTagalog = cast(dchar[])x"00001700000017150000171F0000171F";
 
-export extern(C) bool sidero_utf_lut_isScriptTagalog(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptTagalog.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptTagalog[mid << 1], end = Table_sidero_utf_lut_isScriptTagalog[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptTagalog_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptTagalog);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptSundanese = cast(dchar[])x"00001B8000001BBF00001CC000001CC7";
 
-export extern(C) bool sidero_utf_lut_isScriptSundanese(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptSundanese.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptSundanese[mid << 1], end = Table_sidero_utf_lut_isScriptSundanese[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptSundanese_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptSundanese);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptOld_Permic = cast(dchar[])x"000103500001037A";
 
-export extern(C) bool sidero_utf_lut_isScriptOld_Permic(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptOld_Permic.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptOld_Permic[mid << 1], end = Table_sidero_utf_lut_isScriptOld_Permic[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptOld_Permic_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptOld_Permic);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptShavian = cast(dchar[])x"000104500001047F";
 
-export extern(C) bool sidero_utf_lut_isScriptShavian(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptShavian.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptShavian[mid << 1], end = Table_sidero_utf_lut_isScriptShavian[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptShavian_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptShavian);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptLycian = cast(dchar[])x"000102800001029C";
 
-export extern(C) bool sidero_utf_lut_isScriptLycian(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptLycian.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptLycian[mid << 1], end = Table_sidero_utf_lut_isScriptLycian[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptLycian_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptLycian);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptMiao = cast(dchar[])x"00016F0000016F4A00016F4F00016F8700016F8F00016F9F";
 
-export extern(C) bool sidero_utf_lut_isScriptMiao(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptMiao.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptMiao[mid << 1], end = Table_sidero_utf_lut_isScriptMiao[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptMiao_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptMiao);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptTangut = cast(dchar[])x"00016FE000016FE000017000000187F70001880000018AFF00018D0000018D08";
 
-export extern(C) bool sidero_utf_lut_isScriptTangut(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptTangut.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptTangut[mid << 1], end = Table_sidero_utf_lut_isScriptTangut[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptTangut_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptTangut);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptBengali = cast(dchar[])x"0000098000000983000009850000098C0000098F0000099000000993000009A8000009AA000009B0000009B2000009B2000009B6000009B9000009BC000009C4000009C7000009C8000009CB000009CE000009D7000009D7000009DC000009DD000009DF000009E3000009E6000009FE";
 
-export extern(C) bool sidero_utf_lut_isScriptBengali(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptBengali.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptBengali[mid << 1], end = Table_sidero_utf_lut_isScriptBengali[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptBengali_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptBengali);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptInscriptional_Pahlavi = cast(dchar[])x"00010B6000010B7200010B7800010B7F";
 
-export extern(C) bool sidero_utf_lut_isScriptInscriptional_Pahlavi(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptInscriptional_Pahlavi.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptInscriptional_Pahlavi[mid << 1], end = Table_sidero_utf_lut_isScriptInscriptional_Pahlavi[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptInscriptional_Pahlavi_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptInscriptional_Pahlavi);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptVithkuqi = cast(dchar[])x"000105700001057A0001057C0001058A0001058C00010592000105940001059500010597000105A1000105A3000105B1000105B3000105B9000105BB000105BC";
 
-export extern(C) bool sidero_utf_lut_isScriptVithkuqi(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptVithkuqi.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptVithkuqi[mid << 1], end = Table_sidero_utf_lut_isScriptVithkuqi[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptVithkuqi_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptVithkuqi);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptArmenian = cast(dchar[])x"0000053100000556000005590000058A0000058D0000058F0000FB130000FB17";
 
-export extern(C) bool sidero_utf_lut_isScriptArmenian(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptArmenian.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptArmenian[mid << 1], end = Table_sidero_utf_lut_isScriptArmenian[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptArmenian_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptArmenian);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptNew_Tai_Lue = cast(dchar[])x"00001980000019AB000019B0000019C9000019D0000019DA000019DE000019DF";
 
-export extern(C) bool sidero_utf_lut_isScriptNew_Tai_Lue(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptNew_Tai_Lue.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptNew_Tai_Lue[mid << 1], end = Table_sidero_utf_lut_isScriptNew_Tai_Lue[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptNew_Tai_Lue_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptNew_Tai_Lue);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptSogdian = cast(dchar[])x"00010F3000010F59";
 
-export extern(C) bool sidero_utf_lut_isScriptSogdian(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptSogdian.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptSogdian[mid << 1], end = Table_sidero_utf_lut_isScriptSogdian[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptSogdian_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptSogdian);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptBuhid = cast(dchar[])x"0000174000001753";
 
-export extern(C) bool sidero_utf_lut_isScriptBuhid(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptBuhid.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptBuhid[mid << 1], end = Table_sidero_utf_lut_isScriptBuhid[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptBuhid_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptBuhid);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptManichaean = cast(dchar[])x"00010AC000010AE600010AEB00010AF6";
 
-export extern(C) bool sidero_utf_lut_isScriptManichaean(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptManichaean.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptManichaean[mid << 1], end = Table_sidero_utf_lut_isScriptManichaean[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptManichaean_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptManichaean);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptGreek = cast(dchar[])x"000003700000037300000375000003770000037A0000037D0000037F0000037F00000384000003840000038600000386000003880000038A0000038C0000038C0000038E000003A1000003A3000003E1000003F0000003FF00001D2600001D2A00001D5D00001D6100001D6600001D6A00001DBF00001DBF00001F0000001F1500001F1800001F1D00001F2000001F4500001F4800001F4D00001F5000001F5700001F5900001F5900001F5B00001F5B00001F5D00001F5D00001F5F00001F7D00001F8000001FB400001FB600001FC400001FC600001FD300001FD600001FDB00001FDD00001FEF00001FF200001FF400001FF600001FFE00002126000021260000AB650000AB65000101400001018E000101A0000101A00001D2000001D245";
 
-export extern(C) bool sidero_utf_lut_isScriptGreek(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptGreek.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptGreek[mid << 1], end = Table_sidero_utf_lut_isScriptGreek[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptGreek_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptGreek);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptBraille = cast(dchar[])x"00002800000028FF";
 
-export extern(C) bool sidero_utf_lut_isScriptBraille(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptBraille.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptBraille[mid << 1], end = Table_sidero_utf_lut_isScriptBraille[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptBraille_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptBraille);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptAvestan = cast(dchar[])x"00010B0000010B3500010B3900010B3F";
 
-export extern(C) bool sidero_utf_lut_isScriptAvestan(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptAvestan.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptAvestan[mid << 1], end = Table_sidero_utf_lut_isScriptAvestan[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptAvestan_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptAvestan);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptArabic = cast(dchar[])x"0000060000000604000006060000060B0000060D0000061A0000061C0000061E000006200000063F000006410000064A000006560000066F00000671000006DC000006DE000006FF000007500000077F000008700000088E000008900000089100000897000008E1000008E3000008FF0000FB500000FBC20000FBD30000FD3D0000FD400000FD8F0000FD920000FDC70000FDCF0000FDCF0000FDF00000FDFF0000FE700000FE740000FE760000FEFC00010E6000010E7E00010EC200010EC400010EFC00010EFF0001EE000001EE030001EE050001EE1F0001EE210001EE220001EE240001EE240001EE270001EE270001EE290001EE320001EE340001EE370001EE390001EE390001EE3B0001EE3B0001EE420001EE420001EE470001EE470001EE490001EE490001EE4B0001EE4B0001EE4D0001EE4F0001EE510001EE520001EE540001EE540001EE570001EE570001EE590001EE590001EE5B0001EE5B0001EE5D0001EE5D0001EE5F0001EE5F0001EE610001EE620001EE640001EE640001EE670001EE6A0001EE6C0001EE720001EE740001EE770001EE790001EE7C0001EE7E0001EE7E0001EE800001EE890001EE8B0001EE9B0001EEA10001EEA30001EEA50001EEA90001EEAB0001EEBB0001EEF00001EEF1";
 
-export extern(C) bool sidero_utf_lut_isScriptArabic(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptArabic.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptArabic[mid << 1], end = Table_sidero_utf_lut_isScriptArabic[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptArabic_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptArabic);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptJavanese = cast(dchar[])x"0000A9800000A9CD0000A9D00000A9D90000A9DE0000A9DF";
 
-export extern(C) bool sidero_utf_lut_isScriptJavanese(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptJavanese.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptJavanese[mid << 1], end = Table_sidero_utf_lut_isScriptJavanese[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptJavanese_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptJavanese);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptLydian = cast(dchar[])x"00010920000109390001093F0001093F";
 
-export extern(C) bool sidero_utf_lut_isScriptLydian(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptLydian.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptLydian[mid << 1], end = Table_sidero_utf_lut_isScriptLydian[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptLydian_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptLydian);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptPau_Cin_Hau = cast(dchar[])x"00011AC000011AF8";
 
-export extern(C) bool sidero_utf_lut_isScriptPau_Cin_Hau(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptPau_Cin_Hau.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptPau_Cin_Hau[mid << 1], end = Table_sidero_utf_lut_isScriptPau_Cin_Hau[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptPau_Cin_Hau_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptPau_Cin_Hau);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptCypro_Minoan = cast(dchar[])x"00012F9000012FF2";
 
-export extern(C) bool sidero_utf_lut_isScriptCypro_Minoan(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptCypro_Minoan.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptCypro_Minoan[mid << 1], end = Table_sidero_utf_lut_isScriptCypro_Minoan[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptCypro_Minoan_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptCypro_Minoan);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptBuginese = cast(dchar[])x"00001A0000001A1B00001A1E00001A1F";
 
-export extern(C) bool sidero_utf_lut_isScriptBuginese(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptBuginese.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptBuginese[mid << 1], end = Table_sidero_utf_lut_isScriptBuginese[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptBuginese_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptBuginese);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptBatak = cast(dchar[])x"00001BC000001BF300001BFC00001BFF";
 
-export extern(C) bool sidero_utf_lut_isScriptBatak(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptBatak.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptBatak[mid << 1], end = Table_sidero_utf_lut_isScriptBatak[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptBatak_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptBatak);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptNandinagari = cast(dchar[])x"000119A0000119A7000119AA000119D7000119DA000119E4";
 
-export extern(C) bool sidero_utf_lut_isScriptNandinagari(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptNandinagari.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptNandinagari[mid << 1], end = Table_sidero_utf_lut_isScriptNandinagari[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptNandinagari_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptNandinagari);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptCham = cast(dchar[])x"0000AA000000AA360000AA400000AA4D0000AA500000AA590000AA5C0000AA5F";
 
-export extern(C) bool sidero_utf_lut_isScriptCham(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptCham.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptCham[mid << 1], end = Table_sidero_utf_lut_isScriptCham[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptCham_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptCham);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptGunjala_Gondi = cast(dchar[])x"00011D6000011D6500011D6700011D6800011D6A00011D8E00011D9000011D9100011D9300011D9800011DA000011DA9";
 
-export extern(C) bool sidero_utf_lut_isScriptGunjala_Gondi(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptGunjala_Gondi.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptGunjala_Gondi[mid << 1], end = Table_sidero_utf_lut_isScriptGunjala_Gondi[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptGunjala_Gondi_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptGunjala_Gondi);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptCypriot = cast(dchar[])x"000108000001080500010808000108080001080A0001083500010837000108380001083C0001083C0001083F0001083F";
 
-export extern(C) bool sidero_utf_lut_isScriptCypriot(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptCypriot.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptCypriot[mid << 1], end = Table_sidero_utf_lut_isScriptCypriot[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptCypriot_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptCypriot);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptUgaritic = cast(dchar[])x"000103800001039D0001039F0001039F";
 
-export extern(C) bool sidero_utf_lut_isScriptUgaritic(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptUgaritic.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptUgaritic[mid << 1], end = Table_sidero_utf_lut_isScriptUgaritic[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptUgaritic_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptUgaritic);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptGeorgian = cast(dchar[])x"000010A0000010C5000010C7000010C7000010CD000010CD000010D0000010FA000010FC000010FF00001C9000001CBA00001CBD00001CBF00002D0000002D2500002D2700002D2700002D2D00002D2D";
 
-export extern(C) bool sidero_utf_lut_isScriptGeorgian(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptGeorgian.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptGeorgian[mid << 1], end = Table_sidero_utf_lut_isScriptGeorgian[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptGeorgian_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptGeorgian);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptSharada = cast(dchar[])x"00011180000111DF";
 
-export extern(C) bool sidero_utf_lut_isScriptSharada(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptSharada.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptSharada[mid << 1], end = Table_sidero_utf_lut_isScriptSharada[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptSharada_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptSharada);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptTamil = cast(dchar[])x"00000B8200000B8300000B8500000B8A00000B8E00000B9000000B9200000B9500000B9900000B9A00000B9C00000B9C00000B9E00000B9F00000BA300000BA400000BA800000BAA00000BAE00000BB900000BBE00000BC200000BC600000BC800000BCA00000BCD00000BD000000BD000000BD700000BD700000BE600000BFA00011FC000011FF100011FFF00011FFF";
 
-export extern(C) bool sidero_utf_lut_isScriptTamil(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptTamil.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptTamil[mid << 1], end = Table_sidero_utf_lut_isScriptTamil[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptTamil_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptTamil);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptCherokee = cast(dchar[])x"000013A0000013F5000013F8000013FD0000AB700000ABBF";
 
-export extern(C) bool sidero_utf_lut_isScriptCherokee(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptCherokee.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptCherokee[mid << 1], end = Table_sidero_utf_lut_isScriptCherokee[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptCherokee_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptCherokee);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptPahawh_Hmong = cast(dchar[])x"00016B0000016B4500016B5000016B5900016B5B00016B6100016B6300016B7700016B7D00016B8F";
 
-export extern(C) bool sidero_utf_lut_isScriptPahawh_Hmong(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptPahawh_Hmong.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptPahawh_Hmong[mid << 1], end = Table_sidero_utf_lut_isScriptPahawh_Hmong[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptPahawh_Hmong_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptPahawh_Hmong);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptSyloti_Nagri = cast(dchar[])x"0000A8000000A82C";
 
-export extern(C) bool sidero_utf_lut_isScriptSyloti_Nagri(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptSyloti_Nagri.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptSyloti_Nagri[mid << 1], end = Table_sidero_utf_lut_isScriptSyloti_Nagri[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptSyloti_Nagri_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptSyloti_Nagri);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptKharoshthi = cast(dchar[])x"00010A0000010A0300010A0500010A0600010A0C00010A1300010A1500010A1700010A1900010A3500010A3800010A3A00010A3F00010A4800010A5000010A58";
 
-export extern(C) bool sidero_utf_lut_isScriptKharoshthi(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptKharoshthi.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptKharoshthi[mid << 1], end = Table_sidero_utf_lut_isScriptKharoshthi[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptKharoshthi_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptKharoshthi);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptZanabazar_Square = cast(dchar[])x"00011A0000011A47";
 
-export extern(C) bool sidero_utf_lut_isScriptZanabazar_Square(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptZanabazar_Square.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptZanabazar_Square[mid << 1], end = Table_sidero_utf_lut_isScriptZanabazar_Square[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptZanabazar_Square_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptZanabazar_Square);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptKatakana = cast(dchar[])x"000030A1000030FA000030FD000030FF000031F0000031FF000032D0000032FE00003300000033570000FF660000FF6F0000FF710000FF9D0001AFF00001AFF30001AFF50001AFFB0001AFFD0001AFFE0001B0000001B0000001B1200001B1220001B1550001B1550001B1640001B167";
 
-export extern(C) bool sidero_utf_lut_isScriptKatakana(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptKatakana.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptKatakana[mid << 1], end = Table_sidero_utf_lut_isScriptKatakana[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptKatakana_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptKatakana);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptTelugu = cast(dchar[])x"00000C0000000C0C00000C0E00000C1000000C1200000C2800000C2A00000C3900000C3C00000C4400000C4600000C4800000C4A00000C4D00000C5500000C5600000C5800000C5A00000C5D00000C5D00000C6000000C6300000C6600000C6F00000C7700000C7F";
 
-export extern(C) bool sidero_utf_lut_isScriptTelugu(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptTelugu.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptTelugu[mid << 1], end = Table_sidero_utf_lut_isScriptTelugu[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptTelugu_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptTelugu);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptEthiopic = cast(dchar[])x"00001200000012480000124A0000124D000012500000125600001258000012580000125A0000125D00001260000012880000128A0000128D00001290000012B0000012B2000012B5000012B8000012BE000012C0000012C0000012C2000012C5000012C8000012D6000012D8000013100000131200001315000013180000135A0000135D0000137C000013800000139900002D8000002D9600002DA000002DA600002DA800002DAE00002DB000002DB600002DB800002DBE00002DC000002DC600002DC800002DCE00002DD000002DD600002DD800002DDE0000AB010000AB060000AB090000AB0E0000AB110000AB160000AB200000AB260000AB280000AB2E0001E7E00001E7E60001E7E80001E7EB0001E7ED0001E7EE0001E7F00001E7FE";
 
-export extern(C) bool sidero_utf_lut_isScriptEthiopic(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptEthiopic.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptEthiopic[mid << 1], end = Table_sidero_utf_lut_isScriptEthiopic[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptEthiopic_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptEthiopic);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptVai = cast(dchar[])x"0000A5000000A62B";
 
-export extern(C) bool sidero_utf_lut_isScriptVai(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptVai.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptVai[mid << 1], end = Table_sidero_utf_lut_isScriptVai[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptVai_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptVai);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptBamum = cast(dchar[])x"0000A6A00000A6F70001680000016A38";
 
-export extern(C) bool sidero_utf_lut_isScriptBamum(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptBamum.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptBamum[mid << 1], end = Table_sidero_utf_lut_isScriptBamum[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptBamum_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptBamum);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptHangul = cast(dchar[])x"00001100000011FF0000302E0000302F000031310000318E000032000000321E000032600000327E0000A9600000A97C0000AC000000D7A30000D7B00000D7C60000D7CB0000D7FB0000FFA00000FFBE0000FFC20000FFC70000FFCA0000FFCF0000FFD20000FFD70000FFDA0000FFDC";
 
-export extern(C) bool sidero_utf_lut_isScriptHangul(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptHangul.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptHangul[mid << 1], end = Table_sidero_utf_lut_isScriptHangul[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptHangul_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptHangul);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptMongolian = cast(dchar[])x"000018000000180100001804000018040000180600001819000018200000187800001880000018AA000116600001166C";
 
-export extern(C) bool sidero_utf_lut_isScriptMongolian(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptMongolian.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptMongolian[mid << 1], end = Table_sidero_utf_lut_isScriptMongolian[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptMongolian_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptMongolian);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptOld_Uyghur = cast(dchar[])x"00010F7000010F89";
 
-export extern(C) bool sidero_utf_lut_isScriptOld_Uyghur(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptOld_Uyghur.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptOld_Uyghur[mid << 1], end = Table_sidero_utf_lut_isScriptOld_Uyghur[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptOld_Uyghur_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptOld_Uyghur);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptMahajani = cast(dchar[])x"0001115000011176";
 
-export extern(C) bool sidero_utf_lut_isScriptMahajani(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptMahajani.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptMahajani[mid << 1], end = Table_sidero_utf_lut_isScriptMahajani[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptMahajani_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptMahajani);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptKhmer = cast(dchar[])x"00001780000017DD000017E0000017E9000017F0000017F9000019E0000019FF";
 
-export extern(C) bool sidero_utf_lut_isScriptKhmer(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptKhmer.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptKhmer[mid << 1], end = Table_sidero_utf_lut_isScriptKhmer[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptKhmer_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptKhmer);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptGrantha = cast(dchar[])x"0001130000011303000113050001130C0001130F0001131000011313000113280001132A00011330000113320001133300011335000113390001133C0001134400011347000113480001134B0001134D000113500001135000011357000113570001135D00011363000113660001136C0001137000011374";
 
-export extern(C) bool sidero_utf_lut_isScriptGrantha(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptGrantha.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptGrantha[mid << 1], end = Table_sidero_utf_lut_isScriptGrantha[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptGrantha_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptGrantha);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptKannada = cast(dchar[])x"00000C8000000C8C00000C8E00000C9000000C9200000CA800000CAA00000CB300000CB500000CB900000CBC00000CC400000CC600000CC800000CCA00000CCD00000CD500000CD600000CDD00000CDE00000CE000000CE300000CE600000CEF00000CF100000CF3";
 
-export extern(C) bool sidero_utf_lut_isScriptKannada(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptKannada.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptKannada[mid << 1], end = Table_sidero_utf_lut_isScriptKannada[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptKannada_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptKannada);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptYezidi = cast(dchar[])x"00010E8000010EA900010EAB00010EAD00010EB000010EB1";
 
-export extern(C) bool sidero_utf_lut_isScriptYezidi(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptYezidi.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptYezidi[mid << 1], end = Table_sidero_utf_lut_isScriptYezidi[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptYezidi_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptYezidi);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptOld_North_Arabian = cast(dchar[])x"00010A8000010A9F";
 
-export extern(C) bool sidero_utf_lut_isScriptOld_North_Arabian(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptOld_North_Arabian.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptOld_North_Arabian[mid << 1], end = Table_sidero_utf_lut_isScriptOld_North_Arabian[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptOld_North_Arabian_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptOld_North_Arabian);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptTai_Le = cast(dchar[])x"000019500000196D0000197000001974";
 
-export extern(C) bool sidero_utf_lut_isScriptTai_Le(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptTai_Le.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptTai_Le[mid << 1], end = Table_sidero_utf_lut_isScriptTai_Le[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptTai_Le_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptTai_Le);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptHebrew = cast(dchar[])x"00000591000005C7000005D0000005EA000005EF000005F40000FB1D0000FB360000FB380000FB3C0000FB3E0000FB3E0000FB400000FB410000FB430000FB440000FB460000FB4F";
 
-export extern(C) bool sidero_utf_lut_isScriptHebrew(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptHebrew.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptHebrew[mid << 1], end = Table_sidero_utf_lut_isScriptHebrew[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptHebrew_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptHebrew);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptGujarati = cast(dchar[])x"00000A8100000A8300000A8500000A8D00000A8F00000A9100000A9300000AA800000AAA00000AB000000AB200000AB300000AB500000AB900000ABC00000AC500000AC700000AC900000ACB00000ACD00000AD000000AD000000AE000000AE300000AE600000AF100000AF900000AFF";
 
-export extern(C) bool sidero_utf_lut_isScriptGujarati(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptGujarati.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptGujarati[mid << 1], end = Table_sidero_utf_lut_isScriptGujarati[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptGujarati_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptGujarati);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptTangsa = cast(dchar[])x"00016A7000016ABE00016AC000016AC9";
 
-export extern(C) bool sidero_utf_lut_isScriptTangsa(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptTangsa.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptTangsa[mid << 1], end = Table_sidero_utf_lut_isScriptTangsa[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptTangsa_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptTangsa);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptCarian = cast(dchar[])x"000102A0000102D0";
 
-export extern(C) bool sidero_utf_lut_isScriptCarian(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptCarian.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptCarian[mid << 1], end = Table_sidero_utf_lut_isScriptCarian[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptCarian_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptCarian);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptBhaiksuki = cast(dchar[])x"00011C0000011C0800011C0A00011C3600011C3800011C4500011C5000011C6C";
 
-export extern(C) bool sidero_utf_lut_isScriptBhaiksuki(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptBhaiksuki.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptBhaiksuki[mid << 1], end = Table_sidero_utf_lut_isScriptBhaiksuki[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptBhaiksuki_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptBhaiksuki);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptMasaram_Gondi = cast(dchar[])x"00011D0000011D0600011D0800011D0900011D0B00011D3600011D3A00011D3A00011D3C00011D3D00011D3F00011D4700011D5000011D59";
 
-export extern(C) bool sidero_utf_lut_isScriptMasaram_Gondi(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptMasaram_Gondi.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptMasaram_Gondi[mid << 1], end = Table_sidero_utf_lut_isScriptMasaram_Gondi[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptMasaram_Gondi_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptMasaram_Gondi);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptRunic = cast(dchar[])x"000016A0000016EA000016EE000016F8";
 
-export extern(C) bool sidero_utf_lut_isScriptRunic(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptRunic.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptRunic[mid << 1], end = Table_sidero_utf_lut_isScriptRunic[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptRunic_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptRunic);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptDuployan = cast(dchar[])x"0001BC000001BC6A0001BC700001BC7C0001BC800001BC880001BC900001BC990001BC9C0001BC9F";
 
-export extern(C) bool sidero_utf_lut_isScriptDuployan(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptDuployan.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptDuployan[mid << 1], end = Table_sidero_utf_lut_isScriptDuployan[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptDuployan_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptDuployan);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptWarang_Citi = cast(dchar[])x"000118A0000118F2000118FF000118FF";
 
-export extern(C) bool sidero_utf_lut_isScriptWarang_Citi(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptWarang_Citi.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptWarang_Citi[mid << 1], end = Table_sidero_utf_lut_isScriptWarang_Citi[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptWarang_Citi_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptWarang_Citi);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptPhags_Pa = cast(dchar[])x"0000A8400000A877";
 
-export extern(C) bool sidero_utf_lut_isScriptPhags_Pa(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptPhags_Pa.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptPhags_Pa[mid << 1], end = Table_sidero_utf_lut_isScriptPhags_Pa[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptPhags_Pa_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptPhags_Pa);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptKawi = cast(dchar[])x"00011F0000011F1000011F1200011F3A00011F3E00011F5A";
 
-export extern(C) bool sidero_utf_lut_isScriptKawi(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptKawi.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptKawi[mid << 1], end = Table_sidero_utf_lut_isScriptKawi[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptKawi_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptKawi);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptNag_Mundari = cast(dchar[])x"0001E4D00001E4F9";
 
-export extern(C) bool sidero_utf_lut_isScriptNag_Mundari(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptNag_Mundari.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptNag_Mundari[mid << 1], end = Table_sidero_utf_lut_isScriptNag_Mundari[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptNag_Mundari_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptNag_Mundari);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptGaray = cast(dchar[])x"00010D4000010D6500010D6900010D8500010D8E00010D8F";
 
-export extern(C) bool sidero_utf_lut_isScriptGaray(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptGaray.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptGaray[mid << 1], end = Table_sidero_utf_lut_isScriptGaray[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptGaray_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptGaray);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptGurung_Khema = cast(dchar[])x"0001610000016139";
 
-export extern(C) bool sidero_utf_lut_isScriptGurung_Khema(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptGurung_Khema.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptGurung_Khema[mid << 1], end = Table_sidero_utf_lut_isScriptGurung_Khema[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptGurung_Khema_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptGurung_Khema);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptKirat_Rai = cast(dchar[])x"00016D4000016D79";
 
-export extern(C) bool sidero_utf_lut_isScriptKirat_Rai(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptKirat_Rai.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptKirat_Rai[mid << 1], end = Table_sidero_utf_lut_isScriptKirat_Rai[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptKirat_Rai_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptKirat_Rai);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptOl_Onal = cast(dchar[])x"0001E5D00001E5FA0001E5FF0001E5FF";
 
-export extern(C) bool sidero_utf_lut_isScriptOl_Onal(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptOl_Onal.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptOl_Onal[mid << 1], end = Table_sidero_utf_lut_isScriptOl_Onal[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptOl_Onal_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptOl_Onal);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptSunuwar = cast(dchar[])x"00011BC000011BE100011BF000011BF9";
 
-export extern(C) bool sidero_utf_lut_isScriptSunuwar(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptSunuwar.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptSunuwar[mid << 1], end = Table_sidero_utf_lut_isScriptSunuwar[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptSunuwar_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptSunuwar);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptTodhri = cast(dchar[])x"000105C0000105F3";
 
-export extern(C) bool sidero_utf_lut_isScriptTodhri(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptTodhri.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptTodhri[mid << 1], end = Table_sidero_utf_lut_isScriptTodhri[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptTodhri_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptTodhri);
     return cast(IntervalSet!dchar)Set;
 }
 static immutable dchar[] Table_sidero_utf_lut_isScriptTulu_Tigalari = cast(dchar[])x"00011380000113890001138B0001138B0001138E0001138E00011390000113B5000113B7000113C0000113C2000113C2000113C5000113C5000113C7000113CA000113CC000113D5000113D7000113D8000113E1000113E2";
 
-export extern(C) bool sidero_utf_lut_isScriptTulu_Tigalari(dchar against) @trusted nothrow @nogc pure {
-    ptrdiff_t low, high = Table_sidero_utf_lut_isScriptTulu_Tigalari.length / 2;
-
-    while(low < high) {
-        const mid = low + (high - low) / 2;
-        const start = Table_sidero_utf_lut_isScriptTulu_Tigalari[mid << 1], end = Table_sidero_utf_lut_isScriptTulu_Tigalari[(mid << 1) | 1];
-
-        if (against >= start && against <= end)
-            return true;
-        else if (against > end)
-            low = mid + 1;
-        else if (against < start)
-            high = mid;
-    }
-
-    return false;
-}
 export extern(C) IntervalSet!dchar sidero_utf_lut_isScriptTulu_Tigalari_Set() @trusted nothrow @nogc {
     static IntervalSet!dchar Set = IntervalSet!dchar.constructCTFE(cast(dstring)Table_sidero_utf_lut_isScriptTulu_Tigalari);
     return cast(IntervalSet!dchar)Set;

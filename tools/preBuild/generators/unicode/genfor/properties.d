@@ -15,12 +15,7 @@ void genForProperties() {
             apiOutput ~= "\n";
             apiOutput ~= "/// Is character member of property.\n";
 
-            generateIsCheck(apiOutput, implOutput, "sidero_utf_lut_isMemberOf" ~ property, PropList.ranges[i], true);
+            generateIsCheck(apiOutput, implOutput, "sidero_utf_lut_isMemberOf" ~ property, PropList.ranges[i], true, false);
         }
     }
-
-    apiOutput ~= q{
-/// Is character whitespace?
-alias isUnicodeWhiteSpace = sidero_utf_lut_isMemberOfWhite_Space;
-};
 }

@@ -22,4 +22,5 @@ import sidero.base.internal.unicode.unicodedataCCC;
 import sidero.base.internal.unicode.unicodedataCF;
 import sidero.base.internal.unicode.unicodedataDM;
 import sidero.base.internal.unicode.wordbreakproperty;
+import sidero.base.internal.unicode.graphemebreakproperty;
     

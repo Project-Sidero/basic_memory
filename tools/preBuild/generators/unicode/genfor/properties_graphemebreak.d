@@ -13,7 +13,7 @@ void genForGraphemeBreakProperty() {
             apiOutput ~= "\n";
             apiOutput ~= "/// Is character member of grapheme break property.\n";
 
-            generateIsCheck(apiOutput, implOutput, "sidero_utf_lut_isMemberOfGrapheme" ~ property, GraphemeBreakProperty.ranges[i], true);
+            generateIsCheck(apiOutput, implOutput, "sidero_utf_lut_isMemberOfGrapheme" ~ property, GraphemeBreakProperty.ranges[i], true, false);
         }
     }
 }

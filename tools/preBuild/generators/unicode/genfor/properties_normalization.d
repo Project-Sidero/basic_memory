@@ -11,5 +11,5 @@ void genForNormalizationProps() {
 
     apiOutput ~= "\n";
     apiOutput ~= "/// Is character part of full composition execlusions.\n";
-    generateIsCheck(apiOutput, implOutput, "sidero_utf_lut_isFullCompositionExcluded", DerivedNormalizationProps.fullCompositionExclusion, false);
+    generateIsCheck(apiOutput, implOutput, "sidero_utf_lut_isFullCompositionExcluded", DerivedNormalizationProps.fullCompositionExclusion, false, false);
 }

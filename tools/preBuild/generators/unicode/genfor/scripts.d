@@ -44,7 +44,7 @@ void scriptFor() {
 
 void isUnknown() {
     apiOutput ~= "/// Is the character a member of the script Unknown\n";
-    generateIsCheck(apiOutput, implOutput, "sidero_utf_lut_isScriptUnknown", Scripts.all.ranges, true, true);
+    generateIsCheck(apiOutput, implOutput, "sidero_utf_lut_isScriptUnknown", Scripts.all.ranges, true, false, true);
 }
 
 void isKnown() {
@@ -54,7 +54,7 @@ void isKnown() {
 
             static if(script != Script.Unknown) {
                 apiOutput ~= "/// Is the character a member of the script " ~ Sm ~ "\n";
-                generateIsCheck(apiOutput, implOutput, "sidero_utf_lut_isScript" ~ Sm, Scripts.scriptRanges[script], true);
+                generateIsCheck(apiOutput, implOutput, "sidero_utf_lut_isScript" ~ Sm, Scripts.scriptRanges[script], true, false);
             }
         }
     }

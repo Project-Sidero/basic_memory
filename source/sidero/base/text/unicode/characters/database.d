@@ -103,7 +103,7 @@ bool isCaseIgnorable(dchar input) {
 
 ///
 bool isCased(dchar input) {
-    return unidb.isUnicodeCased(input);
+    return input in unidb.sidero_utf_lut_isCased_Set;
 }
 
 /// Get numeric value in the form of numerator / denominator. If not a number returns [0, 0].

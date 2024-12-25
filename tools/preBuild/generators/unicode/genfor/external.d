@@ -10,35 +10,6 @@ module sidero.base.text.unicode.database;
 import sidero.base.containers.set.interval;
 // Generated do not modify
 
-/// Add 1 to end to foreach
-struct ValueRange {
-    ///
-    dchar start, end;
-    @safe nothrow @nogc pure const:
-
-    this(dchar index) {
-        this.start = index;
-        this.end = index;
-    }
-
-    this(dchar start, dchar end) {
-        assert(end >= start);
-
-        this.start = start;
-        this.end = end;
-    }
-
-    ///
-    size_t spread() {
-        return cast(size_t)((end + 1) - start);
-    }
-
-    /// Does argument fall within range. start <= index <= end.
-    bool within(dchar index) {
-        return start <= index && end >= index;
-    }
-}
-
 ///
 enum Language {
     ///
@@ -443,30 +414,6 @@ bool isUnicodeCaseIgnorable(dchar input) @safe nothrow @nogc pure {
                 default:
                     return false;
             }
-    }
-}
-
-// Is character cased
-bool isUnicodeCased(dchar input) @safe nothrow @nogc pure {
-    switch(sidero_utf_lut_getGeneralCategory(input)) {
-        case GeneralCategory.Lt:
-        case GeneralCategory.Ll:
-        case GeneralCategory.Lu:
-            return true;
-
-        default:
-            return sidero_utf_lut_isMemberOfOther_Lowercase(input) || sidero_utf_lut_isMemberOfOther_Uppercase(input);
-    }
-}
-
-// Is character Grapheme extend
-bool isUnicodeGraphemeExtend(dchar input) @safe nothrow @nogc pure {
-    switch(sidero_utf_lut_getGeneralCategory(input)) {
-        case GeneralCategory.Me:
-        case GeneralCategory.Mn:
-            return true;
-        default:
-            return sidero_utf_lut_isMemberOfOther_Grapheme_Extend(input);
     }
 }
 

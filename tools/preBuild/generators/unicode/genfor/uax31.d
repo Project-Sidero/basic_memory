@@ -30,7 +30,7 @@ void start_C() {
     apiOutput ~= "/// Is UAX31 for C start set.\n";
     apiOutput ~= "/// Returns: false if not set.\n";
 
-    generateIsCheck(apiOutput, implOutput, "sidero_utf_lut_isUAX31_C_Start", ranges.ranges, true);
+    generateIsCheck(apiOutput, implOutput, "sidero_utf_lut_isUAX31_C_Start", ranges.ranges, true, false);
 }
 
 void continue_C() {
@@ -40,7 +40,7 @@ void continue_C() {
     apiOutput ~= "/// Is UAX31 for C continue set.\n";
     apiOutput ~= "/// Returns: false if not set.\n";
 
-    generateIsCheck(apiOutput, implOutput, "sidero_utf_lut_isUAX31_C_Continue", DerivedCoreProperties_Binary[DerivedCorePropertyBinary.XID_Continue], true);
+    generateIsCheck(apiOutput, implOutput, "sidero_utf_lut_isUAX31_C_Continue", DerivedCoreProperties_Binary[DerivedCorePropertyBinary.XID_Continue], true, false);
 }
 
 void start_JS() {
@@ -55,7 +55,7 @@ void start_JS() {
     apiOutput ~= "/// Is UAX31 for Javascript start set.\n";
     apiOutput ~= "/// Returns: false if not set.\n";
 
-    generateIsCheck(apiOutput, implOutput, "sidero_utf_lut_isUAX31_JS_Start", ranges.ranges, true);
+    generateIsCheck(apiOutput, implOutput, "sidero_utf_lut_isUAX31_JS_Start", ranges.ranges, true, false);
 }
 
 void continue_JS() {
@@ -71,5 +71,5 @@ void continue_JS() {
     apiOutput ~= "/// Is UAX31 for Javascript continue set.\n";
     apiOutput ~= "/// Returns: false if not set.\n";
 
-    generateIsCheck(apiOutput, implOutput, "sidero_utf_lut_isUAX31_JS_Continue", ranges.ranges, true);
+    generateIsCheck(apiOutput, implOutput, "sidero_utf_lut_isUAX31_JS_Continue", ranges.ranges, true, false);
 }

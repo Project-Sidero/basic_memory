@@ -6,6 +6,7 @@ import std.format : formattedWrite;
 
 void genForHangulSyllableType() {
     implOutput ~= q{module sidero.base.internal.unicode.hangulsyllabletype;
+import sidero.base.containers.set.interval;
 // Generated do not modify
 
 enum HangulSyllableType {
@@ -38,44 +39,35 @@ struct ValueRange {
     {
         apiOutput ~= "\n";
         apiOutput ~= "/// Is character a hangul syllable?\n";
-        generateIsCheck(apiOutput, implOutput, "sidero_utf_lut_isHangulSyllable", HangulSyllableType.all, false);
+        generateIsCheck(apiOutput, implOutput, "sidero_utf_lut_isHangulSyllable", HangulSyllableType.all, false, false);
         apiOutput ~= "\n";
     }
 
-    genForHangulType;
+    genForHangulType2;
 }
 
 private:
 
-void genForHangulType() {
+void genForHangulType2() {
     static string[] NameOfValue = ["LeadingConsonant", "Vowel", "TrailingConsonant", "LV_Syllable", "LVT_Syllable"];
 
-    apiOutput ~= "/// Gets the ranges of values in a given Hangul syllable type.\n";
-    apiOutput ~= "deprecated export immutable(ValueRange[]) sidero_utf_lut_hangulSyllables(HangulSyllableType type) @trusted nothrow @nogc pure {\n";
-    apiOutput ~= "    return cast(immutable(ValueRange[]))sidero_utf_lut_hangulSyllables2(type);\n";
-    apiOutput ~= "}\n";
-    apiOutput ~= "private extern(C) immutable(void[]) sidero_utf_lut_hangulSyllables2(HangulSyllableType type) @safe nothrow @nogc pure;\n";
+    {
+        apiOutput ~= "/// Gets the ranges of values in a given Hangul syllable type.\n";
+        apiOutput ~= "export extern(C) IntervalSet!dchar sidero_utf_lut_hangulSyllables(HangulSyllableType type) @trusted nothrow @nogc {\n";
 
-    implOutput ~= "export extern(C) immutable(void[]) sidero_utf_lut_hangulSyllables2(HangulSyllableType type) @safe nothrow @nogc pure {\n";
-    implOutput ~= "    final switch(type) {\n";
-
-    static foreach(i; 0 .. 5) {
-        {
-            implOutput ~= "        case HangulSyllableType." ~ NameOfValue[i] ~ ":\n";
-            implOutput ~= "            static immutable Array = [";
-
-            foreach(entry; HangulSyllableType.tupleof[i]) {
-                if(entry.isSingle)
-                    implOutput.formattedWrite!"ValueRange(0x%X), "(entry.start);
-                else
-                    implOutput.formattedWrite!"ValueRange(0x%X, 0x%X), "(entry.start, entry.end);
-            }
-
-            implOutput ~= "];\n";
-            implOutput ~= "            return Array;\n";
+        apiOutput ~= "    final switch(type) {\n";
+        foreach(nov; NameOfValue) {
+            apiOutput ~= "        case HangulSyllableType." ~ nov ~ ":\n";
+            apiOutput ~= "            return sidero_utf_lut_hangulSyllables_" ~ nov ~ "_Set();\n";
         }
+
+        apiOutput ~= "    }\n";
+        apiOutput ~= "}\n";
     }
 
-    implOutput ~= "    }\n";
-    implOutput ~= "}\n";
+    static foreach(i; 0 .. 5) {
+        apiOutput ~= "/// Gets the ranges of values in a Hangul syllable " ~ NameOfValue[i] ~ ".\n";
+        generateIsCheck(apiOutput, implOutput, "sidero_utf_lut_hangulSyllables_" ~ NameOfValue[i],
+                HangulSyllableType.tupleof[i], true, false);
+    }
 }
