@@ -5,11 +5,10 @@ import sidero.base.containers.readonlyslice;
 
 private {
     alias Set_int = IntervalSet!int;
-    alias Set_int_int = IntervalSet!(int, int);
 }
 
 ///
-struct IntervalSet(RealKeyType, ValueType = void) {
+struct IntervalSet(RealKeyType) {
     static assert(__traits(isArithmetic, KeyType) || __traits(compiles, KeyType.init < KeyType.init &&
             KeyType.init == KeyType.init), "Only comparable types may be used for a set key");
 
@@ -31,16 +30,7 @@ struct IntervalSet(RealKeyType, ValueType = void) {
                 state.mutex.unlock;
 
                 KeyType key = iterator.key;
-
-                static if(is(ValueType == void)) {
-                    int ret = del(key);
-                } else {
-                    static if(!is(ValueType == void) && __traits(compiles, del(key, iterator.value))) {
-                        int ret = del(key, iterator.value);
-                    } else {
-                        int ret = del(key);
-                    }
-                }
+                const ret = del(key);
 
                 if(ret)
                     return ret;
@@ -56,81 +46,41 @@ struct IntervalSet(RealKeyType, ValueType = void) {
 
 export:
 
-    static if(is(ValueType == void)) {
-        mixin OpApplyCombos!(KeyType, void, "opApply", true, true, true, false, false);
-    } else {
-        mixin OpApplyCombosKeyNotValue!(ValueType, KeyType, "opApply", true, true, true, false, false);
-    }
+    mixin OpApplyCombos!(KeyType, void, "opApply", true, true, true, false, false);
 
 @safe nothrow:
 
-    static if(is(ValueType == void)) {
-        /// Start + end pairs will construct into a set at CTFE, must be sorted and coalesced.
-        static IntervalSet constructCTFE(immutable(RealKeyType)[] allKeys) {
-            import sidero.base.hash.utils : hashOf;
+    /// Start + end pairs will construct into a set at CTFE, must be sorted and coalesced.
+    static IntervalSet constructCTFE(immutable(RealKeyType)[] allKeys) {
+        import sidero.base.hash.utils : hashOf;
 
-            if(allKeys.length == 0)
-                return IntervalSet.init;
+        if(allKeys.length == 0)
+            return IntervalSet.init;
 
-            assert(allKeys.length % 2 == 0);
-            const count = allKeys.length / 2;
+        assert(allKeys.length % 2 == 0);
+        const count = allKeys.length / 2;
 
-            IntervalSet ret;
+        IntervalSet ret;
 
-            if(__ctfe) {
-                ret.state = new State;
-                ret.state.copyOnWrite = true;
+        if(__ctfe) {
+            ret.state = new State;
+            ret.state.copyOnWrite = true;
 
-                ret.state.count = count;
-                ret.state.nodeCount = count;
+            ret.state.count = count;
+            ret.state.nodeCount = count;
 
-                ret.state.sliceOfKeys = allKeys;
-                ret.state.sliceOfKeysHash = hashOf();
+            ret.state.sliceOfKeys = allKeys;
+            ret.state.sliceOfKeysHash = hashOf();
 
-                for(size_t i; i < allKeys.length; i += 2) {
-                    KeyType k = KeyType(allKeys[i], allKeys[i + 1]);
-                    ret.state.sliceOfKeysHash = hashOf(k, ret.state.sliceOfKeysHash);
-                }
-
-                return ret;
+            for(size_t i; i < allKeys.length; i += 2) {
+                KeyType k = KeyType(allKeys[i], allKeys[i + 1]);
+                ret.state.sliceOfKeysHash = hashOf(k, ret.state.sliceOfKeysHash);
             }
 
-            assert(0);
+            return ret;
         }
-    } else {
-        /// Start + end pairs will construct into a set at CTFE, must be sorted and coalesced.
-        static IntervalSet constructCTFE(immutable(RealKeyType)[] allKeys, immutable(ValueType)[] allValues) {
-            import sidero.base.hash.utils : hashOf;
 
-            if(allKeys.length == 0)
-                return IntervalSet.init;
-
-            assert(allKeys.length % 2 == 0);
-            const count = allKeys.length / 2;
-
-            IntervalSet ret;
-
-            if(__ctfe) {
-                ret.state = new State;
-                ret.state.copyOnWrite = true;
-
-                ret.state.count = count;
-                ret.state.nodeCount = count;
-
-                ret.state.sliceOfKeys = allKeys;
-                ret.state.sliceOfValues = allValues;
-                ret.state.sliceOfKeysHash = hashOf();
-
-                for(size_t i; i < allKeys.length; i += 2) {
-                    KeyType k = KeyType(allKeys[i], allKeys[i + 1]);
-                    ret.state.sliceOfKeysHash = hashOf(k, ret.state.sliceOfKeysHash);
-                }
-
-                return ret;
-            }
-
-            assert(0);
-        }
+        assert(0);
     }
 
 @nogc:
@@ -153,176 +103,86 @@ export:
         return state is null;
     }
 
-    static if(is(ValueType == void)) {
-        ///
-        void opOpAssign(string op : "~")(RealKeyType key) scope {
-            this.insert(KeyType(key));
-        }
+    ///
+    void opOpAssign(string op : "~")(RealKeyType key) scope {
+        this.insert(KeyType(key));
+    }
 
-        ///
-        void opOpAssign(string op : "~")(KeyType key) scope {
-            this.insert(key);
-        }
+    ///
+    void opOpAssign(string op : "~")(KeyType key) scope {
+        this.insert(key);
+    }
 
-        ///
-        void insert(RealKeyType startEnd, bool update = false) scope {
-            this.insert(KeyType(startEnd), update);
-        }
+    ///
+    void insert(RealKeyType startEnd, bool update = false) scope {
+        this.insert(KeyType(startEnd), update);
+    }
 
-        ///
-        void insert(RealKeyType start, RealKeyType end, bool update = false) scope {
-            this.insert(KeyType(start, end), update);
-        }
+    ///
+    void insert(RealKeyType start, RealKeyType end, bool update = false) scope {
+        this.insert(KeyType(start, end), update);
+    }
 
-        ///
-        void insert(KeyType key, bool update = false) scope {
-            checkInit;
+    ///
+    void insert(KeyType key, bool update = false) scope {
+        checkInit;
 
-            state.mutex.lock;
-            scope(exit)
-                state.mutex.unlock;
+        state.mutex.lock;
+        scope(exit)
+            state.mutex.unlock;
 
-            Link containing;
-            Link* parent = state.findParentOfKey(&state.head, key, containing);
-            Link c;
+        Link containing;
+        Link* parent = state.findParentOfKey(&state.head, key, containing);
+        Link c;
 
-            if(containing !is null) {
-                bool adjustStart = key.end == containing.key.start || key.end + 1 == containing.key.start,
-                    adjustEnd = key.start == containing.key.end || key.start == containing.key.end + 1;
+        if(containing !is null) {
+            bool adjustStart = key.end == containing.key.start || key.end + 1 == containing.key.start,
+                adjustEnd = key.start == containing.key.end || key.start == containing.key.end + 1;
 
-                if(adjustEnd) {
-                    // adjust end, as it can combine
-                    state.count += (key.end + 1) - key.start;
-                    containing.key.end = key.end;
-                    return;
-                } else if(adjustStart) {
-                    // adjust start, as it can combine
-                    state.count += containing.key.start - key.start;
-                    containing.key.start = key.start;
-                    return;
-                } else if(key.start >= containing.key.start && key.end <= containing.key.end) {
-                    // already in set
-                    return;
-                }
+            if(adjustEnd) {
+                // adjust end, as it can combine
+                state.count += (key.end + 1) - key.start;
+                containing.key.end = key.end;
+                return;
+            } else if(adjustStart) {
+                // adjust start, as it can combine
+                state.count += containing.key.start - key.start;
+                containing.key.start = key.start;
+                return;
+            } else if(key.start >= containing.key.start && key.end <= containing.key.end) {
+                // already in set
+                return;
             }
+        }
 
-            if(*parent !is null) {
-                c = *parent;
+        if(*parent !is null) {
+            c = *parent;
 
-                if(c.key == key) {
-                    // all done!
-                    return;
-                } else if(key.start >= c.key.start && key.end <= c.key.end) {
-                    // already in set
-                    return;
-                } else if(c.key > key) {
-                    // c.left
-                    parent = &c.left;
-                } else if(c.key < key) {
-                    // c.right
-                    parent = &c.right;
-                }
+            if(c.key == key) {
+                // all done!
+                return;
+            } else if(key.start >= c.key.start && key.end <= c.key.end) {
+                // already in set
+                return;
+            } else if(c.key > key) {
+                // c.left
+                parent = &c.left;
+            } else if(c.key < key) {
+                // c.right
+                parent = &c.right;
             }
-
-            state.mutated = true;
-
-            *parent = state.nodeAllocator.make!Node(containing, null, null, 0, key);
-            state.count += (key.end + 1) - key.start;
-            state.nodeCount++;
-
-            state.repatchChildCounts(state.head, state.head.key > key ? state.head.left : state.head.right,
-                    state.head.key > key ? state.head.right : state.head.left, *parent);
-            state.rotateForChildren(parent);
-            state.rotateForChildren(&state.head);
-        }
-    } else {
-        ///
-        void opIndexAssign(ValueType value, RealKeyType key) scope {
-            this.insert(KeyType(key), value);
         }
 
-        ///
-        void opIndexAssign(ValueType value, KeyType key) scope {
-            this.insert(key, value);
-        }
+        state.mutated = true;
 
-        ///
-        void insert(RealKeyType startEnd, ValueType value, bool update = false) scope {
-            this.insert(KeyType(startEnd), value, update);
-        }
+        *parent = state.nodeAllocator.make!Node(containing, null, null, 0, key);
+        state.count += (key.end + 1) - key.start;
+        state.nodeCount++;
 
-        ///
-        void insert(RealKeyType start, RealKeyType end, ValueType value, bool update = false) scope {
-            this.insert(KeyType(start, end), value, update);
-        }
-
-        ///
-        void insert(KeyType key, ValueType value, bool update = true) scope {
-            checkInit;
-
-            state.mutex.lock;
-            scope(exit)
-                state.mutex.unlock;
-
-            Link containing;
-            Link* parent = state.findParentOfKey(&state.head, key, containing);
-            Link c;
-
-            if(containing !is null) {
-                bool adjustStart = key.end == containing.key.start || key.end + 1 == containing.key.start,
-                    adjustEnd = key.start == containing.key.end || key.start == containing.key.end + 1;
-
-                if(containing.value != value) {
-                    if(adjustEnd) {
-                        // adjust end, as it can combine
-                        state.count += (key.end + 1) - key.start;
-                        containing.key.end = key.end;
-                        return;
-                    } else if(adjustStart) {
-                        // adjust start, as it can combine
-                        state.count += containing.key.start - key.start;
-                        containing.key.start = key.start;
-                        return;
-                    }
-                }
-
-                if(key.start >= containing.key.start && key.end <= containing.key.end) {
-                    // already in set
-                    return;
-                }
-            }
-
-            if(*parent !is null) {
-                c = *parent;
-
-                if(c.key == key) {
-                    // all done!
-                    if(update)
-                        c.value = value;
-                    return;
-                } else if(key.start >= c.key.start && key.end <= c.key.end) {
-                    // already in set
-                    return;
-                } else if(c.key > key) {
-                    // c.left
-                    parent = &c.left;
-                } else if(c.key < key) {
-                    // c.right
-                    parent = &c.right;
-                }
-            }
-
-            state.mutated = true;
-
-            *parent = state.nodeAllocator.make!Node(containing, null, null, 0, key, value);
-            state.count += (key.end + 1) - key.start;
-            state.nodeCount++;
-
-            state.repatchChildCounts(state.head, state.head.key > key ? state.head.left : state.head.right,
-                    state.head.key > key ? state.head.right : state.head.left, *parent);
-            state.rotateForChildren(parent);
-            state.rotateForChildren(&state.head);
-        }
+        state.repatchChildCounts(state.head, state.head.key > key ? state.head.left : state.head.right,
+                state.head.key > key ? state.head.right : state.head.left, *parent);
+        state.rotateForChildren(parent);
+        state.rotateForChildren(&state.head);
     }
 
     ///
@@ -340,12 +200,7 @@ export:
         Link createFromNode(Link newParent, Link old) {
             Link retL;
 
-            static if(is(ValueType == void)) {
-                retL = ret.state.nodeAllocator.make!Node(newParent, null, null, 0, old.key);
-            } else {
-                retL = ret.state.nodeAllocator.make!Node(newParent, null, null, 0, old.key, old.value);
-            }
-
+            retL = ret.state.nodeAllocator.make!Node(newParent, null, null, 0, old.key);
             retL.countChildren = old.countChildren;
 
             if(old.left !is null)
@@ -356,25 +211,17 @@ export:
             return retL;
         }
 
-        Link createFromSlice(Link newParent, immutable(RealKeyType)[] toGoKey, immutable(ValueType)[] toGoValue) @trusted {
-            assert(toGoKey.length == toGoValue.length * 2);
+        Link createFromSlice(Link newParent, immutable(RealKeyType)[] toGoKey) @trusted {
             if(toGoKey.length < 2)
                 return null;
 
             const mid = toGoKey.length / 2;
 
-            static if(is(ValueType == void)) {
-                Link retL = ret.state.nodeAllocator.make!Node(newParent, null, null, 0,
-                        KeyType(cast(RealKeyType)toGoKey[mid], cast(RealKeyType)toGoKey[mid + 1]));
-                immutable(ValueType[]) leftValues, rightValues;
-            } else {
-                Link retL = ret.state.nodeAllocator.make!Node(newParent, null, null, 0,
-                        KeyType(cast(RealKeyType)toGoKey[mid], cast(RealKeyType)toGoKey[mid + 1]), cast(ValueType)toGoValue[mid]);
-                immutable(ValueType)[] leftValues = toGoValue[0 .. mid], rightValues = toGoValue[mid + 2 .. $];
-            }
+            Link retL = ret.state.nodeAllocator.make!Node(newParent, null, null, 0,
+                    KeyType(cast(RealKeyType)toGoKey[mid], cast(RealKeyType)toGoKey[mid + 1]));
 
-            retL.left = createFromSlice(retL, toGoKey[0 .. mid], leftValues);
-            retL.right = createFromSlice(retL, toGoKey[mid + 2 .. $], rightValues);
+            retL.left = createFromSlice(retL, toGoKey[0 .. mid]);
+            retL.right = createFromSlice(retL, toGoKey[mid + 2 .. $]);
 
             if(newParent !is null)
                 newParent.countChildren += retL.countChildren + 1;
@@ -388,7 +235,7 @@ export:
             ret.state.count = state.count;
             ret.state.nodeCount = state.nodeCount;
         } else {
-            ret.state.head = createFromSlice(null, state.sliceOfKeys, state.sliceOfValues);
+            ret.state.head = createFromSlice(null, state.sliceOfKeys);
             ret.state.count = state.sliceOfKeys.length / 2;
             ret.state.nodeCount = state.sliceOfKeys.length;
         }
@@ -411,19 +258,10 @@ export:
         IntervalSet ret;
         ret.checkInit;
 
-        static if(is(ValueType == void)) {
-            foreach(KeyType k; this) {
-                foreach(val; k) {
-                    if(val !in other)
-                        ret ~= val;
-                }
-            }
-        } else {
-            foreach(KeyType k, ValueType v; this) {
-                foreach(val; k) {
-                    if(val !in other)
-                        ret[val] = v;
-                }
+        foreach(KeyType k; this) {
+            foreach(val; k) {
+                if(val !in other)
+                    ret ~= val;
             }
         }
 
@@ -435,26 +273,13 @@ export:
         IntervalSet ret;
         ret.checkInit;
 
-        static if(is(ValueType == void)) {
-            foreach(KeyType k; this) {
-                if(other.contains(k, true)) {
-                    ret ~= k;
-                } else if(other.contains(k, false)) {
-                    foreach(val; k) {
-                        if(other.contains(val, false))
-                            ret ~= val;
-                    }
-                }
-            }
-        } else {
-            foreach(KeyType k, ValueType v; this) {
-                if(other.contains(k, true)) {
-                    ret[k] = v;
-                } else if(other.contains(k, false)) {
-                    foreach(val; k) {
-                        if(other.contains(val, false))
-                            ret[KeyType(val)] = v;
-                    }
+        foreach(KeyType k; this) {
+            if(other.contains(k, true)) {
+                ret ~= k;
+            } else if(other.contains(k, false)) {
+                foreach(val; k) {
+                    if(other.contains(val, false))
+                        ret ~= val;
                 }
             }
         }
@@ -466,14 +291,8 @@ export:
     IntervalSet union_(IntervalSet other) scope {
         IntervalSet ret = this.dup;
 
-        static if(is(ValueType == void)) {
-            foreach(KeyType k; other) {
-                ret ~= k;
-            }
-        } else {
-            foreach(KeyType k, ValueType v; other) {
-                ret.insert(k, v, false);
-            }
+        foreach(KeyType k; other) {
+            ret ~= k;
         }
 
         return ret;
@@ -533,26 +352,14 @@ export:
 
         state.count -= key2.end - key2.start;
 
-        static if(is(ValueType == void)) {
-            state.patchRemove(parent);
-            state.mutex.unlock;
+        state.patchRemove(parent);
+        state.mutex.unlock;
 
-            if(key2.start < key.start)
-                this.insert(KeyType(key2.start, key.start - 1));
+        if(key2.start < key.start)
+            this.insert(KeyType(key2.start, key.start - 1));
 
-            if(key.end < key2.end)
-                this.insert(KeyType(key.end + 1, key2.end));
-        } else {
-            ValueType value = c.value;
-            state.patchRemove(parent);
-            state.mutex.unlock;
-
-            if(key2.start < key.start)
-                this.insert(KeyType(key2.start, key.start - 1), value);
-
-            if(key.end < key2.end)
-                this.insert(KeyType(key.end + 1, key2.end), value);
-        }
+        if(key.end < key2.end)
+            this.insert(KeyType(key.end + 1, key2.end));
     }
 
     ///
@@ -619,56 +426,6 @@ export:
         }
 
         return false;
-    }
-
-    static if(is(ValueType == void)) {
-    } else {
-        ///
-        bool contains(KeyType key, out ValueType value, bool requireAll = false) scope {
-            if(isNull)
-                return false;
-
-            state.mutex.lock;
-            scope(exit)
-                state.mutex.unlock;
-
-            if(state.sliceOfKeys.length == 0) {
-                Link containing;
-                Link* parent = state.findParentOfKey(&state.head, key, containing);
-
-                if(*parent !is null) {
-                    if(requireAll ? (key.start >= (*parent).key.start && key.end <= (*parent).key.end) : (*parent).key.within(key)) {
-                        value = (*parent).value;
-                        return true;
-                    }
-                } else if(containing !is null) {
-                    if(requireAll ? (key.start >= containing.key.start && key.end <= containing.key.end) : containing.key.within(key)) {
-                        value = containing.value;
-                        return true;
-                    }
-                }
-            } else {
-                ptrdiff_t low, high = state.sliceOfKeys.length / 2;
-
-                while(low < high) {
-                    const mid = low + (high - low) / 2;
-                    const start = state.sliceOfKeys[mid << 1], end = state.sliceOfKeys[(mid << 1) | 1];
-
-                    if(key.start >= start && key.start <= end) {
-                        if(requireAll && key.end > end)
-                            return false;
-
-                        value = state.sliceOfValues[mid];
-                        return true;
-                    } else if(key.start > end)
-                        low = mid + 1;
-                    else if(key.start < start)
-                        high = mid;
-                }
-            }
-
-            return false;
-        }
     }
 
     ///
@@ -741,7 +498,7 @@ export:
 private:
     import sidero.base.containers.set.internal.state;
 
-    mixin SetInternals!(KeyType, ValueType);
+    mixin SetInternals!(KeyType);
 }
 
 unittest {

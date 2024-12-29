@@ -4,11 +4,10 @@ import sidero.base.containers.readonlyslice;
 
 private {
     alias Set_int = Set!int;
-    alias Set_int_int = Set!(int, int);
 }
 
 ///
-struct Set(KeyType, ValueType = void) {
+struct Set(KeyType) {
     static assert(__traits(isArithmetic, KeyType) || __traits(compiles, KeyType.init < KeyType.init &&
             KeyType.init == KeyType.init), "Only comparable types may be used for a set key");
 
@@ -29,12 +28,7 @@ struct Set(KeyType, ValueType = void) {
                 state.mutex.unlock;
 
                 KeyType key = iterator.key;
-
-                static if(!is(ValueType == void) && __traits(compiles, del(key, iterator.value))) {
-                    int ret = del(key, iterator.value);
-                } else {
-                    int ret = del(key);
-                }
+                const ret = del(key);
 
                 if(ret)
                     return ret;
@@ -50,73 +44,37 @@ struct Set(KeyType, ValueType = void) {
 
 export:
 
-    static if(is(ValueType == void)) {
-        mixin OpApplyCombos!(KeyType, void, "opApply", true, true, true, false, false);
-    } else {
-        mixin OpApplyCombos!(ValueType, KeyType, "opApply", true, true, true, false, false);
-    }
+    mixin OpApplyCombos!(KeyType, void, "opApply", true, true, true, false, false);
 
 @safe nothrow:
 
-    static if(is(ValueType == void)) {
-        /// Will construct into a set at CTFE, must be sorted.
-        static Set constructCTFE(immutable(KeyType)[] allKeys) {
-            import sidero.base.hash.utils : hashOf;
+    /// Will construct into a set at CTFE, must be sorted.
+    static Set constructCTFE(immutable(KeyType)[] allKeys) {
+        import sidero.base.hash.utils : hashOf;
 
-            if(allKeys.length == 0)
-                return Set.init;
+        if(allKeys.length == 0)
+            return Set.init;
 
-            Set ret;
+        Set ret;
 
-            if(__ctfe) {
-                ret.state = new State;
-                ret.state.copyOnWrite = true;
+        if(__ctfe) {
+            ret.state = new State;
+            ret.state.copyOnWrite = true;
 
-                ret.state.count = allKeys.length;
-                ret.state.nodeCount = allKeys.length;
+            ret.state.count = allKeys.length;
+            ret.state.nodeCount = allKeys.length;
 
-                ret.state.sliceOfKeys = allKeys;
-                ret.state.sliceOfKeysHash = hashOf();
+            ret.state.sliceOfKeys = allKeys;
+            ret.state.sliceOfKeysHash = hashOf();
 
-                foreach(k; allKeys) {
-                    ret.state.sliceOfKeysHash = hashOf(k, ret.state.sliceOfKeysHash);
-                }
-
-                return ret;
+            foreach(k; allKeys) {
+                ret.state.sliceOfKeysHash = hashOf(k, ret.state.sliceOfKeysHash);
             }
 
-            assert(0);
+            return ret;
         }
-    } else {
-        /// Will construct into a set at CTFE, must be sorted.
-        static Set constructCTFE(immutable(KeyType)[] allKeys, immutable(ValueType)[] allValues) {
-            import sidero.base.hash.utils : hashOf;
 
-            if(allKeys.length == 0)
-                return Set.init;
-
-            Set ret;
-
-            if(__ctfe) {
-                ret.state = new State;
-                ret.state.copyOnWrite = true;
-
-                ret.state.count = allKeys.length;
-                ret.state.nodeCount = allKeys.length;
-
-                ret.state.sliceOfKeys = allKeys;
-                ret.state.sliceOfValues = allValues;
-                ret.state.sliceOfKeysHash = hashOf();
-
-                foreach(k; allKeys) {
-                    ret.state.sliceOfKeysHash = hashOf(k, ret.state.sliceOfKeysHash);
-                }
-
-                return ret;
-            }
-
-            assert(0);
-        }
+        assert(0);
     }
 
 @nogc:
@@ -139,94 +97,47 @@ export:
         return state is null;
     }
 
-    static if(is(ValueType == void)) {
-        ///
-        void opOpAssign(string op : "~")(KeyType key) scope {
-            this.insert(key);
-        }
+    ///
+    void opOpAssign(string op : "~")(KeyType key) scope {
+        this.insert(key);
+    }
 
-        ///
-        void insert(KeyType key, bool update = false) scope {
-            checkInit;
+    ///
+    void insert(KeyType key, bool update = false) scope {
+        checkInit;
 
-            state.mutex.lock;
-            scope(exit)
-                state.mutex.unlock;
+        state.mutex.lock;
+        scope(exit)
+            state.mutex.unlock;
 
-            Link containing;
-            Link* parent = state.findParentOfKey(&state.head, key, containing);
-            Link c;
+        Link containing;
+        Link* parent = state.findParentOfKey(&state.head, key, containing);
+        Link c;
 
-            if(*parent !is null) {
-                c = *parent;
+        if(*parent !is null) {
+            c = *parent;
 
-                if(c.key == key) {
-                    // all done!
-                    return;
-                } else if(c.key > key) {
-                    // c.left
-                    parent = &c.left;
-                } else if(c.key < key) {
-                    // c.right
-                    parent = &c.right;
-                }
+            if(c.key == key) {
+                // all done!
+                return;
+            } else if(c.key > key) {
+                // c.left
+                parent = &c.left;
+            } else if(c.key < key) {
+                // c.right
+                parent = &c.right;
             }
-
-            state.mutated = true;
-
-            *parent = state.nodeAllocator.make!Node(containing, null, null, 0, key);
-            state.count++;
-
-            state.repatchChildCounts(state.head, state.head.key > key ? state.head.left : state.head.right,
-                    state.head.key > key ? state.head.right : state.head.left, *parent);
-            state.rotateForChildren(parent);
-            state.rotateForChildren(&state.head);
-        }
-    } else {
-        ///
-        void opIndexAssign(ValueType value, KeyType key) scope {
-            this.insert(key, value);
         }
 
-        ///
-        void insert(KeyType key, ValueType value, bool update = true) scope {
-            checkInit;
+        state.mutated = true;
 
-            state.mutex.lock;
-            scope(exit)
-                state.mutex.unlock;
+        *parent = state.nodeAllocator.make!Node(containing, null, null, 0, key);
+        state.count++;
 
-            Link containing;
-            Link* parent = state.findParentOfKey(&state.head, key, containing);
-            Link c;
-
-            if(*parent !is null) {
-                c = *parent;
-
-                if(c.key == key) {
-                    // all done!
-                    if(update)
-                        c.value = value;
-                    return;
-                } else if(c.key > key) {
-                    // c.left
-                    parent = &c.left;
-                } else if(c.key < key) {
-                    // c.right
-                    parent = &c.right;
-                }
-            }
-
-            state.mutated = true;
-
-            *parent = state.nodeAllocator.make!Node(containing, null, null, 0, key, value);
-            state.count++;
-
-            state.repatchChildCounts(state.head, state.head.key > key ? state.head.left : state.head.right,
-                    state.head.key > key ? state.head.right : state.head.left, *parent);
-            state.rotateForChildren(parent);
-            state.rotateForChildren(&state.head);
-        }
+        state.repatchChildCounts(state.head, state.head.key > key ? state.head.left : state.head.right,
+                state.head.key > key ? state.head.right : state.head.left, *parent);
+        state.rotateForChildren(parent);
+        state.rotateForChildren(&state.head);
     }
 
     ///
@@ -242,11 +153,7 @@ export:
         ret.checkInit;
 
         Link createFromNode(Link newParent, Link old) {
-            static if(is(ValueType == void)) {
-                Link retL = ret.state.nodeAllocator.make!Node(newParent, null, null, 0, old.key);
-            } else {
-                Link retL = ret.state.nodeAllocator.make!Node(newParent, null, null, 0, old.key, old.value);
-            }
+            Link retL = ret.state.nodeAllocator.make!Node(newParent, null, null, 0, old.key);
 
             retL.countChildren = old.countChildren;
 
@@ -258,23 +165,16 @@ export:
             return retL;
         }
 
-        Link createFromSlice(Link newParent, immutable(KeyType[]) toGoKey, immutable(ValueType[]) toGoValue) {
-            assert(toGoKey.length == toGoValue.length);
+        Link createFromSlice(Link newParent, immutable(KeyType[]) toGoKey) {
             if(toGoKey.length == 0)
                 return null;
 
             const mid = toGoKey.length / 2;
 
-            static if(is(ValueType == void)) {
-                Link retL = ret.state.nodeAllocator.make!Node(newParent, null, null, 0, toGoKey[mid]);
-                immutable(ValueType[]) leftValues, rightValues;
-            } else {
-                Link retL = ret.state.nodeAllocator.make!Node(newParent, null, null, 0, toGoKey[mid], toGoValue[mid]);
-                immutable(ValueType[]) leftValues = toGoValue[0 .. mid], rightValues = toGoValue[mid + 1 .. $];
-            }
+            Link retL = ret.state.nodeAllocator.make!Node(newParent, null, null, 0, toGoKey[mid]);
 
-            retL.left = createFromSlice(retL, toGoKey[0 .. mid], leftValues);
-            retL.right = createFromSlice(retL, toGoKey[mid + 1 .. $], rightValues);
+            retL.left = createFromSlice(retL, toGoKey[0 .. mid]);
+            retL.right = createFromSlice(retL, toGoKey[mid + 1 .. $]);
 
             if(newParent !is null)
                 newParent.countChildren += retL.countChildren + 1;
@@ -287,7 +187,7 @@ export:
             ret.state.count = state.count;
             ret.state.nodeCount = state.nodeCount;
         } else {
-            ret.state.head = createFromSlice(null, state.sliceOfKeys, state.sliceOfValues);
+            ret.state.head = createFromSlice(null, state.sliceOfKeys);
             ret.state.count = state.sliceOfKeys.length;
             ret.state.nodeCount = state.sliceOfKeys.length;
         }
@@ -310,16 +210,9 @@ export:
         Set ret;
         ret.checkInit;
 
-        static if(is(ValueType == void)) {
-            foreach(KeyType k; this) {
-                if(k !in other)
-                    ret ~= k;
-            }
-        } else {
-            foreach(KeyType k, ValueType v; this) {
-                if(k !in other)
-                    ret[k] = v;
-            }
+        foreach(KeyType k; this) {
+            if(k !in other)
+                ret ~= k;
         }
 
         return ret;
@@ -330,16 +223,9 @@ export:
         Set ret;
         ret.checkInit;
 
-        static if(is(ValueType == void)) {
-            foreach(KeyType k; this) {
-                if(k in other)
-                    ret ~= k;
-            }
-        } else {
-            foreach(KeyType k, ValueType v; this) {
-                if(k in other)
-                    ret[k] = v;
-            }
+        foreach(KeyType k; this) {
+            if(k in other)
+                ret ~= k;
         }
 
         return ret;
@@ -349,14 +235,8 @@ export:
     Set union_(Set other) scope {
         Set ret = this.dup;
 
-        static if(is(ValueType == void)) {
-            foreach(KeyType k; other) {
-                ret ~= k;
-            }
-        } else {
-            foreach(KeyType k, ValueType v; other) {
-                ret.insert(k, v, false);
-            }
+        foreach(KeyType k; other) {
+            ret ~= k;
         }
 
         return ret;
@@ -456,45 +336,6 @@ export:
         }
     }
 
-    static if(is(ValueType == void)) {
-    } else {
-        ///
-        bool contains(KeyType key, out ValueType value) scope {
-            if(isNull)
-                return false;
-
-            state.mutex.lock;
-            scope(exit)
-                state.mutex.unlock;
-
-            if(state.sliceOfKeys.length == 0) {
-                Link* parent = state.findParentOfKey(&state.head, key);
-
-                if(*parent !is null && (*parent).key == key) {
-                    value = (*parent).value;
-                    return true;
-                }
-            } else {
-                ptrdiff_t low, high = state.sliceOfKeys.length / 2;
-
-                while(low < high) {
-                    const mid = low + (high - low) / 2;
-                    const ckey = state.sliceOfKeys[mid];
-
-                    if(key == ckey) {
-                        value = state.sliceOfValues[mid];
-                        return true;
-                    } else if(key > ckey)
-                        low = mid + 1;
-                    else if(key < ckey)
-                        high = mid;
-                }
-            }
-
-            return false;
-        }
-    }
-
     ///
     KeyType front() scope {
         cannotBeSlice;
@@ -564,7 +405,7 @@ private:
     import sidero.base.containers.set.internal.state;
 
     alias RealKeyType = KeyType;
-    mixin SetInternals!(KeyType, ValueType);
+    mixin SetInternals!(KeyType);
 }
 
 unittest {

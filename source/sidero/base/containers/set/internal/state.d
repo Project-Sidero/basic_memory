@@ -1,5 +1,5 @@
 module sidero.base.containers.set.internal.state;
-mixin template SetInternals(KeyType, ValueType) {
+mixin template SetInternals(KeyType) {
     alias Link = Node*;
 
     State* state;
@@ -50,10 +50,6 @@ mixin template SetInternals(KeyType, ValueType) {
         Link current;
         KeyType key;
 
-        static if(!is(ValueType == void)) {
-            ValueType value;
-        }
-
     @safe nothrow @nogc:
 
         this(State* state) scope {
@@ -86,10 +82,6 @@ mixin template SetInternals(KeyType, ValueType) {
             if(current is null)
                 return;
             key = current.key;
-
-            static if(!is(ValueType == void)) {
-                value = current.value;
-            }
 
             state.mutated = false;
         }
@@ -134,11 +126,6 @@ mixin template SetInternals(KeyType, ValueType) {
         size_t countChildren;
         KeyType key;
 
-        static if(is(ValueType == void)) {
-        } else {
-            ValueType value;
-        }
-
     @safe nothrow @nogc:
 
         void patchThisChildCount() scope {
@@ -150,11 +137,6 @@ mixin template SetInternals(KeyType, ValueType) {
 
         void cleanup() scope {
             this.key.destroy;
-
-            static if(is(ValueType == void)) {
-            } else {
-                this.value.destroy;
-            }
 
             if(left !is null)
                 left.cleanup;
@@ -185,7 +167,6 @@ mixin template SetInternals(KeyType, ValueType) {
 
         // used for ROM tables
         immutable(RealKeyType)[] sliceOfKeys;
-        immutable(ValueType)[] sliceOfValues;
         ulong sliceOfKeysHash;
 
         Link head;
