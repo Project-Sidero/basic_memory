@@ -219,6 +219,26 @@ export:
     }
 
     ///
+    Set symmetricDifference(Set other) {
+        // [ab~~acd] == [bcd]
+
+        Set ret;
+        ret.checkInit;
+
+        foreach(KeyType k; this) {
+            if(k !in other)
+                ret ~= k;
+        }
+
+        foreach(KeyType k; other) {
+            if(k !in ret && k !in this)
+                ret ~= k;
+        }
+
+        return ret;
+    }
+
+    ///
     Set intersect(Set other) scope {
         Set ret;
         ret.checkInit;
@@ -522,7 +542,10 @@ unittest {
         Ti inter = set1.intersect(set2);
         assert(inter.keys == [1]);
 
-        Ti not = set1.difference(set2);
-        assert(not.keys == [2, 3]);
+        Ti diff = set1.difference(set2);
+        assert(diff.keys == [2, 3]);
+
+        Ti symmDiff = set1.symmetricDifference(set2);
+        assert(symmDiff.keys == [-1, 0, 2, 3]);
     }
 }

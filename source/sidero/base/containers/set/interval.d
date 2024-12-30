@@ -269,6 +269,30 @@ export:
     }
 
     ///
+    IntervalSet symmetricDifference(IntervalSet other) {
+        // [ab~~acd] == [bcd]
+
+        IntervalSet ret;
+        ret.checkInit;
+
+        foreach(KeyType k; this) {
+            foreach(val; k) {
+                if(val !in other)
+                    ret ~= val;
+            }
+        }
+
+        foreach(KeyType k; other) {
+            foreach(val; k) {
+                if(val !in ret && val !in this)
+                    ret ~= val;
+            }
+        }
+
+        return ret;
+    }
+
+    ///
     IntervalSet intersect(IntervalSet other) scope {
         IntervalSet ret;
         ret.checkInit;
@@ -645,7 +669,10 @@ unittest {
         Ti inter = set1.intersect(set2);
         assert(inter.keys == [Ii(1)]);
 
-        Ti not = set1.difference(set2);
-        assert(not.keys == [Ii(2, 3)]);
+        Ti diff = set1.difference(set2);
+        assert(diff.keys == [Ii(2, 3)]);
+
+        Ti symmDiff = set1.symmetricDifference(set2);
+        assert(symmDiff.keys == [Ii(-1, 0), Ii(2, 3)]);
     }
 }
