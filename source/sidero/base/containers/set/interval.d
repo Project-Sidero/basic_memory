@@ -323,6 +323,50 @@ export:
     }
 
     ///
+    IntervalSet invert(RealKeyType min = RealKeyType.min, RealKeyType max = RealKeyType.max) {
+        IntervalSet ret;
+        ret.checkInit;
+
+        this.state.mutex.lock;
+        scope(exit)
+            this.state.mutex.unlock;
+
+        bool seenOne;
+        RealKeyType lastSeen = min;
+
+        void handle(KeyType key) {
+            if (seenOne) {
+                ret ~= KeyType(lastSeen + 1, key.start - 1);
+                lastSeen = key.end;
+            } else {
+                seenOne = true;
+
+                if (key.start < min) {
+                } else {
+                    ret ~= KeyType(min, key.start - 1);
+                }
+
+                lastSeen = key.end;
+            }
+        }
+
+        void walk(Link parent) {
+            if (parent.left !is null)
+                walk(parent.left);
+            handle(parent.key);
+            if (parent.right !is null)
+                walk(parent.right);
+        }
+
+        walk(state.head);
+
+        if (lastSeen < max)
+            ret ~= KeyType(lastSeen + 1, max);
+
+        return ret;
+    }
+
+    ///
     Slice!KeyType keys() scope @trusted {
         import sidero.base.containers.dynamicarray;
         import std.algorithm : sort;
@@ -674,5 +718,19 @@ unittest {
 
         Ti symmDiff = set1.symmetricDifference(set2);
         assert(symmDiff.keys == [Ii(-1, 0), Ii(2, 3)]);
+    }
+
+    {
+        Ti set;
+
+        set ~= 1;
+        set ~= 2;
+        set ~= 3;
+
+        set ~= 6;
+        set ~= 7;
+
+        Ti inverted = set.invert(0, 10);
+        assert(inverted.keys == [Ii(0), Ii(4, 5), Ii(8, 10)]);
     }
 }
