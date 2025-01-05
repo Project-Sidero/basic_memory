@@ -371,7 +371,7 @@ export:
         import sidero.base.containers.dynamicarray;
         import std.algorithm : sort;
 
-        if(this.count == 0)
+        if(this.length == 0)
             return typeof(return).init;
 
         DynamicArray!KeyType ret;
@@ -431,7 +431,7 @@ export:
     }
 
     ///
-    size_t count() scope const @trusted {
+    size_t length() scope const @trusted {
         if(isNull || state.head is null)
             return 0;
 
@@ -531,7 +531,7 @@ export:
 
     ///
     int opCmp(scope IntervalSet other) scope const {
-        const c1 = this.count, c2 = other.count;
+        const c1 = this.length, c2 = other.length;
 
         if(c1 < c2)
             return -1;
@@ -574,7 +574,7 @@ unittest {
     alias Ti = IntervalSet!int;
 
     Ti ti;
-    assert(ti.count == 0);
+    assert(ti.length == 0);
     assert(0 !in ti);
     assert(1 !in ti);
     assert(2 !in ti);
@@ -583,7 +583,7 @@ unittest {
     assert(5 !in ti);
 
     ti.insert(2);
-    assert(ti.count == 1);
+    assert(ti.length == 1);
     assert(0 !in ti);
     assert(1 !in ti);
     assert(2 in ti);
@@ -605,7 +605,7 @@ unittest {
 
     ti.insert(3);
 
-    assert(ti.count == 2);
+    assert(ti.length == 2);
     assert(0 !in ti);
     assert(1 !in ti);
     assert(2 in ti);
@@ -630,7 +630,7 @@ unittest {
     }
 
     ti.insert(4);
-    assert(ti.count == 3);
+    assert(ti.length == 3);
     assert(0 !in ti);
     assert(1 !in ti);
     assert(2 in ti);
@@ -655,7 +655,7 @@ unittest {
     }
 
     ti.remove(3);
-    assert(ti.count == 2);
+    assert(ti.length == 2);
     assert(0 !in ti);
     assert(1 !in ti);
     assert(2 in ti);
