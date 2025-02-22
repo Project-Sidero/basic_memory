@@ -121,7 +121,7 @@ export @safe nothrow @nogc:
             this.instance.opRC(false);
     }
 
-    void opAssign(return scope ref CRef other) scope {
+    void opAssign(return scope CRef other) scope {
         this.destroy;
         this.__ctor(other);
     }

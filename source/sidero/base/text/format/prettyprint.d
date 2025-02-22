@@ -330,11 +330,13 @@ private:
             builder.formattedWrite("@{:p}", cast(void*)input);
         }
 
-        static if(!is(SubType == void)) {
-            builder ~= "("c;
-            this.startWithoutPrefix = true;
-            this.handle(builder, *input, true);
-            builder ~= ")"c;
+        if (input !is null) {
+            static if(!is(SubType == void)) {
+                builder ~= "("c;
+                this.startWithoutPrefix = true;
+                this.handle(builder, *input, true);
+                builder ~= ")"c;
+            }
         }
     }
 

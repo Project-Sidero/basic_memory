@@ -92,7 +92,7 @@ export @safe nothrow @nogc:
                 mutex.unlock;
 
             this.haveError = true;
-            writeln(useErrorStream(true), location.fileName, ":", location.lineNumber, ": error: ", message);
+            writeln(useErrorStream(true), location.fileName, ":", location.lineNumber, ":", location.lineOffset, ": error: ", message);
         }
     }
 
@@ -137,7 +137,7 @@ export @safe nothrow @nogc:
                 mutex.unlock;
 
             this.haveError = true;
-            logger.error(location.fileName, ":", location.lineNumber, ": error: ", message);
+            logger.error(location.fileName, ":", location.lineNumber, ":", location.lineOffset, ": error: ", message);
         }
     }
 
@@ -168,7 +168,7 @@ export @safe nothrow @nogc:
                 mutex.unlock;
 
             this.haveError = true;
-            builder.formattedWrite(String_UTF8("{:s}:{:d}: error: {:s}\n"), location.fileName, location.lineNumber, message);
+            builder.formattedWrite(String_UTF8("{:s}:{:d}:{:d}: error: {:s}\n"), location.fileName, location.lineNumber, location.lineOffset, message);
         }
     }
 
