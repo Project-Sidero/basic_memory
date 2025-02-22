@@ -5,6 +5,7 @@ import sidero.base.allocators;
 import sidero.base.errors;
 import sidero.base.text;
 import sidero.base.attributes;
+import sidero.base.encoding.utf;
 
 private alias A8 = Appender!ubyte;
 
@@ -411,6 +412,22 @@ export:
         void append(scope DynamicArray!dchar input) scope @trusted {
             this.append(String_UTF8(input.unsafeGetLiteral()));
         }
+
+        ///
+        void opOpAssign(string op : "~")(dchar input) scope @trusted {
+            char[4] buffer = void;
+            const count = encodeUTF8(input, buffer[]);
+
+            this.append(String_UTF8(buffer[0 .. count]));
+        }
+
+        ///
+        void append(dchar input) scope @trusted {
+            char[4] buffer = void;
+            const count = encodeUTF8(input, buffer[]);
+
+            this.append(String_UTF8(buffer[0 .. count]));
+        }
     } else static if(is(Type == wchar)) {
         ///
         void opOpAssign(string op : "~")(scope StringBuilder_UTF8 input) scope {
@@ -520,6 +537,22 @@ export:
         ///
         void append(scope DynamicArray!dchar input) scope @trusted {
             this.append(String_UTF16(input.unsafeGetLiteral()));
+        }
+
+        ///
+        void opOpAssign(string op : "~")(dchar input) scope @trusted {
+            char[2] buffer = void;
+            const count = encodeUTF16(input, buffer[]);
+
+            this.append(String_UTF16(buffer[0 .. count]));
+        }
+
+        ///
+        void append(dchar input) scope @trusted {
+            wchar[2] buffer = void;
+            const count = encodeUTF16(input, buffer[]);
+
+            this.append(String_UTF16(buffer[0 .. count]));
         }
     } else static if(is(Type == dchar)) {
         ///
@@ -749,8 +782,6 @@ private:
     }();
 
     enum ByteLength = Count * Type.sizeof;
-
-    static assert((ByteLength + Block.sizeof) % CacheSize == 0, "Block + string data must be a multiply of cache size");
 }
 
 ///

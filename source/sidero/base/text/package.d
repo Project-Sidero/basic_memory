@@ -9,6 +9,7 @@ public import sidero.base.text.unicode.builder_utf8;
 public import sidero.base.text.unicode.builder_utf16;
 public import sidero.base.text.unicode.builder_utf32;
 public import sidero.base.text.format;
+public import sidero.base.text.processing;
 
 ///
 alias String_UTF(Char : char) = String_UTF8;

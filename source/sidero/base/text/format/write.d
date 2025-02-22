@@ -7,6 +7,12 @@ import sidero.base.allocators;
 
 export @safe nothrow @nogc:
 
+StringBuilder_UTF8 text(Args...)(scope Args args) {
+    String_UTF32 tempFormat;
+    StringBuilder_UTF8 ret = StringBuilder_UTF8(globalAllocator());
+    return formattedWriteImpl(ret, tempFormat, false, args);
+}
+
 ///
 StringBuilder_UTF8 formattedWrite(Args...)(scope String_UTF8.LiteralType formatString, scope Args args) @trusted {
     scope String_UTF32 tempFormat;

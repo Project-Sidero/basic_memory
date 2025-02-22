@@ -4,6 +4,7 @@ import sidero.base.allocators;
 import sidero.base.errors;
 import sidero.base.text;
 import sidero.base.attributes;
+import sidero.base.encoding.utf;
 
 private {
     alias DAint = DynamicArray!int;
@@ -519,6 +520,7 @@ export:
             assert(!str.isNull);
         }
     } else static if(is(T == char)) {
+        ///
         String_UTF8 asUTF() scope @trusted {
             if(this.isNull)
                 return String_UTF8.init;
@@ -531,7 +533,24 @@ export:
             String_UTF8 str = slice.asUTF;
             assert(!str.isNull);
         }
+
+        ///
+        void opOpAssign(string op : "~")(dchar input) scope @trusted {
+            char[4] buffer = void;
+            const count = encodeUTF8(input, buffer[]);
+
+            this.put(buffer[0 .. count]);
+        }
+
+        ///
+        @property void put(dchar input) scope @trusted {
+            char[4] buffer = void;
+            const count = encodeUTF8(input, buffer[]);
+
+            this.put(buffer[0 .. count]);
+        }
     } else static if(is(T == wchar)) {
+        ///
         String_UTF16 asUTF() scope @trusted {
             if(this.isNull)
                 return String_UTF16.init;
@@ -544,7 +563,24 @@ export:
             String_UTF16 str = slice.asUTF;
             assert(!str.isNull);
         }
+
+        ///
+        void opOpAssign(string op : "~")(dchar input) scope @trusted {
+            wchar[2] buffer = void;
+            const count = encodeUTF16(input, buffer[]);
+
+            this.put(buffer[0 .. count]);
+        }
+
+        ///
+        @property void put(dchar input) scope @trusted {
+            wchar[2] buffer = void;
+            const count = encodeUTF16(input, buffer[]);
+
+            this.put(buffer[0 .. count]);
+        }
     } else static if(is(T == dchar)) {
+        ///
         String_UTF32 asUTF() scope @trusted {
             if(this.isNull)
                 return String_UTF32.init;
