@@ -45,7 +45,8 @@ ulong hashOf(Type)(scope ref Type value, ulong previousHash) @trusted {
 
                     static foreach(i; 0 .. Type2.sizeof) {
                         buffer[i] = temp & 0xFF;
-                        temp >>= 8;
+                        static if (i + 1 < Type2.sizeof)
+                            temp >>= 8;
                     }
 
                     ret = fnv_64_1a(buffer[], ret);
