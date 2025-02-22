@@ -77,8 +77,6 @@ nothrow @safe:
     @disable void opAssign(return scope ref typeof(this) other) scope const;
     @disable void opAssign(return scope typeof(this) other) scope const;
 
-    @disable auto opCast(T)();
-
     this(ref return scope typeof(this) other) @trusted scope @nogc {
         this.tupleof = other.tupleof;
 
@@ -693,8 +691,6 @@ nothrow @safe:
     bool opCast(T : bool)() scope const @nogc {
         return !isNull;
     }
-
-    @disable auto opCast(T)();
 
     ///
     alias equals = opEquals;

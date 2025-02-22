@@ -1011,8 +1011,6 @@ nothrow @nogc:
         return !isNull;
     }
 
-    @disable auto opCast(T)();
-
     /// Compare the literals by pointer only.
     bool equalsByPointer(String_UTF8 other) scope const {
         return this.compareByPointer(other) == 0;

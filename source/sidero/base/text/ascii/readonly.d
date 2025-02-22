@@ -542,8 +542,6 @@ nothrow @nogc:
         return this[index .. index + 1];
     }
 
-    @disable auto opCast(T)();
-
     /// Compare the literals by pointer only.
     bool equalsByPointer(String_ASCII other) scope const {
         return this.compareByPointer(other) == 0;

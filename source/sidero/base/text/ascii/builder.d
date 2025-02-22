@@ -125,8 +125,6 @@ nothrow @safe:
     @disable void opAssign(ref StringBuilder_ASCII other) const;
     @disable void opAssign(StringBuilder_ASCII other) const;
 
-    @disable auto opCast(T)();
-
     this(ref return scope StringBuilder_ASCII other) @trusted scope @nogc {
         this.tupleof = other.tupleof;
 
@@ -443,8 +441,6 @@ nothrow @safe:
     bool opCast(T : bool)() scope const @nogc {
         return !isNull;
     }
-
-    @disable auto opCast(T)();
 
     ///
     alias equals = opEquals;
