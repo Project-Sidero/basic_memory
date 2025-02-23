@@ -370,7 +370,19 @@ auto make(T, Allocator, Args...)(scope auto ref Allocator alloc, return scope au
     assert(ret !is null);
 
     version(D_BetterC) {
-        emplace!T(ret, args);
+        static if(is(T == class)) {
+            import sidero.base.allocators.utils;
+
+            // LDC doesn't like emplace: https://github.com/ldc-developers/ldc/issues/2425
+            fillUninitializedClassWithInit!T(array);
+
+            static if (__traits(compiles, ret.__ctor(args))) {
+                ret.__ctor(args);
+            } else
+                static assert(Args.length == 0, "Trying to pass arguments to constructor failed, parameters do not match arguments");
+        } else {
+            emplace!T(ret, args);
+        }
     } else {
         try {
             emplace!T(ret, args);
