@@ -895,7 +895,10 @@ struct DuplicativeHashMapIterator(RealKeyType, ValueType) {
         Cursor ret;
 
         const hash = nodeList.getHash(key);
+
         auto keyNode = nodeList.nodeFor(hash, key);
+        if (keyNode is null)
+            return ret;
 
         ret.keyNode = keyNode;
         ret.valueNode = &ret.keyNode.head;
@@ -968,6 +971,9 @@ struct DuplicativeHashMapIterator(RealKeyType, ValueType) {
         }
 
         void onEOL(scope ref NodeList nodeList) scope {
+            if (keyNode is null)
+                return;
+
             keyNode.onIteratorOut;
             valueNode.onIteratorOut;
 
