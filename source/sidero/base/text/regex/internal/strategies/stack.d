@@ -65,7 +65,11 @@ bool attemptMatch(ref MatchInProgressState mips) @trusted {
         if(last is currentChoice && lastPtr is mips.inProgress.currentPtr) {
             fail = __LINE__;
             break;
+        } else if(mips.sw.peek >= regexState.limiter.time) {
+            fail = __LINE__;
+            break;
         }
+
         last = currentChoice;
         lastPtr = mips.inProgress.currentPtr;
 

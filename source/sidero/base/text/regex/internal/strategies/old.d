@@ -150,6 +150,9 @@ bool attemptMatch2(ref MatchingState ms, RegexNFANode* childAsParent) @trusted {
             assert(0);
         last = current;
 
+        if(ms.parent.sw.peek >= ms.matchState.regexState.limiter.time)
+            return false;
+
         if(debugThis)
             printf("-On complete loop: %d\n", current.idNumber);
 

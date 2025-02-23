@@ -7,6 +7,7 @@ import sidero.base.text.processing;
 import sidero.base.text;
 import sidero.base.allocators;
 import sidero.base.encoding.utf : decodeLength, decode;
+import sidero.base.datetime;
 
 @safe nothrow @nogc:
 
@@ -39,6 +40,7 @@ MatchState* processNextMatch(RegexState* regexState, MatchState* previousMatchSt
     mips.inProgress.parent = &mips;
     mips.inProgress.currentPtr = matchState.inputForThis.ptr;
     mips.inProgress.matchState = matchState;
+    mips.sw.start;
 
     sidero.base.text.regex.internal.strategies.stack.StackStrategyState strategy_stack;
     bool function(ref MatchInProgressState) @safe nothrow @nogc attemptMatch;
@@ -86,7 +88,7 @@ MatchState* processNextMatch(RegexState* regexState, MatchState* previousMatchSt
         // ^ matches after each new line that is seen (or at very start)
 
         if(regexState.require_start_at_newline) {
-            for(;;) {
+            while(mips.sw.peek < regexState.limiter.time) {
                 mips.inProgress.consumeNewLine();
                 processedBefore;
 
@@ -117,7 +119,7 @@ Stride: {
 
         size_t len;
 
-        while(mips.startPtr < mips.endPtr) {
+        while(mips.startPtr < mips.endPtr && mips.sw.peek < regexState.limiter.time) {
             processedBefore;
             const a = attemptMatch(mips), b = handleEndAnchor();
 
@@ -178,6 +180,7 @@ struct MatchInProgressState {
     const(char)* endPtr;
     MatchingState inProgress;
 
+    StopWatch sw;
     void* strategy;
 
 @safe nothrow @nogc:

@@ -3,6 +3,7 @@ import sidero.base.text.regex.internal.state;
 import sidero.base.text.regex.matching;
 import sidero.base.text;
 import sidero.base.allocators;
+import sidero.base.datetime;
 
 ///
 struct RegexMode {
@@ -31,9 +32,10 @@ The defaults are configured for a multiprocessor environment where you do not wa
  for user provided patterns.
 */
 struct RegexLimiter {
-    // TODO: Duration
+    // 100ms is plenty of time to run a regex match, if it isn't the user should probably be notified.
+    Duration time = 100.milliSeconds;
 
-    /// Limit the positions that can be stored, defaults to 1024 which works out at 16kb of ram
+    /// Limit the positions that can be stored, defaults to 1024 which works out at 16kb of ram.
     uint positions = 1024;
 
     /// Limit the instances of terms that can be stored, defaults to 512, which works out at 32kb of ram.
