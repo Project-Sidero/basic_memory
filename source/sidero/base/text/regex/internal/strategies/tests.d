@@ -23,10 +23,10 @@ mixin template RegexMatchStrategyTests(RegexMatchStrategy strategy) {
         bool outputDebug;
 
         if(outputDebug) {
-            import std.stdio;
+            import sidero.base.console;
 
-            debug writeln("====================== MATCHING ======================");
-            debug writeln("    [[  ", contents, "  ]] for test: ", forTest, " for: [[ ", r.pattern, " ]]");
+            writeln("====================== MATCHING ======================");
+            writeln("    [[  ", contents, "  ]] for test: ", forTest, " for: [[ ", r.pattern, " ]]");
         }
 
         Match match = r.matchFirst(String_UTF8(contents));
