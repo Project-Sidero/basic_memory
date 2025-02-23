@@ -12,8 +12,7 @@ import sidero.base.encoding.utf : decodeLength, decode;
 
 MatchState* processNextMatch(RegexState* regexState, MatchState* previousMatchState, String_UTF8 input = String_UTF8.init) @trusted {
     static import sidero.base.text.regex.internal.strategies.stack;
-
-    //static import sidero.fileformats.regex.internal.strategies.old;
+    static import sidero.base.text.regex.internal.strategies.old;
 
     if(!((previousMatchState !is null && previousMatchState.after.text.length != 0) || (previousMatchState is null && input.length != 0))) {
         return null;
@@ -51,7 +50,7 @@ MatchState* processNextMatch(RegexState* regexState, MatchState* previousMatchSt
         break;
 
     case RegexMatchStrategy.Old:
-        //attemptMatch = &sidero.fileformats.regex.internal.strategies.old.attemptMatch;
+        attemptMatch = &sidero.base.text.regex.internal.strategies.old.attemptMatch;
         break;
     }
 

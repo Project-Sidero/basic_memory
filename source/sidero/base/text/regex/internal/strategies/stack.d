@@ -12,7 +12,7 @@ import sidero.base.allocators;
 bool attemptMatch(ref MatchInProgressState mips) @trusted {
     import core.stdc.stdio;
 
-    bool debugThis = true;
+    bool debugThis;
 
     if(debugThis)
         printf("=================== BACKTRACK STACK ===================\n");

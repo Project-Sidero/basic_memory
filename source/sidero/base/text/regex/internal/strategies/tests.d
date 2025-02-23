@@ -20,7 +20,7 @@ mixin template RegexMatchStrategyTests(RegexMatchStrategy strategy) {
     }
 
     const(char)[][2] expectMatch(Regex r, string contents, int forTest = __LINE__) {
-        bool outputDebug = true;
+        bool outputDebug;
 
         if(outputDebug) {
             import std.stdio;
@@ -694,7 +694,6 @@ mixin template RegexMatchStrategyTests(RegexMatchStrategy strategy) {
         assert(expectMatch(r, "") == ["", ""]);
         assert(expectMatch(r, "be") == ["", ""]);
         assert(expectMatch(r, "bme") == ["", ""]);
-        import sidero.base.console;debugWriteln(expectMatch(r, "bmme"));
         assert(expectMatch(r, "bmme") == ["", "bmme"]);
     }
 
