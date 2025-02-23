@@ -6,7 +6,7 @@ import sidero.base.containers.dynamicarray;
 
 ///
 struct MatchValue {
-    ///
+    /// Warning: that the full input is in normal form D not C, it may not be where you expect!
     size_t byteOffsetFromStartOfInput;
     ///
     String_UTF8 text;

@@ -155,6 +155,8 @@ Complete: {
             matchState.rc(true);
         }
 
+        // TODO: case folding
+
         {
             if(matchState.before.text.length > 0)
                 matchState.before.byteOffsetFromStartOfInput = matchState.before.text.ptr - matchState.all.text.ptr;

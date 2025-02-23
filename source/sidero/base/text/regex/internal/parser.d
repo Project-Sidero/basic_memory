@@ -11,9 +11,8 @@ import sidero.base.math.interval;
 
 RegexNFANode* parse(String_UTF8 contents, RegexState* regexState, RegexMode mode, ErrorSinkRef errorSink) @trusted {
     assert(!errorSink.isNull);
+    assert(contents.isPtrNullTerminated);
 
-    if(!contents.isPtrNullTerminated)
-        contents = contents.dup;
     regexState.pattern = contents;
 
     Parser parser = Parser(contents, regexState, errorSink);

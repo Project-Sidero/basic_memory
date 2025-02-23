@@ -23,6 +23,8 @@ struct RegexMode {
     Disables `before` value of each match.
     */
     bool anchored;
+
+    // TODO: case insensitive matching
 }
 
 /**
@@ -43,6 +45,12 @@ struct RegexLimiter {
 }
 
 /*
+Warning: operates on normal form D, not C!
+    This is very important to note that offset from start may not be exactly where you expect.
+
+The regex pattern grammar is as follows:
+
+---
 Sequence:
     '^'|opt ItemMinMax* '$'|opt
 
@@ -149,6 +157,7 @@ TODO: EscapeBoundary:
     'b' '{' 'w' '}'
     'b' '{' 'l' '}'
     'b' '{' 's' '}'
+---
 */
 
 ///
@@ -191,9 +200,16 @@ export @safe nothrow @nogc:
         if(isNull)
             return typeof(return).init;
 
+        // Normal form D is used due to non-starters
+        against = against.toNFD.dup;
+
+        // TODO: case folding
+
         MatchState* ms = processNextMatch(state, null, against);
         return Match(ms);
     }
+
+    // TODO: replace!
 
     ///
     static Regex from(String_UTF8 text, RegexMode mode = RegexMode(), RegexLimiter limiter = RegexLimiter()) {
@@ -215,9 +231,13 @@ export @safe nothrow @nogc:
         ret.state.allocator = allocator;
         ret.state.rc(true);
 
-        ret.state.pattern = text;
+        // Normal form D is used due to non-starters
+        ret.state.pattern = text.toNFD.dup;
+
+        // TODO: case folding
+
         ret.state.limiter = limiter;
-        ret.state.head = parse(text, ret.state, mode, errorSink);
+        ret.state.head = parse(ret.state.pattern, ret.state, mode, errorSink);
 
         if(errorSink.haveError)
             return Regex.init;
