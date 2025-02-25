@@ -889,6 +889,11 @@ export @safe nothrow @nogc:
     }
 
     ///
+    bool isChildOf(scope FilePath parent) scope {
+        return parent.isParentOf(this);
+    }
+
+    ///
     bool opEquals(scope String_UTF8.LiteralType other) scope const {
         return this.toString() == other;
     }
