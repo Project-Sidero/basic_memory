@@ -923,6 +923,7 @@ export @safe nothrow @nogc:
     ///
     @trusted unittest {
         assert(FilePath.from("something.d").assumeOkay.matchesGlob("*.d"));
+        assert(!FilePath.from(".gitignore").assumeOkay.matchesGlob("*.d"));
     }
 
     ///
@@ -1690,11 +1691,12 @@ struct GlobMatch {
         stack.unsafeGetLiteral[currentOffset] = StackPos(rules.ptr, 0, 0, startPtr);
 
         bool prefixMatch(const(char)* ptr, const(char)[] against) {
-            if(ptr + against.length <= endPtr) {
-                foreach(i, c; against) {
-                    if(c != ptr[i])
-                        return false;
-                }
+            if(ptr + against.length > endPtr)
+                return false;
+
+            foreach(i, c; against) {
+                if(c != ptr[i])
+                    return false;
             }
 
             return true;
@@ -1741,15 +1743,20 @@ struct GlobMatch {
 
         while(stackUsed > 0) {
             StackPos* pos = stack.ptr + currentOffset;
-            if (pos.ptr + pos.consumed == endPtr)
-                return true;
 
-            if (advance(pos)) {
-                if (pos.ruleId == rules.length - 1)
+            if(advance(pos)) {
+                if(pos.ruleId + 1 == rules.length) {
+                    if (pos.ptr + pos.consumed == endPtr)
+                        return true;
+
+                    currentOffset--;
+                    stackUsed--;
                     continue;
+                }
 
                 size_t newRuleId = pos.ruleId + 1;
                 const(char)* nextPtr = pos.ptr + pos.consumed;
+                assert(nextPtr <= endPtr);
 
                 currentOffset = getNextStackPosition();
                 stack.unsafeGetLiteral[currentOffset] = StackPos(rules.ptr + newRuleId, 0, newRuleId, nextPtr);
@@ -1763,8 +1770,6 @@ struct GlobMatch {
     }
 
     void compilePattern() scope @trusted {
-        import sidero.base.console;
-
         const(char)[] togo = pattern.unsafeGetLiteral;
 
         while(togo.length > 0) {
