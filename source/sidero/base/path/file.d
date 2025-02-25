@@ -307,9 +307,11 @@ export @safe nothrow @nogc:
                 StringBuilder_UTF8 components = state.storage[offset .. $];
 
                 while(count > 0 && components.length > 0) {
-                    count--;
-
                     ptrdiff_t index = components.lastIndexOf(sep);
+                    // empty components don't matter
+                    if (index + 1 < components.length)
+                        count--;
+
                     if(index > 0)
                         components.remove(index, ptrdiff_t.max);
                     else
@@ -342,12 +344,14 @@ export @safe nothrow @nogc:
         assert(!FilePath.from(".bin", FilePathPlatform.Posix).assumeOkay.removeComponents(1).couldPointToEntry);
         assert(FilePath.from("~/.bin", FilePathPlatform.Posix).assumeOkay.removeComponents(1) == "~/");
         assert(FilePath.from("/root/bin", FilePathPlatform.Posix).assumeOkay.removeComponents(1) == "/root");
+        assert(FilePath.from("/root/bin/", FilePathPlatform.Posix).assumeOkay.removeComponents(1) == "/root");
 
         assert(FilePath.from(".bin", FilePathPlatform.Windows).assumeOkay.removeComponents(1).isNull);
         assert(FilePath.from("~/.bin", FilePathPlatform.Windows).assumeOkay.removeComponents(1) == "%USERPROFILE%\\");
         assert(FilePath.from("C:\\My Program\\bin", FilePathPlatform.Windows).assumeOkay.removeComponents(1) == "\\\\?\\C:\\My Program");
         assert(FilePath.from("\\\\hostname\\share\\My Program\\bin", FilePathPlatform.Windows)
                 .assumeOkay.removeComponents(1) == "\\\\hostname\\share\\My Program");
+        assert(FilePath.from("C:\\My Program\\bin\\", FilePathPlatform.Windows).assumeOkay.removeComponents(1) == "\\\\?\\C:\\My Program");
     }
 
     /// Ditto
