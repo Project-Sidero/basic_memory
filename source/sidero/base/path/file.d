@@ -315,10 +315,6 @@ export @safe nothrow @nogc:
                     else
                         components.remove(0, ptrdiff_t.max);
                 }
-
-                if(state.storage.length > 0 && !state.storage.endsWith(sep))
-                    state.storage ~= sep;
-
             }
 
             state.couldPointToEntry = state.storage.length > 0;
