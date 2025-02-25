@@ -19,7 +19,7 @@ mixin template RegexMatchStrategyTests(RegexMatchStrategy strategy) {
         return r;
     }
 
-    const(char)[][2] expectMatch(Regex r, string contents, int forTest = __LINE__) {
+    const(char)[][2] expectMatch(Regex r, string contents, int forTest = __LINE__) @trusted {
         bool outputDebug;
 
         if(outputDebug) {
@@ -44,9 +44,17 @@ mixin template RegexMatchStrategyTests(RegexMatchStrategy strategy) {
                     matched.length, "[[  ", matched, "  ]] ", contents.length, "[[  ", contents, "  ]]");
         }
 
-        if(matched.length == 0)
-            return [null, null];
-        return [before, matched];
+        const(char)[][2] ret = void;
+
+        if(matched.length == 0) {
+            ret[0] = null;
+            ret[1] = null;
+        } else {
+            ret[0] = before;
+            ret[1] = matched;
+        }
+
+        return ret;
     }
 
     unittest {

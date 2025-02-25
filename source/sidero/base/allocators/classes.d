@@ -127,8 +127,9 @@ export @safe nothrow @nogc:
     }
 
     ///
-    bool isNull() {
-        this.checked = this.instance !is null;
+    bool isNull() scope const @trusted {
+        bool* checked = cast(bool*)&this.checked;
+        *checked = this.instance !is null;
         return this.instance is null;
     }
 
@@ -205,6 +206,26 @@ export @safe nothrow @nogc:
         }
 
         return ret;
+    }
+
+    ///
+    ulong toHash() scope const {
+        if(isNull)
+            return 0;
+        else
+            return instance.toHash();
+    }
+
+    ///
+    int opCmp(scope CRef other) scope {
+        ulong a = this.toHash, b = other.toHash;
+
+        if(a < b)
+            return -1;
+        else if(a > b)
+            return 1;
+        else
+            return 0;
     }
 }
 
