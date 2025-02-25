@@ -341,13 +341,13 @@ export @safe nothrow @nogc:
     @trusted unittest {
         assert(!FilePath.from(".bin", FilePathPlatform.Posix).assumeOkay.removeComponents(1).couldPointToEntry);
         assert(FilePath.from("~/.bin", FilePathPlatform.Posix).assumeOkay.removeComponents(1) == "~/");
-        assert(FilePath.from("/root/bin", FilePathPlatform.Posix).assumeOkay.removeComponents(1) == "/root/");
+        assert(FilePath.from("/root/bin", FilePathPlatform.Posix).assumeOkay.removeComponents(1) == "/root");
 
         assert(FilePath.from(".bin", FilePathPlatform.Windows).assumeOkay.removeComponents(1).isNull);
         assert(FilePath.from("~/.bin", FilePathPlatform.Windows).assumeOkay.removeComponents(1) == "%USERPROFILE%\\");
-        assert(FilePath.from("C:\\My Program\\bin", FilePathPlatform.Windows).assumeOkay.removeComponents(1) == "\\\\?\\C:\\My Program\\");
+        assert(FilePath.from("C:\\My Program\\bin", FilePathPlatform.Windows).assumeOkay.removeComponents(1) == "\\\\?\\C:\\My Program");
         assert(FilePath.from("\\\\hostname\\share\\My Program\\bin", FilePathPlatform.Windows)
-                .assumeOkay.removeComponents(1) == "\\\\hostname\\share\\My Program\\");
+                .assumeOkay.removeComponents(1) == "\\\\hostname\\share\\My Program");
     }
 
     /// Ditto

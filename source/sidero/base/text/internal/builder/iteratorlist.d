@@ -647,25 +647,27 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
         }
 
         void onInsertIncreaseFromHead(size_t ifFromOffsetFromHead, size_t amount, bool adjustMaxIfEqual) {
-           version(none) {
+            version(none) {
                 import core.stdc.stdio;
 
-                debug printf("%p: iff %zd, +delta %zd, min %zd, max %zd, forwards %zd, backwards %zd\n", &this, ifFromOffsetFromHead, amount,
-                this.minimumOffsetFromHead, this.maximumOffsetFromHead, this.forwards.offsetFromHead, this.backwards.offsetFromHead);
+                debug printf("%p: iff %zd, +delta %zd, min %zd, max %zd, forwards %zd, backwards %zd\n", &this,
+                        ifFromOffsetFromHead, amount,
+                        this.minimumOffsetFromHead, this.maximumOffsetFromHead, this.forwards.offsetFromHead,
+                        this.backwards.offsetFromHead);
                 debug fflush(stdout);
             }
 
             if(this.maximumOffsetFromHead < ifFromOffsetFromHead)
                 return;
-            else if (this.maximumOffsetFromHead == ifFromOffsetFromHead) {
-                if (!adjustMaxIfEqual)
+            else if(this.maximumOffsetFromHead == ifFromOffsetFromHead) {
+                if(!adjustMaxIfEqual)
                     return;
             }
 
             debugMe("before onInsert2", true);
             blockList.debugMe;
 
-            if (this.minimumOffsetFromHead >= ifFromOffsetFromHead)
+            if(this.minimumOffsetFromHead >= ifFromOffsetFromHead)
                 this.minimumOffsetFromHead += amount;
             this.maximumOffsetFromHead += amount;
 
@@ -900,25 +902,25 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
         bool emptyInternal() {
             version(none) {
                 debug {
-                    import std.stdio;
+                    import core.stdc.stdio;
 
-                    try {
-                        writeln(primedForwards, " ", primedBackwards, " ", this.minimumOffsetFromHead, " <= ",
-                                forwards.offsetFromHead, " <= ", backwards.offsetFromHead, " <= ", this.maximumOffsetFromHead);
-                        stdout.flush;
-                    } catch(Exception) {
-                    }
+                    printf("empty internal %d, %d, %zd <= %zd <= %zd <= %zd\n", primedForwards, primedBackwards,
+                            this.minimumOffsetFromHead, forwards.offsetFromHead, backwards.offsetFromHead, this.maximumOffsetFromHead);
                 }
             }
 
+            bool ret;
+
             if(primedForwards && primedBackwards)
-                return backwards.offsetFromHead < forwards.offsetFromHead || forwards.offsetFromHead >= this.maximumOffsetFromHead;
+                ret = backwards.offsetFromHead < forwards.offsetFromHead || forwards.offsetFromHead >= this.maximumOffsetFromHead;
             else if(primedForwards)
-                return forwards.offsetFromHead >= this.maximumOffsetFromHead;
+                ret = forwards.offsetFromHead >= this.maximumOffsetFromHead;
             else if(primedBackwards)
-                return backwards.offsetFromHead < cast(ptrdiff_t)this.minimumOffsetFromHead;
+                ret = backwards.offsetFromHead < cast(ptrdiff_t)this.minimumOffsetFromHead;
             else
-                return this.minimumOffsetFromHead >= this.maximumOffsetFromHead;
+                ret = this.minimumOffsetFromHead >= this.maximumOffsetFromHead;
+
+            return ret;
         }
 
         Char frontInternal() {
@@ -1191,9 +1193,9 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
                 amount -= canDo;
             }
 
-            if (offsetIntoBlock == block.length) {
-                if (limitToData) {
-                    if (block.next !is null && block.next.next !is null) {
+            if(offsetIntoBlock == block.length) {
+                if(limitToData) {
+                    if(block.next !is null && block.next.next !is null) {
                         block = block.next;
                         offsetIntoBlock = 0;
                     }
@@ -1369,12 +1371,12 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
                 debug {
                     import core.stdc.stdio;
 
-                    if (this.block !is null)
-                    printf("%s Cursor: block=0x%p, offsetIntoBlock=%zd, offsetFromHead=%zd, length=%zd\n", prefix.ptr,
-                    this.block, this.offsetIntoBlock, this.offsetFromHead, this.block.length);
+                    if(this.block !is null)
+                        printf("%s Cursor: block=0x%p, offsetIntoBlock=%zd, offsetFromHead=%zd, length=%zd\n",
+                                prefix.ptr, this.block, this.offsetIntoBlock, this.offsetFromHead, this.block.length);
                     else
-                    printf("%s Cursor: block=0x%p, offsetIntoBlock=%zd, offsetFromHead=%zd\n", prefix.ptr, this.block,
-                    this.offsetIntoBlock, this.offsetFromHead);
+                        printf("%s Cursor: block=0x%p, offsetIntoBlock=%zd, offsetFromHead=%zd\n", prefix.ptr,
+                                this.block, this.offsetIntoBlock, this.offsetFromHead);
                 }
             }
         }

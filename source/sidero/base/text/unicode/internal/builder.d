@@ -946,10 +946,12 @@ struct UTF_State(Char) {
                 if(needToUseOtherBuffer) {
                     auto items = cast(Char[])this.forwardItems;
                     assert(items.length > 0);
-                    this.forwardItems = cast(void[])items[0 .. $ - 1];
+                    this.forwardItems = cast(void[])(items[0 .. $ - 1]);
+                    assert(items.length > (cast(Char[])this.forwardItems).length);
                 } else if(this.backwardItems.length > 0) {
                     auto items = cast(Char[])this.backwardItems;
-                    this.backwardItems = cast(void[])items[0 .. $ - 1];
+                    this.backwardItems = cast(void[])(items[0 .. $ - 1]);
+                    assert(items.length > (cast(Char[])this.backwardItems).length);
                 }
 
                 if(this.backwardItems.length == 0 && !this.emptyInternal) {
