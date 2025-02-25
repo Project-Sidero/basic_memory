@@ -309,7 +309,7 @@ export @safe nothrow @nogc:
                 while(count > 0 && components.length > 0) {
                     ptrdiff_t index = components.lastIndexOf(sep);
                     // empty components don't matter
-                    if (index + 1 < components.length)
+                    if(index + 1 < components.length)
                         count--;
 
                     if(index > 0)
@@ -891,6 +891,38 @@ export @safe nothrow @nogc:
     ///
     bool isChildOf(scope FilePath parent) scope {
         return parent.isParentOf(this);
+    }
+
+    ///
+    bool matchesGlob(scope String_UTF8.LiteralType other) scope {
+        return matchesGlob(String_UTF8(other));
+    }
+
+    /**
+        For relative paths, matches against glob pattern
+
+        Supports ? and *
+    */
+    bool matchesGlob(scope String_UTF8 pattern) scope @trusted {
+        if(isNull || pattern.length == 0 || this.isAbsolute)
+            return false;
+
+        String_UTF8 against = state.storage.asReadOnly;
+        GlobMatch gm;
+
+        // get both pattern and against into the same normalization
+        gm.pattern = pattern.toNFD.dup;
+        gm.against = against.toNFD.dup;
+
+        gm.pattern.stripZeroTerminator;
+        gm.against.stripZeroTerminator;
+
+        return gm.run;
+    }
+
+    ///
+    @trusted unittest {
+        assert(FilePath.from("something.d").assumeOkay.matchesGlob("*.d"));
     }
 
     ///
@@ -1630,5 +1662,156 @@ Result!FilePath parseFilePathFromString(Input)(scope Input input, scope return R
         }
 
         return typeof(return)(ret);
+    }
+}
+
+struct GlobMatch {
+    String_UTF8 pattern, against;
+    DynamicArray!Rule rules;
+
+@safe nothrow @nogc:
+
+    bool run() scope @trusted {
+        compilePattern;
+
+        const(char)* startPtr = against.ptr;
+        const(char)* endPtr = startPtr + against.length;
+
+        DynamicArray!StackPos stack;
+        size_t stackUsed;
+
+        size_t getNextStackPosition() {
+            if(stack.length <= stackUsed)
+                stack.length = stack.length + 8;
+            return stackUsed++;
+        }
+
+        size_t currentOffset = getNextStackPosition();
+        stack.unsafeGetLiteral[currentOffset] = StackPos(rules.ptr, 0, 0, startPtr);
+
+        bool prefixMatch(const(char)* ptr, const(char)[] against) {
+            if(ptr + against.length <= endPtr) {
+                foreach(i, c; against) {
+                    if(c != ptr[i])
+                        return false;
+                }
+            }
+
+            return true;
+        }
+
+        bool advance(StackPos* pos) {
+            import sidero.base.encoding.utf : decodeLength;
+
+            const(char)* had = pos.ptr + pos.consumed;
+
+            final switch(pos.rule.type) {
+            case Rule.Type.Prefix:
+                if(prefixMatch(had, pos.rule.prefix)) {
+                    pos.consumed += pos.rule.prefix.length;
+                    return true;
+                }
+                break;
+
+            case Rule.Type.AnyOne:
+                if(pos.consumed == 0 && had + 1 <= endPtr) {
+                    const len = decodeLength(*had);
+
+                    if(had + len <= endPtr) {
+                        pos.consumed += len;
+                        return true;
+                    }
+                }
+                break;
+
+            case Rule.Type.AnyMultiple:
+                if(had + 1 <= endPtr) {
+                    const len = decodeLength(*had);
+
+                    if(had + len <= endPtr) {
+                        pos.consumed += len;
+                        return true;
+                    }
+                }
+                break;
+            }
+
+            return false;
+        }
+
+        while(stackUsed > 0) {
+            StackPos* pos = stack.ptr + currentOffset;
+            if (pos.ptr + pos.consumed == endPtr)
+                return true;
+
+            if (advance(pos)) {
+                if (pos.ruleId == rules.length - 1)
+                    continue;
+
+                size_t newRuleId = pos.ruleId + 1;
+                const(char)* nextPtr = pos.ptr + pos.consumed;
+
+                currentOffset = getNextStackPosition();
+                stack.unsafeGetLiteral[currentOffset] = StackPos(rules.ptr + newRuleId, 0, newRuleId, nextPtr);
+            } else {
+                currentOffset--;
+                stackUsed--;
+            }
+        }
+
+        return false;
+    }
+
+    void compilePattern() scope @trusted {
+        import sidero.base.console;
+
+        const(char)[] togo = pattern.unsafeGetLiteral;
+
+        while(togo.length > 0) {
+            Rule.Type type;
+            size_t inPrefix;
+
+            foreach(c; togo) {
+                if(c == '*') {
+                    if(inPrefix > 0)
+                        break;
+
+                    type = Rule.Type.AnyMultiple;
+                    break;
+                } else if(c == '?') {
+                    if(inPrefix > 0)
+                        break;
+                    type = Rule.Type.AnyOne;
+                    break;
+                }
+
+                inPrefix++;
+            }
+
+            if(inPrefix) {
+                rules ~= Rule(type, togo[0 .. inPrefix]);
+                togo = togo[inPrefix .. $];
+            } else {
+                rules ~= Rule(type);
+                togo = togo[1 .. $];
+            }
+        }
+    }
+
+    static struct Rule {
+        enum Type {
+            Prefix,
+            AnyOne,
+            AnyMultiple,
+        }
+
+        Type type;
+        const(char)[] prefix;
+    }
+
+    static struct StackPos {
+        Rule* rule;
+        size_t consumed, ruleId;
+        const(char)* ptr;
     }
 }
