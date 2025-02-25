@@ -533,6 +533,7 @@ private:
 
         enum IsFieldIgnored(Type2, string name) = () {
             alias member = __traits(getMember, cast(Type2)input, name);
+            const isPrivate = __traits(getVisibility, member) == "private";
             bool ignored = false;
 
             foreach(attr; __traits(getAttributes, member)) {
@@ -540,7 +541,7 @@ private:
                     ignored = true;
             }
 
-            return ignored;
+            return [ignored, isPrivate];
         }();
 
         enum IsFieldOverlapped(Type2, string name, string[] FieldNames) = __traits(getVisibility, __traits(getMember, input, name)) != "private" && () {
@@ -611,8 +612,8 @@ private:
                     enum ignored = IsFieldIgnored!(Type, name);
                     enum overlapped = IsFieldOverlapped!(Type, name, FieldNames);
 
-                    static if(ignored || overlapped) {
-                        handleField!(Type, name)(ignored, overlapped);
+                    static if((ignored[0] && !ignored[1]) || overlapped) {
+                        handleField!(Type, name)(ignored[0], overlapped);
                     }
                 }
             }
@@ -630,8 +631,8 @@ private:
                             enum ignored = IsFieldIgnored!(Base, name);
                             enum overlapped = IsFieldOverlapped!(Base, name, FieldNames);
 
-                            static if(ignored || overlapped) {
-                                handleField!(Base, name)(ignored, overlapped);
+                            static if((ignored[0] && !ignored[1]) || overlapped) {
+                                handleField!(Base, name)(ignored[0], overlapped);
                             }
                         }
                     }
