@@ -40,7 +40,6 @@ void fillUninitializedWithInit(T)(scope T[] array...) @trusted {
 /// Initialize uninitialized memory to its init state
 void fillUninitializedClassWithInit(T)(scope void[] array) @trusted {
     immutable initState = cast(immutable(ubyte[]))__traits(initSymbol, T);
-    assert(initState.length == T.sizeof);
 
     foreach(i, ref v; (cast(ubyte[])array)[0 .. initState.length]) {
         v = initState[i];
