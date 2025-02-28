@@ -497,6 +497,13 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
 
         void moveRange(scope Cursor.Block* ifThisBlock, size_t ifStartOffsetInBlock, scope Cursor.Block* movedIntoBlock,
                 size_t movedIntoOffset, size_t amount) scope @trusted {
+            version(none) {
+                import core.stdc.stdio;
+
+                debug printf("move 0x%p range from 0x%p into 0x%p, when offset >= %zd as %zd amount %zd\n", &this,
+                        ifThisBlock, movedIntoBlock, ifStartOffsetInBlock, movedIntoOffset, amount);
+            }
+
             debugMe("before moveRange");
 
             forwards.moveRange(ifThisBlock, ifStartOffsetInBlock, movedIntoBlock, movedIntoOffset, amount);
@@ -587,10 +594,14 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
 
                     assert(iterator2.forwards.offsetFromHead > 0);
                     assert(iterator4.forwards.offsetFromHead > 0);
-                    assert(iterator1.backwards.offsetFromHead > 0);
-                    assert(iterator2.backwards.offsetFromHead > 0);
-                    assert(iterator3.backwards.offsetFromHead > 0);
-                    assert(iterator4.backwards.offsetFromHead > 0);
+                    assert(iterator1.backwards.offsetFromHead == Text1.length + Text2.length - 1);
+                    assert(iterator2.backwards.offsetFromHead == Text1.length + Text2.length - 1);
+                    assert(iterator3.backwards.offsetFromHead == Text1.length + Text2.length - 2);
+                    assert(iterator4.backwards.offsetFromHead == Text1.length + Text2.length - 2);
+                    assert(iterator1.backwards.offsetIntoBlock == 12);
+                    assert(iterator2.backwards.offsetIntoBlock == 12);
+                    assert(iterator3.backwards.offsetIntoBlock == 11);
+                    assert(iterator4.backwards.offsetIntoBlock == 11);
                 }
 
                 {
@@ -615,10 +626,14 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
 
                     assert(iterator2.forwards.offsetFromHead > 0);
                     assert(iterator4.forwards.offsetFromHead > 0);
-                    assert(iterator1.backwards.offsetFromHead > 0);
-                    assert(iterator2.backwards.offsetFromHead > 0);
-                    assert(iterator3.backwards.offsetFromHead > 0);
-                    assert(iterator4.backwards.offsetFromHead > 0);
+                    assert(iterator1.backwards.offsetFromHead == Text1.length + Text2.length - 1);
+                    assert(iterator2.backwards.offsetFromHead == Text1.length + Text2.length - 1);
+                    assert(iterator3.backwards.offsetFromHead == Text1.length + Text2.length - 2);
+                    assert(iterator4.backwards.offsetFromHead == Text1.length + Text2.length - 2);
+                    assert(iterator1.backwards.offsetIntoBlock == 20);
+                    assert(iterator2.backwards.offsetIntoBlock == 20);
+                    assert(iterator3.backwards.offsetIntoBlock == 19);
+                    assert(iterator4.backwards.offsetIntoBlock == 19);
                 }
 
                 assert(iterator1.forwards.offsetIntoBlock == 0);
@@ -630,12 +645,8 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
                 assert(iterator3.forwards.block is a);
                 assert(iterator4.forwards.block is b);
 
-                assert(iterator1.backwards.offsetIntoBlock == 0);
-                assert(iterator2.backwards.offsetIntoBlock == 0);
-                assert(iterator3.backwards.offsetIntoBlock == Text1.length + Text2.length - 3);
-                assert(iterator4.backwards.offsetIntoBlock == Text1.length + Text2.length - 3);
-                assert(iterator1.backwards.block is c);
-                assert(iterator2.backwards.block is c);
+                assert(iterator1.backwards.block is b);
+                assert(iterator2.backwards.block is b);
                 assert(iterator3.backwards.block is b);
                 assert(iterator4.backwards.block is b);
             }
@@ -650,10 +661,11 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
             version(none) {
                 import core.stdc.stdio;
 
-                debug printf("%p: iff %zd, +delta %zd, min %zd, max %zd, forwards %zd, backwards %zd\n", &this,
-                        ifFromOffsetFromHead, amount,
-                        this.minimumOffsetFromHead, this.maximumOffsetFromHead, this.forwards.offsetFromHead,
-                        this.backwards.offsetFromHead);
+                debug printf("%p: iff %zd, +delta %zd, min %zd, max %zd, forwards %zd:%zd, backwards %zd:%zd\n",
+                        &this, ifFromOffsetFromHead, amount,
+                        this.minimumOffsetFromHead,
+                        this.maximumOffsetFromHead, this.forwards.offsetFromHead, this.forwards.offsetIntoBlock,
+                        this.backwards.offsetFromHead, this.backwards.offsetIntoBlock);
                 debug fflush(stdout);
             }
 
@@ -667,12 +679,23 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
             debugMe("before onInsert2", true);
             blockList.debugMe;
 
-            if(this.minimumOffsetFromHead >= ifFromOffsetFromHead)
+            if(forwards.offsetFromHead >= ifFromOffsetFromHead) {
+                forwards.setup(blockList, forwards.offsetFromHead + amount);
+            }
+
+            version(none) {
+                import core.stdc.stdio;
+
+                debug printf("< forwards, backwards >\n");
+            }
+
+            if(backwards.offsetFromHead >= ifFromOffsetFromHead) {
+                backwards.setup(blockList, backwards.offsetFromHead + amount);
+            }
+
+            if(this.minimumOffsetFromHead > ifFromOffsetFromHead)
                 this.minimumOffsetFromHead += amount;
             this.maximumOffsetFromHead += amount;
-
-            forwards.onInsertIncreaseFromHead(ifFromOffsetFromHead, amount, this.maximumOffsetFromHead);
-            backwards.onInsertIncreaseFromHead(ifFromOffsetFromHead, amount, this.maximumOffsetFromHead);
 
             debugMe("after onInsert2", true);
             blockList.debugMe;
@@ -992,6 +1015,7 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
 
                         if(forwards.offsetFromHead == 0 && backwards.offsetFromHead == 0) {
                         } else if(forwards.block.next is cursorF.block && forwards.offsetIntoBlock == forwards.block.length) {
+                        } else if(forwards.block.previous is cursorF.block && forwards.offsetFromHead == 0) {
                         } else if(cursorB.block !is null && backwards.block.next is cursorB.block &&
                                 backwards.offsetIntoBlock == backwards.block.length) {
                         } else if(cursorF.block.next is forwards.block && forwards.offsetIntoBlock == 0 &&
@@ -1160,6 +1184,16 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
         void advanceForward(size_t amount, size_t maximumOffsetFromHead, bool limitToData) scope {
             assert(block !is null);
 
+            version(none) {
+                import core.stdc.stdio;
+
+                debug printf("advancing forward 0x%p, offsetIntoBlock %zd offsetFromHead %zd\n", block,
+                        this.offsetIntoBlock, this.offsetFromHead);
+                scope(exit)
+                    debug printf(" advanced forward 0x%p, offsetIntoBlock %zd offsetFromHead %zd\n", block,
+                            this.offsetIntoBlock, this.offsetFromHead);
+            }
+
             // if we are at the end of our current block, skip to the start of next
             if(offsetIntoBlock == block.length && offsetFromHead < maximumOffsetFromHead && block.next !is null && block.next.next !is null) {
                 block = block.next;
@@ -1295,10 +1329,15 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
 
         void moveRange(scope Block* ifThisBlock, size_t ifStartOffsetInBlock, scope Block* movedIntoBlock,
                 size_t movedIntoOffset, size_t amount) scope @trusted {
+            version(none) {
+                import core.stdc.stdio;
 
+                debug printf("MOVING CURSOR for block 0x%p with 0x%p, min offset %zd as %zd amount %zd\n", ifThisBlock,
+                        movedIntoBlock, ifStartOffsetInBlock, movedIntoOffset, amount);
+            }
             if(this.block is ifThisBlock) {
                 if(this.offsetIntoBlock >= ifStartOffsetInBlock) {
-                    if(this.offsetIntoBlock < ifStartOffsetInBlock + amount) {
+                    if(this.offsetIntoBlock <= ifStartOffsetInBlock + amount) {
                         this.block = movedIntoBlock;
                         this.offsetIntoBlock = (this.offsetIntoBlock - ifStartOffsetInBlock) + movedIntoOffset;
                     } else {
@@ -1306,12 +1345,6 @@ struct IteratorListImpl(Char, alias CustomIteratorContents) {
                     }
                 } else
                     assert(this.offsetIntoBlock < ifStartOffsetInBlock);
-            }
-        }
-
-        void onInsertIncreaseFromHead(size_t ifFromOffsetFromHead, size_t amount, size_t maximumOffsetFromHead) scope {
-            if(this.offsetFromHead >= ifFromOffsetFromHead) {
-                advanceForward(amount, maximumOffsetFromHead, offsetFromHead + amount < maximumOffsetFromHead);
             }
         }
 

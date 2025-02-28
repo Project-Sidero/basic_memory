@@ -679,7 +679,7 @@ mixin template StringBuilderOperations() {
                 if(cursor.offsetIntoBlock == BlockList.Count) {
                     // at end of the current block
 
-                    if (cursor.block.next.length > 0 && cursor.block.next.length < BlockList.Count) {
+                    if(cursor.block.next.length > 0 && cursor.block.next.length < BlockList.Count) {
                         // move into next as it has space
                         cursor.block = cursor.block.next;
                     } else {
@@ -692,7 +692,8 @@ mixin template StringBuilderOperations() {
                 } else {
                     // split everything at and to the right
                     Block* splitInto = blockList.insert(cursor.block), oldBlock = cursor.block;
-                    size_t oldOffset = cursor.offsetIntoBlock, amount = cursor.block.length - cursor.offsetIntoBlock;
+                    size_t oldOffset = cursor.offsetIntoBlock, amount = cursor.block.length - cursor.offsetIntoBlock,
+                        oldLength = oldBlock.length;
 
                     cursor.block.moveFromInto(oldOffset, amount, splitInto, 0);
 
@@ -780,7 +781,7 @@ mixin template StringBuilderOperations() {
 
                         onInsert(cA[0 .. canDo]);
 
-                        if (amountToInsert < canDo) {
+                        if(amountToInsert < canDo) {
                             debug {
                                 foreach(iterator; iteratorList) {
                                     iterator.debugMe("inserted", true);
@@ -807,7 +808,9 @@ mixin template StringBuilderOperations() {
                         foreach(iterator; iteratorList) {
                             assert(iterator.forwards.offsetIntoBlock <= iterator.forwards.block.length);
                             if(!(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length)) {
-                                assert(iterator.backwards.offsetIntoBlock <= iterator.backwards.block.length);
+                                iterator.debugMe("DEBUG ITERATOR ON INSERT");
+                                blockList.debugMe();
+                                assert(0);
                             }
                         }
                     }
@@ -1182,6 +1185,49 @@ struct OpTest(Char) {
         allocator.dispose(&this);
     }
 
+    ptrdiff_t externalOffsetOf(scope Iterator* iterator, scope ref OtherStateAsTarget!Char toFind, bool onlyOnce) scope @trusted {
+        blockList.mutex.pureLock;
+        if(toFind.obj !is &this)
+            toFind.mutex(true);
+
+        size_t maximumOffsetFromHead, lastConsumed;
+        scope Cursor cursor = cursorFor(iterator, maximumOffsetFromHead, 0);
+        size_t startingOffset = cursor.offsetFromHead;
+
+        ptrdiff_t ret = -1;
+        replaceOperation(iterator, cursor, (scope Cursor cursor, size_t maximumOffsetFromHead) {
+            lastConsumed = 0;
+
+            foreach(value; toFind.foreachValue) {
+                if(cursor.isOutOfRange(0, maximumOffsetFromHead))
+                    return false;
+
+                Char c1 = value, c2 = cursor.get();
+
+                if(c1 != c2)
+                    return 0;
+
+                lastConsumed++;
+                cursor.advanceForward(1, maximumOffsetFromHead, true);
+            }
+
+            return lastConsumed;
+        }, (scope Iterator* iterator, scope ref Cursor cursor) @trusted {
+            ret = cursor.offsetFromHead;
+            cursor.advanceForward(lastConsumed, maximumOffsetFromHead, true);
+            return size_t(0);
+        }, false, onlyOnce);
+
+        blockList.mutex.unlock;
+        if(toFind.obj !is &this)
+            toFind.mutex(false);
+
+        if(ret >= 0)
+            ret -= startingOffset;
+
+        return ret;
+    }
+
     void debugPosition(scope Cursor cursor) {
         debugPosition(cursor.block, cursor.offsetIntoBlock);
     }
@@ -1360,6 +1406,56 @@ struct OpTest(Char) {
 
         OtherStateAsTarget!Char get() scope return @trusted {
             return OtherStateAsTarget!Char(cast(void*)literal.ptr, &mutex, &foreachContiguous, &foreachValue, &length);
+        }
+    }
+}
+
+unittest {
+    OpTc s = OpTc(globalAllocator());
+    scope(exit)
+        s.rc(false);
+
+    {
+        OpTc.LiteralAsTarget literal;
+        literal.literal = "Corrupt user configuration file for Sideroit at FilePath(\\\\?\\C:\\Users\\alpha\\AppData\\Local\\sideroit\\settings.json5)\n\\\\?\\C:\\Users\\alpha\\AppData\\Local\\sideroit\\settings.json5:6:1: error: Unexpected token type Type.Punctuation, expected string for object member name\n";
+        auto literal2 = literal.get;
+        s.externalInsert(null, 0, literal2, false);
+    }
+
+    {
+        auto temp = s.newIterator(null, 0, s.externalLength(null));
+        scope(exit)
+            s.rcIterator(false, temp);
+
+        OpTc.LiteralAsTarget newline;
+        newline.literal = "\n";
+        auto newline2 = newline.get;
+
+        OpTc.LiteralAsTarget inserted;
+        inserted.literal = "[CONFIG LOADER]";
+        auto inserted2 = inserted.get;
+
+        {
+            s.externalInsert(temp, 0, inserted2, false);
+            assert(temp.backwards.offsetFromHead == 278);
+
+            ptrdiff_t index = s.externalOffsetOf(temp, newline2, true);
+            assert(index == 114);
+
+            temp.forwards.advanceForward(index + 1, temp.maximumOffsetFromHead, true);
+
+            assert(s.externalLength(temp) > 0);
+        }
+
+        {
+            s.externalInsert(temp, 0, inserted2, false);
+
+            ptrdiff_t index = s.externalOffsetOf(temp, newline2, true);
+            assert(index == 147);
+
+            temp.forwards.advanceForward(index + 1, temp.maximumOffsetFromHead, true);
+
+            assert(s.externalLength(temp) == 0);
         }
     }
 }

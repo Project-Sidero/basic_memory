@@ -2775,7 +2775,7 @@ struct ASCII_State {
                 if (cursor.isOutOfRange(0, maximumOffsetFromHead))
                     return false;
 
-                ubyte c1 = value, c2 = cursor.get();
+                Char c1 = value, c2 = cursor.get();
 
                 if (!caseSensitive) {
                     c1 = c1.toLower;
