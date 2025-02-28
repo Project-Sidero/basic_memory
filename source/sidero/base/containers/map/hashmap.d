@@ -961,7 +961,7 @@ struct HashMapIterator(RealKeyType, ValueType) {
 
     @safe nothrow @nogc:
 
-         ~this() scope {
+         export ~this() scope {
             assert(node is null);
         }
 
@@ -1048,6 +1048,9 @@ struct HashMapNode(RealKeyType, ValueType) {
 
         this.moveIntoBiggerBuckets();
         assert(buckets.length > 0);
+    }
+
+    export ~this() {
     }
 
     void cleanup() scope {

@@ -1803,6 +1803,14 @@ struct GlobMatch {
         }
     }
 
+    export ulong toHash() const {
+        assert(0);
+    }
+
+    export bool opEquals(GlobMatch other) const {
+        assert(0);
+    }
+
     static struct Rule {
         enum Type {
             Prefix,
@@ -1812,6 +1820,19 @@ struct GlobMatch {
 
         Type type;
         const(char)[] prefix;
+
+        export @safe nothrow @nogc:
+
+        ulong toHash() scope const {
+            import sidero.base.hash.utils;
+
+            auto ret = hashOf(type);
+            return hashOf(prefix, ret);
+        }
+
+        bool opEquals(ref const Rule other) scope const {
+            return this.type == other.type && this.prefix == other.prefix;
+        }
     }
 
     static struct StackPos {

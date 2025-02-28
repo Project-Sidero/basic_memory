@@ -83,6 +83,16 @@ struct GeneralPurposeAllocator {
 
     alias impl this;
 
+    export @safe nothrow @nogc:
+
+    ulong toHash() const {
+        return 0;
+    }
+
+    ulong opEquals(GeneralPurposeAllocator other) const {
+        return false;
+    }
+
     ///
     __gshared RCAllocatorInstance!GeneralPurposeAllocator instance;
 }
