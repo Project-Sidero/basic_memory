@@ -801,7 +801,7 @@ struct FileTarget {
 
     FileAppender logStream;
 
-@safe nothrow @nogc:
+export @safe nothrow @nogc:
 
     this(return scope ref FileTarget other) scope {
     }

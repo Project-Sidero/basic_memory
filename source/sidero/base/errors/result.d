@@ -3,6 +3,7 @@ import sidero.base.errors.message;
 import sidero.base.attributes;
 import sidero.base.internal.logassert;
 import sidero.base.containers.utils : genericCompare;
+import sidero.base.math.utils;
 import std.traits : isPointer;
 
 export:

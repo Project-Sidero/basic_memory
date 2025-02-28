@@ -217,7 +217,7 @@ private:
                 value.toStringPretty(&builder.put, pp);
             }));
 
-    void handlePrefix(scope StringBuilder_UTF8 builder, bool onlyRepeat = false, bool usePrefix = true, bool useSuffix = true) {
+    void handlePrefix()(scope StringBuilder_UTF8 builder, bool onlyRepeat = false, bool usePrefix = true, bool useSuffix = true) {
         if(this.startWithoutPrefix) {
             this.startWithoutPrefix = false;
             return;

@@ -870,7 +870,7 @@ struct TZFile {
 
     String_UTF8 tzString;
 
-@safe nothrow @nogc:
+export @safe nothrow @nogc:
 
     this(return scope ref TZFile other) scope {
         this.tupleof = other.tupleof;
