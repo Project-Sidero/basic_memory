@@ -330,7 +330,7 @@ private:
             builder.formattedWrite("@{:p}", cast(void*)input);
         }
 
-        if (input !is null) {
+        if(input !is null) {
             static if(!is(SubType == void)) {
                 builder ~= "("c;
                 this.startWithoutPrefix = true;
@@ -656,13 +656,18 @@ private:
             auto before = builder[0 .. offsetForToString], after = builder[offsetForToString .. $];
 
             if(after.startsWith(FQN)) {
-                builder.remove(offsetForToString, ptrdiff_t.max);
+                builder.remove(offsetForToString, FQN.length);
             } else if(after.startsWith(TypeIdentifierName)) {
                 builder.remove(offsetForToString, TypeIdentifierName.length);
             }
 
             if(after.startsWith("(")) {
                 builder.remove(offsetForToString, 1);
+
+                if(after.endsWith(")"))
+                    after.remove(-1, 1);
+            } else if(before.endsWith("(") && after.startsWith("@")) {
+                builder.remove(offsetForToString - 1, 1);
 
                 if(after.endsWith(")"))
                     after.remove(-1, 1);
@@ -698,8 +703,9 @@ private:
                             __traits(child, input, Symbols[SymbolId])(&builder.put, toCallPrettyPrint);
                         } else static if(__traits(compiles, builder ~= __traits(child, input, Symbols[SymbolId])(toCallPrettyPrint))) {
                             builder ~= __traits(child, input, Symbols[SymbolId])(toCallPrettyPrint);
-                        } else
+                        } else {
                             gotOne = false;
+                        }
                     } else {
                         static if(__traits(compiles, __traits(child, input, Symbols[SymbolId])(builder))) {
                             __traits(child, input, Symbols[SymbolId])(builder);
