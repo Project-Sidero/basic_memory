@@ -3,6 +3,7 @@ import sidero.base.console.internal.mechanism;
 import sidero.base.console.inbandinfo;
 import sidero.base.text;
 import sidero.base.console.internal.bindings;
+import sidero.base.internal.posix;
 
 export @safe nothrow @nogc:
 
@@ -194,8 +195,12 @@ void rawWriteImpl(scope String_ASCII input, bool useError = false) @trusted {
     if(useStdio) {
         FILE* fileHandle = useError ? stdioError : stdioOut;
 
-        fwrite(input.ptr, char.sizeof, useLength, fileHandle);
-        fflush(fileHandle);
+        version(Posix) {
+            writeAppend(fileHandle, input.ptr, char.sizeof * useLength);
+        } else {
+            fwrite(input.ptr, char.sizeof, useLength, fileHandle);
+            fflush(fileHandle);
+        }
     }
 }
 
@@ -223,8 +228,12 @@ void rawWriteImpl(scope StringBuilder_ASCII input, bool useError = false) @trust
     if(useStdio) {
         FILE* fileHandle = useError ? stdioError : stdioOut;
 
-        fwrite(inputA.ptr, char.sizeof, useLength, fileHandle);
-        fflush(fileHandle);
+        version(Posix) {
+            writeAppend(fileHandle, inputA.ptr, char.sizeof * useLength);
+        } else {
+            fwrite(inputA.ptr, char.sizeof, useLength, fileHandle);
+            fflush(fileHandle);
+        }
     }
 }
 
@@ -274,8 +283,12 @@ void rawWriteImpl(scope String_UTF8 input, bool useError = false) @trusted {
 
         FILE* fileHandle = useError ? stdioError : stdioOut;
 
-        fwrite(input.ptr, char.sizeof, useLength, fileHandle);
-        fflush(fileHandle);
+        version(Posix) {
+            writeAppend(fileHandle, input.ptr, char.sizeof * useLength);
+        } else {
+            fwrite(input.ptr, char.sizeof, useLength, fileHandle);
+            fflush(fileHandle);
+        }
     }
 }
 
@@ -318,7 +331,11 @@ void rawWriteImpl(scope StringBuilder_UTF8 input, bool useError = false) @truste
 
         FILE* fileHandle = useError ? stdioError : stdioOut;
 
-        fwrite(input8.ptr, char.sizeof, useLength, fileHandle);
-        fflush(fileHandle);
+        version(Posix) {
+            writeAppend(fileHandle, input8.ptr, char.sizeof * useLength);
+        } else {
+            fwrite(input8.ptr, char.sizeof, useLength, fileHandle);
+            fflush(fileHandle);
+        }
     }
 }
