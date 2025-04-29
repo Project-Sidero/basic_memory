@@ -11,15 +11,19 @@ enum {
     ///
     RangeException = ErrorMessage("RE", "Range Exception"),
     ///
-    FailedToAllocateError = ErrorMessage("FTAE", "Failed To Allocate Memory"),
+    FailedToAllocateError = ErrorMessage("FTAE",
+            "Failed To Allocate Memory"),
     ///
-    NonMatchingStateToArgumentException = ErrorMessage("NMSTA",
-            "Argument provided does not map into state"),
+    NonMatchingExpectedStateException = ErrorMessage("NMES",
+            "State does not match what is expected"),
     ///
-    TimeOutException = ErrorMessage("TOE", "Timeout exception"),
+    NonMatchingStateToArgumentException = ErrorMessage("NMSTA", "Argument provided does not map into state"),
     ///
-    PlatformNotImplementedException = ErrorMessage("PNIE",
-            "Platform is not implemented"),
+    TimeOutException = ErrorMessage("TOE",
+            "Timeout exception"),
+    ///
+    PlatformNotImplementedException = ErrorMessage(
+            "PNIE", "Platform is not implemented"),
     ///
     UnknownPlatformBehaviorException = ErrorMessage("UPBE",
             "Platform behavior is unexpected"),
