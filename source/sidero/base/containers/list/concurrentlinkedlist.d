@@ -251,7 +251,7 @@ nothrow @nogc:
     }
 
     ///
-    bool isNull() scope {
+    bool isNull() scope const {
         return this.state is null;
     }
 

@@ -98,7 +98,7 @@ scope nothrow @nogc @safe:
     }
 
     ///
-    void opAssign(scope Result other) {
+    void opAssign(return scope Result other) @trusted {
         if(__ctfe) {
             this.tupleof = Result.init.tupleof;
         } else {
