@@ -58,10 +58,10 @@
                 "tools/templates/sidero/base/text/unicode/builder.d"
             ],
             "preBuildCommands-posix": [
-                "DFLAGS=\"\" ${DUB_EXE} run --bare --skip-registry=all --root=${SIDERO_BASE:RUNGENERATORS_PACKAGE_DIR}/tools :preBuild"
+                "DFLAGS=\"\" ${DUB_EXE} run --bare --skip-registry=all --root=${SIDERO_BASE:RUNGENERATORS_PACKAGE_DIR}/tools --build=debug :preBuild"
             ],
             "preBuildCommands-windows": [
-                "set DFLAGS= && ${DUB_EXE} run --bare --skip-registry=all --root=${SIDERO_BASE:RUNGENERATORS_PACKAGE_DIR}/tools :preBuild"
+                "set DFLAGS= && ${DUB_EXE} run --bare --skip-registry=all --root=${SIDERO_BASE:RUNGENERATORS_PACKAGE_DIR}/tools --build=debug :preBuild"
             ]
         },
         {

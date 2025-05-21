@@ -188,7 +188,7 @@ export @safe nothrow @nogc:
     }
 
     /// Get a version of this time zone for a given year, if available otherwise return this.
-    TimeZone forYear(long year) scope @trusted {
+    TimeZone forYear(long year) return scope @trusted {
         mutex.pureLock;
         scope (exit)
             mutex.unlock;

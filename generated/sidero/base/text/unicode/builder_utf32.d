@@ -651,7 +651,7 @@ nothrow @safe:
 
     @nogc {
         ///
-        typeof(this) normalize(bool compatibility, bool composition, UnicodeLanguage language) scope @trusted {
+        typeof(this) normalize(bool compatibility, bool composition, UnicodeLanguage language) return scope @trusted {
             state.handle((StateIterator.S8 state, StateIterator.I8 iterator) {
                 assert(state !is null);
                 state.externalNormalization(iterator, language, compatibility, composition);
@@ -667,22 +667,22 @@ nothrow @safe:
         }
 
         ///
-        typeof(this) toNFD(UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        typeof(this) toNFD(UnicodeLanguage language = UnicodeLanguage.Unknown) return scope {
             return this.normalize(false, false, language);
         }
 
         ///
-        typeof(this) toNFC(UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        typeof(this) toNFC(UnicodeLanguage language = UnicodeLanguage.Unknown) return scope {
             return this.normalize(false, true, language);
         }
 
         ///
-        typeof(this) toNFKD(UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        typeof(this) toNFKD(UnicodeLanguage language = UnicodeLanguage.Unknown) return scope {
             return this.normalize(true, false, language);
         }
 
         ///
-        typeof(this) toNFKC(UnicodeLanguage language = UnicodeLanguage.Unknown) scope {
+        typeof(this) toNFKC(UnicodeLanguage language = UnicodeLanguage.Unknown) return scope {
             return this.normalize(true, true, language);
         }
     }

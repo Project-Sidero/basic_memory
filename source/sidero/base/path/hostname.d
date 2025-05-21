@@ -157,7 +157,7 @@ export @safe nothrow @nogc:
     }
 
     ///
-    String_ASCII toString() scope return {
+    String_ASCII toString() return scope {
         return this.text;
     }
 

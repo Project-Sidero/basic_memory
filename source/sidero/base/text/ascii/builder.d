@@ -1428,7 +1428,7 @@ nothrow @safe:
 
     @nogc {
         ///
-        StringBuilder_ASCII insert(ptrdiff_t index, scope const(char)[] input...) scope return {
+        StringBuilder_ASCII insert(ptrdiff_t index, scope const(char)[] input...) return scope {
             this.insertImplSlice(input, index);
             return this;
         }
@@ -1439,7 +1439,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_ASCII insert(ptrdiff_t index, scope LiteralType input...) scope return {
+        StringBuilder_ASCII insert(ptrdiff_t index, scope LiteralType input...) return scope {
             this.insertImplSlice(input, index);
             return this;
         }
@@ -1450,7 +1450,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_ASCII insert(ptrdiff_t index, scope String_ASCII other) scope return {
+        StringBuilder_ASCII insert(ptrdiff_t index, scope String_ASCII other) return scope {
             other.stripZeroTerminator;
 
             this.insertImplReadOnly(other, index);
@@ -1463,7 +1463,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_ASCII insert(ptrdiff_t index, scope StringBuilder_ASCII input) scope return {
+        StringBuilder_ASCII insert(ptrdiff_t index, scope StringBuilder_ASCII input) return scope {
             this.insertImplBuilder(input, index);
             return this;
         }
@@ -1476,7 +1476,7 @@ nothrow @safe:
 
     @nogc {
         ///
-        StringBuilder_ASCII prepend(scope const(char)[] input...) scope return @trusted {
+        StringBuilder_ASCII prepend(scope const(char)[] input...) return scope @trusted {
             return this.insert(0, input);
         }
 
@@ -1486,7 +1486,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_ASCII prepend(scope LiteralType input...) scope return @trusted {
+        StringBuilder_ASCII prepend(scope LiteralType input...) return scope @trusted {
             return this.insert(0, input);
         }
 
@@ -1496,7 +1496,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_ASCII prepend(scope String_ASCII other) scope return @trusted {
+        StringBuilder_ASCII prepend(scope String_ASCII other) return scope @trusted {
             other.stripZeroTerminator;
 
             return this.insert(0, other);
@@ -1508,7 +1508,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_ASCII prepend(scope StringBuilder_ASCII input) scope return @trusted {
+        StringBuilder_ASCII prepend(scope StringBuilder_ASCII input) return scope @trusted {
             return this.insert(0, input);
         }
 
@@ -1668,7 +1668,7 @@ nothrow @safe:
 
     @nogc {
         ///
-        StringBuilder_ASCII clobberInsert(ptrdiff_t index, scope const(char)[] input...) scope return {
+        StringBuilder_ASCII clobberInsert(ptrdiff_t index, scope const(char)[] input...) return scope {
             this.insertImplSlice(input, index, true);
             return this;
         }
@@ -1679,7 +1679,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_ASCII clobberInsert(ptrdiff_t index, scope LiteralType input...) scope return {
+        StringBuilder_ASCII clobberInsert(ptrdiff_t index, scope LiteralType input...) return scope {
             this.insertImplSlice(input, index, true);
             return this;
         }
@@ -1690,7 +1690,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_ASCII clobberInsert(ptrdiff_t index, scope String_ASCII other) scope return {
+        StringBuilder_ASCII clobberInsert(ptrdiff_t index, scope String_ASCII other) return scope {
             other.stripZeroTerminator;
 
             this.insertImplReadOnly(other, index, true);
@@ -1703,7 +1703,7 @@ nothrow @safe:
         }
 
         ///
-        StringBuilder_ASCII clobberInsert(ptrdiff_t index, scope StringBuilder_ASCII input) scope return {
+        StringBuilder_ASCII clobberInsert(ptrdiff_t index, scope StringBuilder_ASCII input) return scope {
             this.insertImplBuilder(input, index, true);
             return this;
         }

@@ -2448,7 +2448,7 @@ nothrow @nogc:
     }
 
     ///
-    String_ASCII stripLeft() scope return {
+    String_ASCII stripLeft() return scope {
         import sidero.base.text.ascii.characters : isWhiteSpace;
 
         LiteralType us = this.literal;
@@ -2477,7 +2477,7 @@ nothrow @nogc:
     }
 
     ///
-    String_ASCII stripRight() scope return {
+    String_ASCII stripRight() return scope {
         import sidero.base.text.ascii.characters : isWhiteSpace;
 
         size_t amount;

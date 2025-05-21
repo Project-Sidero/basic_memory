@@ -396,7 +396,7 @@ package(sidero.base.datetime):
         return typeof(return)(ret);
     }
 
-    String_UTF8 nameFor(long unixTime) scope @trusted {
+    String_UTF8 nameFor(long unixTime) return scope @trusted {
         ptrdiff_t index = -1;
 
         foreach_reverse (offset, transition; this.transitionsForRange) {

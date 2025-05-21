@@ -197,7 +197,7 @@ export:
     }
 
     ///
-    String_UTF8 name() scope const @trusted {
+    String_UTF8 name() return scope const @trusted {
         return (cast(Logger)this).name_;
     }
 
@@ -321,7 +321,7 @@ export:
     }
 
     ///
-    String_UTF8 toString() scope const {
+    String_UTF8 toString() return scope const {
         return this.name;
     }
 

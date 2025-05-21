@@ -107,7 +107,7 @@ String_UTF8 getPosixLocalTimeZone() @trusted {
     return typeof(return).init;
 }
 
-Result!PosixTZBase parsePosixTZ(scope String_UTF8 spec) @trusted {
+Result!PosixTZBase parsePosixTZ(return scope String_UTF8 spec) @trusted {
     import sidero.base.text.unicode.characters.database;
 
     // https://github.com/eggert/tz/blob/main/localtime.c#L1123

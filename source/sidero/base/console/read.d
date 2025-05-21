@@ -379,7 +379,7 @@ Result!dchar handleWindowsReadChar(Duration timeout) @trusted {
         assert(0);
 }
 
-Result!StringBuilder_ASCII handleWindowsReadLine(scope ref StringBuilder_ASCII builder, Duration timeout) @trusted {
+Result!StringBuilder_ASCII handleWindowsReadLine(return scope ref StringBuilder_ASCII builder, Duration timeout) @trusted {
     version(Windows) {
         const block = timeout < Duration.zero;
         DWORD dwTimeout, oldMode, readLength;
@@ -509,7 +509,7 @@ Result!StringBuilder_ASCII handleWindowsReadLine(scope ref StringBuilder_ASCII b
         assert(0);
 }
 
-Result!StringBuilder_UTF8 handleWindowsReadLine(scope ref StringBuilder_UTF8 builder, Duration timeout) @trusted {
+Result!StringBuilder_UTF8 handleWindowsReadLine(return scope ref StringBuilder_UTF8 builder, Duration timeout) @trusted {
     version(Windows) {
         import sidero.base.encoding.utf;
 
