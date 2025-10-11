@@ -70,13 +70,13 @@ export:
             ret.state.nodeCount = count;
 
             ret.state.sliceOfKeys = allKeys;
-            ret.state.sliceOfKeysHash = hashOf();
+            ulong hashTemp = hashOf();
 
-            for(size_t i; i < allKeys.length; i += 2) {
-                KeyType k = KeyType(allKeys[i], allKeys[i + 1]);
-                ret.state.sliceOfKeysHash = hashOf(k, ret.state.sliceOfKeysHash);
+            foreach(key; allKeys) {
+                hashTemp = hashOf(key, hashTemp);
             }
 
+            ret.state.sliceOfKeysHash = hashTemp;
             return ret;
         }
 
@@ -335,13 +335,13 @@ export:
         RealKeyType lastSeen = min;
 
         void handle(KeyType key) {
-            if (seenOne) {
+            if(seenOne) {
                 ret ~= KeyType(lastSeen + 1, key.start - 1);
                 lastSeen = key.end;
             } else {
                 seenOne = true;
 
-                if (key.start < min) {
+                if(key.start < min) {
                 } else {
                     ret ~= KeyType(min, key.start - 1);
                 }
@@ -351,16 +351,16 @@ export:
         }
 
         void walk(Link parent) {
-            if (parent.left !is null)
+            if(parent.left !is null)
                 walk(parent.left);
             handle(parent.key);
-            if (parent.right !is null)
+            if(parent.right !is null)
                 walk(parent.right);
         }
 
         walk(state.head);
 
-        if (lastSeen < max)
+        if(lastSeen < max)
             ret ~= KeyType(lastSeen + 1, max);
 
         return ret;
