@@ -1180,7 +1180,7 @@ struct UTF_State(Char) {
 
                 size_t maximum() {
                     return iterator is null ? state.blockList.numberOfItems : (iterator.primedBackwards ?
-                    iterator.backwards.offsetFromHead + 1 : iterator.maximumOffsetFromHead);
+                            iterator.backwards.offsetFromHead + 1 : iterator.maximumOffsetFromHead);
                 }
 
                 bool emptyInternal() {
@@ -1231,7 +1231,7 @@ struct UTF_State(Char) {
 
             size_t maximum() {
                 return iterator is null ? state.blockList.numberOfItems : (iterator.primedBackwards ?
-                iterator.backwards.offsetFromHead + 1 : iterator.maximumOffsetFromHead);
+                        iterator.backwards.offsetFromHead + 1 : iterator.maximumOffsetFromHead);
             }
 
             bool emptyInternal() {
