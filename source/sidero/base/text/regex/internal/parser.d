@@ -133,7 +133,7 @@ struct Parser {
         }
 
         void handleZeroOrMultiplier(int max) {
-            assert(lastSibling.next1 !is null || lastSibling.type == RegexNFANode.Type.Prefix);
+            assert(lastSibling.next1 !is null || lastSibling.type == RegexNFANode.Type.Prefix || lastSibling.type == RegexNFANode.Type.Any);
             assert(lastSibling.next2 is null);
             split1PrefixChar();
 

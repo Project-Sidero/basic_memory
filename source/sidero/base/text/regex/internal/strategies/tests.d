@@ -851,4 +851,35 @@ mixin template RegexMatchStrategyTests(RegexMatchStrategy strategy) {
             assert(expectMatch(r, "bme") == ["", "bm"]);
         }
     }
+
+    unittest {
+        Regex r = regex("(?.).*\\1");
+        Appender!char appender;
+        r.state.head.toDot(appender, "badtestphobos10152");
+        assert(appender.asReadOnly == q{digraph badtestphobos10152 {
+    rankdir=LR;
+
+    Start[shape=doublecircle];
+    Start -> N0;
+
+    N0[label="$GROUP$ 0"];
+    N0 -> N1[label="group"];
+    N1 -> N2[style="dotted", label="success (look back) 1"];
+    subgraph SG_N1 {
+        N1[label="$ANY$"];
+    }
+    N0 -> N2[style="dashed", label="after success"];
+    N2[label="{0, 2147483647}&nbsp;&nbsp;&nbsp;&nbsp;$ANY$"];
+    N2 -> N3[label="next2"];
+    N2 -> N3[style="dashed", label="after success"];
+    N3[label="$LOOKBEHIND$ 0"];
+    End[shape=doublecircle];
+    N3 -> End;
+}});
+
+        static if(strategy == RegexMatchStrategy.Stack) {
+            assert(expectMatch(r, "") == ["", ""]);
+            assert(expectMatch(r, "xaya") == ["x", "aya"]);
+        }
+    }
 }
