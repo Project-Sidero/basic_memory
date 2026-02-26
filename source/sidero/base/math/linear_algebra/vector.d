@@ -639,6 +639,7 @@ unittest {
 ///
 Type standardDeviation(Type)(scope const(Type)[] values) if (isNumeric!Type) {
     import sidero.base.algorithm : sum;
+    import core.stdc.math : sqrt;
 
     static struct Handler {
         const(Type)[] values;
@@ -662,13 +663,13 @@ Type standardDeviation(Type)(scope const(Type)[] values) if (isNumeric!Type) {
     handler.values = values;
     handler.average = sum(values) / values.length;
 
-    return handler.sum / values.length;
+    return cast(Type) sqrt(cast(double)(handler.sum / values.length));
 }
 
 ///
 unittest {
-    static Values = [1f, 2, 3];
-    assert(Values.standardDeviation.isClose(0.6, 0.2));
+    static Values = [1f, 2, 4];
+    assert(Values.standardDeviation.isClose(1.247219, 0.000001));
 }
 
 ///
