@@ -447,7 +447,7 @@ private:
             builder ~= ")"c;
     }
 
-    bool handleStructClassFields(Type)(scope StringBuilder_UTF8 builder, scope ref Type input) {
+    bool handleStructClassFields(Type)(scope StringBuilder_UTF8 builder, scope ref Type input) @trusted {
         bool isFirst = true;
         bool hadAField;
 
@@ -527,7 +527,7 @@ private:
         return hadAField;
     }
 
-    bool handleStructClassOverlappedFields(Type)(scope StringBuilder_UTF8 builder, scope ref Type input) {
+    bool handleStructClassOverlappedFields(Type)(scope StringBuilder_UTF8 builder, scope ref Type input) @trusted {
         bool isFirst = true, isFirstOfType = true;
         bool hadAField;
 
@@ -544,7 +544,7 @@ private:
             return [ignored, isPrivate];
         }();
 
-        enum IsFieldOverlapped(Type2, string name, string[] FieldNames) = __traits(getVisibility, __traits(getMember, input, name)) != "private" && () {
+        enum IsFieldOverlapped(Type2, string name, string[] FieldNames) = __traits(getVisibility, __traits(getMember, input, name)) != "private" && () @trusted {
             alias member = __traits(getMember, cast(Type2)input, name);
 
             static foreach(name2; FieldNames) {
